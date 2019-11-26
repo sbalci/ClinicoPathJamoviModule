@@ -1,0 +1,13 @@
+Package: ClinicoPath
+Type: Package
+Title: Analysis for Clinicopathological Research
+Version: 0.0.1
+Author: Serdar Balci
+Maintainer: Serdar Balci <drserdarbalci@gmail.com>
+Description: Using many different R-project packages
+    So credit should go to main authors
+    I just try to convert the codes that I often use into jamovi module
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, arsenal
