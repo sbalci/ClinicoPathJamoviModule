@@ -22,5 +22,15 @@ analyses:
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuTitle: CrossTable
+  - title: survival
+    name: survival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: survival
+  - title: WriteSummary
+    name: writesummary
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: WriteSummary
 
 ...

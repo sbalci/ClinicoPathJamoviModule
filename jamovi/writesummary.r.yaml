@@ -1,0 +1,11 @@
+---
+name:  writesummary
+title: WriteSummary
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: WriteSummary
+      type:  Preformatted
+
+...

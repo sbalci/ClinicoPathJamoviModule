@@ -10,4 +10,4 @@ Description: Using many different R-project packages
 License: GPL
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, ggplot2, arsenal
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, arsenal, survival, xfun, knitr, dplyr

@@ -1,0 +1,11 @@
+---
+name:  survival
+title: survival
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: survival
+      type:  Preformatted
+
+...
