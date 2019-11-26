@@ -1,9 +1,19 @@
 exportPattern("^[[:alpha:]]+")
 import(ggplot2)
 import(arsenal)
+import(survival)
+import(xfun)
+import(knitr)
+import(dplyr)
 
 export(tableoneClass)
 export(tableoneOptions)
 
 export(crosstableClass)
 export(crosstableOptions)
+
+export(survivalClass)
+export(survivalOptions)
+
+export(writesummaryClass)
+export(writesummaryOptions)
