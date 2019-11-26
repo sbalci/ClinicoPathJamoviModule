@@ -1,0 +1,2 @@
+# ClinicoPathJamoviModule
+ClinicoPath Jamovi Module
