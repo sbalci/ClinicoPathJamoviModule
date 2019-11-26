@@ -1,0 +1,15 @@
+---
+name:  tableone
+title: TableOne
+menuGroup: ClinicoPath
+version: '0.0.1'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables
+      type: Variables
+...

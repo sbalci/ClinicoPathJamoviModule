@@ -1,0 +1,26 @@
+---
+title: Analysis for Clinicopathological Research
+name: ClinicoPath
+version: 0.0.1
+jms: '1.0'
+authors:
+  - Serdar Balci
+maintainer: Serdar Balci <drserdarbalci@gmail.com>
+date: '2019-11-26'
+type: R
+description: >-
+  Using many different R-project packages So credit should go to main authors I
+  just try to convert the codes that I often use into jamovi module
+analyses:
+  - title: TableOne
+    name: tableone
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: TableOne
+  - title: CrossTable
+    name: crosstable
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: CrossTable
+
+...
