@@ -13,16 +13,50 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$vars) == 0)
                 return()
             
-            
-            meanfun <- function(x) mean(x, na.rm=TRUE)
-            
             mydata <- self$data
             
-            myvar <- self$options$vars
+            myvars <- formula <- jmvcore::constructFormula(terms = self$options$vars)
             
-            mean_x <- meanfun(mydata[[myvar]])
+            myvars <- jmvcore::decomposeFormula(formula = formula) 
             
-            results <- print(mean_x)
+            myvars <- unlist(myvars)
+            
+            mysummary <- function(myvar) {
+                
+            mean_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
+
+            sd_x <- round(sd(x = mydata[[myvar]], na.rm = TRUE), digits = 1)
+
+            median_x <- round(median(mydata[[myvar]], na.rm=TRUE), digits = 1)
+
+            min_x <- round(min(mydata[[myvar]], na.rm=TRUE), digits = 1)
+
+            max_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
+
+            print(
+                paste0(
+                    "Mean of ",
+                    myvar,
+                    " is: ",
+                    mean_x,
+                    " ± ",
+                    sd_x,
+                    ". (Median: ",
+                    median_x,
+                    " [Min: ",
+                    min_x,
+                    " - ",
+                    "Max: ",
+                    max_x,
+                    "])",
+                    collapse = " "
+                    )
+            )
+            }
+            
+            results <- purrr::map(.x = myvars, .f = mysummary)
+            
+            results <- unlist(results)
             
             self$results$text$setContent(results)
 

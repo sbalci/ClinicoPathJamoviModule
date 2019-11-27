@@ -14,7 +14,7 @@ writesummaryOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..vars <- jmvcore::OptionVariable$new(
+            private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
 

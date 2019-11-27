@@ -11,5 +11,5 @@ License: GPL
 Encoding: UTF-8
 LazyData: true
 Imports: jmvcore (>= 0.8.5), R6, ggplot2, arsenal, survival, xfun,
-        knitr, dplyr
-Built: R 3.3.0; ; 2019-11-26 19:22:24 UTC; unix
+        knitr, dplyr, purrr
+Built: R 3.3.0; ; 2019-11-27 06:43:30 UTC; unix
