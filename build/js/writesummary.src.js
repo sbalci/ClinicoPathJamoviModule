@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Dependent Variable","type":"Variable"}];
+const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Dependent Variable","type":"Variables"}];
 
 const view = function() {
     
@@ -41,7 +41,6 @@ view.layout = ui.extend({
 							type: DefaultControls.VariablesListBox,
 							typeName: 'VariablesListBox',
 							name: "vars",
-							maxItemCount: 1,
 							isTarget: true
 						}
 					]

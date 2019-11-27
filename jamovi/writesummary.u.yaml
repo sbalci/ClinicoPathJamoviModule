@@ -13,5 +13,4 @@ children:
         children:
           - type: VariablesListBox
             name: vars
-            maxItemCount: 1
             isTarget: true
