@@ -4,8 +4,30 @@ title: survival
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: survival
+    - name:  text1
+      title: Survival kmfit
+      type:  Preformatted
+
+    - name: plot
+      title: Kaplan-Meier Survival Plot
+      type: Image
+      width:  400
+      height: 300
+
+    - name:  text2
+      title: Comment mediandf
+      type:  Preformatted
+
+    - name:  text3
+      title: Comment summary
+      type:  Preformatted
+
+    - name:  text4
+      title: Comment kable
+      type:  Preformatted
+
+    - name:  summary
+      title: Summary
       type:  Preformatted
 
 ...

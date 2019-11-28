@@ -6,9 +6,6 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = writesummaryBase,
     private = list(
         .run = function() {
-
-            
-            
             
             if (length(self$options$vars) == 0)
                 return()

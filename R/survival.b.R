@@ -1,4 +1,8 @@
 
+
+#' @importFrom R6 R6Class
+#' @importFrom jmvcore toNumeric
+
 # This file is a generated template, your changes will not be overwritten
 
 survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -6,63 +10,146 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = survivalBase,
     private = list(
         .run = function() {
-
             
-            
-            
-            if (length(self$options$vars) == 0)
+            if (length(self$options$factor) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
+
+                        
+            mydata <- self$data
             
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
+            myoveralltime <- self$options$overalltime
             
+            myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
             
-            explanatoryUni <- "LVI"
-            dependentUni <- "Surv(OverallTime, Outcome)"
+            myfactor <- self$options$factor
             
-            mydata %>%
-                finalfit::finalfit(dependentUni, explanatoryUni) -> tUni
+            myfactor <- self$data[[myfactor]]
             
-            knitr::kable(tUni, row.names=FALSE, align=c('l', 'l', 'r', 'r', 'r', 'r'))
+            myoutcome <- self$options$outcome
+          
+            myoutcome <- self$data[[myoutcome]]
             
-            
-            tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>% 
-                janitor::clean_names() 
-            
-            tUni_df_descr <- paste0("When ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[2],
-                                    ", there is ",
-                                    tUni_df$hr_univariable[2],
-                                    " times risk than ",
-                                    "when ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[1],
-                                    "."
-            )
+            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myfactor, data = mydata)
             
             
+            km_fit_median_df <- summary(km_fit)
+            
+            km_fit_median_df <- km_fit_median_df$table
+            
+            km_fit_median_df <- as.data.frame(km_fit_median_df) %>%
+                tibble::rownames_to_column()
+            
+
+
+            # km_fit_median_definition <-
+
+            # km_fit_median_df %>%
+            #     dplyr::mutate(
+            #         description =
+            #             glue::glue(
+            #                 "When {m1}, {m2}, {m3}, {m4}, median survival is "
+            #                 # {m8} [{m9} - {m10}, 95% CI] months.
+            #             )
+            #     ) %>%
+            #     dplyr::select(description) %>%
+            #     dplyr::pull()
+                        
+            
+            # sTable <- summary(km_fit)$table
+            # st <- self$results$summary
+            # 
+            # for (i in seq_len(nrow(km_fit))) {
+            #     if (nrow(km_fit) == 1)
+            #         g <- sTable
+            #     else
+            #         g <- sTable[i,]
+            #     nevents <- sum(g['events'])
+            #     n <- g['n.max']
+            #     ncensor <- n - nevents
+            #     median <- g['median']
+            #     mean <- g['*rmean']
+            #     prop <- nevents / n
+            #     
+            #     st$setRow(rowNo=i, list(
+            #         censored=ncensor,
+            #         events=nevents,
+            #         n=n,
+            #         prop=nevents/n,
+            #         median=median,
+            #         mean=mean))
+            # }
+            # 
+            # st$setStatus('complete')
+            # 
+            # 
+            # results1 <- st
             
             
             
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-            formula <- paste('~', formula)
-            formula <- as.formula(formula)
-            
-            table1 <- arsenal::tableby(formula, self$data)
-            
-            results <- summary(table1)
-            
-            self$results$text$setContent(results)
             
             
             
+            
+            
+            
+            results1 <- km_fit
+            
+            results2 <- names(km_fit_median_df)
+
+            # 
+            # results3 <- summary(km_fit)
+            # 
+            # results4 <- knitr::kable(km_fit_median_df)
+            
+            self$results$text1$setContent(results1)
+            
+            self$results$text2$setContent(results2)
+            # 
+            # self$results$text3$setContent(results3)
+            # 
+            # self$results$text4$setContent(results4)
+            
+            
+            
+            # formulaL <- jmvcore::format('({a} , {b})', a = myoveralltime, b = formulaL2)
+            # formulaL <- paste("(", formulaL1, "," ,formulaL2, ")")
+
+            # formulaR <- jmvcore::constructFormula(terms = self$options$factor)
+            # formulaR <- jmvcore::constructFormula(terms = "myfactor")
+            
+            # formula <- jmvcore::composeFormula(lht = formulaL, rht = formulaR)
+            # formula <- paste(formulaL, '~', formulaR, ', data = self$data')
+            
+            # formula <- as.formula(formula)
+            
+            
+            # km_fit <- survival::survfit(survival::Surv(formula))
             
             
             # `self$data` contains the data
             # `self$options` contains the options
             # `self$results` contains the results object (to populate)
 
-        })
+        }
+        
+        # ,
+        # 
+        # 
+        # .plot=function(image, theme, ggtheme, ...){
+        #     
+        #     
+        # 
+        #     plot(km_fit)
+        #     
+        #     
+        #     
+        #     
+        # }
+        
+        
+        
+        
+        
+        
+        )
 )
