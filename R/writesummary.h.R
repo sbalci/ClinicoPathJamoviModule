@@ -16,7 +16,11 @@ writesummaryOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..vars)
         }),

@@ -12,4 +12,6 @@ options:
     - name: vars
       title: Dependent Variable
       type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 ...

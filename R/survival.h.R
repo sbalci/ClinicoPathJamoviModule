@@ -6,10 +6,9 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            factor = NULL,
+            outcome = NULL,
+            overalltime = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,46 +16,39 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+            private$..factor <- jmvcore::OptionVariable$new(
+                "factor",
+                factor)
+            private$..outcome <- jmvcore::OptionVariable$new(
+                "outcome",
+                outcome)
+            private$..overalltime <- jmvcore::OptionVariable$new(
+                "overalltime",
+                overalltime)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..factor)
+            self$.addOption(private$..outcome)
+            self$.addOption(private$..overalltime)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        factor = function() private$..factor$value,
+        outcome = function() private$..outcome$value,
+        overalltime = function() private$..overalltime$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..factor = NA,
+        ..outcome = NA,
+        ..overalltime = NA)
 )
 
 survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        text1 = function() private$.items[["text1"]],
+        plot = function() private$.items[["plot"]],
+        text2 = function() private$.items[["text2"]],
+        text3 = function() private$.items[["text3"]],
+        text4 = function() private$.items[["text4"]],
+        summary = function() private$.items[["summary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -66,8 +58,30 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="survival")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
-                title="survival"))}))
+                name="text1",
+                title="Survival kmfit"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Kaplan-Meier Survival Plot",
+                width=400,
+                height=300))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text2",
+                title="Comment mediandf"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text3",
+                title="Comment summary"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text4",
+                title="Comment kable"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="summary",
+                title="Summary"))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "survivalBase",
@@ -92,40 +106,44 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param factor .
+#' @param outcome .
+#' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
 survival <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    factor,
+    outcome,
+    overalltime) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('survival requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(factor)) factor <- jmvcore::resolveQuo(jmvcore::enquo(factor))
+    if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
+    if ( ! missing(overalltime)) overalltime <- jmvcore::resolveQuo(jmvcore::enquo(overalltime))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(factor), factor, NULL),
+            `if`( ! missing(outcome), outcome, NULL),
+            `if`( ! missing(overalltime), overalltime, NULL))
 
 
     options <- survivalOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        factor = factor,
+        outcome = outcome,
+        overalltime = overalltime)
 
     analysis <- survivalClass$new(
         options = options,

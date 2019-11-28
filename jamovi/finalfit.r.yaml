@@ -1,0 +1,11 @@
+---
+name:  finalfit
+title: FinalFit
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: FinalFit
+      type:  Preformatted
+
+...

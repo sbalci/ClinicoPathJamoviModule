@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Dependent Variable","type":"Variables"}];
+const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Dependent Variable","type":"Variables","suggested":["continuous"],"permitted":["numeric"]}];
 
 const view = function() {
     

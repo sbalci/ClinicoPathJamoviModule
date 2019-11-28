@@ -5,7 +5,6 @@ import(survival)
 import(xfun)
 import(knitr)
 import(dplyr)
-import(purrr)
 
 export(tableoneClass)
 export(tableoneOptions)
@@ -13,8 +12,14 @@ export(tableoneOptions)
 export(crosstableClass)
 export(crosstableOptions)
 
+export(writesummaryClass)
+export(writesummaryOptions)
+
 export(survivalClass)
 export(survivalOptions)
 
-export(writesummaryClass)
-export(writesummaryOptions)
+export(survClass)
+export(survOptions)
+
+export(finalfitClass)
+export(finalfitOptions)
