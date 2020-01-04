@@ -1,10 +1,7 @@
-
-
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
 
 # This file is a generated template, your changes will not be overwritten
-
 survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "survivalClass",
     inherit = survivalBase,
@@ -32,14 +29,54 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myfactor, data = mydata)
             
             
-            km_fit_median_df <- summary(km_fit)
+            km_fit_median_df <- summary(km_fit)[["table"]]
             
-            km_fit_median_df <- km_fit_median_df$table
+            # km_fit_median_df <- km_fit_median_df$table
             
-            km_fit_median_df <- as.data.frame(km_fit_median_df) %>%
+            km_fit_median_df <- 
+                as.data.frame(km_fit_median_df) %>%
                 tibble::rownames_to_column()
             
-
+            
+            
+            # km_fit <- survival::survfit(formula = survival::Surv(myoveralltime, myoutcome) ~ myfactor, data = mydata)
+            # 
+            # # s <- survival::survfit(formula=survival::Surv(elapsed, event) ~ group, data=data)
+            # 
+            # km_fit_Table <- summary(km_fit)$table
+            # 
+            # # sTable <- summary(s)$table
+            # 
+            # st <- self$results$summary
+            # 
+            # for (i in seq_len(nrow(km_fit))) {
+            #     if (nrow(km_fit) == 1)
+            #         g <- km_fit_Table
+            #     else
+            #         g <- km_fit_Table[i,]
+            #     nevents <- sum(g['events'])
+            #     n <- g['n.max']
+            #     ncensor <- n - nevents
+            #     median <- g['median']
+            #     mean <- g['*rmean']
+            #     prop <- nevents / n
+            #     
+            #     # st$setRow(rowNo=i, list(
+            #     #     censored=ncensor,
+            #     #     events=nevents,
+            #     #     n=n,
+            #     #     prop=nevents/n,
+            #     #     median=median,
+            #     #     mean=mean))
+            # }
+            # 
+            # st$setStatus('complete')
+            # 
+            # self$results$summary2$setContent(st)
+            # 
+            # self$results$summary$setContent(summary)
+            
+            
 
             # km_fit_median_definition <-
 
@@ -86,28 +123,25 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             
             
+            results1 <- surv_summary(km_fit, data = mydata)
             
+            results2 <- summary(km_fit)$table
             
+            results3 <- km_fit_median_df
             
+            results4 <- km_fit_median_df$table
             
-            
-            
-            results1 <- km_fit
-            
-            results2 <- names(km_fit_median_df)
-
-            # 
-            # results3 <- summary(km_fit)
-            # 
-            # results4 <- knitr::kable(km_fit_median_df)
+            results5 <- capture.output(km_fit)
             
             self$results$text1$setContent(results1)
             
             self$results$text2$setContent(results2)
-            # 
-            # self$results$text3$setContent(results3)
-            # 
-            # self$results$text4$setContent(results4)
+
+            self$results$text3$setContent(results3)
+
+            self$results$text4$setContent(results4)
+            
+            self$results$text5$setContent(results5)
             
             
             

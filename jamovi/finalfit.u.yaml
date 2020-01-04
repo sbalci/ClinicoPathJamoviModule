@@ -9,26 +9,23 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Explanatory Variable
         children:
           - type: VariablesListBox
-            name: dep
+            name: explanatory
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable
+        label: Outcome
         children:
           - type: VariablesListBox
-            name: group
+            name: outcome
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: alt
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: varEq
+      - type: TargetLayoutBox
+        label: OverallTime
+        children:
+          - type: VariablesListBox
+            name: overalltime
+            maxItemCount: 1
+            isTarget: true

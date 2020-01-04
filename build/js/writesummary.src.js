@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Dependent Variable","type":"Variables","suggested":["continuous"],"permitted":["numeric"]}];
+const options = [{"name":"data","type":"Data"},{"name":"vars","title":"Variables","type":"Variables","suggested":["continuous"],"permitted":["numeric"]}];
 
 const view = function() {
     
@@ -35,7 +35,7 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TargetLayoutBox,
 					typeName: 'TargetLayoutBox',
-					label: "Dependent Variable",
+					label: "Variables",
 					controls: [
 						{
 							type: DefaultControls.VariablesListBox,

@@ -1,6 +1,0 @@
-exportPattern("^[[:alpha:]]+")
-import(ggplot2)
-import(arsenal)
-
-export(tableoneClass)
-export(tableoneOptions)

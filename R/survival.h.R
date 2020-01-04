@@ -44,11 +44,16 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         text1 = function() private$.items[["text1"]],
-        plot = function() private$.items[["plot"]],
         text2 = function() private$.items[["text2"]],
         text3 = function() private$.items[["text3"]],
         text4 = function() private$.items[["text4"]],
-        summary = function() private$.items[["summary"]]),
+        text5 = function() private$.items[["text5"]],
+        text6 = function() private$.items[["text6"]],
+        text7 = function() private$.items[["text7"]],
+        text8 = function() private$.items[["text8"]],
+        summary = function() private$.items[["summary"]],
+        summary2 = function() private$.items[["summary2"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -59,29 +64,49 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Survival kmfit"))
+                title="Survival one"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text2",
+                title="Survival two"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text3",
+                title="Survival three"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text4",
+                title="Survival four"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text5",
+                title="Survival one"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text6",
+                title="Survival two"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text7",
+                title="Survival three"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text8",
+                title="Survival four"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="summary",
+                title="Summary"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="summary2",
+                title="Summary2"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Kaplan-Meier Survival Plot",
                 width=400,
-                height=300))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Comment mediandf"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text3",
-                title="Comment summary"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text4",
-                title="Comment kable"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="summary",
-                title="Summary"))}))
+                height=300))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "survivalBase",
@@ -112,11 +137,16 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text6} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$summary2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

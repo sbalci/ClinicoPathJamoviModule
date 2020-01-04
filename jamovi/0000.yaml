@@ -48,5 +48,28 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: FinalFit
+  - title: Report General Features
+    name: report
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Report
+    menuTitle: Report General Features
+  - title: Independent Samples T-Test
+    name: ttest
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Independent Samples T-Test
+  - title: Frequencies
+    name: frequencies
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Frequencies
+  - title: correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: correlation
+usesNative: true
+minApp: 1.0.8
 
 ...

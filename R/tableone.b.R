@@ -19,6 +19,8 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             results <- summary(table1)
             
+            # results <- kableExtra::kable(results)
+            
             self$results$text$setContent(results)
         
             

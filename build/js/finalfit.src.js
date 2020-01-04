@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"dep","title":"Dependent Variable","type":"Variable"},{"name":"group","title":"Grouping Variable","type":"Variable"},{"name":"alt","title":"Alternative hypothesis","type":"List","options":[{"title":"Not equal","name":"notequal"},{"title":"One greater","name":"onegreater"},{"title":"Two greater","name":"twogreater"}],"default":"notequal"},{"name":"varEq","title":"Assume equal variances","type":"Bool","default":true}];
+const options = [{"name":"data","type":"Data"},{"name":"explanatory","title":"Explanatory Variable","type":"Variable"},{"name":"outcome","title":"Outcome","type":"Variable"},{"name":"overalltime","title":"OverallTime","type":"Variable"}];
 
 const view = function() {
     
@@ -35,12 +35,12 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TargetLayoutBox,
 					typeName: 'TargetLayoutBox',
-					label: "Dependent Variable",
+					label: "Explanatory Variable",
 					controls: [
 						{
 							type: DefaultControls.VariablesListBox,
 							typeName: 'VariablesListBox',
-							name: "dep",
+							name: "explanatory",
 							maxItemCount: 1,
 							isTarget: true
 						}
@@ -49,40 +49,30 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TargetLayoutBox,
 					typeName: 'TargetLayoutBox',
-					label: "Grouping Variable",
+					label: "Outcome",
 					controls: [
 						{
 							type: DefaultControls.VariablesListBox,
 							typeName: 'VariablesListBox',
-							name: "group",
+							name: "outcome",
 							maxItemCount: 1,
 							isTarget: true
 						}
 					]
-				}
-			]
-		},
-		{
-			type: DefaultControls.LayoutBox,
-			typeName: 'LayoutBox',
-			margin: "large",
-			controls: [
+				},
 				{
-					type: DefaultControls.ComboBox,
-					typeName: 'ComboBox',
-					name: "alt"
-				}
-			]
-		},
-		{
-			type: DefaultControls.LayoutBox,
-			typeName: 'LayoutBox',
-			margin: "large",
-			controls: [
-				{
-					type: DefaultControls.CheckBox,
-					typeName: 'CheckBox',
-					name: "varEq"
+					type: DefaultControls.TargetLayoutBox,
+					typeName: 'TargetLayoutBox',
+					label: "OverallTime",
+					controls: [
+						{
+							type: DefaultControls.VariablesListBox,
+							typeName: 'VariablesListBox',
+							name: "overalltime",
+							maxItemCount: 1,
+							isTarget: true
+						}
+					]
 				}
 			]
 		}

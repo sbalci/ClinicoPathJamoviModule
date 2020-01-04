@@ -1,0 +1,63 @@
+---
+name:  report
+title: Report General Features
+menuGroup: ClinicoPath
+menuSubgroup: Report
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      
+    - name: vars
+      title: Variables
+      type: Variables
+      
+    - name: med
+      title: Median
+      type: Bool
+      default: false
+      
+    - name: cent
+      title: Centrality
+      type: Bool
+      default: true
+
+    - name: disp
+      title: Dispersion
+      type: Bool
+      default: true      
+
+    - name: ran
+      title: Range
+      type: Bool
+      default: true
+
+    - name: distr
+      title: Distribution
+      type: Bool
+      default: false
+
+    - name: lev
+      title: Levels Percentage
+      type: Bool
+      default: false
+
+    - name: n_ch
+      title: Character Numbers
+      type: Integer
+      default: 3
+      min: 0
+      max: 5
+      
+    - name: mis
+      title: Missing
+      type: Bool
+      default: false
+      
+    - name: gli
+      title: Glimpse Data
+      type: Bool
+      default: true
+...

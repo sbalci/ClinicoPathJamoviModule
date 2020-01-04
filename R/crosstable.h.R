@@ -17,10 +17,20 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group)
+                group,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -96,6 +106,8 @@ crosstable <- function(
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(group), group, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- crosstableOptions$new(
         vars = vars,

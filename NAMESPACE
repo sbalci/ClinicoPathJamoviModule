@@ -1,6 +1,4 @@
 exportPattern("^[[:alpha:]]+")
-import(ggplot2)
-import(arsenal)
 import(survival)
 import(xfun)
 import(knitr)
