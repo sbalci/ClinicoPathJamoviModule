@@ -12,9 +12,9 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             mydata <- self$data
             
-            myvars <- formula <- jmvcore::constructFormula(terms = self$options$vars)
+            myvars <- jmvcore::constructFormula(terms = self$options$vars)
             
-            myvars <- jmvcore::decomposeFormula(formula = formula) 
+            myvars <- jmvcore::decomposeFormula(formula = myvars) 
             
             myvars <- unlist(myvars)
             

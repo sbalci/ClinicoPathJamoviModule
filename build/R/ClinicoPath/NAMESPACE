@@ -1,6 +1,4 @@
 exportPattern("^[[:alpha:]]+")
-import(ggplot2)
-import(arsenal)
 import(survival)
 import(xfun)
 import(knitr)
@@ -23,3 +21,15 @@ export(survOptions)
 
 export(finalfitClass)
 export(finalfitOptions)
+
+export(reportClass)
+export(reportOptions)
+
+export(ttestClass)
+export(ttestOptions)
+
+export(frequenciesClass)
+export(frequenciesOptions)
+
+export(correlationClass)
+export(correlationOptions)

@@ -21,4 +21,4 @@ NeedsCompilation: yes
 Packaged: 2019-10-04 17:43:48 UTC; jcheng
 Repository: CRAN
 Date/Publication: 2019-10-04 23:00:08 UTC
-Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-11-24 19:45:17 UTC; unix
+Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2020-01-04 11:00:57 UTC; unix

@@ -10,7 +10,7 @@ options:
       type: Data
 
     - name: vars
-      title: Dependent Variable
+      title: Variables
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]

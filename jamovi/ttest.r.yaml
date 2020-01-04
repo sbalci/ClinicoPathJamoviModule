@@ -1,0 +1,11 @@
+---
+name:  ttest
+title: Independent Samples T-Test
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Independent Samples T-Test
+      type:  Preformatted
+
+...

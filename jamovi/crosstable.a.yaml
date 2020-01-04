@@ -12,8 +12,12 @@ options:
     - name: vars
       title: Dependent Variable
       type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
     - name: group
       title: Grouping Variable
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 ...
