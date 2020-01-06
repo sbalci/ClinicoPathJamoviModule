@@ -1,4 +1,8 @@
-
+#' @importFrom R6 R6Class
+#' @importFrom jmvcore toNumeric
+#' @import finalfit
+#' @import survival
+#' @import survminer
 # This file is a generated template, your changes will not be overwritten
 
 finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
