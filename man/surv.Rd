@@ -2,9 +2,21 @@
 % Please edit documentation in R/surv.h.R
 \name{surv}
 \alias{surv}
-\title{Survival Analysis}
+\title{survcopied}
 \usage{
-surv(data, event, eventLevel, elapsed, groups, ci = FALSE, cens = TRUE)
+surv(
+  data,
+  event,
+  eventLevel,
+  elapsed,
+  groups,
+  tests,
+  sc = TRUE,
+  hf = FALSE,
+  chf = FALSE,
+  ci = FALSE,
+  cens = FALSE
+)
 }
 \arguments{
 \item{data}{.}
@@ -17,6 +29,14 @@ surv(data, event, eventLevel, elapsed, groups, ci = FALSE, cens = TRUE)
 
 \item{groups}{.}
 
+\item{tests}{.}
+
+\item{sc}{.}
+
+\item{hf}{.}
+
+\item{chf}{.}
+
 \item{ci}{.}
 
 \item{cens}{.}
@@ -28,6 +48,7 @@ A results object containing:
   \code{results$tests} \tab \tab \tab \tab \tab a table \cr
   \code{results$sc} \tab \tab \tab \tab \tab an image \cr
   \code{results$hf} \tab \tab \tab \tab \tab an image \cr
+  \code{results$chf} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -37,5 +58,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Survival Analysis
+survcopied
 }
