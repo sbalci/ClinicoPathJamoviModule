@@ -28,6 +28,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myfactor, data = mydata)
             
+            surv_sum <- survminer::surv_summary(km_fit, data = mydata)
             
             km_fit_median_df <- summary(km_fit)[["table"]]
             
@@ -127,7 +128,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             results2 <- summary(km_fit)$table
             
-            results3 <- km_fit_median_df
+            results3 <- surv_sum
             
             results4 <- km_fit_median_df$table
             
