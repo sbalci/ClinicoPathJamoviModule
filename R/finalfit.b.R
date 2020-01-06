@@ -24,33 +24,36 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             myoutcome <- self$data[[myoutcome]]
             
-            dependent <- paste("Surv(", myoveralltime, ", ", myoutcome, ")")
             
             
-            mydata %>%
-                finalfit::finalfit(dependent, explanatory) -> tUni
             
             
-            results1 <- knitr::kable(tUni, row.names=FALSE, align=c('l', 'l', 'r', 'r', 'r', 'r'))
-
+            finalfit::finalfit(.data = mydata,
+                               dependent = Surv(myoveralltime, myoutcome),
+                               explanatory = explanatory) -> tUni
             
+            results1 <- tUni
             
-            tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>% 
-                janitor::clean_names() 
-            
-            tUni_df_descr <- paste0("When ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[2],
-                                    ", there is ",
-                                    tUni_df$hr_univariable[2],
-                                    " times risk than ",
-                                    "when ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[1],
-                                    "."
-            )
+            # results1 <- knitr::kable(tUni, row.names=FALSE, align=c('l', 'l', 'r', 'r', 'r', 'r'))
+            # 
+            # 
+            # 
+            # tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>% 
+            #     janitor::clean_names() 
+            # 
+            # tUni_df_descr <- paste0("When ",
+            #                         tUni_df$dependent_surv_overall_time_outcome[1],
+            #                         " is ",
+            #                         tUni_df$x[2],
+            #                         ", there is ",
+            #                         tUni_df$hr_univariable[2],
+            #                         " times risk than ",
+            #                         "when ",
+            #                         tUni_df$dependent_surv_overall_time_outcome[1],
+            #                         " is ",
+            #                         tUni_df$x[1],
+            #                         "."
+            # )
             
             
             # results2 <- names(km_fit_median_df)
