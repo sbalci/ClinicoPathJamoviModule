@@ -1,4 +1,5 @@
-
+#' @importFrom R6 R6Class
+#' @importFrom jmvcore toNumeric
 # This file is a generated template, your changes will not be overwritten
 
 writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -6,20 +7,20 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = writesummaryBase,
     private = list(
         .run = function() {
-            
+
             if (length(self$options$vars) == 0)
                 return()
-            
+
             mydata <- self$data
-            
+
             myvars <- jmvcore::constructFormula(terms = self$options$vars)
-            
-            myvars <- jmvcore::decomposeFormula(formula = myvars) 
-            
+
+            myvars <- jmvcore::decomposeFormula(formula = myvars)
+
             myvars <- unlist(myvars)
-            
+
             mysummary <- function(myvar) {
-                
+
             mean_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
 
             sd_x <- round(sd(x = mydata[[myvar]], na.rm = TRUE), digits = 1)
@@ -36,7 +37,7 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     myvar,
                     " is: ",
                     mean_x,
-                    " ± ",
+                    " + ",
                     sd_x,
                     ". (Median: ",
                     median_x,
@@ -50,15 +51,15 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
             )
             }
-            
+
             results <- purrr::map(.x = myvars, .f = mysummary)
-            
+
             results <- unlist(results)
-            
+
             self$results$text$setContent(results)
 
-            
-            
+
+
             # `self$data` contains the data
             # `self$options` contains the options
             # `self$results` contains the results object (to populate)
