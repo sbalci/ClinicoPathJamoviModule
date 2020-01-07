@@ -13,38 +13,87 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
-            
+
             mydata <- self$data
-            
-            explanatory <- self$options$explanatory
-            
-            explanatory <- self$data[[explanatory]]
-            
+
             myoveralltime <- self$options$overalltime
-            
+
             myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
-            
+
+            myexplanatory <- self$options$explanatory
+
+            myexplanatory <- self$data[[myexplanatory]]
+
             myoutcome <- self$options$outcome
-            
+
             myoutcome <- self$data[[myoutcome]]
-            
-            
-            
-            
-            
-            finalfit::finalfit(.data = mydata,
-                               dependent = Surv(myoveralltime, myoutcome),
-                               explanatory = explanatory) -> tUni
-            
-            results1 <- tUni
-            
+
+            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myexplanatory,
+                                        data = mydata)
+
+
+            # myoveralltime <- deneme$OverallTime
+            #
+            # myoutcome <- deneme$Outcome
+            #
+            # myexplanatory <- deneme$LVI
+
+
+            formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
+            formula2 <- jmvcore::decomposeFormula(formula = formula2)
+            formula2 <- jmvcore::composeTerm(formula2)
+
+
+            formulaL <- jmvcore::constructFormula(terms = "myoveralltime")
+
+            formulaL <- jmvcore::decomposeFormula(formula = formulaL)
+
+            formulaR <- jmvcore::constructFormula(terms = "myoutcome")
+
+            formulaR <- jmvcore::decomposeFormula(formula = formulaR)
+
+
+            formula <- paste("Surv(", formulaL, ",", formulaR, ")")
+
+            mydependent <- jmvcore::composeTerm(formula)
+
+            mydata %>%
+                finalfit::finalfit(formula, formula2) -> tUni
+
+
+
+
+
+
+
+
+
+
+
+
+            results1 <- summary(km_fit)$table
+
+            results2 <- tUni
+
+            result <- list(results1, results2)
+
+
+            self$results$text$setContent(result)
+
+
+            # finalfit::finalfit(.data = mydata,
+            #                    dependent = Surv(myoveralltime, myoutcome),
+            #                    explanatory = explanatory) -> tUni
+
+
+
             # results1 <- knitr::kable(tUni, row.names=FALSE, align=c('l', 'l', 'r', 'r', 'r', 'r'))
-            # 
-            # 
-            # 
-            # tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>% 
-            #     janitor::clean_names() 
-            # 
+            #
+            #
+            #
+            # tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
+            #     janitor::clean_names()
+            #
             # tUni_df_descr <- paste0("When ",
             #                         tUni_df$dependent_surv_overall_time_outcome[1],
             #                         " is ",
@@ -58,15 +107,15 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #                         tUni_df$x[1],
             #                         "."
             # )
-            
-            
+
+
             # results2 <- names(km_fit_median_df)
-            
-            
-            self$results$text1$setContent(results1)
-            
+
+
+
+
             # self$results$text2$setContent(results2)
-            
+
             # `self$data` contains the data
             # `self$options` contains the options
             # `self$results` contains the results object (to populate)
