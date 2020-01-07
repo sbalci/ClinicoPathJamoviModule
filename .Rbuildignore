@@ -1,5 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-/data/
-/temp/
-/build/
+data
+temp
+build
+^.*\.jmo$
+jamovi
