@@ -44,6 +44,8 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
 
+            formulaR <- jmvcore::toNumeric(formulaR)
+
             myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
 
             finalfit::finalfit(.data = mydata,
