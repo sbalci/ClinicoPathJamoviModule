@@ -1,5 +1,5 @@
 #' @importFrom R6 R6Class
-#' @importFrom jmvcore toNumeric
+#' @import jmvcore
 #' @import finalfit
 #' @import survival
 #' @import survminer
@@ -13,6 +13,8 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
+
+            # results 1
 
             mydata <- self$data
 
@@ -28,97 +30,34 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myoutcome <- self$data[[myoutcome]]
 
-            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myexplanatory,
-                                        data = mydata)
-
-
-            # myoveralltime <- deneme$OverallTime
-            #
-            # myoutcome <- deneme$Outcome
-            #
-            # myexplanatory <- deneme$LVI
-
-
-            formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
-            formula2 <- jmvcore::decomposeFormula(formula = formula2)
-            formula2 <- jmvcore::composeTerm(formula2)
-
-
-            formulaL <- jmvcore::constructFormula(terms = "myoveralltime")
-
-            formulaL <- jmvcore::decomposeFormula(formula = formulaL)
-
-            formulaR <- jmvcore::constructFormula(terms = "myoutcome")
-
-            formulaR <- jmvcore::decomposeFormula(formula = formulaR)
-
-
-            formula <- paste("Surv(", formulaL, ",", formulaR, ")")
-
-            mydependent <- jmvcore::composeTerm(formula)
-
-            mydata %>%
-                finalfit::finalfit(formula, formula2) -> tUni
-
-
-
-
-
-
-
-
-
-
-
+            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myexplanatory, data = mydata)
 
             results1 <- summary(km_fit)$table
 
+            # results 2
+
+            formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+            formula2 <- jmvcore::composeTerm(formula2)
+
+            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+            myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
+
+            finalfit::finalfit(.data = mydata,
+                               dependent = myformula,
+                               explanatory = formula2) -> tUni
+
             results2 <- tUni
 
-            result <- list(results1, results2)
 
+            # results
 
-            self$results$text$setContent(result)
+            results <- list(results1, results2)
 
-
-            # finalfit::finalfit(.data = mydata,
-            #                    dependent = Surv(myoveralltime, myoutcome),
-            #                    explanatory = explanatory) -> tUni
-
-
-
-            # results1 <- knitr::kable(tUni, row.names=FALSE, align=c('l', 'l', 'r', 'r', 'r', 'r'))
-            #
-            #
-            #
-            # tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
-            #     janitor::clean_names()
-            #
-            # tUni_df_descr <- paste0("When ",
-            #                         tUni_df$dependent_surv_overall_time_outcome[1],
-            #                         " is ",
-            #                         tUni_df$x[2],
-            #                         ", there is ",
-            #                         tUni_df$hr_univariable[2],
-            #                         " times risk than ",
-            #                         "when ",
-            #                         tUni_df$dependent_surv_overall_time_outcome[1],
-            #                         " is ",
-            #                         tUni_df$x[1],
-            #                         "."
-            # )
-
-
-            # results2 <- names(km_fit_median_df)
-
-
-
-
-            # self$results$text2$setContent(results2)
-
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
+            self$results$text$setContent(results)
 
         })
 )
