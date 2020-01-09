@@ -12,12 +12,18 @@ options:
     - name: explanatory
       title: Explanatory Variable
       type: Variable
-      
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
     - name: outcome
       title: Outcome
       type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     - name: overalltime
       title: OverallTime
       type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 ...
