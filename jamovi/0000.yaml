@@ -69,6 +69,11 @@ analyses:
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuTitle: correlation
+  - title: FinalFit Multivariate Survival
+    name: multisurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: FinalFit Multivariate Survival
 usesNative: true
 minApp: 1.0.8
 
