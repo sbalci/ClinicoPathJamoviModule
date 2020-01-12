@@ -18,13 +18,26 @@ finalfitOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..explanatory <- jmvcore::OptionVariable$new(
                 "explanatory",
-                explanatory)
+                explanatory,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
-                outcome)
+                outcome,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
-                overalltime)
+                overalltime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
@@ -107,6 +120,7 @@ finalfit <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(overalltime), overalltime, NULL))
 
+    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- finalfitOptions$new(
         explanatory = explanatory,

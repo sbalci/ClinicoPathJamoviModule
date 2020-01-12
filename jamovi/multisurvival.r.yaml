@@ -1,0 +1,11 @@
+---
+name:  multisurvival
+title: FinalFit Multivariate Survival
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: FinalFit Multivariate Survival
+      type:  Preformatted
+
+...

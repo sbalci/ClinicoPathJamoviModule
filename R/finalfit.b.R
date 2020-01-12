@@ -21,17 +21,18 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
 
-            myexplanatory <- self$options$explanatory
+            thefactor <- self$options$explanatory
 
-            myexplanatory <- self$data[[myexplanatory]]
+            thefactor <- self$data[[thefactor]]
 
             myoutcome <- self$options$outcome
 
             myoutcome <- self$data[[myoutcome]]
 
-            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ myexplanatory, data = mydata)
+            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ thefactor, data = mydata)
 
             results1 <- summary(km_fit)$table
+
 
             # results 1 summary
 
@@ -83,6 +84,31 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                      row.names = FALSE,
                                      align = c('l', 'l', 'r', 'r', 'r', 'r'))
 
+
+            # results 3 summary
+
+
+            tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
+                janitor::clean_names(dat = ., case = "snake")
+
+            tUni_df_descr <- paste0("When ",
+                                    tUni_df$dependent_surv_overall_time_outcome[1],
+                                    " is ",
+                                    tUni_df$x[2],
+                                    ", there is ",
+                                    tUni_df$hr_univariable[2],
+                                    " times risk than ",
+                                    "when ",
+                                    tUni_df$dependent_surv_overall_time_outcome[1],
+                                    " is ",
+                                    tUni_df$x[1],
+                                    "."
+            )
+
+            results3summary <- tUni_df_descr
+
+
+
             # results 4
 
 
@@ -100,14 +126,62 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             results4 <- myplot
 
 
-            # results
+
+            # results 5
+
+
+            km_fit_summary <- summary(km_fit, times = c(12,36,60))
+
+            km_fit_df <- as.data.frame(km_fit_summary[c("strata", "time", "n.risk", "n.event", "surv", "std.err", "lower", "upper")])
+
+            results5 <- km_fit_df
+
+
+            # results 5 summary
+
+
+
+            km_fit_df %>%
+                dplyr::mutate(
+                    description =
+                        glue::glue(
+                            "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
+                        )
+                ) %>%
+                dplyr::select(description) %>%
+                pull() -> km_fit_definition
+
+            results5summary <- km_fit_definition
+
+
+            # results 6
+
+
+            # pairwiseformula <- paste("Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+
+            # results6 <-
+            #     survminer::pairwise_survdiff(
+            #     formula = pairwiseformula,
+            #     data = mydata,
+            #     p.adjust.method = "BH"
+            # )
+
+
+
+
+            # results all
 
 
             results <- list(results1,
                             results1summary,
                             results2,
                             results3,
-                            results4)
+                            results3summary,
+                            results4,
+                            results5,
+                            results5summary
+                            # results6
+                            )
 
             self$results$text$setContent(results)
 

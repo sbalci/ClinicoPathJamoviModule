@@ -152,5 +152,6 @@ Imports:
     finalfit, 
     boot, 
     grid, 
-    stats
+    stats,
+    snakecase
 RoxygenNote: 7.0.2
