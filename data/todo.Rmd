@@ -1,0 +1,299 @@
+---
+title: "Jamovi Module"
+output: html_notebook
+---
+
+# Develop
+
+
+
+```{r library}
+# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+
+# jmvtools::check("C://Program Files//jamovi//bin")
+
+# jmvtools::install(home = "C://Program Files//jamovi//bin")
+
+# .libPaths(new = "C:\\ClinicoPathLibrary")
+
+Sys.setenv(TZ="Europe/Istanbul")
+
+library("jmvtools")
+```
+
+
+```{r check, include=FALSE}
+jmvtools::check()
+```
+
+
+```{r add analysis, eval=FALSE, include=FALSE}
+
+# jmvtools::install()
+# 
+# jmvtools::create('SuperAwesome')
+# 
+# jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
+# 
+# jmvtools::addAnalysis(name='survival', title='survival')
+# 
+# jmvtools::addAnalysis(name='correlation', title='correlation')
+# 
+# jmvtools::addAnalysis(name='tableone', title='TableOne')
+# 
+# jmvtools::addAnalysis(name='crosstable', title='CrossTable')
+# 
+# 
+# jmvtools::addAnalysis(name='writesummary', title='WriteSummary')
+
+# jmvtools::addAnalysis(name='finalfit', title='FinalFit')
+
+# jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival')
+
+# jmvtools::addAnalysis(name='report', title='Report General Features')
+
+# jmvtools::addAnalysis(name='frequencies', title='Frequencies')
+```
+
+
+
+
+
+
+```{r devtools install, include=FALSE}
+devtools::install()
+```
+
+
+```{r jmvtools install, include=FALSE}
+jmvtools::install()
+```
+
+
+
+```{r construct}
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
+
+jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+unlist(vars)
+
+cformula <- jmvcore::composeTerm(components = formula)
+
+jmvcore::composeTerm(components = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = formula)
+
+jmvcore::decomposeTerm(term = cformula)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+---
+
+# Example
+
+
+```{r read data}
+deneme <- readxl::read_xlsx(path = here::here("data", "histopathology-template2019-11-25.xlsx"))
+```
+
+
+```{r writesummary}
+library("ClinicoPath")
+
+deneme$Age <- as.numeric(as.character(deneme$Age))
+
+ClinicoPath::writesummary(data = deneme, vars = Age)
+```
+
+
+```{r survival}
+ClinicoPath::survival(
+    data = deneme,
+    factor = Sex,
+    outcome = Outcome,
+    overalltime = OverallTime)
+```
+
+
+
+```{r finalfit}
+devtools::install(upgrade = FALSE, quick = TRUE)
+library(dplyr)
+library(survival)
+library(finalfit)
+deneme <- readxl::read_xlsx(path = here::here("data", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::finalfit(data = deneme,
+                      explanatory = Sex,
+                      outcome = Outcome,
+                      overalltime = OverallTime)
+```
+
+
+
+
+
+```{r construct formula}
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"))
+
+jmvcore::constructFormula(terms = list("A", "B", "C"))
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+unlist(vars)
+```
+
+
+
+
+```{r construct formula 2}
+library(dplyr)
+library(survival)
+
+deneme <- readxl::read_xlsx(path = here::here("data", "histopathology-template2019-11-25.xlsx"))
+
+myoveralltime <- deneme$OverallTime
+myoutcome <- deneme$Outcome
+myexplanatory <- deneme$LVI
+
+formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
+# formula2 <- jmvcore::decomposeFormula(formula = formula2)
+# formula2 <- paste("", formula2)
+# formula2 <- as.formula(formula2)
+formula2 <- jmvcore::composeTerm(formula2)
+
+
+formulaL <- jmvcore::constructFormula(terms = "myoveralltime")
+# formulaL <- jmvcore::decomposeFormula(formula = formulaL)
+
+formulaR <- jmvcore::constructFormula(terms = "myoutcome")
+# formulaR <- jmvcore::decomposeFormula(formula = formulaR)
+
+formula <- paste("Surv(", formulaL, ",", formulaR, ")")
+# formula <- jmvcore::composeTerm(formula)
+# formula <- as.formula(formula)
+# jmvcore::constructFormula(terms = c(formula, formula2))
+
+deneme %>%
+  finalfit::finalfit(formula, formula2) -> tUni
+
+tUni
+```
+
+
+```{r construct formula 3}
+formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+vars <- unlist(vars)
+
+explanatory <- jmvcore::constructFormula(terms = c("explanatory"))    
+
+explanatory <- jmvcore::decomposeFormula(formula = explanatory)
+
+explanatory <- unlist(explanatory)
+
+myformula <- paste("Surv(", vars[1], ", ", vars[2], ")")
+
+
+
+deneme %>%
+finalfit::finalfit(myformula, explanatory) -> tUni
+
+```
+
+
+
+---
+
+# Other Codes
+
+## force git
+
+```{r force git, eval=FALSE, include=FALSE}
+# gitUpdateCommitPush
+CommitMessage <- paste("updated on ", Sys.time(), sep = "")
+wd <- getwd()
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+system(command = gitCommand, intern = TRUE)
+
+```
+
+
+## arsenal
+
+```{r arsenal, results='asis'}
+
+tab1 <- arsenal::tableby(~ Age + Sex, data = deneme)
+
+results <- summary(tab1)
+
+
+# results$object
+# results$control
+# results$totals
+# results$hasStrata
+# results$text
+# results$pfootnote
+# results$term.name
+# 
+# tab1$Call
+# 
+# tab1$control
+
+tab1$tables # this is where results lie
+
+
+```
+
+
+## define survival time
+
+```{r define survival time}
+mydata$int <- lubridate::interval(
+  lubridate::ymd(mydata$SurgeryDate),
+  lubridate::ymd(mydata$LastFollowUpDate)
+  )
+mydata$OverallTime <- lubridate::time_length(mydata$int, "month")
+mydata$OverallTime <- round(mydata$OverallTime, digits = 1)
+```
+
+
+
+
+## Multivariate Analysis Survival
+
+
+```{r Multivariate Analysis, eval=FALSE, include=FALSE}
+library(finalfit)
+library(survival)
+explanatoryMultivariate <- explanatoryKM
+dependentMultivariate <- dependentKM
+
+mydata %>%
+  finalfit(dependentMultivariate, explanatoryMultivariate) -> tMultivariate
+
+knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))
+```
+
+
+
+
+
+
+
