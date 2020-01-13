@@ -153,5 +153,9 @@ Imports:
     boot, 
     grid, 
     stats,
-    snakecase
+    snakecase,
+    caret,
+    foreach,
+    iterators,
+    recipes
 RoxygenNote: 7.0.2
