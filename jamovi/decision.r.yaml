@@ -1,0 +1,15 @@
+---
+name:  decision
+title: Medical Decision
+jrs:   '1.1'
+
+items:
+    - name:  text1
+      title: Table
+      type:  Preformatted
+#
+#     - name:  text2
+#       title: Caret Summary
+#       type:  Preformatted
+
+...

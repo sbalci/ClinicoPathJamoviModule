@@ -167,6 +167,11 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # )
 
 
+            # results 7
+
+            results7 <- paste("14.01.2019 12:00")
+
+
 
 
             # results all
@@ -179,9 +184,9 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             results3summary,
                             results4,
                             results5,
-                            results5summary
+                            results5summary,
                             # results6
-                            )
+                            results7)
 
             self$results$text$setContent(results)
 
