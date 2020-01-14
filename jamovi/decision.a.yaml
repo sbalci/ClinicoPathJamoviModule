@@ -1,0 +1,33 @@
+---
+name:  decision
+title: Medical Decision
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: gold
+      title: Gold Standart
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: goldPositive
+      title: Gold Standart Positive Value
+      type: Level
+      variable: (gold)
+
+    - name: newtest
+      title: New Test
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: testPositive
+      title: New Test Positive Value
+      type: Level
+      variable: (newtest)
+...

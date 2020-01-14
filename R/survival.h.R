@@ -18,13 +18,26 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..factor <- jmvcore::OptionVariable$new(
                 "factor",
-                factor)
+                factor,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
-                outcome)
+                outcome,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
-                overalltime)
+                overalltime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..factor)
             self$.addOption(private$..outcome)
@@ -169,6 +182,7 @@ survival <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(overalltime), overalltime, NULL))
 
+    for (v in factor) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- survivalOptions$new(
         factor = factor,

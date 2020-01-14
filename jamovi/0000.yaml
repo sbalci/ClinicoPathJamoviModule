@@ -74,6 +74,11 @@ analyses:
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuTitle: FinalFit Multivariate Survival
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Medical Decision
 usesNative: true
 minApp: 1.0.8
 
