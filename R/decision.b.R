@@ -18,6 +18,8 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             goldPLevel <- self$options$goldPositive
 
+
+
             testVariable <- self$options$newtest
 
             # testVariable <- self$data[[testVariable]]
@@ -31,7 +33,7 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results1df <- conftable_df
 
-            results1df <- results1df[[Freq]][results1df[[Var1]] == testVariable]
+            # results1df <- results1df[[Freq]][results1df[[Var1]] == testVariable]
 
 
 
@@ -67,6 +69,31 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Caret
 
+            mydata2 <- mydata %>%
+                mutate(
+                    goldVariable = case_when(
+                        goldVariable == goldPLevel ~ "Positive",
+                        NA ~ NA_character_,
+                        TRUE ~ "Negative"
+                    )
+                ) %>%
+                mutate(
+                    testVariable = case_when(
+                        testVariable == testPLevel ~ "Positive",
+                        NA ~ NA_character_,
+                        TRUE ~ "Negative"
+                    )
+                )
+
+            # goldVariable <- forcats::as_factor(goldVariable)
+            # testVariable <- forcats::as_factor(testVariable)
+            #
+            # goldPLevel <- forcats::as_factor(goldPLevel)
+            # testPLevel <- forcats::as_factor(testPLevel)
+
+
+
+
 
             # sens <- caret::sensitivity(mydata, goldVariable, positive = goldPLevel)
 
@@ -81,29 +108,9 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                # PPV is {PPV}.")
 
 
+            results2 <- table(mydata2[[testVariable]], mydata2[[goldVariable]])
 
-            # results2 <- summary_caret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            # results2 <- caret::confusionMatrix(conftable)
 
 
             # Results
@@ -112,16 +119,9 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              results1df,
                              results1TP)
 
-            self$results$text1$setContent(results1)
+            self$results$text1$setContent(results2)
 
             # self$results$text2$setContent(results2)
-
-
-
-
-
-
-
 
 
             # `self$data` contains the data

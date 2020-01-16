@@ -162,7 +162,9 @@ ClinicoPath::decision(
 ```{r decision 2}
 mytable <- table(deneme$Outcome, deneme$Smoker)
 
-
+caret::confusionMatrix(mytable)
+confusionMatrix(pred, truth)
+confusionMatrix(xtab, prevalence = 0.25)
 
 levels(deneme$Outcome)
 
