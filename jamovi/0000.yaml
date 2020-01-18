@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2019-11-26'
+date: '2020-01-17'
 type: R
 description: >-
   Using many different R-project packages So credit should go to main authors I
@@ -30,50 +30,42 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Report
     menuTitle: WriteSummary
-  - title: survival
-    name: survival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: survival
-  - title: survcopied
-    name: surv
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: survcopied
-    menuTitle: survcopied
-  - title: FinalFit
-    name: finalfit
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: FinalFit
   - title: Report General Features
     name: report
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Report
     menuTitle: Report General Features
-  - title: Independent Samples T-Test
-    name: ttest
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuTitle: Independent Samples T-Test
   - title: Frequencies
     name: frequencies
     ns: ClinicoPath
     menuGroup: ClinicoPath
+    menuSubgroup: Report
     menuTitle: Frequencies
-  - title: correlation
-    name: correlation
+  - title: survival
+    name: survival
     ns: ClinicoPath
     menuGroup: ClinicoPath
-    menuTitle: correlation
+    menuSubgroup: Survival
+    menuTitle: survival
+  - title: FinalFit
+    name: finalfit
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: FinalFit
   - title: FinalFit Multivariate Survival
     name: multisurvival
     ns: ClinicoPath
     menuGroup: ClinicoPath
+    menuSubgroup: Survival
     menuTitle: FinalFit Multivariate Survival
+  - title: correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Correlation
+    menuTitle: correlation
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
