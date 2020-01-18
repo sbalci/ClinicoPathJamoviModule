@@ -5,11 +5,6 @@ jrs:   '1.1'
 
 items:
     - name:  text1
-      title: Table
+      title: Tables
       type:  Preformatted
-
-    - name:  text2
-      title: Caret Summary
-      type:  Preformatted
-
 ...

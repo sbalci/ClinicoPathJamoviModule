@@ -6,91 +6,96 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = decisionBase,
     private = list(
         .run = function() {
-
-
             # Data definition
-
             mydata <- self$data
 
-            goldVariable <- self$options$gold
 
-            # goldVariable <- self$data[[goldVariable]]
+            testPLevel <- jmvcore::constructFormula(terms = self$options$testPositive)
 
-            goldPLevel <- self$options$goldPositive
-
-
-
-            testVariable <- self$options$newtest
-
-            # testVariable <- self$data[[testVariable]]
-
-            testPLevel <- self$options$testPositive
-
-            conftable <- table(mydata[[testVariable]], mydata[[goldVariable]])
-
-            conftable_df <- as.data.frame(conftable)
-
-
-            results1df <- conftable_df
-
-            # results1df <- results1df[[Freq]][results1df[[Var1]] == testVariable]
-
-
-
-            # Table
-
-
-
-            results1 <- conftable
-
-
-            # Table 2
-
-
-            goldPLevel <- jmvcore::constructFormula(terms = "goldPLevel")
-            goldPLevel <- jmvcore::decomposeFormula(formula = goldPLevel)
-            goldPLevel <- unlist(goldPLevel)
-
-
-            testPLevel <- jmvcore::constructFormula(terms = "testPLevel")
             testPLevel <- jmvcore::decomposeFormula(formula = testPLevel)
+
             testPLevel <- unlist(testPLevel)
 
 
-            TP <- conftable[1,2]
+            testVariable <- jmvcore::constructFormula(terms = self$options$newtest)
 
-            results1TP <- TP
+            testVariable <- jmvcore::decomposeFormula(formula = testVariable)
 
-
-
-
+            testVariable <- unlist(testVariable)
 
 
+            goldPLevel <- jmvcore::constructFormula(terms = self$options$goldPositive)
 
-            # Caret
+            goldPLevel <- jmvcore::decomposeFormula(formula = goldPLevel)
 
-            mydata2 <- mydata %>%
-                mutate(
-                    goldVariable = case_when(
-                        goldVariable == goldPLevel ~ "Positive",
+            goldPLevel <- unlist(goldPLevel)
+
+
+            goldVariable <- jmvcore::constructFormula(terms = self$options$gold)
+
+            goldVariable <- jmvcore::decomposeFormula(formula = goldVariable)
+
+            goldVariable <- unlist(goldVariable)
+
+            mydata[[testVariable]] <- forcats::as_factor(mydata[[testVariable]])
+
+            mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
+
+            # Table 1
+
+            Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
+
+
+            results1 <- Table1
+
+            # Recode
+
+            mydata2 <- mydata
+
+            mydata2 <- mydata2 %>%
+                filter(complete.cases(.)) %>%
+                dplyr::mutate(
+                    testVariable2 =
+                    dplyr::case_when(
+                        .data[[testVariable]] == self$options$testPositive ~ "Positive",
                         NA ~ NA_character_,
                         TRUE ~ "Negative"
                     )
                 ) %>%
-                mutate(
-                    testVariable = case_when(
-                        testVariable == testPLevel ~ "Positive",
-                        NA ~ NA_character_,
-                        TRUE ~ "Negative"
-                    )
+
+                dplyr::mutate(
+                    goldVariable2 =
+                        dplyr::case_when(
+                            .data[[goldVariable]] == self$options$goldPositive ~ "Positive",
+                            NA ~ NA_character_,
+                            TRUE ~ "Negative"
+                        )
                 )
 
-            # goldVariable <- forcats::as_factor(goldVariable)
-            # testVariable <- forcats::as_factor(testVariable)
-            #
-            # goldPLevel <- forcats::as_factor(goldPLevel)
-            # testPLevel <- forcats::as_factor(testPLevel)
+            mydata2 <- mydata2 %>%
+                dplyr::mutate(
+                    testVariable2 = forcats::fct_relevel(testVariable2, "Positive")
+                ) %>%
+                dplyr::mutate(
+                    goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
+                )
 
+
+            # Caret
+
+            conf_table <- table(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
+
+
+            results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
+
+            # Results
+
+            results <- list(
+                results1,
+                results_caret
+            )
+
+            self$results$text1$setContent(results)
 
 
 
@@ -108,20 +113,6 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                # PPV is {PPV}.")
 
 
-            results2 <- table(mydata2[[testVariable]], mydata2[[goldVariable]])
-
-            # results2 <- caret::confusionMatrix(conftable)
-
-
-            # Results
-
-            results1 <- list(results1,
-                             results1df,
-                             results1TP)
-
-            self$results$text1$setContent(results2)
-
-            # self$results$text2$setContent(results2)
 
 
             # `self$data` contains the data

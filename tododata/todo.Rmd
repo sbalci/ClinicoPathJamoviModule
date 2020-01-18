@@ -1,3 +1,7 @@
+---
+title: "ToDo"
+---
+
 # Develop
 
 
@@ -62,6 +66,7 @@ devtools::install()
 
 
 ```{r jmvtools install, include=FALSE}
+# jmvtools::check()
 jmvtools::install()
 ```
 
@@ -149,12 +154,20 @@ ClinicoPath::finalfit(data = deneme,
 ```{r decision}
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
 ClinicoPath::decision(
     data = deneme,
     gold = Outcome,
     goldPositive = "1",
     newtest = Smoker,
-    testPositive = "DOĞRU")
+    testPositive = "TRUE")
+
+ClinicoPath::decision(
+    data = deneme,
+    gold = LVI,
+    goldPositive = "Present",
+    newtest = PNI,
+    testPositive = "Present")
 ```
 
 
