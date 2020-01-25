@@ -107,7 +107,6 @@ jmvcore::decomposeTerm(term = cformula)
 
 
 
-
 ---
 
 # Example
