@@ -1,36 +1,24 @@
-title: Medical Decision
-name: decision
+title: GGStatsPlot
+name: statsplot
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
-
     children:
       - type: TargetLayoutBox
-        label: Gold Standart
-
+        label: Dependent Variable
         children:
           - type: VariablesListBox
-            name: gold
+            name: dep
             maxItemCount: 1
             isTarget: true
-
-          - type: LevelSelector
-            name: goldPositive
-            enable: (gold)
-
       - type: TargetLayoutBox
-        label: New Test
-
+        label: Grouping Variable
         children:
           - type: VariablesListBox
-            name: newtest
+            name: group
             maxItemCount: 1
             isTarget: true
-
-          - type: LevelSelector
-            name: testPositive
-            enable: (newtest)

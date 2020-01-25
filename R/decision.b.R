@@ -6,6 +6,14 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = decisionBase,
     private = list(
         .run = function() {
+
+            description <- "Description of Module"
+
+
+            if (length(self$options$testPositive) + length(self$options$newtest) + length(self$options$goldPositive) + length(self$options$gold) < 4)
+                return()
+
+
             # Data definition
             mydata <- self$data
 
@@ -43,7 +51,21 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Table 1
 
-            Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
+            # Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
+
+
+
+
+            Table1 <- mydata %>%
+                janitor::tabyl(.data[[testVariable]], .data[[goldVariable]]) %>%
+                janitor::adorn_totals(c("row", "col")) %>%
+                janitor::adorn_percentages("row") %>%
+                janitor::adorn_pct_formatting(rounding = "half up", digits = 1) %>%
+                janitor::adorn_ns() %>%
+                janitor::adorn_title("combined")
+            # %>%
+            #     knitr::kable()
+
 
 
             results1 <- Table1
@@ -88,19 +110,11 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
 
-            # Results
-
-            results <- list(
-                results1,
-                results_caret
-            )
-
-            self$results$text1$setContent(results)
 
 
 
 
-            # sens <- caret::sensitivity(mydata, goldVariable, positive = goldPLevel)
+            # sens <- caret::sensitivity(mydata2, reference = "goldVariable2", positive = "Positive")
 
             # caret::specificity(mydata, goldVariable, negative = levels(reference)[2])
 
@@ -113,6 +127,15 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                # PPV is {PPV}.")
 
 
+            # Results
+
+            results <- list(
+                description,
+                results1,
+                results_caret
+            )
+
+            self$results$text1$setContent(results)
 
 
             # `self$data` contains the data

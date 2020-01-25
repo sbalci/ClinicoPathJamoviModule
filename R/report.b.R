@@ -35,20 +35,28 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-            myreport <- mydata %>%
-                select(myvars) %>%
-                report::report(.,
-                               median = med,
-                               centrality = cent,
-                               dispersion = disp,
-                               range = ran,
-                               distribution = distr,
-                               levels_percentage = lev,
-                               n_characters = n_ch,
-                               missing_percentage = mis
-                               )
+            # myreport <- mydata %>%
+            #     select(myvars) %>%
+            #     report::report(.,
+            #                    median = med,
+            #                    centrality = cent,
+            #                    dispersion = disp,
+            #                    range = ran,
+            #                    distribution = distr,
+            #                    levels_percentage = lev,
+            #                    n_characters = n_ch,
+            #                    missing_percentage = mis
+            #                    )
 
-            results1 <- myreport
+            # results1 <- myreport
+
+
+
+            results1 <- mydata %>%
+                explore::describe(.) %>%
+                dplyr::filter(na > 0)
+
+
 
             self$results$text$setContent(results1)
 

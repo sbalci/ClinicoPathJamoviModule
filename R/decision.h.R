@@ -71,7 +71,7 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Tables"))}))
+                title="Medical Decision"))}))
 
 decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisionBase",

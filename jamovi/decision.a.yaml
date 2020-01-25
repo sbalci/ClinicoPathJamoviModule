@@ -16,7 +16,7 @@ options:
       permitted: [ factor ]
 
     - name: goldPositive
-      title: Gold Standart Positive Value
+      title: Positive Level
       type: Level
       variable: (gold)
 
@@ -27,7 +27,7 @@ options:
       permitted: [ factor ]
 
     - name: testPositive
-      title: New Test Positive Value
+      title: Positive Level
       type: Level
       variable: (newtest)
 ...

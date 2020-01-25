@@ -1,0 +1,11 @@
+---
+name:  statsplot
+title: GGStatsPlot
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: GGStatsPlot
+      type:  Preformatted
+
+...

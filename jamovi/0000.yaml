@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-01-17'
+date: '2020-01-23'
 type: R
 description: >-
   Using many different R-project packages So credit should go to main authors I
@@ -70,7 +70,20 @@ analyses:
     name: decision
     ns: ClinicoPath
     menuGroup: ClinicoPath
+    menuSubgroup: Decision
     menuTitle: Medical Decision
+  - title: Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Decision
+    menuTitle: Decision Calculator
+  - title: GGStatsPlot
+    name: statsplot
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Plots
+    menuTitle: GGStatsPlot
 usesNative: true
 minApp: 1.0.8
 
