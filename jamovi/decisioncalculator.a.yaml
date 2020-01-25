@@ -1,0 +1,28 @@
+---
+name:  decisioncalculator
+title: Decision Calculator
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: TP
+      title: 'True Positive ='
+      type: Number
+      default: 90
+
+    - name: TN
+      title: 'True Negative ='
+      type: Number
+      default: 30
+
+    - name: FP
+      title: 'False Positive ='
+      type: Number
+      default: 20
+
+    - name: FN
+      title: 'False Negative ='
+      type: Number
+      default: 80
+...

@@ -56,7 +56,8 @@ finalfitOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -67,7 +68,14 @@ finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="FinalFit"))}))
+                title="FinalFit"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Survival Plot",
+                width=400,
+                height=300,
+                renderFun=".plot"))}))
 
 finalfitBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "finalfitBase",
@@ -98,6 +106,7 @@ finalfitBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

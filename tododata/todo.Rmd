@@ -53,6 +53,11 @@ jmvtools::check()
 # jmvtools::addAnalysis(name='report', title='Report General Features')
 
 # jmvtools::addAnalysis(name='frequencies', title='Frequencies')
+
+# jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')
+
+# jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
+
 ```
 
 
@@ -172,6 +177,18 @@ ClinicoPath::decision(
 
 
 
+```{r statsplot}
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::statsplot(
+    data = deneme,
+    dep = Age,
+    group = Smoker)
+```
+
+
+
+
 ```{r decision 2}
 mytable <- table(deneme$Outcome, deneme$Smoker)
 
@@ -209,6 +226,23 @@ jmvcore::constructFormula(terms = list("A", "B", "C"))
 vars <- jmvcore::decomposeFormula(formula = formula) 
 
 unlist(vars)
+
+formula <- as.formula(formula)
+
+
+my_group <- "lvi"
+my_dep <- "age"
+
+formula <- paste0('x = ', group, 'y = ', dep)
+myformula <- as.formula(formula)
+
+myformula <- glueformula::gf({my_group}, {my_dep})
+
+myformula <- glue::glue( 'x = ' , {my_group}, ', y = ' , {my_dep})
+
+myformula <- jmvcore::composeTerm(myformula)
+
+
 ```
 
 
@@ -247,6 +281,64 @@ deneme %>%
 
 tUni
 ```
+
+
+```{r}
+library(dplyr)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(LVI, Age)
+results
+
+mydep <- deneme$Age
+mygroup <- deneme$LVI
+
+
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mygroup <- jmvcore::composeTerm(mygroup)
+
+mydep <- jmvcore::constructFormula(terms = "mydep")
+mydep <- jmvcore::composeTerm(mydep)
+
+myformula <- glue::glue('x = ', {mygroup}, ', y = ' , {mydep})
+
+myformula <- jmvcore::composeTerm(myformula)
+
+myformula <- as.formula(myformula)
+
+
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(myformula)
+results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mydep2 <- quote(mydep)
+mygroup2 <- quote(mygroup)
+
+
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2)
+results
+```
+
+
+
+
+
+
 
 
 ```{r construct formula 3}

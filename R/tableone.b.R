@@ -12,17 +12,42 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$vars) == 0)
                 return()
 
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-            formula <- paste('~', formula)
-            formula <- as.formula(formula)
+            # formula <- jmvcore::constructFormula(terms = self$options$vars)
+            # formula <- paste('~', formula)
+            # formula <- as.formula(formula)
 
-            table1 <- arsenal::tableby(formula, self$data)
+            # table1 <- arsenal::tableby(formula, self$data)
 
-            results <- summary(table1)
+            # results1 <- summary(table1, text = "html")
 
-            # results <- kableExtra::kable(results)
 
-            self$results$text$setContent(results)
+
+
+            # result2 <- "You have entered"
+
+            # result2 <- kableExtra::kable(results1, format = "html", digits = 1,
+            #                              escape = TRUE) %>%
+            #     kableExtra::kable_styling(kable_input = .,
+            #                               bootstrap_options = "striped", full_width = F, position = "left")
+
+
+
+            # table one
+
+
+            tableo <- self$data %>%
+                tableone::CreateTableOne(data = .)
+
+
+
+
+            # results
+
+            self$results$text$setContent(tableo)
+
+
+            # html <- self$results$result2
+            # html$setContent(result2)
 
 
             # `self$data` contains the data

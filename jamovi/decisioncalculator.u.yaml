@@ -1,0 +1,36 @@
+title: Decision Calculator
+name: decisioncalculator
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: Medical Decision Calculator
+    children:
+      - type: LayoutBox
+        style: inline
+        children:
+          - type: LayoutBox
+            margin: large
+            cell:
+              row: 1
+              column: 1
+            children:
+              - type: TextBox
+                name: TP
+                format: number
+              - type: TextBox
+                name: FP
+                format: number
+          - type: LayoutBox
+            margin: large
+            cell:
+              row: 1
+              column: 2
+            children:
+              - type: TextBox
+                name: TN
+                format: number
+              - type: TextBox
+                name: FN
+                format: number

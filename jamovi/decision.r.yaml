@@ -5,6 +5,6 @@ jrs:   '1.1'
 
 items:
     - name:  text1
-      title: Tables
+      title: Medical Decision
       type:  Preformatted
 ...

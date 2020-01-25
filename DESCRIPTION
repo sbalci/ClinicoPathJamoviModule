@@ -22,11 +22,15 @@ Imports:
     janitor,
     ggplot2,
     insight,
-    forcats
+    forcats,
+    ggstatsplot,
+    tableone,
+    explore
 Remotes:
-    easystats/report@7dd4eac9270d9ecea48517b0178fca5a0b7914da
+    easystats/report@580d9d571ad16dc40f1eeb5afd6aae481cde9d40
 Suggests:
-    remotes, 
+    remotes,
+    devtools,
     broom, 
     GGally, 
     gridExtra, 

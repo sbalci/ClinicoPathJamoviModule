@@ -8,4 +8,10 @@ items:
       title: FinalFit
       type:  Preformatted
 
+    - name: plot
+      title: Survival Plot
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot
 ...

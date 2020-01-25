@@ -8,4 +8,9 @@ items:
       title: TableOne
       type:  Preformatted
 
+    # - name:  result2
+    #   title: Advice
+    #   type: Html
+    #   description: the method recommendation
+    #   visible: (text)
 ...
