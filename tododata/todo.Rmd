@@ -56,6 +56,10 @@ jmvtools::check()
 
 # jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')
 
+# jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')
+
+# jmvtools::addAnalysis(name='scat2', title='scat2')
+
 # jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
 
 ```
@@ -173,6 +177,16 @@ ClinicoPath::decision(
     newtest = PNI,
     testPositive = "Present")
 ```
+
+```{r}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ggstatsplot::ggbetweenstats(data = deneme, 
+                            x = LVI,
+                            y = Age)
+
+```
+
+
 
 
 
@@ -300,6 +314,42 @@ mygroup <- jmvcore::composeTerm(mygroup)
 mydep <- jmvcore::constructFormula(terms = "mydep")
 mydep <- jmvcore::composeTerm(mydep)
 
+
+# not working
+# eval(mygroup)
+# rlang::eval_tidy(mygroup)
+# !!mygroup
+# {{mygroup}}
+# sym(mygroup)
+# quote(mygroup)
+# enexpr(mygroup)
+
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mydep <- jmvcore::constructFormula(terms = "mydep")
+
+formula1 <- paste(mydep)
+formula1 <- jmvcore::composeTerm(formula1)
+
+
+mygroup <- paste(mygroup)
+mygroup <- jmvcore::composeTerm(mygroup)
+
+mydep <- deneme$Age
+mygroup <- deneme$LVI
+
+mydep <- jmvcore::resolveQuo(jmvcore::enquo(mydep))
+mygroup <- jmvcore::resolveQuo(jmvcore::enquo(mygroup))
+
+mydata2 <- data.frame(mygroup=mygroup, mydep=mydep)
+
+results <- mydata2 %>%
+                ggstatsplot::ggbetweenstats(
+x = mygroup, y = mydep  )
+
+results
+
+
+
 myformula <- glue::glue('x = ', {mygroup}, ', y = ' , {mydep})
 
 myformula <- jmvcore::composeTerm(myformula)
@@ -307,9 +357,6 @@ myformula <- jmvcore::composeTerm(myformula)
 myformula <- as.formula(myformula)
 
 
-results <- deneme %>%
-                ggstatsplot::ggbetweenstats(myformula)
-results
 
 
 

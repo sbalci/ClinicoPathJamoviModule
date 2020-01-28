@@ -1,0 +1,46 @@
+---
+name:  scat2
+title: scat2
+jrs:   '1.1'
+
+items:
+    # - name:  text1
+    #   title: GGStatsPlot2
+    #   type:  Preformatted
+
+
+    - name: plot1
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+
+    - name: scat2
+      title: 'Scatter Plot'
+      type: Image
+      description: a scatter plot
+      renderFun: .scat2
+      clearWith:
+        - x
+        - y
+        - group
+        - marg
+        - line
+        - se
+
+
+    - name: scat3
+      title: 'New Plot'
+      type: Image
+      description: new plot
+      renderFun: .scat2
+      clearWith:
+        - x
+        - y
+        - group
+        - marg
+        - line
+        - se
+
+
+...

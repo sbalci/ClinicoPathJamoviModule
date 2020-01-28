@@ -84,6 +84,28 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Plots
     menuTitle: GGStatsPlot
+  - title: GGStatsPlot2
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Plots
+    menuTitle: GGStatsPlot2
+  - title: scat2
+    name: scat2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Plots
+    menuTitle: scat2
+    description: Function for making ggstatsplot plots.
+  - title: Scatterplot
+    name: scat
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Plots
+    menuTitle: Scatterplot
+    description: >-
+      Function for making clean, good looking scatter plots with the option to
+      add marginal denisty or box plots.
 usesNative: true
 minApp: 1.0.8
 
