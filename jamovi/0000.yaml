@@ -4,13 +4,14 @@ name: ClinicoPath
 version: 0.0.1
 jms: '1.0'
 authors:
-  - Serdar Balci
+  - null
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-01-23'
+date: '2020-01-28'
 type: R
 description: >-
-  Using many different R-project packages So credit should go to main authors I
-  just try to convert the codes that I often use into jamovi module
+  I am collecting many different R-project packages here So credit should go to
+  main authors I just try to convert the codes that I often use into jamovi
+  module
 analyses:
   - title: TableOne
     name: tableone
@@ -18,54 +19,18 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Tables
     menuTitle: TableOne
-  - title: CrossTable
-    name: crosstable
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Tables
-    menuTitle: CrossTable
   - title: WriteSummary
     name: writesummary
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Report
     menuTitle: WriteSummary
-  - title: Report General Features
-    name: report
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Report
-    menuTitle: Report General Features
-  - title: Frequencies
-    name: frequencies
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Report
-    menuTitle: Frequencies
-  - title: survival
-    name: survival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: survival
   - title: FinalFit
     name: finalfit
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: FinalFit
-  - title: FinalFit Multivariate Survival
-    name: multisurvival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: FinalFit Multivariate Survival
-  - title: correlation
-    name: correlation
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Correlation
-    menuTitle: correlation
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
@@ -78,34 +43,12 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Decision
     menuTitle: Decision Calculator
-  - title: GGStatsPlot
-    name: statsplot
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Plots
-    menuTitle: GGStatsPlot
   - title: GGStatsPlot2
     name: statsplot2
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Plots
     menuTitle: GGStatsPlot2
-  - title: scat2
-    name: scat2
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Plots
-    menuTitle: scat2
-    description: Function for making ggstatsplot plots.
-  - title: Scatterplot
-    name: scat
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Plots
-    menuTitle: Scatterplot
-    description: >-
-      Function for making clean, good looking scatter plots with the option to
-      add marginal denisty or box plots.
 usesNative: true
 minApp: 1.0.8
 
