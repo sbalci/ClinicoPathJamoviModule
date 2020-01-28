@@ -1,0 +1,20 @@
+---
+name:  statsplot2
+title: GGStatsPlot2
+jrs:   '1.1'
+
+items:
+    - name:  text1
+      title: GGStatsPlot2
+      type:  Preformatted
+
+    - name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+
+refs: ggstatsplot
+
+
+...
