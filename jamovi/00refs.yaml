@@ -162,4 +162,29 @@ refs:
         url: https://cran.r-project.org/package=ggstatsplot
         doi: '10.5281/zenodo.2074621'
 
+    report:
+        type: 'software'
+        author:
+        year: 2018
+        title: ""
+        publisher: ''
+        url: https://cran.r-project.org/package=ggstatsplot
+
+    arsenal:
+        type: 'software'
+        author:
+        year: 2018
+        title: ""
+        publisher: ''
+        url: https://cran.r-project.org/package=ggstatsplot
+
+    tangram:
+        type: 'software'
+        author: Garbett, S.
+        year: 2018
+        title: "tangram: The Grammar of Tables"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=tangram'
+        url: https://cran.r-project.org/package=tangram
+
+
 ...

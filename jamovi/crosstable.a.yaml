@@ -1,0 +1,29 @@
+---
+name:  crosstable
+title: CrossTable
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for making Cross Tables.
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Dependent Variable
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  variable in the column
+
+...

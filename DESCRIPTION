@@ -25,7 +25,8 @@ Imports:
     forcats,
     ggstatsplot,
     tableone,
-    explore
+    explore,
+    tangram
 Remotes:
     easystats/report@580d9d571ad16dc40f1eeb5afd6aae481cde9d40
 Suggests:

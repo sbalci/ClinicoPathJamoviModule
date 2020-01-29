@@ -1,10 +1,10 @@
 ---
-title: Analysis for Clinicopathological Research
+title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
 version: 0.0.1
 jms: '1.0'
 authors:
-  - null
+  - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
 date: '2020-01-28'
 type: R
@@ -19,12 +19,26 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Tables
     menuTitle: TableOne
+    description: Form a Table1 to use in general description of the dataset
+  - title: CrossTable
+    name: crosstable
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Tables
+    menuTitle: CrossTable
+    description: Function for making Cross Tables.
   - title: WriteSummary
     name: writesummary
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Report
     menuTitle: WriteSummary
+  - title: Report General Features
+    name: report
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Report
+    menuTitle: Report General Features
   - title: FinalFit
     name: finalfit
     ns: ClinicoPath
@@ -49,6 +63,27 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Plots
     menuTitle: GGStatsPlot2
+    description: Function for making ggstatsplot plots
+  - title: correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: correlation
+  - title: FinalFit Multivariate Survival
+    name: multisurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: FinalFit Multivariate Survival
+  - title: Frequencies
+    name: frequencies
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Frequencies
+  - title: Interrater Intrarater Reliability
+    name: agreement
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Interrater Intrarater Reliability
 usesNative: true
 minApp: 1.0.8
 

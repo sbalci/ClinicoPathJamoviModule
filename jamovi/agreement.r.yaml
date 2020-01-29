@@ -1,0 +1,11 @@
+---
+name:  agreement
+title: Interrater Intrarater Reliability
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
+
+...
