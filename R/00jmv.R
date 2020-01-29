@@ -143,4 +143,25 @@
         `title`="ggstatsplot: 'ggplot2' Based Plots with Statistical Details", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=ggstatsplot", 
         `url`="https://cran.r-project.org/package=ggstatsplot", 
-        `doi`="10.5281/zenodo.2074621"))
+        `doi`="10.5281/zenodo.2074621"), 
+    `report`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=2018, 
+        `title`="", 
+        `publisher`="", 
+        `url`="https://cran.r-project.org/package=ggstatsplot"), 
+    `arsenal`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=2018, 
+        `title`="", 
+        `publisher`="", 
+        `url`="https://cran.r-project.org/package=ggstatsplot"), 
+    `tangram`=list(
+        `type`="software", 
+        `author`="Garbett, S.", 
+        `year`=2018, 
+        `title`="tangram: The Grammar of Tables", 
+        `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=tangram", 
+        `url`="https://cran.r-project.org/package=tangram"))

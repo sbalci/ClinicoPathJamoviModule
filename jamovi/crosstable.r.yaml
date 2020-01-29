@@ -1,0 +1,25 @@
+---
+name:  crosstable
+title: CrossTable
+jrs:   '1.1'
+
+items:
+    - name:  text1
+      title: CrossTable Arsenal
+      type:  Preformatted
+
+    - name:  text2
+      title: CrossTable Tangram
+      type:  Preformatted
+
+    - name:  text3
+      title: CrossTable Tangram NEJM
+      type:  Html
+
+    - name:  text4
+      title: CrossTable Tangram Lancet
+      type:  Html
+
+refs: tangram
+
+...

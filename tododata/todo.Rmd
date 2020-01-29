@@ -62,6 +62,8 @@ jmvtools::check()
 
 # jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
 
+# jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')
+
 ```
 
 
@@ -408,6 +410,47 @@ deneme %>%
 finalfit::finalfit(myformula, explanatory) -> tUni
 
 ```
+
+
+```{r table tangram}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+table3 <-
+  tangram::html5(
+    tangram::tangram(
+      "Death ~ LVI + PNI + Age", deneme),
+    fragment=TRUE,
+    inline="nejm.css",
+    caption = "HTML5 Table NEJM Style",
+    id="tbl3")
+
+table3
+
+mydep <- deneme$Age
+mygroup <- deneme$Death
+
+
+formulaR <- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age"))
+
+formulaL <- jmvcore::constructFormula(terms = "Death")
+
+formula <- paste(formulaL, '~', formulaR)
+
+formula <- as.formula(formula)
+
+
+table <- tangram::html5(
+    tangram::tangram(formula, deneme
+                     ))
+
+table
+
+
+```
+
+
+
 
 
 
