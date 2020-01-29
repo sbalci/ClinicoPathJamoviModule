@@ -240,7 +240,12 @@ jmvcore::constructFormula(terms = list("A", "B", "C"))
 
 vars <- jmvcore::decomposeFormula(formula = formula) 
 
-unlist(vars)
+vars <- jmvcore::decomposeTerms(vars)
+
+as.vector(reduce(vars))
+
+
+vars <- unlist(vars)
 
 formula <- as.formula(formula)
 
