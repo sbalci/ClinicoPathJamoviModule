@@ -186,5 +186,14 @@ refs:
         publisher: '[R package]. Retrieved from https://cran.r-project.org/package=tangram'
         url: https://cran.r-project.org/package=tangram
 
+    irr:
+        type: 'software'
+        author:
+        year: 2018
+        title: ""
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=irr'
+        url: https://cran.r-project.org/package=irr
+
+
 
 ...

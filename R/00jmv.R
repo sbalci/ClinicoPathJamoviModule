@@ -164,4 +164,11 @@
         `year`=2018, 
         `title`="tangram: The Grammar of Tables", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=tangram", 
-        `url`="https://cran.r-project.org/package=tangram"))
+        `url`="https://cran.r-project.org/package=tangram"), 
+    `irr`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=2018, 
+        `title`="", 
+        `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=irr", 
+        `url`="https://cran.r-project.org/package=irr"))

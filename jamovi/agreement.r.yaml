@@ -4,8 +4,11 @@ title: Interrater Intrarater Reliability
 jrs:   '1.1'
 
 items:
-    - name:  text
+    - name:  text1
       title: Interrater Intrarater Reliability
       type:  Preformatted
 
+    - name:  text2
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
 ...

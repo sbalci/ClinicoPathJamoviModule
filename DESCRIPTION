@@ -21,14 +21,16 @@ Imports:
     glue,
     janitor,
     ggplot2,
-    insight,
     forcats,
     ggstatsplot,
     tableone,
     explore,
-    tangram
+    tangram,
+    irr
 Remotes:
-    easystats/report@580d9d571ad16dc40f1eeb5afd6aae481cde9d40
+    easystats/insight,
+    easystats/parameters,
+    easystats/report
 Suggests:
     remotes,
     devtools,
@@ -154,7 +156,6 @@ Suggests:
     jpeg, 
     bayestestR, 
     performance, 
-    parameters, 
     kableExtra, 
     boot, 
     grid, 
