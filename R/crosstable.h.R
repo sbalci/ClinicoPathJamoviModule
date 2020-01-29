@@ -57,7 +57,7 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="CrossTable",
-                refs="tangram")
+                refs="tangram, arsenal")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",

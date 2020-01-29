@@ -9,28 +9,21 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: outcome
+      title: Outcome
       type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
-    - name: group
-      title: Grouping Variable
+    - name: overalltime
+      title: OverallTime
       type: Variable
-
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
-
-    - name: varEq
-      title: Assume equal variances
-      type: Bool
-      default: true
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 ...

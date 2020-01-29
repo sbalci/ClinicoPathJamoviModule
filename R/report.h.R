@@ -111,7 +111,8 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Report General Features")
+                title="Report General Features",
+                refs="report")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

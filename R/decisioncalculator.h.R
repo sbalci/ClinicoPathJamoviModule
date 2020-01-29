@@ -62,7 +62,8 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Calculator")
+                title="Decision Calculator",
+                refs="caret")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",

@@ -6,10 +6,9 @@ frequenciesOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            vars = NULL,
+            show_na = FALSE,
+            na_lev = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,40 +16,35 @@ frequenciesOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..show_na <- jmvcore::OptionBool$new(
+                "show_na",
+                show_na,
+                default=FALSE)
+            private$..na_lev <- jmvcore::OptionBool$new(
+                "na_lev",
+                na_lev,
+                default=FALSE)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..vars)
+            self$.addOption(private$..show_na)
+            self$.addOption(private$..na_lev)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        vars = function() private$..vars$value,
+        show_na = function() private$..show_na$value,
+        na_lev = function() private$..na_lev$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..vars = NA,
+        ..show_na = NA,
+        ..na_lev = NA)
 )
 
 frequenciesResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -63,7 +57,8 @@ frequenciesResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Frequencies")
+                title="Frequencies",
+                refs="janitor")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -92,10 +87,9 @@ frequenciesBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param vars .
+#' @param show_na .
+#' @param na_lev .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -104,28 +98,25 @@ frequenciesBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @export
 frequencies <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    vars,
+    show_na = FALSE,
+    na_lev = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('frequencies requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(vars), vars, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- frequenciesOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        vars = vars,
+        show_na = show_na,
+        na_lev = na_lev)
 
     analysis <- frequenciesClass$new(
         options = options,

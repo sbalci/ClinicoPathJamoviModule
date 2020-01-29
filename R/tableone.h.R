@@ -36,7 +36,8 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="TableOne")
+                title="TableOne",
+                refs="tableone")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

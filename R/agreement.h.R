@@ -37,7 +37,8 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Interrater Intrarater Reliability")
+                title="Interrater Intrarater Reliability",
+                refs="irr")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",

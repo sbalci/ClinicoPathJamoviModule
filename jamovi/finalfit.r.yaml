@@ -14,4 +14,8 @@ items:
       width:  400
       height: 300
       renderFun: .plot
+
+
+refs: finalfit
+
 ...

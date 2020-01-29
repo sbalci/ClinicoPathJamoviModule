@@ -9,28 +9,19 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
-      type: Variable
+    - name: vars
+      title: Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
-    - name: group
-      title: Grouping Variable
-      type: Variable
-
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
-
-    - name: varEq
-      title: Assume equal variances
+    - name: show_na
+      title: Missing Values
       type: Bool
-      default: true
+      default: false
+
+    - name: na_lev
+      title: Missing Levels
+      type: Bool
+      default: false
 ...

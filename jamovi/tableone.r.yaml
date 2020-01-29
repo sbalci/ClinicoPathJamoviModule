@@ -13,4 +13,7 @@ items:
     #   type: Html
     #   description: the method recommendation
     #   visible: (text)
+
+refs: tableone
+
 ...
