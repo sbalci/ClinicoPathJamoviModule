@@ -20,6 +20,6 @@ items:
       title: CrossTable Tangram Lancet
       type:  Html
 
-refs: tangram
+refs: tangram, arsenal
 
 ...

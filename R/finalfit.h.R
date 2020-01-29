@@ -64,7 +64,8 @@ finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="FinalFit")
+                title="FinalFit",
+                refs="finalfit")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
