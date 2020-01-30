@@ -69,9 +69,15 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Interrater Intrarater Reliability
 #'
-#' 
+#' Function for Interrater Intrarater Reliability.
+#'
+#' @examples
+#' # example will be added
+#'
 #' @param data .
-#' @param vars .
+#' @param vars a string naming the variable from \code{data} that contains the
+#'   diagnosis given by the observer, variable can be categorical, ordinal or
+#'   numeric
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr

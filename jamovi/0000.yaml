@@ -88,6 +88,7 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Agreement
     menuTitle: Interrater Intrarater Reliability
+    description: Function for Interrater Intrarater Reliability.
 usesNative: true
 minApp: 1.0.8
 

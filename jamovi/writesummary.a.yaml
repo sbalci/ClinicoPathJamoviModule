@@ -2,6 +2,7 @@
 name:  writesummary
 title: WriteSummary
 menuGroup: ClinicoPath
+menuSubgroup: Descriptives
 version: '1.0.0'
 jas: '1.2'
 

@@ -2,6 +2,7 @@
 name:  tableone
 title: TableOne
 menuGroup: ClinicoPath
+menuSubgroup: Descriptives
 version: '0.0.1'
 jas: '1.2'
 

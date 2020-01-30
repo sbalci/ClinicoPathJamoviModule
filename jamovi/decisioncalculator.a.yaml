@@ -2,6 +2,7 @@
 name:  decisioncalculator
 title: Decision Calculator
 menuGroup: ClinicoPath
+menuSubgroup: Decision
 version: '1.0.0'
 jas: '1.2'
 
