@@ -81,7 +81,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Correlation
-    menuTitle: correlation
+    menuTitle: Correlation
   - title: Interrater Intrarater Reliability
     name: agreement
     ns: ClinicoPath

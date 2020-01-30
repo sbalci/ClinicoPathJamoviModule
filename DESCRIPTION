@@ -8,7 +8,7 @@ Maintainer: Serdar Balci <drserdarbalci@gmail.com>
 Description: Using many different R-project packages.
     So credit should go to main authors.
     I just try to convert the codes that I often use into jamovi module.
-License: GPL + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 
@@ -36,6 +36,7 @@ Remotes:
 Suggests:
     remotes,
     devtools,
+    tidyselect,
     broom, 
     GGally, 
     gridExtra, 
@@ -63,7 +64,6 @@ Suggests:
     assertthat, 
     pkgconfig, 
     Rcpp, 
-    tidyselect, 
     BH, 
     plogr, 
     ellipsis, 
