@@ -81,7 +81,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Correlation
-    menuTitle: Correlation
+    menuTitle: correlation
   - title: Interrater Intrarater Reliability
     name: agreement
     ns: ClinicoPath
@@ -89,6 +89,16 @@ analyses:
     menuSubgroup: Agreement
     menuTitle: Interrater Intrarater Reliability
     description: Function for Interrater Intrarater Reliability.
+  - title: Cluster Analysis
+    name: cluster
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Cluster Analysis
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Decision Tree
 usesNative: true
 minApp: 1.0.8
 

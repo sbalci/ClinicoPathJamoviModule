@@ -1,0 +1,11 @@
+---
+name:  cluster
+title: Cluster Analysis
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Cluster Analysis
+      type:  Preformatted
+
+...

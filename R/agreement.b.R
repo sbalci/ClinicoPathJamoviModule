@@ -1,3 +1,8 @@
+#' Agreement
+#'
+#'
+#' @importFrom R6 R6Class
+#' @import jmvcore
 
 # This file is a generated template, your changes will not be overwritten
 
@@ -25,8 +30,12 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             result1 <- irr::agree(ratings)
 
-
             result2 <- irr::kappa2(ratings)
+
+
+
+
+
 
 
             self$results$text1$setContent(result1)

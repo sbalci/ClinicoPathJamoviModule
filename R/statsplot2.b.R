@@ -1,4 +1,6 @@
-
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#'
 # This file is a generated template, your changes will not be overwritten
 
 statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -6,6 +8,10 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = statsplot2Base,
     private = list(
         .run = function() {
+
+            if(is.null(self$options$dep) || is.null(self$options$group))
+                return()
+
 
             mydata <- self$data
 
@@ -17,10 +23,26 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- jmvcore::naOmit(plotData)
 
             image <- self$results$plot
+
             image$setState(plotData)
 
 
-            self$results$text1$setContent(plotData)
+            # self$results$text1$setContent(plotData)
+
+
+            # mydepType <- data.frame(vclass = class(mydep),
+            #                         vtypeof = typeof(mydep),
+            #                         vordered = is.ordered(mydep),
+            #                         vfactor = is.factor(mydep),
+            #                         vnumeric = is.numeric(mydep),
+            #                         vdouble = is.double(mydep),
+            #                         vcharacter = is.character(mydep),
+            #                         vdate = lubridate::is.Date(mydep),
+            #                         vdate2 = is.na.POSIXlt(mydep)
+            #                         )
+            # mygroupType <- class(mygroup)
+            # variableTypes <- list(mydepType, mygroupType)
+            # self$results$text1$setContent(variableTypes)
 
 
 
