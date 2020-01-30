@@ -45,3 +45,5 @@ build
 ^.*\.jmo$
 
 ^tests$
+
+^\.github/
