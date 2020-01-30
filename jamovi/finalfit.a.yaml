@@ -2,6 +2,7 @@
 name:  finalfit
 title: FinalFit
 menuGroup: ClinicoPath
+menuSubgroup: Survival
 version: '1.0.0'
 jas: '1.2'
 

@@ -2,6 +2,7 @@
 name:  statsplot2
 title: GGStatsPlot2
 menuGroup: ClinicoPath
+menuSubgroup: Comparisons
 version: '1.0.0'
 jas: '1.2'
 
