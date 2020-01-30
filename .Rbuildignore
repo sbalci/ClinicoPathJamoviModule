@@ -27,9 +27,6 @@
 ### License
 ^LICENSE\.md$
 
-### Hex logo
-^img/
-
 ### Jamovi
 ^jamovi/
 .jmo$
@@ -47,3 +44,5 @@ build
 ^tests$
 
 ^\.github/
+^docs$
+^pkgdown$

@@ -28,7 +28,8 @@ Imports:
     explore,
     tangram,
     irr,
-    rlang
+    rlang,
+    tidyselect
 Remotes:
     easystats/insight,
     easystats/parameters,
@@ -36,7 +37,7 @@ Remotes:
 Suggests:
     remotes,
     devtools,
-    tidyselect,
+    lubridate,
     broom, 
     GGally, 
     gridExtra, 

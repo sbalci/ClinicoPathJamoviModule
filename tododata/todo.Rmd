@@ -64,6 +64,10 @@ jmvtools::check()
 
 # jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')
 
+# jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
+
+# jmvtools::addAnalysis(name='tree', title='Decision Tree')
+
 ```
 
 
@@ -277,6 +281,12 @@ deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-templa
 myoveralltime <- deneme$OverallTime
 myoutcome <- deneme$Outcome
 myexplanatory <- deneme$LVI
+
+class(myoveralltime)
+class(myoutcome)
+typeof(myexplanatory)
+
+is.ordered(myexplanatory)
 
 formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
 # formula2 <- jmvcore::decomposeFormula(formula = formula2)
