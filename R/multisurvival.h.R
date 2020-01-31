@@ -18,12 +18,7 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
-                explanatory,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                explanatory)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -65,7 +60,7 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="FinalFit Multivariate Survival",
                 refs="finalfit")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 title="FinalFit Multivariate Survival"))}))
@@ -98,7 +93,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -121,7 +116,6 @@ multisurvival <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(overalltime), overalltime, NULL))
 
-    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- multisurvivalOptions$new(
         explanatory = explanatory,

@@ -38,26 +38,26 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Frequencies
-  - title: CrossTable
+  - title: CrossTables
     name: crosstable
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Comparisons
-    menuTitle: CrossTable
+    menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: GGStatsPlot2
+  - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Comparisons
-    menuTitle: GGStatsPlot2
+    menuTitle: Graphs and Plots
     description: Function for making ggstatsplot plots
-  - title: FinalFit
+  - title: Survival FinalFit
     name: finalfit
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
-    menuTitle: FinalFit
+    menuTitle: Survival FinalFit
   - title: FinalFit Multivariate Survival
     name: multisurvival
     ns: ClinicoPath
@@ -67,38 +67,40 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuSubgroup: Decision
     menuTitle: Medical Decision
   - title: Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuSubgroup: Decision
     menuTitle: Decision Calculator
-  - title: correlation
+  - title: Correlation
     name: correlation
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuSubgroup: Correlation
-    menuTitle: correlation
+    menuTitle: Correlation
   - title: Interrater Intrarater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuSubgroup: Agreement
     menuTitle: Interrater Intrarater Reliability
     description: Function for Interrater Intrarater Reliability.
   - title: Cluster Analysis
     name: cluster
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuTitle: Cluster Analysis
+    menuSubgroup: Cluster Analysis
   - title: Decision Tree
     name: tree
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuTitle: Decision Tree
+    menuSubgroup: Decision Tree
 usesNative: true
 minApp: 1.0.8
 

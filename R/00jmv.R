@@ -146,17 +146,17 @@
         `doi`="10.5281/zenodo.2074621"), 
     `report`=list(
         `type`="software", 
-        `author`=NULL, 
-        `year`=2018, 
-        `title`="", 
-        `publisher`="", 
-        `url`="https://CRAN.R-project.org/package=report"), 
+        `author`="Makowski, Dominique, L\u00FCdecke, Daniel", 
+        `year`=2019, 
+        `title`="The report package for R: Ensuring the use of best practices for results reporting", 
+        `publisher`="[R package]. Retrieved from https://github.com/easystats/report", 
+        `url`="https://github.com/easystats/report"), 
     `arsenal`=list(
         `type`="software", 
-        `author`=NULL, 
+        `author`="Heinzen, E Sinnwell, J Atkinson, E Gunderson, T Dougherty, G", 
         `year`=2018, 
-        `title`="", 
-        `publisher`="", 
+        `title`="arsenal: An Arsenal of 'R' Functions for Large-Scale Statistical Summaries", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=arsenal", 
         `url`="https://CRAN.R-project.org/package=arsenal"), 
     `tangram`=list(
         `type`="software", 
@@ -167,7 +167,7 @@
         `url`="https://CRAN.R-project.org/package=tangram"), 
     `irr`=list(
         `type`="software", 
-        `author`="Matthias Gamer, Jim Lemon and Ian Fellows Puspendra Singh", 
+        `author`="Matthias Gamer, Jim Lemon, Ian Fellows, Puspendra Singh", 
         `year`=2019, 
         `title`="Various Coefficients of Interrater Reliability and Agreement.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=irr", 
@@ -185,4 +185,18 @@
         `year`=2019, 
         `title`="janitor: Simple Tools for Examining and Cleaning Dirty Data.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=janitor", 
-        `url`="https://CRAN.R-project.org/package=janitor"))
+        `url`="https://CRAN.R-project.org/package=janitor"), 
+    `finalfit`=list(
+        `type`="software", 
+        `author`="Ewen Harrison and Tom Drake and Riinu Ots", 
+        `year`=2019, 
+        `title`="finalfit: Quickly Create Elegant Regression Results Tables and Plots when Modelling", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=finalfit", 
+        `url`="https://CRAN.R-project.org/package=finalfit"), 
+    `caret`=list(
+        `type`="software", 
+        `author`="Max Kuhn", 
+        `year`=2020, 
+        `title`="caret: Classification and Regression Training", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=caret", 
+        `url`="https://CRAN.R-project.org/package=caret"))

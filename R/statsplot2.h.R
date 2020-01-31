@@ -44,7 +44,7 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="GGStatsPlot2",
+                title="Plots",
                 refs="ggstatsplot")
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -76,7 +76,7 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' GGStatsPlot2
+#' Graphs and Plots
 #'
 #' 
 #' @param data .

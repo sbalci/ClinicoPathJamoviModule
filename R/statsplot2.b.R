@@ -9,11 +9,10 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            if(is.null(self$options$dep) || is.null(self$options$group))
+            if (length(self$options$dep) + length(self$options$group) < 2)
                 return()
 
-
-            mydata <- self$data
+            # mydata <- self$data
 
             mydep <- self$data[[self$options$dep]]
             mygroup <- self$data[[self$options$group]]

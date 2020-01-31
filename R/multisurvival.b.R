@@ -14,48 +14,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
 
-            # results 1
-
             mydata <- self$data
-
-            myoveralltime <- self$options$overalltime
-
-            myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
-
-            thefactor <- self$options$explanatory
-
-            thefactor <- self$data[[thefactor]]
-
-            myoutcome <- self$options$outcome
-
-            myoutcome <- self$data[[myoutcome]]
-
-            km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ thefactor, data = mydata)
-
-            results1 <- summary(km_fit)$table
-
-
-
-
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-            formula <- paste('~', formula)
-            formula <- as.formula(formula)
-
-            table1 <- arsenal::tableby(formula, self$data)
-
-
-
-
-
-
-
-
-
-            # results 2
 
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
-            formula2 <- jmvcore::composeTerm(formula2)
+            #
+            # jmvcore::constructFormula(terms = list("A", "B", "C"))
+            #
+            #
+            # formula2 <- jmvcore::composeTerm(formula2)
 
             formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
@@ -65,23 +32,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             finalfit::finalfit(.data = mydata,
                                dependent = myformula,
-                               explanatory = formula2) -> tUni
-
-            results2 <- tUni
-
-
-            # results 3
+                               explanatory = formula2) -> tMultivariate
 
 
 
-            results3 <- knitr::kable(tUni,
+            results1 <- knitr::kable(tMultivariate,
                                      row.names = FALSE,
-                                     align = c('l', 'l', 'r', 'r', 'r', 'r'))
-
-
-
-
-
+                                     align = c('l', 'l', 'r', 'r', 'r', 'r'),
+                                     format = "html")
 
 
             self$results$text$setContent(results1)

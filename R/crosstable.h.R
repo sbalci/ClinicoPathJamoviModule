@@ -49,7 +49,8 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         text3 = function() private$.items[["text3"]],
-        text4 = function() private$.items[["text4"]]),
+        text4 = function() private$.items[["text4"]],
+        text5 = function() private$.items[["text5"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -57,7 +58,7 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="CrossTable",
-                refs="tangram, arsenal")
+                refs="tangram, arsenal, finalfit")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -73,7 +74,11 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="CrossTable Tangram Lancet"))}))
+                title="CrossTable Tangram Lancet"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text5",
+                title="CrossTable FinalFit"))}))
 
 crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstableBase",
@@ -94,7 +99,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' CrossTable
+#' CrossTables
 #'
 #' Function for making Cross Tables.
 #' @param data .
@@ -106,6 +111,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

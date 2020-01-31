@@ -1,7 +1,7 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: ClinicoPath
+menuGroup: ClinicoPath2
 menuSubgroup: Decision
 version: '1.0.0'
 jas: '1.2'

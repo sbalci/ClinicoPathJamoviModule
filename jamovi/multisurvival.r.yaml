@@ -6,7 +6,7 @@ jrs:   '1.1'
 items:
     - name:  text
       title: FinalFit Multivariate Survival
-      type:  Preformatted
+      type:  Html
 
 refs: finalfit
 

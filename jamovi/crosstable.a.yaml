@@ -1,6 +1,6 @@
 ---
 name:  crosstable
-title: CrossTable
+title: CrossTables
 menuGroup: ClinicoPath
 menuSubgroup: Comparisons
 version: '1.0.0'

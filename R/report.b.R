@@ -62,23 +62,23 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text$setContent(results1)
 
 
-            if (self$options$gli == 0){
-
-                return()
-
-            } else{
-
-
-                mydata <- self$data
-
-                results2 <- mydata %>%
-                    dplyr::select(myvars) %>%
-                    dplyr::glimpse(.)
-
-                self$results$text2$setContent(results2)
-
-
-            }
+            # if (self$options$gli == 0){
+            #
+            #     return()
+            #
+            # } else{
+            #
+            #
+            #     mydata <- self$data
+            #
+            #     results2 <- mydata %>%
+            #         dplyr::select(myvars) %>%
+            #         dplyr::glimpse(.)
+            #
+            #     self$results$text2$setContent(results2)
+            #
+            #
+            # }
 
             # `self$data` contains the data
             # `self$options` contains the options

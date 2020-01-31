@@ -13,8 +13,6 @@ options:
     - name: explanatory
       title: Explanatory Variables
       type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
 
     - name: outcome
       title: Outcome

@@ -34,7 +34,7 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             results1 <- summary(km_fit)$table
 
 
-            # results 1 summary
+            # results 2
 
             km_fit_median_df <- summary(km_fit)
             km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
@@ -52,12 +52,12 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::select(description) %>%
                 pull() -> km_fit_median_definition
 
-            results1summary <- km_fit_median_definition
+            results2 <- km_fit_median_definition
 
 
 
 
-            # results 2
+            # results 3
 
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
@@ -69,23 +69,27 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
 
+
+
+
             finalfit::finalfit(.data = mydata,
                                dependent = myformula,
                                explanatory = formula2) -> tUni
 
-            results2 <- tUni
+            results3 <- tUni
 
 
-            # results 3
+            # results 4
 
 
 
-            results3 <- knitr::kable(tUni,
+            results4 <- knitr::kable(tUni,
                                      row.names = FALSE,
-                                     align = c('l', 'l', 'r', 'r', 'r', 'r'))
+                                     align = c('l', 'l', 'r', 'r', 'r', 'r'),
+                                     format = "html")
 
 
-            # results 3 summary
+            # results 5
 
 
             tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
@@ -105,39 +109,21 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     "."
             )
 
-            results3summary <- tUni_df_descr
+            results5 <- tUni_df_descr
 
 
 
-            # results 4
-
-
-            myplot <- finalfit::surv_plot(.data = mydata,
-                                    dependent = myformula,
-                                    explanatory = formula2,
-                                    xlab = 'Time (months)',
-                                    pval = TRUE,
-                                    legend = 'none',
-                                    break.time.by = 12,
-                                    xlim = c(0,60)
-                )
-
-
-            results4 <- myplot
-
-
-
-            # results 5
+            # results 6
 
 
             km_fit_summary <- summary(km_fit, times = c(12,36,60))
 
             km_fit_df <- as.data.frame(km_fit_summary[c("strata", "time", "n.risk", "n.event", "surv", "std.err", "lower", "upper")])
 
-            results5 <- km_fit_df
+            results6 <- km_fit_df
 
 
-            # results 5 summary
+            # results 7
 
 
 
@@ -151,44 +137,148 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::select(description) %>%
                 pull() -> km_fit_definition
 
-            results5summary <- km_fit_definition
+            results7 <- km_fit_definition
 
 
-            # results 6
+            # results 8
 
 
-            # pairwiseformula <- paste("Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+            # mydata <- self$data
+            #
+            # myoveralltime <- self$options$overalltime
+            #
+            # myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
+            #
+            # thefactor <- self$options$explanatory
+            #
+            # thefactor <- self$data[[thefactor]]
+            #
+            # myoutcome <- self$options$outcome
+            #
+            # myoutcome <- self$data[[myoutcome]]
 
-            # results6 <-
-            #     survminer::pairwise_survdiff(
-            #     formula = pairwiseformula,
+
+
+            formula_p1 <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+            formula_p3 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+            formula_p2 <- jmvcore::constructFormula(terms = self$options$outcome)
+
+
+            formula_p <- paste('Surv(', formula_p1, ',',  formula_p2, ') ~ ', formula_p3)
+
+            formula_p <- as.formula(formula_p)
+
+
+            results8 <-
+                survminer::pairwise_survdiff(
+                formula = formula_p,
+                data = self$data,
+                p.adjust.method = "BH"
+            )
+
+
+
+            # survminer::pairwise_survdiff(
+            #     formula = Surv(OverallTime, Outcome) ~ TStage,
             #     data = mydata,
             #     p.adjust.method = "BH"
             # )
 
 
-            # results 7
+            # results
 
-            results7 <- paste("20.01.2019 12:00")
+            self$results$text1$setContent(results1)
+
+            self$results$text2$setContent(results2)
+
+            self$results$text3$setContent(results3)
+
+            self$results$text4$setContent(results4)
+
+            self$results$text5$setContent(results5)
+
+            self$results$text6$setContent(results6)
+
+            self$results$text7$setContent(results7)
+
+            self$results$text8$setContent(results8)
 
 
 
+            # Prepare plotData
 
-            # results all
+
+            my_overalltime <- self$data[[self$options$overalltime]]
+            my_outcome <- self$data[[self$options$outcome]]
+            my_factor <- self$data[[self$options$explanatory]]
 
 
-            results <- list(results1,
-                            results1summary,
-                            results2,
-                            results3,
-                            results3summary,
-                            # results4,
-                            results5,
-                            results5summary,
-                            # results6
-                            results7)
+            plotData <- data.frame(ovt = my_overalltime,
+                                   out = my_outcome,
+                                   fct = my_factor)
 
-            self$results$text$setContent(results)
+            plotData <- jmvcore::naOmit(plotData)
+
+            image <- self$results$plot
+
+            image$setState(plotData)
+
+
+        },
+
+        .plot=function(image, ...) {  # <-- the plot function
+
+            if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
+                return()
+
+
+            plotData <- image$state
+
+            # plot <- hist(plotData[['ovt']])
+
+            # plot <- hist(plotData[['out']])
+
+            # plot <- hist(plotData[['fct']])
+
+            # plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
+
+            myexplanatory <- 'fct'
+            mydependent <- 'Surv(ovt, out)'
+
+
+            plot <- plotData %>%
+                finalfit::surv_plot(.data = .,
+                                          dependent = mydependent,
+                                          explanatory = myexplanatory,
+                                          xlab = 'Time (months)',
+                                          pval = TRUE,
+                                          legend = 'none',
+                                          break.time.by = 12,
+                                          xlim = c(0,60)
+            )
+
+
+            # https://rpkgs.datanovia.com/survminer/reference/ggsurvplot.html
+            # dependentKM <- "Surv(OverallTime, Outcome)"
+            # explanatoryKM <- "LVI"
+            #
+            # mydata %>%
+            #     finalfit::surv_plot(.data = .,
+            #                         dependent = dependentKM,
+            #                         explanatory = explanatoryKM,
+            #                         xlab='Time (months)',
+            #                         pval=TRUE,
+            #                         legend = 'none',
+            #                         break.time.by = 12,
+            #                         xlim = c(0,60)
+            #                         # legend.labs = c('a','b')
+            #     )
+
+
+            print(plot)
+            TRUE
 
 
         }

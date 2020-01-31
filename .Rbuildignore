@@ -46,3 +46,4 @@ build
 ^\.github/
 ^docs$
 ^pkgdown$
+^img$

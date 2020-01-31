@@ -1,7 +1,7 @@
 ---
 name:  tree
 title: Decision Tree
-menuGroup: ClinicoPath
+menuGroup: ClinicoPath2
 menuSubgroup: Decision Tree
 version: '1.0.0'
 jas: '1.2'
