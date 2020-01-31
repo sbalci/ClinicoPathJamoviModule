@@ -1,11 +1,39 @@
 ---
 name:  finalfit
-title: FinalFit
+title: Survival Analysis
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: FinalFit
+    - name:  text1
+      title: Median Survival Table
+      type:  Preformatted
+
+    - name:  text2
+      title: Median Survival Summary
+      type:  Preformatted
+
+    - name:  text3
+      title: Cox
+      type:  Preformatted
+
+    - name:  text4
+      title: Cox Table
+      type:  Html
+
+    - name:  text5
+      title: Cox Summary
+      type:  Preformatted
+
+    - name:  text6
+      title: '1, 3, 5-yr Survival'
+      type:  Preformatted
+
+    - name:  text7
+      title: '1, 3, 5-yr Survival Summary'
+      type:  Preformatted
+
+    - name:  text8
+      title: Pairwise Comparison
       type:  Preformatted
 
     - name: plot

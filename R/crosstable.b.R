@@ -10,7 +10,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
-            if (length(self$options$vars) == 0)
+            if (length(self$options$vars) == 0 | length(self$options$group) == 0)
                 return()
 
             # Arsenal Table
@@ -20,6 +20,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formulaL <- jmvcore::constructFormula(terms = self$options$group)
 
             formula <- paste(formulaL, '~', formulaR)
+
             formula <- as.formula(formula)
 
             table1 <- arsenal::tableby(formula, self$data)
@@ -45,10 +46,10 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tangram::html5(
                     tangram::tangram(
                         formula, self$data),
-                    fragment=TRUE,
-                    inline="nejm.css",
+                    fragment = TRUE,
+                    inline = "nejm.css",
                     caption = "Cross Table NEJM Style",
-                    id="tbl3")
+                    id = "tbl3")
 
             results3 <- table3
 
@@ -61,16 +62,43 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tangram::html5(
                     tangram::tangram(
                         formula, self$data),
-                    fragment=TRUE,
-                    inline="lancet.css",
+                    fragment = TRUE,
+                    inline = "lancet.css",
                     caption = "Cross Table Lancet Style",
-                    id="tbl4")
+                    id = "tbl4")
 
             results4 <- table4
 
             self$results$text4$setContent(results4)
 
 
+
+            # Table FinalFit
+
+            # https://finalfit.org/articles/tables_gallery.html#cross-tables
+
+
+            myvars <- jmvcore::decomposeFormula(formula = formulaR)
+
+            myvars <- unlist(myvars)
+
+            self$data %>%
+                summary_factorlist(dependent = self$options$group,
+                                   explanatory = myvars,
+                                   # column = TRUE,
+                                   total_col = TRUE,
+                                   p = TRUE,
+                                   add_dependent_label = TRUE,
+                                   na_include = FALSE
+                                   # catTest = catTestfisher
+                ) -> table5
+
+            # knitr::kable(table5, row.names = FALSE, align = c('l', 'l', 'r', 'r', 'r'))
+
+
+            results5 <- table5
+
+            self$results$text5$setContent(results5)
 
 
 

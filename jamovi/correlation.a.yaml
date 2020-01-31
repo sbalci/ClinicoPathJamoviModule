@@ -1,7 +1,8 @@
 ---
 name:  correlation
-title: correlation
-menuGroup: ClinicoPath
+title: Correlation
+menuGroup: ClinicoPath2
+menuSubgroup: Correlation
 version: '1.0.0'
 jas: '1.2'
 

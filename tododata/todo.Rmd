@@ -92,6 +92,9 @@ formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
 
 jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
 
+
+jmvcore::constructFormula(terms = list("A", "B", "C"))
+
 vars <- jmvcore::decomposeFormula(formula = formula) 
 
 unlist(vars)

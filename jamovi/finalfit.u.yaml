@@ -1,4 +1,4 @@
-title: FinalFit
+title: Survival FinalFit
 name: finalfit
 jus: '3.0'
 stage: 0
@@ -16,14 +16,14 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Outcome
+        label: 'Outcome (event:1)'
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: OverallTime
+        label: OverallTime (in months)
         children:
           - type: VariablesListBox
             name: overalltime

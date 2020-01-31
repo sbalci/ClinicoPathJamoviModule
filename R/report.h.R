@@ -14,8 +14,7 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             distr = FALSE,
             lev = FALSE,
             n_ch = 3,
-            mis = FALSE,
-            gli = TRUE, ...) {
+            mis = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -60,10 +59,6 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "mis",
                 mis,
                 default=FALSE)
-            private$..gli <- jmvcore::OptionBool$new(
-                "gli",
-                gli,
-                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..med)
@@ -74,7 +69,6 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..lev)
             self$.addOption(private$..n_ch)
             self$.addOption(private$..mis)
-            self$.addOption(private$..gli)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -85,8 +79,7 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         distr = function() private$..distr$value,
         lev = function() private$..lev$value,
         n_ch = function() private$..n_ch$value,
-        mis = function() private$..mis$value,
-        gli = function() private$..gli$value),
+        mis = function() private$..mis$value),
     private = list(
         ..vars = NA,
         ..med = NA,
@@ -96,15 +89,13 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..distr = NA,
         ..lev = NA,
         ..n_ch = NA,
-        ..mis = NA,
-        ..gli = NA)
+        ..mis = NA)
 )
 
 reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
-        text2 = function() private$.items[["text2"]]),
+        text = function() private$.items[["text"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -116,11 +107,7 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Report General Features"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Glimpse Data"))}))
+                title="Report General Features"))}))
 
 reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "reportBase",
@@ -154,11 +141,9 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param lev .
 #' @param n_ch .
 #' @param mis .
-#' @param gli .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
@@ -172,8 +157,7 @@ report <- function(
     distr = FALSE,
     lev = FALSE,
     n_ch = 3,
-    mis = FALSE,
-    gli = TRUE) {
+    mis = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('report requires jmvcore to be installed (restart may be required)')
@@ -194,8 +178,7 @@ report <- function(
         distr = distr,
         lev = lev,
         n_ch = n_ch,
-        mis = mis,
-        gli = gli)
+        mis = mis)
 
     analysis <- reportClass$new(
         options = options,

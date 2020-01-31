@@ -1,7 +1,7 @@
 ---
 name:  cluster
 title: Cluster Analysis
-menuGroup: ClinicoPath
+menuGroup: ClinicoPath2
 menuSubgroup: Cluster Analysis
 version: '1.0.0'
 jas: '1.2'

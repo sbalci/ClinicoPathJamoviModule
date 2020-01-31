@@ -1,17 +1,17 @@
 ---
 name:  agreement
 title: Interrater Intrarater Reliability
-menuGroup: ClinicoPath
+menuGroup: ClinicoPath2
 menuSubgroup: Agreement
 version: '1.0.0'
 jas: '1.2'
 
 description:
     main: Function for Interrater Intrarater Reliability.
-    R:
-        dontrun: false
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: false
+    #     usage: |
+    #         # example will be added
 
 
 options:

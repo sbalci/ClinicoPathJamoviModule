@@ -1,6 +1,6 @@
 ---
 name:  finalfit
-title: FinalFit
+title: Survival FinalFit
 menuGroup: ClinicoPath
 menuSubgroup: Survival
 version: '1.0.0'
@@ -17,13 +17,13 @@ options:
       permitted: [ factor ]
 
     - name: outcome
-      title: Outcome
+      title: 'Outcome (event:1)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: overalltime
-      title: OverallTime
+      title: OverallTime (in months)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]

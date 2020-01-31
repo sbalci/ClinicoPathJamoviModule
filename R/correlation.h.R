@@ -88,7 +88,7 @@ correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' correlation
+#' Correlation
 #'
 #' 
 #' @param data .

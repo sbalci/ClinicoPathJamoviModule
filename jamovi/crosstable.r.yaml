@@ -20,6 +20,11 @@ items:
       title: CrossTable Tangram Lancet
       type:  Html
 
-refs: tangram, arsenal
+    - name:  text5
+      title: CrossTable FinalFit
+      type:  Preformatted
+
+
+refs: tangram, arsenal, finalfit
 
 ...

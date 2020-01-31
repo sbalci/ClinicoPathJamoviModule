@@ -1,6 +1,6 @@
 ---
 name:  statsplot2
-title: GGStatsPlot2
+title: Graphs and Plots
 menuGroup: ClinicoPath
 menuSubgroup: Comparisons
 version: '1.0.0'

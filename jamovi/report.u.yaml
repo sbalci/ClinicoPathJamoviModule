@@ -40,5 +40,3 @@ children:
     children:
       - type: CheckBox
         name: mis
-      - type: CheckBox
-        name: gli
