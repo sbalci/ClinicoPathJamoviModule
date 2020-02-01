@@ -4,15 +4,15 @@ title: TableOne
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: TableOne
+
+    - name:  todo
+      title: To Do
       type:  Preformatted
 
-    # - name:  result2
-    #   title: Advice
-    #   type: Html
-    #   description: the method recommendation
-    #   visible: (text)
+    - name:  text1
+      title: Table via TableOne
+      type:  Preformatted
+
 
 refs: tableone
 

@@ -9,33 +9,44 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development",
+                " -  ",
+                " -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
             if (length(self$options$vars) == 0)
                 return()
+
 
             # formula <- jmvcore::constructFormula(terms = self$options$vars)
             # formula <- paste('~', formula)
             # formula <- as.formula(formula)
-
-            # table1 <- arsenal::tableby(formula, self$data)
-
-            # results1 <- summary(table1, text = "html")
-
-
-
-
-            # result2 <- "You have entered"
-
-            # result2 <- kableExtra::kable(results1, format = "html", digits = 1,
-            #                              escape = TRUE) %>%
+            # table1 <- arsenal::tableby(formula, self$data,
+            #                            total = TRUE,
+            #                            digits = 1,
+            #                            digits.count = 1
+            #                            )
+            # myarsenal <- summary(table1, text = "html")
+            # myarsenal <- kableExtra::kable(myarsenal, format = "html",
+            #                                digits = 1,
+            #                                escape = TRUE) %>%
             #     kableExtra::kable_styling(kable_input = .,
-            #                               bootstrap_options = "striped", full_width = F, position = "left")
-
-
+            #                               bootstrap_options = "striped",
+            #                               full_width = F,
+            #                               position = "left")
 
             # table one
 
 
-            tableo <- self$data %>%
+            mytableone <- self$data %>%
                 tableone::CreateTableOne(data = .)
 
 
@@ -43,11 +54,8 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # results
 
-            self$results$text$setContent(tableo)
+            self$results$text1$setContent(mytableone)
 
-
-            # html <- self$results$result2
-            # html$setContent(result2)
 
 
             # `self$data` contains the data

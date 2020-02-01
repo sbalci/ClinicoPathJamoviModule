@@ -29,7 +29,8 @@ tableoneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        todo = function() private$.items[["todo"]],
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -40,8 +41,12 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs="tableone")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
-                title="TableOne"))}))
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text1",
+                title="Table via TableOne"))}))
 
 tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tableoneBase",
@@ -69,7 +74,8 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

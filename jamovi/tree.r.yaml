@@ -4,8 +4,21 @@ title: Decision Tree
 jrs:   '1.1'
 
 items:
-    - name:  text
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    - name:  text1
       title: Decision Tree
       type:  Preformatted
+
+    - name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+
+refs: explore
 
 ...

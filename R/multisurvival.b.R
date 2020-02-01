@@ -10,6 +10,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development
+                -  correct multivariate formula
+                -  or_plot
+                - "
+            )
+
+            self$results$todo$setContent(todo)
+
 
             if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
@@ -43,6 +54,25 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             self$results$text$setContent(results1)
+
+
+
+            # explanatory = c("age.factor", "sex.factor",
+            #                 "obstruct.factor", "perfor.factor")
+            # dependent = 'mort_5yr'
+            # colon_s %>%
+            #     finalfit(dependent, explanatory, metrics=TRUE) -> t2
+            # knitr::kable(t2[[1]], row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))
+            # knitr::kable(t2[[2]], row.names=FALSE, col.names="")
+            #
+            #
+            # explanatory = c("age.factor", "sex.factor",
+            #                 "obstruct.factor", "perfor.factor")
+            # dependent = 'mort_5yr'
+            # colon_s %>%
+            #     or_plot(dependent, explanatory)
+
+
 
 
             # `self$data` contains the data

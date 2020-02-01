@@ -17,12 +17,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                vars)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
@@ -46,6 +41,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         text3 = function() private$.items[["text3"]],
@@ -58,8 +54,15 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="CrossTable",
-                refs="tangram, arsenal, finalfit")
+                refs=list(
+                    "tangram",
+                    "arsenal",
+                    "finalfit"))
             self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
                 title="CrossTable Arsenal"))
@@ -107,7 +110,8 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group variable in the column
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
@@ -131,7 +135,6 @@ crosstable <- function(
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(group), group, NULL))
 
-    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- crosstableOptions$new(

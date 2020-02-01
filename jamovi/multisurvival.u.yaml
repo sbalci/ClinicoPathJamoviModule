@@ -2,7 +2,7 @@ title: FinalFit Multivariate Survival
 name: multisurvival
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -21,6 +21,10 @@ children:
             name: outcome
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome)
+
       - type: TargetLayoutBox
         label: OverallTime
         children:

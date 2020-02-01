@@ -10,10 +10,23 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development:
+                -
+                -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
             if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
                 return()
 
-            # results 1
+            # Median Survival Table, results1
 
             mydata <- self$data
 
@@ -32,6 +45,29 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ thefactor, data = mydata)
 
             results1 <- summary(km_fit)$table
+
+            # km_fit_median_df <- summary(km_fit)
+            # km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+            #     janitor::clean_names(dat = ., case = "snake") %>%
+            #     tibble::rownames_to_column(.data = .)
+
+            results1 <- tibble::as_tibble(results1,
+                                         .name_repair = "minimal") %>%
+                    janitor::clean_names(dat = ., case = "snake")
+
+
+            # Median Survival Table Html Type, results1html
+
+
+            results1html <- knitr::kable(results1,
+                                     row.names = FALSE,
+                                     align = c('l', 'l', 'r', 'r', 'r', 'r'),
+                                     format = "html")
+
+
+
+
+
 
 
             # results 2
@@ -143,22 +179,6 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # results 8
 
 
-            # mydata <- self$data
-            #
-            # myoveralltime <- self$options$overalltime
-            #
-            # myoveralltime <- jmvcore::toNumeric(self$data[[myoveralltime]])
-            #
-            # thefactor <- self$options$explanatory
-            #
-            # thefactor <- self$data[[thefactor]]
-            #
-            # myoutcome <- self$options$outcome
-            #
-            # myoutcome <- self$data[[myoutcome]]
-
-
-
             formula_p1 <- jmvcore::constructFormula(terms = self$options$overalltime)
 
             formula_p3 <- jmvcore::constructFormula(terms = self$options$explanatory)
@@ -179,17 +199,11 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
 
-
-            # survminer::pairwise_survdiff(
-            #     formula = Surv(OverallTime, Outcome) ~ TStage,
-            #     data = mydata,
-            #     p.adjust.method = "BH"
-            # )
-
-
             # results
 
             self$results$text1$setContent(results1)
+
+            self$results$text1html$setContent(results1html)
 
             self$results$text2$setContent(results2)
 
