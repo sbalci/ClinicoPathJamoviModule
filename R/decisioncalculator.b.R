@@ -9,6 +9,21 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development",
+                " -  ",
+                " -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
+
+
             TP <- self$options$TP
 
             FP <- self$options$FP

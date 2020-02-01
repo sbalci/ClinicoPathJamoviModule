@@ -33,6 +33,7 @@ writesummaryOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 writesummaryResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]]),
     private = list(),
     public=list(
@@ -41,6 +42,10 @@ writesummaryResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="WriteSummary")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -72,6 +77,7 @@ writesummaryBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'

@@ -36,6 +36,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
 statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -46,6 +47,10 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Plots",
                 refs="ggstatsplot")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -84,6 +89,7 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }

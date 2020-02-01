@@ -8,6 +8,7 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             explanatory = NULL,
             outcome = NULL,
+            outcomeLevel = NULL,
             overalltime = NULL, ...) {
 
             super$initialize(
@@ -21,11 +22,11 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 explanatory)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
-                outcome,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
+                outcome)
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(outcome)")
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
                 overalltime,
@@ -36,21 +37,25 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..overalltime)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
         overalltime = function() private$..overalltime$value),
     private = list(
         ..explanatory = NA,
         ..outcome = NA,
+        ..outcomeLevel = NA,
         ..overalltime = NA)
 )
 
 multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]]),
     private = list(),
     public=list(
@@ -60,6 +65,10 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="FinalFit Multivariate Survival",
                 refs="finalfit")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -90,9 +99,11 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param explanatory .
 #' @param outcome .
+#' @param outcomeLevel .
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -101,6 +112,7 @@ multisurvival <- function(
     data,
     explanatory,
     outcome,
+    outcomeLevel,
     overalltime) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -120,6 +132,7 @@ multisurvival <- function(
     options <- multisurvivalOptions$new(
         explanatory = explanatory,
         outcome = outcome,
+        outcomeLevel = outcomeLevel,
         overalltime = overalltime)
 
     analysis <- multisurvivalClass$new(

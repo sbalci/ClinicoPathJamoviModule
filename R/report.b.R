@@ -9,6 +9,22 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development",
+                " -  ",
+                " -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
+
+
             if (length(self$options$vars) == 0)
                 return()
 

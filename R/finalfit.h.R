@@ -56,7 +56,9 @@ finalfitOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
+        text1html = function() private$.items[["text1html"]],
         text2 = function() private$.items[["text2"]],
         text3 = function() private$.items[["text3"]],
         text4 = function() private$.items[["text4"]],
@@ -75,7 +77,15 @@ finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs="finalfit")
             self$add(jmvcore::Preformatted$new(
                 options=options,
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
                 name="text1",
+                title="Median Survival Table"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text1html",
                 title="Median Survival Table"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -141,7 +151,9 @@ finalfitBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr

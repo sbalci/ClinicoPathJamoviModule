@@ -13,6 +13,19 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$vars) == 0 | length(self$options$group) == 0)
                 return()
 
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development
+                -
+                -
+                "
+            )
+
+            self$results$todo$setContent(todo)
+
+
             # Arsenal Table
 
             formulaR <- jmvcore::constructFormula(terms = self$options$vars)
@@ -26,6 +39,21 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             table1 <- arsenal::tableby(formula, self$data)
 
             results1 <- summary(table1)
+
+
+            # results1 <- knitr::asis_output(results1)
+
+
+
+            results1 <- knitr::kable(results1,
+                         row.names = FALSE,
+                         align = c('l', 'l', 'r', 'r', 'r', 'r'),
+                         format = "html") %>%
+                kableExtra::kable_styling(kable_input = .,
+                                          bootstrap_options = "striped",
+                                          full_width = F,
+                                          position = "left")
+
 
             self$results$text1$setContent(results1)
 

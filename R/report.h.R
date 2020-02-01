@@ -95,6 +95,7 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]]),
     private = list(),
     public=list(
@@ -104,6 +105,10 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Report General Features",
                 refs="report")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -143,6 +148,7 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param mis .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'

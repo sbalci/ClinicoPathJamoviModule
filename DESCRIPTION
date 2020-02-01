@@ -3,7 +3,12 @@ Type: Package
 Title: Analysis for Clinicopathological Research
 Version: 0.0.1
 Date: 2020-01-29
-Author: Serdar Balci
+Authors@R: 
+    person(given = "Serdar",
+           family = "Balci",
+           role = c("aut", "cre"),
+           email = "drserdarbalci@gmail.com",
+           comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <drserdarbalci@gmail.com>
 Description: Using many different R-project packages.
     So credit should go to main authors.
@@ -29,11 +34,14 @@ Imports:
     tangram,
     irr,
     rlang,
-    tidyselect
+    tidyselect,
+    psycho,
+    explore
 Remotes:
     easystats/insight,
     easystats/parameters,
-    easystats/report
+    easystats/report,
+    easystats/correlation
 Suggests:
     remotes,
     devtools,
@@ -194,7 +202,14 @@ Suggests:
     pamr,
     superpc,
     Cubist,
-    rpart
+    rpart,
+    qgraph,
+    nFactors,
+    ppcor,
+    rstanarm,
+    MuMIn,
+    blavaan,
+    effectsize
 RoxygenNote: 7.0.2
 URL: https://github.com/sbalci/ClinicoPathJamoviModule
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues

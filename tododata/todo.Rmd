@@ -110,6 +110,12 @@ jmvcore::decomposeTerm(term = formula)
 jmvcore::decomposeTerm(term = cformula)
 
 
+
+composeTerm <- jmvcore::composeTerm(components = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = composeTerm)
+
+
 ```
 
 
@@ -412,7 +418,6 @@ formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
 
 vars <- jmvcore::decomposeFormula(formula = formula) 
 
-vars <- unlist(vars)
 
 explanatory <- jmvcore::constructFormula(terms = c("explanatory"))    
 

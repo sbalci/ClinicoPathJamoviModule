@@ -9,11 +9,27 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development",
+                " -  ",
+                " -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
             description <- "Description of Module"
 
 
             if (length(self$options$testPositive) + length(self$options$newtest) + length(self$options$goldPositive) + length(self$options$gold) < 4)
                 return()
+
+
+
+
 
 
             # Data definition

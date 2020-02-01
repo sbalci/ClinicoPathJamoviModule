@@ -56,18 +56,31 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        todo = function() private$.items[["todo"]],
+        text1 = function() private$.items[["text1"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree")
+                title="Decision Tree",
+                refs="explore")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
-                title="Decision Tree"))}))
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text1",
+                title="Decision Tree"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                width=600,
+                height=450,
+                renderFun=".plot"))}))
 
 treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "treeBase",
@@ -98,7 +111,9 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param varEq .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

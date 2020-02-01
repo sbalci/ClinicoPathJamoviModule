@@ -4,9 +4,14 @@ title: CrossTable
 jrs:   '1.1'
 
 items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
     - name:  text1
       title: CrossTable Arsenal
-      type:  Preformatted
+      type:  Html
 
     - name:  text2
       title: CrossTable Tangram
@@ -25,6 +30,9 @@ items:
       type:  Preformatted
 
 
-refs: tangram, arsenal, finalfit
+refs:
+    - tangram
+    - arsenal
+    - finalfit
 
 ...

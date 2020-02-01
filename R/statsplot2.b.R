@@ -9,6 +9,19 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development",
+                " -  ",
+                " -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+
             if (length(self$options$dep) + length(self$options$group) < 2)
                 return()
 
@@ -49,6 +62,9 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         .plot=function(image, ...) {  # <-- the plot function
+
+            if (length(self$options$dep) + length(self$options$group) < 2)
+                return()
 
 
             plotData <- image$state
