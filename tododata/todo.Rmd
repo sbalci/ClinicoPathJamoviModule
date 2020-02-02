@@ -12,8 +12,12 @@ title: "ToDo"
 # jmvtools::check("C://Program Files//jamovi//bin")
 
 # jmvtools::install(home = "C://Program Files//jamovi//bin")
+# 
+# devtools::build(path = "C:\\ClinicoPathOutput")
 
 # .libPaths(new = "C:\\ClinicoPathLibrary")
+
+# devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))
 
 Sys.setenv(TZ="Europe/Istanbul")
 
