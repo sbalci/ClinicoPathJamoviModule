@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ClinicoPath Jamovi Module 🔬
+# ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬
 
 <!-- badges: start -->
 
@@ -21,7 +21,7 @@ commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule
 [![Daily downloads
 badge](https://cranlogs.r-pkg.org/badges/last-day/clinicopathjamovimodule?color=blue)](https://CRAN.R-project.org/package=clinicopathjamovimodule)
 [![GitHub
-version](https://img.shields.io/badge/GitHub-0.0.0.9000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
+version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub
 issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 [![GitHub code size in
@@ -32,7 +32,7 @@ forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](
 stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/stargazers)
 [![Website](https://img.shields.io/badge/website-clinicopathjamovimodule-orange.svg?colorB=E91E63)](https://sbalci.github.io/clinicopathjamovimodule/)
 [![HitCount](http://hits.dwyl.io/sbalci/clinicopathjamovimodule.svg)](http://hits.dwyl.io/sbalci/clinicopathjamovimodule)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=%23rstats%20codes%20for%20histopathology%20research%20by%20@serdarbalci&url=https%3A%2F%2Fgithub.com%2Fsbalci%2Fclinicopathjamovimodule)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20histopathology%20research%20using%20%23#rstats%20packages%20📦by%20@serdarbalci&url=https%3A%2F%2Fgithub.com%2Fsbalci%2Fclinicopathjamovimodule)
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![contributions
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
@@ -57,9 +57,7 @@ Thanks\!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://sayth
 [![Download
 ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
 
-<style>.bmc-button img{width: 35px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{padding: 7px 10px 7px 10px !important;line-height: 35px !important;height:51px !important;min-width:217px !important;text-decoration: none !important;display:inline-flex !important;color:#ffffff !important;background-color:#5F7FFF !important;border-radius: 5px !important;border: 1px solid transparent !important;padding: 7px 10px 7px 10px !important;font-size: 28px !important;letter-spacing:0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#ffffff !important;}</style>
-
-<link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy
 me a coffee</span></a>
 
 -----
@@ -112,6 +110,8 @@ install_github("sbalci/ClinicoPath")
 #### CrossTable
 
 ![jamovi-and-R-tangram](img/jamovi-and-R-tangram.png){50% .center}
+
+![](img/jamovi-and-CrossTable-FinalFit.png)
 
 #### GGStatsPlot2
 

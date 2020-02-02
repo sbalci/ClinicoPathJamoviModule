@@ -550,6 +550,47 @@ knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r
 ```
 
 
+---
+
+```{r}
+# Find arguments in yaml
+
+list_of_yaml <- c(
+    list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv",
+               pattern = "\\.yaml$",
+               full.names = TRUE,
+               all.files = TRUE,
+               include.dirs = TRUE,
+               recursive = TRUE
+    )
+)
+
+
+text_of_yaml_yml <- purrr::map(
+    .x = list_of_yaml,
+    .f = readLines
+)
+
+text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml)) 
+
+arglist <-
+    stringr::str_extract(
+        string = text_of_yaml_yml, 
+        pattern = 
+            "([[:alnum:]]*):"
+    )
+
+arglist <- arglist[!is.na(arglist)]
+arglist <- unique(arglist)
+arglist <- gsub(pattern = ":", # remove some characters
+                    replacement = "",
+                    x = arglist)
+arglist <- trimws(arglist) # remove whitespace
+
+cat(arglist, sep = "\n")
+
+```
+
 
 
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • ClinicoPath</title>
+<title>Report General Features — report • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -35,7 +35,9 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Report General Features — report" />
+<meta property="og:description" content="Report General Features" />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -54,7 +56,7 @@
   </head>
 
   <body>
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -101,126 +103,92 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Report General Features</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/report.h.R'><code>R/report.h.R</code></a></small>
+    <div class="hidden name"><code>report.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Report General Features</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>report</span>(
+  <span class='no'>data</span>,
+  <span class='no'>vars</span>,
+  <span class='kw'>med</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>cent</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>disp</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>ran</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>distr</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>lev</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>n_ch</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>mis</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      <tr>
-        
-        <td>
-          <p><code><a href="agreement.html">agreement()</a></code> </p>
-        </td>
-        <td><p>Interrater Intrarater Reliability</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="agreementClass.html">agreementClass</a></code> </p>
-        </td>
-        <td><p>Agreement</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cluster.html">cluster()</a></code> </p>
-        </td>
-        <td><p>Cluster Analysis</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="correlation.html">correlation()</a></code> </p>
-        </td>
-        <td><p>Correlation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="crosstable.html">crosstable()</a></code> </p>
-        </td>
-        <td><p>CrossTables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="decision.html">decision()</a></code> </p>
-        </td>
-        <td><p>Medical Decision</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="decisioncalculator.html">decisioncalculator()</a></code> </p>
-        </td>
-        <td><p>Decision Calculator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="finalfit.html">finalfit()</a></code> </p>
-        </td>
-        <td><p>Survival FinalFit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="frequencies.html">frequencies()</a></code> </p>
-        </td>
-        <td><p>Frequencies</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="multisurvival.html">multisurvival()</a></code> </p>
-        </td>
-        <td><p>FinalFit Multivariate Survival</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="report.html">report()</a></code> </p>
-        </td>
-        <td><p>Report General Features</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="statsplot2.html">statsplot2()</a></code> </p>
-        </td>
-        <td><p>Graphs and Plots</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tableone.html">tableone()</a></code> </p>
-        </td>
-        <td><p>TableOne</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tree.html">tree()</a></code> </p>
-        </td>
-        <td><p>Decision Tree</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="writesummary.html">writesummary()</a></code> </p>
-        </td>
-        <td><p>WriteSummary</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>data</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>vars</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>med</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>cent</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>disp</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>ran</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>distr</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>lev</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>n_ch</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>mis</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A results object containing:</p><table class='table'>
+<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+</table>
+
+
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
     </ul>
+
   </div>
 </div>
 

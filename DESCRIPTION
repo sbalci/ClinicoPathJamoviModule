@@ -1,8 +1,8 @@
 Package: ClinicoPath
 Type: Package
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1
-Date: 2020-01-29
+Version: 0.0.1.1000
+Date: 2020-02-02
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -212,3 +212,4 @@ Suggests:
 RoxygenNote: 7.0.2
 URL: https://github.com/sbalci/ClinicoPathJamoviModule
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues
+VignetteBuilder: knitr

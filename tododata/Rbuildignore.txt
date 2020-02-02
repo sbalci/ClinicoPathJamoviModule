@@ -32,6 +32,8 @@
 .jmo$
 ^build/R/
 ^build/js/
+\.h\.R
+\.b\.R
 
 tododata
 docs
@@ -43,3 +45,5 @@ build
 
 ^\.github/
 ^docs$
+^pkgdown$
+^img$
