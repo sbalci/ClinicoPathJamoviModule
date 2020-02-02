@@ -1,16 +1,18 @@
 #' Agreement
 #'
+#' This function uses a dataframe to calculate decision tests
 #'
+#' @return list
+#' @export
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-
-# This file is a generated template, your changes will not be overwritten
 
 agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agreementClass",
     inherit = agreementBase,
     private = list(
+
         .run = function() {
 
 
