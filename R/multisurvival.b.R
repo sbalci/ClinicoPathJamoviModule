@@ -22,7 +22,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent(todo)
 
 
-            if (length(self$options$explanatory) + length(self$options$outcome) + length(self$options$overalltime) < 3)
+            if (length(self$options$explanatory) < 1 |  (length(self$options$outcome) + length(self$options$overalltime) < 2))
                 return()
 
             mydata <- self$data

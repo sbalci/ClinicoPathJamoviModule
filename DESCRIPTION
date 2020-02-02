@@ -35,8 +35,7 @@ Imports:
     irr,
     rlang,
     tidyselect,
-    psycho,
-    explore
+    psycho
 Remotes:
     easystats/insight,
     easystats/parameters,
