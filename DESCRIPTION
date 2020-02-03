@@ -56,7 +56,6 @@ Suggests:
     pROC, 
     scales, 
     stringr, 
-    survminer, 
     tibble, 
     tidyr, 
     covr, 
