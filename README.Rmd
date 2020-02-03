@@ -99,6 +99,10 @@ install_github("sbalci/ClinicoPath")
 
 #### TableOne
 
+
+<img src="man/figures/jamovi-and-R-tableone.png" align="center" />
+
+
 ![jamovi-and-R-tableone](img/jamovi-and-R-tableone.png){50% .center}
 
 
