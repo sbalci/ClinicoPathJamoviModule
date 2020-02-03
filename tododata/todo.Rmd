@@ -79,12 +79,12 @@ jmvtools::check()
 
 
 
-```{r devtools install, include=FALSE}
+```{r devtools install, eval=FALSE, include=FALSE}
 devtools::install()
 ```
 
 
-```{r jmvtools install, include=FALSE}
+```{r jmvtools install, eval=FALSE, include=FALSE}
 # jmvtools::check()
 jmvtools::install()
 ```
@@ -140,7 +140,7 @@ deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-templa
 ```
 
 
-```{r writesummary}
+```{r writesummary, eval=FALSE, include=FALSE}
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -152,19 +152,8 @@ ClinicoPath::writesummary(data = deneme, vars = Age)
 ```
 
 
-```{r survival}
-devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-ClinicoPath::survival(
-    data = deneme,
-    factor = Sex,
-    outcome = Outcome,
-    overalltime = OverallTime)
-```
 
-
-
-```{r finalfit}
+```{r finalfit, eval=FALSE, include=FALSE}
 devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
 library(survival)
@@ -178,7 +167,7 @@ ClinicoPath::finalfit(data = deneme,
 
 
 
-```{r decision}
+```{r decision, eval=FALSE, include=FALSE}
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -197,7 +186,7 @@ ClinicoPath::decision(
     testPositive = "Present")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ggstatsplot::ggbetweenstats(data = deneme, 
                             x = LVI,
@@ -209,7 +198,7 @@ ggstatsplot::ggbetweenstats(data = deneme,
 
 
 
-```{r statsplot}
+```{r statsplot, eval=FALSE, include=FALSE}
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::statsplot(
@@ -221,7 +210,7 @@ ClinicoPath::statsplot(
 
 
 
-```{r decision 2}
+```{r decision 2, eval=FALSE, include=FALSE}
 mytable <- table(deneme$Outcome, deneme$Smoker)
 
 caret::confusionMatrix(mytable)
@@ -250,7 +239,7 @@ mytable[[0]]
 
 
 
-```{r construct formula}
+```{r construct formula, eval=FALSE, include=FALSE}
 formula <- jmvcore::constructFormula(terms = c("A", "B", "C"))
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
@@ -258,8 +247,6 @@ jmvcore::constructFormula(terms = list("A", "B", "C"))
 vars <- jmvcore::decomposeFormula(formula = formula) 
 
 vars <- jmvcore::decomposeTerms(vars)
-
-as.vector(reduce(vars))
 
 
 vars <- unlist(vars)
@@ -285,7 +272,7 @@ myformula <- jmvcore::composeTerm(myformula)
 
 
 
-```{r construct formula 2}
+```{r construct formula 2, eval=FALSE, include=FALSE}
 library(dplyr)
 library(survival)
 
@@ -326,7 +313,7 @@ tUni
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 library(dplyr)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -417,7 +404,7 @@ results
 
 
 
-```{r construct formula 3}
+```{r construct formula 3, eval=FALSE, include=FALSE}
 formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
 
 vars <- jmvcore::decomposeFormula(formula = formula) 
@@ -526,7 +513,7 @@ tab1$tables # this is where results lie
 
 ## define survival time
 
-```{r define survival time}
+```{r define survival time, eval=FALSE, include=FALSE}
 mydata$int <- lubridate::interval(
   lubridate::ymd(mydata$SurgeryDate),
   lubridate::ymd(mydata$LastFollowUpDate)
@@ -594,6 +581,9 @@ arglist <- trimws(arglist) # remove whitespace
 cat(arglist, sep = "\n")
 
 ```
+
+
+
 
 
 
