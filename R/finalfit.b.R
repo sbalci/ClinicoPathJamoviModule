@@ -2,7 +2,6 @@
 #' @import jmvcore
 #' @import finalfit
 #' @import survival
-#' @import survminer
 
 finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "finalfitClass",

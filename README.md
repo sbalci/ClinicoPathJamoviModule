@@ -32,7 +32,7 @@ forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](
 stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/stargazers)
 [![Website](https://img.shields.io/badge/website-clinicopathjamovimodule-orange.svg?colorB=E91E63)](https://sbalci.github.io/clinicopathjamovimodule/)
 [![HitCount](http://hits.dwyl.io/sbalci/clinicopathjamovimodule.svg)](http://hits.dwyl.io/sbalci/clinicopathjamovimodule)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20histopathology%20research%20using%20%23#rstats%20packages%20📦by%20@serdarbalci&url=https%3A%2F%2Fgithub.com%2Fsbalci%2Fclinicopathjamovimodule)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20research%20using%20various%20%23rstats%20packages%20📦.%20@serdarbalci&url=https%3A%2F%2Fgithub.com%2Fsbalci%2Fclinicopathjamovimodule)
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![contributions
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
@@ -59,6 +59,8 @@ ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https:/
 
 <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy
 me a coffee</span></a>
+
+-----
 
 -----
 
@@ -96,6 +98,8 @@ install_github("sbalci/ClinicoPath")
 ### Descriptives
 
 #### TableOne
+
+<img src="man/figures/jamovi-and-R-tableone.png" align="center" />
 
 ![jamovi-and-R-tableone](img/jamovi-and-R-tableone.png){50% .center}
 
@@ -304,3 +308,19 @@ welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?styl
 [![Say
 Thanks\!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
 [![HitCount](http://hits.dwyl.io/sbalci/clinicopathjamovimodule.svg)](http://hits.dwyl.io/sbalci/clinicopathjamovimodule)
+
+<!-- Package | Status | Usage | GitHub | References -->
+
+<!-- ----------------- | ----------------- | ----------------- | ----------------- | ----------------- -->
+
+<!-- xxx | [![Travis Build Status](https://travis-ci.org/IndrajeetPatil/ggstatsplot.svg?branch=master)](https://travis-ci.org/IndrajeetPatil/ggstatsplot) | xxx | GitHub version | xxx -->
+
+<!-- xxx | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/IndrajeetPatil/ggstatsplot?branch=master&svg=true)](https://ci.appveyor.com/project/IndrajeetPatil/ggstatsplot) | xxx | [![Forks](https://img.shields.io/badge/forks-87-blue.svg)](https://github.com/IndrajeetPatil/ggstatsplot/) | xxx -->
+
+<!-- [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/) | [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/) | xxx | [![Github Issues](https://img.shields.io/badge/issues-24-red.svg)](https://github.com/IndrajeetPatil/ggstatsplot/issues) | [![vignettes](https://img.shields.io/badge/vignettes-0.2.0-orange.svg?colorB=FF5722)](https://CRAN.R-project.org/package=ggstatsplot/vignettes/) -->
+
+<!-- [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/IndrajeetPatil/ggstatsplot.svg)](https://github.com/IndrajeetPatil/ggstatsplot) | [![Coverage Status](https://coveralls.io/repos/github/IndrajeetPatil/ggstatsplot/badge.svg?branch=master)](https://coveralls.io/github/IndrajeetPatil/ggstatsplot?branch=master) | xxx | [![Github Stars](https://img.shields.io/github/stars/IndrajeetPatil/ggstatsplot.svg?style=social&label=Github)](https://github.com/IndrajeetPatil/ggstatsplot) | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2074621.svg)](https://doi.org/10.5281/zenodo.2074621) -->
+
+<!-- [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) | [![Codecov test coverage](https://codecov.io/gh/IndrajeetPatil/ggstatsplot/branch/master/graph/badge.svg)](https://codecov.io/gh/IndrajeetPatil/ggstatsplot?branch=master) | [![HitCount](http://hits.dwyl.io/IndrajeetPatil/ggstatsplot.svg)](http://hits.dwyl.io/IndrajeetPatil/ggstatsplot) | [![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--03-yellowgreen.svg)](https://github.com/IndrajeetPatil/ggstatsplot/commits/master) | [![GitHub last commit](https://img.shields.io/github/last-commit/IndrajeetPatil/ggstatsplot.svg)](https://github.com/IndrajeetPatil/ggstatsplot/commits/master) -->
+
+<!-- [![status](https://tinyverse.netlify.com/badge/ggstatsplot)](https://CRAN.R-project.org/package=ggstatsplot) | [![R build status](https://github.com/IndrajeetPatil/ggstatsplot/workflows/R-CMD-check/badge.svg)](https://github.com/IndrajeetPatil/ggstatsplot) | [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/ggstatsplot/community) | [![Project Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) | [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/IndrajeetPatil/ggstatsplot/issues) -->
