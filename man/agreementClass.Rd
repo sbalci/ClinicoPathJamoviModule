@@ -3,9 +3,6 @@
 \name{agreementClass}
 \alias{agreementClass}
 \title{Agreement}
-\value{
-list
-}
 \description{
 This function uses a dataframe to calculate decision tests
 }

@@ -39,7 +39,7 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="TableOne",
                 refs="tableone")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
@@ -74,7 +74,7 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'

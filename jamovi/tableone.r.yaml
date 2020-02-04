@@ -7,7 +7,7 @@ items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
+      type:  Html
 
     - name:  text1
       title: Table via TableOne
