@@ -7,11 +7,12 @@ items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
+      type:  Html
 
     - name:  text
       title: WriteSummary
       type:  Preformatted
+
 
 # refs:
 

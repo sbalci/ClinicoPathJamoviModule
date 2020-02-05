@@ -14,11 +14,11 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
       - uses: r-lib/actions/setup-pandoc@v1
       - name: Install rmarkdown
-        run: Rscript -e 'install.packages("rmarkdown")'
+        run: Rscript -e "install.packages('rmarkdown')"
       - name: Install packages
-        run: Rscript -e 'install.packages("devtools"); devtools::install_github("jimhester/itdepends")'
+        run: Rscript -e "install.packages('devtools'); devtools::install_github('jimhester/itdepends')"
       - name: Render README
-        run: Rscript -e 'rmarkdown::render("README.Rmd")'
+        run: Rscript -e "rmarkdown::render('README.Rmd')"
       - name: Commit results
         run: |
           git commit examples/README.md -m 'Re-build README.Rmd' || echo "No changes to commit"
