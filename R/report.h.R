@@ -105,7 +105,7 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Report General Features",
                 refs="report")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
@@ -148,7 +148,7 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param mis .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
