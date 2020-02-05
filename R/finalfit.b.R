@@ -249,28 +249,41 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             plotData <- image$state
 
-            # plot <- hist(plotData[['ovt']])
 
-            # plot <- hist(plotData[['out']])
+            plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
 
-            # plot <- hist(plotData[['fct']])
+            # plot1 <- hist(plotData[['ovt2']])
 
-            # plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
+            plot2 <- hist(plotData[['out']])
 
-            myexplanatory <- 'fct'
-            mydependent <- 'Surv(ovt, out)'
+            plot3 <- hist(plotData[['fct']])
 
-
-            plot <- plotData %>%
-                finalfit::surv_plot(.data = .,
-                                          dependent = mydependent,
-                                          explanatory = myexplanatory,
-                                          xlab = 'Time (months)',
-                                          pval = TRUE,
-                                          legend = 'none',
-                                          break.time.by = 12,
-                                          xlim = c(0,60)
+            plot <- list(
+                # plot1,
+                plot2,
+                plot3
             )
+
+
+
+
+
+            # myexplanatory <- 'fct'
+            # mydependent <- 'Surv(ovt, out)'
+
+            # mydependent <- survival::Surv(
+            #     jmvcore::toNumeric(plotData[['ovt']]), plotData[['out']])
+
+            # plot <- plotData %>%
+            #     finalfit::surv_plot(.data = .,
+            #                               dependent = mydependent,
+            #                               explanatory = myexplanatory,
+            #                               xlab = 'Time (months)',
+            #                               pval = TRUE,
+            #                               legend = 'none',
+            #                               break.time.by = 12,
+            #                               xlim = c(0,60)
+            # )
 
 
             # https://rpkgs.datanovia.com/survminer/reference/ggsurvplot.html

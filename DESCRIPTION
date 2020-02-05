@@ -21,6 +21,7 @@ Imports:
     R6,
     dplyr,
     survival,
+    survminer,
     finalfit,
     arsenal,
     purrr,
