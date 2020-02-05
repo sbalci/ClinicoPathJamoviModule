@@ -7,9 +7,7 @@ title: "ToDo"
 Imports:
     bayestestR (>= 0.5.0)
 Remotes:
-    easystats/insight,
     easystats/parameters,
-    easystats/report,
     easystats/correlation
 Suggests:
     remotes,
@@ -30,7 +28,6 @@ Suggests:
     tidyr, 
     covr, 
     cmprsk, 
-    knitr, 
     readr, 
     rmarkdown, 
     rstan, 

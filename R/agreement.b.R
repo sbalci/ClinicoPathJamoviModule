@@ -1,6 +1,3 @@
-#' Agreement
-#'
-#' This function uses a dataframe to calculate decision tests
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore

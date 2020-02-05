@@ -24,3 +24,7 @@ A results object containing:
 \description{
 Function for Interrater Intrarater Reliability.
 }
+\examples{
+# example will be added
+
+}

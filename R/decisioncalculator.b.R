@@ -1,7 +1,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom utils data
 #'
-# This file is a generated template, your changes will not be overwritten
 
 decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisioncalculatorClass",
@@ -19,10 +19,6 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             self$results$todo$setContent(todo)
-
-
-
-
 
             TP <- self$options$TP
 
@@ -45,14 +41,6 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text2$setContent(caretresult)
 
-
-
-
-
-
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
 
         })
 )

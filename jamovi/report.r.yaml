@@ -7,15 +7,11 @@ items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
+      type:  Html
 
     - name:  text
       title: Report General Features
       type:  Preformatted
-
-    # - name:  text2
-    #   title: Glimpse Data
-    #   type:  Preformatted
 
 refs: report
 
