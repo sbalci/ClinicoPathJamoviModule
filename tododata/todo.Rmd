@@ -203,6 +203,11 @@ library("jmvtools")
 
 ```{r check, include=FALSE}
 jmvtools::check()
+
+rhub::check_on_macos()
+
+rhub::check_for_cran()
+
 ```
 
 
