@@ -1,5 +1,6 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
+#' @importFrom purrr map
 # This file is a generated template, your changes will not be overwritten
 
 writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -8,24 +9,23 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            if (length(self$options$vars) == 0)
+            if (length(self$options$vars) == 0){
+                todo <- "
+                <br>Welcome to ClinicoPath
+                          <br><br>
+                          This tool will help you to write descriptive statistics for numeric variables.
+                          <br><br>
+                          Please cite the packages and jamovi using references below.
+                          "
+
+                html <- self$results$todo
+                html$setContent(todo)
                 return()
 
-
-            # TODO
-
-            todo <- glue::glue(
-                "This Module is still under development
-                -
-                -
-                "
-            )
-
-            self$results$todo$setContent(todo)
-
-
-            ####
-
+            } else {
+                todo <- "Summary of continious variables:"
+                html <- self$results$todo
+                html$setContent(todo)
 
 
             mydata <- self$data
@@ -77,9 +77,9 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
+
+            }
+
 
         })
 )

@@ -1,5 +1,7 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
+#' @importFrom magrittr "%>%"
+#' @importFrom tableone CreateTableOne
 
 tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tableoneClass",
