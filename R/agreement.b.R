@@ -2,8 +2,6 @@
 #'
 #' This function uses a dataframe to calculate decision tests
 #'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 
@@ -43,16 +41,13 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-            ratings <- mydata %>% select(myvars)
+            ratings <- mydata %>%
+                dplyr::select(myvars)
 
 
             result1 <- irr::agree(ratings)
 
             result2 <- irr::kappa2(ratings)
-
-
-
-
 
 
 

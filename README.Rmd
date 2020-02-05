@@ -17,6 +17,13 @@ knitr::opts_chunk$set(
 
 # ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬   
 
+
+https://zenodo.org/account/settings/github/repository/sbalci/ClinicoPathJamoviModule
+
+DOI 10.17605/OSF.IO/9SZUD
+
+https://osf.io/9szud/
+
 <!-- badges: start -->
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/)
@@ -59,7 +66,7 @@ knitr::opts_chunk$set(
 
 ---
 
-A Jamovi Module that contains main analysis used in **ClinicoPathological** research.
+A [Jamovi](https://www.jamovi.org) Module that contains main analysis used in **ClinicoPathological** research.
 
 
 🔬👀📑🗃📊🏨🗄📇📖⚗📝🎶📈📉📃🖍
@@ -70,7 +77,7 @@ A Jamovi Module that contains main analysis used in **ClinicoPathological** rese
 ---
 
 
-## Installation in jamovi
+## Installation in [jamovi](https://www.jamovi.org)
 
 Download the relevant `jmo` file for your operating system from [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/) or [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
@@ -92,7 +99,7 @@ And install using side-load.
 #### TableOne
 
 
-<img src="man/figures/jamovi-and-R-tableone.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 50% />
 
 
 
