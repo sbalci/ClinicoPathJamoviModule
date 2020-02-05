@@ -34,3 +34,5 @@ build
 ^\.github/
 ^docs$
 ^tic\.R$
+^\.circleci/
+^appveyor\.yml$
