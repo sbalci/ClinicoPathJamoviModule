@@ -33,3 +33,4 @@ build
 ^tests$
 ^\.github/
 ^docs$
+^tic\.R$
