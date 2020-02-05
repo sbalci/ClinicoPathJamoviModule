@@ -1,0 +1,17 @@
+version: 1.0.{build}
+
+build_script:
+  - cmd: ''
+
+build:
+  verbosity: minimal
+
+platform: x64
+
+environment:
+  R_ARCH: x64
+
+on_success:
+  - Rscript -e "covr::codecov()"
+
+

@@ -5,41 +5,31 @@
 \.Rproj$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-
-
 ### Configuration
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$
 ^_pkgdown\.yml$
-
 ### pkgdown websites
 ^public/
 ^docs/
-
 ### Obsolete and temporary files/directories
 ^delete/
 ^temp/
-
 ### Uncompiled documentation files
 ^README\.Rmd$
-
 ### License
 ^LICENSE\.md$
-
 ### Jamovi
 ^jamovi/
 .jmo$
 ^build/R/
 ^build/js/
-
 tododata
 docs
 temp
 build
 ^.*\.jmo$
-
 ^tests$
-
 ^\.github/
 ^docs$
