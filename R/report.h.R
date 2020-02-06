@@ -152,8 +152,8 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   Default is false.
 #' @param n_ch Boolean argument whether to use percentage instead of numbers.
 #'   Default is false.
-#' @param mis Boolean argument whether to include missing values. Default is
-#'   false.
+#' @param mis Boolean argument whether to include missing as percentage.
+#'   Default is false.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
