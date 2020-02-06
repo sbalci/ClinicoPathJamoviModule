@@ -2,6 +2,7 @@
 
 * Documentations are being added.
 * CI are being added.
+* Badges, README are updated.
 
 # ClinicoPath 0.0.1.1000
 

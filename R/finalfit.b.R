@@ -250,19 +250,19 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- image$state
 
 
-            plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
+            # plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
 
             # plot1 <- hist(plotData[['ovt2']])
 
-            plot2 <- hist(plotData[['out']])
+            # plot2 <- hist(plotData[['out']])
 
-            plot3 <- hist(plotData[['fct']])
+            # plot3 <- hist(plotData[['fct']])
 
-            plot <- list(
-                # plot1,
-                plot2,
-                plot3
-            )
+            # plot <- list(
+            #     plot1,
+            #     plot2,
+            #     plot3
+            # )
 
 
 
@@ -303,8 +303,8 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #     )
 
 
-            print(plot)
-            TRUE
+            # print(plot)
+            # TRUE
 
 
         }
