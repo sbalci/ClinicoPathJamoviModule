@@ -52,9 +52,7 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..n_ch <- jmvcore::OptionInteger$new(
                 "n_ch",
                 n_ch,
-                default=3,
-                min=0,
-                max=5)
+                default=3)
             private$..mis <- jmvcore::OptionBool$new(
                 "mis",
                 mis,
@@ -136,16 +134,26 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' Report General Features
 #'
 #' 
-#' @param data .
-#' @param vars .
-#' @param med .
-#' @param cent .
-#' @param disp .
-#' @param ran .
-#' @param distr .
-#' @param lev .
-#' @param n_ch .
-#' @param mis .
+#' @param data the data as a data frame
+#' @param vars string naming the variables from \code{data} that contains the
+#'   values used for the report. Uses report::report() function. Refer to
+#'   report.data.frame {report} documentation.
+#' @param med Boolean argument whether to include 'median' instead of 'mean'.
+#'   Default is false.
+#' @param cent Boolean argument whether to include centrality (mean or
+#'   median). Default is true.
+#' @param disp Boolean argument whether to include dispersion. Default is
+#'   true.
+#' @param ran Boolean argument whether to include centrality (mean or median).
+#'   Default is true.
+#' @param distr Boolean argument whether to include kurtosis and skewness.
+#'   Default is false.
+#' @param lev Boolean argument whether to use percentage instead of numbers.
+#'   Default is false.
+#' @param n_ch Boolean argument whether to use percentage instead of numbers.
+#'   Default is false.
+#' @param mis Boolean argument whether to include missing values. Default is
+#'   false.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

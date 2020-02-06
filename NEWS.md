@@ -1,4 +1,6 @@
-#  Functions work as defaults 0.0.1.1000
+# ClinicoPath 0.0.1.1000
+
+## Functions work as defaults 
 
 * Divided module into 2 windows: ClinicoPath1 and ClinicoPath2
 * Removed unnecessary outputs.
@@ -6,37 +8,42 @@
 * Updated Readme file
 * Currently functions are working. But only in defaults.
 
-* For descriptive analysis:
+###  For descriptive analysis:
 
-    * TableOne
-    * WriteSummary
-    * Report General Features
-    * Frequencies
+* TableOne
+* WriteSummary
+* Report General Features
+* Frequencies
 
-* For comparing variables:
+### For comparing variables:
 
-    * CrossTable
-    * GGStatsPlot2
+* CrossTable
+* GGStatsPlot2
 
-* For survival analysis
+### For survival analysis
 
-    * FinalFit
-    * FinalFit Multivariate Survival
+* FinalFit
+* FinalFit Multivariate Survival
 
-* For medical decision tests:
+### For medical decision tests:
 
-    * Medical Decision
-    * Decision Calculator
+* Medical Decision
+* Decision Calculator
 
-* For correlation analysis:
+### For correlation analysis:
 
-    * Correlation
-    * For inter and intra observer agreement
+* Correlation
+
+### For inter and intra observer agreement
 
 * Interrater Intrarater Reliability
 
-* Started decision tree and cluster analysis sections. Not active yet.
+### Decision tree and cluster analysis sections.
 
-# First Release 0.0.1-beta
+* Not active yet.
+
+# ClinicoPath 0.0.1-beta
+
+* First Pre-release
 
 * https://github.com/sbalci/ClinicoPathJamoviModule/releases/tag/0.0.1-beta

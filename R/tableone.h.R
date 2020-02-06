@@ -69,9 +69,17 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' TableOne
 #'
-#' 
-#' @param data .
-#' @param vars .
+#' Function for making Table-1.
+#'
+#' @examples
+#' \dontrun{
+#' ClinicoPath::tableone(
+#' data = data,
+#' vars = vars())
+#'}
+#' @param data the data as a data frame
+#' @param vars a string naming the variables from \code{data} that contains
+#'   the values used for the Table-1
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

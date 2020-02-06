@@ -7,9 +7,10 @@
 writesummary(data, vars)
 }
 \arguments{
-\item{data}{.}
+\item{data}{the data as a data frame}
 
-\item{vars}{.}
+\item{vars}{a string naming the variables from \code{data} that contains
+the continious values used for the report}
 }
 \value{
 A results object containing:

@@ -16,6 +16,8 @@ Description: Using many different R-project packages.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.6)
 Imports: 
     jmvcore (>= 0.8.5),
     R6,
@@ -36,15 +38,13 @@ Imports:
     irr,
     rlang,
     tidyselect,
-    psycho
+    psycho,
+    knitr
 Remotes:
     easystats/insight,
     easystats/performance,
     easystats/report
-Suggests:
-    knitr
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
-URL: https://github.com/sbalci/ClinicoPathJamoviModule/ ,
-     https://sbalci.github.io/ClinicoPathJamoviModule/ 
+URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues

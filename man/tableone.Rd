@@ -7,9 +7,10 @@
 tableone(data, vars)
 }
 \arguments{
-\item{data}{.}
+\item{data}{the data as a data frame}
 
-\item{vars}{.}
+\item{vars}{a string naming the variables from \code{data} that contains
+the values used for the Table-1}
 }
 \value{
 A results object containing:
@@ -19,5 +20,12 @@ A results object containing:
 }
 }
 \description{
-TableOne
+Function for making Table-1.
+}
+\examples{
+\dontrun{
+ClinicoPath::tableone(
+data = data,
+vars = vars())
+}
 }
