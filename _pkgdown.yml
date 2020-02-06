@@ -1,2 +1,15 @@
 destination: docs
 url: https://sbalci.github.io/ClinicoPathJamoviModule/
+authors:
+  Serdar Balci:
+    href: https://www.serdarbalci.com/
+development:
+  mode: auto
+navbar:
+  structure:
+    left:  [home, intro, reference, articles, tutorials, news]
+    right: [github, twitter]
+  components:
+    twitter:
+      icon: "fab fa-twitter fa-lg"
+      href: http://twitter.com/serdarbalci

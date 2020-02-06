@@ -1,3 +1,8 @@
+# ClinicoPath WIP
+
+* Documentations are being added.
+* CI are being added.
+
 # ClinicoPath 0.0.1.1000
 
 ## Functions work as defaults 
