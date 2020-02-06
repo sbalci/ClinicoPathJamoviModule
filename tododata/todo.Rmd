@@ -208,6 +208,9 @@ rhub::check_on_macos()
 
 rhub::check_for_cran()
 
+
+# codemetar::write_codemeta()
+
 ```
 
 

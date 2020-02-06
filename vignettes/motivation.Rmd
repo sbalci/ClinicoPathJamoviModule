@@ -1,0 +1,175 @@
+---
+title: "Motivation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Motivation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://github.com/sbalci/ClinicoPathJamoviModule
+
+
+This repository is a template for the codes I use in [my and my friends' histopathology research](https://sbalci.github.io/cv/SerdarBalciMDPathologist.html).
+
+
+---
+
+
+**See examples**
+
+- See some of the codes here: https://sbalci.github.io/histopathology-template/Report.html
+
+
+- You may also install [histopathR](https://sbalci.github.io/histopathR/) package to get all the codes as R Markdown Template.
+
+
+---
+
+
+``` r
+devtools::install_github("sbalci/histopathR")
+rmarkdown::draft(file = "myfile",
+                 template = "clinicopathological",
+                 package = "histopathR",
+                 create_dir = TRUE,
+                 edit = TRUE)
+```
+
+
+- I have tried to collect common codes in [My R Codes For Data Analysis](https://sbalci.github.io/MyRCodesForDataAnalysis/). I plan to collect them under the package [histopathR](https://sbalci.github.io/histopathR/) gradually.
+
+
+---
+
+
+**How to use**
+
+- *In RStudio:*
+
+   - Fork this repository. Then use this repository as template as described [here](https://help.github.com/en/articles/creating-a-repository-from-a-template).
+
+   - Use RStudio project as described [here](https://happygitwithr.com/existing-github-first.html#new-rstudio-project-via-git-clone-1).
+
+   - Do not forget to change chunk functions to `eval = TRUE`.
+
+   - This template contains packages using [renv](https://rstudio.github.io/renv/articles/renv.html).
+
+- *Via Docker:*
+
+https://hub.docker.com/r/serdarbalci/clinicopathological
+
+```bash
+docker pull serdarbalci/clinicopathological
+```
+
+
+https://twitter.com/serdarbalci/status/1197849208302252032
+
+
+- *As a standalone app (for mac only):*
+
+
+
+https://sourceforge.net/projects/histopathr/
+
+https://twitter.com/serdarbalci/status/1198348640294711296
+
+
+https://serdarbalci.gitbook.io/parapathology/computers/computers#deploying-a-shiny-app-as-a-desktop-application-with-electron
+
+- *As a Shiny app:*
+
+Launch here:
+https://serdarbalci.shinyapps.io/histopathR/
+
+Run in your own computer R session:
+
+```r
+library(shiny)
+runUrl("https://github.com/sbalci/histopathRshiny/raw/master/histopathRshiny.tar.gz")
+```
+
+
+
+Code here:
+https://github.com/sbalci/histopathRshiny
+
+
+- *As a jamovi module:*
+
+Download module here:
+
+https://github.com/sbalci/ClinicoPathJamoviModule/raw/master/ClinicoPath.jmo
+
+https://github.com/sbalci/ClinicoPathJamoviModule
+
+https://sourceforge.net/projects/clinicopathjamovimodule/
+
+
+---
+
+**Recommended Links for Reproducible and ClinicoPathological Research**
+
+- [Reproducible Templates for Analysis and Dissemination](https://www.coursera.org/learn/reproducible-templates-analysis/home/info)
+
+- [Happy Git and GitHub for the useR](https://happygitwithr.com/)
+
+- [R-Giris Dersi Sunum](https://sbalci.github.io/MyRCodesForDataAnalysis/R-Giris.html)
+
+- [R-Giris Dersi](https://sbalci.github.io/MyRCodesForDataAnalysis/R-Giris.nb.html)
+
+- [R-Markdown Dersi Sunum](https://sbalci.github.io/MyRCodesForDataAnalysis/R-Markdown.nb.html)
+
+- [R-Markdown Dersi](https://sbalci.github.io/MyRCodesForDataAnalysis/R-Markdown.html)
+
+- [How to Prepare Data for Histopathology Research pdf](https://sbalci.github.io/MyRCodesForDataAnalysis/How-to-Prepare-Data-for-Histopathology-Research.pdf)
+
+- [How to Prepare Data for Histopathology Research](https://sbalci.github.io/MyRCodesForDataAnalysis/How-to-Prepare-Data-for-Histopathology-Research.nb.html)
+
+- [How to Prepare Data for Histopathology Research Presentation](https://sbalci.github.io/MyRCodesForDataAnalysis/How-to-Prepare-Data-for-Histopathology-Research.html)
+
+
+- ["The Quartz guide to bad data"nın Türkçe çevirisi: Kötü Veri Kılavuzu ](https://sbalci.github.io/Kotu-Veri-Kilavuzu/)
+
+
+- [Create A MS Word Template for R Markdown](https://vimeo.com/110804387)
+
+
+---
+
+
+**Please Give Me FeedBack**
+
+https://goo.gl/forms/YjGZ5DHgtPlR1RnB3
+
+

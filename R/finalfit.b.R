@@ -85,7 +85,7 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                 ) %>%
                 dplyr::select(description) %>%
-                pull() -> km_fit_median_definition
+                dplyr::pull() -> km_fit_median_definition
 
             results2 <- km_fit_median_definition
 
@@ -170,7 +170,7 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                 ) %>%
                 dplyr::select(description) %>%
-                pull() -> km_fit_definition
+                dplyr::pull() -> km_fit_definition
 
             results7 <- km_fit_definition
 

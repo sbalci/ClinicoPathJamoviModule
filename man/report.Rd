@@ -45,8 +45,8 @@ Default is false.}
 \item{n_ch}{Boolean argument whether to use percentage instead of numbers.
 Default is false.}
 
-\item{mis}{Boolean argument whether to include missing values. Default is
-false.}
+\item{mis}{Boolean argument whether to include missing as percentage.
+Default is false.}
 }
 \value{
 A results object containing:

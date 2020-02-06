@@ -48,3 +48,5 @@ RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues
+Suggests: 
+    rmarkdown
