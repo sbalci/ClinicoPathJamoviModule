@@ -52,7 +52,9 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results1 <- tibble::as_tibble(results1,
                                          .name_repair = "minimal") %>%
-                    janitor::clean_names(dat = ., case = "snake")
+                janitor::clean_names(dat = ., case = "snake") %>%
+                tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
 
 
             # Median Survival Table Html Type, results1html
@@ -129,6 +131,11 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
                 janitor::clean_names(dat = ., case = "snake")
+
+
+            n_level <- dim(tUni_df)[2]
+
+
 
             tUni_df_descr <- paste0("When ",
                                     tUni_df$dependent_surv_overall_time_outcome[1],
@@ -234,6 +241,14 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             plotData <- jmvcore::naOmit(plotData)
 
+            # plotData <- mydata %>%
+            #     dplyr::select(explanatory,
+            #                   outcome,
+            #                   overalltime) %>%
+            #     filter(complete.cases(.))
+
+
+
             image <- self$results$plot
 
             image$setState(plotData)
@@ -250,26 +265,26 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- image$state
 
 
-            # plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
+            plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
 
-            # plot1 <- hist(plotData[['ovt2']])
+            plot1 <- plot(plotData[['ovt']])
 
-            # plot2 <- hist(plotData[['out']])
+            plot2 <- plot(plotData[['out']])
 
-            # plot3 <- hist(plotData[['fct']])
+            plot3 <- plot(plotData[['fct']])
 
-            # plot <- list(
-            #     plot1,
-            #     plot2,
-            #     plot3
-            # )
-
-
+            plot <- list(
+                plot1,
+                plot2,
+                plot3
+            )
 
 
 
-            # myexplanatory <- 'fct'
-            # mydependent <- 'Surv(ovt, out)'
+
+
+            # myexplanatory <- 'explanatory'
+            # mydependent <- 'Surv(overalltime, outcome)'
 
             # mydependent <- survival::Surv(
             #     jmvcore::toNumeric(plotData[['ovt']]), plotData[['out']])
@@ -303,12 +318,8 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #     )
 
 
-            # print(plot)
-            # TRUE
-
-
+            print(plot)
+            TRUE
         }
-
-
         )
 )
