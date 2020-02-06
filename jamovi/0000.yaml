@@ -19,7 +19,7 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: TableOne
-    description: Form a Table1 to use in general description of the dataset
+    description: Function for making Table-1.
   - title: WriteSummary
     name: writesummary
     ns: ClinicoPath

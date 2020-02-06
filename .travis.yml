@@ -5,16 +5,10 @@ matrix:
   include:
     - os: osx
       r: release
-    - os: osx
-      r: oldrel
-    - os: linux
-      r: devel
     - os: linux
       r: release
       env:
       - BUILD_PKGDOWN=true
-    - os: linux
-      r: oldrel
 
 # meta -------------------------------------------------------------------------
 language: r
@@ -46,7 +40,7 @@ install:
   - R -q -e 'tic::install()'
 before_script: R -q -e 'tic::before_script()'
 script: R -q -e 'tic::script()'
-after_success: R -q -e 'tic::after_success(); library(covr); codecov()'
+after_success: R -q -e 'tic::after_success()'
 after_failure: R -q -e 'tic::after_failure()'
 before_deploy: R -q -e 'tic::before_deploy()'
 deploy:

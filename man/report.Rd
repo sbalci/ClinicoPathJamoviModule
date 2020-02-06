@@ -18,25 +18,35 @@ report(
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{the data as a data frame}
 
-\item{vars}{.}
+\item{vars}{string naming the variables from \code{data} that contains the
+values used for the report. Uses report::report() function. Refer to
+report.data.frame {report} documentation.}
 
-\item{med}{.}
+\item{med}{Boolean argument whether to include 'median' instead of 'mean'.
+Default is false.}
 
-\item{cent}{.}
+\item{cent}{Boolean argument whether to include centrality (mean or
+median). Default is true.}
 
-\item{disp}{.}
+\item{disp}{Boolean argument whether to include dispersion. Default is
+true.}
 
-\item{ran}{.}
+\item{ran}{Boolean argument whether to include centrality (mean or median).
+Default is true.}
 
-\item{distr}{.}
+\item{distr}{Boolean argument whether to include kurtosis and skewness.
+Default is false.}
 
-\item{lev}{.}
+\item{lev}{Boolean argument whether to use percentage instead of numbers.
+Default is false.}
 
-\item{n_ch}{.}
+\item{n_ch}{Boolean argument whether to use percentage instead of numbers.
+Default is false.}
 
-\item{mis}{.}
+\item{mis}{Boolean argument whether to include missing values. Default is
+false.}
 }
 \value{
 A results object containing:

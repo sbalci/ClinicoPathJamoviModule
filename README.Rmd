@@ -2,6 +2,7 @@
 output: github_document
 ---
 # ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬   
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 
@@ -91,6 +92,9 @@ And install using side-load.
 
 
 #### Report General Features
+
+<img src="man/figures/jamovi-and-R-report.gif" align="center" width = 50% />
+
 
 
 #### Frequencies
@@ -339,7 +343,7 @@ UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issue)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
-[![HitCount](http://hits.dwyl.io/sbalci/clinicopathjamovimodule.svg)](http://hits.dwyl.io/sbalci/clinicopathjamovimodule)
+<!-- [![HitCount](http://hits.dwyl.io/sbalci/clinicopathjamovimodule.svg)](http://hits.dwyl.io/sbalci/clinicopathjamovimodule) -->
 
 
 
