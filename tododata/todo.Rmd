@@ -204,12 +204,14 @@ library("jmvtools")
 ```{r check, include=FALSE}
 jmvtools::check()
 
-rhub::check_on_macos()
+# rhub::check_on_macos()
 
-rhub::check_for_cran()
+# rhub::check_for_cran()
 
 
 # codemetar::write_codemeta()
+
+knitr::knit("README.Rmd")
 
 ```
 
