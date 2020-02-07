@@ -17,13 +17,16 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/)
+![Twitter Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
 <!-- badges: end -->
 
 
 [![Download ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
-<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy me a coffee</span></a>
-![Twitter Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
+<a href="https://www.buymeacoffee.com/bS0teIs" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
 
+
+---
 
 
 ## ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬
@@ -224,3 +227,8 @@ https://osf.io/9szud/
 <a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow @serdarbalci</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 [![Download ClinicoPathJamoviModule](https://sourceforge.net/sflogo.php?type=13&group_id=3162830)](https://sourceforge.net/p/clinicopathjamovimodule/)
+
+
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy me a coffee</span></a>
+
+

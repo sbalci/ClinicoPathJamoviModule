@@ -57,6 +57,7 @@ frequenciesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 purrr::set_names(myvars)
 
 
+
             self$results$text$setContent(results)
 
 

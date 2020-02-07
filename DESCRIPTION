@@ -39,7 +39,8 @@ Imports:
     rlang,
     tidyselect,
     psycho,
-    knitr
+    knitr,
+    broomExtra(>= 1.0.1)
 Remotes:
     easystats/insight,
     easystats/performance,
