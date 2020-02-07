@@ -313,11 +313,24 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "broomExtra",
+      "name": "broomExtra",
+      "version": ">= 1.0.1",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=broomExtra"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md",
-  "fileSize": "6778.21KB",
+  "fileSize": "6779.309KB",
   "contIntegration": [
     "https://travis-ci.com/sbalci/ClinicoPathJamoviModule",
     "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule",
