@@ -32,12 +32,6 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Report General Features
-  - title: Frequencies
-    name: frequencies
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Descriptives
-    menuTitle: Frequencies
   - title: CrossTables
     name: crosstable
     ns: ClinicoPath
