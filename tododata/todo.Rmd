@@ -210,14 +210,21 @@ jmvtools::check()
 
 # codemetar::write_codemeta()
 
-knitr::knit("README.Rmd")
+
+devtools::check()
+
+```
+
+
+```{r pkgdown build, include=FALSE}
+
+rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
 devtools::document()
 
 pkgdown::build_site()
 
 
-devtools::check()
 
 ```
 
@@ -470,6 +477,20 @@ myformula <- jmvcore::composeTerm(myformula)
 
 ```
 
+
+```{r}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+library(survival)
+km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
+
+library(dplyr)
+km_fit_median_df <- summary(km_fit)
+km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+                janitor::clean_names(dat = ., case = "snake") %>%
+                tibble::rownames_to_column(.data = ., var = "LVI")
+
+```
 
 
 

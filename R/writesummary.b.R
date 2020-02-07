@@ -36,6 +36,7 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
+            # mysummary function
             mysummary <- function(myvar) {
 
             mean_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
