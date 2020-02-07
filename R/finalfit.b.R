@@ -319,22 +319,30 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            myexplanatory <- plotData[['fct']]
-            mydependent <- survival::Surv(plotData[['ovt']], plotData[['out']])
+            # myexplanatory <- plotData[['fct']]
+            # mydependent <- survival::Surv(plotData[['ovt']], plotData[['out']])
 
             # mydependent <- survival::Surv(
             #     jmvcore::toNumeric(plotData[['ovt']]), plotData[['out']])
 
-            # plot <- plotData %>%
-            #     finalfit::surv_plot(.data = .,
-            #                               dependent = mydependent,
-            #                               explanatory = myexplanatory,
-            #                               xlab = 'Time (months)',
-            #                               pval = TRUE,
-            #                               legend = 'none',
-            #                               break.time.by = 12,
-            #                               xlim = c(0,60)
-            # )
+
+            dependentKM <- 'Surv(ovt, out)'
+            explanatoryKM <- 'fct'
+
+
+            plot <- plotData %>%
+                finalfit::surv_plot(.data = .,
+                                    # dependent = Surv(jmvcore::toNumeric(.data[['ovt']]),
+                                    #                  .data[['out']]),
+                                    # explanatory = 'fct',
+                                    dependent = dependentKM,
+                                    explanatory = explanatoryKM,
+                                    xlab = 'Time (months)',
+                                    pval = TRUE,
+                                    legend = 'none',
+                                    break.time.by = 12,
+                                    xlim = c(0,60)
+            )
 
 
             # https://rpkgs.datanovia.com/survminer/reference/ggsurvplot.html
