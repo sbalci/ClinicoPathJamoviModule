@@ -2,6 +2,7 @@
 #' @import jmvcore
 #' @import finalfit
 #' @import survival
+#' @importFrom rlang .data
 
 finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "finalfitClass",
@@ -50,42 +51,52 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #     janitor::clean_names(dat = ., case = "snake") %>%
             #     tibble::rownames_to_column(.data = .)
 
-            results1 <- tibble::as_tibble(results1,
-                                         .name_repair = "minimal") %>%
+            # results1 <- tibble::as_tibble(results1,
+            #                              .name_repair = "minimal") %>%
+            #     janitor::clean_names(dat = ., case = "snake") %>%
+            #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
+
+            km_fit_median_df <- summary(km_fit)
+            results1html <- as.data.frame(km_fit_median_df$table) %>%
                 janitor::clean_names(dat = ., case = "snake") %>%
                 tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
+            results1html[,1] <- gsub(pattern = "thefactor=",
+                                     replacement = "",
+                                     x = results1html[,1])
 
 
 
             # Median Survival Table Html Type, results1html
 
 
-            results1html <- knitr::kable(results1,
+            results1html <- knitr::kable(results1html,
                                      row.names = FALSE,
-                                     align = c('l', 'l', 'r', 'r', 'r', 'r'),
-                                     format = "html")
+                                     align = c('l', rep('r', 9)),
+                                     format = "html",
+                                     digits = 1)
 
 
-
-
-
-
-
-            # results 2
+            # results 2 median survival summary
 
             km_fit_median_df <- summary(km_fit)
             km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
                 janitor::clean_names(dat = ., case = "snake") %>%
-                tibble::rownames_to_column(.data = .)
+                tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
 
 
             km_fit_median_df %>%
                 dplyr::mutate(
                     description =
-                        glue::glue(
-                            "When {rowname}, median survival is {median} [{x0_95lcl} - {x0_95ucl}, 95% CI] months."
+        glue::glue(
+        "When ", self$options$explanatory, "{.data[[self$options$explanatory]]}, median survival is {median} [{x0_95lcl} - {x0_95ucl}, 95% CI] months."
                         )
                 ) %>%
+        dplyr::mutate(
+            description = gsub(pattern = "thefactor=", replacement = " is ", x = description)
+        ) %>%
                 dplyr::select(description) %>%
                 dplyr::pull() -> km_fit_median_definition
 
@@ -133,25 +144,49 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 janitor::clean_names(dat = ., case = "snake")
 
 
-            n_level <- dim(tUni_df)[2]
+            n_level <- dim(tUni_df)[1]
+
+            tUni_df_descr <- function(n) {
+                paste0(
+                    "When ",
+                    tUni_df$dependent_surv_overall_time_outcome[1],
+                    " is ",
+                    tUni_df$x[n + 1],
+                    ", there is ",
+                    tUni_df$hr_univariable[n + 1],
+                    " times risk than ",
+                    "when ",
+                    tUni_df$dependent_surv_overall_time_outcome[1],
+                    " is ",
+                    tUni_df$x[1],
+                    "."
+                )
+
+            }
 
 
 
-            tUni_df_descr <- paste0("When ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[2],
-                                    ", there is ",
-                                    tUni_df$hr_univariable[2],
-                                    " times risk than ",
-                                    "when ",
-                                    tUni_df$dependent_surv_overall_time_outcome[1],
-                                    " is ",
-                                    tUni_df$x[1],
-                                    "."
-            )
+            results5 <- purrr::map(.x = c(2:n_level-1), .f = tUni_df_descr)
 
-            results5 <- tUni_df_descr
+            results5 <- unlist(results5)
+
+
+
+            # tUni_df_descr <- paste0("When ",
+            #                         tUni_df$dependent_surv_overall_time_outcome[1],
+            #                         " is ",
+            #                         tUni_df$x[2],
+            #                         ", there is ",
+            #                         tUni_df$hr_univariable[2],
+            #                         " times risk than ",
+            #                         "when ",
+            #                         tUni_df$dependent_surv_overall_time_outcome[1],
+            #                         " is ",
+            #                         tUni_df$x[1],
+            #                         "."
+            # )
+
+            # results5 <- tUni_df_descr
 
 
 
@@ -239,7 +274,7 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    out = my_outcome,
                                    fct = my_factor)
 
-            plotData <- jmvcore::naOmit(plotData)
+            # plotData <- jmvcore::naOmit(plotData)
 
             # plotData <- mydata %>%
             #     dplyr::select(explanatory,
@@ -265,26 +300,27 @@ finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- image$state
 
 
-            plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
+            # plotData[['ovt2']] <- jmvcore::toNumeric(plotData[['ovt']])
 
-            plot1 <- plot(plotData[['ovt']])
+            # plot1 <- ggplot2::qplot(plotData[['ovt']])
+            #
+            # plot2 <- ggplot2::qplot(plotData[['out']])
+            #
+            # plot3 <- ggplot2::qplot(plotData[['fct']])
 
-            plot2 <- plot(plotData[['out']])
+            # plot <- list(
+            #     plot1,
+            #     plot2,
+            #     plot3
+            # )
 
-            plot3 <- plot(plotData[['fct']])
-
-            plot <- list(
-                plot1,
-                plot2,
-                plot3
-            )
+            # plot <- plot1
 
 
 
 
-
-            # myexplanatory <- 'explanatory'
-            # mydependent <- 'Surv(overalltime, outcome)'
+            myexplanatory <- plotData[['fct']]
+            mydependent <- survival::Surv(plotData[['ovt']], plotData[['out']])
 
             # mydependent <- survival::Surv(
             #     jmvcore::toNumeric(plotData[['ovt']]), plotData[['out']])

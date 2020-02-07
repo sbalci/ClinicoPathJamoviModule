@@ -13,3 +13,5 @@ navbar:
     twitter:
       icon: "fab fa-twitter fa-lg"
       href: http://twitter.com/serdarbalci
+home:
+  strip_header: true
