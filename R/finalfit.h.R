@@ -74,7 +74,9 @@ finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Survival Analysis",
-                refs="finalfit")
+                refs=list(
+                    "finalfit",
+                    "survival"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",

@@ -11,7 +11,7 @@
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.1000",
+  "version": "0.0.1.1001",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -313,24 +313,11 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=knitr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "broomExtra",
-      "name": "broomExtra",
-      "version": ">= 1.0.1",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=broomExtra"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md",
-  "fileSize": "6779.309KB",
+  "fileSize": "6778.554KB",
   "contIntegration": [
     "https://travis-ci.com/sbalci/ClinicoPathJamoviModule",
     "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule",
@@ -350,6 +337,10 @@
     "survival",
     "tableone",
     "report",
-    "sideload"
+    "sideload",
+    "correlation",
+    "decision",
+    "summary",
+    "statistics"
   ]
 }
