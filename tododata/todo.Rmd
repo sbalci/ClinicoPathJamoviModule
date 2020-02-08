@@ -217,22 +217,21 @@ devtools::check()
 
 
 ```{r pkgdown build, include=FALSE}
-
 rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
 devtools::document()
 
 pkgdown::build_site()
+```
 
 
+```{r git force push, include=FALSE}
 # gitUpdateCommitPush
 CommitMessage <- paste("updated on ", Sys.time(), sep = "")
 wd <- getwd()
 gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
 system(command = gitCommand, intern = TRUE)
-
-
-
 
 ```
 

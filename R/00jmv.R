@@ -206,4 +206,11 @@
         `year`=2018, 
         `title`="The Psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science. Journal of Open Source Software, 3(22), 470.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=psycho.R", 
-        `url`="https://CRAN.R-project.org/package=psycho.R"))
+        `url`="https://CRAN.R-project.org/package=psycho.R"), 
+    `survival`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
+        `url`="https://CRAN.R-project.org/package=survival"))

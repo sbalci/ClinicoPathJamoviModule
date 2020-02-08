@@ -9,10 +9,10 @@
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/)
-![Twitter
-Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
 <!-- badges: end -->
 
+![Twitter
+Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
 [![Download
 ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
 <a href="https://www.buymeacoffee.com/bS0teIs" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
@@ -41,7 +41,7 @@ or
 
 And install using side-load as shown below:
 
-<img src="man/figures/jamovi-sideload.gif" align="center" width = 50% />
+<img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
 ## Screenshots of Module
 
@@ -49,15 +49,15 @@ And install using side-load as shown below:
 
 #### TableOne
 
-<img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 
 #### WriteSummary
 
-<img src="man/figures/jamovi-write-summary-continious-variables.gif" align="center" width = 50% />
+<img src="man/figures/jamovi-write-summary-continious-variables.gif" align="center" width = 75% />
 
 #### Report General Features
 
-<img src="man/figures/jamovi-and-R-report.gif" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
 
 #### Frequencies
 
@@ -65,37 +65,37 @@ And install using side-load as shown below:
 
 #### CrossTable
 
-<img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
 
-<img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
 
 #### GGStatsPlot2
 
-<img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
 
 ### Survival
 
 #### FinalFit
 
-<img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
 
-<img src="man/figures/jamovi-and-survival-analysis-finalfit-2.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-survival-analysis-finalfit-2.png" align="center" width = 75% />
 
-<img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
 
 #### FinalFit Multivariate Survival
 
-<img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
 
 ### Decision
 
 #### Medical Decision
 
-<img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
 #### Decision Calculator
 
-<img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 50% />
+<img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
 
 ### Correlation
 

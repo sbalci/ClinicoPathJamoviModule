@@ -1,5 +1,6 @@
-# ClinicoPath WIP
+# ClinicoPath 0.0.1.1001
 
+* removed 'frequencies'
 * Documentations are being added.
 * CI are being added.
 * Badges, README are updated.

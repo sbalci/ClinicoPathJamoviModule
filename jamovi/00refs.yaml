@@ -236,4 +236,11 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=psycho.R'
         url: https://CRAN.R-project.org/package=psycho.R
 
+    survival:
+        type: 'software'
+        author:
+        year:
+        title: ""
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survival'
+        url: https://CRAN.R-project.org/package=survival
 ...

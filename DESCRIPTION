@@ -1,8 +1,8 @@
 Package: ClinicoPath
 Type: Package
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.1000
-Date: 2020-02-05
+Version: 0.0.1.1001
+Date: 2020-02-07
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -39,15 +39,14 @@ Imports:
     rlang,
     tidyselect,
     psycho,
-    knitr,
-    broomExtra(>= 1.0.1)
+    knitr
 Remotes:
     easystats/insight,
     easystats/performance,
     easystats/report
+Suggests: 
+    rmarkdown
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues
-Suggests: 
-    rmarkdown
