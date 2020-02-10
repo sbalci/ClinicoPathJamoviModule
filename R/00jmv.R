@@ -209,8 +209,8 @@
         `url`="https://CRAN.R-project.org/package=psycho.R"), 
     `survival`=list(
         `type`="software", 
-        `author`=NULL, 
-        `year`=NULL, 
-        `title`="", 
+        `author`="Terry M Therneau, Thomas Lumley", 
+        `year`=2019, 
+        `title`="survival: Survival Analysis", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
         `url`="https://CRAN.R-project.org/package=survival"))
