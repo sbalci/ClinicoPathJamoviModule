@@ -20,8 +20,8 @@ multisurvival(data, explanatory, outcome, outcomeLevel, overalltime)
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

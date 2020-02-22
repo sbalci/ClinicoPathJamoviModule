@@ -20,8 +20,8 @@ cluster(data, dep, group, alt = "notequal", varEq = TRUE)
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{
