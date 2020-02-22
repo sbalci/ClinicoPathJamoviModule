@@ -51,8 +51,8 @@ Default is false.}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

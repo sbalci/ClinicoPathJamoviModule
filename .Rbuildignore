@@ -39,3 +39,6 @@ build
 ^\.circleci/
 ^appveyor\.yml$
 ^codemeta\.json$
+.gitpod.Dockerfile
+.gitpod.yml
+.binder

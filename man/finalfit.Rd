@@ -18,17 +18,17 @@ finalfit(data, explanatory, outcome, overalltime)
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
-  \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text4} \tab \tab \tab \tab \tab a html \cr
-  \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text6} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text1html} \tab \tab \tab \tab \tab a html \cr
+\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text4} \tab \tab \tab \tab \tab a html \cr
+\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text6} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
