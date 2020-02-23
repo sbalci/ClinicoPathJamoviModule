@@ -7,11 +7,14 @@ development:
   mode: auto
 navbar:
   structure:
-    left:  [home, intro, reference, articles, tutorials, news]
+    left:  [home, intro, devversion, reference, articles, tutorials, news]
     right: [twitter, github]
   components:
     twitter:
       icon: "fab fa-twitter fa-lg"
       href: http://twitter.com/serdarbalci
+    devversion:
+      icon: "fa-cogs"
+      href: dev/index.html
 home:
   strip_header: true
