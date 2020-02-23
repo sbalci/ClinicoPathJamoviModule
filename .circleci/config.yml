@@ -36,9 +36,9 @@ jobs:
             R -q -e 'tic::script()'
 
       # save R pkg cache -------------------------------------------------------
-       - save_cache:
-           key: R-package-library-{{ checksum "/tmp/_tmp_file" }}
-           paths:
+      - save_cache:
+          key: R-package-library-{{ checksum "/tmp/_tmp_file" }}
+          paths:
              - /usr/local/lib/R/site-library
   deploy:
     environment:
