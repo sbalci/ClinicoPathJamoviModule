@@ -39,62 +39,12 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: Graphs and Plots
-    name: statsplot2
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Comparisons
-    menuTitle: Graphs and Plots
-    description: Function for making ggstatsplot plots
   - title: Survival FinalFit
     name: finalfit
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival FinalFit
-  - title: FinalFit Multivariate Survival
-    name: multisurvival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: FinalFit Multivariate Survival
-  - title: Medical Decision
-    name: decision
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Decision
-    menuTitle: Medical Decision
-  - title: Decision Calculator
-    name: decisioncalculator
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Decision
-    menuTitle: Decision Calculator
-  - title: Correlation
-    name: correlation
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Correlation
-    menuTitle: Correlation
-  - title: Interrater Intrarater Reliability
-    name: agreement
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Agreement
-    menuTitle: Interrater Intrarater Reliability
-    description: Function for Interrater Intrarater Reliability.
-  - title: Cluster Analysis
-    name: cluster
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuTitle: Cluster Analysis
-    menuSubgroup: Cluster Analysis
-  - title: Decision Tree
-    name: tree
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuTitle: Decision Tree
-    menuSubgroup: Decision Tree
 usesNative: true
 minApp: 1.0.8
 
