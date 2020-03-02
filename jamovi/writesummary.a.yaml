@@ -1,6 +1,6 @@
 ---
 name:  writesummary
-title: WriteSummary
+title: Write Summary of Continious Variables
 menuGroup: ClinicoPath
 menuSubgroup: Descriptives
 version: '1.0.0'

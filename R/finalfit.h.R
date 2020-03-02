@@ -56,15 +56,12 @@ finalfitOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]],
-        text1html = function() private$.items[["text1html"]],
         text2 = function() private$.items[["text2"]],
-        text3 = function() private$.items[["text3"]],
-        text4 = function() private$.items[["text4"]],
+        text1html = function() private$.items[["text1html"]],
         text5 = function() private$.items[["text5"]],
-        text6 = function() private$.items[["text6"]],
+        text4 = function() private$.items[["text4"]],
         text7 = function() private$.items[["text7"]],
+        text6 = function() private$.items[["text6"]],
         text8 = function() private$.items[["text8"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -76,43 +73,32 @@ finalfitResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Survival Analysis",
                 refs=list(
                     "finalfit",
-                    "survival"))
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="todo",
-                title="To Do"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text1",
-                title="Median Survival Table"))
+                name="text2",
+                title="Median Survival Summary and Table"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1html",
                 title="Median Survival Table"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text2",
-                title="Median Survival Summary"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text3",
-                title="Cox"))
+                name="text5",
+                title="Cox Regression Summary and Table"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
                 title="Cox Table"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text5",
-                title="Cox Summary"))
-            self$add(jmvcore::Preformatted$new(
+                name="text7",
+                title="1, 3, 5-yr Survival Summary and Table"))
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text6",
                 title="1, 3, 5-yr Survival"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text7",
-                title="1, 3, 5-yr Survival Summary"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text8",
@@ -144,7 +130,7 @@ finalfitBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' Survival FinalFit
+#' Survival Analysis
 #'
 #' 
 #' @param data .
@@ -153,15 +139,12 @@ finalfitBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text6} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text6} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }

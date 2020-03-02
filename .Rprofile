@@ -1,9 +1,10 @@
-source("renv/activate.R")
+# source("renv/activate.R")
 
 
 .First <- function(){
-    cat("\nWelcome to histopathology template project", date(), "\n", "\n dplyr, %>%, %$% are loaded")
+    cat("\nWelcome to ClinicoPath", date())
 }
+
 
 .Last <- function(){
     cat("\nGoodbye at ", date(), "\n")

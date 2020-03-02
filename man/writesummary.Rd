@@ -2,7 +2,7 @@
 % Please edit documentation in R/writesummary.h.R
 \name{writesummary}
 \alias{writesummary}
-\title{WriteSummary}
+\title{Write Summary of Continious Variables}
 \usage{
 writesummary(data, vars)
 }
@@ -20,5 +20,5 @@ A results object containing:
 }
 }
 \description{
-WriteSummary
+Write Summary of Continious Variables
 }

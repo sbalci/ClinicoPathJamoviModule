@@ -55,7 +55,7 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     myvar,
                     " is: ",
                     mean_x,
-                    " + ",
+                    " \u00B1 ",
                     sd_x,
                     ". (Median: ",
                     median_x,

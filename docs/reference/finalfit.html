@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Survival FinalFit — finalfit • ClinicoPath</title>
+<title>Survival Analysis — finalfit • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -18,8 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.1/css/all.min.css" integrity="sha256-PbSmjxuVAzJ6FPvNYsrXygfGhNJYyZ2GktDbkMBqQZg=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.1/css/v4-shims.min.css" integrity="sha256-A6jcAdwFD48VMjlI3GDxUd+eCQa7/KWy6G9oe/ovaPA=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Survival FinalFit — finalfit" />
-<meta property="og:description" content="Survival FinalFit" />
+<meta property="og:title" content="Survival Analysis — finalfit" />
+<meta property="og:description" content="Survival Analysis" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.1001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1</span>
       </span>
     </div>
 
@@ -135,13 +135,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Survival FinalFit</h1>
+    <h1>Survival Analysis</h1>
     <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/finalfit.h.R'><code>R/finalfit.h.R</code></a></small>
     <div class="hidden name"><code>finalfit.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Survival FinalFit</p>
+    <p>Survival Analysis</p>
     </div>
 
     <pre class="usage"><span class='fu'>finalfit</span>(<span class='no'>data</span>, <span class='no'>explanatory</span>, <span class='no'>outcome</span>, <span class='no'>overalltime</span>)</pre>
@@ -170,15 +170,12 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text1html</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$text1html</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text5</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text6</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text7</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text6</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text8</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
@@ -186,7 +183,7 @@
 
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
@@ -203,7 +200,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.9000.</p>
 </div>
 
       </footer>

@@ -1,6 +1,6 @@
 ---
 name:  finalfit
-title: Survival FinalFit
+title: Survival Analysis
 menuGroup: ClinicoPath
 menuSubgroup: Survival
 version: '1.0.0'

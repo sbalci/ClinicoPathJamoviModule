@@ -30,16 +30,11 @@ Imports:
 
 
 Remotes:
-    easystats/insight,
-    easystats/performance,
-    easystats/report,
-    easystats/parameters,
     easystats/correlation,
     neuropsychology/psycho.R@0.4.0
 
 
 Suggests:
-    bayestestR,
     rmarkdown,
     remotes,
     devtools,
@@ -155,8 +150,6 @@ Suggests:
     DBI,
     png, 
     jpeg, 
-    performance, 
-    kableExtra, 
     boot, 
     grid, 
     snakecase,
@@ -201,7 +194,7 @@ Suggests:
     rstanarm,
     MuMIn,
     blavaan,
-    effectsize
+    
     
     
     

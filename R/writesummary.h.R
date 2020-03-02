@@ -41,7 +41,7 @@ writesummaryResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="WriteSummary")
+                title="Write Summary of Continious Variables")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -49,7 +49,7 @@ writesummaryResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="WriteSummary"))}))
+                title="Summary of Continious Variables"))}))
 
 writesummaryBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "writesummaryBase",
@@ -70,7 +70,7 @@ writesummaryBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' WriteSummary
+#' Write Summary of Continious Variables
 #'
 #' 
 #' @param data the data as a data frame
