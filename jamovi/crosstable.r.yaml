@@ -5,34 +5,34 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Preformatted
+    # - name:  todo
+    #   title: To Do
+    #   type:  Preformatted
 
-    - name:  text1
-      title: CrossTable Arsenal
-      type:  Html
+    # - name:  text1
+    #   title: CrossTable Arsenal
+    #   type:  Html
 
-    - name:  text2
-      title: CrossTable Tangram
-      type:  Preformatted
+    # - name:  text2
+    #   title: CrossTable Tangram
+    #   type:  Preformatted
 
     - name:  text3
       title: CrossTable Tangram NEJM
       type:  Html
 
-    - name:  text4
-      title: CrossTable Tangram Lancet
-      type:  Html
+    # - name:  text4
+    #   title: CrossTable Tangram Lancet
+    #   type:  Html
 
-    - name:  text5
-      title: CrossTable FinalFit
-      type:  Preformatted
+    # - name:  text5
+    #   title: CrossTable FinalFit
+    #   type:  Preformatted
 
 
 refs:
     - tangram
-    - arsenal
-    - finalfit
+    # - arsenal
+    # - finalfit
 
 ...

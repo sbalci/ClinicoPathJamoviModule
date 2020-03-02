@@ -213,4 +213,11 @@
         `year`=2019, 
         `title`="survival: Survival Analysis", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
-        `url`="https://CRAN.R-project.org/package=survival"))
+        `url`="https://CRAN.R-project.org/package=survival"), 
+    `survminer`=list(
+        `type`="software", 
+        `author`="Alboukadel Kassambara and Marcin Kosinski and Przemyslaw Biecek", 
+        `year`=2019, 
+        `title`="survminer: Drawing Survival Curves using 'ggplot2'", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survminer", 
+        `url`="https://CRAN.R-project.org/package=survminer"))

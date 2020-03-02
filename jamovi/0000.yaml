@@ -20,12 +20,12 @@ analyses:
     menuSubgroup: Descriptives
     menuTitle: TableOne
     description: Function for making Table-1.
-  - title: WriteSummary
+  - title: Write Summary of Continious Variables
     name: writesummary
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: WriteSummary
+    menuTitle: Write Summary of Continious Variables
   - title: Report General Features
     name: report
     ns: ClinicoPath
@@ -39,12 +39,12 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: Survival FinalFit
+  - title: Survival Analysis
     name: finalfit
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
-    menuTitle: Survival FinalFit
+    menuTitle: Survival Analysis
 usesNative: true
 minApp: 1.0.8
 

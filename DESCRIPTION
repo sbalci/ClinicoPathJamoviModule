@@ -34,13 +34,22 @@ Imports:
     ggplot2,
     forcats,
     tableone,
-    explore,
     tangram,
     rlang,
     tidyselect,
-    knitr
+    knitr,
+    remotes
 Remotes:
+    easystats/modelbased,
+    easystats/insight,
+    easystats/bayestestR,
+    easystats/performance,
+    easystats/parameters,
     easystats/report
+Suggests:
+    kableExtra,
+    effectsize,
+    emmeans
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 

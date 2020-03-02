@@ -41,12 +41,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        text3 = function() private$.items[["text3"]],
-        text4 = function() private$.items[["text4"]],
-        text5 = function() private$.items[["text5"]]),
+        text3 = function() private$.items[["text3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -55,33 +50,11 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="CrossTable",
                 refs=list(
-                    "tangram",
-                    "arsenal",
-                    "finalfit"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="todo",
-                title="To Do"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="text1",
-                title="CrossTable Arsenal"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="CrossTable Tangram"))
+                    "tangram"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text3",
-                title="CrossTable Tangram NEJM"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="text4",
-                title="CrossTable Tangram Lancet"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text5",
-                title="CrossTable FinalFit"))}))
+                title="CrossTable Tangram NEJM"))}))
 
 crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstableBase",
@@ -110,12 +83,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group variable in the column
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
