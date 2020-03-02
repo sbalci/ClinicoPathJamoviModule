@@ -44,7 +44,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--02-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -79,8 +79,6 @@ URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fsbalci.gi
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub
 watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
-[![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
 <!-- badges: end -->
 
 -----
@@ -119,6 +117,8 @@ DOI 10.17605/OSF.IO/9SZUD
 
 <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy
 me a coffee</span></a>
+
+<https://paypal.me/serdarbalci>
 
 -----
 
@@ -261,7 +261,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--02-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
