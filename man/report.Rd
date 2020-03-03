@@ -2,7 +2,7 @@
 % Please edit documentation in R/report.h.R
 \name{report}
 \alias{report}
-\title{Report General Features}
+\title{Summary of All Data}
 \usage{
 report(data, vars)
 }
@@ -21,5 +21,5 @@ A results object containing:
 }
 }
 \description{
-Report General Features
+Summary of All Data
 }

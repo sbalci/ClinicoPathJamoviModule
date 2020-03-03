@@ -10,7 +10,7 @@ items:
       type:  Html
 
     - name:  text1
-      title: 'Table-1'
+      title: ''
       type:  Preformatted
 
 

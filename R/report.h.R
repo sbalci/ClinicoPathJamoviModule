@@ -37,7 +37,7 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Report General Features",
+                title="Summary of All Data",
                 refs="report")
             self$add(jmvcore::Html$new(
                 options=options,
@@ -46,7 +46,7 @@ reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Report General Features"))}))
+                title=""))}))
 
 reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "reportBase",
@@ -67,7 +67,7 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' Report General Features
+#' Summary of All Data
 #'
 #' 
 #' @param data the data as a data frame
