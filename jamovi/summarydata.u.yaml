@@ -1,5 +1,9 @@
 title: Summary of Continious Variables
+<<<<<<< HEAD:jamovi/summarydata.u.yaml
 name: summarydata
+=======
+name: summary
+>>>>>>> 3cad591a735ef48ee840b518674542545a958cad:jamovi/summary.u.yaml
 jus: '3.0'
 stage: 0
 compilerMode: aggressive

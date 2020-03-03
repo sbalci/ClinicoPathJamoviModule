@@ -1,5 +1,9 @@
 ---
+<<<<<<< HEAD:jamovi/summarydata.a.yaml
 name:  summarydata
+=======
+name:  summary
+>>>>>>> 3cad591a735ef48ee840b518674542545a958cad:jamovi/summary.a.yaml
 title: Summary of Continious Variables
 menuGroup: ClinicoPath
 menuSubgroup: Descriptives
