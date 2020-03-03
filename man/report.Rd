@@ -4,18 +4,7 @@
 \alias{report}
 \title{Report General Features}
 \usage{
-report(
-  data,
-  vars,
-  med = FALSE,
-  cent = TRUE,
-  disp = TRUE,
-  ran = TRUE,
-  distr = FALSE,
-  lev = FALSE,
-  n_ch = 3,
-  mis = FALSE
-)
+report(data, vars)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -23,30 +12,6 @@ report(
 \item{vars}{string naming the variables from \code{data} that contains the
 values used for the report. Uses report::report() function. Refer to
 report.data.frame {report} documentation.}
-
-\item{med}{Boolean argument whether to include 'median' instead of 'mean'.
-Default is false.}
-
-\item{cent}{Boolean argument whether to include centrality (mean or
-median). Default is true.}
-
-\item{disp}{Boolean argument whether to include dispersion. Default is
-true.}
-
-\item{ran}{Boolean argument whether to include centrality (mean or median).
-Default is true.}
-
-\item{distr}{Boolean argument whether to include kurtosis and skewness.
-Default is false.}
-
-\item{lev}{Boolean argument whether to use percentage instead of numbers.
-Default is false.}
-
-\item{n_ch}{Boolean argument whether to use percentage instead of numbers.
-Default is false.}
-
-\item{mis}{Boolean argument whether to include missing as percentage.
-Default is false.}
 }
 \value{
 A results object containing:
