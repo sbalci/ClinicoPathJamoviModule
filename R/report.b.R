@@ -36,21 +36,14 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
-            med <- self$options$med
-
-            cent <- self$options$cent
-
-            disp <- self$options$disp
-
-            ran <- self$options$ran
-
-            distr <- self$options$distr
-
-            lev <- self$options$lev
-
-            n_ch <- self$options$n_ch
-
-            mis <- self$options$mis
+            # med <- self$options$med
+            # cent <- self$options$cent
+            # disp <- self$options$disp
+            # ran <- self$options$ran
+            # distr <- self$options$distr
+            # lev <- self$options$lev
+            # n_ch <- self$options$n_ch
+            # mis <- self$options$mis
 
             formula <- jmvcore::constructFormula(terms = self$options$vars)
 
@@ -61,15 +54,15 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myreport <- mydata %>%
                 select(myvars) %>%
                 report::report(.
-            ,
-                               median = med,
-                               centrality = cent,
-                               dispersion = disp,
-                               range = ran,
-                               distribution = distr,
-                               levels_percentage = lev,
-                               n_characters = n_ch,
-                               missing_percentage = mis
+            # ,
+            #                    median = med,
+            #                    centrality = cent,
+            #                    dispersion = disp,
+            #                    range = ran,
+            #                    distribution = distr,
+            #                    levels_percentage = lev,
+            #                    n_characters = n_ch,
+            #                    missing_percentage = mis
                                )
 
             results1 <- myreport

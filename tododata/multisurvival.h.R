@@ -63,7 +63,7 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="FinalFit Multivariate Survival",
+                title="Multivariate Survival Analysis",
                 refs="finalfit")
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -93,7 +93,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' FinalFit Multivariate Survival
+#' Multivariate Survival Analysis
 #'
 #' 
 #' @param data .

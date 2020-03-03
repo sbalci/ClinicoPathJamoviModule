@@ -1,6 +1,6 @@
 ---
 name:  multisurvival
-title: FinalFit Multivariate Survival
+title: Multivariate Survival Analysis
 menuGroup: ClinicoPath
 menuSubgroup: Survival
 version: '1.0.0'

@@ -12,14 +12,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO
 
-            todo <- glue::glue(
-                "This Module is still under development
-                -  correct multivariate formula
-                -  or_plot
-                - "
-            )
+            # todo <- glue::glue(
+            #     "This Module is still under development
+            #     -  correct multivariate formula
+            #     -  or_plot
+            #     - "
+            # )
 
-            self$results$todo$setContent(todo)
+            # self$results$todo$setContent(todo)
 
 
             if (length(self$options$explanatory) < 1 |  (length(self$options$outcome) + length(self$options$overalltime) < 2))

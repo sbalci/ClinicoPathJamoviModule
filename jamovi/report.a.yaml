@@ -21,68 +21,68 @@ options:
             values used for the report. Uses report::report() function.
             Refer to report.data.frame {report}	documentation.
 
-    - name: med
-      title: Median
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean argument whether to include 'median' instead of 'mean'. Default is false.
+    # - name: med
+    #   title: Median
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include 'median' instead of 'mean'. Default is false.
 
-    - name: cent
-      title: Centrality
-      type: Bool
-      default: true
-      description:
-          R: >
-            Boolean argument whether to include centrality (mean or median). Default is true.
+    # - name: cent
+    #   title: Centrality
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include centrality (mean or median). Default is true.
 
-    - name: disp
-      title: Dispersion
-      type: Bool
-      default: true
-      description:
-          R: >
-            Boolean argument whether to include dispersion. Default is true.
+    # - name: disp
+    #   title: Dispersion
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include dispersion. Default is true.
 
-    - name: ran
-      title: Range
-      type: Bool
-      default: true
-      description:
-          R: >
-            Boolean argument whether to include centrality (mean or median). Default is true.
+    # - name: ran
+    #   title: Range
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include centrality (mean or median). Default is true.
 
-    - name: distr
-      title: Distribution
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean argument whether to include kurtosis and skewness. Default is false.
+    # - name: distr
+    #   title: Distribution
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include kurtosis and skewness. Default is false.
 
-    - name: lev
-      title: Levels Percentage
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean argument whether to use percentage instead of numbers. Default is false.
+    # - name: lev
+    #   title: Levels Percentage
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean argument whether to use percentage instead of numbers. Default is false.
 
-    - name: n_ch
-      title: Character Numbers
-      type: Integer
-      default: 3
-      description:
-          R: >
-            Boolean argument whether to use percentage instead of numbers. Default is false.
+    # - name: n_ch
+    #   title: Character Numbers
+    #   type: Integer
+    #   default: 3
+    #   description:
+    #       R: >
+    #         Boolean argument whether to use percentage instead of numbers. Default is false.
 
-    - name: mis
-      title: Missing Percentage
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean argument whether to include missing as percentage. Default is false.
+    # - name: mis
+    #   title: Missing Percentage
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean argument whether to include missing as percentage. Default is false.
 
 ...
