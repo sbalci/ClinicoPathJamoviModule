@@ -18,7 +18,9 @@ summarydataOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "vars",
                 vars,
                 suggested=list(
-                    "continuous"))
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..vars)
         }),

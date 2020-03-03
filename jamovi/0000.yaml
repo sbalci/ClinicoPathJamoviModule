@@ -26,12 +26,12 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Summary of Continious Variables
-  - title: Report General Features
+  - title: Summary of All Data
     name: report
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: Report General Features
+    menuTitle: Summary of All Data
   - title: CrossTables
     name: crosstable
     ns: ClinicoPath
@@ -39,12 +39,6 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: Summary of Continious Variables
-    name: summarydata
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Descriptives
-    menuTitle: Summary of Continious Variables
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
@@ -54,11 +48,11 @@ analyses:
 datasets:
   - name: histopathology
     path: histopathology.omv
-    description: 'Fake histopathology research data'
+    description: Fake histopathology research data
     tags:
-      - 'Table One'
-      - 'Data Summary'
-      - 'Survival'
+      - Table One
+      - Data Summary
+      - Survival
 usesNative: true
 minApp: 1.0.8
 

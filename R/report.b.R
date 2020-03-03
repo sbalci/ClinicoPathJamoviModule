@@ -19,8 +19,6 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           <br><br>
                           Select the 'Variables' you want to include in the summary. Numeric, Ordinal, and Categorical variables are allowed.
                           <br><br>
-                          Use checkboxes to change the output of summary.
-                          <br><br>
                           This tool uses report package. Please cite the packages and jamovi using references below.
                           "
 
@@ -29,7 +27,7 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             } else {
 
-                todo <- "Summary of the data: "
+                todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
 
