@@ -14,29 +14,3 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: med
-      - type: CheckBox
-        name: cent
-      - type: CheckBox
-        name: disp
-      - type: CheckBox
-        name: ran
-      - type: CheckBox
-        name: distr
-      - type: CheckBox
-        name: lev
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: n_ch
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: mis
