@@ -62,7 +62,7 @@ datasets:
     path: histopathology.omv
     description: Fake histopathology research data
     tags:
-      - Table-1
+      - Table One
       - Data Summary
       - Survival
 usesNative: true
