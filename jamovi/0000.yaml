@@ -6,26 +6,26 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-01-28'
+date: '2020-03-03'
 type: R
 description: >-
   I am collecting many different R-project packages here So credit should go to
   main authors I just try to convert the codes that I often use into jamovi
   module
 analyses:
-  - title: TableOne
+  - title: Table One
     name: tableone
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: TableOne
-    description: Function for making Table-1.
-  - title: Write Summary of Continious Variables
-    name: writesummary
+    menuTitle: Table One
+    description: Function for making Table One.
+  - title: Summary of Continious Variables
+    name: summary
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: Write Summary of Continious Variables
+    menuTitle: Summary of Continious Variables
   - title: Report General Features
     name: report
     ns: ClinicoPath
@@ -45,6 +45,26 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
+  - title: Summary of Continious Variables
+    name: summary
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Descriptives
+    menuTitle: Summary of Continious Variables
+  - title: Survival Analysis
+    name: survival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: Survival Analysis
+datasets:
+  - name: histopathology
+    path: histopathology.omv
+    description: Fake histopathology research data
+    tags:
+      - Table-1
+      - Data Summary
+      - Survival
 usesNative: true
 minApp: 1.0.8
 
