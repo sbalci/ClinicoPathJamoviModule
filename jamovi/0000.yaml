@@ -39,14 +39,8 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: Survival Analysis
-    name: finalfit
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: Survival Analysis
   - title: Summary of Continious Variables
-    name: summary
+    name: summarydata
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
@@ -60,11 +54,11 @@ analyses:
 datasets:
   - name: histopathology
     path: histopathology.omv
-    description: Fake histopathology research data
+    description: 'Fake histopathology research data'
     tags:
-      - Table-1
-      - Data Summary
-      - Survival
+      - 'Table One'
+      - 'Data Summary'
+      - 'Survival'
 usesNative: true
 minApp: 1.0.8
 
