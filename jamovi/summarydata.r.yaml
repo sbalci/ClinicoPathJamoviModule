@@ -1,6 +1,6 @@
 ---
-name:  writesummary
-title: Write Summary of Continious Variables
+name:  summarydata
+title: Summary of Continious Variables
 jrs:   '1.1'
 
 items:
@@ -10,7 +10,7 @@ items:
       type:  Html
 
     - name:  text
-      title: Summary of Continious Variables
+      title: ''
       type:  Preformatted
 
 

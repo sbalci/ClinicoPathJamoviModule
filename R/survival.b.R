@@ -4,9 +4,9 @@
 #' @import survival
 #' @importFrom rlang .data
 
-finalfitClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "finalfitClass",
-    inherit = finalfitBase,
+survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "survivalClass",
+    inherit = survivalBase,
     private = list(
         .run = function() {
 

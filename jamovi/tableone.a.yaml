@@ -1,13 +1,13 @@
 ---
 name:  tableone
-title: TableOne
+title: Table One
 menuGroup: ClinicoPath
 menuSubgroup: Descriptives
 version: '0.0.1'
 jas: '1.2'
 
 description:
-    main: 'Function for making Table-1.'
+    main: 'Function for making Table One.'
     R:
         dontrun: true
         usage: |
@@ -28,5 +28,5 @@ options:
       description:
           R: >
             a string naming the variables from `data` that contains the
-            values used for the Table-1
+            values used for the Table One.
 ...

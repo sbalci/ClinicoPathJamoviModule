@@ -6,15 +6,7 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL,
-            med = FALSE,
-            cent = TRUE,
-            disp = TRUE,
-            ran = TRUE,
-            distr = FALSE,
-            lev = FALSE,
-            n_ch = 3,
-            mis = FALSE, ...) {
+            vars = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -25,69 +17,13 @@ reportOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
-            private$..med <- jmvcore::OptionBool$new(
-                "med",
-                med,
-                default=FALSE)
-            private$..cent <- jmvcore::OptionBool$new(
-                "cent",
-                cent,
-                default=TRUE)
-            private$..disp <- jmvcore::OptionBool$new(
-                "disp",
-                disp,
-                default=TRUE)
-            private$..ran <- jmvcore::OptionBool$new(
-                "ran",
-                ran,
-                default=TRUE)
-            private$..distr <- jmvcore::OptionBool$new(
-                "distr",
-                distr,
-                default=FALSE)
-            private$..lev <- jmvcore::OptionBool$new(
-                "lev",
-                lev,
-                default=FALSE)
-            private$..n_ch <- jmvcore::OptionInteger$new(
-                "n_ch",
-                n_ch,
-                default=3)
-            private$..mis <- jmvcore::OptionBool$new(
-                "mis",
-                mis,
-                default=FALSE)
 
             self$.addOption(private$..vars)
-            self$.addOption(private$..med)
-            self$.addOption(private$..cent)
-            self$.addOption(private$..disp)
-            self$.addOption(private$..ran)
-            self$.addOption(private$..distr)
-            self$.addOption(private$..lev)
-            self$.addOption(private$..n_ch)
-            self$.addOption(private$..mis)
         }),
     active = list(
-        vars = function() private$..vars$value,
-        med = function() private$..med$value,
-        cent = function() private$..cent$value,
-        disp = function() private$..disp$value,
-        ran = function() private$..ran$value,
-        distr = function() private$..distr$value,
-        lev = function() private$..lev$value,
-        n_ch = function() private$..n_ch$value,
-        mis = function() private$..mis$value),
+        vars = function() private$..vars$value),
     private = list(
-        ..vars = NA,
-        ..med = NA,
-        ..cent = NA,
-        ..disp = NA,
-        ..ran = NA,
-        ..distr = NA,
-        ..lev = NA,
-        ..n_ch = NA,
-        ..mis = NA)
+        ..vars = NA)
 )
 
 reportResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -138,22 +74,6 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars string naming the variables from \code{data} that contains the
 #'   values used for the report. Uses report::report() function. Refer to
 #'   report.data.frame {report} documentation.
-#' @param med Boolean argument whether to include 'median' instead of 'mean'.
-#'   Default is false.
-#' @param cent Boolean argument whether to include centrality (mean or
-#'   median). Default is true.
-#' @param disp Boolean argument whether to include dispersion. Default is
-#'   true.
-#' @param ran Boolean argument whether to include centrality (mean or median).
-#'   Default is true.
-#' @param distr Boolean argument whether to include kurtosis and skewness.
-#'   Default is false.
-#' @param lev Boolean argument whether to use percentage instead of numbers.
-#'   Default is false.
-#' @param n_ch Boolean argument whether to use percentage instead of numbers.
-#'   Default is false.
-#' @param mis Boolean argument whether to include missing as percentage.
-#'   Default is false.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -163,15 +83,7 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @export
 report <- function(
     data,
-    vars,
-    med = FALSE,
-    cent = TRUE,
-    disp = TRUE,
-    ran = TRUE,
-    distr = FALSE,
-    lev = FALSE,
-    n_ch = 3,
-    mis = FALSE) {
+    vars) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('report requires jmvcore to be installed (restart may be required)')
@@ -184,15 +96,7 @@ report <- function(
 
 
     options <- reportOptions$new(
-        vars = vars,
-        med = med,
-        cent = cent,
-        disp = disp,
-        ran = ran,
-        distr = distr,
-        lev = lev,
-        n_ch = n_ch,
-        mis = mis)
+        vars = vars)
 
     analysis <- reportClass$new(
         options = options,

@@ -37,7 +37,7 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="TableOne",
+                title="Table One",
                 refs="tableone")
             self$add(jmvcore::Html$new(
                 options=options,
@@ -67,9 +67,9 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' TableOne
+#' Table One
 #'
-#' Function for making Table-1.
+#' Function for making Table One.
 #'
 #' @examples
 #' \dontrun{
@@ -79,7 +79,7 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'}
 #' @param data the data as a data frame
 #' @param vars a string naming the variables from \code{data} that contains
-#'   the values used for the Table-1
+#'   the values used for the Table One.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

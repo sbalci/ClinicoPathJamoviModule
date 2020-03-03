@@ -2,7 +2,7 @@
 % Please edit documentation in R/tableone.h.R
 \name{tableone}
 \alias{tableone}
-\title{TableOne}
+\title{Table One}
 \usage{
 tableone(data, vars)
 }
@@ -10,7 +10,7 @@ tableone(data, vars)
 \item{data}{the data as a data frame}
 
 \item{vars}{a string naming the variables from \code{data} that contains
-the values used for the Table-1}
+the values used for the Table One.}
 }
 \value{
 A results object containing:
@@ -20,7 +20,7 @@ A results object containing:
 }
 }
 \description{
-Function for making Table-1.
+Function for making Table One.
 }
 \examples{
 \dontrun{

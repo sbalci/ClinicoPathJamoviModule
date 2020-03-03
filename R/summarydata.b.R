@@ -3,9 +3,9 @@
 #' @importFrom purrr map
 # This file is a generated template, your changes will not be overwritten
 
-writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "writesummaryClass",
-    inherit = writesummaryBase,
+summarydataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "summarydataClass",
+    inherit = summarydataBase,
     private = list(
         .run = function() {
 
@@ -23,7 +23,7 @@ writesummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             } else {
-                todo <- "Summary of continious variables:"
+                todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
 
