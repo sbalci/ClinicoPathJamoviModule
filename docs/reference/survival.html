@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • ClinicoPath</title>
+<title>Survival Analysis — survival • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -35,7 +35,9 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Survival Analysis — survival" />
+<meta property="og:description" content="Survival Analysis" />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -54,7 +56,7 @@
   </head>
 
   <body>
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -131,66 +133,63 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Survival Analysis</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/survival.h.R'><code>R/survival.h.R</code></a></small>
+    <div class="hidden name"><code>survival.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Survival Analysis</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>survival</span>(<span class='no'>data</span>, <span class='no'>explanatory</span>, <span class='no'>outcome</span>, <span class='no'>overalltime</span>)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      <tr>
-        
-        <td>
-          <p><code><a href="crosstable.html">crosstable()</a></code> </p>
-        </td>
-        <td><p>CrossTables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="report.html">report()</a></code> </p>
-        </td>
-        <td><p>Summary of All Data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summarydata.html">summarydata()</a></code> </p>
-        </td>
-        <td><p>Summary of Continious Variables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="survival.html">survival()</a></code> </p>
-        </td>
-        <td><p>Survival Analysis</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tableone.html">tableone()</a></code> </p>
-        </td>
-        <td><p>Table One</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>data</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>explanatory</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>outcome</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>overalltime</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A results object containing:</p><table class='table'>
+<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text1html</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$text5</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$text7</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text6</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$text8</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+</table>
+
+
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
     </ul>
+
   </div>
 </div>
 

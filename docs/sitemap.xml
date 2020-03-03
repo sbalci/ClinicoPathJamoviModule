@@ -7,16 +7,16 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/crosstable.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/finalfit.html</loc>
-  </url>
-  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/report.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/summarydata.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/writesummary.html</loc>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survival.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/data-preperation.html</loc>

@@ -1,6 +1,6 @@
 ---
 name:  report
-title: Report General Features
+title: Summary of All Data
 jrs:   '1.1'
 
 items:
@@ -10,7 +10,7 @@ items:
       type:  Html
 
     - name:  text
-      title: Report General Features
+      title: ''
       type:  Preformatted
 
 refs: report
