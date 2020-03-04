@@ -1,6 +1,6 @@
 ---
-name:  report
-title: Summary of All Data
+name:  reportcat
+title: Summary of Categorical Variables
 jrs:   '1.1'
 
 items:

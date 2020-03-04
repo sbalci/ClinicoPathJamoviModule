@@ -41,7 +41,7 @@ summarydataResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Summary of Continious Variables")
+                title="Summary of Continuous Variables")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -70,12 +70,12 @@ summarydataBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' Summary of Continious Variables
+#' Summary of Continuous Variables
 #'
 #' 
 #' @param data the data as a data frame
 #' @param vars a string naming the variables from \code{data} that contains
-#'   the continious values used for the report
+#'   the continuous values used for the report
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

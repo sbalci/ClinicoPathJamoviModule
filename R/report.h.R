@@ -67,7 +67,7 @@ reportBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' Summary of All Data
+#' Summary of Categorical Variables
 #'
 #' 
 #' @param data the data as a data frame

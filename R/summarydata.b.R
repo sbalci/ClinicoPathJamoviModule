@@ -39,15 +39,15 @@ summarydataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # mysummary function
             mysummary <- function(myvar) {
 
-            mean_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
+            mean_x <- round(mean(jmvcore::toNumeric(mydata[[myvar]]), na.rm = TRUE), digits = 1)
 
-            sd_x <- round(sd(x = mydata[[myvar]], na.rm = TRUE), digits = 1)
+            sd_x <- round(sd(x = jmvcore::toNumeric(mydata[[myvar]]), na.rm = TRUE), digits = 1)
 
-            median_x <- round(median(mydata[[myvar]], na.rm=TRUE), digits = 1)
+            median_x <- round(median(jmvcore::toNumeric(mydata[[myvar]]), na.rm = TRUE), digits = 1)
 
-            min_x <- round(min(mydata[[myvar]], na.rm=TRUE), digits = 1)
+            min_x <- round(min(jmvcore::toNumeric(mydata[[myvar]]), na.rm = TRUE), digits = 1)
 
-            max_x <- round(mean(mydata[[myvar]], na.rm=TRUE), digits = 1)
+            max_x <- round(max(jmvcore::toNumeric(mydata[[myvar]]), na.rm = TRUE), digits = 1)
 
             print(
                 paste0(

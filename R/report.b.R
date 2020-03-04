@@ -3,9 +3,9 @@
 #'
 # This file is a generated template, your changes will not be overwritten
 
-reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "reportClass",
-    inherit = reportBase,
+reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "reportcatClass",
+    inherit = reportcatBase,
     private = list(
         .run = function() {
 
@@ -17,7 +17,7 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           This tool will help you to write a general summary of variables
                               in your data.
                           <br><br>
-                          Select the 'Variables' you want to include in the summary. Numeric, Ordinal, and Categorical variables are allowed.
+                          Select the 'Variables' you want to include in the summary. Nominal, Ordinal and Categorical variables are allowed.
                           <br><br>
                           This tool uses report package. Please cite the packages and jamovi using references below.
                           "
@@ -51,8 +51,15 @@ reportClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myreport <- mydata %>%
                 select(myvars) %>%
-                report::report(.
-            # ,
+                report::report(.,
+                               median = FALSE,
+                               centrality = TRUE,
+                               dispersion = TRUE,
+                               range = TRUE,
+                               distribution = FALSE,
+                               levels_percentage = FALSE,
+                               n_entries = 3,
+                               missing_percentage = FALSE
             #                    median = med,
             #                    centrality = cent,
             #                    dispersion = disp,
