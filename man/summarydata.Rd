@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarydata.h.R
 \name{summarydata}
 \alias{summarydata}
-\title{Summary of Continious Variables}
+\title{Summary of Continuous Variables}
 \usage{
 summarydata(data, vars)
 }
@@ -10,7 +10,7 @@ summarydata(data, vars)
 \item{data}{the data as a data frame}
 
 \item{vars}{a string naming the variables from \code{data} that contains
-the continious values used for the report}
+the continuous values used for the report}
 }
 \value{
 A results object containing:
@@ -20,5 +20,5 @@ A results object containing:
 }
 }
 \description{
-Summary of Continious Variables
+Summary of Continuous Variables
 }
