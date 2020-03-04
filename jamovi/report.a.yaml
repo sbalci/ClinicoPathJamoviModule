@@ -1,6 +1,6 @@
 ---
-name:  report
-title: Summary of All Data
+name:  reportcat
+title: Summary of Categorical Variables
 menuGroup: ClinicoPath
 menuSubgroup: Descriptives
 version: '1.0.0'
@@ -15,12 +15,15 @@ options:
     - name: vars
       title: Variables
       type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description:
           R: >
             string naming the variables from `data` that contains the
             values used for the report. Uses report::report() function.
             Refer to report.data.frame {report}	documentation.
 
+#
     # - name: med
     #   title: Median
     #   type: Bool
@@ -28,7 +31,6 @@ options:
     #   description:
     #       R: >
     #         Boolean argument whether to include 'median' instead of 'mean'. Default is false.
-
     # - name: cent
     #   title: Centrality
     #   type: Bool

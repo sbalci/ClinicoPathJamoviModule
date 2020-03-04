@@ -20,18 +20,18 @@ analyses:
     menuSubgroup: Descriptives
     menuTitle: Table One
     description: Function for making Table One.
-  - title: Summary of Continious Variables
+  - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: Summary of Continious Variables
-  - title: Summary of All Data
-    name: report
+    menuTitle: Summary of Continuous Variables
+  - title: Summary of Categorical Variables
+    name: reportcat
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
-    menuTitle: Summary of All Data
+    menuTitle: Summary of Categorical Variables
   - title: CrossTables
     name: crosstable
     ns: ClinicoPath
