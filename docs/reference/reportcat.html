@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Summary of Continuous Variables — summarydata • ClinicoPath</title>
+<title>Summary of Categorical Variables — reportcat • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Summary of Continuous Variables — summarydata" />
-<meta property="og:description" content="Summary of Continuous Variables" />
+<meta property="og:title" content="Summary of Categorical Variables — reportcat" />
+<meta property="og:description" content="Summary of Categorical Variables" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -135,16 +135,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Summary of Continuous Variables</h1>
-    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/summarydata.h.R'><code>R/summarydata.h.R</code></a></small>
-    <div class="hidden name"><code>summarydata.Rd</code></div>
+    <h1>Summary of Categorical Variables</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/reportcat.h.R'><code>R/reportcat.h.R</code></a></small>
+    <div class="hidden name"><code>reportcat.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Summary of Continuous Variables</p>
+    <p>Summary of Categorical Variables</p>
     </div>
 
-    <pre class="usage"><span class='fu'>summarydata</span>(<span class='no'>data</span>, <span class='no'>vars</span>)</pre>
+    <pre class="usage"><span class='fu'>reportcat</span>(<span class='no'>data</span>, <span class='no'>vars</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -155,8 +155,9 @@
     </tr>
     <tr>
       <th>vars</th>
-      <td><p>a string naming the variables from <code>data</code> that contains
-the continuous values used for the report</p></td>
+      <td><p>string naming the variables from <code>data</code> that contains the
+values used for the report. Uses report::report() function. Refer to
+report.data.frame report documentation.</p></td>
     </tr>
     </table>
 
