@@ -56,6 +56,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text2 = function() private$.items[["text2"]],
         text1html = function() private$.items[["text1html"]],
         text5 = function() private$.items[["text5"]],
@@ -75,22 +76,46 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "finalfit",
                     "survival",
                     "survminer"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Median Survival Summary and Table"))
+                title="Median Survival Summary and Table",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1html",
-                title="Median Survival Table"))
+                title="Median Survival Table",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text5",
-                title="Cox Regression Summary and Table"))
+                title="Cox Regression Summary and Table",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="Cox Table"))
+                title="Cox Table",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text7",
@@ -98,18 +123,31 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text6",
-                title="1, 3, 5-yr Survival"))
+                title="1, 3, 5-yr Survival",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text8",
-                title="Pairwise Comparison"))
+                title="Pairwise Comparison",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Survival Plot",
                 width=400,
                 height=300,
-                renderFun=".plot"))}))
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "survivalBase",
@@ -139,6 +177,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr

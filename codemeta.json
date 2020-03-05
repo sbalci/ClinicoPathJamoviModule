@@ -43,18 +43,6 @@
   "softwareSuggestions": [
     {
       "@type": "SoftwareApplication",
-      "identifier": "kableExtra",
-      "name": "kableExtra",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=kableExtra"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "effectsize",
       "name": "effectsize",
       "provider": {
@@ -301,6 +289,30 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=remotes"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "kableExtra",
+      "name": "kableExtra",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=kableExtra"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "Hmisc",
+      "name": "Hmisc",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=Hmisc"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -330,5 +342,5 @@
     "summary",
     "statistics"
   ],
-  "fileSize": "8360.726KB"
+  "fileSize": "8785.365KB"
 }

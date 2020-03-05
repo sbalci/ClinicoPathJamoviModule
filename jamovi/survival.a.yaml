@@ -17,13 +17,13 @@ options:
       permitted: [ factor ]
 
     - name: outcome
-      title: 'Outcome (event:1)'
+      title: 'Outcome (event:1, censored:0)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: overalltime
-      title: OverallTime (in months)
+      title: 'Overall Time (in months)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
