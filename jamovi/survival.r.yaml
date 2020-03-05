@@ -5,9 +5,14 @@ jrs:   '1.1'
 
 items:
 
-    # - name:  todo
-    #   title: To Do
-    #   type:  Preformatted
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
 
     # - name:  text1
     #   title: Median Survival Table
@@ -16,11 +21,18 @@ items:
     - name:  text2
       title: 'Median Survival Summary and Table'
       type:  Preformatted
-
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text1html
       title: Median Survival Table
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     # - name:  text3
     #   title: Cox
@@ -29,10 +41,18 @@ items:
     - name:  text5
       title: 'Cox Regression Summary and Table'
       type:  Preformatted
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text4
       title: Cox Table
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text7
       title: '1, 3, 5-yr Survival Summary and Table'
@@ -41,10 +61,18 @@ items:
     - name:  text6
       title: '1, 3, 5-yr Survival'
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text8
       title: Pairwise Comparison
       type:  Preformatted
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name: plot
       title: Survival Plot
@@ -52,6 +80,11 @@ items:
       width:  400
       height: 300
       renderFun: .plot
+      requiresData: true
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
 
 refs:

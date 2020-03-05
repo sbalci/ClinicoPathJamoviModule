@@ -16,14 +16,14 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Outcome (event:1)'
+        label: 'Outcome (event:1, censored:0)'
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: OverallTime (in months)
+        label: Overall Time (in months)
         children:
           - type: VariablesListBox
             name: overalltime

@@ -2,7 +2,7 @@
 
 
 .First <- function(){
-    cat("\nWelcome to ClinicoPath", date())
+    cat("\nWelcome to ClinicoPath", date(), "\n")
 }
 
 

@@ -38,7 +38,9 @@ Imports:
     rlang,
     tidyselect,
     knitr,
-    remotes
+    remotes,
+    kableExtra,
+    Hmisc
 Remotes:
     easystats/modelbased,
     easystats/insight,
@@ -47,7 +49,6 @@ Remotes:
     easystats/parameters,
     easystats/report
 Suggests:
-    kableExtra,
     effectsize,
     emmeans
 RoxygenNote: 7.0.2

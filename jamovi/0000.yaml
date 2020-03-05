@@ -46,9 +46,18 @@ analyses:
     menuSubgroup: Survival
     menuTitle: Survival Analysis
 datasets:
-  - name: histopathology
+  - name: histopathology including analysis
     path: histopathology.omv
-    description: Fake histopathology research data
+    description: >-
+      Fake histopathology research data for ClinicoPath module, includes
+      analysis
+    tags:
+      - Table One
+      - Data Summary
+      - Survival
+  - name: histopathology excel
+    path: histopathology.xlsx
+    description: Fake histopathology research data for ClinicoPath module
     tags:
       - Table One
       - Data Summary
