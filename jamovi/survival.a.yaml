@@ -16,15 +16,30 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
+    - name: overalltime
+      title: 'Overall Time (in months)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
     - name: outcome
       title: 'Outcome (event:1, censored:0)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-    - name: overalltime
-      title: 'Overall Time (in months)'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
+    # - name: outcomeLevel
+    #   title: Outcome Level
+    #   type: Level
+    #   variable: (outcome)
+
+
+
+    - name: sc
+      title: Survival Curve
+      type: Bool
+      default: false
+
+
+
 ...
