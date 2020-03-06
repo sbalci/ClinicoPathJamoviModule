@@ -343,6 +343,8 @@ unlist(vars)
 
 cformula <- jmvcore::composeTerm(components = formula)
 
+jmvcore::composeTerm("A")
+
 jmvcore::composeTerm(components = c("A", "B", "C"))
 
 jmvcore::decomposeTerm(term = c("A", "B", "C"))
@@ -846,6 +848,24 @@ cat(arglist, sep = "\n")
 
 
 
+
+
+<!-- # -->
+<!-- #                 # tUni_df_descr <- paste0("When ", -->
+<!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], -->
+<!-- #                 #                         " is ", -->
+<!-- #                 #                         tUni_df$x[2], -->
+<!-- #                 #                         ", there is ", -->
+<!-- #                 #                         tUni_df$hr_univariable[2], -->
+<!-- #                 #                         " times risk than ", -->
+<!-- #                 #                         "when ", -->
+<!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], -->
+<!-- #                 #                         " is ", -->
+<!-- #                 #                         tUni_df$x[1], -->
+<!-- #                 #                         "." -->
+<!-- #                 # ) -->
+<!-- # -->
+<!-- #                 # results5 <- tUni_df_descr -->
 
 
 
