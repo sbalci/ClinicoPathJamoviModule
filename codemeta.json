@@ -5,7 +5,7 @@
   ],
   "@type": "SoftwareSourceCode",
   "identifier": "ClinicoPath",
-  "description": "Analysis for Clinicopathological Research \n    Using many different R-project packages.\n    So credit should go to main authors.\n    I just try to convert the codes that I often use into jamovi module.",
+  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival curves, and natural language summaries. I am\n    collecting many different R-project packages here. So credit should go to main\n    authors.",
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
@@ -304,15 +304,15 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "Hmisc",
-      "name": "Hmisc",
+      "identifier": "ggstatsplot",
+      "name": "ggstatsplot",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=Hmisc"
+      "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -342,5 +342,5 @@
     "summary",
     "statistics"
   ],
-  "fileSize": "8785.365KB"
+  "fileSize": "8776.536KB"
 }

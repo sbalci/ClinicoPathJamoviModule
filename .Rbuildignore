@@ -1,3 +1,53 @@
+### R user files
+.RProfile
+
+### R Studio files
+\.Rproj$
+^.*\.Rproj$
+^\.Rproj\.user$
+
+
+### Configuration
+^\.travis\.yml$
+^codecov\.yml$
+^\.gitlab-ci\.yml$
+^_pkgdown\.yml$
+
+### pkgdown websites
+^public/
+^docs/
+
+### Obsolete and temporary files/directories
+^delete/
+^temp/
+
+### Uncompiled documentation files
+^README\.Rmd$
+
+### License
+^LICENSE\.md$
+
+### Jamovi
+^jamovi/
+.jmo$
+^build/R/
+^build/js/
+\.h\.R
+\.b\.R
+
+tododata
+docs
+temp
+build
+^.*\.jmo$
+
+^tests$
+
+^\.github/
+^docs$
+^pkgdown$
+^img$
+
 ^renv$
 ^renv\.lock$
 ### R user files
@@ -7,21 +57,27 @@
 \.Rproj$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+
 ### Configuration
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$
 ^_pkgdown\.yml$
+
 ### pkgdown websites
 ^public/
 ^docs/
+
 ### Obsolete and temporary files/directories
 ^delete/
 ^temp/
+
 ### Uncompiled documentation files
 ^README\.Rmd$
+
 ### License
 ^LICENSE\.md$
+
 ### Jamovi
 ^jamovi/
 .jmo$

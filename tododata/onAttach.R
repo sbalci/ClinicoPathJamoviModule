@@ -1,3 +1,3 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to my package")
+  packageStartupMessage("Welcome to ClinicoPath package")
 }

@@ -9,9 +9,11 @@ maintainer: Serdar Balci <drserdarbalci@gmail.com>
 date: '2020-03-03'
 type: R
 description: >-
-  I am collecting many different R-project packages here So credit should go to
-  main authors I just try to convert the codes that I often use into jamovi
-  module
+  ClinicoPath help researchers to generate natural language summaries of their
+  dataset, generate cross tables with statistical tests, and survival analysis
+  with survival tables, survival curves, and natural language summaries. I am
+  collecting many different R-project packages here. So credit should go to main
+  authors. I just try to convert the codes that I often use into jamovi module.
 analyses:
   - title: Table One
     name: tableone
@@ -39,12 +41,24 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Comparisons
+    menuTitle: Graphs and Plots
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
+  - title: Multivariate Survival Analysis
+    name: multisurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: Multivariate Survival Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
@@ -63,6 +77,26 @@ datasets:
       - Table One
       - Data Summary
       - Survival
+  - name: melanoma
+    path: melanoma.csv
+    description: >-
+      melanoma dataseet obtained from {boot}.
+      https://stat.ethz.ch/R-manual/R-devel/library/boot/html/melanoma.html
+    tags:
+      - Data Summary
+      - Survival
+      - Competing risks regression
+  - name: colon
+    path: colon.csv
+    description: 'colon cancer dataset, obtained from {survival}.'
+    tags:
+      - Data Summary
+      - Survival
+  - name: BreastCancer
+    path: BreastCancer.csv
+    description: 'Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.'
+    tags:
+      - Classification
 usesNative: true
 minApp: 1.0.8
 
