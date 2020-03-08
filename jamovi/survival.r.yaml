@@ -97,8 +97,8 @@ items:
     - name: plot
       title: Survival Plot
       type: Image
-      width:  400
-      height: 300
+      width:  600
+      height: 450
       renderFun: .plot
       requiresData: true
       clearWith:

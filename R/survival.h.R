@@ -148,11 +148,12 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Survival Plot",
-                width=400,
-                height=300,
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
+                    "sc",
                     "explanatory",
                     "outcome",
                     "overalltime")))}))

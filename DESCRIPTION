@@ -2,7 +2,7 @@ Package: ClinicoPath
 Type: Package
 Title: Analysis for Clinicopathological Research
 Version: 0.0.1
-Date: 2020-03-02
+Date: 2020-03-07
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -11,9 +11,11 @@ Authors@R:
            comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <drserdarbalci@gmail.com>
 Description: Analysis for Clinicopathological Research 
-    Using many different R-project packages.
-    So credit should go to main authors.
-    I just try to convert the codes that I often use into jamovi module.
+    ClinicoPath help researchers to generate natural language summaries of their
+    dataset, generate cross tables with statistical tests, and survival analysis
+    with survival tables, survival curves, and natural language summaries. I am
+    collecting many different R-project packages here. So credit should go to main
+    authors.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -40,7 +42,7 @@ Imports:
     knitr,
     remotes,
     kableExtra,
-    Hmisc
+    ggstatsplot
 Remotes:
     easystats/modelbased,
     easystats/insight,

@@ -2,6 +2,7 @@
 #' @import jmvcore
 #' @import finalfit
 #' @import survival
+#' @import survminer
 #' @importFrom rlang .data
 #'
 
@@ -33,6 +34,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 If censored (patient is alive or free of disease) at the last visit it is 0.
                 <br><br>
                 Survival should be numeric, continuous, and in months.
+                <br><br>
+                This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
                 <br><br>
                 This tool will be updated to calculate competing risks.
                                "
@@ -138,7 +141,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 results1html <- as.data.frame(km_fit_median_df$table) %>%
                     janitor::clean_names(dat = ., case = "snake") %>%
                     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
-
                 results1html[,1] <- gsub(pattern = "thefactor=",
                                          replacement = "",
                                          x = results1html[,1])
@@ -150,11 +152,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              align = c('l', rep('r', 9)),
                                              format = "html",
                                              digits = 1)
-
-
-
-
-
 
                 # results 2 median survival summary ----
 
@@ -178,7 +175,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 results2 <- km_fit_median_definition
 
-                # results 3 ----
+                # results 3 univariate cox regression ----
 
 
                 # myoveralltime,
@@ -218,7 +215,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # results 4 ----
 
-                results4 <- knitr::kable(tUni,
+                results4 <- knitr::kable(tUni[, 1:4],
                                          row.names = FALSE,
                                          align = c('l', 'l', 'r', 'r', 'r', 'r'),
                                          format = "html")
@@ -310,15 +307,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 } else {
 
-                    formula_p1 <- jmvcore::constructFormula(terms = self$options$overalltime)
-                    formula_p3 <- jmvcore::constructFormula(terms = self$options$explanatory)
-                    formula_p2 <- jmvcore::constructFormula(terms = self$options$outcome)
-                    formula_p <- paste('Surv(', formula_p1, ',',  formula_p2, ') ~ ', formula_p3)
+                    formula_p <- paste(myformula, ' ~ ', formula2)
                     formula_p <- as.formula(formula_p)
                     results8 <-
                         survminer::pairwise_survdiff(
                             formula = formula_p,
-                            data = self$data,
+                            data = mydata,
                             p.adjust.method = "BH"
                         )
                 }

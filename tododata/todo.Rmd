@@ -868,6 +868,30 @@ cat(arglist, sep = "\n")
 <!-- #                 # results5 <- tUni_df_descr -->
 
 
+```{r}
+boot::melanoma
+rio::export(x = boot::melanoma, file = "data/melanoma.csv")
+
+survival::colon
+rio::export(x = survival::colon, file = "data/colon.csv")
+
+# BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
+# 
+# BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
+# 
+# BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE,
+#                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )
+
+library(mlbench)
+
+data("BreastCancer")
+BreastCancer
+
+rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
+
+
+
+```
 
 
 
