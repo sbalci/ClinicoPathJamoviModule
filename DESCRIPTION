@@ -52,7 +52,8 @@ Remotes:
     easystats/report
 Suggests:
     effectsize,
-    emmeans
+    emmeans,
+    rmarkdown
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 
