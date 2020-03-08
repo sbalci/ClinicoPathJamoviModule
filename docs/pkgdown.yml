@@ -3,6 +3,7 @@ pkgdown: 1.4.1.9000
 pkgdown_sha: 134033d9d744c548c6fbe297bc0fbd1a2f498e83
 articles:
   data-preperation: data-preperation.html
+  module_development_jamovi: module_development_jamovi.html
   motivation: motivation.html
 urls:
   reference: https://sbalci.github.io/ClinicoPathJamoviModule//reference

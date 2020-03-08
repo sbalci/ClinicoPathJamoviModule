@@ -4,21 +4,33 @@
 \alias{survival}
 \title{Survival Analysis}
 \usage{
-survival(data, explanatory, outcome, overalltime)
+survival(
+  data,
+  explanatory,
+  overalltime,
+  outcome,
+  cutp = "12, 36, 60",
+  sc = FALSE
+)
 }
 \arguments{
 \item{data}{.}
 
 \item{explanatory}{.}
 
+\item{overalltime}{.}
+
 \item{outcome}{.}
 
-\item{overalltime}{.}
+\item{cutp}{.}
+
+\item{sc}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$deneme} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
