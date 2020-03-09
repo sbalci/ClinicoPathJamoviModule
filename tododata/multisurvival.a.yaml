@@ -1,0 +1,34 @@
+---
+name:  multisurvival
+title: Multivariate Survival Analysis
+menuGroup: ClinicoPath
+menuSubgroup: Survival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+
+    - name: outcome
+      title: 'Outcome (event:1, censored:0)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    # - name: outcomeLevel
+    #   title: |
+    #       Select Event (Death, Recurrence)
+    #   type: Level
+    #   variable: (outcome)
+
+    - name: overalltime
+      title: 'Overall Time (in months)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+...

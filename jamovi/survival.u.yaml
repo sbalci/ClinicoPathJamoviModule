@@ -34,3 +34,19 @@ children:
     children:
       - type: CheckBox
         name: sc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cutp
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timetypedata
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timetypeoutput

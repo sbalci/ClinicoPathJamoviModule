@@ -1,0 +1,28 @@
+---
+name:  agreement
+title: Interrater Intrarater Reliability
+menuGroup: ClinicoPath2
+menuSubgroup: Agreement
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Interrater Intrarater Reliability.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Raters
+      type: Variables
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            diagnosis given by the observer, variable can be categorical, ordinal or numeric
+...

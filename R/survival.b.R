@@ -141,6 +141,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 results1html <- as.data.frame(km_fit_median_df$table) %>%
                     janitor::clean_names(dat = ., case = "snake") %>%
                     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
                 results1html[,1] <- gsub(pattern = "thefactor=",
                                          replacement = "",
                                          x = results1html[,1])
@@ -213,14 +214,14 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # results3 <- tUni
 
-                # results 4 ----
+                # results 4  univariate survival html ----
 
                 results4 <- knitr::kable(tUni[, 1:4],
                                          row.names = FALSE,
                                          align = c('l', 'l', 'r', 'r', 'r', 'r'),
                                          format = "html")
 
-                # results 5 ----
+                # results 5 univariate survival explanation ----
 
                 tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
                     janitor::clean_names(dat = ., case = "snake")
@@ -238,7 +239,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         tUni_df$hr_univariable[n + 1],
                         " times risk than ",
                         "when ",
-                        tUni_df$dependent_surv_overall_time_outcome[1],
+                        self$options$explanatory,
+                        # tUni_df$dependent_surv_overall_time_outcome[1],
                         " is ",
                         tUni_df$x[1],
                         "."
@@ -250,10 +252,26 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 results5 <- unlist(results5)
 
 
+                # results 6 1,3,5-yr survival ----
 
-                # results 6 ----
+                utimes <- self$options$cutp
 
-                km_fit_summary <- summary(km_fit, times = c(12,36,60))
+                utimes <- strsplit(utimes, ",")
+                utimes <- purrr::reduce(utimes, as.vector)
+                utimes <- as.numeric(utimes)
+
+                # as.numeric(strsplit(utimes, ',')[[1]])
+
+                if (length(utimes) == 0) {
+                utimes <- c(12,36,60)
+                }
+
+                # self$results$deneme$setContent(utimes)
+
+                # utimes <- c(12,36,60)
+                km_fit_summary <- summary(km_fit, times = utimes
+                                              # c(12,36,60)
+                                          )
 
                 km_fit_df <- as.data.frame(km_fit_summary[c("strata", "time", "n.risk", "n.event", "surv", "std.err", "lower", "upper")])
 
@@ -267,6 +285,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                align = c('l', rep('r', 7)),
                                                format = "html",
                                                digits = 2)
+
 
                 results6 <- km_fit_df_html
 
@@ -283,7 +302,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                # results 7 ----
+                # results 7 1,3,5-yr survival summary ----
 
                 km_fit_df %>%
                     dplyr::mutate(
@@ -299,7 +318,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                     # results 8 ----
+                     # results 8 pairwise comparison ----
 
                 if(n_level < 3) {
 

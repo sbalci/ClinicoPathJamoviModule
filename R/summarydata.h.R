@@ -6,6 +6,7 @@ summarydataOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            lang = "English",
             vars = NULL, ...) {
 
             super$initialize(
@@ -14,6 +15,14 @@ summarydataOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..lang <- jmvcore::OptionList$new(
+                "lang",
+                lang,
+                options=list(
+                    "English",
+                    "T\u00FCrk\u00E7e",
+                    "Deutsch"),
+                default="English")
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars,
@@ -22,11 +31,14 @@ summarydataOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 permitted=list(
                     "numeric"))
 
+            self$.addOption(private$..lang)
             self$.addOption(private$..vars)
         }),
     active = list(
+        lang = function() private$..lang$value,
         vars = function() private$..vars$value),
     private = list(
+        ..lang = NA,
         ..vars = NA)
 )
 
@@ -73,6 +85,7 @@ summarydataBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' Summary of Continuous Variables
 #'
 #' 
+#' @param lang select language
 #' @param data the data as a data frame
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report
@@ -84,6 +97,7 @@ summarydataBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' @export
 summarydata <- function(
+    lang = "English",
     data,
     vars) {
 
@@ -98,6 +112,7 @@ summarydata <- function(
 
 
     options <- summarydataOptions$new(
+        lang = lang,
         vars = vars)
 
     analysis <- summarydataClass$new(
