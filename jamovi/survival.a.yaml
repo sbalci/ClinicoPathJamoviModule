@@ -53,44 +53,43 @@ options:
 
     - name: cutp
       title: >
-          Define at least two cutpoints (in months) for survival table
-          Seperate with comma
+          Cutpoints (months) for survival table
       type: String
       default: '12, 36, 60'
 
 
-    - name: timetypedata
-      title: Time in Data
-      type: List
-      options:
-        - title: Days
-          name: Days
-        - title: Weeks
-          name: Weeks
-        - title: Months
-          name: Months
-        - title: Years
-          name: Years
-      default: Months
-      description:
-          R: select the time type in data
+    # - name: timetypedata
+    #   title: Time in Data
+    #   type: List
+    #   options:
+    #     - title: Days
+    #       name: Days
+    #     - title: Weeks
+    #       name: Weeks
+    #     - title: Months
+    #       name: Months
+    #     - title: Years
+    #       name: Years
+    #   default: Months
+    #   description:
+    #       R: select the time type in data
 
 
-    - name: timetypeoutput
-      title: Time in Output
-      type: List
-      options:
-        - title: Days
-          name: Days
-        - title: Weeks
-          name: Weeks
-        - title: Months
-          name: Months
-        - title: Years
-          name: Years
-      default: Months
-      description:
-          R: select the time type in output
+    # - name: timetypeoutput
+    #   title: Time in Output
+    #   type: List
+    #   options:
+    #     - title: Days
+    #       name: Days
+    #     - title: Weeks
+    #       name: Weeks
+    #     - title: Months
+    #       name: Months
+    #     - title: Years
+    #       name: Years
+    #   default: Months
+    #   description:
+    #       R: select the time type in output
 
 
     - name: sc

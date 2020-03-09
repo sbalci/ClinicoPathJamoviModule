@@ -17,3 +17,215 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(ClinicoPath)
 ```
+
+
+
+
+# ‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’
+
+# R
+
+
+
+
+# jamovi
+
+
+
+
+
+
+
+
+
+# General
+
+
+
+
+Serdar Balci Nov 27th, 2019 at 7:00 PM
+is it possible to use github-only packages as module dependencies?
+
+
+
+
+2 replies
+Also sent to the channel
+
+Serdar Balci  3 months ago
+I have installed Version 1.1.8.0 and now I can get github packages. The picture shows module using easystats/report package
+Ekran Resmi 2019-11-28 20.14.55.png 
+Ekran Resmi 2019-11-28 20.14.55.png
+
+
+
+jonathon:whale2:  3 months ago
+:+1:
+
+
+
+---
+
+
+
+Serdar Balci  3 months ago
+Only n, nevent and rmean are displayed in jamovi environment but others are only visible in RStudio. Similar to macOS it is not only output, the generated tables have different column names and content. (edited) 
+2 files 
+Ekran Resmi 2019-12-05 15.48.47.png
+
+
+Ekran Resmi 2019-12-05 15.48.32.png
+
+
+
+Serdar Balci  3 months ago
+I found out that survminer package also forms these tables, but its dependencies require never R versions (edited) 
+
+jonathon:whale2:  3 months ago
+ But similarly the generated tables by summary function to survfit objects are different.
+might be worth chasing up the author of the package you’re using, to try and find why this is. there’s certainly nothing jamovi is doing which would lead to these differences.
+yup, i’m working on updating the R version at the moment.
+:+1:
+1
+
+
+Serdar Balci  3 months ago
+Thank you. I will try to contact them.
+
+Serdar Balci  2 months ago
+This summary function issue is no longer a problem with R 3.6 and windows. Now I can use many packages and get results via jamovi module.
+
+jonathon:whale2:  2 months ago
+oh great
+
+
+---
+
+
+Serdar Balci  2:17 PM
+Hello,
+Using “preformatted” result element I get a markdown table output. Is there a way to somehow render/convert this output to html version. Or should I go with https://dev.jamovi.org/api_table.html table api? (edited) 
+Ekran Resmi 2020-01-09 13.21.46.png 
+Ekran Resmi 2020-01-09 13.21.46.png
+
+
+
+
+
+
+
+
+jonathon:whale2:  11:53 PM
+so you’re best to make use of the table api … the table API has a lot more features than an md table. (edited) 
+:+1:
+1
+
+
+---
+
+
+
+
+Serdar Balci  2 months ago
+Thank you it works
+Ekran Resmi 2020-01-19 18.16.14.png 
+Ekran Resmi 2020-01-19 18.16.14.png
+
+
+
+Damian Dropmann:piggy:  2 months ago
+Awesome! That space around the 'new test positive' is a bit strange.
+
+Damian Dropmann:piggy:  2 months ago
+Maybe it's wrapped in another container or something.
+
+Serdar Balci  2 months ago
+Thank you. I have also recognised that. I thought it was due to spacing. Below is the yaml.
+title: Medical Decision
+name: decision
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Gold Standart
+        children:
+          - type: VariablesListBox
+            name: gold
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: goldPositive
+      - type: TargetLayoutBox
+        label: New Test
+        children:
+          - type: VariablesListBox
+            name: newtest
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: testPositive (edited) 
+
+
+---
+
+     - name: p
+       title: "p"
+       type: number
+       format: zto,pvalue
+       
+       
+---
+
+
+
+so wrt width/height, you can set that in the .r.yaml like so:
+https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49
+it’s possible to do it programmatically, with … image$setSize()
+
+
+---
+
+
+
+
+
+
+
+```
+Serdar Balci  4:48 PM
+ I think I am getting familiar with the codes :)
+QuickTime Movie 
+JamoviModule.mov
+4 MB QuickTime Movie— Click to download
+```
+
+
+
+
+
+```
+Serdar Balci Nov 29th, 2019 at 12:39 PM
+Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo
+
+4 replies
+
+jonathon:whale2:  3 months ago
+It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not)
+
+jonathon:whale2:  3 months ago
+If there's native dependencies, then the module needs to be built separately for each os.
+
+jonathon:whale2:  3 months ago
+But I can take care of building it for different oses
+
+Serdar Balci  3 months ago
+Oh, I see. Thank you :slightly_smiling_face:
+```
+
+
+
