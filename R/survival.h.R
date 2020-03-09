@@ -9,6 +9,9 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             explanatory = NULL,
             overalltime = NULL,
             outcome = NULL,
+            cutp = "12, 36, 60",
+            timetypedata = "Months",
+            timetypeoutput = "Months",
             sc = FALSE, ...) {
 
             super$initialize(
@@ -39,6 +42,28 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..cutp <- jmvcore::OptionString$new(
+                "cutp",
+                cutp,
+                default="12, 36, 60")
+            private$..timetypedata <- jmvcore::OptionList$new(
+                "timetypedata",
+                timetypedata,
+                options=list(
+                    "Days",
+                    "Weeks",
+                    "Months",
+                    "Years"),
+                default="Months")
+            private$..timetypeoutput <- jmvcore::OptionList$new(
+                "timetypeoutput",
+                timetypeoutput,
+                options=list(
+                    "Days",
+                    "Weeks",
+                    "Months",
+                    "Years"),
+                default="Months")
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -47,17 +72,26 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..cutp)
+            self$.addOption(private$..timetypedata)
+            self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..sc)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         overalltime = function() private$..overalltime$value,
         outcome = function() private$..outcome$value,
+        cutp = function() private$..cutp$value,
+        timetypedata = function() private$..timetypedata$value,
+        timetypeoutput = function() private$..timetypeoutput$value,
         sc = function() private$..sc$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
         ..outcome = NA,
+        ..cutp = NA,
+        ..timetypedata = NA,
+        ..timetypeoutput = NA,
         ..sc = NA)
 )
 
@@ -65,6 +99,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        deneme = function() private$.items[["deneme"]],
         text2 = function() private$.items[["text2"]],
         text1html = function() private$.items[["text1html"]],
         text5 = function() private$.items[["text5"]],
@@ -92,6 +127,10 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="deneme",
+                title=""))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
@@ -151,6 +190,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
+                visible="(sc)",
                 requiresData=TRUE,
                 clearWith=list(
                     "sc",
@@ -184,10 +224,14 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param explanatory .
 #' @param overalltime .
 #' @param outcome .
+#' @param cutp .
+#' @param timetypedata select the time type in data
+#' @param timetypeoutput select the time type in output
 #' @param sc .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$deneme} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
@@ -204,6 +248,9 @@ survival <- function(
     explanatory,
     overalltime,
     outcome,
+    cutp = "12, 36, 60",
+    timetypedata = "Months",
+    timetypeoutput = "Months",
     sc = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -225,6 +272,9 @@ survival <- function(
         explanatory = explanatory,
         overalltime = overalltime,
         outcome = outcome,
+        cutp = cutp,
+        timetypedata = timetypedata,
+        timetypeoutput = timetypeoutput,
         sc = sc)
 
     analysis <- survivalClass$new(

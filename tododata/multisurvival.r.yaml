@@ -1,0 +1,39 @@
+---
+name:  multisurvival
+title: Multivariate Survival Analysis
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    # - name:  todo2
+    #   title: ToDo2
+    #   type:  Preformatted
+
+    - name:  text
+      title: FinalFit Multivariate Survival
+      type:  Html
+
+
+    - name: plot
+      title: Survival Plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - sc
+          - explanatory
+          - outcome
+          - overalltime
+
+
+
+
+refs: finalfit
+
+...

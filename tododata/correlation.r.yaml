@@ -1,0 +1,36 @@
+---
+name:  correlation
+title: Correlation
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    - name:  text1
+      title: 'Correlation 1'
+      type:  Preformatted
+
+
+    - name:  text2
+      title: 'Correlation 2'
+      type:  Preformatted
+
+    - name:  text3
+      title: 'Correlation 3'
+      type:  Preformatted
+
+
+    - name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+
+
+refs:
+    - psycho
+
+...

@@ -14,9 +14,9 @@ items:
           - overalltime
 
 
-    # - name:  deneme
-    #   title: ''
-    #   type:  Preformatted
+    - name:  deneme
+      title: ''
+      type:  Preformatted
     #
     #
     # - name:  deneme2
@@ -100,6 +100,7 @@ items:
       width:  600
       height: 450
       renderFun: .plot
+      visible: (sc)
       requiresData: true
       clearWith:
           - sc

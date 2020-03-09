@@ -895,3 +895,27 @@ rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
 
 
 
+
+```{r pairwise}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+# names(deneme)
+
+mypairwise <-  survminer::pairwise_survdiff(
+                            formula = Surv(OverallTime, Outcome) ~ TStage,
+                            data = deneme,
+                            p.adjust.method = "BH"
+                            )
+
+
+mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>% 
+  tibble::rownames_to_column()
+
+mypairwise2 %>% 
+  tidyr::pivot_longer(cols = -rowname) %>% 
+  dplyr::filter(complete.cases(.))
+
+```
+
+
+                            
+                            

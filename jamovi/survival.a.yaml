@@ -7,6 +7,23 @@ version: '1.0.0'
 jas: '1.2'
 
 options:
+
+    # - name: lang
+    #   title: Language
+    #   type: List
+    #   options:
+    #     - title: English
+    #       name: English
+    #     - title: Türkçe
+    #       name: Türkçe
+    #     - title: Deutsch
+    #       name: Deutsch
+    #   default: English
+    #   description:
+    #       R: select language
+
+
+
     - name: data
       type: Data
 
@@ -34,12 +51,51 @@ options:
     #   variable: (outcome)
 
 
+    - name: cutp
+      title: >
+          Define at least two cutpoints (in months) for survival table
+          Seperate with comma
+      type: String
+      default: '12, 36, 60'
+
+
+    - name: timetypedata
+      title: Time in Data
+      type: List
+      options:
+        - title: Days
+          name: Days
+        - title: Weeks
+          name: Weeks
+        - title: Months
+          name: Months
+        - title: Years
+          name: Years
+      default: Months
+      description:
+          R: select the time type in data
+
+
+    - name: timetypeoutput
+      title: Time in Output
+      type: List
+      options:
+        - title: Days
+          name: Days
+        - title: Weeks
+          name: Weeks
+        - title: Months
+          name: Months
+        - title: Years
+          name: Years
+      default: Months
+      description:
+          R: select the time type in output
+
 
     - name: sc
-      title: Survival Curve
+      title: Show Survival Plot
       type: Bool
       default: false
-
-
 
 ...

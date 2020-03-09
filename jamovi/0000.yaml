@@ -59,6 +59,43 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Multivariate Survival Analysis
+  - title: Interrater Intrarater Reliability
+    name: agreement
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Agreement
+    menuTitle: Interrater Intrarater Reliability
+    description: Function for Interrater Intrarater Reliability.
+  - title: Cluster Analysis
+    name: cluster
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Cluster Analysis
+    menuTitle: Cluster Analysis
+  - title: Correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Correlation
+    menuTitle: Correlation
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Medical Decision
+  - title: Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Decision Calculator
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision Tree
+    menuTitle: Decision Tree
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
@@ -80,7 +117,7 @@ datasets:
   - name: melanoma
     path: melanoma.csv
     description: >-
-      melanoma dataseet obtained from {boot}.
+      melanoma dataset obtained from {boot}.
       https://stat.ethz.ch/R-manual/R-devel/library/boot/html/melanoma.html
     tags:
       - Data Summary

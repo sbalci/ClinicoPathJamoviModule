@@ -101,6 +101,9 @@
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
     </li>
     <li>
+      <a href="../articles/module_development_jamovi.html">Module Development for Jamovi</a>
+    </li>
+    <li>
       <a href="../articles/motivation.html">Motivation</a>
     </li>
   </ul>
@@ -144,7 +147,14 @@
     <p>Survival Analysis</p>
     </div>
 
-    <pre class="usage"><span class='fu'>survival</span>(<span class='no'>data</span>, <span class='no'>explanatory</span>, <span class='no'>outcome</span>, <span class='no'>overalltime</span>)</pre>
+    <pre class="usage"><span class='fu'>survival</span>(
+  <span class='no'>data</span>,
+  <span class='no'>explanatory</span>,
+  <span class='no'>overalltime</span>,
+  <span class='no'>outcome</span>,
+  <span class='kw'>cutp</span> <span class='kw'>=</span> <span class='st'>"12, 36, 60"</span>,
+  <span class='kw'>sc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,11 +168,19 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>overalltime</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>outcome</th>
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>overalltime</th>
+      <th>cutp</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>sc</th>
       <td><p>.</p></td>
     </tr>
     </table>
@@ -171,6 +189,7 @@
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$deneme</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$text1html</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text5</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
