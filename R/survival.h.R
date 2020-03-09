@@ -81,6 +81,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text7 = function() private$.items[["text7"]],
         text6 = function() private$.items[["text6"]],
         text8 = function() private$.items[["text8"]],
+        text9 = function() private$.items[["text9"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -157,6 +158,14 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text9",
+                title="Pairwise Comparison Summary",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -211,6 +220,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text6} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text9} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

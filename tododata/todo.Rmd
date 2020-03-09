@@ -901,7 +901,7 @@ deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-templa
 # names(deneme)
 
 mypairwise <-  survminer::pairwise_survdiff(
-                            formula = Surv(OverallTime, Outcome) ~ TStage,
+                            formula = survival::Surv(OverallTime, Outcome) ~ TStage,
                             data = deneme,
                             p.adjust.method = "BH"
                             )
@@ -912,7 +912,23 @@ mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>%
 
 mypairwise2 %>% 
   tidyr::pivot_longer(cols = -rowname) %>% 
-  dplyr::filter(complete.cases(.))
+  dplyr::filter(complete.cases(.)) %>% 
+  dplyr::mutate(description =
+                            glue::glue(
+                                "The comparison between {rowname} and {name} has a p-value of {round(value, 2)}."
+                            )
+                    ) %>% 
+                    dplyr::select(description) %>%
+                    dplyr::pull() -> mypairwisedescription
+
+mypairwisedescription <- unlist(mypairwisedescription)
+
+mypairwisedescription <- c(
+"In the pairwise comparison of",
+mypairwisedescription)
+
+
+
 
 ```
 

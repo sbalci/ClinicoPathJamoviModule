@@ -94,6 +94,14 @@ items:
           - outcome
           - overalltime
 
+    - name:  text9
+      title: Pairwise Comparison Summary
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
     - name: plot
       title: Survival Plot
       type: Image

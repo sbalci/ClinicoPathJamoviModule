@@ -13,9 +13,7 @@ Maintainer: Serdar Balci <drserdarbalci@gmail.com>
 Description: Analysis for Clinicopathological Research 
     ClinicoPath help researchers to generate natural language summaries of their
     dataset, generate cross tables with statistical tests, and survival analysis
-    with survival tables, survival curves, and natural language summaries. I am
-    collecting many different R-project packages here. So credit should go to main
-    authors.
+    with survival tables, survival curves, and natural language summaries.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
