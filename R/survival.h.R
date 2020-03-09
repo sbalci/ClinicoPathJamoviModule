@@ -10,8 +10,6 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             overalltime = NULL,
             outcome = NULL,
             cutp = "12, 36, 60",
-            timetypedata = "Months",
-            timetypeoutput = "Months",
             sc = FALSE, ...) {
 
             super$initialize(
@@ -46,24 +44,6 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "cutp",
                 cutp,
                 default="12, 36, 60")
-            private$..timetypedata <- jmvcore::OptionList$new(
-                "timetypedata",
-                timetypedata,
-                options=list(
-                    "Days",
-                    "Weeks",
-                    "Months",
-                    "Years"),
-                default="Months")
-            private$..timetypeoutput <- jmvcore::OptionList$new(
-                "timetypeoutput",
-                timetypeoutput,
-                options=list(
-                    "Days",
-                    "Weeks",
-                    "Months",
-                    "Years"),
-                default="Months")
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -73,8 +53,6 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..overalltime)
             self$.addOption(private$..outcome)
             self$.addOption(private$..cutp)
-            self$.addOption(private$..timetypedata)
-            self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..sc)
         }),
     active = list(
@@ -82,16 +60,12 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         overalltime = function() private$..overalltime$value,
         outcome = function() private$..outcome$value,
         cutp = function() private$..cutp$value,
-        timetypedata = function() private$..timetypedata$value,
-        timetypeoutput = function() private$..timetypeoutput$value,
         sc = function() private$..sc$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
         ..outcome = NA,
         ..cutp = NA,
-        ..timetypedata = NA,
-        ..timetypeoutput = NA,
         ..sc = NA)
 )
 
@@ -225,8 +199,6 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @param outcome .
 #' @param cutp .
-#' @param timetypedata select the time type in data
-#' @param timetypeoutput select the time type in output
 #' @param sc .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -249,8 +221,6 @@ survival <- function(
     overalltime,
     outcome,
     cutp = "12, 36, 60",
-    timetypedata = "Months",
-    timetypeoutput = "Months",
     sc = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -273,8 +243,6 @@ survival <- function(
         overalltime = overalltime,
         outcome = outcome,
         cutp = cutp,
-        timetypedata = timetypedata,
-        timetypeoutput = timetypeoutput,
         sc = sc)
 
     analysis <- survivalClass$new(

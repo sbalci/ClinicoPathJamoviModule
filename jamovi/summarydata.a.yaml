@@ -8,19 +8,19 @@ jas: '1.2'
 
 options:
 
-    - name: lang
-      title: Language
-      type: List
-      options:
-        - title: English
-          name: English
-        - title: Türkçe
-          name: Türkçe
-        - title: Deutsch
-          name: Deutsch
-      default: English
-      description:
-          R: select language
+    # - name: lang
+    #   title: Language
+    #   type: List
+    #   options:
+    #     - title: English
+    #       name: English
+    #     - title: Türkçe
+    #       name: Türkçe
+    #     - title: Deutsch
+    #       name: Deutsch
+    #   default: English
+    #   description:
+    #       R: select language
 
 
     - name: data

@@ -41,61 +41,12 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
-  - title: Graphs and Plots
-    name: statsplot2
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Comparisons
-    menuTitle: Graphs and Plots
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
-  - title: Multivariate Survival Analysis
-    name: multisurvival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: Multivariate Survival Analysis
-  - title: Interrater Intrarater Reliability
-    name: agreement
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Agreement
-    menuTitle: Interrater Intrarater Reliability
-    description: Function for Interrater Intrarater Reliability.
-  - title: Cluster Analysis
-    name: cluster
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Cluster Analysis
-    menuTitle: Cluster Analysis
-  - title: Correlation
-    name: correlation
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Correlation
-    menuTitle: Correlation
-  - title: Medical Decision
-    name: decision
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Decision
-    menuTitle: Medical Decision
-  - title: Decision Calculator
-    name: decisioncalculator
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Decision
-    menuTitle: Decision Calculator
-  - title: Decision Tree
-    name: tree
-    ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Decision Tree
-    menuTitle: Decision Tree
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
