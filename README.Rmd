@@ -181,19 +181,16 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 
 Made possible via the codes, help, and guidence of
 
-jamovi,
-
-tableone,
-
-report,
-
-survival,
-
-survminer
-
-finalfit,
-
-rstats community
+- [jamovi](https://www.jamovi.org/) developer [Jonathon Love](https://github.com/jonathon-love),
+- [finalfit](https://finalfit.org/) developer [Ewen Harrison](https://github.com/ewenharrison), 
+- [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/) developer [Indrajeet Patil](https://github.com/IndrajeetPatil), 
+- [tangram](https://github.com/spgarbet/tangram) developer [Shawn Garbett](https://github.com/spgarbet), 
+- [easystats](https://easystats.github.io/blog/) developers , 
+- [report](https://easystats.github.io/report/) , 
+- [tableone](https://github.com/kaz-yos/tableone), 
+- [survival](https://github.com/therneau/survival), 
+- [survminer](https://github.com/kassambara/survminer), and
+- [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
 
 
