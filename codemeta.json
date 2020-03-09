@@ -5,7 +5,7 @@
   ],
   "@type": "SoftwareSourceCode",
   "identifier": "ClinicoPath",
-  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival curves, and natural language summaries. I am\n    collecting many different R-project packages here. So credit should go to main\n    authors.",
+  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival curves, and natural language summaries.",
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
@@ -354,5 +354,5 @@
     "summary",
     "statistics"
   ],
-  "fileSize": "8793.435KB"
+  "fileSize": "8803.179KB"
 }

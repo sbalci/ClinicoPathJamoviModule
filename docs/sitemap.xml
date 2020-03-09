@@ -4,31 +4,10 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//index.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreement.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/cluster.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/correlation.html</loc>
-  </url>
-  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/crosstable.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decision.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisioncalculator.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/multisurvival.html</loc>
-  </url>
-  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/reportcat.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/statsplot2.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/summarydata.html</loc>
@@ -38,9 +17,6 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>
-  </url>
-  <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tree.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/data-preperation.html</loc>

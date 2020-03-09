@@ -323,6 +323,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if(n_level < 3) {
 
                     results8 <- "No pairwise comparison when explanatory variable has < 3 levels"
+                    results9 <- ""
 
                 } else {
 
@@ -332,8 +333,34 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         survminer::pairwise_survdiff(
                             formula = formula_p,
                             data = mydata,
-                            p.adjust.method = "BH"
-                        )
+                            p.adjust.method = "BH")
+
+
+
+
+
+                            mypairwise2 <- as.data.frame(results8[["p.value"]]) %>%
+                                tibble::rownames_to_column()
+
+                            mypairwise2 %>%
+                                tidyr::pivot_longer(cols = -rowname) %>%
+                                dplyr::filter(complete.cases(.)) %>%
+                                dplyr::mutate(description =
+                                                  glue::glue(
+                                                      "The comparison between ", self$options$explanatory, " {rowname} and ", self$options$explanatory," {name} has a p-value of {round(value, 2)}."
+                                                  )
+                                ) %>%
+                                dplyr::select(description) %>%
+                                dplyr::pull() -> mypairwisedescription
+
+                            mypairwisedescription <- unlist(mypairwisedescription)
+
+                            mypairwisedescription <- paste0(
+                                "In the pairwise comparison of ", self$options$explanatory, ":\n",
+                                mypairwisedescription, "\n")
+
+                            results9 <- mypairwisedescription
+
                 }
 
 
@@ -348,6 +375,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$text6$setContent(results6)
                 self$results$text7$setContent(results7)
                 self$results$text8$setContent(results8)
+                self$results$text9$setContent(results9)
+
 
 
 # Prepare Data For Plot ----

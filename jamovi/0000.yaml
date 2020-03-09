@@ -6,14 +6,12 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-03-03'
+date: '2020-03-09'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
   dataset, generate cross tables with statistical tests, and survival analysis
-  with survival tables, survival curves, and natural language summaries. I am
-  collecting many different R-project packages here. So credit should go to main
-  authors. I just try to convert the codes that I often use into jamovi module.
+  with survival tables, survival curves, and natural language summaries.
 analyses:
   - title: Table One
     name: tableone
