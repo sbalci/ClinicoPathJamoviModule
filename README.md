@@ -5,14 +5,17 @@
 
 -----
 
-## ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬
+## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
-A [Jamovi](https://www.jamovi.org) Module that contains main analysis
-used in **ClinicoPathological** research.
+A [jamovi](https://www.jamovi.org) Module that contains main analysis
+used in **ClinicoPathological** research. ClinicoPath help researchers
+to generate natural language summaries of their dataset, generate cross
+tables with statistical tests, and survival analysis with survival
+tables, survival curves, and natural language summaries.
 
 🔬👀📑🗃📊🏨🗄📇📖⚗📝🎶📈📉📃🖍 🔬🔬🏋🚴🚙👨💻 📸📺🎛🔭🔬💊🔐🍫🌸
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+<!-- 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩 -->
 
 -----
 
@@ -30,14 +33,17 @@ DOI 10.17605/OSF.IO/9SZUD
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
-Download and install [jamovi](https://www.jamovi.org).
+  - Step 1: Download and install [jamovi](https://www.jamovi.org).
 
 Download the relevant `jmo` file for your operating system from
 [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
 or
 [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
-And install using side-load as shown below:
+windows: <https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo>
+macOS: <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
+
+  - Step 2: And install using side-load as shown below:
 
 <img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
@@ -199,7 +205,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--10-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -282,7 +288,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--10-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last

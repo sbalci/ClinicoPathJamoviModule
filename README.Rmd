@@ -18,9 +18,9 @@ knitr::opts_chunk$set(
 ---
 
 
-## ClinicoPath [Jamovi](https://www.jamovi.org) Module 🔬
+## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
-A [Jamovi](https://www.jamovi.org) Module that contains main analysis used in **ClinicoPathological** research.
+A [jamovi](https://www.jamovi.org) Module that contains main analysis used in **ClinicoPathological** research. ClinicoPath help researchers to generate natural language summaries of their dataset, generate cross tables with statistical tests, and survival analysis with survival tables, survival curves, and natural language summaries.
 
 
 🔬👀📑🗃📊🏨🗄📇📖⚗📝🎶📈📉📃🖍
@@ -28,7 +28,7 @@ A [Jamovi](https://www.jamovi.org) Module that contains main analysis used in **
 📸📺🎛🔭🔬💊🔐🍫🌸
 
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+<!-- 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩 -->
 
 
 
@@ -50,11 +50,15 @@ https://osf.io/9szud/
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
-Download and install [jamovi](https://www.jamovi.org).
+- Step 1: Download and install [jamovi](https://www.jamovi.org).
 
 Download the relevant `jmo` file for your operating system from [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/) or [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
-And install using side-load as shown below:
+windows: https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo
+macOS: https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo
+
+
+- Step 2: And install using side-load as shown below:
 
 
 
@@ -177,7 +181,7 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 ```
 
 
-## Acknowledgement
+## Acknowledgement {#acknowledgement}
 
 Made possible via the codes, help, and guidence of
 

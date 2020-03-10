@@ -68,6 +68,19 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- image$state
 
 
+            # https://indrajeetpatil.github.io/ggstatsplot/
+            # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+            # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+            #
+            # ggdotplotstats 	dot plots/charts 	for distribution about labeled numeric variable
+            #
+            # ggbarstats 	bar charts 	for categorical data
+            #
+            # ggscatterstats 	scatterplots 	for correlations between two variables
+
+            # http://corybrunson.github.io/ggalluvial/
+
+
             # plot <- ggplot(plotData, aes(x = gr,
             #                              y = dp)) +
             #     geom_point()
