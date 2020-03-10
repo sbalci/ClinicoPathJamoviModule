@@ -53,7 +53,8 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -61,7 +62,9 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Multivariate Survival Analysis",
-                refs="finalfit")
+                refs=list(
+                    "finalfit",
+                    "ggstatsplot"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",
@@ -73,10 +76,23 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Survival Plot",
+                title="Hazards Regression Plot",
                 width=600,
                 height=450,
                 renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "sc",
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot2",
+                title="Hazards Regression Plot",
+                width=600,
+                height=450,
+                renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
                     "sc",
@@ -115,6 +131,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

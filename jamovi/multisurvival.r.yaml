@@ -17,9 +17,8 @@ items:
       title: FinalFit Multivariate Survival
       type:  Html
 
-
     - name: plot
-      title: Survival Plot
+      title: Hazards Regression Plot
       type: Image
       width:  600
       height: 450
@@ -31,9 +30,21 @@ items:
           - outcome
           - overalltime
 
+    - name: plot2
+      title: Hazards Regression Plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - sc
+          - explanatory
+          - outcome
+          - overalltime
 
-
-
-refs: finalfit
+refs:
+    - finalfit
+    - ggstatsplot
 
 ...
