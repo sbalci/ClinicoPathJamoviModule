@@ -124,6 +124,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          ggplot2::theme(axis.title = ggplot2::element_text(size = 12)
                                                )))
 
+            # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#cox-proportional-hazards-regression-model-coxph
+            # # fit a stratified model
+            # mod <-
+            #     survival::coxph(
+            #         formula = Surv(time, status) ~ x + strata(sex),
+            #         data = test1
+            #     )
+            #
+            # # plot
+            # ggstatsplot::ggcoefstats(
+            #     x = mod,
+            #     exponentiate = TRUE,
+            #     title = "Cox proportional hazards regression model"
+            # )
 
 
             print(plot)

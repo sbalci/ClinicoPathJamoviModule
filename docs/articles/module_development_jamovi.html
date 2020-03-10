@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.1</span>
       </span>
     </div>
 
@@ -111,10 +111,265 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ClinicoPath)</span></code></pre></div>
+<div id="a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="section level1">
+<h1 class="hasAnchor">
+<a href="#a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="anchor"></a>‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’</h1>
+<p>Official documentation is here: <a href="https://dev.jamovi.org/" class="uri">https://dev.jamovi.org/</a></p>
+<div id="preparing-development-tools" class="section level2">
+<h2 class="hasAnchor">
+<a href="#preparing-development-tools" class="anchor"></a>preparing development tools</h2>
+<p>jmvtools should be installed from the jamovi repo</p>
+<p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="dt">repos=</span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>jmvtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>jmvtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</span></code></pre></div>
+<p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
+</div>
+<div id="add-analysis" class="section level2">
+<h2 class="hasAnchor">
+<a href="#add-analysis" class="anchor"></a>add analysis</h2>
+<pre><code><a href="https://rdrr.io/pkg/jmvtools/man/create.html">jmvtools::create('function')</a></code></pre>
+</div>
+</div>
+<div id="description" class="section level1">
+<h1 class="hasAnchor">
+<a href="#description" class="anchor"></a>DESCRIPTION</h1>
+<p><code>Imports</code>, <code>Depends</code>, <code>Suggests</code>, and <code>Remotes</code> have practically no difference in building jamovi modules. The <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> copies libraries under <em>build</em> folder.</p>
+<p>Under <code>Imports</code> <code>jmvcore</code> and <code>R6</code> are defaults.</p>
+<p>With Remotes one can install github packages as well. But with each <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> command it tries to check the updates, and if you are online throws an error. An <code>upgrade = FALSE, quick = TRUE</code> argument like in devtools::install() is not available, yet. One workaround is temporarily deleting Remotes from DESCRIPTION. The package folders continue to remain under build folder.</p>
+<p>One can also directly copy package folders from system R package folder (find via <code><a href="https://rdrr.io/r/base/libPaths.html">.libPaths()</a></code>) as well.</p>
+</div>
+<div id="namespace" class="section level1">
+<h1 class="hasAnchor">
+<a href="#namespace" class="anchor"></a>NAMESPACE</h1>
+<p>No need to change.</p>
+</div>
+<div id="r" class="section level1">
+<h1 class="hasAnchor">
+<a href="#r" class="anchor"></a>R</h1>
+<p>R folder is where the codes are present. There are two files.</p>
+<div id="function-h-r" class="section level2">
+<h2 class="hasAnchor">
+<a href="#function-h-r" class="anchor"></a>function.h.R</h2>
+<p>No need to change. Auto-updated and overwritten.</p>
+</div>
+<div id="function-b-r" class="section level2">
+<h2 class="hasAnchor">
+<a href="#function-b-r" class="anchor"></a>function.b.R</h2>
+</div>
+</div>
+<div id="jamovi" class="section level1">
+<h1 class="hasAnchor">
+<a href="#jamovi" class="anchor"></a>jamovi</h1>
+<div id="function-a-yaml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#function-a-yaml" class="anchor"></a>function.a.yaml</h2>
+</div>
+<div id="function-r-yaml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#function-r-yaml" class="anchor"></a>function.r.yaml</h2>
+<p>Using “preformatted” result element I get a markdown table output. Is there a way to somehow render/convert this output to html version. Or should I go with <a href="https://dev.jamovi.org/api_table.html" class="uri">https://dev.jamovi.org/api_table.html</a> table api? (edited) Ekran Resmi 2020-01-09 13.21.46.png Ekran Resmi 2020-01-09 13.21.46.png</p>
+<p>jonathon:whale2: 11:53 PM so you’re best to make use of the table api … the table API has a lot more features than an md table. (edited) :+1: 1</p>
+<pre><code> - name: p
+   title: "p"
+   type: number
+   format: zto,pvalue
+   </code></pre>
+</div>
+<div id="function-u-yaml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#function-u-yaml" class="anchor"></a>function.u.yaml</h2>
+</div>
+<div id="yaml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#yaml" class="anchor"></a>0000.yaml</h2>
+</div>
+<div id="refs-yaml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#refs-yaml" class="anchor"></a>00refs.yaml</h2>
+<p>prepare a 00refs.yaml like this:<br><a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
+<p>attach references to objects in the .r.yaml file like this:</p>
+<p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
+</div>
+</div>
+<div id="general" class="section level1">
+<h1 class="hasAnchor">
+<a href="#general" class="anchor"></a>General</h1>
+<div id="rstudio-options" class="section level2">
+<h2 class="hasAnchor">
+<a href="#rstudio-options" class="anchor"></a>RStudio options</h2>
+</div>
+<div id="gitignore" class="section level2">
+<h2 class="hasAnchor">
+<a href="#gitignore" class="anchor"></a>.gitignore</h2>
+<p>add following to .gitignore file</p>
+<pre><code># jamovi
+/build/
+/build-*/
+*.jmo</code></pre>
+</div>
+<div id="r-version" class="section level2">
+<h2 class="hasAnchor">
+<a href="#r-version" class="anchor"></a>R version</h2>
+<p>Try to use compatible packages with the jamovi’s R version.</p>
+</div>
+<div id="electron" class="section level2">
+<h2 class="hasAnchor">
+<a href="#electron" class="anchor"></a>Electron</h2>
+<p>jamovi is electron based. See R, shiny, and electron based application development here: <a href="https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron">Deploying a Shiny app as a desktop application with Electron</a></p>
+<p>project structure</p>
+<p><a href="https://dev.jamovi.org/info_project-structure.html" class="uri">https://dev.jamovi.org/info_project-structure.html</a></p>
+</div>
+</div>
+<div id="other-codes" class="section level1">
+<h1 class="hasAnchor">
+<a href="#other-codes" class="anchor"></a>Other Codes</h1>
+<div id="datasets" class="section level2">
+<h2 class="hasAnchor">
+<a href="#datasets" class="anchor"></a>Datasets</h2>
+<pre><code>make a data folder (same as with an R package), and then you put entries in your 0000.yaml file:
+https://github.com/gamlj/gamlj/blob/master/jamovi/0000.yaml#L47-L108
+jamovi/0000.yaml:47-108
+datasets:
+  - name: qsport
+    path: qsport.csv
+    description: Training hours
+    tags:</code></pre>
+<p>.omv and .csv allowed. excel is also allowed but user does not see if it is csv or excel file.</p>
+<p>jmvcore::toNumeric() <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
+<p>can I just send whole data to plot function? you usually don’t want to, but sometimes it’s appropriate. normally you just provide a summary of the data to the plot function … just enough data for it to do it’s job. but if you need the whole data set for the plot function, then you can specify requiresData: true on the image object. that means the plot function can access self$data. i do it in the correlation matrix for example. there’s no summary i could send … the plot function needs all the data: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143</a> jamovi/corrmatrix.r.yaml:143 requiresData: true</p>
+</div>
+<div id="error-messages" class="section level2">
+<h2 class="hasAnchor">
+<a href="#error-messages" class="anchor"></a>Error messages</h2>
+<p>data &lt;- data.frame(outcome=c(1,0,0,1,NA,1)) data &lt;- na.omit(data) if ( ! is.numeric(data<span class="math inline">\(outcome) || any(data\)</span>outcome != 0 &amp; data$outcome != 1)) stop(‘Outcome variable must only contains 1s and 0s’)</p>
+<p>it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up.</p>
+<p>part of our philosophy is that people shouldn’t have to set their data up if they can’t be bothered … because with large data sets it can take a lot of time. so i’d encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() … more on our data philosophy here: <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
+<p><a href="https://youtu.be/oWZrrWc6e74" class="uri">https://youtu.be/oWZrrWc6e74</a></p>
+<p>in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent. also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there.</p>
+<p>visible: (optionName) <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416</a> jamovi/ttestis.r.yaml:408-416 - name: qq type: Image description: Q-Q plot width: 350 height: 300</p>
+<p>is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox? I tried to get info from a self<span class="math inline">\(options\)</span>var via lubridate::is.Date and is.na.POSIXlt but it did not work hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack</p>
+<p>Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around.</p>
+<p>learn YAML syntax</p>
+<p>it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. you can take a look at jmv for examples: <a href="https://github.com/jamovi/jmv/tree/master/jamovi" class="uri">https://github.com/jamovi/jmv/tree/master/jamovi</a></p>
+<p>I don’t think we’ve got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you’ll find there’s not that many parameter names.</p>
+<p>as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over</p>
+<p>Hi, there are scarce sources for pairwise chi-square tests. I have found rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test() but that package has been removed from CRAN. Would you consider implementing this feature? I also thought to add these functions in a module, but I want to ask your policy about removed packages as well. 4 replies</p>
+<p>jonathon:whale2: 18 days ago provided the module can be built with an entry in REMOTES, we don’t care if it’s not on CRAN</p>
+<p>jonathon:whale2: 18 days ago … but you’re obviously taking a risk using something which isn’t maintained</p>
+<p>Serdar Balci 18 days ago Thanks. Maybe just copying that function with appropriate reference may solve maintenance issue. I will think about it.</p>
+<p>jonathon:whale2: 18 days ago oh yup</p>
+<hr>
+<p>I have a question. I want to user to enter cut points in a box and then evaluate it as a vector. the function is this: summary(km_fit, times = c(12,36,60) I want user to define times vector. I have tried the following: utimes &lt;- jmvcore::decomposeTerms(self<span class="math inline">\(options\)</span>cutp) utimes &lt;- as.vector(utimes) summary(km_fit, times = utimes a.yaml is as follows: - name: cutp title: Define at least two cutpoints (in months) for survival table type: String default: ‘12, 36, 60’ Would you please guide me to convert input into a vector. (edited) 3 replies</p>
+<p>Serdar Balci 13 hours ago I think this seems to work: utimes &lt;- self<span class="math inline">\(options\)</span>cutp utimes &lt;- strsplit(utimes, “,”) utimes &lt;- purrr::reduce(utimes, as.vector) utimes &lt;- as.numeric(utimes) (edited)</p>
+<p>jonathon:whale2: 5 hours ago yup, this will do it too: as.numeric(strsplit(utimes, ‘,’)[[1]]) (it’s better if you can avoid using purrr, because it’s not really necessary, and you’re better off reducing the amount of dependencies you use)</p>
+<p>Serdar Balci 5 hours ago thank you. :+1:</p>
+<hr>
+<p>so wrt width/height, you can set that in the .r.yaml like so: <a href="https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49" class="uri">https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49</a> it’s possible to do it programmatically, with … image$setSize()</p>
+<hr>
+<pre><code>Serdar Balci  4:48 PM
+ I think I am getting familiar with the codes :)
+QuickTime Movie 
+JamoviModule.mov
+4 MB QuickTime Movie— Click to download</code></pre>
+<pre><code>Serdar Balci Nov 29th, 2019 at 12:39 PM
+Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo
+
+4 replies
+
+jonathon:whale2:  3 months ago
+It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not)
+
+jonathon:whale2:  3 months ago
+If there's native dependencies, then the module needs to be built separately for each os.
+
+jonathon:whale2:  3 months ago
+But I can take care of building it for different oses
+
+Serdar Balci  3 months ago
+Oh, I see. Thank you :slightly_smiling_face:</code></pre>
+<hr>
+</div>
+</div>
+<div id="develop" class="section level1">
+<h1 class="hasAnchor">
+<a href="#develop" class="anchor"></a>Develop</h1>
+<hr>
+</div>
+<div id="example" class="section level1">
+<h1 class="hasAnchor">
+<a href="#example" class="anchor"></a>Example</h1>
+<hr>
+<div id="arsenal" class="section level2">
+<h2 class="hasAnchor">
+<a href="#arsenal" class="anchor"></a>arsenal</h2>
+</div>
+<div id="define-survival-time" class="section level2">
+<h2 class="hasAnchor">
+<a href="#define-survival-time" class="anchor"></a>define survival time</h2>
+</div>
+<div id="multivariate-analysis-survival" class="section level2">
+<h2 class="hasAnchor">
+<a href="#multivariate-analysis-survival" class="anchor"></a>Multivariate Analysis Survival</h2>
+<hr>
+<!-- # --><!-- #                 # tUni_df_descr <- paste0("When ", --><!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --><!-- #                 #                         " is ", --><!-- #                 #                         tUni_df$x[2], --><!-- #                 #                         ", there is ", --><!-- #                 #                         tUni_df$hr_univariable[2], --><!-- #                 #                         " times risk than ", --><!-- #                 #                         "when ", --><!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --><!-- #                 #                         " is ", --><!-- #                 #                         tUni_df$x[1], --><!-- #                 #                         "." --><!-- #                 # ) --><!-- # --><!-- #                 # results5 <- tUni_df_descr -->
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li>
+<a href="#a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies">‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#preparing-development-tools">preparing development tools</a></li>
+      <li><a href="#add-analysis">add analysis</a></li>
+      </ul>
+</li>
+      <li><a href="#description">DESCRIPTION</a></li>
+      <li><a href="#namespace">NAMESPACE</a></li>
+      <li>
+<a href="#r">R</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#function-h-r">function.h.R</a></li>
+      <li><a href="#function-b-r">function.b.R</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#jamovi">jamovi</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#function-a-yaml">function.a.yaml</a></li>
+      <li><a href="#function-r-yaml">function.r.yaml</a></li>
+      <li><a href="#function-u-yaml">function.u.yaml</a></li>
+      <li><a href="#yaml">0000.yaml</a></li>
+      <li><a href="#refs-yaml">00refs.yaml</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#general">General</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#rstudio-options">RStudio options</a></li>
+      <li><a href="#gitignore">.gitignore</a></li>
+      <li><a href="#r-version">R version</a></li>
+      <li><a href="#electron">Electron</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#other-codes">Other Codes</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#datasets">Datasets</a></li>
+      <li><a href="#error-messages">Error messages</a></li>
+      </ul>
+</li>
+      <li><a href="#develop">Develop</a></li>
+      <li>
+<a href="#example">Example</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#arsenal">arsenal</a></li>
+      <li><a href="#define-survival-time">define survival time</a></li>
+      <li><a href="#multivariate-analysis-survival">Multivariate Analysis Survival</a></li>
+      </ul>
+</li>
+      </ul>
+</div>
       </div>
 
 </div>
