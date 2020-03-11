@@ -7,7 +7,10 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             dep = NULL,
-            group = NULL, ...) {
+            group = NULL,
+            direction = "Independent",
+            typex = "continuous",
+            typey = "continuous", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -21,16 +24,46 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group)
+            private$..direction <- jmvcore::OptionList$new(
+                "direction",
+                direction,
+                options=list(
+                    "repeated",
+                    "independent"),
+                default="Independent")
+            private$..typex <- jmvcore::OptionList$new(
+                "typex",
+                typex,
+                options=list(
+                    "continuous",
+                    "categorical"),
+                default="continuous")
+            private$..typey <- jmvcore::OptionList$new(
+                "typey",
+                typey,
+                options=list(
+                    "continuous",
+                    "categorical"),
+                default="continuous")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
+            self$.addOption(private$..direction)
+            self$.addOption(private$..typex)
+            self$.addOption(private$..typey)
         }),
     active = list(
         dep = function() private$..dep$value,
-        group = function() private$..group$value),
+        group = function() private$..group$value,
+        direction = function() private$..direction$value,
+        typex = function() private$..typex$value,
+        typey = function() private$..typey$value),
     private = list(
         ..dep = NA,
-        ..group = NA)
+        ..group = NA,
+        ..direction = NA,
+        ..typex = NA,
+        ..typey = NA)
 )
 
 statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -46,7 +79,9 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Plots",
-                refs="ggstatsplot")
+                refs=list(
+                    "ggstatsplot",
+                    "ggalluvial"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",
@@ -54,13 +89,20 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="GGStatsPlot2"))
+                title="GGStatsPlot"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 width=600,
                 height=450,
-                renderFun=".plot"))}))
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "direction",
+                    "typex",
+                    "typey")))}))
 
 statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Base",
@@ -87,6 +129,9 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param dep .
 #' @param group .
+#' @param direction select measurement type (repeated or independent)
+#' @param typex select type of grouping variable
+#' @param typey select type of dependent variable
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
@@ -98,7 +143,10 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 statsplot2 <- function(
     data,
     dep,
-    group) {
+    group,
+    direction = "Independent",
+    typex = "continuous",
+    typey = "continuous") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('statsplot2 requires jmvcore to be installed (restart may be required)')
@@ -114,7 +162,10 @@ statsplot2 <- function(
 
     options <- statsplot2Options$new(
         dep = dep,
-        group = group)
+        group = group,
+        direction = direction,
+        typex = typex,
+        typey = typey)
 
     analysis <- statsplot2Class$new(
         options = options,

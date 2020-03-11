@@ -17,4 +17,45 @@ options:
     - name: group
       title: Grouping Variable
       type: Variable
+
+    - name: direction
+      title: Measurement Type
+      type: List
+      options:
+        - title: Repeated
+          name: repeated
+        - title: Independent
+          name: independent
+      default: Independent
+      description:
+          R: select measurement type (repeated or independent)
+
+
+    - name: typex
+      title: Type of gouping variable
+      type: List
+      options:
+        - title: Continuous
+          name: continuous
+        - title: Categorical
+          name: categorical
+      default: continuous
+      description:
+          R: select type of grouping variable
+
+
+
+    - name: typey
+      title: Type of dependent variable
+      type: List
+      options:
+        - title: Continuous
+          name: continuous
+        - title: Categorical
+          name: categorical
+      default: continuous
+      description:
+          R: select type of dependent variable
+
 ...
+
