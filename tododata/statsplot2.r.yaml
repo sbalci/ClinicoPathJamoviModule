@@ -10,7 +10,7 @@ items:
       type:  Preformatted
 
     - name:  text1
-      title: GGStatsPlot2
+      title: GGStatsPlot
       type:  Preformatted
 
     - name: plot
@@ -18,8 +18,20 @@ items:
       width:  600
       height: 450
       renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - direction
+          - typex
+          - typey
 
-refs: ggstatsplot
 
+
+
+
+refs:
+    - ggstatsplot
+    - ggalluvial
 
 ...
