@@ -45,12 +45,6 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
-  - title: Multivariate Survival Analysis
-    name: multisurvival
-    ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
-    menuTitle: Multivariate Survival Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
@@ -90,6 +84,6 @@ datasets:
     tags:
       - Classification
 usesNative: true
-minApp: 1.0.8
+minApp: 1.2.8
 
 ...
