@@ -1,14 +1,17 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import ggplot2
+#' @import ggstatsplot
+#' @import ggalluvial
+#' @importFrom rlang .data
 #'
-# This file is a generated template, your changes will not be overwritten
+
 
 statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Class",
     inherit = statsplot2Base,
     private = list(
         .run = function() {
-
 
             # TODO
 
@@ -20,79 +23,123 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$todo$setContent(todo)
 
-            if (length(self$options$dep) + length(self$options$group) < 2)
-                return()
-
-            # mydata <- self$data
-
-            mydep <- self$data[[self$options$dep]]
-            mygroup <- self$data[[self$options$group]]
-
-
-            plotData <- data.frame(gr = mygroup, dp = jmvcore::toNumeric(mydep))
-            plotData <- jmvcore::naOmit(plotData)
-
-            image <- self$results$plot
-
-            image$setState(plotData)
-
-
-            # self$results$text1$setContent(plotData)
-
-
-            # mydepType <- data.frame(vclass = class(mydep),
-            #                         vtypeof = typeof(mydep),
-            #                         vordered = is.ordered(mydep),
-            #                         vfactor = is.factor(mydep),
-            #                         vnumeric = is.numeric(mydep),
-            #                         vdouble = is.double(mydep),
-            #                         vcharacter = is.character(mydep),
-            #                         vdate = lubridate::is.Date(mydep),
-            #                         vdate2 = is.na.POSIXlt(mydep)
-            #                         )
-            # mygroupType <- class(mygroup)
-            # variableTypes <- list(mydepType, mygroupType)
-            # self$results$text1$setContent(variableTypes)
-
-
-
         },
-
 
         .plot=function(image, ...) {  # <-- the plot function
 
             if (length(self$options$dep) + length(self$options$group) < 2)
                 return()
 
+            mydata <- self$data
 
-            plotData <- image$state
+            mydep <- self$data[[self$options$dep]]
+            mygroup <- self$data[[self$options$group]]
 
+            direction <- self$data[[self$options$direction]]
+            typex <- self$data[[self$options$typex]]
+            typey <- self$data[[self$options$typey]]
 
             # https://indrajeetpatil.github.io/ggstatsplot/
-            # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
-            # ggwithinstats 	violin plots 	for comparisons within groups/conditions
-            #
-            # ggdotplotstats 	dot plots/charts 	for distribution about labeled numeric variable
-            #
-            # ggbarstats 	bar charts 	for categorical data
-            #
-            # ggscatterstats 	scatterplots 	for correlations between two variables
 
-            # http://corybrunson.github.io/ggalluvial/
+            if (direction == "independent" & typex == "categorical" & typey == "continuous") {
 
+                # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
 
-            # plot <- ggplot(plotData, aes(x = gr,
-            #                              y = dp)) +
-            #     geom_point()
-
-            plot <- plotData %>%
-                ggstatsplot::ggbetweenstats(
-                    x = gr,
-                    y = dp
+                plot <- ggstatsplot::ggbetweenstats(
+                    data = mydata,
+                    x = mygroup,
+                    y = mydep
                     )
+
+                } else if (direction == "independent" & typex == "continuous" & typey == "continuous") {
+
+                    # ggscatterstats 	scatterplots 	for correlations between two variables
+
+                    plot <- ggstatsplot::ggscatterstats(
+                        data = mydata,
+                        x = mygroup,
+                        y = mydep
+                    )
+
+
+                } else if (direction == "independent" & typex == "categorical" & typey == "categorical") {
+
+                # ggbarstats 	bar charts 	for categorical data
+
+                    plot <- ggstatsplot::ggbarstats(
+                        data = mydata,
+                        x = mygroup,
+                        y = mydep
+                    )
+
+
+                } else if (direction == "independent" & typex == "continuous" & typey == "categorical") {
+
+
+                    plot <- "Not Available"
+
+
+
+
+                } else if (direction == "dependent" & typex == "categorical" & typey == "continuous") {
+
+                    # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+
+                    plot <- ggstatsplot::ggwithinstats(
+                        data = mydata,
+                        x = mygroup,
+                        y = mydep
+                    )
+
+                } else if (direction == "dependent" & typex == "continuous" & typey == "continuous") {
+
+                    plot <- "Not Available"
+
+
+                } else if (direction == "dependent" & typex == "categorical" & typey == "categorical") {
+
+                     # http://corybrunson.github.io/ggalluvial/
+
+
+                    mydata_changes <- mydata %>%
+                        dplyr::select(.data[[mygroup]], .data[[mygroup]]) %>%
+                        dplyr::filter(complete.cases(.)) %>%
+                        dplyr::group_by(.data[[mygroup]], .data[[mygroup]]) %>%
+                        dplyr::tally()
+
+                    # plot <- ggplot(data = mydata_changes,
+                    #        aes(axis1 = TumorEcadherin, axis2 = TomurcukEcadherin,
+                    #            y = n)) +
+                    #     scale_x_discrete(limits = c("TumorEcadherin", "TomurcukEcadherin"),
+                    #                      expand = c(.1, .05)
+                    #     ) +
+                    #     xlab("Tumor Tomurcuk") +
+                    #     geom_alluvium(aes(fill = PeritumoralTomurcukGr4,
+                    #                       colour = PeritumoralTomurcukGr4
+                    #     )) +
+                    #     geom_stratum() +
+                    #     geom_text(stat = "stratum", label.strata = TRUE) +
+                    #     theme_minimal() +
+                    #     ggtitle("Changes in Ecadherin")
+
+
+
+                    plot <- "Under Construction"
+
+                } else if (direction == "dependent" & typex == "continuous" & typey == "categorical") {
+
+
+                    plot <- "Not Available"
+
+
+
+
+                }
+
 
             print(plot)
             TRUE
+
 
 
         })

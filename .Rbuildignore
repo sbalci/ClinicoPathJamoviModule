@@ -34,6 +34,8 @@
 ^build/js/
 
 tododata
+data
+vignettes
 docs
 temp
 build

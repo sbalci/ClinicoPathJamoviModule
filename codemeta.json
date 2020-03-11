@@ -5,13 +5,13 @@
   ],
   "@type": "SoftwareSourceCode",
   "identifier": "ClinicoPath",
-  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival curves, and natural language summaries.",
+  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival plots, and natural language summaries.",
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.1",
+  "version": "0.0.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -354,5 +354,5 @@
     "summary",
     "statistics"
   ],
-  "fileSize": "8802.393KB"
+  "fileSize": "6661.283KB"
 }

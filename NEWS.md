@@ -1,3 +1,19 @@
+# ClinicoPath v0.0.1
+
+
+A jamovi module that contains main analysis used in clinicopathological research. ClinicoPath help researchers to generate natural language summaries of their dataset, generate cross tables with statistical tests, and survival analysis with survival tables, survival curves, and natural language summaries.
+
+You may install using side load:
+windows: https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo
+macOS: https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo
+
+https://github.com/sbalci/ClinicoPathJamoviModule
+
+
+https://github.com/sbalci/ClinicoPathJamoviModule/releases/tag/v0.0.1
+
+
+
 # ClinicoPath 0.0.1.1001
 
 * removed 'frequencies'
