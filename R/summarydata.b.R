@@ -76,9 +76,6 @@ summarydataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text$setContent(results)
 
-
-
-
             }
 
 

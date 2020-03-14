@@ -33,17 +33,30 @@ DOI 10.17605/OSF.IO/9SZUD
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
+<img src="man/figures/jamovi-library.png" align="center" width = 75% />
+
+## Installation via sideload [jamovi](https://www.jamovi.org)
+
   - Step 1: Download and install [jamovi](https://www.jamovi.org).
 
-Download the relevant `jmo` file for your operating system from
-[releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
-or
-[sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
+  - Step 2: Download the relevant `jmo` file for your operating system
+    from
+    
+      - a: For development version
 
-windows: <https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo>
-macOS: <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
+  - [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
 
-  - Step 2: And install using side-load as shown below:
+  - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
+    
+      - b: For stable version
+
+  - windows:
+    <https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo>
+
+  - macOS:
+    <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
+
+  - Step 3: And install using side-load as shown below:
 
 <img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
@@ -55,29 +68,33 @@ macOS: <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
 
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 
-#### WriteSummary
+#### Summary of Continuous Variables
 
 <img src="man/figures/jamovi-write-summary-continious-variables.gif" align="center" width = 75% />
 
-#### Report General Features
+#### Summary of Categorical Variables
 
 <img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
 
 ### Comparisons
 
-#### CrossTable
+#### Cross Table
 
 <img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
 
-#### GGStatsPlot2
+#### GGStatsPlot
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
 
+<img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
+
 ### Survival
 
-#### FinalFit
+#### Univariate Survival Analysis
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
 
@@ -85,17 +102,25 @@ macOS: <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
 
-#### FinalFit Multivariate Survival
+#### Multivariate Survival Analysis
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
 
 ### Decision
 
 #### Medical Decision
 
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
 #### Decision Calculator
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
 
@@ -103,9 +128,13 @@ macOS: <https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo>
 
 #### Correlation
 
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
 ### Agreement
 
 #### Interrater Intrarater Reliability
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 ## Installation in R
 
@@ -144,6 +173,8 @@ Made possible via the codes, help, and guidence of
   - [survminer](https://github.com/kassambara/survminer), and
   - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
+-----
+
 <a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow
 @serdarbalci</a>
 
@@ -153,6 +184,8 @@ Made possible via the codes, help, and guidence of
 me a coffee</span></a>
 
 <https://paypal.me/serdarbalci>
+
+-----
 
 <img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>  
 ![Twitter
@@ -205,7 +238,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--10-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--12-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -288,7 +321,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--10-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--12-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last

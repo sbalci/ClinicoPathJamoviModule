@@ -11,7 +11,7 @@
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1",
+  "version": "0.0.1.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -76,6 +76,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=rmarkdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "igraph",
+      "name": "igraph",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=igraph"
     }
   ],
   "softwareRequirements": [
@@ -325,6 +337,30 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggalluvial",
+      "name": "ggalluvial",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggalluvial"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "networkD3",
+      "name": "networkD3",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=networkD3"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -354,5 +390,5 @@
     "summary",
     "statistics"
   ],
-  "fileSize": "6661.283KB"
+  "fileSize": "13450.843KB"
 }

@@ -1,0 +1,50 @@
+---
+name:  statsplot2
+title: Plots
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    - name:  text1
+      title: GGStatsPlot
+      type:  Preformatted
+
+
+    - name:  text2
+      title: GGStatsPlot
+      type:  Preformatted
+
+
+
+    - name:  text3
+      title: GGStatsPlot
+      type:  Preformatted
+
+
+    - title: GGStatsPlot
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - direction
+          - typex
+          - typey
+
+
+
+
+
+refs:
+    - ggstatsplot
+    - ggalluvial
+
+...

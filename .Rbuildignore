@@ -33,12 +33,12 @@
 ^build/R/
 ^build/js/
 
-tododata
-data
-vignettes
-docs
-temp
-build
+^tododata/
+^data/
+^vignettes/
+^docs/
+^temp/
+^build/
 ^.*\.jmo$
 
 ^tests$
