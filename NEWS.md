@@ -1,3 +1,10 @@
+# ClinicoPath 0.0.1.0001
+
+Added multivariate survival, and comparison plots.
+
+
+
+
 # ClinicoPath v0.0.1
 
 

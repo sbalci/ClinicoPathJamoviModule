@@ -1,0 +1,61 @@
+---
+name:  statsplot2
+title: Graphs and Plots
+menuGroup: ClinicoPath
+menuSubgroup: Comparisons
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+
+    - name: direction
+      title: Measurement Type
+      type: List
+      options:
+        - title: Repeated (within groups)
+          name: repeated
+        - title: Independent (between groups)
+          name: independent
+      default: independent
+      description:
+          R: select measurement type (repeated or independent)
+
+
+    # - name: typex
+    #   title: Type of grouping variable
+    #   type: List
+    #   options:
+    #     - title: Continuous
+    #       name: continuous
+    #     - title: Categorical
+    #       name: categorical
+    #   default: continuous
+    #   description:
+    #       R: select type of grouping variable
+
+
+
+    # - name: typey
+    #   title: Type of dependent variable
+    #   type: List
+    #   options:
+    #     - title: Continuous
+    #       name: continuous
+    #     - title: Categorical
+    #       name: categorical
+    #   default: continuous
+    #   description:
+    #       R: select type of dependent variable
+
+...
+

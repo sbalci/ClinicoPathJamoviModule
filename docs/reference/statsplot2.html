@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.1</span>
       </span>
     </div>
 
@@ -147,7 +147,7 @@
     <p>Graphs and Plots</p>
     </div>
 
-    <pre class="usage"><span class='fu'>statsplot2</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>)</pre>
+    <pre class="usage"><span class='fu'>statsplot2</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>, <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -164,6 +164,10 @@
       <th>group</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>direction</th>
+      <td><p>select measurement type (repeated or independent)</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -171,6 +175,8 @@
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 

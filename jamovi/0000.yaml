@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.1
+version: 0.0.1.0001
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-03-09'
+date: '2020-03-11'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -39,12 +39,24 @@ analyses:
     menuSubgroup: Comparisons
     menuTitle: CrossTables
     description: Function for making Cross Tables.
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Comparisons
+    menuTitle: Graphs and Plots
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
+  - title: Multivariate Survival Analysis
+    name: multisurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: Multivariate Survival Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

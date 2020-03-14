@@ -220,4 +220,11 @@
         `year`=2019, 
         `title`="survminer: Drawing Survival Curves using 'ggplot2'", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survminer", 
-        `url`="https://CRAN.R-project.org/package=survminer"))
+        `url`="https://CRAN.R-project.org/package=survminer"), 
+    `ggalluvial`=list(
+        `type`="software", 
+        `author`="Jason Cory Brunson", 
+        `year`=2019, 
+        `title`="ggalluvial: Alluvial Plots in 'ggplot2'.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggalluvial", 
+        `url`="https://CRAN.R-project.org/package=ggalluvial"))

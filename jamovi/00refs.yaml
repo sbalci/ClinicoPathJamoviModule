@@ -252,4 +252,12 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survminer'
         url: https://CRAN.R-project.org/package=survminer
 
+
+    ggalluvial:
+        type: 'software'
+        author: Jason Cory Brunson
+        year: 2019
+        title: "ggalluvial: Alluvial Plots in 'ggplot2'."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggalluvial'
+        url: https://CRAN.R-project.org/package=ggalluvial
 ...
