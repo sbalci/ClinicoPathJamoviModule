@@ -13,6 +13,7 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 -
                 -  "
             )

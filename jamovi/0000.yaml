@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.1.0001
+version: 0.0.1.0002
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-03-11'
+date: '2020-03-17'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -42,8 +42,8 @@ analyses:
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Comparisons
+    menuGroup: ClinicoPath2
+    menuSubgroup: Comparisons2
     menuTitle: Graphs and Plots
   - title: Survival Analysis
     name: survival
@@ -54,9 +54,40 @@ analyses:
   - title: Multivariate Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
+    menuGroup: ClinicoPath2
+    menuSubgroup: Survival2
     menuTitle: Multivariate Survival Analysis
+  - title: Interrater Intrarater Reliability
+    name: agreement
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Agreement
+    menuTitle: Interrater Intrarater Reliability
+    description: Function for Interrater Intrarater Reliability.
+  - title: Correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Correlation
+    menuTitle: Correlation
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Medical Decision
+  - title: Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Decision Calculator
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision Tree
+    menuTitle: Decision Tree
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

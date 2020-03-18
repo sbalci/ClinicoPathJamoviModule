@@ -14,6 +14,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 -
                 -
                 "
@@ -77,7 +78,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tree3 <- iris %>%
                 explore::explain_tree(target = Sepal.Length)
 
-            plot <- tree1
+            plot <- tree2
 
             print(plot)
             TRUE
