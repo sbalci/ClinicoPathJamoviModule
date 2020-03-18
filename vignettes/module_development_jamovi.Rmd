@@ -19,6 +19,14 @@ library(ClinicoPath)
 ```
 
 
+
+# [useR!2017: *jamovi*: a spreadsheet for R](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R)
+
+<iframe src="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R/player" width="960" height="540" allowFullScreen frameBorder="0" title="*jamovi*: a spreadsheet for R - Microsoft Channel 9 Video"></iframe>
+
+
+
+
 # ‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’
 
 Official documentation is here: https://dev.jamovi.org/

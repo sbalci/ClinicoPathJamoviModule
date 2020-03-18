@@ -16,6 +16,10 @@ items:
     - name:  text
       title: FinalFit Multivariate Survival
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name: plot
       title: Hazards Regression Plot
@@ -25,7 +29,6 @@ items:
       renderFun: .plot
       requiresData: true
       clearWith:
-          - sc
           - explanatory
           - outcome
           - overalltime
@@ -33,12 +36,11 @@ items:
     - name: plot2
       title: Hazards Regression Plot
       type: Image
-      width:  600
-      height: 450
+      width:  800
+      height: 600
       renderFun: .plot2
       requiresData: true
       clearWith:
-          - sc
           - explanatory
           - outcome
           - overalltime

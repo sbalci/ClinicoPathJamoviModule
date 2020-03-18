@@ -72,7 +72,11 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
-                title="FinalFit Multivariate Survival"))
+                title="FinalFit Multivariate Survival",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -82,7 +86,6 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
-                    "sc",
                     "explanatory",
                     "outcome",
                     "overalltime")))
@@ -90,12 +93,11 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot2",
                 title="Hazards Regression Plot",
-                width=600,
-                height=450,
+                width=800,
+                height=600,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
-                    "sc",
                     "explanatory",
                     "outcome",
                     "overalltime")))}))

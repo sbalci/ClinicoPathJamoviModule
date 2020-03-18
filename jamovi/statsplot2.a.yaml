@@ -1,8 +1,8 @@
 ---
 name:  statsplot2
 title: Graphs and Plots
-menuGroup: ClinicoPath
-menuSubgroup: Comparisons
+menuGroup: ClinicoPath2
+menuSubgroup: Comparisons2
 version: '1.0.0'
 jas: '1.2'
 

@@ -16,18 +16,40 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-            if (length(self$options$explanatory) < 1 |  (length(self$options$outcome) + length(self$options$overalltime) < 2))
+            if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
+            {
+
+
+                # TODO ----
+
+                todo <- glue::glue(
+                    "This Module is still under development
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+                - "
+                )
+
+                self$results$todo$setContent(todo)
+
+
                 return()
+
+            } else {
 
 
             # TODO ----
 
             todo <- glue::glue(
                 "This Module is still under development
+                Analysis below
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
                 - "
             )
 
             self$results$todo$setContent(todo)
+
+
 
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
@@ -35,6 +57,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myoutcome2 <- na.omit(myoutcome2)
             if (any(myoutcome2 != 0 & myoutcome2 != 1))
                 stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
 
 
             mydata <- self$data
@@ -49,12 +72,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
 
+            formulaR <- jmvcore::toNumeric(formulaR)
+
+
             myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
 
 
             finalfit::finalfit(.data = mydata,
                                dependent = myformula,
-                               explanatory = formula2) -> tMultivariate
+                               explanatory = formula2
+                               # ,
+                               # metrics = TRUE
+                               ) -> tMultivariate
 
             results1 <- knitr::kable(tMultivariate,
                                      row.names = FALSE,
@@ -64,8 +93,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text$setContent(results1)
 
-        },
 
+
+            }
+
+        },
 
         .plot=function(image, ...) {  # <-- the plot function ----
 
@@ -74,10 +106,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
+            if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
+                return()
+
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
             myoutcome2 <- self$data[[myoutcome2]]
             myoutcome2 <- na.omit(myoutcome2)
+
+            if(class(myoutcome2) == "factor")
+                stop("Please use a continuous variable for outcome.")
+
+
             if (any(myoutcome2 != 0 & myoutcome2 != 1))
                 stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
@@ -90,6 +130,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formulaL <- jmvcore::toNumeric(formulaL)
 
             formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+            formulaR <- jmvcore::toNumeric(formulaR)
+
 
             myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
 
@@ -116,11 +159,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
+                if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
+                    return()
 
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
             myoutcome2 <- self$data[[myoutcome2]]
             myoutcome2 <- na.omit(myoutcome2)
+
+            if(class(myoutcome2) == "factor")
+                stop("Please use a continuous variable for outcome.")
+
             if (any(myoutcome2 != 0 & myoutcome2 != 1))
                 stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
@@ -134,6 +183,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formulaL <- jmvcore::toNumeric(formulaL)
 
             formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+            formulaR <- jmvcore::toNumeric(formulaR)
+
 
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 

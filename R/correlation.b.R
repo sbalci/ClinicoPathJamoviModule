@@ -13,6 +13,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 - Correlation matrix via ggplot
                 -
                 "
@@ -47,7 +48,17 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # self$results$text3$setContent(cor3)
 
-
+            # library("correlation")
+            # mydata %$%
+            #     cor.test(PeritumoralTomurcukSayi, Yas, method = "spearman", exact = FALSE)
+            # mydata %$%
+            #     cor.test(PeritumoralTomurcukSayi, Yas, method = "spearman", exact = FALSE) %>%
+            #     report::report()
+            # ggplot(mydata, aes(x = PeritumoralTomurcukSayi, y = Yas)) +
+            #     geom_point() +
+            #     geom_smooth(method = lm, size = 1)
+            # mydata %>%
+            #     ggstatsplot::ggscatterstats(x = PeritumoralTomurcukSayi, y = Yas, type = "np")
 
 #
 #             iris %>%

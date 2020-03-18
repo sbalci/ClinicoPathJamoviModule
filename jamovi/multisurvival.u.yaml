@@ -15,7 +15,7 @@ children:
             name: explanatory
             isTarget: true
       - type: TargetLayoutBox
-        label: Outcome
+        label: 'Outcome (event:1, censored:0)'
         children:
           - type: VariablesListBox
             name: outcome
