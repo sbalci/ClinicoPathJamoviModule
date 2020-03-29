@@ -4,7 +4,7 @@
 \alias{statsplot2}
 \title{Graphs and Plots}
 \usage{
-statsplot2(data, dep, group, direction = "independent")
+statsplot2(data, dep, group, direction = "independent", distribution = "p")
 }
 \arguments{
 \item{data}{.}
@@ -14,6 +14,8 @@ statsplot2(data, dep, group, direction = "independent")
 \item{group}{.}
 
 \item{direction}{select measurement type (repeated or independent)}
+
+\item{distribution}{select distribution type (parametric or nonparametric)}
 }
 \value{
 A results object containing:

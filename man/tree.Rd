@@ -4,27 +4,23 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, dep, group, alt = "notequal", varEq = TRUE)
+tree(data, vars, target)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
+\item{vars}{explanatory variables}
 
-\item{group}{.}
-
-\item{alt}{.}
-
-\item{varEq}{.}
+\item{target}{target variable}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
-Decision Tree
+Function for making Decision Trees.
 }

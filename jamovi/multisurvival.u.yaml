@@ -22,7 +22,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: OverallTime
+        label: 'Overall Time (in months)'
         children:
           - type: VariablesListBox
             name: overalltime

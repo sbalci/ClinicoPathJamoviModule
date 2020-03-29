@@ -36,8 +36,7 @@ items:
           - dep
           - group
           - direction
-          - typex
-          - typey
+          - distribution
 
 
 

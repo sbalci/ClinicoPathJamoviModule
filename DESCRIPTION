@@ -1,8 +1,8 @@
-Package: ClinicoPath
 Type: Package
+Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0002
-Date: 2020-03-17
+Version: 0.0.1.0004
+Date: 2020-03-29
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -10,57 +10,67 @@ Authors@R:
            email = "drserdarbalci@gmail.com",
            comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <drserdarbalci@gmail.com>
-Description: Analysis for Clinicopathological Research 
-    ClinicoPath help researchers to generate natural language summaries of their
-    dataset, generate cross tables with statistical tests, and survival analysis
-    with survival tables, survival plots, and natural language summaries.
+Description: Analysis for Clinicopathological Research
+    ClinicoPath help researchers to generate natural language summaries of
+    their dataset, generate cross tables with statistical tests, and
+    survival analysis with survival tables, survival plots, and natural
+    language summaries.
 License: GPL-3
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
+URL: https://github.com/sbalci/ClinicoPathJamoviModule/,
+    https://sbalci.github.io/ClinicoPathJamoviModule/
+BugReports: 
+    https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:
     R (>= 3.6)
 Imports: 
-    jmvcore (>= 0.8.5),
-    R6,
+    caret,
+    correlation,
     dplyr,
+    explore,
+    FFTrees,
+    finalfit,
+    forcats,
+    ggalluvial,
+    ggplot2,
+    ggstatsplot,
+    glue,
+    irr,
+    janitor,
+    jmvcore (>= 0.8.5),
+    jsonlite,
+    knitr,
+    networkD3,
+    purrr,
+    R6,
+    report,
+    rlang,
+    scales,
     survival,
     survminer,
-    finalfit,
-    arsenal,
-    purrr,
-    glue,
-    janitor,
-    ggplot2,
-    forcats,
     tableone,
     tangram,
-    rlang,
-    knitr,
-    remotes,
+    tibble,
+    tidyr,
+    utils
+Suggests:
+    rmarkdown,
+    tidyselect,
     kableExtra,
-    ggstatsplot,
-    ggalluvial,
-    caret,
-    irr
+    yarrr,
+    circlize,
+    randomForest
+VignetteBuilder: 
+    knitr
 Remotes:
-    r-lib/tidyselect,
+    ndphillips/FFTrees,
+    easystats/parameters,
+    easystats/bayestestR,
+    easystats/effectsize,
+    easystats/correlation,
     easystats/modelbased,
     easystats/insight,
-    easystats/bayestestR,
-    easystats/performance,
-    easystats/parameters,
     easystats/report
-Suggests:
-    effectsize,
-    emmeans,
-    rmarkdown,
-    igraph,
-    iterators,
-    rms,
-    commonmark,
-    sass
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
-VignetteBuilder: knitr
-URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/ 
-BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/

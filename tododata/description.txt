@@ -1,0 +1,63 @@
+Package: ClinicoPath
+Type: Package
+Title: Analysis for Clinicopathological Research
+Version: 0.0.1.0003
+Date: 2020-03-22
+Authors@R:
+    person(given = "Serdar",
+           family = "Balci",
+           role = c("aut", "cre"),
+           email = "drserdarbalci@gmail.com",
+           comment = c(ORCID = "0000-0002-7852-3851"))
+Maintainer: Serdar Balci <drserdarbalci@gmail.com>
+Description: Analysis for Clinicopathological Research
+    ClinicoPath help researchers to generate natural language summaries of their
+    dataset, generate cross tables with statistical tests, and survival analysis
+    with survival tables, survival plots, and natural language summaries.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 3.6)
+Imports:
+    jmvcore (>= 0.8.5),
+    R6,
+    dplyr,
+    tableone,
+    tangram,
+    survival,
+    survminer,
+    finalfit,
+    ggstatsplot,
+    irr,
+    explore,
+    caret,
+    networkD3
+Remotes:
+    ndphillips/FFTrees,
+    easystats/parameters,
+    easystats/bayestestR,
+    easystats/effectsize,
+    easystats/correlation,
+    easystats/modelbased,
+    easystats/insight,
+    easystats/report
+Suggests:
+    rlang,
+    tidyselect,
+    purrr,
+    glue,
+    janitor,
+    ggplot2,
+    forcats,
+    knitr,
+    kableExtra,
+    scales,
+    yarrr,
+    circlize,
+    randomForest
+RoxygenNote: 7.0.2
+VignetteBuilder: knitr
+URL: https://github.com/sbalci/ClinicoPathJamoviModule/, https://sbalci.github.io/ClinicoPathJamoviModule/
+BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/

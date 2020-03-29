@@ -1,14 +1,12 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
-# This file is a generated template, your changes will not be overwritten
+
 
 treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "treeClass",
     inherit = treeBase,
     private = list(
         .run = function() {
-
-
 
             # TODO
 
@@ -23,66 +21,108 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent(todo)
 
 
-            ####
+            if (is.null(self$options$vars) || is.null(self$options$target))
+                return()
 
 
-
-            # if (length(self$options$dep) + length(self$options$group) < 2)
-            #     return()
-
-
-
+            # prepare data for explore ----
             # https://cran.r-project.org/web/packages/explore/vignettes/explore.html
-
-
-            # mydata <- self$data
-
-            # mydep <- self$data[[self$options$dep]]
-            # mygroup <- self$data[[self$options$group]]
-
-
-            # plotData <- data.frame(gr = mygroup, dp = jmvcore::toNumeric(mydep))
-            # plotData <- jmvcore::naOmit(plotData)
 
 
             # image <- self$results$plot
 
             # image$setState(plotData)
 
-
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
-
         },
 
 
-        .plot=function(image, ...) {  # <-- the plot function
+        .plot = function(image, ...) {  # <-- the plot function ----
 
-            # if (length(self$options$dep) + length(self$options$group) < 2)
-            #     return()
+            if (is.null(self$options$vars) || is.null(self$options$target))
+                return()
 
+            mydata <- self$data
+            myvars <- self$options$vars
+            mytarget <- self$options$target
 
-            # plotData <- image$state
+            xtarget <- jmvcore::composeTerm(components = self$options$target)
 
+            mydata <- jmvcore::naOmit(mydata)
 
+            mydata <- mydata %>%
+                dplyr::select(mytarget, myvars)
 
-            tree1 <- iris %>% explore::explain_tree(target = Species)
-
-            iris$is_versicolor <- ifelse(iris$Species == "versicolor", 1, 0)
-
-            tree2 <- iris %>%
-                dplyr::select(-Species) %>%
-                explore::explain_tree(target = is_versicolor)
-
-            tree3 <- iris %>%
-                explore::explain_tree(target = Sepal.Length)
-
-            plot <- tree2
+            plot <- mydata %>%
+                explore::explain_tree(data = .,
+                                      target = .data[[xtarget]])
 
             print(plot)
             TRUE
 
 
-        })
+        },
+
+
+        .plot2 = function(image, ...) {  # <-- the plot2 function ----
+
+            if (is.null(self$options$vars) || is.null(self$options$target))
+                return()
+
+            mydata <- self$data
+            myvars <- self$options$vars
+            mytarget <- self$options$target
+
+            mydata <- jmvcore::naOmit(mydata)
+
+            mydata <- mydata %>%
+                dplyr::select(mytarget, myvars)
+
+            # plot <- mydata %>%
+            #     explore::explain_tree(data = .,
+            #                           target = .data[[xtarget]])
+
+
+            formula <- jmvcore::constructFormula(terms = self$options$target)
+
+            formula <- paste(formula, '~ .')
+
+            formula <- as.formula(formula)
+
+            # Create an FFTrees object from the data
+            FFTrees.fft <- FFTrees::FFTrees(
+                formula = formula,
+                data = mydata
+                )
+
+            # Plot the best tree applied to the test data
+            plot2 <- plot(FFTrees.fft,
+                 data = mydata
+                 # ,
+                 # main = "Heart Disease",
+                 # decision.labels = c("Healthy", "Disease")
+                 )
+
+
+            # Create an FFTrees object from the heartdisease data
+            # iris.fft <- FFTrees::FFTrees(formula = Species ~.,
+            #                      data = iris)
+            # Plot the best tree applied to the test data
+            # plot <- plot(iris.fft,
+            #      data = "iris",
+            #      main = "iris")
+
+
+
+
+
+            print(plot2)
+            TRUE
+
+
+        }
+
+
+
+
+        )
 )

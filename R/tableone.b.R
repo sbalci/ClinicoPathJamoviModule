@@ -1,10 +1,9 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
-#' @importFrom tableone CreateTableOne
 #' @import dplyr
-#' @import tidyselect
-#' @import gt
-#' @import gtsummary
+#' @importFrom tableone CreateTableOne
+#'
+
 
 tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tableoneClass",
@@ -26,6 +25,7 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html <- self$results$todo
                 html$setContent(todo)
                 return()
+
             } else {
 
                 todo <- ""
@@ -40,16 +40,6 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # results
 
             self$results$text1$setContent(mytableone)
-
-            # gtsummary
-
-            # myvars <- jmvcore::constructFormula(terms = self$options$vars)
-            # myvars <- jmvcore::decomposeFormula(formula = myvars)
-            # myvars <- unlist(myvars)
-            # mytableone2 <- self$data %>%
-            #     dplyr::select(myvars)
-            # mytableone2 <- gtsummary::tbl_summary(mytableone2)
-            # self$results$text2$setContent(mytableone2)
 
 
             }

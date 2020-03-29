@@ -291,17 +291,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
                 # results 7 1,3,5-yr survival summary ----
 
                 km_fit_df %>%
@@ -327,7 +316,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 } else {
 
-                    formula_p <- paste(myformula, ' ~ ', formula2)
+                    formula_p <- paste0('survival::Surv(', formulaL, ',', formulaR, ') ~ ', formula2)
                     formula_p <- as.formula(formula_p)
                     results8 <-
                         survminer::pairwise_survdiff(
@@ -339,7 +328,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                            mypairwise2 <- as.data.frame(results8[["p.value"]]) %>%
+                mypairwise2 <- as.data.frame(results8[["p.value"]]) %>%
                                 tibble::rownames_to_column()
 
                             mypairwise2 %>%

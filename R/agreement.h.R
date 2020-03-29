@@ -30,6 +30,7 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        text = function() private$.items[["text"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]]),
     private = list(),
@@ -44,6 +45,10 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text",
+                title="Table"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -86,6 +91,7 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #' }

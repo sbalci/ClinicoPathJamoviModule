@@ -9,8 +9,6 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-
-
             if (length(self$options$vars) < 2)
                 return()
 
@@ -44,11 +42,14 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::select(myvars)
 
 
+            result <- table(ratings[,1], ratings[,2])
+
             result1 <- irr::agree(ratings)
 
             result2 <- irr::kappa2(ratings)
 
 
+            self$results$text$setContent(result)
 
             self$results$text1$setContent(result1)
 

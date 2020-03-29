@@ -8,7 +8,8 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            direction = "independent", ...) {
+            direction = "independent",
+            distribution = "p", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -29,19 +30,29 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "repeated",
                     "independent"),
                 default="independent")
+            private$..distribution <- jmvcore::OptionList$new(
+                "distribution",
+                distribution,
+                options=list(
+                    "p",
+                    "np"),
+                default="p")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..direction)
+            self$.addOption(private$..distribution)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        direction = function() private$..direction$value),
+        direction = function() private$..direction$value,
+        distribution = function() private$..distribution$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..direction = NA)
+        ..direction = NA,
+        ..distribution = NA)
 )
 
 statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -90,8 +101,7 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "direction",
-                    "typex",
-                    "typey")))}))
+                    "distribution")))}))
 
 statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Base",
@@ -119,6 +129,7 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param direction select measurement type (repeated or independent)
+#' @param distribution select distribution type (parametric or nonparametric)
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
@@ -133,7 +144,8 @@ statsplot2 <- function(
     data,
     dep,
     group,
-    direction = "independent") {
+    direction = "independent",
+    distribution = "p") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('statsplot2 requires jmvcore to be installed (restart may be required)')
@@ -150,7 +162,8 @@ statsplot2 <- function(
     options <- statsplot2Options$new(
         dep = dep,
         group = group,
-        direction = direction)
+        direction = direction,
+        distribution = distribution)
 
     analysis <- statsplot2Class$new(
         options = options,
