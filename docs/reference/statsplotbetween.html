@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Summary of Continuous Variables — summarydata • ClinicoPath</title>
+<title>Stats Plot Between — statsplotbetween • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Summary of Continuous Variables — summarydata" />
-<meta property="og:description" content="Summary of Continuous Variables" />
+<meta property="og:title" content="Stats Plot Between — statsplotbetween" />
+<meta property="og:description" content="Stats Plot Between" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -138,36 +138,42 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Summary of Continuous Variables</h1>
-    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/summarydata.h.R'><code>R/summarydata.h.R</code></a></small>
-    <div class="hidden name"><code>summarydata.Rd</code></div>
+    <h1>Stats Plot Between</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/statsplotbetween.h.R'><code>R/statsplotbetween.h.R</code></a></small>
+    <div class="hidden name"><code>statsplotbetween.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Summary of Continuous Variables</p>
+    <p>Stats Plot Between</p>
     </div>
 
-    <pre class="usage"><span class='fu'>summarydata</span>(<span class='no'>data</span>, <span class='no'>vars</span>)</pre>
+    <pre class="usage"><span class='fu'>statsplotbetween</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>data</th>
-      <td><p>the data as a data frame</p></td>
+      <td><p>.</p></td>
     </tr>
     <tr>
-      <th>vars</th>
-      <td><p>a string naming the variables from <code>data</code> that contains
-the continuous values used for the report</p></td>
+      <th>dep</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>group</th>
+      <td><p>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$plothtml</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 

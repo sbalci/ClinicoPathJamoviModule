@@ -20,15 +20,18 @@ options:
       suggested: [ continuous ]
       permitted: [ numeric ]
 
+
     # - name: outcomeLevel
     #   title: |
     #       Select Event (Death, Recurrence)
     #   type: Level
     #   variable: (outcome)
 
+
     - name: overalltime
       title: 'Overall Time (in months)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+
 ...

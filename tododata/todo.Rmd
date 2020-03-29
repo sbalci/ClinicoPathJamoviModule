@@ -2,6 +2,537 @@
 title: "ToDo"
 ---
 
+```
+            # gtsummary
+
+            # myvars <- jmvcore::constructFormula(terms = self$options$vars)
+            # myvars <- jmvcore::decomposeFormula(formula = myvars)
+            # myvars <- unlist(myvars)
+            # mytableone2 <- self$data %>%
+            #     dplyr::select(myvars)
+            # mytableone2 <- gtsummary::tbl_summary(mytableone2)
+            # self$results$text2$setContent(mytableone2)
+```
+
+
+    # - name: outcomeLevel
+    #   title: |
+    #       Select Event (Death, Recurrence)
+    #   type: Level
+    #   variable: (outcome)
+
+
+
+
+
+
+
+---
+
+,
+arsenal,
+
+rlang,
+knitr,
+remotes,
+kableExtra,
+
+caret,
+irr
+Remotes:
+
+
+easystats/bayestestR,
+easystats/performance,
+easystats/parameters,
+easystats/report
+Suggests:
+    effectsize,
+emmeans,
+rmarkdown,
+igraph,
+iterators,
+rms,
+commonmark,
+sass
+
+
+
+
+
+
+
+```
+# #
+# #
+# #     if (is.null(self$options$dep) || is.null(self$options$group))
+# #         return()
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #
+# #     # klass <- print(
+# #     #     list(
+# #     #         "mydep" = c(typeof(mydep), class(mydep)),
+# #     #         "mygroup" = c(typeof(mygroup), class(mygroup))
+# #     #         )
+# #     #     )
+# #
+# #
+# #     # self$results$text1$setContent(klass)
+# #
+# #
+# #     # plotData <- data.frame(gr = mygroup,
+# #     #                        dp = mydep)
+# #     # plotData <- jmvcore::naOmit(plotData)
+# #     # mydata_changes <- plotData %>%
+# #     #     dplyr::group_by(gr, dp) %>%
+# #     #     dplyr::tally(x = .)
+# #     #
+# #     # self$results$text2$setContent(mydata_changes)
+# #     #
+# #     # plotData <- data.frame(gr = mygroup,
+# #     #                        dp = mydep)
+# #     #
+# #     # plotData <- jmvcore::naOmit(plotData)
+# #     #
+# #     #
+# #     # mydata_changes <- plotData %>%
+# #     #     dplyr::group_by(gr, dp) %>%
+# #     #     dplyr::tally(x = .)
+# #     #
+# #     #
+# #     # deneme <- ggalluvial::is_alluvia_form(
+# #     #     as.data.frame(mydata_changes),
+# #     #     axes = 1:2, silent = TRUE)
+# #
+# #     # nodes = data.frame("name" =
+# #     #                        c(self$options$group,
+# #     #                          self$options$dep))
+# #     #
+# #     # links <- mydata_changes
+# #     #
+# #     # names(links) = c("source", "target", "value")
+# #     #
+# #     # deneme <- networkD3::sankeyNetwork(Links = links, Nodes = nodes,
+# #     #                                  Source = "source", Target = "target",
+# #     #                                  Value = "value", NodeID = "name",
+# #     #                                  fontSize= 12, nodeWidth = 30)
+# #
+# #
+# #
+# #     # self$results$text3$setContent(deneme)
+# #
+# #
+# #
+# #
+# #     # Prepare Data for Plot ----
+# #
+# #     direction <- self$options$direction
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #     contin <- c("integer", "numeric", "double")
+# #     categ <- c("factor")
+# #
+# # # independent, factor, continuous ----
+# # # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #             todo <- glue::glue(
+# #                 "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         -
+# #         -  "
+# #             )
+# #
+# #
+# #
+# #         }
+# #
+# #
+# # # independent, continuous, continuous ----
+# # # ggscatterstats 	scatterplots 	for correlations between two variables
+# #
+# #     if (direction == "independent" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = jmvcore::toNumeric(mygroup),
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #
+# #             todo <- glue::glue(
+# #                 "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         -
+# #         -  "
+# #             )
+# #     }
+# #
+# #
+# # # independent, factor, factor ----
+# # # ggbarstats 	bar charts 	for categorical data
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = mydep)
+# #
+# #
+# #
+# #             todo <- glue::glue(
+# #                 "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         -
+# #         -  "
+# #             )
+# #
+# #
+# #         }
+# #
+# #     # independent, continuous, factor ----
+# #
+# #     if (direction == "independent" && class(mygroup) %in% contin && class(mydep) == "factor") {
+# #         todo <- glue::glue(
+# #             "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         - Please switch the values: factor variable should be on x-axis and continuous variable should be on y-axis
+# #         -  "
+# #         )
+# #
+# #         stop("Please switch the values: factor variable should be on x-axis and continuous variable should be on y-axis")
+# #         }
+# #
+# #
+# #
+# #     # repeated, factor, continuous ----
+# #     # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+# #
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #             todo <- glue::glue(
+# #                 "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         -
+# #         -  "
+# #             )
+# #
+# #
+# #             }
+# #
+# #
+# #     # repeated, continuous, continuous ----
+# #     # rmcorr::rmcorr()
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #         todo <- glue::glue(
+# #             "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         - Currently this module does not support repeated measures correlation.
+# #         -  "
+# #         )
+# #
+# #
+# #         stop("Currently this module does not support repeated measures correlation.")
+# #
+# #     }
+# #
+# #
+# #     # repeated, factor, factor ----
+# #     # http://corybrunson.github.io/ggalluvial/
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = mydep)
+# #
+# #
+# #
+# #             todo <- glue::glue(
+# #                 "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         -
+# #         -  "
+# #             )
+# #         }
+# #
+# #     # repeated, continuous, factor ----
+# #
+# #     if (direction == "repeated" && class(mygroup) %in% contin && class(mydep) == "factor") {
+# #
+# #         todo <- glue::glue(
+# #             "This Module is still under development
+# #         🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+# #         - Please switch the values: factor variable should be on x-axis and continuous variable should be on y-axis
+# #         -  "
+# #         )
+# #
+# #
+# #         stop("Please switch the values: factor variable should be on x-axis and continuous variable should be on y-axis")
+# #
+# #
+# #     }
+# 
+# 
+# 
+# 
+# 
+# # Results ----
+# 
+# 
+# 
+# # Send Data to Plot ----
+# 
+# # plotData <- jmvcore::naOmit(plotData)
+# # image <- self$results$plot
+# # image$setState(plotData)
+# 
+# 
+# # }
+# 
+# 
+# # ,
+# #
+# # .plot = function(image, ...) {  # <-- the plot function ----
+# #
+# #
+# #     if (is.null(self$options$dep) || is.null(self$options$group))
+# #         return()
+# #
+# #
+# #     plotData <- image$state
+# #
+# #     direction <- self$options$direction
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #     contin <- c("integer", "numeric", "double")
+# #     categ <- c("factor")
+# #
+# #     # independent, factor, continuous ----
+# #     # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+# #
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #
+# #             plot <- ggstatsplot::ggbetweenstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #         }
+# #
+# #     # independent, continuous, continuous ----
+# #     # ggscatterstats 	scatterplots 	for correlations between two variables
+# #
+# #
+# #         if (direction == "independent" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #
+# #             plot <- ggstatsplot::ggscatterstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #
+# #         }
+# #
+# #     # independent, factor, factor ----
+# #     # ggbarstats 	bar charts 	for categorical data
+# #
+# #
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #
+# #
+# #             plot <- ggstatsplot::ggbarstats(
+# #                                     data = plotData,
+# #                                     main = gr,
+# #                                     condition = dp
+# #                                 )
+# #         }
+# #
+# #     # repeated, factor, continuous ----
+# #     # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+# #
+# #
+# # if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #
+# #
+# #             plot <- ggstatsplot::ggwithinstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #
+# #         }
+# #
+# #     # repeated, continuous, continuous ----
+# #     # rmcorr::rmcorr()
+# #
+# #             # my.rmc <- rmcorr::rmcorr(participant = Subject,
+# #             #                          measure1 = PacO2,
+# #             #                          measure2 = pH,
+# #             #                          dataset = rmcorr::bland1995)
+# #             #
+# #             # plot(my.rmc, overall = TRUE)
+# #             #
+# #             # ggplot2::ggplot(rmcorr::bland1995,
+# #             #                 ggplot2::aes(x = PacO2,
+# #             #                              y = pH,
+# #             #                              group = factor(Subject),
+# #             #                              color = factor(Subject)
+# #             #                 )
+# #             # ) +
+# #             #     ggplot2::geom_point(ggplot2::aes(colour = factor(Subject))) +
+# #             #     ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1)
+# #
+# #
+# #
+# #     # repeated, factor, factor ----
+# #     # http://corybrunson.github.io/ggalluvial/
+# #     # networkD3
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #
+# #             mydata_changes <- plotData %>%
+# #                 dplyr::group_by(gr, dp) %>%
+# #                 dplyr::tally(x = .)
+# #
+# #
+# #             # head(as.data.frame(UCBAdmissions), n = 12)
+# #
+# #             # ggalluvial::is_alluvia_form(
+# #             #     as.data.frame(UCBAdmissions),
+# #             #     axes = 1:3, silent = TRUE)
+# #
+# #
+# #
+# #             # plot <- ggplot(as.data.frame(UCBAdmissions),
+# #             #        aes(y = Freq, axis1 = Gender, axis2 = Dept)) +
+# #             #     geom_alluvium(aes(fill = Admit), width = 1/12) +
+# #             #     geom_stratum(width = 1/12, fill = "black", color = "grey") +
+# #             #     geom_label(stat = "stratum", infer.label = TRUE) +
+# #             #     scale_x_discrete(limits = c("Gender", "Dept"), expand = c(.05, .05)) +
+# #             #     scale_fill_brewer(type = "qual", palette = "Set1") +
+# #             #     ggtitle("UC Berkeley admissions and rejections, by sex and department")
+# #
+# #
+# #
+# #
+# #
+# #             stratum <- ggalluvial::StatStratum
+# #
+# #             plot <- ggplot2::ggplot(data = mydata_changes,
+# #                                     ggplot2::aes(axis1 = gr,
+# #                        axis2 = dp,
+# #                        y = n)) +
+# #                 ggplot2::scale_x_discrete(limits = c(self$options$group, self$options$dep),
+# #                                  expand = c(.1, .05)
+# #                 ) +
+# #                 ggplot2::xlab(self$options$group) +
+# #                 ggalluvial::geom_alluvium(ggplot2::aes(fill = gr,
+# #                                   colour = gr
+# #                 )) +
+# #                 ggalluvial::geom_stratum() +
+# #                 ggalluvial::stat_stratum(geom = "stratum") +
+# #                 ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
+# #
+# #                 # ggalluvial::geom_stratum(stat = "stratum", label.strata = TRUE) +
+# #                 # ggplot2::geom_text(stat = "stratum", infer.label = TRUE) +
+# #                 # ggplot2::geom_text(label.strata = TRUE) +
+# #                 # ggalluvial::geom_stratum()
+# #                 ggplot2::theme_minimal()
+# #                 # ggplot2::ggtitle(paste0("Changes in ", self$options$group))
+# #             #
+# #             #
+# #             # nodes = data.frame("name" =
+# #             #                        c(self$options$group,
+# #             #                          self$options$dep))
+# #             #
+# #             # links <- mydata_changes
+# #             #
+# #             # names(links) = c("source", "target", "value")
+# #             #
+# #             # plot <- networkD3::sankeyNetwork(Links = links, Nodes = nodes,
+# #             #               Source = "source", Target = "target",
+# #             #               Value = "value", NodeID = "name",
+# #             #               fontSize= 12, nodeWidth = 30)
+# #
+# #             # library(networkD3)
+# #             # nodes = data.frame("name" =
+# #             #                        c("Node A", # Node 0
+# #             #                          "Node B", # Node 1
+# #             #                          "Node C", # Node 2
+# #             #                          "Node D"))# Node 3
+# #             # links = as.data.frame(matrix(c(
+# #             #     0, 1, 10, # Each row represents a link. The first number
+# #             #     0, 2, 20, # represents the node being conntected from.
+# #             #     1, 3, 30, # the second number represents the node connected to.
+# #             #     2, 3, 40),# The third number is the value of the node
+# #             #     byrow = TRUE, ncol = 3))
+# #             # names(links) = c("source", "target", "value")
+# #             # sankeyNetwork(Links = links, Nodes = nodes,
+# #             #               Source = "source", Target = "target",
+# #             #               Value = "value", NodeID = "name",
+# #             #               fontSize= 12, nodeWidth = 30)
+# #
+# #             # plot <- c("Under Construction")
+# #
+# #             # plot <- list(plot1,
+# #             #              plot2)
+# #
+# #
+# #
+# #         }
+# #
+# #
+# #
+# #     print(plot)
+# #     TRUE
+# #
+# # }
+# #
+# #         )
+# # )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
 # Packages
 
 
@@ -247,6 +778,19 @@ devtools::check()
 
 ```
 
+```{r eval=FALSE, include=FALSE}
+# From CRAN
+# install.packages("attachment")
+# From github
+# remotes::install_github("ThinkR-open/attachment")
+
+# If you correctly called the package dependencies in the {roxygen2} skeleton, in your functions, in your Rmarkdown vignettes and in your tests, you only need to run attachment::att_to_description()just before devtools::check(). And that’s it, there is nothing else to remember !
+attachment::att_to_description()
+
+```
+
+
+
 
 ```{r pkgdown build, include=FALSE}
 rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
@@ -300,6 +844,11 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')
 
+# jmvtools::addAnalysis(name='statsplotbetween', title='Stats Plot Between')
+
+# jmvtools::addAnalysis(name='competingsurvival', title='Competing Survival')
+
+
 # jmvtools::addAnalysis(name='scat2', title='scat2')
 
 # jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
@@ -329,10 +878,12 @@ jmvtools::install()
 
 
 
-```{r construct}
+```{r construct formula}
 formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
 
 jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
+
+jmvcore::constructFormula(terms = "A")
 
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
@@ -378,6 +929,24 @@ jmvcore::decomposeTerm(term = composeTerm)
 ```{r read data}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ```
+
+```{r}
+inherits(deneme$Sex, "character")
+```
+
+```{r}
+ggstatsplot::ggbetweenstats(data = deneme,
+                            x = Sex,
+                            y = Age,
+                            type = "p")
+
+ClinicoPath::statsplot2(
+    data = deneme,
+    dep = Age,
+    group = Sex)
+```
+
+
 
 
 ```{r writesummary, eval=FALSE, include=FALSE}
@@ -504,6 +1073,10 @@ formula <- as.formula(formula)
 
 
 my_group <- "lvi"
+
+jmvcore::composeTerm(my_group)
+
+
 my_dep <- "age"
 
 formula <- paste0('x = ', group, 'y = ', dep)
@@ -991,5 +1564,98 @@ mypairwisedescription)
             #         x = gr,
             #         y = dp
             #         )
+```
+
+
+
+
+```{r read csv}
+library(readr)
+BreastCancer <- read_csv("data/BreastCancer.csv")
+View(BreastCancer)
+```
+
+
+```{r}
+
+mytarget <- "Class"
+myvars <- c("Cl.thickness",
+            "Cell.size",
+            "Cell.shape",
+            "Marg.adhesion",
+            "Epith.c.size",
+            "Bare.nuclei",
+            "Bl.cromatin",
+            "Normal.nucleoli",
+            "Mitoses")
+
+# mytarget <- jmvcore::composeTerms(mytarget)
+# mytarget <- jmvcore::constructFormula(terms = mytarget)
+
+BreastCancer %>%
+                dplyr::select(all_of(mytarget), all_of(myvars)) %>%
+                explore::explain_tree(target = .data[[mytarget]])
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+mytarget <- "Class"
+myvars <- c("Cl.thickness",
+            "Cell.size",
+            "Cell.shape",
+            "Marg.adhesion",
+            "Epith.c.size",
+            "Bare.nuclei",
+            "Bl.cromatin",
+            "Normal.nucleoli",
+            "Mitoses")
+
+mydata <- BreastCancer %>% 
+    select(mytarget, myvars)
+
+formula <- jmvcore::constructFormula(terms = mytarget)
+
+formula <- paste(formula, '~ .')
+
+formula <- as.formula(formula)
+
+ # Create an FFTrees object from the data
+ FFTrees.fft <- FFTrees::FFTrees(
+     formula = formula,
+     data = mydata
+     )
+
+ # Plot the best tree applied to the test data
+ plot2 <- plot(FFTrees.fft,
+      data = mydata
+      # ,
+      # main = "Heart Disease",
+      # decision.labels = c("Healthy", "Disease")
+                 )
+```
+
+
+
+
+
+```{r}
+devtools::install(upgrade = FALSE, quick = TRUE)
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+ClinicoPath::statsplotbetween(
+    data = deneme,
+    dep = LVI,
+    group = PNI)
 ```
 

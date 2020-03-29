@@ -28,7 +28,21 @@ options:
           name: independent
       default: independent
       description:
+          ui: options for measurement type
           R: select measurement type (repeated or independent)
+
+
+    - name: distribution
+      title: Distribution of Data
+      type: List
+      options:
+        - title: Parametric (normal distribution)
+          name: p
+        - title: Nonparametric
+          name: np
+      default: p
+      description:
+          R: select distribution type (parametric or nonparametric)
 
 
     # - name: typex

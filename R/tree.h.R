@@ -6,10 +6,8 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            vars = NULL,
+            target = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,40 +15,22 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars)
+            private$..target <- jmvcore::OptionVariable$new(
+                "target",
+                target)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..vars)
+            self$.addOption(private$..target)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        vars = function() private$..vars$value,
+        target = function() private$..target$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..vars = NA,
+        ..target = NA)
 )
 
 treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -58,7 +38,7 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        plot = function() private$.items[["plot"]]),
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -66,7 +46,9 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Decision Tree",
-                refs="explore")
+                refs=list(
+                    "explore",
+                    "FFTrees"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",
@@ -77,10 +59,15 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Decision Tree"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
+                name="plot2",
+                title="FFTrees",
                 width=600,
                 height=450,
-                renderFun=".plot"))}))
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "target")))}))
 
 treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "treeBase",
@@ -103,44 +90,38 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Decision Tree
 #'
-#' 
+#' Function for making Decision Trees.
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param vars explanatory variables
+#' @param target target variable
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 tree <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    vars,
+    target) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('tree requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(target)) target <- jmvcore::resolveQuo(jmvcore::enquo(target))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(target), target, NULL))
 
 
     options <- treeOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        vars = vars,
+        target = target)
 
     analysis <- treeClass$new(
         options = options,

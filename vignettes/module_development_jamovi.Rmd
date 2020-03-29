@@ -150,7 +150,39 @@ https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174
 
 
 
+# `build` folder
+
+## `js` folder
+
+### event.js
+
+
+
+## R3.6.1-macos
+
+
+
+# Installing
+
+# `jmvtools::install`
+
+# `devtools::install`
+
+
+```r
+devtools::install(upgrade = FALSE, quick = TRUE)
+```
+
+
+
 # General
+
+## YAML
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cdLNKUoMc6c" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
 
 ## RStudio options
 

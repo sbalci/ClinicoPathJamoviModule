@@ -5,13 +5,13 @@
   ],
   "@type": "SoftwareSourceCode",
   "identifier": "ClinicoPath",
-  "description": "Analysis for Clinicopathological Research \n    ClinicoPath help researchers to generate natural language summaries of their\n    dataset, generate cross tables with statistical tests, and survival analysis\n    with survival tables, survival plots, and natural language summaries.",
+  "description": "Analysis for Clinicopathological Research\n    ClinicoPath help researchers to generate natural language summaries of\n    their dataset, generate cross tables with statistical tests, and\n    survival analysis with survival tables, survival plots, and natural\n    language summaries.",
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
-  "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
+  "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.2",
+  "version": "0.0.1.4",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -43,30 +43,6 @@
   "softwareSuggestions": [
     {
       "@type": "SoftwareApplication",
-      "identifier": "effectsize",
-      "name": "effectsize",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=effectsize"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "emmeans",
-      "name": "emmeans",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=emmeans"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "rmarkdown",
       "name": "rmarkdown",
       "provider": {
@@ -79,63 +55,63 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "igraph",
-      "name": "igraph",
+      "identifier": "tidyselect",
+      "name": "tidyselect",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=igraph"
+      "sameAs": "https://CRAN.R-project.org/package=tidyselect"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "iterators",
-      "name": "iterators",
+      "identifier": "kableExtra",
+      "name": "kableExtra",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=iterators"
+      "sameAs": "https://CRAN.R-project.org/package=kableExtra"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "rms",
-      "name": "rms",
+      "identifier": "yarrr",
+      "name": "yarrr",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=rms"
+      "sameAs": "https://CRAN.R-project.org/package=yarrr"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "commonmark",
-      "name": "commonmark",
+      "identifier": "circlize",
+      "name": "circlize",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=commonmark"
+      "sameAs": "https://CRAN.R-project.org/package=circlize"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "sass",
-      "name": "sass",
+      "identifier": "randomForest",
+      "name": "randomForest",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=sass"
+      "sameAs": "https://CRAN.R-project.org/package=randomForest"
     }
   ],
   "softwareRequirements": [
@@ -144,6 +120,156 @@
       "identifier": "R",
       "name": "R",
       "version": ">= 3.6"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "caret",
+      "name": "caret",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=caret"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "correlation",
+      "name": "correlation",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://github.com/easystats/correlation"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "dplyr",
+      "name": "dplyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dplyr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "explore",
+      "name": "explore",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=explore"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "FFTrees",
+      "name": "FFTrees",
+      "sameAs": "https://github.com/ndphillips/FFTrees"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "finalfit",
+      "name": "finalfit",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=finalfit"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "forcats",
+      "name": "forcats",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=forcats"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggalluvial",
+      "name": "ggalluvial",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggalluvial"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggplot2",
+      "name": "ggplot2",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggplot2"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggstatsplot",
+      "name": "ggstatsplot",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "glue",
+      "name": "glue",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=glue"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "irr",
+      "name": "irr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=irr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "janitor",
+      "name": "janitor",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=janitor"
     },
     {
       "@type": "SoftwareApplication",
@@ -160,6 +286,54 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "jsonlite",
+      "name": "jsonlite",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=jsonlite"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "knitr",
+      "name": "knitr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "networkD3",
+      "name": "networkD3",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=networkD3"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "purrr",
+      "name": "purrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=purrr"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "R6",
       "name": "R6",
       "provider": {
@@ -172,15 +346,33 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "dplyr",
-      "name": "dplyr",
+      "identifier": "report",
+      "name": "report",
+      "sameAs": "https://github.com/easystats/report"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rlang",
+      "name": "rlang",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=dplyr"
+      "sameAs": "https://CRAN.R-project.org/package=rlang"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "scales",
+      "name": "scales",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=scales"
     },
     {
       "@type": "SoftwareApplication",
@@ -208,90 +400,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "finalfit",
-      "name": "finalfit",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=finalfit"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "arsenal",
-      "name": "arsenal",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=arsenal"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "purrr",
-      "name": "purrr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=purrr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "glue",
-      "name": "glue",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=glue"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "janitor",
-      "name": "janitor",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=janitor"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "ggplot2",
-      "name": "ggplot2",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=ggplot2"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "forcats",
-      "name": "forcats",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=forcats"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "tableone",
       "name": "tableone",
       "provider": {
@@ -316,99 +424,32 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "rlang",
-      "name": "rlang",
+      "identifier": "tibble",
+      "name": "tibble",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=rlang"
+      "sameAs": "https://CRAN.R-project.org/package=tibble"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "knitr",
-      "name": "knitr",
+      "identifier": "tidyr",
+      "name": "tidyr",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=knitr"
+      "sameAs": "https://CRAN.R-project.org/package=tidyr"
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "remotes",
-      "name": "remotes",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=remotes"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "kableExtra",
-      "name": "kableExtra",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=kableExtra"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "ggstatsplot",
-      "name": "ggstatsplot",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "ggalluvial",
-      "name": "ggalluvial",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=ggalluvial"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "caret",
-      "name": "caret",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=caret"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "irr",
-      "name": "irr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=irr"
+      "identifier": "utils",
+      "name": "utils"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -436,7 +477,9 @@
     "correlation",
     "decision",
     "summary",
-    "statistics"
+    "statistics",
+    "survival-analysis",
+    "natural-language-summaries"
   ],
-  "fileSize": "13456.767KB"
+  "fileSize": "27081.113KB"
 }

@@ -1,31 +1,31 @@
 ---
-name:  statsplot2
-title: Plots
+name:  statsplotbetween
+title: Stats Plot Between
 jrs:   '1.1'
 
 items:
-
-    - name:  todo
-      title: To Do
+    - name:  text
+      title: Stats Plot Between
       type:  Preformatted
 
+
     - name:  text1
-      title: GGStatsPlot
+      title: Text1
       type:  Preformatted
 
 
     - name:  text2
-      title: GGStatsPlot
+      title: Text2
       type:  Preformatted
 
 
+    - name:  plothtml
+      title: plothtml
+      type:  Html
 
-    - name:  text3
-      title: GGStatsPlot
-      type:  Preformatted
 
 
-    - title: GGStatsPlot
+    - title: D3
       name: plot
       type: Image
       width:  600
@@ -35,15 +35,8 @@ items:
       clearWith:
           - dep
           - group
-          - direction
-          - distribution
 
 
 
-
-
-refs:
-    - ggstatsplot
-    - ggalluvial
 
 ...

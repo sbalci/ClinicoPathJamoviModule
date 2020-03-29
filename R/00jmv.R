@@ -227,4 +227,18 @@
         `year`=2019, 
         `title`="ggalluvial: Alluvial Plots in 'ggplot2'.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggalluvial", 
-        `url`="https://CRAN.R-project.org/package=ggalluvial"))
+        `url`="https://CRAN.R-project.org/package=ggalluvial"), 
+    `explore`=list(
+        `type`="software", 
+        `author`="Roland Krasser", 
+        `year`=2020, 
+        `title`="explore: Simplifies Exploratory Data Analysis.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=explore", 
+        `url`="https://CRAN.R-project.org/package=explore"), 
+    `FFTrees`=list(
+        `type`="software", 
+        `author`="Nathaniel Phillips, Hansjoerg Neth, Jan Woike and Wolfgang Gaissmaer", 
+        `year`=2019, 
+        `title`="FFTrees: Generate, Visualise, and Evaluate Fast-and-Frugal Decision Trees", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=FFTrees", 
+        `url`="https://CRAN.R-project.org/package=FFTrees"))

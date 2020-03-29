@@ -1,5 +1,5 @@
-title: Decision Tree
-name: tree
+title: Stats Plot Between
+name: statsplotbetween
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -9,15 +9,16 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Explanatory Variables
+        label: Dependent Variable
         children:
           - type: VariablesListBox
-            name: vars
+            name: dep
+            maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Target Variable
+        label: Grouping Variable
         children:
           - type: VariablesListBox
-            name: target
+            name: group
             maxItemCount: 1
             isTarget: true

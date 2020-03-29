@@ -17,6 +17,7 @@ numeric}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 }

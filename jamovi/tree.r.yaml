@@ -13,12 +13,30 @@ items:
       title: Decision Tree
       type:  Preformatted
 
-    - name: plot
+    # - name: plot
+    #   title: Decision Tree
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot
+    #   requiresData: true
+    #   clearWith:
+    #       - vars
+    #       - target
+
+
+    - name: plot2
+      title: FFTrees
       type: Image
       width:  600
       height: 450
-      renderFun: .plot
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - vars
+          - target
 
-refs: explore
-
+refs:
+    - explore
+    - FFTrees
 ...

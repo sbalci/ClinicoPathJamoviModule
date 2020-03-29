@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.1.0002
+version: 0.0.1.0004
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-03-17'
+date: '2020-03-29'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -88,6 +88,19 @@ analyses:
     menuGroup: ClinicoPath2
     menuSubgroup: Decision Tree
     menuTitle: Decision Tree
+    description: Function for making Decision Trees.
+  - title: Competing Survival
+    name: competingsurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Survival2
+    menuTitle: Competing Survival
+  - title: Stats Plot Between
+    name: statsplotbetween
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Comparisons2
+    menuTitle: Stats Plot Between
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
@@ -108,9 +121,7 @@ datasets:
       - Survival
   - name: melanoma
     path: melanoma.csv
-    description: >-
-      melanoma dataset obtained from {boot}.
-      https://stat.ethz.ch/R-manual/R-devel/library/boot/html/melanoma.html
+    description: 'melanoma dataset obtained from {boot}.'
     tags:
       - Data Summary
       - Survival

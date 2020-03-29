@@ -6,32 +6,22 @@ menuSubgroup: Decision Tree
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: Function for making Decision Trees.
+
 options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
+    - name: vars
+      title: Explanatory Variables
+      type: Variables
+      description: >
+                  explanatory variables
+
+    - name: target
+      title: Target Variable
       type: Variable
-
-    - name: group
-      title: Grouping Variable
-      type: Variable
-
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
-
-    - name: varEq
-      title: Assume equal variances
-      type: Bool
-      default: true
+      description: >
+                  target variable
 ...

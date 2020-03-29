@@ -40,27 +40,16 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mygroup <- self$data[[self$options$group]]
 
-            contin <- c("integer", "numeric", "double")
-            categ <- c("factor")
 
-            distribution <- self$options$distribution
-            distribution <- jmvcore::composeTerm(distribution)
-
-          direction <- self$options$direction
-          direction <- jmvcore::composeTerm(direction)
-
-
-            klass <- print(
-                list(
-                    "mydep" = c(typeof(mydep), class(mydep)),
-                    "mydep2" = c(inherits(mydep, "factor"), inherits(mydep, "character"), inherits(mydep, "integer"), inherits(mydep, "numeric"), inherits(mydep, contin)),
-                    "mygroup" = c(typeof(mygroup), class(mygroup)),
-                    "a" = c(distribution, direction)
-                    )
-                )
+            # klass <- print(
+            #     list(
+            #         "mydep" = c(typeof(mydep), class(mydep)),
+            #         "mygroup" = c(typeof(mygroup), class(mygroup))
+            #         )
+            #     )
 
 
-            self$results$text1$setContent(klass)
+            # self$results$text1$setContent(klass)
 
 
             # plotData <- data.frame(gr = mygroup,
@@ -108,7 +97,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         },
 
-        .plot = function(image, ...) {  # <-- the plot function ----
+        .plot = function(image, ...) {  # <-- the plot function
 
 
             if (is.null(self$options$dep) || is.null(self$options$group))
@@ -119,8 +108,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             direction <- self$options$direction
 
-
-            distribution <- jmvcore::constructFormula(terms = self$options$distribution)
+            distribution <- self$options$distribution
 
             mydata <- self$data
 
@@ -133,12 +121,11 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # independent ----
 
-        # independent, factor, continuous ----
-
             if (direction == "independent") {
 
+                # independent, factor, continuous ----
 
-                if (inherits(mygroup, "factor") && inherits(mydep, contin)) {
+                if (class(mygroup) == "factor" && class(mydep) %in% contin) {
 
                 # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
 
@@ -155,7 +142,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # independent, continuous, continuous ----
 
-                } else if (inherits(mygroup, contin) && inherits(mydep, contin)) {
+                } else if (class(mygroup) %in% contin && class(mydep) %in% contin) {
 
             # ggscatterstats 	scatterplots 	for correlations between two variables
 
@@ -171,7 +158,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # independent, factor, factor ----
 
-                } else if (inherits(mygroup, "factor") && inherits(mydep, "factor")) {
+                } else if (class(mygroup) == "factor" && class(mydep) == "factor") {
 
 
                     # ggbarstats 	bar charts 	for categorical data
@@ -189,7 +176,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # independent, continuous, factor ----
 
-                } else if (inherits(mygroup, contin) && inherits(mydep, "factor")) {
+                } else if (class(mygroup) %in% contin && class(mydep) == "factor") {
 
                     plot <- "Not Available"
 
@@ -201,7 +188,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # repeated, factor, continuous ----
 
-                if (inherits(mygroup, "factor") && inherits(mydep, contin)) {
+                if (class(mygroup) == "factor" && class(mydep) %in% contin) {
 
                     # ggwithinstats 	violin plots 	for comparisons within groups/conditions
 
@@ -220,7 +207,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             # repeated, continuous, continuous ----
 
 
-                } else if (inherits(mygroup, contin) && inherits(mydep, contin)) {
+                } else if (class(mygroup) %in% contin && class(mydep) %in% contin) {
 
                     plot <- c("Not Available")
 
@@ -249,7 +236,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                } else if (inherits(mygroup, "factor") && inherits(mydep, "factor")) {
+                } else if (class(mygroup) == "factor" && class(mydep) == "factor") {
 
                      # http://corybrunson.github.io/ggalluvial/
 
@@ -350,7 +337,7 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             # repeated, continuous, factor ----
 
 
-                } else if (inherits(mygroup, contin) && inherits(mydep, "factor")) {
+                } else if (class(mygroup) %in% contin && class(mydep) == "factor") {
 
                     plot <- c("Not Available")
 
@@ -362,8 +349,5 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot)
             TRUE
 
-        }
-
-
-        )
+        })
 )
