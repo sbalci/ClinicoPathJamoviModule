@@ -2,6 +2,7 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import ggstatsplot
+#' @import statsExpressions
 #' @import ggalluvial
 #' @importFrom rlang .data
 #' @importFrom ggalluvial StatStratum
@@ -28,11 +29,13 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$todo$setContent(todo)
 
+
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return()
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
+
 
             mydata <- self$data
 
@@ -63,47 +66,122 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text1$setContent(klass)
 
 
-            # plotData <- data.frame(gr = mygroup,
-            #                        dp = mydep)
-            # plotData <- jmvcore::naOmit(plotData)
-            # mydata_changes <- plotData %>%
-            #     dplyr::group_by(gr, dp) %>%
-            #     dplyr::tally(x = .)
-
-            # self$results$text2$setContent(mydata_changes)
-
-            # plotData <- data.frame(gr = mygroup,
-            #                        dp = mydep)
-            # plotData <- jmvcore::naOmit(plotData)
-
-
-            # mydata_changes <- plotData %>%
-            #     dplyr::group_by(gr, dp) %>%
-            #     dplyr::tally(x = .)
-
-
-            # deneme <- ggalluvial::is_alluvia_form(
-            #     as.data.frame(mydata_changes),
-            #     axes = 1:2, silent = TRUE)
-
-            # nodes = data.frame("name" =
-            #                        c(self$options$group,
-            #                          self$options$dep))
-            #
-            # links <- mydata_changes
-            #
-            # names(links) = c("source", "target", "value")
-            #
-            # deneme <- networkD3::sankeyNetwork(Links = links, Nodes = nodes,
-            #                                  Source = "source", Target = "target",
-            #                                  Value = "value", NodeID = "name",
-            #                                  fontSize= 12, nodeWidth = 30)
 
 
 
-            # self$results$text3$setContent(deneme)
+# independent ----
 
-            # independent, factor, continuous ----
+# independent, factor, continuous ----
+
+if (direction == "independent") {
+
+
+                if (inherits(mygroup, "factor") && inherits(mydep, contin)) {
+
+                    # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+                    stat_exp <- c("independent", "factor", "continuous")
+
+
+                    # independent, continuous, continuous ----
+
+                } else if (inherits(mygroup, contin) && inherits(mydep, contin)) {
+
+                    # ggscatterstats 	scatterplots 	for correlations between two variables
+                    stat_exp <- c("independent", "continuous", "continuous")
+
+
+                    # independent, factor, factor ----
+
+                } else if (inherits(mygroup, "factor") && inherits(mydep, "factor")) {
+
+
+# expr_contingency_tab
+
+                    stat_exp <- c("independent", "factor", "factor")
+
+
+
+                    # independent, continuous, factor ----
+
+                } else if (inherits(mygroup, contin) && inherits(mydep, "factor")) {
+
+
+                    stat_exp <- ("no output")
+
+
+                }
+
+                # repeated ----
+
+            } else if (direction == "repeated") {
+
+                # repeated, factor, continuous ----
+
+                if (inherits(mygroup, "factor") && inherits(mydep, contin)) {
+
+                    # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+
+                    stat_exp <- c("repeated", "factor", "continuous")
+
+
+
+                    # repeated, continuous, continuous ----
+
+
+                } else if (inherits(mygroup, contin) && inherits(mydep, contin)) {
+
+                    stat_exp <- c("repeated", "continuous", "continuous")
+
+
+
+                    # repeated, factor, factor ----
+
+
+
+                } else if (inherits(mygroup, "factor") && inherits(mydep, "factor")) {
+
+                    stat_exp <- c("repeated", "factor", "factor")
+
+                    # repeated, continuous, factor ----
+
+
+                } else if (inherits(mygroup, contin) && inherits(mydep, "factor")) {
+
+
+                    stat_exp <- c("no output")
+
+
+                }
+
+            }
+
+
+            self$results$text4$setContent(stat_exp)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         },
@@ -131,7 +209,8 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             contin <- c("integer", "numeric", "double")
             categ <- c("factor")
 
-        # independent ----
+
+            # independent ----
 
         # independent, factor, continuous ----
 
