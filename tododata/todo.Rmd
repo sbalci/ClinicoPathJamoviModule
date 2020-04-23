@@ -2,6 +2,20 @@
 title: "ToDo"
 ---
 
+# Future Works:
+
+## ndphillips/FFTrees
+
+
+
+
+
+
+
+
+
+
+
 ```
             # gtsummary
 
@@ -733,14 +747,6 @@ Suggests:
 
 
 
-
-
-
-
-
-
----
-
 # Develop
 
 
@@ -752,13 +758,15 @@ Suggests:
 
 # jmvtools::install(home = "C://Program Files//jamovi//bin")
 # 
+# jmvtools::install(pkg = "C://ClinicoPath", home = "C://Program Files//jamovi//bin")
+
 # devtools::build(path = "C:\\ClinicoPathOutput")
 
 # .libPaths(new = "C:\\ClinicoPathLibrary")
 
 # devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))
 
-Sys.setenv(TZ="Europe/Istanbul")
+Sys.setenv(TZ = "Europe/Istanbul")
 
 library("jmvtools")
 ```
@@ -867,6 +875,9 @@ system(command = gitCommand, intern = TRUE)
 
 
 ```{r devtools install, eval=FALSE, include=FALSE}
+Sys.unsetenv("R_PROFILE_USER")
+devtools::check()
+
 devtools::install()
 ```
 
@@ -1658,4 +1669,173 @@ ClinicoPath::statsplotbetween(
     dep = LVI,
     group = PNI)
 ```
+
+
+
+
+# Packages for Development
+
+
+
+---
+
+
+## rpkgtools
+
+
+devtools::install_github("IndrajeetPatil/rpkgtools")
+
+
+
+## available
+
+
+Check if a package name is available to use https://docs.ropensci.org/available
+
+
+https://github.com/r-lib/available
+
+
+```{r eval=FALSE, include=FALSE}
+available::available("clinicopath")
+available::available("lens2r")
+
+```
+
+
+
+## bench
+
+
+High Precision Timing of R Expressions http://bench.r-lib.org/
+
+https://github.com/r-lib/bench
+
+
+
+
+
+
+## desc
+
+
+Manipulate DESCRIPTION files
+https://github.com/r-lib/desc
+
+
+
+## pkgverse
+
+pkgverse: Build a Meta-Package Universe
+https://pkgverse.mikewk.com/
+
+
+
+## pkgbuild
+
+pkgbuild: Find Tools Needed to Build R Packages
+https://github.com/r-lib/pkgbuild
+
+
+## pkgload
+
+pkgload: Simulate Package Installation and Attach
+https://github.com/r-lib/pkgload
+
+
+## rcmdcheck
+
+rcmdcheck: Run 'R CMD check' from 'R' and Capture Results
+https://github.com/r-lib/rcmdcheck
+
+
+
+
+## remotes
+
+
+## sessioninfo
+
+Print Session Information
+
+https://github.com/r-lib/sessioninfo
+
+
+
+## "covr
+
+
+
+
+## "exampletestr
+
+
+## "covrpage",
+
+
+## "gramr",
+
+
+## "lintr",
+
+
+## "goodpractice",
+
+
+## "pkgdown",
+
+
+## "usethis",
+
+
+## "testthat",
+
+
+## "spelling",
+
+
+## "RTest",
+
+https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
+
+
+## "rhub",
+
+
+## "roxygen2",
+
+
+## "sinew",
+
+
+## "styler",
+
+
+
+## "vdiffr"
+
+
+
+
+## "attachment (https://github.com/ThinkR-open/attachment)
+## "covrpage (https://github.com/yonicd/covrpage)
+## "defender (https://github.com/ropenscilabs/defender)
+## "gramr (https://github.com/ropenscilabs/gramr)
+## "packagemetrics (https://github.com/ropenscilabs/packagemetrics)
+## "pRojects (https://github.com/lockedata/pRojects)
+## "revdepcheck (https://github.com/r-lib/revdepcheck)
+## "roxygen2Comment (https://github.com/csgillespie/roxygen2Comment)
+## "roxygen2md (https://github.com/r-lib/roxygen2md)
+## "testdown (https://github.com/ThinkR-open/testdown)
+## "tic (https://github.com/ropenscilabs/tic)
+
+
+
+
+
+---
+
+
+
+
 

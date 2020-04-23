@@ -19,11 +19,17 @@ items:
       type:  Preformatted
 
 
-
     - name:  text3
       title: GGStatsPlot
       type:  Preformatted
 
+    - name:  text4
+      title: Stats Expression
+      type:  Preformatted
+
+    - name:  text5
+      title: Stats Expression Formula
+      type:  Preformatted
 
     - title: GGStatsPlot
       name: plot

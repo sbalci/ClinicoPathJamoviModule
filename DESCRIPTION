@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0004
-Date: 2020-03-29
+Version: 0.0.1.0005
+Date: 2020-04-22
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -32,6 +32,7 @@ Imports:
     forcats,
     ggalluvial,
     ggplot2,
+    statsExpressions,
     ggstatsplot,
     glue,
     irr,
@@ -63,12 +64,12 @@ VignetteBuilder:
     knitr
 Remotes:
     ndphillips/FFTrees,
-    easystats/parameters,
+    easystats/insight,
     easystats/bayestestR,
+    easystats/parameters,
     easystats/effectsize,
     easystats/correlation,
     easystats/modelbased,
-    easystats/insight,
     easystats/report
 Encoding: UTF-8
 LazyData: true

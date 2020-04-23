@@ -24,6 +24,8 @@ A results object containing:
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
