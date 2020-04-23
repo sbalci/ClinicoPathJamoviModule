@@ -98,3 +98,7 @@ build
 .gitpod.Dockerfile
 .gitpod.yml
 .binder
+^\.ccache$
+^\.github$
+^clang-.*
+^gfortran.*
