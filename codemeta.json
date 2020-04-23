@@ -11,14 +11,14 @@
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.4",
+  "version": "0.0.1.5",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.0",
+    "version": "3.6.3",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.0 (2019-04-26)",
+  "runtimePlatform": "R version 3.6.3 (2020-02-29)",
   "author": [
     {
       "@type": "Person",
@@ -225,6 +225,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "statsExpressions",
+      "name": "statsExpressions",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=statsExpressions"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "ggstatsplot",
       "name": "ggstatsplot",
       "provider": {
@@ -413,14 +425,7 @@
     {
       "@type": "SoftwareApplication",
       "identifier": "tangram",
-      "name": "tangram",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=tangram"
+      "name": "tangram"
     },
     {
       "@type": "SoftwareApplication",
@@ -453,7 +458,6 @@
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
-  "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md",
   "contIntegration": [
     "https://travis-ci.com/sbalci/ClinicoPathJamoviModule",
     "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule",
@@ -481,5 +485,5 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "27081.113KB"
+  "fileSize": "27080.883KB"
 }
