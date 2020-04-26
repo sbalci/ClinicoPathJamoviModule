@@ -102,11 +102,11 @@ DOI 10.17605/OSF.IO/9SZUD
 
 #### Multivariate Survival Analysis
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
+
+#### Odds Ratio Table and Plot
 
 ### Decision
 
