@@ -36,9 +36,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 Survival should be numeric, continuous, and in months.
                 <br><br>
                 This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                <br><br>
-                This tool will be updated to calculate competing risks.
-                               "
+                                   "
                 )
 
                 html <- self$results$todo
@@ -171,7 +169,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dplyr::mutate(
                         description = gsub(pattern = "thefactor=", replacement = " is ", x = description)
                     ) %>%
-                    dplyr::select(description) %>%
+                    jmvcore::select(description) %>%
                     dplyr::pull() -> km_fit_median_definition
 
                 results2 <- km_fit_median_definition
@@ -300,7 +298,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
                             )
                     ) %>%
-                    dplyr::select(description) %>%
+                    jmvcore::select(description) %>%
                     dplyr::pull() -> km_fit_definition
 
                 results7 <- km_fit_definition
@@ -339,7 +337,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                       "The comparison between ", self$options$explanatory, " {rowname} and ", self$options$explanatory," {name} has a p-value of {round(value, 2)}."
                                                   )
                                 ) %>%
-                                dplyr::select(description) %>%
+                                jmvcore::select(description) %>%
                                 dplyr::pull() -> mypairwisedescription
 
                             mypairwisedescription <- unlist(mypairwisedescription)

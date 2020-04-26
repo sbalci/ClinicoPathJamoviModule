@@ -11,11 +11,11 @@ options:
       type: Data
 
     - name: dep
-      title: Dependent Variable
+      title: 'Dependent (y-axis, 1st measurement)'
       type: Variable
 
     - name: group
-      title: Grouping Variable
+      title: 'Grouping (x-axis, 2nd measurement)'
       type: Variable
 
     - name: direction

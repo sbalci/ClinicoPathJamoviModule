@@ -16,7 +16,12 @@ reportcatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
 
             self$.addOption(private$..vars)
         }),
@@ -94,6 +99,7 @@ reportcat <- function(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- reportcatOptions$new(
         vars = vars)

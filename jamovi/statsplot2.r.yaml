@@ -1,35 +1,43 @@
 ---
 name:  statsplot2
-title: Plots
+title: Graphs and Plots
 jrs:   '1.1'
 
 items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
+      type:  Html
+      clearWith:
+          - dep
+          - group
+          - direction
+          - distribution
 
-    - name:  text1
-      title: GGStatsPlot
-      type:  Preformatted
+    # - name:  text1
+    #   title: Variable Types
+    #   type:  Preformatted
 
+    # - name:  text2
+    #   title: GGStatsPlot
+    #   type:  Preformatted
 
-    - name:  text2
-      title: GGStatsPlot
-      type:  Preformatted
-
-
-    - name:  text3
-      title: GGStatsPlot
-      type:  Preformatted
+    # - name:  text3
+    #   title: GGStatsPlot
+    #   type:  Preformatted
 
     - name:  text4
-      title: Stats Expression
+      title: Explanation
       type:  Preformatted
+      clearWith:
+          - dep
+          - group
+          - direction
+          - distribution
 
-    - name:  text5
-      title: Stats Expression Formula
-      type:  Preformatted
+    # - name:  text5
+    #   title: Stats Expression Formula
+    #   type:  Preformatted
 
     - title: GGStatsPlot
       name: plot
@@ -43,9 +51,6 @@ items:
           - group
           - direction
           - distribution
-
-
-
 
 
 refs:
