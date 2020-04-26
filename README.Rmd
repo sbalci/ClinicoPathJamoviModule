@@ -125,7 +125,6 @@ https://osf.io/9szud/
 <img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
 
 
-
 ### Survival
 
 #### Univariate Survival Analysis
@@ -148,14 +147,14 @@ https://osf.io/9szud/
 
 #### Multivariate Survival Analysis
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
 
 
 <img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
 
+
+#### Odds Ratio Table and Plot 
 
 
 
