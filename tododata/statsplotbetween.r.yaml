@@ -1,0 +1,42 @@
+---
+name:  statsplotbetween
+title: Stats Plot Between
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Stats Plot Between
+      type:  Preformatted
+
+
+    - name:  text1
+      title: Text1
+      type:  Preformatted
+
+
+    - name:  text2
+      title: Text2
+      type:  Preformatted
+
+
+    - name:  plothtml
+      title: plothtml
+      type:  Html
+
+
+
+    - title: D3
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+
+
+
+
+...

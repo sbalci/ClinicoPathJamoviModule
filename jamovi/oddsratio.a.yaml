@@ -1,0 +1,25 @@
+---
+name:  oddsratio
+title: Odds Ratio Table and Plot
+menuGroup: ClinicoPath
+menuSubgroup: Survival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+
+    - name: outcome
+      title: >-
+          Mortality or Recurrence
+          (event:1, healthy:0)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+...

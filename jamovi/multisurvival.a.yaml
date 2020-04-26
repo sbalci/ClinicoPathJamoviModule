@@ -1,8 +1,8 @@
 ---
 name:  multisurvival
 title: Multivariate Survival Analysis
-menuGroup: ClinicoPath2
-menuSubgroup: Survival2
+menuGroup: ClinicoPath
+menuSubgroup: Survival
 version: '1.0.0'
 jas: '1.2'
 
@@ -20,18 +20,16 @@ options:
       suggested: [ continuous ]
       permitted: [ numeric ]
 
+    - name: overalltime
+      title: 'Overall Time (in months)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     # - name: outcomeLevel
     #   title: |
     #       Select Event (Death, Recurrence)
     #   type: Level
     #   variable: (outcome)
-
-
-    - name: overalltime
-      title: 'Overall Time (in months)'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
 
 ...

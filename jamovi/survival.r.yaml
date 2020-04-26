@@ -13,26 +13,21 @@ items:
           - outcome
           - overalltime
 
+    # - name:  deneme
+    #   title: ''
+    #   type:  Preformatted
 
-    - name:  deneme
-      title: ''
-      type:  Preformatted
-    #
-    #
     # - name:  deneme2
     #   title: ''
     #   type:  Preformatted
-    #
-    #
+
     # - name:  deneme3
     #   title: ''
     #   type:  Preformatted
-    #
-    #
+
     # - name:  deneme4
     #   title: ''
     #   type:  Preformatted
-
 
     # - name:  text1
     #   title: Median Survival Table

@@ -1,0 +1,28 @@
+---
+name:  agreement
+title: Interrater Intrarater Reliability
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    - name:  text
+      title: 'Table'
+      type:  Preformatted
+
+    - name:  text1
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
+
+    - name:  text2
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
+
+
+refs: irr
+
+
+...

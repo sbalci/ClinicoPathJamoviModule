@@ -9,7 +9,7 @@ summarydataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            if (length(self$options$vars) == 0){
+            if (length(self$options$vars) == 0) {
                 todo <- "
                 <br>Welcome to ClinicoPath
                           <br><br>

@@ -65,14 +65,18 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs=list(
                     "finalfit",
                     "ggstatsplot"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
-                title="FinalFit Multivariate Survival",
+                title="Multivariate Survival",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -118,8 +122,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                completeWhenFilled = FALSE)
         }))
 
 #' Multivariate Survival Analysis
@@ -131,7 +134,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param overalltime .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
