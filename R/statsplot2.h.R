@@ -59,11 +59,7 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        text3 = function() private$.items[["text3"]],
         text4 = function() private$.items[["text4"]],
-        text5 = function() private$.items[["text5"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -71,34 +67,28 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Plots",
+                title="Graphs and Plots",
                 refs=list(
                     "ggstatsplot",
                     "ggalluvial"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text1",
-                title="GGStatsPlot"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="GGStatsPlot"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text3",
-                title="GGStatsPlot"))
+                title="To Do",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "direction",
+                    "distribution")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text4",
-                title="Stats Expression"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text5",
-                title="Stats Expression Formula"))
+                title="Explanation",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "direction",
+                    "distribution")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="GGStatsPlot",
@@ -142,12 +132,8 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param distribution select distribution type (parametric or nonparametric)
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

@@ -24,9 +24,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue("
                     <br>Welcome to ClinicoPath
                     <br><br>
-                        This tool will help you perform a multivariate survival analysis.
+                        This tool will help you produce an odds ratio table and plot.
                     <br><br>
-                        Explanatory variable should be categorical (ordinal or nominal).
+                        Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
                         Outcome variable should be coded binary (0 or 1).
                     <br><br>
@@ -34,9 +34,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         If censored (patient is alive or free of disease) at the last visit it is 0.
                     <br><br>
-                        Survival should be numeric, continuous, and in months.
-                    <br><br>
-                        This function uses finalfit and ggstatsplot packages. Please cite jamovi and the packages as given below.
+                        This function uses finalfit package. Please cite jamovi and the packages as given below.
                     <br><br>
                     ")
 
@@ -48,11 +46,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Empty message when all variables selected
 
-                todo <- glue::glue("Analysis based on:
-                <br>
-                glm(depdendent ~ explanatory, family='binomial')
-                <br>
-                    ")
+                todo <- ""
+
+                # glue::glue("Analysis based on:
+                # <br>
+                # glm(depdendent ~ explanatory, family='binomial')
+                # <br>
+                #     ")
 
                 html <- self$results$todo
                 html$setContent(todo)

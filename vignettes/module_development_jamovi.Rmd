@@ -201,6 +201,18 @@ add following to .gitignore file
 
 Try to use compatible packages with the jamovi's R version.
 
+Use: **R 3.6.1** https://cran.r-project.org/bin/macosx/R-3.6.1.pkg
+
+
+Use packages from mran: 
+
+```r
+options(repos = c('https://repo.jamovi.org',
+                  "https://cran.microsoft.com/snapshot/2020-01-01"
+                  )
+)
+```
+
 
 
 ## Electron

@@ -29,7 +29,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         This tool will help you perform a multivariate survival analysis.
                     <br><br>
-                        Explanatory variable should be categorical (ordinal or nominal).
+                        Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
                         Outcome variable should be coded binary (0 or 1).
                     <br><br>
