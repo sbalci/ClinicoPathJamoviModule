@@ -73,7 +73,6 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        deneme = function() private$.items[["deneme"]],
         text2 = function() private$.items[["text2"]],
         text1html = function() private$.items[["text1html"]],
         text5 = function() private$.items[["text5"]],
@@ -102,10 +101,6 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="deneme",
-                title=""))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
@@ -197,8 +192,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                completeWhenFilled = FALSE)
         }))
 
 #' Survival Analysis
@@ -213,7 +207,6 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$deneme} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr

@@ -85,8 +85,7 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                completeWhenFilled = FALSE)
         }))
 
 #' Competing Survival

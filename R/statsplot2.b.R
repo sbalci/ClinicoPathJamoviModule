@@ -2,7 +2,6 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import ggstatsplot
-#' @import statsExpressions
 #' @import ggalluvial
 #' @importFrom rlang .data
 #' @importFrom ggalluvial StatStratum
@@ -21,7 +20,6 @@ statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 -
                 -  "
             )

@@ -2,6 +2,22 @@
 title: "ToDo"
 ---
 
+Remotes:
+
+
+
+    easystats/correlation,
+    easystats/report
+
+
+
+
+
+
+
+
+
+
 # Future Works:
 
 ## ndphillips/FFTrees
@@ -866,6 +882,8 @@ system(command = gitCommand, intern = TRUE)
 # jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
 
 # jmvtools::addAnalysis(name='tree', title='Decision Tree')
+# 
+# jmvtools::addAnalysis(name='oddsratio', title='Odds Ratio Table and Plot')
 
 ```
 
@@ -1309,6 +1327,54 @@ table
 
 
 ```
+
+
+
+
+
+```{r read data OR}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+mydata <- deneme
+
+formula2 <- jmvcore::constructFormula(terms = c("LVI", "PNI", "Age"))
+
+formulaR <- jmvcore::constructFormula(terms = "Death")
+
+formulaR <- jmvcore::toNumeric(formulaR)
+
+
+
+plot <-
+                finalfit::or_plot(
+                    .data = mydata,
+                    dependent = formulaR,
+                    explanatory = formula2,
+                    remove_ref = FALSE,
+                    table_text_size = 4,
+                    title_text_size = 14,
+                    random_effect = NULL,
+                    factorlist = NULL,
+                    glmfit = NULL,
+                    confint_type = NULL,
+                    breaks = NULL,
+                    column_space = c(-0.5, 0, 0.5),
+                    dependent_label = "Death",
+                    prefix = "",
+                    suffix = ": OR (95% CI, p-value)",
+                    table_opts = NULL,
+                    plot_opts = list(
+                    ggplot2::xlab("OR, 95% CI"),
+                    ggplot2::theme(
+                    axis.title = ggplot2::element_text(size = 12)
+                    )
+                    )
+                    )
+
+
+```
+
 
 
 

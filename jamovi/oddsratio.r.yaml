@@ -1,0 +1,50 @@
+---
+name:  oddsratio
+title: Odds Ratio Table and Plot
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+
+    - name:  text
+      title: Odds Ratio Table
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+
+    - name: plot
+      title: Odds Ratio Plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - explanatory
+          - outcome
+
+
+    # - name: plot2
+    #   title: Odds Ratio Plot
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   clearWith:
+    #       - explanatory
+    #       - outcome
+
+refs:
+    - finalfit
+
+
+
+...

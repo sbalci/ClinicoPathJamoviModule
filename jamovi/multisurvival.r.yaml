@@ -7,14 +7,14 @@ items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
-
-    # - name:  todo2
-    #   title: ToDo2
-    #   type:  Preformatted
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text
-      title: FinalFit Multivariate Survival
+      title: Multivariate Survival
       type:  Html
       clearWith:
           - explanatory

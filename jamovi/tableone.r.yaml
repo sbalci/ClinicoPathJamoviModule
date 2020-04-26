@@ -12,11 +12,8 @@ items:
     - name:  text1
       title: ''
       type:  Preformatted
-
-
-    # - name:  text2
-    #   title: ''
-    #   type:  Preformatted
+      clearWith:
+          - vars
 
 
 refs: tableone
