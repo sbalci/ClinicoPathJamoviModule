@@ -49,7 +49,6 @@ Suggests:
     rmarkdown,
     kableExtra
 Remotes:
-    r-lib/rlang,
     easystats/insight,
     easystats/bayestestR,
     easystats/parameters,
