@@ -3,7 +3,6 @@
 #' @import finalfit
 #' @import survival
 #' @import survminer
-#' @importFrom rlang .data
 #'
 
 survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -169,7 +168,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dplyr::mutate(
                         description = gsub(pattern = "thefactor=", replacement = " is ", x = description)
                     ) %>%
-                    jmvcore::select(description) %>%
+                    dplyr::select(description) %>%
                     dplyr::pull() -> km_fit_median_definition
 
                 results2 <- km_fit_median_definition
@@ -298,7 +297,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
                             )
                     ) %>%
-                    jmvcore::select(description) %>%
+                    dplyr::select(description) %>%
                     dplyr::pull() -> km_fit_definition
 
                 results7 <- km_fit_definition
@@ -337,7 +336,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                       "The comparison between ", self$options$explanatory, " {rowname} and ", self$options$explanatory," {name} has a p-value of {round(value, 2)}."
                                                   )
                                 ) %>%
-                                jmvcore::select(description) %>%
+                                dplyr::select(description) %>%
                                 dplyr::pull() -> mypairwisedescription
 
                             mypairwisedescription <- unlist(mypairwisedescription)

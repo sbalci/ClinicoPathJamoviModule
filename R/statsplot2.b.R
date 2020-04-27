@@ -3,7 +3,6 @@
 #' @import ggplot2
 #' @import ggstatsplot
 #' @import ggalluvial
-#' @importFrom rlang .data
 #' @importFrom ggalluvial StatStratum
 #
 

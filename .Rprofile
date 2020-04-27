@@ -1,11 +1,16 @@
-options(repos = c('https://repo.jamovi.org',
+# source("renv/activate.R")
+options(repos = c(
+    # 'https://repo.jamovi.org',
                   "https://cran.microsoft.com/snapshot/2020-01-01"
                   )
 )
 
+.libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
+
+
 # source(
 #     "renv/activate.R"
-#     # "~/histopathRprojects/ClinicoPath/renv/activate.R"
+    # "~/histopathRprojects/ClinicoPath/renv/activate.R"
 #     # here::here("renv/activate.R")
 # )
 

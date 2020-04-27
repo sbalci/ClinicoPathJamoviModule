@@ -38,7 +38,6 @@ Imports:
     knitr,
     purrr,
     R6,
-    rlang,
     scales,
     survival,
     survminer,
@@ -50,12 +49,13 @@ Suggests:
     rmarkdown,
     kableExtra
 Remotes:
-    easystats/parameters@7218695fc0c5c42fd7bee5a47296333ab3b03c7f,
-    easystats/insight@8ed88976f587a55334fbba42b7a46a8d97238be7,
-    easystats/bayestestR@a9ea16a8a8a448d798aa286fbed308ae178be4a6,
-    easystats/modelbased@9eae1cc4f7cef5e7ac5a701e555b1523aef34e4a,
-    easystats/effectsize@ff71c0039f211b3e2cf26f465d1d5795c50722cd,
-    easystats/report@90be23fcbda621254116bf8dcd73222975194063
+    r-lib/rlang,
+    easystats/insight,
+    easystats/bayestestR,
+    easystats/parameters,
+    easystats/modelbased,
+    easystats/effectsize,
+    easystats/report
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
