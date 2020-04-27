@@ -15,10 +15,10 @@
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.1",
+    "version": "3.6.3",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.1 (2019-07-05)",
+  "runtimePlatform": "R version 3.6.3 (2020-02-29)",
   "author": [
     {
       "@type": "Person",
@@ -372,6 +372,5 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "13453.423KB",
-  "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
+  "fileSize": "13452.727KB"
 }
