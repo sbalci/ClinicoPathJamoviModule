@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0006
-Date: 2020-04-26
+Version: 0.0.1.0007
+Date: 2020-04-27
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -24,17 +24,13 @@ Depends:
     R (>= 3.6.0)
 Imports: 
     dplyr,
-    explore,
     finalfit,
-    forcats,
     ggalluvial,
     ggplot2,
-    statsExpressions,
     ggstatsplot,
     glue,
     janitor,
     jmvcore (>= 0.8.5),
-    jsonlite,
     knitr,
     purrr,
     R6,
@@ -44,10 +40,9 @@ Imports:
     tableone,
     tangram,
     tibble,
-    tidyr
-Suggests:
-    rmarkdown,
-    kableExtra
+    tidyr,
+    kableExtra,
+    irr
 Remotes:
     easystats/insight,
     easystats/bayestestR,
@@ -55,7 +50,7 @@ Remotes:
     easystats/modelbased,
     easystats/effectsize,
     easystats/report
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Encoding: UTF-8
 LazyData: true

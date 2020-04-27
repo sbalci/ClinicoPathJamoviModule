@@ -1,7 +1,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
-# This file is a generated template, your changes will not be overwritten
 
 reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "reportcatClass",
