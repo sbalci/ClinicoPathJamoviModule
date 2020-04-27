@@ -1,7 +1,6 @@
 #' @importFrom R6 R6Class
-#' @importFrom jmvcore toNumeric
+#' @import jmvcore
 #' @importFrom purrr map
-# This file is a generated template, your changes will not be overwritten
 
 summarydataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "summarydataClass",

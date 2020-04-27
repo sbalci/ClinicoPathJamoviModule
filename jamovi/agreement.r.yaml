@@ -1,0 +1,47 @@
+---
+name:  agreement
+title: Interrater Intrarater Reliability
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Preformatted
+
+    - name:  text
+      title: 'Table'
+      type:  Preformatted
+
+    - name:  text1
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
+
+    - name:  text2
+      title: Interrater Intrarater Reliability
+      type:  Preformatted
+
+    - name:  irrtable
+      title: Interrater Reliability
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: Subjects
+          type: integer
+        - name: Raters
+          type: integer
+        - name: Kappa
+          type: number
+        - name: z
+          type: number
+        - name: p
+          type: number
+          format: zto,pvalue
+
+refs: irr
+
+
+...

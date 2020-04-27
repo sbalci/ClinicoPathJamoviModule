@@ -1,6 +1,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import irr
 
 agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agreementClass",
@@ -47,6 +48,19 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             result1 <- irr::agree(ratings)
 
             result2 <- irr::kappa2(ratings)
+
+
+
+            #>  Cohen's Kappa for 2 Raters (Weights: unweighted)
+            #>
+            #>  Subjects = 30
+            #>    Raters = 2
+            #>     Kappa = 0.651
+            #>
+            #>         z = 7
+            #>   p-value = 2.63e-12
+
+
 
 
             self$results$text$setContent(result)

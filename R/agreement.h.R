@@ -32,7 +32,8 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        irrtable = function() private$.items[["irrtable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -56,7 +57,33 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Interrater Intrarater Reliability"))}))
+                title="Interrater Intrarater Reliability"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="irrtable",
+                title="Interrater Reliability",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="Subjects", 
+                        `type`="integer"),
+                    list(
+                        `name`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))}))
 
 agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agreementBase",
@@ -94,7 +121,14 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$irrtable$asDF}
+#'
+#' \code{as.data.frame(results$irrtable)}
 #'
 #' @export
 agreement <- function(

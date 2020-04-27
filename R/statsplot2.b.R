@@ -13,13 +13,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
         inherit = statsplot2Base,
         private = list(
             .run = function() {
+
                 StatStratum <- ggalluvial::StatStratum
-
-
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
-
 
                 # If no variable selected Initial Message ----
                 if (is.null(self$options$dep) ||

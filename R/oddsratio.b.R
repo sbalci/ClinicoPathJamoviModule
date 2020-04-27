@@ -2,7 +2,6 @@
 #' @import jmvcore
 #' @import finalfit
 #' @import ggplot2
-#' @import ggstatsplot
 #'
 
 oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(

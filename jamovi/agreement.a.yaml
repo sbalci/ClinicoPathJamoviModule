@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Intrarater Reliability
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Agreement
 version: '1.0.0'
 jas: '1.2'
