@@ -29,6 +29,8 @@ items:
         - name: var
           title: ''
           type: text
+        - name: Method
+          type: text
         - name: Subjects
           type: integer
         - name: Raters

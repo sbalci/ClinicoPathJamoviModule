@@ -51,14 +51,36 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            #>  Cohen's Kappa for 2 Raters (Weights: unweighted)
-            #>
-            #>  Subjects = 30
-            #>    Raters = 2
-            #>     Kappa = 0.651
-            #>
-            #>         z = 7
-            #>   p-value = 2.63e-12
+            # > result1[["method"]]
+            # [1] "Percentage agreement (Tolerance=0)"
+            # > result1[["subjects"]]
+            # [1] 248
+            # > result1[["raters"]]
+            # [1] 2
+            # > result1[["irr.name"]]
+            # [1] "%-agree"
+            # > result1[["value"]]
+            # [1] 52.01613
+
+
+# > result2[["method"]]
+# [1] "Cohen's Kappa for 2 Raters (Weights: unweighted)"
+# > result2[["subjects"]]
+# [1] 248
+# > result2[["raters"]]
+# [1] 2
+# > result2[["irr.name"]]
+# [1] "Kappa"
+# > result2[["value"]]
+# [1] 0.003377009
+# > result2[["stat.name"]]
+# [1] "z"
+# > result2[["statistic"]]
+# [1] 0.05419615
+# > result2[["p.value"]]
+# [1] 0.9567789
+
+
 
 
 
@@ -70,10 +92,16 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text2$setContent(result2)
 
 
+            irrname <- result1[["irr.name"]]
 
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
+            table <- self$results$irrtable
+            table$setRow(rowNo=1, values=list(
+                # var=self$options$vars,
+                Method = result1[["method"]],
+                Subjects=result1[["subjects"]],
+                Raters = result1[["raters"]],
+                peragree = result1[["value"]]
+            ))
 
         })
 )

@@ -1737,7 +1737,26 @@ ClinicoPath::statsplotbetween(
 ```
 
 
+```{r irr agreement}
+devtools::install(upgrade = FALSE, quick = TRUE)
+library(dplyr)
 
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+ratings <- deneme %>% 
+    dplyr::select(LVI, PNI)
+
+result1 <- irr::agree(ratings)
+
+
+result2 <- irr::kappa2(ratings)
+
+
+ClinicoPath::agreement(
+    data = deneme,
+    vars = c(LVI,PNI)
+)
+```
 
 # Packages for Development
 
