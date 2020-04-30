@@ -2,7 +2,7 @@
 name:  competingsurvival
 title: Competing Survival
 menuGroup: ClinicoPath2
-menuSubgroup: Survival2
+menuSubgroup: Survival
 version: '1.0.0'
 jas: '1.2'
 

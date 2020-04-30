@@ -56,7 +56,8 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        table1 = function() private$.items[["table1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -76,7 +77,11 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Decision Calculator"))}))
+                title="Decision Calculator"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="table1",
+                title="Table 1"))}))
 
 decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisioncalculatorBase",
@@ -109,6 +114,7 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$table1} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

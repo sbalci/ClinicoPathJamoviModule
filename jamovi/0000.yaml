@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.1.0007
+version: 0.0.1.0008
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -63,13 +63,56 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Odds Ratio Table and Plot
-  - title: Interrater Intrarater Reliability
+  - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath2
     menuSubgroup: Agreement
-    menuTitle: Interrater Intrarater Reliability
-    description: Function for Interrater Intrarater Reliability.
+    menuTitle: Interrater Reliability
+    description: Function for Interrater Reliability.
+  - title: Competing Survival
+    name: competingsurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Survival
+    menuTitle: Competing Survival
+  - title: Correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Correlation
+    menuTitle: Correlation
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Medical Decision
+  - title: Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Decision Calculator
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Decision Tree
+    description: Function for making Decision Trees.
+  - title: Pairwise Chi-Square Test
+    name: pairchi
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuTitle: Pairwise Chi-Square Test
+    menuSubgroup: Comparisons
+  - title: Variable Tree
+    name: vartree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Descriptives
+    menuTitle: Variable Tree
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

@@ -1,0 +1,11 @@
+---
+name:  pairchi
+title: Pairwise Chi-Square Test
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Pairwise Chi-Square Test
+      type:  Preformatted
+
+...

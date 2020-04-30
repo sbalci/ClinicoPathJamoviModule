@@ -30,7 +30,6 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             ####
 
-
             mydata <- self$data
 
             formula <- jmvcore::constructFormula(terms = self$options$vars)
@@ -42,12 +41,23 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ratings <- mydata %>%
                 dplyr::select(myvars)
 
+            xtitle <- names(ratings)[1]
+            ytitle <- names(ratings)[2]
 
-            result <- table(ratings[,1], ratings[,2])
+            result <- table(ratings[,1], ratings[,2], dnn = list(xtitle, ytitle))
+
+            self$results$text$setContent(result)
+
 
             result1 <- irr::agree(ratings)
 
+            self$results$text1$setContent(result1)
+
+
             result2 <- irr::kappa2(ratings)
+
+
+            self$results$text2$setContent(result2)
 
 
 
@@ -81,27 +91,22 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 # [1] 0.9567789
 
 
+            # irrname <- result1[["irr.name"]]
+
+            table2 <- self$results$irrtable
+            table2$setRow(rowNo = 1,
+                         values = list(
+                             method = result2[["method"]],
+                             subjects = result1[["subjects"]],
+                             raters = result1[["raters"]],
+                             peragree = result1[["value"]],
+                             kappa = result2[["value"]],
+                             z = result2[["statistic"]],
+                             p = result2[["p.value"]]
+                             ))
 
 
 
-
-            self$results$text$setContent(result)
-
-            self$results$text1$setContent(result1)
-
-            self$results$text2$setContent(result2)
-
-
-            irrname <- result1[["irr.name"]]
-
-            table <- self$results$irrtable
-            table$setRow(rowNo=1, values=list(
-                # var=self$options$vars,
-                Method = result1[["method"]],
-                Subjects=result1[["subjects"]],
-                Raters = result1[["raters"]],
-                peragree = result1[["value"]]
-            ))
 
         })
 )

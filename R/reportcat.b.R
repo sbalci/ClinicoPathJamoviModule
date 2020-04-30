@@ -48,6 +48,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
+
             myreport <- mydata %>%
                 select(myvars) %>%
                 report::report(.,

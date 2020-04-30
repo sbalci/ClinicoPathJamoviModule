@@ -1,13 +1,13 @@
 ---
 name:  agreement
-title: Interrater Intrarater Reliability
-menuGroup: ClinicoPath
+title: Interrater Reliability
+menuGroup: ClinicoPath2
 menuSubgroup: Agreement
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for Interrater Intrarater Reliability.
+    main: Function for Interrater Reliability.
     R:
         dontrun: false
         usage: |
@@ -19,7 +19,7 @@ options:
       type: Data
 
     - name: vars
-      title: Raters
+      title: Raters (Add two raters)
       type: Variables
       description:
           R: >

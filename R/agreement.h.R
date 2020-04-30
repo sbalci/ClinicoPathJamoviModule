@@ -40,7 +40,7 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Interrater Intrarater Reliability",
+                title="Interrater Reliability",
                 refs="irr")
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -53,11 +53,11 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Interrater Intrarater Reliability"))
+                title="Agreement"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Interrater Intrarater Reliability"))
+                title="Interrater Reliability"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
@@ -65,23 +65,32 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows=1,
                 columns=list(
                     list(
-                        `name`="var", 
-                        `title`="", 
+                        `name`="method", 
+                        `title`="Method", 
                         `type`="text"),
                     list(
-                        `name`="Subjects", 
+                        `name`="subjects", 
+                        `title`="Subjects", 
                         `type`="integer"),
                     list(
-                        `name`="Raters", 
+                        `name`="raters", 
+                        `title`="Raters", 
                         `type`="integer"),
                     list(
-                        `name`="Kappa", 
+                        `name`="peragree", 
+                        `title`="Agreement %", 
+                        `type`="number"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
                         `type`="number"),
                     list(
                         `name`="z", 
+                        `title`="z", 
                         `type`="number"),
                     list(
                         `name`="p", 
+                        `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))}))
 
@@ -104,9 +113,9 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 completeWhenFilled = FALSE)
         }))
 
-#' Interrater Intrarater Reliability
+#' Interrater Reliability
 #'
-#' Function for Interrater Intrarater Reliability.
+#' Function for Interrater Reliability.
 #'
 #' @examples
 #' # example will be added
