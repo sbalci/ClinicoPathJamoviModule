@@ -113,6 +113,12 @@ analyses:
     menuGroup: ClinicoPath2
     menuSubgroup: Descriptives
     menuTitle: Variable Tree
+  - title: ROC
+    name: roc
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: ROC
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
