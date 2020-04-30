@@ -1,0 +1,17 @@
+---
+name:  vartree
+title: Variable Tree
+menuGroup: ClinicoPath2
+menuSubgroup: Descriptives
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables
+      type: Variables
+
+...

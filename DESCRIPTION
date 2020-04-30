@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0007
-Date: 2020-04-27
+Version: 0.0.1.0008
+Date: 2020-04-29
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -42,7 +42,14 @@ Imports:
     tibble,
     tidyr,
     kableExtra,
-    irr
+    irr,
+    caret,
+    forcats,
+    vtree,
+    explore,
+    FFTrees,
+    rpart,
+    rpart.plot
 Remotes:
     easystats/insight,
     easystats/bayestestR,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/agreement.h.R
 \name{agreement}
 \alias{agreement}
-\title{Interrater Intrarater Reliability}
+\title{Interrater Reliability}
 \usage{
 agreement(data, vars)
 }
@@ -30,7 +30,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$irrtable)}
 }
 \description{
-Function for Interrater Intrarater Reliability.
+Function for Interrater Reliability.
 }
 \examples{
 # example will be added

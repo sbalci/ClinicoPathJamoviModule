@@ -1,0 +1,26 @@
+---
+name:  vartree
+title: Variable Tree
+jrs:   '1.1'
+
+items:
+
+    - name:  text1
+      title: Variable Tree
+      type:  Html
+
+    - name:  text2
+      title: Variable Tree
+      type:  Preformatted
+
+    - name: plot
+      title: Variable Tree
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - vars
+
+...

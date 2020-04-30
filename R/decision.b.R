@@ -1,5 +1,8 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import dplyr
+#' @import janitor
+#' @import forcats
 #'
 # This file is a generated template, your changes will not be overwritten
 
@@ -21,10 +24,6 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent(todo)
 
 
-
-            description <- "Description of Module"
-
-
             if (length(self$options$testPositive) + length(self$options$newtest) + length(self$options$goldPositive) + length(self$options$gold) < 4)
                 return()
 
@@ -36,6 +35,7 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Data definition
             mydata <- self$data
 
+            mydata <- jmvcore::naOmit(mydata)
 
             testPLevel <- jmvcore::constructFormula(terms = self$options$testPositive)
 
@@ -77,57 +77,59 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             Table1 <- mydata %>%
                 janitor::tabyl(.data[[testVariable]], .data[[goldVariable]]) %>%
-                janitor::adorn_totals(c("row", "col")) %>%
-                janitor::adorn_percentages("row") %>%
-                janitor::adorn_pct_formatting(rounding = "half up", digits = 1) %>%
-                janitor::adorn_ns() %>%
+                janitor::adorn_totals(dat = ., where = c("row", "col")) %>%
+                janitor::adorn_percentages(dat = ., denominator = "row") %>%
+                janitor::adorn_percentages(dat = ., denominator = "col") %>%
+                janitor::adorn_pct_formatting(dat = ., rounding = "half up", digits = 1) %>%
+                janitor::adorn_ns(dat = .) %>%
                 janitor::adorn_title("combined")
-            # %>%
-            #     knitr::kable()
 
 
 
             results1 <- Table1
 
+            self$results$text1$setContent(results1)
+
+
+
             # Recode
 
-            mydata2 <- mydata
+            # mydata2 <- mydata
+            #
+            # mydata2 <- mydata2 %>%
+            #     dplyr::mutate(
+            #         testVariable2 =
+            #         dplyr::case_when(
+            #             .data[[testVariable]] == self$options$testPositive ~ "Positive",
+            #             NA ~ NA_character_,
+            #             TRUE ~ "Negative"
+            #         )
+            #     ) %>%
+            #
+            #     dplyr::mutate(
+            #         goldVariable2 =
+            #             dplyr::case_when(
+            #                 .data[[goldVariable]] == self$options$goldPositive ~ "Positive",
+            #                 NA ~ NA_character_,
+            #                 TRUE ~ "Negative"
+            #             )
+            #     )
 
-            mydata2 <- mydata2 %>%
-                filter(complete.cases(.)) %>%
-                dplyr::mutate(
-                    testVariable2 =
-                    dplyr::case_when(
-                        .data[[testVariable]] == self$options$testPositive ~ "Positive",
-                        NA ~ NA_character_,
-                        TRUE ~ "Negative"
-                    )
-                ) %>%
-
-                dplyr::mutate(
-                    goldVariable2 =
-                        dplyr::case_when(
-                            .data[[goldVariable]] == self$options$goldPositive ~ "Positive",
-                            NA ~ NA_character_,
-                            TRUE ~ "Negative"
-                        )
-                )
-
-            mydata2 <- mydata2 %>%
-                dplyr::mutate(
-                    testVariable2 = forcats::fct_relevel(testVariable2, "Positive")
-                ) %>%
-                dplyr::mutate(
-                    goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
-                )
+            # mydata2 <- mydata2 %>%
+            #     dplyr::mutate(
+            #         testVariable2 = forcats::fct_relevel(testVariable2, "Positive")
+            #     ) %>%
+            #     dplyr::mutate(
+            #         goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
+            #     )
 
 
             # Caret
 
-            conf_table <- table(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
-
-
-            results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
+            # conf_table <- table(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
+            #
+            #
+            # results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
 
 
 
@@ -146,20 +148,6 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                # PPV is {PPV}.")
 
 
-            # Results
-
-            results <- list(
-                description,
-                results1,
-                results_caret
-            )
-
-            self$results$text1$setContent(results)
-
-
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
 
         })
 )

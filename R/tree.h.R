@@ -38,7 +38,9 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        plot2 = function() private$.items[["plot2"]]),
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]],
+        plot3 = function() private$.items[["plot3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -48,15 +50,28 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Decision Tree",
                 refs=list(
                     "explore",
-                    "FFTrees"))
+                    "FFTrees",
+                    "rpart",
+                    "rpart.plot"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",
                 title="To Do"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
                 title="Decision Tree"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Decision Tree",
+                width=600,
+                height=450,
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "target")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -64,6 +79,17 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "target")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot3",
+                title="rpart",
+                width=600,
+                height=450,
+                renderFun=".plot3",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
@@ -97,8 +123,10 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

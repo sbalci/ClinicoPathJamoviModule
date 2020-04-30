@@ -1,6 +1,6 @@
 ---
 name:  agreement
-title: Interrater Intrarater Reliability
+title: Interrater Reliability
 jrs:   '1.1'
 
 items:
@@ -14,11 +14,11 @@ items:
       type:  Preformatted
 
     - name:  text1
-      title: Interrater Intrarater Reliability
+      title: Agreement
       type:  Preformatted
 
     - name:  text2
-      title: Interrater Intrarater Reliability
+      title: Interrater Reliability
       type:  Preformatted
 
     - name:  irrtable
@@ -26,20 +26,26 @@ items:
       type: Table
       rows:  1
       columns:
-        - name: var
-          title: ''
+        - name: method
+          title: 'Method'
           type: text
-        - name: Method
-          type: text
-        - name: Subjects
+        - name: subjects
+          title: 'Subjects'
           type: integer
-        - name: Raters
+        - name: raters
+          title: 'Raters'
           type: integer
-        - name: Kappa
+        - name: peragree
+          title: 'Agreement %'
+          type: number
+        - name: kappa
+          title: 'Kappa'
           type: number
         - name: z
+          title: 'z'
           type: number
         - name: p
+          title: 'p-value'
           type: number
           format: zto,pvalue
 

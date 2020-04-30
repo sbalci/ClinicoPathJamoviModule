@@ -1758,6 +1758,26 @@ ClinicoPath::agreement(
 )
 ```
 
+
+
+
+```{r}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mytree <- vtree::vtree(deneme, "LVI PNI")
+
+print(mytree)
+
+```
+
+
+
+
+
+
+
+
+
 # Packages for Development
 
 
