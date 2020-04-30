@@ -230,12 +230,12 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Prepare Plot Data
 
-            plotData <- self$data %>%
-                select(self$options$vars)
-
-            image <- self$results$plot
-
-            image$setState(plotData)
+            # plotData <- self$data %>%
+            #     select(self$options$vars)
+            #
+            # image <- self$results$plot
+            #
+            # image$setState(plotData)
 
 
             # `self$data` contains the data
@@ -261,5 +261,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         #     print(plot)
         #     TRUE
-        })
+        }
+
+)
 )

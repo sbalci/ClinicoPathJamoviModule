@@ -34,10 +34,7 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        text3 = function() private$.items[["text3"]],
-        plot = function() private$.items[["plot"]]),
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -46,7 +43,7 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Correlation",
                 refs=list(
-                    "psycho"))
+                    "correlation"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="todo",
@@ -54,21 +51,7 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Correlation 1"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Correlation 2"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text3",
-                title="Correlation 3"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot",
-                width=600,
-                height=450,
-                renderFun=".plot"))}))
+                title="Correlation 1"))}))
 
 correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "correlationBase",
@@ -98,9 +81,6 @@ correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

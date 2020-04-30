@@ -14,7 +14,8 @@ vartree(data, vars)
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$text1} \tab \tab \tab \tab \tab a html \cr
+\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
