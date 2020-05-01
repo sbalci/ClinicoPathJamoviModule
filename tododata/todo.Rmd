@@ -885,6 +885,8 @@ system(command = gitCommand, intern = TRUE)
 # 
 # jmvtools::addAnalysis(name='oddsratio', title='Odds Ratio Table and Plot')
 
+# jmvtools::addAnalysis(name='roc', title='ROC')
+
 ```
 
 
@@ -1737,6 +1739,98 @@ ClinicoPath::statsplotbetween(
 ```
 
 
+```{r}
+myirr <- data.frame(
+          Rater1 = c(0L,1L,1L,0L,0L,0L,1L,1L,1L,0L,1L,
+                 1L,1L,1L,1L,0L,NA,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,
+                 1L,1L,0L,1L,1L,1L,0L,0L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 1L,1L,0L,1L,0L,1L,1L,0L,0L,1L,0L,1L,1L,1L,0L,0L,
+                 0L,0L,1L,1L,1L,0L,0L,1L,1L,1L,1L,0L,0L,0L,1L,0L,
+                 0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,
+                 0L,1L,1L,1L,0L,1L,1L,1L,0L,1L,1L,0L,0L,1L,0L,1L,
+                 1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,0L,0L,
+                 1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 0L,0L,1L,1L,0L,1L,1L,0L,1L,0L,1L,1L,1L,0L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,
+                 0L,0L,1L,1L,1L,1L,0L,0L,1L,1L,0L,1L,1L,1L,0L,1L,
+                 0L,1L,1L,1L,1L,0L,0L,0L,0L,1L,0L,1L,1L,1L,0L,
+                 0L,1L,1L,1L,0L,1L,0L,0L,0L,1L,1L,1L,0L,1L,0L,0L,
+                 0L,1L,1L),
+          Rater2 = c(0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,
+                 0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,1L,1L,1L,0L,
+                 1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,
+                 1L,1L,0L,1L,1L,1L,0L,0L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 1L,1L,0L,1L,0L,1L,1L,0L,0L,1L,0L,1L,1L,1L,0L,0L,
+                 0L,0L,1L,1L,1L,0L,0L,1L,1L,1L,1L,0L,0L,0L,1L,0L,
+                 0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,
+                 0L,1L,1L,1L,0L,1L,1L,1L,0L,1L,1L,0L,0L,1L,0L,1L,
+                 1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,0L,0L,
+                 1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 0L,0L,1L,1L,0L,1L,1L,0L,1L,0L,1L,1L,1L,0L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,
+                 0L,0L,1L,1L,1L,1L,0L,0L,1L,1L,0L,1L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 0L,1L,1L,1L,0L,1L,0L,0L,0L,1L,1L,1L,0L,1L,0L,0L,
+                 0L,1L,1L)
+)
+
+myirr <- myirr %>% 
+    dplyr::mutate(
+        RaterA = dplyr::case_when(
+            Rater1 == 0 ~ "Negative",
+            Rater1 == 1 ~ "Positive"
+        )
+    ) %>% 
+    dplyr::mutate(
+        RaterB = dplyr::case_when(
+            Rater2 == 0 ~ "Negative",
+            Rater2 == 1 ~ "Positive"
+        )
+    ) %>% 
+    dplyr::select(RaterA, RaterB) %>% 
+    mutate(RaterA = as.factor(RaterA)) %>% 
+    mutate(RaterB = as.factor(RaterB))
+
+table <- myirr %$% 
+table(RaterA, RaterB)
+
+mymatrix <- caret::confusionMatrix(table, positive = "Positive")
+mymatrix
+
+caret::sensitivity(table, positive = "Positive")
+
+
+mymatrix2 <- caret::confusionMatrix(table, positive = "Positive", prevalence = 0.25)
+mymatrix2
+
+
+```
+
+
+```{r epiR}
+ dat <- as.table(
+                matrix(c(670,202,74,640),
+                       nrow = 2,
+                       byrow = TRUE)
+                )
+
+            colnames(dat) <- c("Dis+","Dis-")
+            rownames(dat) <- c("Test+","Test-")
+
+            rval <- epiR::epi.tests(dat, conf.level = 0.95)
+
+            rval <- list(
+                dat,
+                rval,
+                print(rval),
+                summary(rval)
+                         )
+```
+
+
 ```{r irr agreement}
 devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
@@ -1756,6 +1850,19 @@ ClinicoPath::agreement(
     data = deneme,
     vars = c(LVI,PNI)
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 
@@ -1942,5 +2049,8 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
 
 
 
+```{r}
+
+```
 
 

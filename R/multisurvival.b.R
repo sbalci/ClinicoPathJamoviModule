@@ -13,13 +13,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
             # If no variable selected Initial Message ----
 
-            if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
+            if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
             {
 
                 # TODO ----
@@ -48,6 +44,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             } else {
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+
 
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
@@ -111,11 +112,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # plotData <- image$state
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
             if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
                 return()
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
 
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
@@ -170,11 +171,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # plotData <- image$state
 
+                if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+                    return()
+
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
-
-                if (is.null(self$options$explanatory) || (length(self$options$outcome) + length(self$options$overalltime) < 2))
-                    return()
 
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome

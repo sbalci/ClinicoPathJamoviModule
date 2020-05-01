@@ -1,5 +1,7 @@
+#'
+#' @importFrom R6 R6Class
+#' @import jmvcore
 
-# This file is a generated template, your changes will not be overwritten
 
 rocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "rocClass",
@@ -7,9 +9,25 @@ rocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
+
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development
+                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+                -
+                -
+                "
+            )
+
+            self$results$todo$setContent(todo)
+
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+
 
         })
 )
