@@ -27,16 +27,26 @@ options:
             diagnosis given by the observer, variable can be categorical, ordinal or numeric
 
     - name: wght
-      title: Use Weighted Kappa with Ordinal Variables
-      type: Bool
-      default: false
+      title: Use Weighted Kappa (Effects only with Ordinal Variables)
+      type: List
+      options:
+        - title: Unweighted
+          name: unweighted
+        - title: Squared
+          name: squared
+        - title: Equal/Linear
+          name: equal
+      default: unweighted
 
     - name: exct
-      title: Use Exact Kappa >2 Variables
+      title: Use Exact Kappa (Effects only >=3 Variables)
       type: Bool
       default: false
 
-
+    - name: sft
+      title: Show Frequency Table
+      type: Bool
+      default: false
 
 
 ...

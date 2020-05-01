@@ -7,8 +7,9 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
-            wght = FALSE,
-            exct = FALSE, ...) {
+            wght = "unweighted",
+            exct = FALSE,
+            sft = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -19,27 +20,38 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
-            private$..wght <- jmvcore::OptionBool$new(
+            private$..wght <- jmvcore::OptionList$new(
                 "wght",
                 wght,
-                default=FALSE)
+                options=list(
+                    "unweighted",
+                    "squared",
+                    "equal"),
+                default="unweighted")
             private$..exct <- jmvcore::OptionBool$new(
                 "exct",
                 exct,
+                default=FALSE)
+            private$..sft <- jmvcore::OptionBool$new(
+                "sft",
+                sft,
                 default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
+            self$.addOption(private$..sft)
         }),
     active = list(
         vars = function() private$..vars$value,
         wght = function() private$..wght$value,
-        exct = function() private$..exct$value),
+        exct = function() private$..exct$value,
+        sft = function() private$..sft$value),
     private = list(
         ..vars = NA,
         ..wght = NA,
-        ..exct = NA)
+        ..exct = NA,
+        ..sft = NA)
 )
 
 agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -58,32 +70,44 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Interrater Reliability",
                 refs="irr")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Table"))
+                title="Table",
+                visible="(sft)",
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Agreement"))
+                title="Agreement",
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Interrater Reliability"))
+                title="Interrater Reliability",
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
-                title="",
+                title="Interrater Reliability",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
-                    list(
-                        `name`="Interrater Reliability", 
-                        `type`="text"),
                     list(
                         `name`="method", 
                         `title`="Method", 
@@ -112,7 +136,11 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `name`="p", 
                         `title`="p-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct")))}))
 
 agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agreementBase",
@@ -146,9 +174,10 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   numeric
 #' @param wght .
 #' @param exct .
+#' @param sft .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
@@ -165,8 +194,9 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 agreement <- function(
     data,
     vars,
-    wght = FALSE,
-    exct = FALSE) {
+    wght = "unweighted",
+    exct = FALSE,
+    sft = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('agreement requires jmvcore to be installed (restart may be required)')
@@ -181,7 +211,8 @@ agreement <- function(
     options <- agreementOptions$new(
         vars = vars,
         wght = wght,
-        exct = exct)
+        exct = exct,
+        sft = sft)
 
     analysis <- agreementClass$new(
         options = options,

@@ -4,7 +4,7 @@
 \alias{agreement}
 \title{Interrater Reliability}
 \usage{
-agreement(data, vars)
+agreement(data, vars, wght = "unweighted", exct = FALSE, sft = FALSE)
 }
 \arguments{
 \item{data}{.}
@@ -12,11 +12,17 @@ agreement(data, vars)
 \item{vars}{a string naming the variable from \code{data} that contains the
 diagnosis given by the observer, variable can be categorical, ordinal or
 numeric}
+
+\item{wght}{.}
+
+\item{exct}{.}
+
+\item{sft}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr

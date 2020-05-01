@@ -1,0 +1,11 @@
+---
+name:  icccoeff
+title: ICC coefficients
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: ICC coefficients
+      type:  Preformatted
+
+...

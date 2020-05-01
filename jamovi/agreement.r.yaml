@@ -7,28 +7,41 @@ items:
 
     - name:  todo
       title: To Do
-      type:  Preformatted
+      type:  Html
+      clearWith:
+          - vars
 
     - name:  text
       title: 'Table'
       type:  Preformatted
+      visible: (sft)
+      clearWith:
+          - vars
+          - wght
+          - exct
 
     - name:  text1
       title: Agreement
       type:  Preformatted
+      clearWith:
+          - vars
+          - wght
+          - exct
 
     - name:  text2
       title: Interrater Reliability
       type:  Preformatted
+      clearWith:
+          - vars
+          - wght
+          - exct
 
     - name:  irrtable
-      title: ''
+      title: 'Interrater Reliability'
       type: Table
       swapRowsColumns: true
       rows:  1
       columns:
-        - name: 'Interrater Reliability'
-          type: text
         - name: method
           title: 'Method'
           type: text
@@ -51,6 +64,10 @@ items:
           title: 'p-value'
           type: number
           format: zto,pvalue
+      clearWith:
+          - vars
+          - wght
+          - exct
 
 refs: irr
 
