@@ -5,16 +5,20 @@ jrs:   '1.1'
 
 items:
 
+    - name:  todo
+      title: To Do
+      type:  Html
+
     - name:  text1
-      title: Variable Tree
+      title: Variable Tree Html
       type:  Html
 
     - name:  text2
-      title: Variable Tree
+      title: Variable Tree Preformatted
       type:  Preformatted
 
     - name: plot
-      title: Variable Tree
+      title: Variable Tree Plot
       type: Image
       width:  600
       height: 450

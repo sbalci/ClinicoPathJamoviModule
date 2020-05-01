@@ -22,12 +22,12 @@ items:
       type:  Preformatted
 
     - name:  irrtable
-      title: Interrater Reliability
+      title: ''
       type: Table
       swapRowsColumns: true
       rows:  1
       columns:
-        - name: ''
+        - name: 'Interrater Reliability'
           type: text
         - name: method
           title: 'Method'

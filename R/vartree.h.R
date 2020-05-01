@@ -29,6 +29,7 @@ vartreeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 vartreeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]]),
@@ -41,16 +42,20 @@ vartreeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Variable Tree")
             self$add(jmvcore::Html$new(
                 options=options,
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="text1",
-                title="Variable Tree"))
+                title="Variable Tree Html"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Variable Tree"))
+                title="Variable Tree Preformatted"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Variable Tree",
+                title="Variable Tree Plot",
                 width=600,
                 height=450,
                 renderFun=".plot",
@@ -84,6 +89,7 @@ vartreeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

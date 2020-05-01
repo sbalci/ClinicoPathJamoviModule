@@ -6,7 +6,9 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL, ...) {
+            vars = NULL,
+            wght = FALSE,
+            exct = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,13 +19,27 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
+            private$..wght <- jmvcore::OptionBool$new(
+                "wght",
+                wght,
+                default=FALSE)
+            private$..exct <- jmvcore::OptionBool$new(
+                "exct",
+                exct,
+                default=FALSE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..wght)
+            self$.addOption(private$..exct)
         }),
     active = list(
-        vars = function() private$..vars$value),
+        vars = function() private$..vars$value,
+        wght = function() private$..wght$value,
+        exct = function() private$..exct$value),
     private = list(
-        ..vars = NA)
+        ..vars = NA,
+        ..wght = NA,
+        ..exct = NA)
 )
 
 agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -61,12 +77,12 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
-                title="Interrater Reliability",
+                title="",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
                     list(
-                        `name`="", 
+                        `name`="Interrater Reliability", 
                         `type`="text"),
                     list(
                         `name`="method", 
@@ -128,6 +144,8 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars a string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical, ordinal or
 #'   numeric
+#' @param wght .
+#' @param exct .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
@@ -146,7 +164,9 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @export
 agreement <- function(
     data,
-    vars) {
+    vars,
+    wght = FALSE,
+    exct = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('agreement requires jmvcore to be installed (restart may be required)')
@@ -159,7 +179,9 @@ agreement <- function(
 
 
     options <- agreementOptions$new(
-        vars = vars)
+        vars = vars,
+        wght = wght,
+        exct = exct)
 
     analysis <- agreementClass$new(
         options = options,

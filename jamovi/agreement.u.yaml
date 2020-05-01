@@ -9,9 +9,15 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Raters (Add two raters)
+        label: Raters
         children:
           - type: VariablesListBox
             name: vars
-            maxItemCount: 2
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: wght
+      - type: CheckBox
+        name: exct

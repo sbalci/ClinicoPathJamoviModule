@@ -10,11 +10,33 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            if (length(self$options$vars) < 2)
-                return()
+            # Data definition ----
+
+            contin <- c("integer", "numeric", "double")
+            # categ <- c("factor")
+
+            exct <- self$options$exct
+            wght <- self$options$wght
+
+            mydata <- self$data
+
+            formula <- jmvcore::constructFormula(terms = self$options$vars)
+
+            myvars <- jmvcore::decomposeFormula(formula = formula)
+
+            myvars <- unlist(myvars)
 
 
-            # TODO
+            ratings <- mydata %>%
+                dplyr::select(myvars)
+
+
+
+
+
+            if ( is.null(self$options$vars) ) {
+
+            # No variables ----
 
             todo <- glue::glue(
                 "This Module is still under development
@@ -27,6 +49,39 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$todo$setContent(todo)
 
+            return()
+
+            } else if ( inherits(myvars, contin) &&
+                        length(self$options$vars) >= 2)  {
+
+                # >=2 & Continuous ----
+
+                todo <- "Continuous"
+
+                self$results$todo$setContent(todo)
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+                result2 <- irr::icc(ratings = ratings,
+                         model = "twoway",
+                         type = "agreement")
+
+
+                self$results$text2$setContent(result2)
+
+
+                ####
+
+            } else if ( length(self$options$vars) == 2
+                        && inherits(myvars, categ)
+                        && wght == FALSE )  {
+
+                # =2 & unweighted ----
+
+                todo <- "Cohen"
+
+                self$results$todo$setContent(todo)
 
 
             if (nrow(self$data) == 0)
@@ -34,21 +89,11 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             ####
 
-            mydata <- self$data
-
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-
-            myvars <- jmvcore::decomposeFormula(formula = formula)
-
-            myvars <- unlist(myvars)
-
-            ratings <- mydata %>%
-                dplyr::select(myvars)
-
             xtitle <- names(ratings)[1]
             ytitle <- names(ratings)[2]
 
-            result <- table(ratings[,1], ratings[,2], dnn = list(xtitle, ytitle))
+            result <- table(ratings[,1], ratings[,2],
+                            dnn = list(xtitle, ytitle))
 
             self$results$text$setContent(result)
 
@@ -58,7 +103,8 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text1$setContent(result1)
 
 
-            result2 <- irr::kappa2(ratings)
+            result2 <- irr::kappa2(ratings = ratings,
+                                   weight = "unweighted")
 
 
             self$results$text2$setContent(result2)
@@ -109,7 +155,45 @@ agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              p = result2[["p.value"]]
                              ))
 
+            } else if (length(self$options$vars) == 2
+                       && inherits(myvars, categ)
+                       && wght == TRUE)  {
 
+                # 2 & categ & weighted
+
+                todo <- "weight"
+
+                self$results$todo$setContent(todo)
+
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+                ####
+
+            } else if ( length(self$options$vars) > 2
+                        && inherits(myvars, categ) )  {
+
+                # >3 & categ ----
+
+                todo <- "> 3 observer"
+
+                self$results$todo$setContent(todo)
+
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+
+
+
+
+                self$results$text2$setContent(result2)
+
+
+
+
+            }
 
 
         })

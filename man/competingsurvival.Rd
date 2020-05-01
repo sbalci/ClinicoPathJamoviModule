@@ -4,22 +4,21 @@
 \alias{competingsurvival}
 \title{Competing Survival}
 \usage{
-competingsurvival(data, dep, group, alt = "notequal", varEq = TRUE)
+competingsurvival(data, explanatory, overalltime, outcome)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
+\item{explanatory}{.}
 
-\item{group}{.}
+\item{overalltime}{.}
 
-\item{alt}{.}
-
-\item{varEq}{.}
+\item{outcome}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }

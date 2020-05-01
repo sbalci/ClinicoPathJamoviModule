@@ -241,4 +241,18 @@
         `year`=2019, 
         `title`="FFTrees: Generate, Visualise, and Evaluate Fast-and-Frugal Decision Trees", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=FFTrees", 
-        `url`="https://CRAN.R-project.org/package=FFTrees"))
+        `url`="https://CRAN.R-project.org/package=FFTrees"), 
+    `rpart`=list(
+        `type`="software", 
+        `author`="Terry Therneau and Beth Atkinson", 
+        `year`=2019, 
+        `title`="rpart: Recursive Partitioning and Regression Trees.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=rpart", 
+        `url`="https://CRAN.R-project.org/package=rpart"), 
+    `rpart.plot`=list(
+        `type`="software", 
+        `author`="Stephen Milborrow", 
+        `year`=2019, 
+        `title`="rpart.plot: Plot 'rpart' Models: An Enhanced Version of 'plot.rpart'", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=rpart.plot", 
+        `url`="https://CRAN.R-project.org/package=rpart.plot"))
