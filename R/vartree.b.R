@@ -37,14 +37,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-
             mydata <- mydata %>%
                 dplyr::select(myvars)
 
-
             myvars <- paste0(myvars, collapse = " ")
-
-
 
             results <- vtree::vtree(mydata, myvars, pngknit = FALSE)
 
@@ -74,21 +70,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- paste0(myvars, collapse = " ")
 
-            mytree <- vtree::vtree(mydata, myvars)
+            mytree <- vtree::vtree(mydata, myvars, pngknit = FALSE)
 
-
-            # plot <- plot(mytree)
-
-            # print(plot)
-            print(mytree)
+            knitr::asis_output(mytree)
+            TRUE
 
         }
-
-
-
-
-
-
 
 
         )

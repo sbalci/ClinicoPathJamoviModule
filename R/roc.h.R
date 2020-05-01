@@ -56,6 +56,7 @@ rocOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]]),
     private = list(),
     public=list(
@@ -64,6 +65,10 @@ rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="ROC")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -98,6 +103,7 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param varEq .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'

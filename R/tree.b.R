@@ -135,18 +135,17 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             iris1 <- iris
-            iris1$target <- sample(x = c(0,1), size = dim(iris)[1], replace = TRUE)
+            iris1$target <- sample(x = c(TRUE,FALSE), size = dim(iris)[1], replace = TRUE)
 
 
-            # Create an FFTrees object from the heartdisease data
             iris.fft <- FFTrees::FFTrees(formula = target ~.,
-                                 data = iris1)
-            # Plot the best tree applied to the test data
-            plot2 <- plot(iris.fft,
-                 data = "iris",
-                 main = "iris")
+                                         data = iris1,
+                                 data.test = iris1,
+                                 force = TRUE)
 
-            print(plot2)
+            plot(iris.fft,
+                 data = "test")
+
             TRUE
 
 

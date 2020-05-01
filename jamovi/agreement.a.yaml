@@ -19,10 +19,24 @@ options:
       type: Data
 
     - name: vars
-      title: Raters (Add two raters)
+      title: Raters
       type: Variables
       description:
           R: >
             a string naming the variable from `data` that contains the
             diagnosis given by the observer, variable can be categorical, ordinal or numeric
+
+    - name: wght
+      title: Use Weighted Kappa with Ordinal Variables
+      type: Bool
+      default: false
+
+    - name: exct
+      title: Use Exact Kappa >2 Variables
+      type: Bool
+      default: false
+
+
+
+
 ...

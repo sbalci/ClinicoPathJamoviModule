@@ -4,6 +4,15 @@ title: Competing Survival
 jrs:   '1.1'
 
 items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
     - name:  text
       title: Competing Survival
       type:  Preformatted
