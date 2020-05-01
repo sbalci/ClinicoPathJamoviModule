@@ -62,8 +62,12 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="irrtable",
                 title="Interrater Reliability",
+                swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
+                    list(
+                        `name`="", 
+                        `type`="text"),
                     list(
                         `name`="method", 
                         `title`="Method", 

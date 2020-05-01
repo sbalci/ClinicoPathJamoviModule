@@ -61,7 +61,11 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]]),
+        text1 = function() private$.items[["text1"]],
+        text2 = function() private$.items[["text2"]],
+        text3 = function() private$.items[["text3"]],
+        text4 = function() private$.items[["text4"]],
+        text5 = function() private$.items[["text5"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -77,7 +81,23 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Medical Decision"))}))
+                title="Medical Decision Table"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text2",
+                title="Medical Decision Results"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text3",
+                title="Matrix Details"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text4",
+                title="Medical Decision Deneme"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text5",
+                title="Medical Decision epiR"))}))
 
 decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisionBase",
@@ -110,6 +130,10 @@ decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

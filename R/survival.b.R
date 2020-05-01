@@ -11,9 +11,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
 
             # If no variable selected Initial Message ----
 
@@ -49,6 +46,13 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
+
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+
+
 
                 # Check if outcome variable is suitable or stop ----
 

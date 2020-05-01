@@ -49,14 +49,18 @@ Imports:
     explore,
     FFTrees,
     rpart,
-    rpart.plot
+    rpart.plot,
+    seriation,
+    epiR
 Remotes:
     easystats/insight,
     easystats/bayestestR,
     easystats/parameters,
     easystats/modelbased,
     easystats/effectsize,
-    easystats/report
+    easystats/report,
+    easystats/correlation,
+    tidymodels/corrr
 VignetteBuilder:
     knitr
 Encoding: UTF-8

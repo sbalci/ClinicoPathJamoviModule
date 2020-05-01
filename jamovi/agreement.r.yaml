@@ -24,8 +24,11 @@ items:
     - name:  irrtable
       title: Interrater Reliability
       type: Table
+      swapRowsColumns: true
       rows:  1
       columns:
+        - name: ''
+          type: text
         - name: method
           title: 'Method'
           type: text

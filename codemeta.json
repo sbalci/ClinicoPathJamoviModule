@@ -365,6 +365,30 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=rpart.plot"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "seriation",
+      "name": "seriation",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=seriation"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "epiR",
+      "name": "epiR",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=epiR"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -395,6 +419,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "13461.136KB",
+  "fileSize": "13462.838KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

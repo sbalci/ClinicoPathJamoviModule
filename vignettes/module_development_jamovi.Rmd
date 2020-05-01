@@ -149,6 +149,48 @@ attach references to objects in the .r.yaml file like this:
 https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174
 
 
+# Tables
+
+I want a long table. I tried to use following but got error.
+
+Below is my current .r.yaml
+   - name:  irrtable
+     title: Interrater Reliability
+      type: Table
+      rows:  1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Subjects'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: peragree
+          title: 'Agreement %'
+          type: number
+        - name: kappa
+          title: 'Kappa'
+          type: number
+        - name: z
+          title: 'z'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+
+
+- try setting swapRowsColumns to true.
+- alternatively, you can name your columns like this method[a], method[b], this will cause the row to be ‘folded’ where the value in method[b] appears below the value in method[a] . an example of this is the t-test:
+https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20
+
+
+
+# Plots
+
 
 # `build` folder
 
