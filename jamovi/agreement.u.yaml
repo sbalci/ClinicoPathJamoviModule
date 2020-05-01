@@ -14,10 +14,16 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+            maxItemCount: 4
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: wght
-      - type: CheckBox
         name: exct
+      - type: CheckBox
+        name: sft
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: wght

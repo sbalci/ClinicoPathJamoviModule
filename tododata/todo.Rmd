@@ -887,6 +887,8 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::addAnalysis(name='roc', title='ROC')
 
+jmvtools::addAnalysis(name = "icccoeff", title = "ICC coefficients")
+
 ```
 
 
@@ -1838,7 +1840,25 @@ library(dplyr)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 ratings <- deneme %>% 
-    dplyr::select(LVI, PNI)
+    dplyr::select(LVI, PNI, Age, ID)
+
+
+f <- unlist(lapply(ratings, class))
+
+any(f == "numeric")
+
+all(f == "numeric")
+
+
+xtitle <- names(ratings)[1]
+ytitle <- names(ratings)[2]
+
+result <- table(ratings[,1], ratings[,2],
+                dnn = list(xtitle, ytitle))
+
+table(ratings)
+
+
 
 result1 <- irr::agree(ratings)
 
@@ -1852,14 +1872,10 @@ ClinicoPath::agreement(
 )
 
 
-
-
-
-
-
-
-
-
+result2 <- irr::kappam.fleiss(
+                    ratings = ratings,
+                    exact = FALSE,
+                    detail = TRUE)
 
 
 

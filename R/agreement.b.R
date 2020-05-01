@@ -2,199 +2,130 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import irr
+# http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa
+#
 
-agreementClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "agreementClass",
-    inherit = agreementBase,
-    private = list(
-
-        .run = function() {
-
-            # Data definition ----
-
-            contin <- c("integer", "numeric", "double")
-            # categ <- c("factor")
-
-            exct <- self$options$exct
-            wght <- self$options$wght
-
-            mydata <- self$data
-
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-
-            myvars <- jmvcore::decomposeFormula(formula = formula)
-
-            myvars <- unlist(myvars)
-
-
-            ratings <- mydata %>%
-                dplyr::select(myvars)
+agreementClass <- if (requireNamespace('jmvcore'))
+    R6::R6Class("agreementClass",
+                inherit = agreementBase,
+                private = list(
+                    .run = function() {
 
 
 
 
 
-            if ( is.null(self$options$vars) ) {
 
-            # No variables ----
+                        # Data definition ----
 
-            todo <- glue::glue(
-                "This Module is still under development
+                        # contin <- c("integer", "numeric", "double")
+                        # categ <- c("factor")
+
+                        exct <- self$options$exct
+                        wght <- self$options$wght
+
+                        mydata <- self$data
+
+                        formula <-
+                            jmvcore::constructFormula(terms = self$options$vars)
+
+                        myvars <- jmvcore::decomposeFormula(formula = formula)
+
+                        myvars <- unlist(myvars)
+
+                        ratings <- mydata %>%
+                            dplyr::select(myvars)
+
+
+
+                        if (is.null(self$options$vars) || length(self$options$vars) < 2) {
+                            # No variables ----
+
+                            todo <- glue::glue(
+                                "This Module is still under development
                 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+            #
+            #     -
+            #     -
+            #     "
+                            )
 
-                -
-                -
-                "
-            )
+                            self$results$todo$setContent(todo)
 
-            self$results$todo$setContent(todo)
-
-            return()
-
-            } else if ( inherits(myvars, contin) &&
-                        length(self$options$vars) >= 2)  {
-
-                # >=2 & Continuous ----
-
-                todo <- "Continuous"
-
-                self$results$todo$setContent(todo)
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-                result2 <- irr::icc(ratings = ratings,
-                         model = "twoway",
-                         type = "agreement")
+                        } else {
+                            if (nrow(self$data) == 0)
+                                stop('Data contains no (complete) rows')
 
 
-                self$results$text2$setContent(result2)
+                            # 2 & categorical ----
+
+                            if (length(self$options$vars) == 2) {
+                                todo <- "Cohen"
+
+                                self$results$todo$setContent(todo)
 
 
-                ####
+                                a <- typeof(ratings)
 
-            } else if ( length(self$options$vars) == 2
-                        && inherits(myvars, categ)
-                        && wght == FALSE )  {
+                                b <- class(ratings)
 
-                # =2 & unweighted ----
-
-                todo <- "Cohen"
-
-                self$results$todo$setContent(todo)
+                                result2 <- irr::kappa2(ratings = ratings,
+                                                       weight = wght)
 
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                                result2 <- list(
+                                    a,
+                                    b,
+                                    result2
+                                )
 
-            ####
-
-            xtitle <- names(ratings)[1]
-            ytitle <- names(ratings)[2]
-
-            result <- table(ratings[,1], ratings[,2],
-                            dnn = list(xtitle, ytitle))
-
-            self$results$text$setContent(result)
+                                self$results$text2$setContent(result2)
 
 
-            result1 <- irr::agree(ratings)
-
-            self$results$text1$setContent(result1)
+                                # >=2 & categorical ----
 
 
-            result2 <- irr::kappa2(ratings = ratings,
-                                   weight = "unweighted")
+                            } else if (length(self$options$vars) >= 2) {
+                                todo <- "kappam.fleiss"
 
+                                self$results$todo$setContent(todo)
 
-            self$results$text2$setContent(result2)
+                                result2 <- irr::kappam.fleiss(ratings = ratings,
+                                                              exact = exct,
+                                                              detail = TRUE)
+
+                                self$results$text2$setContent(result2)
+
+                            }
 
 
 
-            # > result1[["method"]]
-            # [1] "Percentage agreement (Tolerance=0)"
-            # > result1[["subjects"]]
-            # [1] 248
-            # > result1[["raters"]]
-            # [1] 2
-            # > result1[["irr.name"]]
-            # [1] "%-agree"
-            # > result1[["value"]]
-            # [1] 52.01613
+                            result <- table(ratings)
+
+                            self$results$text$setContent(result)
 
 
-# > result2[["method"]]
-# [1] "Cohen's Kappa for 2 Raters (Weights: unweighted)"
-# > result2[["subjects"]]
-# [1] 248
-# > result2[["raters"]]
-# [1] 2
-# > result2[["irr.name"]]
-# [1] "Kappa"
-# > result2[["value"]]
-# [1] 0.003377009
-# > result2[["stat.name"]]
-# [1] "z"
-# > result2[["statistic"]]
-# [1] 0.05419615
-# > result2[["p.value"]]
-# [1] 0.9567789
+                            result1 <- irr::agree(ratings)
+
+                            self$results$text1$setContent(result1)
 
 
-            # irrname <- result1[["irr.name"]]
+                            table2 <- self$results$irrtable
+                            table2$setRow(
+                                rowNo = 1,
+                                values = list(
+                                    method = result2[["method"]],
+                                    subjects = result1[["subjects"]],
+                                    raters = result1[["raters"]],
+                                    peragree = result1[["value"]],
+                                    kappa = result2[["value"]],
+                                    z = result2[["statistic"]],
+                                    p = result2[["p.value"]]
+                                )
+                            )
 
-            table2 <- self$results$irrtable
-            table2$setRow(rowNo = 1,
-                         values = list(
-                             method = result2[["method"]],
-                             subjects = result1[["subjects"]],
-                             raters = result1[["raters"]],
-                             peragree = result1[["value"]],
-                             kappa = result2[["value"]],
-                             z = result2[["statistic"]],
-                             p = result2[["p.value"]]
-                             ))
-
-            } else if (length(self$options$vars) == 2
-                       && inherits(myvars, categ)
-                       && wght == TRUE)  {
-
-                # 2 & categ & weighted
-
-                todo <- "weight"
-
-                self$results$todo$setContent(todo)
+                        }
 
 
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-                ####
-
-            } else if ( length(self$options$vars) > 2
-                        && inherits(myvars, categ) )  {
-
-                # >3 & categ ----
-
-                todo <- "> 3 observer"
-
-                self$results$todo$setContent(todo)
-
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-
-
-
-
-                self$results$text2$setContent(result2)
-
-
-
-
-            }
-
-
-        })
-)
+                    }
+                ))

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0006</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0009</span>
       </span>
     </div>
 
@@ -134,7 +134,11 @@
 <span class="co">#&gt;   influence.merMod                lme4</span>
 <span class="co">#&gt;   cooks.distance.influence.merMod lme4</span>
 <span class="co">#&gt;   dfbeta.influence.merMod         lme4</span>
-<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span></pre></body></html></div>
+<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span>
+<span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span>
+<span class="co">#&gt; loading 'ClinicoPath'</span>
+<span class="co">#&gt; Warning: replacing previous import 'caret::cluster' by 'survival::cluster' when</span>
+<span class="co">#&gt; loading 'ClinicoPath'</span></pre></body></html></div>
 <div id="user2017-jamovi-a-spreadsheet-for-r" class="section level1">
 <h1 class="hasAnchor">
 <a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
@@ -154,7 +158,7 @@
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
-<p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
+<p>You can use <code><a href="https://rdrr.io/pkg/devtools/man/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://rdrr.io/pkg/devtools/man/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 <div id="add-analysis" class="section level2">
 <h2 class="hasAnchor">
@@ -232,6 +236,21 @@
 <p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
 </div>
 </div>
+<div id="tables" class="section level1">
+<h1 class="hasAnchor">
+<a href="#tables" class="anchor"></a>Tables</h1>
+<p>I want a long table. I tried to use following but got error.</p>
+<p>Below is my current .r.yaml - name: irrtable title: Interrater Reliability type: Table rows: 1 columns: - name: method title: ‘Method’ type: text - name: subjects title: ‘Subjects’ type: integer - name: raters title: ‘Raters’ type: integer - name: peragree title: ‘Agreement %’ type: number - name: kappa title: ‘Kappa’ type: number - name: z title: ‘z’ type: number - name: p title: ‘p-value’ type: number format: zto,pvalue</p>
+<ul>
+<li>try setting swapRowsColumns to true.</li>
+<li>alternatively, you can name your columns like this method[a], method[b], this will cause the row to be ‘folded’ where the value in method[b] appears below the value in method[a] . an example of this is the t-test: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20</a>
+</li>
+</ul>
+</div>
+<div id="plots" class="section level1">
+<h1 class="hasAnchor">
+<a href="#plots" class="anchor"></a>Plots</h1>
+</div>
 <div id="build-folder" class="section level1">
 <h1 class="hasAnchor">
 <a href="#build-folder" class="anchor"></a><code>build</code> folder</h1>
@@ -261,7 +280,7 @@
 <h1 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h1>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 </div>
 <div id="general" class="section level1">
 <h1 class="hasAnchor">
@@ -289,6 +308,12 @@
 <h2 class="hasAnchor">
 <a href="#r-version" class="anchor"></a>R version</h2>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
+<p>Use: <strong>R 3.6.1</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.1.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.1.pkg</a></p>
+<p>Use packages from mran:</p>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
+                  <span class="st">"https://cran.microsoft.com/snapshot/2020-01-01"</span>
+                  )
+)</pre></body></html></div>
 </div>
 <div id="electron" class="section level2">
 <h2 class="hasAnchor">

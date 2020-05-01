@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0006</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0009</span>
       </span>
     </div>
 
@@ -134,7 +134,11 @@
 <span class="co">#&gt;   influence.merMod                lme4</span>
 <span class="co">#&gt;   cooks.distance.influence.merMod lme4</span>
 <span class="co">#&gt;   dfbeta.influence.merMod         lme4</span>
-<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span></pre></body></html></div>
+<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span>
+<span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span>
+<span class="co">#&gt; loading 'ClinicoPath'</span>
+<span class="co">#&gt; Warning: replacing previous import 'caret::cluster' by 'survival::cluster' when</span>
+<span class="co">#&gt; loading 'ClinicoPath'</span></pre></body></html></div>
 <p>I have started collecting R codes for my research. Then I started converting the results into natural language sentences. My colleagues are used to spss like point to click software. jamovi is a very good, R based open source project, but it still requires statistical literacy. Here I tried to make a stepwise, easy research analysis workflow.</p>
 <p>Linked repositories: histopathR, histopathology-template, ClinicoPathJamoviModule, histopathRshiny, clinicopathological, histopathRaddins</p>
 <p><a href="https://github.com/users/sbalci/projects/1" class="uri">https://github.com/users/sbalci/projects/1</a></p>
@@ -148,7 +152,7 @@
 <li><p>You may also install <a href="https://sbalci.github.io/histopathR/">histopathR</a> package to get all the codes as R Markdown Template.</p></li>
 </ul>
 <hr>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
 <span class="kw pkg">rmarkdown</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"myfile"</span>,
                  <span class="kw">template</span> <span class="kw">=</span> <span class="st">"clinicopathological"</span>,
                  <span class="kw">package</span> <span class="kw">=</span> <span class="st">"histopathR"</span>,
@@ -247,7 +251,7 @@
 <li><p>See some of the codes here: <a href="https://sbalci.github.io/histopathology-template/Report.html" class="uri">https://sbalci.github.io/histopathology-template/Report.html</a></p></li>
 <li><p>You may also install <a href="https://sbalci.github.io/histopathR/">histopathR</a> package to get all the codes as R Markdown Template.</p></li>
 </ul>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
 <span class="kw pkg">rmarkdown</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"myfile"</span>,
                  <span class="kw">template</span> <span class="kw">=</span> <span class="st">"clinicopathological"</span>,
                  <span class="kw">package</span> <span class="kw">=</span> <span class="st">"histopathR"</span>,
@@ -403,7 +407,7 @@ A work by <a href="https://github.com/sbalci/">Serdar Balci</a>
 <li><p>See some of the codes here: <a href="https://sbalci.github.io/histopathology-template/Report.html" class="uri">https://sbalci.github.io/histopathology-template/Report.html</a></p></li>
 <li><p>You may also install <a href="https://sbalci.github.io/histopathR/">histopathR</a> package to get all the codes as R Markdown Template.</p></li>
 </ul>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"sbalci/histopathR"</span>)
 <span class="kw pkg">rmarkdown</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"myfile"</span>,
                  <span class="kw">template</span> <span class="kw">=</span> <span class="st">"clinicopathological"</span>,
                  <span class="kw">package</span> <span class="kw">=</span> <span class="st">"histopathR"</span>,
