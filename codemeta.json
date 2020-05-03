@@ -11,14 +11,14 @@
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.9",
+  "version": "0.0.1.10",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.6.1",
+    "version": "3.6.3",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.1 (2019-07-05)",
+  "runtimePlatform": "R version 3.6.3 (2020-02-29)",
   "author": [
     {
       "@type": "Person",
@@ -231,18 +231,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "tangram",
-      "name": "tangram",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=tangram"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "tibble",
       "name": "tibble",
       "provider": {
@@ -339,11 +327,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "FFTrees",
-      "name": "FFTrees"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "rpart",
       "name": "rpart",
       "provider": {
@@ -389,6 +372,42 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=epiR"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "magrittr",
+      "name": "magrittr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=magrittr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "corrr",
+      "name": "corrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=corrr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "correlation",
+      "name": "correlation",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=correlation"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -419,6 +438,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "13464.348KB",
+  "fileSize": "13464.046KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

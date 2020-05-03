@@ -1,7 +1,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import dplyr
-#' @import janitor
 #' @import forcats
 #' @import caret
 #'
@@ -71,26 +70,11 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Table 1 ----
 
-            # Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
-
-
-
-
-            Table1 <- mydata %>%
-                janitor::tabyl(.data[[testVariable]], .data[[goldVariable]]) %>%
-                janitor::adorn_totals(dat = ., where = c("row", "col")) %>%
-                janitor::adorn_percentages(dat = ., denominator = "row") %>%
-                janitor::adorn_percentages(dat = ., denominator = "col") %>%
-                janitor::adorn_pct_formatting(dat = ., rounding = "half up", digits = 1) %>%
-                janitor::adorn_ns(dat = .) %>%
-                janitor::adorn_title("combined")
-
-
-
-            results1 <- Table1
+            results1 <- mydata %>%
+                dplyr::select(.data[[testVariable]], .data[[goldVariable]]) %>%
+                table()
 
             self$results$text1$setContent(results1)
-
 
 
             # Recode ----
@@ -123,9 +107,6 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::mutate(
                     goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
                 )
-
-
-
 
 
 

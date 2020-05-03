@@ -15,9 +15,7 @@ children:
             name: explanatory
             isTarget: true
       - type: TargetLayoutBox
-        label: >-
-             Mortality or Recurrence
-             (event:1, healthy:0)
+        label: Mortality or Recurrence
         children:
           - type: VariablesListBox
             name: outcome

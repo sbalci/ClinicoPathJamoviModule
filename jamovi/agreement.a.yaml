@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Agreement
 version: '1.0.0'
 jas: '1.2'
@@ -21,10 +21,20 @@ options:
     - name: vars
       title: Raters
       type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description:
           R: >
             a string naming the variable from `data` that contains the
             diagnosis given by the observer, variable can be categorical, ordinal or numeric
+
+
+    - name: sft
+      title: Show Frequency Table
+      type: Bool
+      default: false
+
+
 
     - name: wght
       title: Use Weighted Kappa (Effects only with Ordinal Variables)
@@ -40,11 +50,6 @@ options:
 
     - name: exct
       title: Use Exact Kappa (Effects only >=3 Variables)
-      type: Bool
-      default: false
-
-    - name: sft
-      title: Show Frequency Table
       type: Bool
       default: false
 

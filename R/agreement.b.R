@@ -11,15 +11,8 @@ agreementClass <- if (requireNamespace('jmvcore'))
                 private = list(
                     .run = function() {
 
-
-
-
-
-
                         # Data definition ----
 
-                        # contin <- c("integer", "numeric", "double")
-                        # categ <- c("factor")
 
                         exct <- self$options$exct
                         wght <- self$options$wght
@@ -37,20 +30,14 @@ agreementClass <- if (requireNamespace('jmvcore'))
                             dplyr::select(myvars)
 
 
-
                         if (is.null(self$options$vars) || length(self$options$vars) < 2) {
                             # No variables ----
 
-                            todo <- glue::glue(
-                                "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-            #
-            #     -
-            #     -
-            #     "
-                            )
+                            # todo <- glue::glue(
+                            #     "This function "
+                            # )
 
-                            self$results$todo$setContent(todo)
+                            # self$results$todo$setContent(todo)
 
                         } else {
                             if (nrow(self$data) == 0)
@@ -60,41 +47,39 @@ agreementClass <- if (requireNamespace('jmvcore'))
                             # 2 & categorical ----
 
                             if (length(self$options$vars) == 2) {
-                                todo <- "Cohen"
+                                # todo <- "Cohen"
 
-                                self$results$todo$setContent(todo)
+                                # self$results$todo$setContent(todo)
 
 
-                                a <- typeof(ratings)
+                                xorder <- unlist(lapply(ratings, is.ordered))
 
-                                b <- class(ratings)
+                                if ( wght %in% c("equal", "squared") && !all(xorder == TRUE) )
+stop("Use ordinal variables when using weight argument")
+
+                                if ( exct == TRUE )
+                                    stop("Use exact argument only >=3 variables")
+
 
                                 result2 <- irr::kappa2(ratings = ratings,
                                                        weight = wght)
 
-
-                                result2 <- list(
-                                    a,
-                                    b,
-                                    result2
-                                )
-
-                                self$results$text2$setContent(result2)
+                                # self$results$text2$setContent(result2)
 
 
                                 # >=2 & categorical ----
 
 
                             } else if (length(self$options$vars) >= 2) {
-                                todo <- "kappam.fleiss"
+                                # todo <- "kappam.fleiss"
 
-                                self$results$todo$setContent(todo)
+                                # self$results$todo$setContent(todo)
 
                                 result2 <- irr::kappam.fleiss(ratings = ratings,
                                                               exact = exct,
                                                               detail = TRUE)
 
-                                self$results$text2$setContent(result2)
+                                # self$results$text2$setContent(result2)
 
                             }
 
@@ -107,7 +92,7 @@ agreementClass <- if (requireNamespace('jmvcore'))
 
                             result1 <- irr::agree(ratings)
 
-                            self$results$text1$setContent(result1)
+                            # self$results$text1$setContent(result1)
 
 
                             table2 <- self$results$irrtable

@@ -34,7 +34,9 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]]),
+        text1 = function() private$.items[["text1"]],
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -51,7 +53,19 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Correlation 1"))}))
+                title="Correlation 1"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                width=600,
+                height=450,
+                renderFun=".plot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot2",
+                width=600,
+                height=450,
+                renderFun=".plot2"))}))
 
 correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "correlationBase",
@@ -69,7 +83,8 @@ correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE)
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE)
         }))
 
 #' Correlation
@@ -81,6 +96,8 @@ correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

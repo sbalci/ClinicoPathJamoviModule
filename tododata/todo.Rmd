@@ -963,6 +963,26 @@ jmvcore::decomposeTerm(term = composeTerm)
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ```
 
+
+```{r}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+library(magrittr)
+
+corx <- deneme %>%
+                dplyr::select(Age, OverallTime) %>% 
+                stats::cor(method = "spearman") %>%
+                report::report()
+
+```
+
+
+
+
+
+
+
+
 ```{r}
 inherits(deneme$Sex, "character")
 ```
@@ -2066,7 +2086,32 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
 
 
 ```{r}
+            # Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
 
+
+            # Table1 <- mydata %>%
+            #     janitor::tabyl(.data[[testVariable]], .data[[goldVariable]]) %>%
+            #     janitor::adorn_totals(dat = ., where = c("row", "col")) %>%
+            #     janitor::adorn_percentages(dat = ., denominator = "row") %>%
+            #     janitor::adorn_percentages(dat = ., denominator = "col") %>%
+            #     janitor::adorn_pct_formatting(dat = ., rounding = "half up", digits = 1) %>%
+            #     janitor::adorn_ns(dat = .) %>%
+            #     janitor::adorn_title("combined")
+            # results1 <- Table1
 ```
 
+
+```{r}
+                # results1 <- summary(km_fit)$table
+
+                # km_fit_median_df <- summary(km_fit)
+                # km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+                #     janitor::clean_names(dat = ., case = "snake") %>%
+                #     tibble::rownames_to_column(.data = .)
+
+                # results1 <- tibble::as_tibble(results1,
+                #                              .name_repair = "minimal") %>%
+                #     janitor::clean_names(dat = ., case = "snake") %>%
+                #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+```
 

@@ -15,11 +15,9 @@ options:
       type: Variables
 
     - name: outcome
-      title: >-
-          Mortality or Recurrence
-          (event:1, healthy:0)
+      title: Mortality or Recurrence
       type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
 ...

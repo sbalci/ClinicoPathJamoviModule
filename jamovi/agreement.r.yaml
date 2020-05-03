@@ -5,11 +5,11 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Html
-      clearWith:
-          - vars
+    # - name:  todo
+    #   title: To Do
+    #   type:  Html
+    #   clearWith:
+    #       - vars
 
     - name:  text
       title: 'Table'
@@ -20,21 +20,21 @@ items:
           - wght
           - exct
 
-    - name:  text1
-      title: Agreement
-      type:  Preformatted
-      clearWith:
-          - vars
-          - wght
-          - exct
+    # - name:  text1
+    #   title: Agreement
+    #   type:  Preformatted
+    #   clearWith:
+    #       - vars
+    #       - wght
+    #       - exct
 
-    - name:  text2
-      title: Interrater Reliability
-      type:  Preformatted
-      clearWith:
-          - vars
-          - wght
-          - exct
+    # - name:  text2
+    #   title: Interrater Reliability
+    #   type:  Preformatted
+    #   clearWith:
+    #       - vars
+    #       - wght
+    #       - exct
 
     - name:  irrtable
       title: 'Interrater Reliability'

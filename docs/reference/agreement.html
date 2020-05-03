@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0009</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0010</span>
       </span>
     </div>
 
@@ -150,7 +150,7 @@
     <p>Function for Interrater Reliability.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>agreement</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='kw'>wght</span> <span class='kw'>=</span> <span class='st'>"unweighted"</span>, <span class='kw'>exct</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>sft</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>agreement</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='kw'>sft</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>wght</span> <span class='kw'>=</span> <span class='st'>"unweighted"</span>, <span class='kw'>exct</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -166,6 +166,10 @@ diagnosis given by the observer, variable can be categorical, ordinal or
 numeric</p></td>
     </tr>
     <tr>
+      <th>sft</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>wght</th>
       <td><p>.</p></td>
     </tr>
@@ -173,19 +177,12 @@ numeric</p></td>
       <th>exct</th>
       <td><p>.</p></td>
     </tr>
-    <tr>
-      <th>sft</th>
-      <td><p>.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$irrtable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 </table>
 

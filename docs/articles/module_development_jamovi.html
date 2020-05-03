@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0009</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0010</span>
       </span>
     </div>
 
@@ -111,10 +111,6 @@
     
     
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ClinicoPath</span>)
-<span class="co">#&gt; Warning in checkMatrixPackageVersion(): Package version inconsistency detected.</span>
-<span class="co">#&gt; TMB was built with Matrix version 1.2.18</span>
-<span class="co">#&gt; Current Matrix version is 1.2.17</span>
-<span class="co">#&gt; Please re-install 'TMB' from source using install.packages('TMB', type = 'source') or ask CRAN for a binary version of 'TMB' matching CRAN's 'Matrix' package</span>
 <span class="co">#&gt; Registered S3 methods overwritten by 'broom.mixed':</span>
 <span class="co">#&gt;   method         from </span>
 <span class="co">#&gt;   augment.lme    broom</span>
@@ -138,6 +134,8 @@
 <span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span>
 <span class="co">#&gt; loading 'ClinicoPath'</span>
 <span class="co">#&gt; Warning: replacing previous import 'caret::cluster' by 'survival::cluster' when</span>
+<span class="co">#&gt; loading 'ClinicoPath'</span>
+<span class="co">#&gt; Warning: replacing previous import 'dplyr::add_row' by 'tangram::add_row' when</span>
 <span class="co">#&gt; loading 'ClinicoPath'</span></pre></body></html></div>
 <div id="user2017-jamovi-a-spreadsheet-for-r" class="section level1">
 <h1 class="hasAnchor">
@@ -231,7 +229,7 @@
 <div id="refs-yaml" class="section level2">
 <h2 class="hasAnchor">
 <a href="#refs-yaml" class="anchor"></a>00refs.yaml</h2>
-<p>prepare a 00refs.yaml like this:<br><a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
+<p>prepare a 00refs.yaml like this: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
 <p>attach references to objects in the .r.yaml file like this:</p>
 <p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
 </div>
@@ -262,9 +260,9 @@
 <a href="#event-js" class="anchor"></a>event.js</h3>
 </div>
 </div>
-<div id="r3-6-1-macos" class="section level2">
+<div id="r3-6-3-macos" class="section level2">
 <h2 class="hasAnchor">
-<a href="#r3-6-1-macos" class="anchor"></a>R3.6.1-macos</h2>
+<a href="#r3-6-3-macos" class="anchor"></a>R3.6.3-macos</h2>
 </div>
 </div>
 <div id="installing" class="section level1">
@@ -308,10 +306,10 @@
 <h2 class="hasAnchor">
 <a href="#r-version" class="anchor"></a>R version</h2>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
-<p>Use: <strong>R 3.6.1</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.1.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.1.pkg</a></p>
+<p>Use: <strong>R 3.6.3</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.3.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.3.pkg</a></p>
 <p>Use packages from mran:</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
-                  <span class="st">"https://cran.microsoft.com/snapshot/2020-01-01"</span>
+                  <span class="st">"https://cran.microsoft.com/snapshot/2020-05-01/"</span>
                   )
 )</pre></body></html></div>
 </div>
@@ -373,7 +371,7 @@ datasets:
 <hr>
 <pre><code>Serdar Balci  4:48 PM
  I think I am getting familiar with the codes :)
-QuickTime Movie 
+QuickTime Movie
 JamoviModule.mov
 4 MB QuickTime Movie— Click to download</code></pre>
 <pre><code>Serdar Balci Nov 29th, 2019 at 12:39 PM

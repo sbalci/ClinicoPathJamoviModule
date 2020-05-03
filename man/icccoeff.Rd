@@ -4,18 +4,12 @@
 \alias{icccoeff}
 \title{ICC coefficients}
 \usage{
-icccoeff(data, dep, group, alt = "notequal", varEq = TRUE)
+icccoeff(data, vars)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
-
-\item{group}{.}
-
-\item{alt}{.}
-
-\item{varEq}{.}
+\item{vars}{.}
 }
 \value{
 A results object containing:
