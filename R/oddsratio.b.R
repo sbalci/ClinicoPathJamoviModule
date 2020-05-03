@@ -35,6 +35,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                     ")
 
+                # https://finalfit.org/articles/all_tables_examples.html#default-1
+
                 html <- self$results$todo
                 html$setContent(todo)
                 return()
@@ -64,11 +66,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 myoutcome2 <- self$data[[myoutcome2]]
                 myoutcome2 <- na.omit(myoutcome2)
 
-                if (class(myoutcome2) == "factor")
-                    stop("Please use a continuous variable for outcome.")
-
-                if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                    stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+                # if (class(myoutcome2) == "factor")
+                #     stop("Please use a continuous variable for outcome.")
+                #
+                # if (any(myoutcome2 != 0 & myoutcome2 != 1))
+                #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
                 mydata <- self$data
 
@@ -122,12 +124,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myoutcome2 <- self$data[[myoutcome2]]
             myoutcome2 <- na.omit(myoutcome2)
 
-            if (class(myoutcome2) == "factor")
-                stop("Please use a continuous variable for outcome.")
-
-
-            if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+            # if (class(myoutcome2) == "factor")
+            #     stop("Please use a continuous variable for outcome.")
+            #
+            #
+            # if (any(myoutcome2 != 0 & myoutcome2 != 1))
+            #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
             mydata <- self$data
 

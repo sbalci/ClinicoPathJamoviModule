@@ -76,12 +76,12 @@ One can also directly copy package folders from system R package folder (find vi
 
 # NAMESPACE
 
-No need to change. 
+No need to change.
 
 
 # R
 
-R folder is where the codes are present. There are two files. 
+R folder is where the codes are present. There are two files.
 
 ## function.h.R
 
@@ -127,8 +127,8 @@ so you’re best to make use of the table api … the table API has a lot more f
        title: "p"
        type: number
        format: zto,pvalue
-```   
-   
+```
+
 
 
 
@@ -141,7 +141,7 @@ so you’re best to make use of the table api … the table API has a lot more f
 
 ## 00refs.yaml
 
-prepare a 00refs.yaml like this:  
+prepare a 00refs.yaml like this:
 https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml
 
 attach references to objects in the .r.yaml file like this:
@@ -200,7 +200,7 @@ https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20
 
 
 
-## R3.6.1-macos
+## R3.6.3-macos
 
 
 
@@ -243,14 +243,14 @@ add following to .gitignore file
 
 Try to use compatible packages with the jamovi's R version.
 
-Use: **R 3.6.1** https://cran.r-project.org/bin/macosx/R-3.6.1.pkg
+Use: **R 3.6.3** https://cran.r-project.org/bin/macosx/R-3.6.3.pkg
 
 
-Use packages from mran: 
+Use packages from mran:
 
 ```r
 options(repos = c('https://repo.jamovi.org',
-                  "https://cran.microsoft.com/snapshot/2020-01-01"
+                  "https://cran.microsoft.com/snapshot/2020-05-01/"
                   )
 )
 ```
@@ -259,7 +259,7 @@ options(repos = c('https://repo.jamovi.org',
 
 ## Electron
 
-jamovi is electron based. See R, shiny, and electron based application development here: [Deploying a Shiny app as a desktop application with Electron](https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron) 
+jamovi is electron based. See R, shiny, and electron based application development here: [Deploying a Shiny app as a desktop application with Electron](https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron)
 
 
 
@@ -421,14 +421,14 @@ summary(km_fit, times = c(12,36,60)
 I want user to define times vector.
 I have tried the following:
 utimes <- jmvcore::decomposeTerms(self$options$cutp)
-utimes <- as.vector(utimes) 
+utimes <- as.vector(utimes)
 summary(km_fit, times = utimes
 a.yaml is as follows:
     - name: cutp
       title: Define at least two cutpoints (in months) for survival table
       type: String
-      default: '12, 36, 60' 
-Would you please guide me to convert input into a vector. (edited) 
+      default: '12, 36, 60'
+Would you please guide me to convert input into a vector. (edited)
 3 replies
 
 Serdar Balci  13 hours ago
@@ -466,7 +466,7 @@ it’s possible to do it programmatically, with … image$setSize()
 ```
 Serdar Balci  4:48 PM
  I think I am getting familiar with the codes :)
-QuickTime Movie 
+QuickTime Movie
 JamoviModule.mov
 4 MB QuickTime Movie— Click to download
 ```
@@ -514,7 +514,7 @@ Oh, I see. Thank you :slightly_smiling_face:
 # jmvtools::check("C://Program Files//jamovi//bin")
 
 # jmvtools::install(home = "C://Program Files//jamovi//bin")
-# 
+#
 # devtools::build(path = "C:\\ClinicoPathOutput")
 
 # .libPaths(new = "C:\\ClinicoPathLibrary")
@@ -566,20 +566,20 @@ system(command = gitCommand, intern = TRUE)
 ```{r add analysis, eval=FALSE, include=FALSE}
 
 # jmvtools::install()
-# 
+#
 # jmvtools::create('SuperAwesome')
-# 
+#
 # jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
-# 
+#
 # jmvtools::addAnalysis(name='survival', title='survival')
-# 
+#
 # jmvtools::addAnalysis(name='correlation', title='correlation')
-# 
+#
 # jmvtools::addAnalysis(name='tableone', title='TableOne')
-# 
+#
 # jmvtools::addAnalysis(name='crosstable', title='CrossTable')
-# 
-# 
+#
+#
 # jmvtools::addAnalysis(name='writesummary', title='WriteSummary')
 
 # jmvtools::addAnalysis(name='finalfit', title='FinalFit')
@@ -631,7 +631,7 @@ jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
 
-vars <- jmvcore::decomposeFormula(formula = formula) 
+vars <- jmvcore::decomposeFormula(formula = formula)
 
 unlist(vars)
 
@@ -731,7 +731,7 @@ ClinicoPath::decision(
 
 ```{r eval=FALSE, include=FALSE}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-ggstatsplot::ggbetweenstats(data = deneme, 
+ggstatsplot::ggbetweenstats(data = deneme,
                             x = LVI,
                             y = Age)
 
@@ -787,7 +787,7 @@ formula <- jmvcore::constructFormula(terms = c("A", "B", "C"))
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
 
-vars <- jmvcore::decomposeFormula(formula = formula) 
+vars <- jmvcore::decomposeFormula(formula = formula)
 
 vars <- jmvcore::decomposeTerms(vars)
 
@@ -964,10 +964,10 @@ results
 ```{r construct formula 3, eval=FALSE, include=FALSE}
 formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
 
-vars <- jmvcore::decomposeFormula(formula = formula) 
+vars <- jmvcore::decomposeFormula(formula = formula)
 
 
-explanatory <- jmvcore::constructFormula(terms = c("explanatory"))    
+explanatory <- jmvcore::constructFormula(terms = c("explanatory"))
 
 explanatory <- jmvcore::decomposeFormula(formula = explanatory)
 
@@ -1046,9 +1046,9 @@ results <- summary(tab1)
 # results$text
 # results$pfootnote
 # results$term.name
-# 
+#
 # tab1$Call
-# 
+#
 # tab1$control
 
 tab1$tables # this is where results lie
@@ -1108,12 +1108,12 @@ text_of_yaml_yml <- purrr::map(
     .f = readLines
 )
 
-text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml)) 
+text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml))
 
 arglist <-
     stringr::str_extract(
-        string = text_of_yaml_yml, 
-        pattern = 
+        string = text_of_yaml_yml,
+        pattern =
             "([[:alnum:]]*):"
     )
 
@@ -1159,9 +1159,9 @@ survival::colon
 rio::export(x = survival::colon, file = "data/colon.csv")
 
 # BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
-# 
+#
 # BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
-# 
+#
 # BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE,
 #                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )
 
@@ -1190,17 +1190,17 @@ mypairwise <-  survminer::pairwise_survdiff(
                             )
 
 
-mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>% 
+mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>%
   tibble::rownames_to_column()
 
-mypairwise2 %>% 
-  tidyr::pivot_longer(cols = -rowname) %>% 
-  dplyr::filter(complete.cases(.)) %>% 
+mypairwise2 %>%
+  tidyr::pivot_longer(cols = -rowname) %>%
+  dplyr::filter(complete.cases(.)) %>%
   dplyr::mutate(description =
                             glue::glue(
                                 "The comparison between {rowname} and {name} has a p-value of {round(value, 2)}."
                             )
-                    ) %>% 
+                    ) %>%
                     dplyr::select(description) %>%
                     dplyr::pull() -> mypairwisedescription
 
@@ -1214,8 +1214,3 @@ mypairwisedescription)
 
 
 ```
-
-
-                            
-                            
-

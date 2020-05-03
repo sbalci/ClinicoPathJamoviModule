@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0009
-Date: 2020-05-01
+Version: 0.0.1.0010
+Date: 2020-05-03
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -38,7 +38,6 @@ Imports:
     survival,
     survminer,
     tableone,
-    tangram,
     tibble,
     tidyr,
     kableExtra,
@@ -47,20 +46,17 @@ Imports:
     forcats,
     vtree,
     explore,
-    FFTrees,
     rpart,
     rpart.plot,
     seriation,
-    epiR
+    epiR,
+    magrittr,
+    corrr,
+    correlation
 Remotes:
-    easystats/insight,
-    easystats/bayestestR,
-    easystats/parameters,
-    easystats/modelbased,
-    easystats/effectsize,
+    ndphillips/FFTrees,
     easystats/report,
-    easystats/correlation,
-    tidymodels/corrr
+    spgarbet/tangram@0.3.2
 VignetteBuilder:
     knitr
 Encoding: UTF-8

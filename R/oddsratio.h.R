@@ -22,9 +22,10 @@ oddsratioOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "outcome",
                 outcome,
                 suggested=list(
-                    "continuous"),
+                    "ordinal",
+                    "nominal"),
                 permitted=list(
-                    "numeric"))
+                    "factor"))
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
@@ -94,7 +95,8 @@ oddsratioBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE)
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE)
         }))
 
 #' Odds Ratio Table and Plot
@@ -127,6 +129,7 @@ oddsratio <- function(
             `if`( ! missing(explanatory), explanatory, NULL),
             `if`( ! missing(outcome), outcome, NULL))
 
+    for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- oddsratioOptions$new(
         explanatory = explanatory,

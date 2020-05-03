@@ -1,5 +1,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import tangram
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -9,7 +10,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
-            if (length(self$options$vars) == 0 | length(self$options$group) == 0)
+
+
+            if ( is.null(self$options$vars) || is.null(self$options$group) )
                 return()
 
 

@@ -7,9 +7,9 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
+            sft = FALSE,
             wght = "unweighted",
-            exct = FALSE,
-            sft = FALSE, ...) {
+            exct = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -19,7 +19,16 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..sft <- jmvcore::OptionBool$new(
+                "sft",
+                sft,
+                default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
                 wght,
@@ -32,35 +41,28 @@ agreementOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "exct",
                 exct,
                 default=FALSE)
-            private$..sft <- jmvcore::OptionBool$new(
-                "sft",
-                sft,
-                default=FALSE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..sft)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
-            self$.addOption(private$..sft)
         }),
     active = list(
         vars = function() private$..vars$value,
+        sft = function() private$..sft$value,
         wght = function() private$..wght$value,
-        exct = function() private$..exct$value,
-        sft = function() private$..sft$value),
+        exct = function() private$..exct$value),
     private = list(
         ..vars = NA,
+        ..sft = NA,
         ..wght = NA,
-        ..exct = NA,
-        ..sft = NA)
+        ..exct = NA)
 )
 
 agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
         irrtable = function() private$.items[["irrtable"]]),
     private = list(),
     public=list(
@@ -70,33 +72,11 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Interrater Reliability",
                 refs="irr")
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do",
-                clearWith=list(
-                    "vars")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
                 title="Table",
                 visible="(sft)",
-                clearWith=list(
-                    "vars",
-                    "wght",
-                    "exct")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text1",
-                title="Agreement",
-                clearWith=list(
-                    "vars",
-                    "wght",
-                    "exct")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Interrater Reliability",
                 clearWith=list(
                     "vars",
                     "wght",
@@ -158,7 +138,8 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE)
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE)
         }))
 
 #' Interrater Reliability
@@ -172,15 +153,12 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars a string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical, ordinal or
 #'   numeric
+#' @param sft .
 #' @param wght .
 #' @param exct .
-#' @param sft .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
@@ -194,9 +172,9 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 agreement <- function(
     data,
     vars,
+    sft = FALSE,
     wght = "unweighted",
-    exct = FALSE,
-    sft = FALSE) {
+    exct = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('agreement requires jmvcore to be installed (restart may be required)')
@@ -207,12 +185,13 @@ agreement <- function(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- agreementOptions$new(
         vars = vars,
+        sft = sft,
         wght = wght,
-        exct = exct,
-        sft = sft)
+        exct = exct)
 
     analysis <- agreementClass$new(
         options = options,

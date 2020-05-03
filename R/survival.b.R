@@ -113,30 +113,9 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # self$results$deneme4$setContent(mydata)
 
 
-
-
-
-
-
-
-
-
-
                 # results 1, Median Survival Table ----
 
                 km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ thefactor, data = mydata)
-
-                # results1 <- summary(km_fit)$table
-
-                # km_fit_median_df <- summary(km_fit)
-                # km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
-                #     janitor::clean_names(dat = ., case = "snake") %>%
-                #     tibble::rownames_to_column(.data = .)
-
-                # results1 <- tibble::as_tibble(results1,
-                #                              .name_repair = "minimal") %>%
-                #     janitor::clean_names(dat = ., case = "snake") %>%
-                #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
 
                 km_fit_median_df <- summary(km_fit)
                 results1html <- as.data.frame(km_fit_median_df$table) %>%

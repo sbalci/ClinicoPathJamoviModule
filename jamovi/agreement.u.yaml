@@ -19,11 +19,11 @@ children:
     margin: large
     children:
       - type: CheckBox
-        name: exct
-      - type: CheckBox
         name: sft
   - type: LayoutBox
     margin: large
     children:
+      - type: CheckBox
+        name: exct
       - type: ComboBox
         name: wght

@@ -17,17 +17,23 @@ items:
     # - name:  text2
     #   title: 'Correlation 2'
     #   type:  Preformatted
-    #
+
     # - name:  text3
     #   title: 'Correlation 3'
     #   type:  Preformatted
-    #
-    #
-    # - name: plot
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot
+
+
+    - name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+
+    - name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
 
 
 refs:

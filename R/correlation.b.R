@@ -1,5 +1,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom magrittr %$%
 #'
 
 
@@ -33,6 +34,9 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Correlation
 
+
+            mydata <- self$data
+
             formula <- jmvcore::constructFormula(terms = self$options$vars)
 
             myvars <- jmvcore::decomposeFormula(formula = formula)
@@ -40,25 +44,36 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myvars <- unlist(myvars)
 
 
-            cor1 <- self$data %>%
+            cor1 <- mydata %>%
                 select(myvars) %>%
                 correlation::correlation(.)
 
-
-            # Results
-
             self$results$text1$setContent(cor1)
+
+
+
+            # corx <- mydata %>%
+            #     dplyr::select(myvars) %$%
+            #     stats::cor.test(method = "spearman", exact = FALSE) %>%
+            #     report::report()
+
+            # cor2 <- cor1 %>%
+            #     report::report(.)
+
 
             # self$results$text2$setContent(cor2)
 
+
+
+
+
+
+
+
             # self$results$text3$setContent(cor3)
 
-            # library("correlation")
-            # mydata %$%
-            #     cor.test(PeritumoralTomurcukSayi, Yas, method = "spearman", exact = FALSE)
-            # mydata %$%
-            #     cor.test(PeritumoralTomurcukSayi, Yas, method = "spearman", exact = FALSE) %>%
-            #     report::report()
+
+
             # ggplot(mydata, aes(x = PeritumoralTomurcukSayi, y = Yas)) +
             #     geom_point() +
             #     geom_smooth(method = lm, size = 1)
@@ -149,29 +164,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 #                 inspectdf::show_plot()
 #
 #
-#             # https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html
-#
-#
-#
-#
-#                 cor <- psycho::affective %>%
-#                 correlation()
-#
-#             summary(cor)
-#
-#
-#             plot(cor)
-#
-#
-#             print(cor)
-#
-#             cor %>%
-#                 report::to_values()
-#
-#
-#             summary(cor) %>%
-#                 knitr::kable(format = "latex") %>%
-#                 kableExtra::kable_styling(latex_options="scale_down")
+
 #
 #
 #             ggplot(mydata, aes(x = tx_zamani_verici_yasi, y = trombosit)) +
@@ -182,9 +175,6 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 #
 # # https://easystats.github.io/report/articles/interpret_metrics.html
 #
-#
-#
-#
 #             mydata %>%
 #                 select(continiousVariables,
 #                        -dateVariables) %>%
@@ -192,13 +182,6 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             ####
-
-
-
-
-
-
-
 
 
             # cor <- self$data %>%
@@ -218,55 +201,45 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #     report::to_values()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             # Prepare Plot Data
 
-            # plotData <- self$data %>%
-            #     select(self$options$vars)
-            #
-            # image <- self$results$plot
-            #
-            # image$setState(plotData)
+            plotData <- self$data %>%
+                dplyr::select(self$options$vars)
+
+            image <- self$results$plot
+
+            image$setState(plotData)
 
 
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
+        },
+        .plot = function(image, ...) {  # <-- the plot function
 
-        # },
-        # .plot=function(image, ...) {  # <-- the plot function
-        #
-        #     if (length(self$options$vars) < 2)
-        #         return()
-        #
-        #     plotData <- image$state
-        #
-        #     plot <- plot(plotData)
-        #
+            if (length(self$options$vars) < 2)
+                return()
 
-            # ggplot(mydata, aes(x = t_pdl1, y = i_pdl1)) +
-            #     geom_point() +
-            #     geom_smooth(method = lm, size = 1)
-            # size sayıya göre olsun
+            plotData <- image$state
+
+            plot <- plot(plotData)
+
+            print(plot)
+            TRUE
+        },
+.plot2 = function(image, ...) {  # <-- the plot2 function
+
+    if (length(self$options$vars) < 2)
+        return()
+
+    plotData <- image$state
 
 
-        #     print(plot)
-        #     TRUE
-        }
+    plot2 <- ggplot(plotData) +
+        geom_point() +
+        geom_smooth(method = lm, size = 1)
+
+
+    print(plot2)
+    TRUE
+}
 
 )
 )

@@ -38,6 +38,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         This function uses finalfit and ggstatsplot packages. Please cite jamovi and the packages as given below.
                     <br><br>
                     ")
+                # https://finalfit.org/articles/all_tables_examples.html#cox-proportional-hazards-model-survival-time-to-event
+
 
                 html <- self$results$todo
                 html$setContent(todo)
@@ -92,7 +94,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             finalfit::finalfit(.data = mydata,
                                dependent = myformula,
-                               explanatory = formula2
+                               explanatory = formula2,
                                # ,
                                # metrics = TRUE
                                ) -> tMultivariate
