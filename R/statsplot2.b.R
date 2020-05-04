@@ -1,10 +1,18 @@
+#' Plots and Graphs Based on Variable Types
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
 #' @import ggstatsplot
 #' @import ggalluvial
 #' @importFrom ggalluvial StatStratum
-#
+#'
+
 
 
 statsplot2Class <- if (requireNamespace('jmvcore'))

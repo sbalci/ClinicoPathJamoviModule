@@ -36,6 +36,6 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Interrater Reliability.
 }
 \examples{
-# example will be added
+will be added
 
 }

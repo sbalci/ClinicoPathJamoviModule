@@ -1,3 +1,10 @@
+#' Decision Calculator
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom utils data
@@ -12,14 +19,13 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO
 
-            todo <- glue::glue(
-                "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-                -
-                -  "
-            )
+            # todo <- glue::glue(
+            #     "This Module is still under development
+            #     -
+            #     -  "
+            # )
 
-            self$results$todo$setContent(todo)
+            # self$results$todo$setContent(todo)
 
             TP <- self$options$TP
 
@@ -29,9 +35,9 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             FN <- self$options$FN
 
-            table1 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE, dimnames = list(c("Test Positive", "Test Negative"), c("Gold Positive","Gold Negative")))
-
-            self$results$text1$setContent(table1)
+            # table1 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE, dimnames = list(c("Test Positive", "Test Negative"), c("Gold Positive","Gold Negative")))
+            #
+            # self$results$text1$setContent(table1)
 
             table2 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE, dimnames = list(c("Positive", "Negative"), c("Positive","Negative")))
 
@@ -42,12 +48,6 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             caretresult <- caret::confusionMatrix(table3)
 
             self$results$text2$setContent(caretresult)
-
-
-
-
-
-
 
 
         })

@@ -1,3 +1,10 @@
+#' Odds Ratio Table and Plot
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import finalfit

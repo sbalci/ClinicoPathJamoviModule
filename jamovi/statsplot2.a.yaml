@@ -6,9 +6,21 @@ menuSubgroup: Comparisons
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: 'Function for Generating Plots and Graphs Based on Variable Types.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
+
 
     - name: dep
       title: 'Dependent (y-axis, 1st measurement)'

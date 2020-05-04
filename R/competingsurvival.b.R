@@ -1,3 +1,9 @@
+#' Competing Survival Analysis
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -17,7 +23,7 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue("
 
                                 This Module is still under development
-                                   🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩",
+                                   ",
 
                 # <br>Welcome to ClinicoPath
                 # <br><br>

@@ -1,7 +1,13 @@
+#' Medical Decision Making
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import dplyr
-#' @import forcats
 #' @import caret
 #'
 
@@ -13,14 +19,13 @@ decisionClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO
 
-            todo <- glue::glue(
-                "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-                -
-                -  "
-            )
-
-            self$results$todo$setContent(todo)
+            # todo <- glue::glue(
+            #     "This Module is still under development
+            #     -
+            #     -  "
+            # )
+            #
+            # self$results$todo$setContent(todo)
 
 
             if (length(self$options$testPositive) + length(self$options$newtest) + length(self$options$goldPositive) + length(self$options$gold) < 4)
@@ -148,19 +153,19 @@ results_caret[["mode"]],
 results_caret[["dots"]]
 )
 
-            self$results$text3$setContent(matrixdetails)
+            # self$results$text3$setContent(matrixdetails)
 
 
             # Individual analysis ----
 
-            sens <- caret::sensitivity(conf_table, positive = "Positive")
+            # sens <- caret::sensitivity(conf_table, positive = "Positive")
 
-            PPV <- caret::posPredValue(conf_table, positive = "Positive")
+            # PPV <- caret::posPredValue(conf_table, positive = "Positive")
 
-            summary_caret <- glue::glue("Sensitivity is {sens}.
-            PPV is {PPV}.")
+            # summary_caret <- glue::glue("Sensitivity is {sens}.
+            # PPV is {PPV}.")
 
-            self$results$text4$setContent(summary_caret)
+            # self$results$text4$setContent(summary_caret)
 
 
             # bdpv ----
@@ -172,25 +177,25 @@ results_caret[["dots"]]
             # https://cran.r-project.org/web/packages/epiR/epiR.pdf
 
 
-            dat <- as.table(
-                matrix(c(670,202,74,640),
-                       nrow = 2,
-                       byrow = TRUE)
-                )
+            # dat <- as.table(
+            #     matrix(c(670,202,74,640),
+            #            nrow = 2,
+            #            byrow = TRUE)
+            #     )
 
-            colnames(dat) <- c("Dis+","Dis-")
-            rownames(dat) <- c("Test+","Test-")
+            # colnames(dat) <- c("Dis+","Dis-")
+            # rownames(dat) <- c("Test+","Test-")
 
-            rval <- epiR::epi.tests(dat, conf.level = 0.95)
+            # rval <- epiR::epi.tests(dat, conf.level = 0.95)
 
-            rval <- list(
-                dat,
-                rval,
-                print(rval),
-                summary(rval)
-                         )
+            # rval <- list(
+            #     dat,
+            #     rval,
+            #     print(rval),
+            #     summary(rval)
+            #              )
 
-            self$results$text5$setContent(rval)
+            # self$results$text5$setContent(rval)
 
 
 
@@ -211,7 +216,6 @@ results_caret[["dots"]]
             # confusionMatrix(pred, truth)
             # confusionMatrix(xtab, prevalence = 0.25)
             #
-            # ###################
             # ## 3 class example
             #
             # confusionMatrix(iris$Species, sample(iris$Species))

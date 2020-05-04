@@ -6,6 +6,14 @@ menuSubgroup: Descriptives
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: Function for Generating Summaries for Continuous Variables.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
 options:
 
     # - name: lang
@@ -26,7 +34,8 @@ options:
     - name: data
       type: Data
       description:
-          R: the data as a data frame
+          R: >
+            The data as a data frame.
 
     - name: vars
       title: Variables

@@ -2115,3 +2115,57 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
                 #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
 ```
 
+```{r update project for release}
+
+readyfunctions <- c(
+    "refs",
+    "^agreement",
+    # "^competingsurvival",
+    # "^correlation",
+    "^crosstable",
+    "^decision",
+    "^decisioncalculator",
+    # "^icccoeff",
+    "^multisurvival",
+    "^oddsratio",
+    # "^pairchi",
+    "^reportcat",
+    # "^roc",
+    "^statsplot2",
+    "^summarydata",
+    "^survival",
+    "^tableone"
+    # "^tree",
+    # "^utils-pipe"
+    # "^vartree"
+)
+
+
+
+
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+file.copy(from = files_R,
+          to = "~/ClinicoPath/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/ClinicoPath/jamovi/",
+          overwrite = TRUE)
+
+```
+

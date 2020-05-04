@@ -1,6 +1,13 @@
+#' ROC Analysis
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#'
 
 
 rocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -15,7 +22,6 @@ rocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 -
                 -
                 "

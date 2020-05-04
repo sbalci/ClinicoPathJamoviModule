@@ -1,14 +1,28 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Decision
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: >
+        Function for Medical Decision Analysis. Sensitivity, specificity, positive predictive value,
+        negative predictive value.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
+
 
     - name: gold
       title: Gold Standart
