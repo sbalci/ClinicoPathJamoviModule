@@ -5,21 +5,21 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Preformatted
+    # - name:  todo
+    #   title: To Do
+    #   type:  Html
 
-    - name:  text1
-      title: Decision Calculator
-      type:  Preformatted
+    # - name:  text1
+    #   title: Decision Calculator
+    #   type:  Preformatted
 
     - name:  text2
       title: Decision Calculator
       type:  Preformatted
 
-    - name:  table1
-      title: 'Table 1'
-      type:  Html
+    # - name:  table1
+    #   title: 'Table 1'
+    #   type:  Html
 
 
 

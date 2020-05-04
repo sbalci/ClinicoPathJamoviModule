@@ -1,3 +1,10 @@
+#' Multivariate Survival Analysis
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import finalfit

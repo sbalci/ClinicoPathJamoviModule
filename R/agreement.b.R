@@ -1,9 +1,19 @@
+#' Interrater Reliability Analysis
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import irr
-# http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa
-#
+#'
+#'
+
+
+# See \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
+
 
 agreementClass <- if (requireNamespace('jmvcore'))
     R6::R6Class("agreementClass",

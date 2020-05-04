@@ -89,33 +89,33 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows=1,
                 columns=list(
                     list(
-                        `name`="method", 
-                        `title`="Method", 
+                        `name`="method",
+                        `title`="Method",
                         `type`="text"),
                     list(
-                        `name`="subjects", 
-                        `title`="Subjects", 
+                        `name`="subjects",
+                        `title`="Subjects",
                         `type`="integer"),
                     list(
-                        `name`="raters", 
-                        `title`="Raters", 
+                        `name`="raters",
+                        `title`="Raters",
                         `type`="integer"),
                     list(
-                        `name`="peragree", 
-                        `title`="Agreement %", 
+                        `name`="peragree",
+                        `title`="Agreement %",
                         `type`="number"),
                     list(
-                        `name`="kappa", 
-                        `title`="Kappa", 
+                        `name`="kappa",
+                        `title`="Kappa",
                         `type`="number"),
                     list(
-                        `name`="z", 
-                        `title`="z", 
+                        `name`="z",
+                        `title`="z",
                         `type`="number"),
                     list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="p",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "vars",
@@ -146,8 +146,7 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' Function for Interrater Reliability.
 #'
-#' @examples
-#' # example will be added
+#' @examples will be added
 #'
 #' @param data .
 #' @param vars a string naming the variable from \code{data} that contains the

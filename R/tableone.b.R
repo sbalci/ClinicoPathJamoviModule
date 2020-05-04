@@ -1,3 +1,10 @@
+#' Table One
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
 #' @importFrom tableone CreateTableOne

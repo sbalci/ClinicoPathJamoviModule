@@ -11,7 +11,7 @@
   "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.10",
+  "version": "0.0.1.11",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -438,6 +438,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "13464.046KB",
+  "fileSize": "13468.737KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

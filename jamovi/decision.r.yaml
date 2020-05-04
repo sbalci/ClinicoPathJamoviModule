@@ -5,33 +5,33 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Preformatted
+    # - name:  todo
+    #   title: To Do
+    #   type:  Html
 
     - name:  text1
-      title: Medical Decision Table
+      title: Original Data
       type:  Preformatted
 
 
     - name:  text2
-      title: Medical Decision Results
+      title: Decision Tests
       type:  Preformatted
 
 
-    - name:  text3
-      title: Matrix Details
-      type:  Preformatted
+    # - name:  text3
+    #   title: Matrix Details
+    #   type:  Preformatted
 
 
-    - name:  text4
-      title: Medical Decision Deneme
-      type:  Preformatted
+    # - name:  text4
+    #   title: Medical Decision Deneme
+    #   type:  Preformatted
 
 
-    - name:  text5
-      title: Medical Decision epiR
-      type:  Preformatted
+    # - name:  text5
+    #   title: Medical Decision epiR
+    #   type:  Preformatted
 
 refs: caret
 

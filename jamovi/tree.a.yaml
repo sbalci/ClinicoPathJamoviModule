@@ -8,10 +8,19 @@ jas: '1.2'
 
 description:
     main: Function for making Decision Trees.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
 
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
+
 
     - name: vars
       title: Explanatory Variables

@@ -6,6 +6,14 @@ menuSubgroup: Survival
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: Function for Generating Summaries for Survival Analysis.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
 options:
 
     # - name: lang
@@ -24,6 +32,10 @@ options:
 
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
+
 
     - name: explanatory
       title: Explanatory Variable

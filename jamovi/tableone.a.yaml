@@ -20,7 +20,8 @@ options:
     - name: data
       type: Data
       description:
-          R: the data as a data frame
+          R: >
+            The data as a data frame.
 
     - name: vars
       title: Variables

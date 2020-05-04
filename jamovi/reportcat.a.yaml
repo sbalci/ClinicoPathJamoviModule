@@ -6,6 +6,13 @@ menuSubgroup: Descriptives
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: Function for Generating Summaries for Categorical Variables.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
 options:
     - name: data
       type: Data

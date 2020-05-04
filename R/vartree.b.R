@@ -1,6 +1,15 @@
+#' Variable Tree
+#'
+#' @return
+#' @export
+#'
+#' @examples will be added
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import vtree
+#'
+
 
 vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeClass",
@@ -13,7 +22,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue(
                 "This Module is still under development
-                🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
                 -
                 -
                 "
