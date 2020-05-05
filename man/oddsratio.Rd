@@ -7,7 +7,7 @@
 oddsratio(data, explanatory, outcome)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{explanatory}{.}
 
@@ -22,5 +22,10 @@ A results object containing:
 }
 }
 \description{
-Odds Ratio Table and Plot
+Function for Odds Ratio Table and Plot.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

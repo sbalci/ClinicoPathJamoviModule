@@ -7,7 +7,7 @@
 vartree(data, vars)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{vars}{.}
 }
@@ -21,5 +21,10 @@ A results object containing:
 }
 }
 \description{
-Variable Tree
+Function for Generating Tree Summaries of Variables.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

@@ -7,19 +7,24 @@
 correlation(data, vars)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{vars}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
-Correlation
+Function for Correlation.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

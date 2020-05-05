@@ -75,7 +75,12 @@ reportcatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Summary of Categorical Variables
 #'
-#' 
+#' Function for Generating Summaries for Categorical Variables.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
 #' @param data the data as a data frame
 #' @param vars string naming the variables from \code{data} that contains the
 #'   values used for the report. Uses report::report() function. Refer to

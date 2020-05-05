@@ -7,7 +7,7 @@
 multisurvival(data, explanatory, outcome, overalltime)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{explanatory}{.}
 
@@ -25,5 +25,10 @@ A results object containing:
 }
 }
 \description{
-Multivariate Survival Analysis
+Function for Multivariate Survival Analysis using Cox-regression.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

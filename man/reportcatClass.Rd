@@ -11,10 +11,6 @@ Summary of Categorical Variables
 
 Summary of Categorical Variables
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:reportcatBase]{ClinicoPath::reportcatBase}} -> \code{reportcatClass}
 }

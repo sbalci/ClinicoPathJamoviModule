@@ -7,7 +7,8 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
-            group = NULL, ...) {
+            group = NULL,
+            style = "nejm.css", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -26,16 +27,27 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..style <- jmvcore::OptionList$new(
+                "style",
+                style,
+                options=list(
+                    "nejm.css",
+                    "lancet.css",
+                    "hmisc.css"),
+                default="nejm.css")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
+            self$.addOption(private$..style)
         }),
     active = list(
         vars = function() private$..vars$value,
-        group = function() private$..group$value),
+        group = function() private$..group$value,
+        style = function() private$..style$value),
     private = list(
         ..vars = NA,
-        ..group = NA)
+        ..group = NA,
+        ..style = NA)
 )
 
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -79,9 +91,15 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' CrossTables
 #'
 #' Function for making Cross Tables.
-#' @param data .
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param vars .
 #' @param group variable in the column
+#' @param style .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
@@ -91,7 +109,8 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 crosstable <- function(
     data,
     vars,
-    group) {
+    group,
+    style = "nejm.css") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('crosstable requires jmvcore to be installed (restart may be required)')
@@ -108,7 +127,8 @@ crosstable <- function(
 
     options <- crosstableOptions$new(
         vars = vars,
-        group = group)
+        group = group,
+        style = style)
 
     analysis <- crosstableClass$new(
         options = options,

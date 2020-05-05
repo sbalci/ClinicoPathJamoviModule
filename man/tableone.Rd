@@ -7,7 +7,7 @@
 tableone(data, vars)
 }
 \arguments{
-\item{data}{the data as a data frame}
+\item{data}{The data as a data frame.}
 
 \item{vars}{a string naming the variables from \code{data} that contains
 the values used for the Table One.}

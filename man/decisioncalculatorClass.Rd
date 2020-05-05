@@ -11,10 +11,6 @@ Decision Calculator
 
 Decision Calculator
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:decisioncalculatorBase]{ClinicoPath::decisioncalculatorBase}} -> \code{decisioncalculatorClass}
 }

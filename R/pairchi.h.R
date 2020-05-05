@@ -96,8 +96,13 @@ pairchiBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Pairwise Chi-Square Test
 #'
-#' 
-#' @param data .
+#' Function for Pairwise Chi-Square Test Analysis.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
 #' @param alt .

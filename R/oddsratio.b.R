@@ -3,7 +3,7 @@
 #' @return
 #' @export
 #'
-#' @examples will be added
+#' 
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore

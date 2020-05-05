@@ -73,8 +73,13 @@ summarydataBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Summary of Continuous Variables
 #'
-#' 
-#' @param data the data as a data frame
+#' Function for Generating Summaries for Continuous Variables.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report
 #' @return A results object containing:

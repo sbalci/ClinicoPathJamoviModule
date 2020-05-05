@@ -4,7 +4,7 @@
 \alias{decisioncalculator}
 \title{Decision Calculator}
 \usage{
-decisioncalculator(TP = 90, TN = 30, FP = 20, FN = 80)
+decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20, pp = FALSE, pprob = 0.3)
 }
 \arguments{
 \item{TP}{.}
@@ -14,16 +14,23 @@ decisioncalculator(TP = 90, TN = 30, FP = 20, FN = 80)
 \item{FP}{.}
 
 \item{FN}{.}
+
+\item{pp}{.}
+
+\item{pprob}{Prior probability (disease prevelance in the community).
+Requires a value between 0.01 and 0.99, default null.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$table1} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
-Decision Calculator
+Function for Medical Decision Calculator.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

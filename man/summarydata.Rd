@@ -7,7 +7,7 @@
 summarydata(data, vars)
 }
 \arguments{
-\item{data}{the data as a data frame}
+\item{data}{The data as a data frame.}
 
 \item{vars}{a string naming the variables from \code{data} that contains
 the continuous values used for the report}
@@ -20,5 +20,10 @@ A results object containing:
 }
 }
 \description{
-Summary of Continuous Variables
+Function for Generating Summaries for Continuous Variables.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

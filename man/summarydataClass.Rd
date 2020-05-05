@@ -11,10 +11,6 @@ Summary of Continuous Variables
 
 Summary of Continuous Variables
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:summarydataBase]{ClinicoPath::summarydataBase}} -> \code{summarydataClass}
 }

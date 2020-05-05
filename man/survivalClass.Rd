@@ -11,10 +11,6 @@ Survival Analysis
 
 Survival Analysis
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:survivalBase]{ClinicoPath::survivalBase}} -> \code{survivalClass}
 }

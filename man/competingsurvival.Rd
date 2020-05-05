@@ -7,7 +7,7 @@
 competingsurvival(data, explanatory, overalltime, outcome)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{explanatory}{.}
 
@@ -23,5 +23,10 @@ A results object containing:
 }
 }
 \description{
-Competing Survival
+Function for Competing Survival.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

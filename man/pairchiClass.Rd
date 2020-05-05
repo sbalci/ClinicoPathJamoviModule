@@ -11,10 +11,6 @@ Pairwise Chi-Square Test
 
 Pairwise Chi-Square Test
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:pairchiBase]{ClinicoPath::pairchiBase}} -> \code{pairchiClass}
 }

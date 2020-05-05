@@ -89,33 +89,33 @@ agreementResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows=1,
                 columns=list(
                     list(
-                        `name`="method",
-                        `title`="Method",
+                        `name`="method", 
+                        `title`="Method", 
                         `type`="text"),
                     list(
-                        `name`="subjects",
-                        `title`="Subjects",
+                        `name`="subjects", 
+                        `title`="Subjects", 
                         `type`="integer"),
                     list(
-                        `name`="raters",
-                        `title`="Raters",
+                        `name`="raters", 
+                        `title`="Raters", 
                         `type`="integer"),
                     list(
-                        `name`="peragree",
-                        `title`="Agreement %",
+                        `name`="peragree", 
+                        `title`="Agreement %", 
                         `type`="number"),
                     list(
-                        `name`="kappa",
-                        `title`="Kappa",
+                        `name`="kappa", 
+                        `title`="Kappa", 
                         `type`="number"),
                     list(
-                        `name`="z",
-                        `title`="z",
+                        `name`="z", 
+                        `title`="z", 
                         `type`="number"),
                     list(
-                        `name`="p",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "vars",
@@ -146,15 +146,22 @@ agreementBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' Function for Interrater Reliability.
 #'
-#' @examples will be added
-#'
-#' @param data .
-#' @param vars a string naming the variable from \code{data} that contains the
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
+#' @param vars A string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical, ordinal or
-#'   numeric
-#' @param sft .
-#' @param wght .
-#' @param exct .
+#'   numeric.
+#' @param sft Boolean selection whether to show frequency table. Default is
+#'   'false'.
+#' @param wght A list for the argument weight (wght), for weighted kappa
+#'   analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
+#'   only with ordinal variables. The function gives error if the variable type
+#'   is not ordinal.
+#' @param exct Boolean selection whether to use exact kappa. Effects only more
+#'   than 3 observers.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr

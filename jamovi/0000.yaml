@@ -26,12 +26,14 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Summary of Continuous Variables
+    description: Function for Generating Summaries for Continuous Variables.
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Summary of Categorical Variables
+    description: Function for Generating Summaries for Categorical Variables.
   - title: CrossTables
     name: crosstable
     ns: ClinicoPath
@@ -45,24 +47,28 @@ analyses:
     menuGroup: ClinicoPath
     menuSubgroup: Comparisons
     menuTitle: Graphs and Plots
+    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Survival Analysis
+    description: Function for Generating Summaries for Survival Analysis.
   - title: Multivariate Survival Analysis
     name: multisurvival
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Multivariate Survival Analysis
+    description: Function for Multivariate Survival Analysis using Cox-regression.
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Survival
     menuTitle: Odds Ratio Table and Plot
+    description: Function for Odds Ratio Table and Plot.
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
@@ -76,24 +82,30 @@ analyses:
     menuGroup: ClinicoPath2
     menuSubgroup: Survival
     menuTitle: Competing Survival
+    description: Function for Competing Survival.
   - title: Correlation
     name: correlation
     ns: ClinicoPath
     menuGroup: ClinicoPath2
     menuSubgroup: Correlation
     menuTitle: Correlation
+    description: Function for Correlation.
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuSubgroup: Decision
     menuTitle: Medical Decision
+    description: >
+      Function for Medical Decision Analysis. Sensitivity, specificity, positive
+      predictive value, negative predictive value.
   - title: Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuSubgroup: Decision
     menuTitle: Decision Calculator
+    description: Function for Medical Decision Calculator.
   - title: Decision Tree
     name: tree
     ns: ClinicoPath
@@ -107,24 +119,28 @@ analyses:
     menuGroup: ClinicoPath2
     menuTitle: Pairwise Chi-Square Test
     menuSubgroup: Comparisons
+    description: Function for Pairwise Chi-Square Test Analysis.
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
     menuGroup: ClinicoPath2
     menuSubgroup: Descriptives
     menuTitle: Variable Tree
+    description: Function for Generating Tree Summaries of Variables.
   - title: ROC
     name: roc
     ns: ClinicoPath
     menuGroup: ClinicoPath2
     menuSubgroup: Decision
     menuTitle: ROC
+    description: Function for ROC Analysis.
   - title: ICC coefficients
     name: icccoeff
     ns: ClinicoPath
     menuGroup: ClinicoPath2
     menuSubgroup: Agreement
     menuTitle: ICC coefficients
+    description: Function for Interclass Correlation Coefficient Calculation.
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

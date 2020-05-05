@@ -11,10 +11,6 @@ Cross Table
 
 Cross Table
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:crosstableBase]{ClinicoPath::crosstableBase}} -> \code{crosstableClass}
 }

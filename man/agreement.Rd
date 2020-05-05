@@ -7,17 +7,22 @@
 agreement(data, vars, sft = FALSE, wght = "unweighted", exct = FALSE)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{vars}{a string naming the variable from \code{data} that contains the
+\item{vars}{A string naming the variable from \code{data} that contains the
 diagnosis given by the observer, variable can be categorical, ordinal or
-numeric}
+numeric.}
 
-\item{sft}{.}
+\item{sft}{Boolean selection whether to show frequency table. Default is
+'false'.}
 
-\item{wght}{.}
+\item{wght}{A list for the argument weight (wght), for weighted kappa
+analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
+only with ordinal variables. The function gives error if the variable type
+is not ordinal.}
 
-\item{exct}{.}
+\item{exct}{Boolean selection whether to use exact kappa. Effects only more
+than 3 observers.}
 }
 \value{
 A results object containing:
@@ -36,6 +41,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Interrater Reliability.
 }
 \examples{
-will be added
-
+\dontrun{
+# example will be added
+}
 }

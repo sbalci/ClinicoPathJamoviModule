@@ -23,15 +23,34 @@ options:
     - name: TN
       title: 'True Negative ='
       type: Number
-      default: 30
+      default: 80
 
     - name: FP
       title: 'False Positive ='
       type: Number
-      default: 20
+      default: 30
 
     - name: FN
       title: 'False Negative ='
       type: Number
-      default: 80
+      default: 20
+
+    - name: pp
+      title: Prior Probability (prevelance)
+      type: Bool
+      default: false
+
+    - name: pprob
+      title: Prior Probability (prevelance)
+      type: Number
+      default: 0.300
+      min: 0.001
+      max: 0.999
+      description:
+          ui: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+          R: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
 ...

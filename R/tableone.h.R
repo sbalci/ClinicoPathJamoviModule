@@ -80,7 +80,7 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' data = data,
 #' vars = vars())
 #'}
-#' @param data the data as a data frame
+#' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the values used for the Table One.
 #' @return A results object containing:

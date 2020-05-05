@@ -3,7 +3,7 @@
 #' @return
 #' @export
 #'
-#' @examples will be added
+#'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -69,15 +69,20 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # results2 <- table2
             # self$results$text2$setContent(results2)
 
-            # Tangram Table NEJM
+            # Tangram Table
+
+
+
+            style <- self$options$style
+
 
             table3 <-
                 tangram::html5(
                     tangram::tangram(
                         formula, self$data),
                     fragment = TRUE,
-                    inline = "nejm.css",
-                    caption = paste0("Cross Table NEJM Style for Dependent ", self$options$group),
+                    inline = style,
+                    caption = paste0("Cross Table for Dependent ", self$options$group),
                     id = "tbl3")
 
             results3 <- table3
