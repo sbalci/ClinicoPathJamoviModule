@@ -64,8 +64,13 @@ icccoeffBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' ICC coefficients
 #'
-#' 
-#' @param data .
+#' Function for Interclass Correlation Coefficient Calculation.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{

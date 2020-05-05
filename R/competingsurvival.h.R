@@ -100,8 +100,13 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Competing Survival
 #'
-#' 
-#' @param data .
+#' Function for Competing Survival.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param explanatory .
 #' @param overalltime .
 #' @param outcome .

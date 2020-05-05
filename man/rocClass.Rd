@@ -11,10 +11,6 @@ ROC Analysis
 
 ROC Analysis
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:rocBase]{ClinicoPath::rocBase}} -> \code{rocClass}
 }

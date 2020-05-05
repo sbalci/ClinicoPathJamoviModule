@@ -11,10 +11,6 @@ Interrater Reliability Analysis
 
 Interrater Reliability Analysis
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:agreementBase]{ClinicoPath::agreementBase}} -> \code{agreementClass}
 }

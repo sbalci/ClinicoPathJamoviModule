@@ -20,7 +20,7 @@ children:
                 name: TP
                 format: number
               - type: TextBox
-                name: FP
+                name: FN
                 format: number
           - type: LayoutBox
             margin: large
@@ -29,8 +29,22 @@ children:
               column: 2
             children:
               - type: TextBox
-                name: TN
+                name: FP
                 format: number
               - type: TextBox
-                name: FN
+                name: TN
                 format: number
+
+  - type: Label
+    label: Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: pp
+          - type: TextBox
+            name: pprob
+            label: Prior Probability  (prevelance)
+            format: number
+            enable: (pp)

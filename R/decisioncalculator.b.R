@@ -3,11 +3,12 @@
 #' @return
 #' @export
 #'
-#' @examples will be added
+#'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom utils data
+#' @importFrom caret confusionMatrix
 #'
 
 decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -45,10 +46,22 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             names(attributes(table3)$dimnames) <- c("Test","Gold Standart")
 
+            # Prior Probability ----
+
+            pp <- self$options$pp
+
+            pprob <- self$options$pprob
+
+            if ( pp ) {
+                caretresult <- caret::confusionMatrix(table3, prevalence = pprob)
+
+            } else {
+
             caretresult <- caret::confusionMatrix(table3)
 
-            self$results$text2$setContent(caretresult)
+            }
 
+            self$results$text2$setContent(caretresult)
 
         })
 )

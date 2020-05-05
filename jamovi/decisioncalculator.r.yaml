@@ -16,6 +16,9 @@ items:
     - name:  text2
       title: Decision Calculator
       type:  Preformatted
+      clearWith:
+          - pp
+          - pprob
 
     # - name:  table1
     #   title: 'Table 1'

@@ -11,10 +11,6 @@ Table One
 
 Table One
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:tableoneBase]{ClinicoPath::tableoneBase}} -> \code{tableoneClass}
 }

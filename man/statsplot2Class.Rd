@@ -11,10 +11,6 @@ Plots and Graphs Based on Variable Types
 
 Plots and Graphs Based on Variable Types
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:statsplot2Base]{ClinicoPath::statsplot2Base}} -> \code{statsplot2Class}
 }

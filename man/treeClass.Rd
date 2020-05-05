@@ -11,10 +11,6 @@ Decision Tree
 
 Decision Tree
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:treeBase]{ClinicoPath::treeBase}} -> \code{treeClass}
 }

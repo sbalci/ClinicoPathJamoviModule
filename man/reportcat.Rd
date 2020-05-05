@@ -21,5 +21,10 @@ A results object containing:
 }
 }
 \description{
-Summary of Categorical Variables
+Function for Generating Summaries for Categorical Variables.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

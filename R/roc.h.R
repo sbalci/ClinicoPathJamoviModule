@@ -96,8 +96,13 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' ROC
 #'
-#' 
-#' @param data .
+#' Function for ROC Analysis.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
 #' @param alt .

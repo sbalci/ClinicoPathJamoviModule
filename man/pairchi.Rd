@@ -7,7 +7,7 @@
 pairchi(data, dep, group, alt = "notequal", varEq = TRUE)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{dep}{.}
 
@@ -25,5 +25,10 @@ A results object containing:
 }
 }
 \description{
-Pairwise Chi-Square Test
+Function for Pairwise Chi-Square Test Analysis.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

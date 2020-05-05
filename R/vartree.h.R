@@ -85,8 +85,13 @@ vartreeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Variable Tree
 #'
-#' 
-#' @param data .
+#' Function for Generating Tree Summaries of Variables.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{

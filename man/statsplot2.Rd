@@ -7,7 +7,7 @@
 statsplot2(data, dep, group, direction = "independent", distribution = "p")
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{dep}{.}
 
@@ -26,5 +26,10 @@ A results object containing:
 }
 }
 \description{
-Graphs and Plots
+Function for Generating Plots and Graphs Based on Variable Types.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

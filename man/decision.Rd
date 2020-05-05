@@ -7,7 +7,7 @@
 decision(data, gold, goldPositive, newtest, testPositive)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{gold}{.}
 
@@ -20,14 +20,16 @@ decision(data, gold, goldPositive, newtest, testPositive)
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{
-Medical Decision
+Function for Medical Decision Analysis. Sensitivity, specificity, positive
+predictive value, negative predictive value.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

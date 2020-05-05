@@ -7,7 +7,7 @@
 crosstable(data, vars, group)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{vars}{.}
 
@@ -21,4 +21,9 @@ A results object containing:
 }
 \description{
 Function for making Cross Tables.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

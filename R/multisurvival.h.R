@@ -128,8 +128,13 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Multivariate Survival Analysis
 #'
-#' 
-#' @param data .
+#' Function for Multivariate Survival Analysis using Cox-regression.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param explanatory .
 #' @param outcome .
 #' @param overalltime .

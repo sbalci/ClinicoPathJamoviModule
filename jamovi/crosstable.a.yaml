@@ -34,4 +34,17 @@ options:
       description: >
                   variable in the column
 
+
+    - name: style
+      title: Table Style
+      type: List
+      options:
+        - title: NEJM
+          name: nejm.css
+        - title: Lancet
+          name: lancet.css
+        - title: hmisc
+          name: hmisc.css
+      default: nejm.css
+
 ...

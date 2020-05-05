@@ -11,10 +11,6 @@ Competing Survival Analysis
 
 Competing Survival Analysis
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:competingsurvivalBase]{ClinicoPath::competingsurvivalBase}} -> \code{competingsurvivalClass}
 }

@@ -101,8 +101,13 @@ oddsratioBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Odds Ratio Table and Plot
 #'
-#' 
-#' @param data .
+#' Function for Odds Ratio Table and Plot.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param explanatory .
 #' @param outcome .
 #' @return A results object containing:

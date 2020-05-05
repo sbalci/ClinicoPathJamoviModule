@@ -7,7 +7,7 @@
 icccoeff(data, vars)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{vars}{.}
 }
@@ -18,5 +18,10 @@ A results object containing:
 }
 }
 \description{
-ICC coefficients
+Function for Interclass Correlation Coefficient Calculation.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

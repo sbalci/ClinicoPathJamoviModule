@@ -198,8 +198,13 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Survival Analysis
 #'
-#' 
-#' @param data .
+#' Function for Generating Summaries for Survival Analysis.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param explanatory .
 #' @param overalltime .
 #' @param outcome .

@@ -11,10 +11,6 @@ Odds Ratio Table and Plot
 
 Odds Ratio Table and Plot
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:oddsratioBase]{ClinicoPath::oddsratioBase}} -> \code{oddsratioClass}
 }

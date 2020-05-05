@@ -125,8 +125,13 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Graphs and Plots
 #'
-#' 
-#' @param data .
+#' Function for Generating Plots and Graphs Based on Variable Types.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
 #' @param direction select measurement type (repeated or independent)

@@ -14,7 +14,7 @@ survival(
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{explanatory}{.}
 
@@ -42,5 +42,10 @@ A results object containing:
 }
 }
 \description{
-Survival Analysis
+Function for Generating Summaries for Survival Analysis.
+}
+\examples{
+\dontrun{
+# example will be added
+}
 }

@@ -9,11 +9,6 @@
 \description{
 Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
 }
-\examples{
-will be added.
-
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:icccoeffBase]{ClinicoPath::icccoeffBase}} -> \code{icccoeffClass}
 }

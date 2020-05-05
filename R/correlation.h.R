@@ -46,7 +46,7 @@ correlationResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Correlation",
                 refs=list(
                     "correlation"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
@@ -89,12 +89,17 @@ correlationBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Correlation
 #'
-#' 
-#' @param data .
+#' Function for Correlation.
+#'
+#' @examples
+#' \dontrun{
+#' # example will be added
+#'}
+#' @param data The data as a data frame.
 #' @param vars .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr

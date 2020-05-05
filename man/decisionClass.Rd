@@ -11,10 +11,6 @@ Medical Decision Making
 
 Medical Decision Making
 }
-\examples{
-will be added
-
-}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:decisionBase]{ClinicoPath::decisionBase}} -> \code{decisionClass}
 }
