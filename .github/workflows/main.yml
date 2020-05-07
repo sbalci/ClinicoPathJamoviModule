@@ -145,8 +145,18 @@ jobs:
           echo -e 'options(Ncpus = 4, pkgType = "source", repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
           Rscript -e "remotes::install_github('ropensci/tic')" -e "print(tic::dsl_load())" -e "tic::prepare_all_stages()" -e "tic::before_install()" -e "tic::install()"
 
+
+
       - name: "Install non-default packages"
-        run: Rscript -e "install.packages(c('finalfit', 'ggstatsplot', 'tableone', 'kableExtra', 'caret', 'vtree', 'correlation'))"
+        run: |
+          Rscript -e "if (!requireNamespace('jmvtools')) install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))"
+          Rscript -e "if (!requireNamespace('finalfit')) install.packages('finalfit', type = 'source')"
+          Rscript -e "if (!requireNamespace('ggstatsplot')) install.packages('ggstatsplot', type = 'source')"
+          Rscript -e "if (!requireNamespace('tableone')) install.packages('tableone', type = 'source')"
+          Rscript -e "if (!requireNamespace('kableExtra')) install.packages('kableExtra', type = 'source')"
+          Rscript -e "if (!requireNamespace('caret')) install.packages('caret', type = 'source')"
+          Rscript -e "if (!requireNamespace('vtree')) install.packages('vtree', type = 'source')"
+          Rscript -e "if (!requireNamespace('correlation')) install.packages('correlation', type = 'source')"
 
       - name: "[Stage] Script"
         run: Rscript -e 'tic::script()'
