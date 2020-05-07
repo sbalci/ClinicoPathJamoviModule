@@ -63,5 +63,147 @@ decisioncalculatorClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text2$setContent(caretresult)
 
+
+            # Self Calculation
+            #
+            # https://cran.r-project.org/web/packages/caret/caret.pdf
+            # https://online.stat.psu.edu/stat509/node/150/
+
+
+            TotalPop <- TP + TN + FP + FN
+
+            DiseaseP <- TP + FN
+
+            DiseaseN <- TN + FP
+
+            TestP <- TP + FP
+
+            TestN <- TN + FN
+
+            TestT <- TP + TN
+
+            TestW <- FP + FN
+
+            Sens <- TP / DiseaseP
+
+            Spec <- TN / DiseaseN
+
+            AccurT <- TestT / TotalPop
+
+            PrevalenceD <- DiseaseP / TotalPop
+
+            PPV <- TP / TestP
+
+            NPV <- TN / TestN
+
+
+            if ( pp ) {
+                # Known prior probability from population
+                PriorProb <- pprob
+                            } else {
+                # From ConfusionMatrix
+            PriorProb <- PrevalenceD
+            }
+
+
+            PostTestProbDisease <-
+                (PriorProb * Sens) /
+                ( (PriorProb * Sens) + (( 1 - PriorProb ) * ( 1 - Spec )))
+
+
+
+            PostTestProbHealthy <-
+                ( (1 - PriorProb) * Spec ) /
+                ( ( ( 1- PriorProb ) * Spec) + ( PriorProb * (1 - Sens) ) )
+
+
+
+
+            LRP <- Sens / (1 - Spec)
+
+            LRN <- (1 - Sens) / Spec
+
+
+
+
+
+
+            # Populate Table
+            #
+
+            manualtable <- self$results$manualtable
+            manualtable$setRow(
+                rowNo = 1,
+                values = list(
+                    tablename = 'Decision Test Statistics',
+                    TotalPop = TotalPop,
+                    DiseaseP = DiseaseP,
+                    DiseaseN = DiseaseN,
+                    TestP = TestP,
+                    TestN = TestN,
+                    TestT = TestT,
+                    TestW = TestW,
+                    Sens = Sens,
+                    Spec = Spec,
+                    AccurT = AccurT,
+                    PrevalenceD = PrevalenceD,
+                    PPV = PPV,
+                    NPV = NPV,
+                    PostTestProbDisease = PostTestProbDisease,
+                    PostTestProbHealthy = PostTestProbHealthy
+                )
+            )
+
+
+
+
+
+
+
+
+            # Reorganize Table
+
+
+
+# caretresult[["positive"]]
+# caretresult[["table"]]
+# caretresult[["overall"]]
+# caretresult[["overall"]][["Accuracy"]]
+# caretresult[["overall"]][["Kappa"]]
+# caretresult[["overall"]][["AccuracyLower"]]
+# caretresult[["overall"]][["AccuracyUpper"]]
+# caretresult[["overall"]][["AccuracyNull"]]
+# caretresult[["overall"]][["AccuracyPValue"]]
+# caretresult[["overall"]][["McnemarPValue"]]
+# caretresult[["byClass"]]
+# caretresult[["byClass"]][["Sensitivity"]]
+# caretresult[["byClass"]][["Specificity"]]
+# caretresult[["byClass"]][["Pos Pred Value"]]
+# caretresult[["byClass"]][["Neg Pred Value"]]
+# caretresult[["byClass"]][["Precision"]]
+# caretresult[["byClass"]][["Recall"]]
+# caretresult[["byClass"]][["F1"]]
+# caretresult[["byClass"]][["Prevalence"]]
+# caretresult[["byClass"]][["Detection Rate"]]
+# caretresult[["byClass"]][["Detection Prevalence"]]
+# caretresult[["byClass"]][["Balanced Accuracy"]]
+# caretresult[["mode"]]
+# caretresult[["dots"]]
+
+
+
+
+            # Write Summary
+
+
+
+
+            # use epiR
+            #
+            #
+            #
+
+
+
         })
 )

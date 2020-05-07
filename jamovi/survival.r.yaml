@@ -13,26 +13,6 @@ items:
           - outcome
           - overalltime
 
-    # - name:  deneme
-    #   title: ''
-    #   type:  Preformatted
-
-    # - name:  deneme2
-    #   title: ''
-    #   type:  Preformatted
-
-    # - name:  deneme3
-    #   title: ''
-    #   type:  Preformatted
-
-    # - name:  deneme4
-    #   title: ''
-    #   type:  Preformatted
-
-    # - name:  text1
-    #   title: Median Survival Table
-    #   type:  Preformatted
-
     - name:  text2
       title: 'Median Survival Summary and Table'
       type:  Preformatted
@@ -72,6 +52,10 @@ items:
     - name:  text7
       title: '1, 3, 5-yr Survival Summary and Table'
       type:  Preformatted
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
 
     - name:  text6
       title: '1, 3, 5-yr Survival'

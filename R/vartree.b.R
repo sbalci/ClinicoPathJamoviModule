@@ -3,7 +3,7 @@
 #' @return
 #' @export
 #'
-#' 
+#'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -78,9 +78,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- paste0(myvars, collapse = " ")
 
-            mytree <- vtree::vtree(mydata, myvars, pngknit = FALSE)
 
-            knitr::asis_output(mytree)
+            vtree::vtree(mydata, myvars)
+
             TRUE
 
         }

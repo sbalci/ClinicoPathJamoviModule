@@ -17,6 +17,11 @@ items:
     #   title: CrossTable Tangram
     #   type:  Preformatted
 
+
+    # - name:  deneme
+    #   title: Tangram Env
+    #   type:  Preformatted
+
     - name:  text3
       title: CrossTable Tangram NEJM
       type:  Html

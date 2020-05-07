@@ -40,3 +40,4 @@ children:
       - type: TextBox
         name: cutp
         format: string
+        width: large

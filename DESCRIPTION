@@ -57,6 +57,9 @@ Remotes:
     ndphillips/FFTrees,
     easystats/report,
     spgarbet/tangram@0.3.2
+Suggests:
+    circlize,
+    randomForest
 VignetteBuilder:
     knitr
 Encoding: UTF-8
