@@ -41,6 +41,22 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop('Data contains no (complete) rows')
 
 
+
+            # g <- globalenv()
+            # while (environmentName(g) != 'R_EmptyEnv') {
+            #     g <- parent.env(g); cat(str(g, give.attr=F))
+            #     return(g)
+            # }
+            # deneme <- g
+
+            # x <-  3
+            # deneme <- get("x", inherits=TRUE)
+            # x <- 3
+            # deneme <- get("x", envir = globalenv())
+            # self$results$deneme$setContent(deneme)
+
+
+
             formulaR <- jmvcore::constructFormula(terms = self$options$vars)
 
             formulaL <- jmvcore::constructFormula(terms = self$options$group)

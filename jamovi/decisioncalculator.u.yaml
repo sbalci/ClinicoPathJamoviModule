@@ -45,6 +45,6 @@ children:
             name: pp
           - type: TextBox
             name: pprob
-            label: Prior Probability  (prevelance)
+            label: ''
             format: number
             enable: (pp)

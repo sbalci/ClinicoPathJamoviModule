@@ -20,6 +20,79 @@ items:
           - pp
           - pprob
 
+
+    - name:  manualtable
+      title: 'Decision Test Statistics'
+      type: Table
+      swapRowsColumns: true
+      rows:  1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: TotalPop
+          title: 'Total Number of Subjects'
+          type: number
+        - name: DiseaseP
+          title: 'Total Number of Subjects with Disease'
+          type: number
+        - name: DiseaseN
+          title: 'Total Number of Healthy Subjects'
+          type: number
+        - name: TestP
+          title: 'Total Number of Positive Tests'
+          type: number
+        - name: TestN
+          title: 'Total Number of Negative Tests'
+          type: number
+        - name: TestT
+          title: 'Total Number of True Test Results'
+          type: number
+        - name: TestW
+          title: 'Total Number of Wrong Test Results'
+          type: number
+        - name: Sens
+          title: 'Sensitivity (True Positives among Diseased)'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity (True Negatives among Healthy)'
+          type: number
+          format: pc
+        - name: AccurT
+          title: 'Accuracy (True Test Result Ratio)'
+          type: number
+          format: pc
+        - name: PrevalenceD
+          title: 'Disease Prevalence in this experimental population'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value (Probability of having disease after a positive test
+          using this experimental population)'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'Negative Predictive Value (Probability of being healthy after a negative test
+          using this experimental population)'
+          type: number
+          format: pc
+        - name: PostTestProbDisease
+          title: 'Post-test Probability of Having Disease  (Probability of having disease after a positive test
+          using known Population Prevalence)'
+          type: number
+          format: pc
+        - name: PostTestProbHealthy
+          title: 'Post-test Probability of Being Healthy (Probability of being healthy after a negative test
+          using known Population Prevalence)'
+          type: number
+          format: pc
+      clearWith:
+          - pp
+          - pprob
+
+
+
     # - name:  table1
     #   title: 'Table 1'
     #   type:  Html

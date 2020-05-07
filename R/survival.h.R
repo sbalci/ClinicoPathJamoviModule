@@ -136,7 +136,11 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text7",
-                title="1, 3, 5-yr Survival Summary and Table"))
+                title="1, 3, 5-yr Survival Summary and Table",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text6",

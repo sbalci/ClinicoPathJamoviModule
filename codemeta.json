@@ -40,7 +40,32 @@
       "@id": "https://orcid.org/0000-0002-7852-3851"
     }
   ],
-  "softwareSuggestions": [],
+  "softwareSuggestions": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "circlize",
+      "name": "circlize",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=circlize"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "randomForest",
+      "name": "randomForest",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=randomForest"
+    }
+  ],
   "softwareRequirements": [
     {
       "@type": "SoftwareApplication",
@@ -438,6 +463,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "13468.737KB",
+  "fileSize": "13471.052KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

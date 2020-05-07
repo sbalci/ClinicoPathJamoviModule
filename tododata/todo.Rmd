@@ -1907,7 +1907,10 @@ result2 <- irr::kappam.fleiss(
 ```{r}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-mytree <- vtree::vtree(deneme, "LVI PNI")
+myvtree <- vtree::vtree
+
+mytree <- myvtree(deneme, "LVI PNI")
+
 
 print(mytree)
 
@@ -2166,6 +2169,21 @@ file.copy(from = files_R,
 file.copy(from = files_jamovi,
           to = "~/ClinicoPath/jamovi/",
           overwrite = TRUE)
+
+```
+
+```{r decision}
+
+table2 <- matrix(c(80, 20, 30, 70), nrow = 2, ncol = 2, byrow = TRUE, dimnames = list(c("Positive", "Negative"), c("Positive","Negative")))
+
+            table3 <- as.table(table2)
+
+            names(attributes(table3)$dimnames) <- c("Test","Gold Standart")
+
+caretresult <- caret::confusionMatrix(table3, mode = "everything")
+
+
+
 
 ```
 

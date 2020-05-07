@@ -1,7 +1,7 @@
 # source("renv/activate.R")
 options(repos = c(
     # 'https://repo.jamovi.org',
-                  "https://cran.microsoft.com/snapshot/2020-01-01"
+                  "https://cran.microsoft.com/snapshot/2020-05-01"
                   )
 )
 
