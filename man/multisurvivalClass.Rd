@@ -3,9 +3,6 @@
 \name{multisurvivalClass}
 \alias{multisurvivalClass}
 \title{Multivariate Survival Analysis}
-\value{
-
-}
 \description{
 Multivariate Survival Analysis
 

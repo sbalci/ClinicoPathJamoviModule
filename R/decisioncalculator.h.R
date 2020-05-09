@@ -131,31 +131,38 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     list(
                         `name`="Sens", 
                         `title`="Sensitivity (True Positives among Diseased)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="Spec", 
                         `title`="Specificity (True Negatives among Healthy)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="AccurT", 
                         `title`="Accuracy (True Test Result Ratio)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="PrevalenceD", 
                         `title`="Disease Prevalence in this experimental population", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="PPV", 
                         `title`="Positive Predictive Value (Probability of having disease after a positive test using this experimental population)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="NPV", 
                         `title`="Negative Predictive Value (Probability of being healthy after a negative test using this experimental population)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="PostTestProbDisease", 
                         `title`="Post-test Probability of Having Disease  (Probability of having disease after a positive test using known Population Prevalence)", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="PostTestProbHealthy", 
                         `title`="Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)", 

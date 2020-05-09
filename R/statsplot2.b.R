@@ -1,7 +1,7 @@
 #' Plots and Graphs Based on Variable Types
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

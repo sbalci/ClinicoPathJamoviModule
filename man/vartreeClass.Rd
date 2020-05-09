@@ -3,9 +3,6 @@
 \name{vartreeClass}
 \alias{vartreeClass}
 \title{Variable Tree}
-\value{
-
-}
 \description{
 Variable Tree
 

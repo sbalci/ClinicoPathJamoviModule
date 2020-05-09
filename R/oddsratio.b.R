@@ -1,7 +1,7 @@
 #' Odds Ratio Table and Plot
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

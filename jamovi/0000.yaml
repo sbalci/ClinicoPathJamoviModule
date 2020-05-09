@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.1.0011
+version: 0.0.1.0012
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-05-04'
+date: '2020-05-08'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -119,7 +119,12 @@ analyses:
     menuGroup: ClinicoPath2
     menuTitle: Pairwise Chi-Square Test
     menuSubgroup: Comparisons
-    description: Function for Pairwise Chi-Square Test Analysis.
+    description: >
+      The χ² test of association (not to be confused with the χ² goodness of
+      fit) is used to test whether two categorical variables are independent or
+      associated. If the p-value is low, it suggests the variables are not
+      independent, and that there is a relationship between the two variables.
+    menuSubtitle: Pairwise Chi-Square Test
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
@@ -141,6 +146,12 @@ analyses:
     menuSubgroup: Agreement
     menuTitle: ICC coefficients
     description: Function for Interclass Correlation Coefficient Calculation.
+  - title: Tables via gtsummary
+    name: gtsummary
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuTitle: Tables via gtsummary
+    menuSubgroup: Comparisons
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

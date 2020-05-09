@@ -60,7 +60,11 @@ DOI 10.17605/OSF.IO/9SZUD
 
 <img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
+-----
+
 ## Screenshots of Module
+
+-----
 
 ### Descriptives
 
@@ -76,23 +80,41 @@ DOI 10.17605/OSF.IO/9SZUD
 
 <img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
 
+#### Variable Tree
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+-----
+
 ### Comparisons
 
-#### Cross Table
+#### Cross Tables
 
 <img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
 
+<img src="man/figures/jamovi-and-tangram-crosstable.gif" align="center" width = 75% />
+
 <img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
 
-#### GGStatsPlot
+##### Tables via arsenal, finalfit, gtsummary
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+#### Pairwise Chi-Square Tests
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+#### Graphs and Plots
 
 <img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
 
+-----
+
 ### Survival
 
-#### Univariate Survival Analysis
+#### Survival Analysis
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
 
@@ -106,21 +128,63 @@ DOI 10.17605/OSF.IO/9SZUD
 
 <img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
 
+<img src="man/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width = 75% />
+
 #### Odds Ratio Table and Plot
+
+#### Competing Survival
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+-----
+
+### Agreement
+
+#### Interrater Reliability
+
+<img src="man/figures/jamovi-clinicopath-kappa-irr.png" align="center" width = 75% />
+
+#### ICC coefficients
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+-----
 
 ### Decision
 
 #### Medical Decision
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
 #### Decision Calculator
 
+<img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
+
+#### Decision Tree
+
+##### explore
+
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
-<img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
+<img src="man/figures/jamovi-clinicopath-explore-decision-tree.png" align="center" width = 75% />
+
+##### FFTrees
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+<img src="man/figures/jamovi-clinicopath-FFTrees-decision-tree.png" align="center" width = 75% />
+
+##### rpart
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+<img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
+
+#### ROC
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+-----
 
 ### Correlation
 
@@ -128,11 +192,7 @@ DOI 10.17605/OSF.IO/9SZUD
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
-### Agreement
-
-#### Interrater Intrarater Reliability
-
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+-----
 
 ## Installation in R
 
@@ -236,7 +296,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--04--26-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -319,7 +379,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--04--26-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last

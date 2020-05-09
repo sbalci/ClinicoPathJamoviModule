@@ -4,7 +4,7 @@
 \alias{crosstable}
 \title{CrossTables}
 \usage{
-crosstable(data, vars, group, style = "nejm.css")
+crosstable(data, vars, group, sty = "nejm")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -13,7 +13,7 @@ crosstable(data, vars, group, style = "nejm.css")
 
 \item{group}{variable in the column}
 
-\item{style}{.}
+\item{sty}{.}
 }
 \value{
 A results object containing:

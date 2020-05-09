@@ -4,7 +4,7 @@
 \alias{tableoneClass}
 \title{Table One}
 \value{
-
+Table
 }
 \description{
 Table One

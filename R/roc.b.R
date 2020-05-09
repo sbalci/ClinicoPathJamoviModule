@@ -1,7 +1,7 @@
 #' ROC Analysis
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'
@@ -10,30 +10,23 @@
 #'
 
 
-rocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "rocClass",
-    inherit = rocBase,
-    private = list(
-        .run = function() {
-
-
-
-            # TODO
-
-            todo <- glue::glue(
-                "This Module is still under development
+rocClass <- if (requireNamespace("jmvcore")) R6::R6Class("rocClass", inherit = rocBase, 
+    private = list(.run = function() {
+        
+        
+        
+        # TODO
+        
+        todo <- glue::glue("This Module is still under development
                 -
                 -
-                "
-            )
-
-            self$results$todo$setContent(todo)
-
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
-
-        })
-)
+                ")
+        
+        self$results$todo$setContent(todo)
+        
+        
+        if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+        
+        
+        
+    }))

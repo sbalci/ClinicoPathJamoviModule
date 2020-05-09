@@ -1,9 +1,9 @@
 #' Decision Tree
 #'
-#' @return
-#' @export
+
+
 #'
-#' 
+#'
 #'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
@@ -50,6 +50,30 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+            # from https://forum.jamovi.org/viewtopic.php?f=2&t=1287
+            # library(caret)
+            # library(partykit)
+            # detach("package:partykit", unload=TRUE)
+            # library(party)
+
+            # Conditional Trees
+
+            # set.seed(3456)
+            # model <- train(
+            #     yvar ~ .,
+            #     data = df,
+            #     method = 'ctree2',
+            #     trControl = trainControl("cv", number = 10, classProbs = FALSE),
+            #     tuneGrid = expand.grid(maxdepth = 3, mincriterion = 0.95)
+            # )
+            # plot(model$finalModel)
+            #
+            # t(sapply(unique(where(model$finalModel)), function(x) {
+            #     n <- nodes(model$finalModel, x)[[1]]
+            #     yvar <- df[as.logical(n$weights), "yvar"]
+            #     cbind.data.frame("Node" = as.integer(x),
+            #                      psych::describe(yvar, quant=c(.25,.50,.75), skew = FALSE))
+            # }))
 
 
 

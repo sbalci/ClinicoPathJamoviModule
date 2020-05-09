@@ -3,9 +3,6 @@
 \name{crosstableClass}
 \alias{crosstableClass}
 \title{Cross Table}
-\value{
-
-}
 \description{
 Cross Table
 

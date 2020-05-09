@@ -3,9 +3,6 @@
 \name{survivalClass}
 \alias{survivalClass}
 \title{Survival Analysis}
-\value{
-
-}
 \description{
 Survival Analysis
 

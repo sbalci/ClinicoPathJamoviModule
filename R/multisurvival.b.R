@@ -1,7 +1,7 @@
 #' Multivariate Survival Analysis
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

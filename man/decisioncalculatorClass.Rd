@@ -3,9 +3,6 @@
 \name{decisioncalculatorClass}
 \alias{decisioncalculatorClass}
 \title{Decision Calculator}
-\value{
-
-}
 \description{
 Decision Calculator
 

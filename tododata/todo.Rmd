@@ -887,7 +887,9 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::addAnalysis(name='roc', title='ROC')
 
-jmvtools::addAnalysis(name = "icccoeff", title = "ICC coefficients")
+# jmvtools::addAnalysis(name = "icccoeff", title = "ICC coefficients")
+
+# jmvtools::addAnalysis(name = "gtsummary", title = "Tables via gtsummary")
 
 ```
 
@@ -1324,8 +1326,10 @@ table3 <-
     tangram::tangram(
       "Death ~ LVI + PNI + Age", deneme),
     fragment=TRUE,
-    inline="nejm.css",
-    caption = "HTML5 Table NEJM Style",
+    # style = "hmisc",
+    style = "nejm",
+    # inline="nejm.css",
+    caption = "HTML5 Table",
     id="tbl3")
 
 table3
@@ -1340,12 +1344,23 @@ formulaL <- jmvcore::constructFormula(terms = "Death")
 
 formula <- paste(formulaL, '~', formulaR)
 
-formula <- as.formula(formula)
+# formula <- as.formula(formula)
+
+sty <- jmvcore::composeTerm(components = "nejm")
+
+gr <- jmvcore::composeTerm(components = "Death")
 
 
 table <- tangram::html5(
     tangram::tangram(formula, deneme
-                     ))
+                     ),
+    fragment=TRUE,
+    # style = "hmisc",
+    # style = "nejm",
+    style = sty,
+    # inline="nejm.css",
+    caption = paste0("HTML5 Table ", gr),
+    id="tbl4")
 
 table
 
@@ -2127,7 +2142,7 @@ readyfunctions <- c(
     # "^correlation",
     "^crosstable",
     "^decision",
-    "^decisioncalculator",
+    # "^decisioncalculator",
     # "^icccoeff",
     "^multisurvival",
     "^oddsratio",
