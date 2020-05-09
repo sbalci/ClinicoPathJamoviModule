@@ -27,7 +27,8 @@ pairchiOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             exp = FALSE,
             pcRow = FALSE,
             pcCol = FALSE,
-            pcTot = FALSE, ...) {
+            pcTot = FALSE,
+            pairw = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -139,6 +140,10 @@ pairchiOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "pcTot",
                 pcTot,
                 default=FALSE)
+            private$..pairw <- jmvcore::OptionBool$new(
+                "pairw",
+                pairw,
+                default=FALSE)
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -162,6 +167,7 @@ pairchiOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..pcRow)
             self$.addOption(private$..pcCol)
             self$.addOption(private$..pcTot)
+            self$.addOption(private$..pairw)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -185,7 +191,8 @@ pairchiOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         exp = function() private$..exp$value,
         pcRow = function() private$..pcRow$value,
         pcCol = function() private$..pcCol$value,
-        pcTot = function() private$..pcTot$value),
+        pcTot = function() private$..pcTot$value,
+        pairw = function() private$..pairw$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -208,7 +215,8 @@ pairchiOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..exp = NA,
         ..pcRow = NA,
         ..pcCol = NA,
-        ..pcTot = NA)
+        ..pcTot = NA,
+        ..pairw = NA)
 )
 
 pairchiResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -219,14 +227,18 @@ pairchiResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         odds = function() private$.items[["odds"]],
         nom = function() private$.items[["nom"]],
         gamma = function() private$.items[["gamma"]],
-        taub = function() private$.items[["taub"]]),
+        taub = function() private$.items[["taub"]],
+        pw = function() private$.items[["pw"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Paired Samples Contingency Tables")
+                title="Pairwise Chi-Square Test",
+                refs=list(
+                    "rmngb",
+                    "RVAideMemoire"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",
@@ -492,7 +504,11 @@ pairchiResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="pw",
+                title="Pairwise Chi-Square Comparison"))}))
 
 pairchiBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "pairchiBase",
@@ -598,6 +614,7 @@ pairchiBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   percentages
 #' @param pcTot \code{TRUE} or \code{FALSE} (default), provide total
 #'   percentages
+#' @param pairw .
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -607,6 +624,7 @@ pairchiBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$nom} \tab \tab \tab \tab \tab a table of the 'nominal' test results \cr
 #'   \code{results$gamma} \tab \tab \tab \tab \tab a table of the gamma test results \cr
 #'   \code{results$taub} \tab \tab \tab \tab \tab a table of the Kendall's tau-b test results \cr
+#'   \code{results$pw} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -640,6 +658,7 @@ pairchi <- function(
     pcRow = FALSE,
     pcCol = FALSE,
     pcTot = FALSE,
+    pairw = FALSE,
     formula) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -714,7 +733,8 @@ pairchi <- function(
         exp = exp,
         pcRow = pcRow,
         pcCol = pcCol,
-        pcTot = pcTot)
+        pcTot = pcTot,
+        pairw = pairw)
 
     analysis <- pairchiClass$new(
         options = options,

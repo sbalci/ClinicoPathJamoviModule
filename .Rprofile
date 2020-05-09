@@ -5,7 +5,7 @@ options(repos = c(
                   )
 )
 
-.libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
+# .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
 
 
 # source(
@@ -20,17 +20,19 @@ options(repos = c(
 # https://conjugateprior.org/2015/06/identifying-the-os-from-r/
 
 
-if (.Platform$OS.type == "windows") {
-
-    library("jmvtools")
-
-    jmvtools::check("C://Program Files//jamovi//bin")
-
-    .libPaths(new = "C:\\ClinicoPathLibrary")
-
-    Sys.setenv(TZ = "Europe/Istanbul")
-
-}
+# if (.Platform$OS.type == "windows") {
+#
+#     if (!requireNamespace('jmvtools')) install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+#
+#     library("jmvtools")
+#
+#     jmvtools::check("C://Program Files//jamovi//bin")
+#
+#     .libPaths(new = "C:\\ClinicoPathLibrary")
+#
+#     Sys.setenv(TZ = "Europe/Istanbul")
+#
+# }
 
 
 .First <- function(){

@@ -309,6 +309,17 @@ inherit = pairchiBase, private = list(
                         rr <- private$.relativeRisk(mat)
                     }
 
+
+                    # pairwise in code ----
+
+                    if (self$options$pairw)
+                        pw <- private$.pairwise(mat)
+
+                    self$results$pw$setContent(pw)
+
+
+
+
                 }) # suppressWarnings
 
                 total <- sum(mat)
@@ -618,6 +629,69 @@ inherit = pairchiBase, private = list(
             return(list(rr=rr, lower=lower, upper=upper))
 
         },
+
+
+# pairwise function ------
+#
+#
+#
+
+.pairwise = function(mat) {
+
+
+    pairwiseRVAideMemoire <- RVAideMemoire::chisq.multcomp(mat)
+
+    pairwisermngb <- rmngb::pairwise.chisq.test(as.table(mat))
+
+
+    pairwise <- list("RVAideMemoire" = pairwiseRVAideMemoire,
+                     "rmngb" = pairwisermngb)
+
+    return(pairwise)
+
+
+    # dims <- dim(mat)
+
+    # if (dims[1] > 2 || dims[2] > 2)
+    #     return(NULL)
+
+    # ciWidth <- self$options$ciWidth
+    # tail <- (100 - ciWidth) / 200
+    # z <- qnorm(tail, lower.tail = FALSE)
+
+    # a <- mat[1,1]
+    # b <- mat[1,2]
+    # c <- mat[2,1]
+    # d <- mat[2,2]
+
+    # p1 <- a / (a + b)
+    # p2 <- c / (c + d)
+
+    # m <- log(p1 / p2)
+    # s <- sqrt((b / (a*(a+b))) + (d / (c*(c+d))))
+    # lower <- exp(m - z*s)
+    # upper <- exp(m + z*s)
+
+    # rr <- p1 / p2
+
+    # return(list(rr=rr, lower=lower, upper=upper))
+
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         .sourcifyOption = function(option) {
             if (option$name %in% c('rows', 'cols', 'counts'))
                 return('')

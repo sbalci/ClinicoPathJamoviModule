@@ -60,7 +60,7 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="CrossTable",
+                title="Cross Tables",
                 refs=list(
                     "tangram"))
             self$add(jmvcore::Html$new(
@@ -88,7 +88,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' CrossTables
+#' Cross Tables
 #'
 #' Function for making Cross Tables.
 #'

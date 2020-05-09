@@ -34,7 +34,14 @@ Official documentation is here: https://dev.jamovi.org/
 
 ## preparing development tools
 
-jmvtools should be installed from the jamovi repo
+### use an unsigned version of jamovi for development in mac
+
+https://dev.jamovi.org/#28-02-2020
+
+https://www.jamovi.org/downloads/jamovi-unsigned.zip
+
+
+### jmvtools should be installed from the jamovi repo
 
 https://dev.jamovi.org/tuts0101-getting-started.html
 
@@ -264,9 +271,22 @@ jamovi is electron based. See R, shiny, and electron based application developme
 
 
 
-project structure
+## Project Structure
 
 https://dev.jamovi.org/info_project-structure.html
+
+
+https://forum.jamovi.org/viewtopic.php?f=12&t=1253&p=4251&hilit=npm#p4251
+
+> the easiest way to build jamovi on macOS is to use our dev bundle.
+https://www.jamovi.org/downloads/jamovi-dev.zip
+if you navigate to the `jamovi.app/Contents/Resources` folder, you'll find a package.json which contains a bunch of different build commands.
+you can issue commands like:
+npm run build:client
+npm run build:server
+npm run build:analyses:jmv
+depending on which component you're wanting to build.
+
 
 
 

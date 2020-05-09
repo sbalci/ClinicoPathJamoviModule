@@ -65,7 +65,8 @@ Suggests:
     randomForest,
     huxtable,
     flextable,
-    Hmisc
+    Hmisc,
+    rmarkdown
 VignetteBuilder:
     knitr
 Encoding: UTF-8
