@@ -1,0 +1,37 @@
+---
+name:  gtsummary
+title: Tables via gtsummary
+menuGroup: ClinicoPath2
+menuSubgroup: Comparisons
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+
+    - name: alt
+      title: Alternative hypothesis
+      type: List
+      options:
+        - title: Not equal
+          name:  notequal
+        - title: One greater
+          name:  onegreater
+        - title: Two greater
+          name:  twogreater
+      default: notequal
+
+    - name: varEq
+      title: Assume equal variances
+      type: Bool
+      default: true
+...

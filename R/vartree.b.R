@@ -1,7 +1,7 @@
 #' Variable Tree
 #'
-#' @return
-#' @export
+
+
 #'
 #'
 #'

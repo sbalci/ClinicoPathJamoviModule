@@ -1,7 +1,7 @@
 #' Survival Analysis
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

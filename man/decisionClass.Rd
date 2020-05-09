@@ -3,9 +3,6 @@
 \name{decisionClass}
 \alias{decisionClass}
 \title{Medical Decision Making}
-\value{
-
-}
 \description{
 Medical Decision Making
 

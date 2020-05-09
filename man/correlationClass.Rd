@@ -3,9 +3,6 @@
 \name{correlationClass}
 \alias{correlationClass}
 \title{Correlation Analysis}
-\value{
-
-}
 \description{
 Correlation Analysis
 

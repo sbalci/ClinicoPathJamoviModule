@@ -8,7 +8,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             vars = NULL,
             group = NULL,
-            style = "nejm.css", ...) {
+            sty = "nejm", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -27,27 +27,27 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..style <- jmvcore::OptionList$new(
-                "style",
-                style,
+            private$..sty <- jmvcore::OptionList$new(
+                "sty",
+                sty,
                 options=list(
-                    "nejm.css",
-                    "lancet.css",
-                    "hmisc.css"),
-                default="nejm.css")
+                    "nejm",
+                    "lancet",
+                    "hmisc"),
+                default="nejm")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
-            self$.addOption(private$..style)
+            self$.addOption(private$..sty)
         }),
     active = list(
         vars = function() private$..vars$value,
         group = function() private$..group$value,
-        style = function() private$..style$value),
+        sty = function() private$..sty$value),
     private = list(
         ..vars = NA,
         ..group = NA,
-        ..style = NA)
+        ..sty = NA)
 )
 
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -99,7 +99,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param vars .
 #' @param group variable in the column
-#' @param style .
+#' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
@@ -110,7 +110,7 @@ crosstable <- function(
     data,
     vars,
     group,
-    style = "nejm.css") {
+    sty = "nejm") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('crosstable requires jmvcore to be installed (restart may be required)')
@@ -128,7 +128,7 @@ crosstable <- function(
     options <- crosstableOptions$new(
         vars = vars,
         group = group,
-        style = style)
+        sty = sty)
 
     analysis <- crosstableClass$new(
         options = options,

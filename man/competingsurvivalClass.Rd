@@ -3,9 +3,6 @@
 \name{competingsurvivalClass}
 \alias{competingsurvivalClass}
 \title{Competing Survival Analysis}
-\value{
-
-}
 \description{
 Competing Survival Analysis
 

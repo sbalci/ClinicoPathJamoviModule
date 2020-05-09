@@ -1,4 +1,4 @@
-title: CrossTables
+title: Cross Tables
 name: crosstable
 jus: '3.0'
 stage: 0
@@ -25,4 +25,4 @@ children:
     margin: large
     children:
       - type: ComboBox
-        name: style
+        name: sty

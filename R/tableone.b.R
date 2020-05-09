@@ -1,9 +1,7 @@
 #' Table One
 #'
-#' @return
-#' @export
+#' @return Table
 #'
-#' 
 #'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
@@ -11,14 +9,11 @@
 #'
 
 
-tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "tableoneClass",
-    inherit = tableoneBase,
-    private = list(
-        .run = function() {
-
-            if (length(self$options$vars) == 0) {
-                todo <- "
+tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass", 
+    inherit = tableoneBase, private = list(.run = function() {
+        
+        if (length(self$options$vars) == 0) {
+            todo <- "
                 <br>Welcome to ClinicoPath
                           <br><br>
                           This tool will help you form a Table One, which is almost always used in clinicopathological research manuscripts.
@@ -27,29 +22,26 @@ tableoneClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           <br><br>
                           This tool uses tableone package. Please cite the packages and jamovi using references below.
                           "
-
-                html <- self$results$todo
-                html$setContent(todo)
-                return()
-
-            } else {
-
-                todo <- ""
-                html <- self$results$todo
-                html$setContent(todo)
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-
-            mytableone <- self$data %>%
-                tableone::CreateTableOne(data = .)
-
+            
+            html <- self$results$todo
+            html$setContent(todo)
+            return()
+            
+        } else {
+            
+            todo <- ""
+            html <- self$results$todo
+            html$setContent(todo)
+            
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+            
+            
+            mytableone <- self$data %>% tableone::CreateTableOne(data = .)
+            
             # results
-
+            
             self$results$text1$setContent(mytableone)
-
-
-            }
-        })
-)
+            
+            
+        }
+    }))

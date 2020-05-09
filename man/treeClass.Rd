@@ -3,9 +3,6 @@
 \name{treeClass}
 \alias{treeClass}
 \title{Decision Tree}
-\value{
-
-}
 \description{
 Decision Tree
 

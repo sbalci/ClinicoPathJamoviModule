@@ -255,4 +255,11 @@
         `year`=2019, 
         `title`="rpart.plot: Plot 'rpart' Models: An Enhanced Version of 'plot.rpart'", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=rpart.plot", 
-        `url`="https://CRAN.R-project.org/package=rpart.plot"))
+        `url`="https://CRAN.R-project.org/package=rpart.plot"), 
+    `gtsummary`=list(
+        `type`="software", 
+        `author`="Daniel D. Sjoberg, Margie Hannum, Karissa Whiting and Emily C. Zabor", 
+        `year`=2020, 
+        `title`="gtsummary: Presentation-Ready Data Summary and Analytic Result Tables", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=gtsummary", 
+        `url`="https://CRAN.R-project.org/package=gtsummary"))

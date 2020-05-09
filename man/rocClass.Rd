@@ -3,9 +3,6 @@
 \name{rocClass}
 \alias{rocClass}
 \title{ROC Analysis}
-\value{
-
-}
 \description{
 ROC Analysis
 

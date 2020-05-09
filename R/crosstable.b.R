@@ -1,20 +1,19 @@
 #' Cross Table
 #'
-#' @return
 #' @export
-#'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import tangram
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstableClass",
     inherit = crosstableBase,
     private = list(
-        .run = function() {
 
+        .run = function() {
 
 
 
@@ -88,18 +87,41 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Tangram Table
 
 
+            mydata <- self$data
 
-            style <- self$options$style
+            sty <- jmvcore::composeTerm(components = self$options$sty)
+
+            gr <- jmvcore::composeTerm(components = self$options$group)
 
 
-            table3 <-
-                tangram::html5(
-                    tangram::tangram(
-                        formula, self$data),
-                    fragment = TRUE,
-                    inline = style,
-                    caption = paste0("Cross Table for Dependent ", self$options$group),
-                    id = "tbl3")
+            # table3 <-
+            #     tangram::html5(
+            #         tangram::tangram(
+            #         formula,
+            #         mydata),
+            #         style = sty,
+            #         # caption = paste0("Cross Table for Dependent ", gr),
+            #         id = "tbl3")
+
+
+            # table3 <-
+            #         tangram::tangram(
+            #             Species~Sepal.Length+Sepal.Width+Petal.Length,
+            #             iris,
+            #         style = 'nejm',
+            #         caption = paste0("Cross Table for Dependent "),
+            #         id = "tbl3")
+
+
+
+            table3 <- tangram::html5(
+                tangram::tangram(
+                    "Species~Sepal.Length+Sepal.Width+Petal.Length",
+                    iris
+                    ),
+                style = "hmisc",
+                caption = paste0("Cross Table for Dependent "),
+                id = "tbl3")
 
             results3 <- table3
 

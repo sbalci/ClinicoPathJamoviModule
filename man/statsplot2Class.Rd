@@ -3,9 +3,6 @@
 \name{statsplot2Class}
 \alias{statsplot2Class}
 \title{Plots and Graphs Based on Variable Types}
-\value{
-
-}
 \description{
 Plots and Graphs Based on Variable Types
 

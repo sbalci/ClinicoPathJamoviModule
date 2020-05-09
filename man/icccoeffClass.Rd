@@ -3,9 +3,6 @@
 \name{icccoeffClass}
 \alias{icccoeffClass}
 \title{Interclass Correlation Coefficient}
-\value{
-
-}
 \description{
 Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
 }

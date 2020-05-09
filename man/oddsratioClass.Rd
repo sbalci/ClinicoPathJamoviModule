@@ -3,9 +3,6 @@
 \name{oddsratioClass}
 \alias{oddsratioClass}
 \title{Odds Ratio Table and Plot}
-\value{
-
-}
 \description{
 Odds Ratio Table and Plot
 

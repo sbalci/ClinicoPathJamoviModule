@@ -1,7 +1,7 @@
 #' Competing Survival Analysis
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

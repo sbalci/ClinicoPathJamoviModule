@@ -80,7 +80,12 @@ https://osf.io/9szud/
 <img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
 
+---
+
+
 ## Screenshots of Module
+
+---
 
 ### Descriptives
 
@@ -102,21 +107,38 @@ https://osf.io/9szud/
 
 
 
+#### Variable Tree
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+---
+
 ### Comparisons
 
-#### Cross Table
+#### Cross Tables
 
 
 <img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
 
 
+<img src="man/figures/jamovi-and-tangram-crosstable.gif" align="center" width = 75% />
+
 
 <img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
 
 
+##### Tables via arsenal, finalfit, gtsummary
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 
-#### GGStatsPlot
+#### Pairwise Chi-Square Tests
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+#### Graphs and Plots
 
 
 <img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
@@ -125,9 +147,11 @@ https://osf.io/9szud/
 <img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
 
 
+---
+
 ### Survival
 
-#### Univariate Survival Analysis
+#### Survival Analysis
 
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
@@ -154,32 +178,89 @@ https://osf.io/9szud/
 <img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
 
 
+<img src="man/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width = 75% />
+
+
+
 #### Odds Ratio Table and Plot 
 
 
+
+#### Competing Survival
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+
+---
+
+
+### Agreement
+
+
+#### Interrater Reliability
+
+
+<img src="man/figures/jamovi-clinicopath-kappa-irr.png" align="center" width = 75% />
+
+
+#### ICC coefficients
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+---
 
 ### Decision
 
 #### Medical Decision
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
-
-
 
 
 #### Decision Calculator
 
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
-
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
 
 
+#### Decision Tree
 
+##### explore
+
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+<img src="man/figures/jamovi-clinicopath-explore-decision-tree.png" align="center" width = 75% />
+
+
+
+
+##### FFTrees 
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+<img src="man/figures/jamovi-clinicopath-FFTrees-decision-tree.png" align="center" width = 75% />
+
+
+
+##### rpart
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+<img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
+
+
+#### ROC
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+---
 
 ### Correlation
 
@@ -188,12 +269,11 @@ https://osf.io/9szud/
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 
-### Agreement
 
 
-#### Interrater Intrarater Reliability
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+---
+
 
 
 

@@ -4,7 +4,7 @@
 \alias{agreementClass}
 \title{Interrater Reliability Analysis}
 \value{
-
+Table
 }
 \description{
 Interrater Reliability Analysis

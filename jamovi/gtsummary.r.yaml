@@ -1,0 +1,20 @@
+---
+name:  gtsummary
+title: Tables via gtsummary
+jrs:   '1.1'
+
+items:
+    # - name:  gtsum1pre
+    #   title: Tables via gtsummary
+    #   type:  Preformatted
+
+    - name:  gtsum1
+      title: Tables via gtsummary
+      type:  Html
+
+
+    # - name:  gtsum1html
+    #   title: Tables via gtsummary
+    #   type:  Html
+
+...

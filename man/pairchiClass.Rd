@@ -3,9 +3,6 @@
 \name{pairchiClass}
 \alias{pairchiClass}
 \title{Pairwise Chi-Square Test}
-\value{
-
-}
 \description{
 Pairwise Chi-Square Test
 

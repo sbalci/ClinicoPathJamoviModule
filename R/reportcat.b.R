@@ -1,7 +1,7 @@
 #' Summary of Categorical Variables
 #'
-#' @return
-#' @export
+
+
 #'
 #' 
 #'

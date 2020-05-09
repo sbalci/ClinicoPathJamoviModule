@@ -40,6 +40,12 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisioncalculatorClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/gtsummary.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/gtsummaryClass.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/icccoeff.html</loc>
   </url>
   <url>
@@ -122,5 +128,8 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/motivation.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/pkgnet-report.html</loc>
   </url>
 </urlset>

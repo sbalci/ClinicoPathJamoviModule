@@ -1,6 +1,6 @@
 ---
 name:  crosstable
-title: CrossTables
+title: Cross Tables
 menuGroup: ClinicoPath
 menuSubgroup: Comparisons
 version: '1.0.0'
@@ -35,16 +35,16 @@ options:
                   variable in the column
 
 
-    - name: style
+    - name: sty
       title: Table Style
       type: List
       options:
         - title: NEJM
-          name: nejm.css
+          name: nejm
         - title: Lancet
-          name: lancet.css
+          name: lancet
         - title: hmisc
-          name: hmisc.css
-      default: nejm.css
+          name: hmisc
+      default: nejm
 
 ...
