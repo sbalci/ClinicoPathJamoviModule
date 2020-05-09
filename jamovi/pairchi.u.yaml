@@ -1,5 +1,5 @@
-name: contTablesPaired
-title: Paired Samples Contingency Tables
+name: pairchi
+title: Pairwise Chi-Square Test
 jus: '2.0'
 compilerMode: tame
 children:
@@ -168,3 +168,23 @@ children:
                         name: pcCol
                       - type: CheckBox
                         name: pcTot
+      - type: CollapseBox
+        label: Pairwise
+        stretchFactor: 1
+        collapsed: true
+        children:
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Pairwise
+                fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
+                children:
+                  - type: CheckBox
+                    name: pairw

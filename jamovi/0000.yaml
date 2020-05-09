@@ -34,12 +34,12 @@ analyses:
     menuSubgroup: Descriptives
     menuTitle: Summary of Categorical Variables
     description: Function for Generating Summaries for Categorical Variables.
-  - title: CrossTables
+  - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
     menuGroup: ClinicoPath
     menuSubgroup: Comparisons
-    menuTitle: CrossTables
+    menuTitle: Cross Tables
     description: Function for making Cross Tables.
   - title: Graphs and Plots
     name: statsplot2

@@ -277,4 +277,10 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide total percentages
+
+    - name: pairw
+      title: Pairwise
+      type: Bool
+      default: false
+
 ...

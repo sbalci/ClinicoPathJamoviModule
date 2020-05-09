@@ -1,6 +1,6 @@
 ---
-name:  contTablesPaired
-title: Paired Samples Contingency Tables
+name:  pairchi
+title: Pairwise Chi-Square Test
 jrs: '1.0'
 
 items:
@@ -280,6 +280,9 @@ items:
           type: number
           format: zto,pvalue
 
+    - name: pw
+      title: Pairwise Chi-Square Comparison
+      type: Preformatted
 
 refs:
     - rmngb

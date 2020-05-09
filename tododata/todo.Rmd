@@ -2202,3 +2202,32 @@ caretresult <- caret::confusionMatrix(table3, mode = "everything")
 
 ```
 
+
+```{r}
+table3 <- matrix(c(80L, 20L, 25L, 30L, 70L, 75L), nrow = 2, ncol = 3, byrow = TRUE)
+
+
+# RVAideMemoire::chisq.multcomp() RVAideMemoire::fisher.multcomp()
+
+RVAideMemoire::chisq.multcomp(table3)
+
+RVAideMemoire::fisher.multcomp(table3)
+
+
+# rmngb::pairwise.chisq.test(x, ...)  rmngb::pairwise.fisher.test(x, ...)
+
+
+library(rmngb)
+x <- sample(1:2, 1e3, TRUE)
+g <- sample(1:4, 1e3, TRUE)
+rmngb::pairwise.chisq.test(x, g)
+tab <- table(g, x)
+rmngb::pairwise.fisher.test(tab, p.adj = "bonf")
+
+rmngb::pairwise.chisq.test(tab)
+
+
+```
+
+
+
