@@ -2,7 +2,7 @@
 % Please edit documentation in R/crosstable.h.R
 \name{crosstable}
 \alias{crosstable}
-\title{CrossTables}
+\title{Cross Tables}
 \usage{
 crosstable(data, vars, group, sty = "nejm")
 }

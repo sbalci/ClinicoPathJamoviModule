@@ -1,5 +1,5 @@
 ---
-name:  pairchi
+name:  pairchi2
 title: Pairwise Chi-Square Test
 jrs: '1.0'
 
@@ -283,6 +283,36 @@ items:
     - name: pw
       title: Pairwise Chi-Square Comparison
       type: Preformatted
+
+
+    - name: tablepw
+      title: 'Pairwise Chi-Square Comparison'
+      type: Table
+      # swapRowsColumns: true
+      visible: (pairw)
+      rows:  1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: v1
+          title: 'Variable 1'
+          type: text
+        - name: v2
+          title: 'Variable 2'
+          type: text
+        - name: pv
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+        - pairw
+
+
 
 refs:
     - rmngb

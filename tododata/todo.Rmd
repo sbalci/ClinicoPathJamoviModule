@@ -2146,7 +2146,7 @@ readyfunctions <- c(
     # "^icccoeff",
     "^multisurvival",
     "^oddsratio",
-    # "^pairchi",
+    # "^pairchi2",
     "^reportcat",
     # "^roc",
     "^statsplot2",
@@ -2209,7 +2209,65 @@ table3 <- matrix(c(80L, 20L, 25L, 30L, 70L, 75L), nrow = 2, ncol = 3, byrow = TR
 
 # RVAideMemoire::chisq.multcomp() RVAideMemoire::fisher.multcomp()
 
-RVAideMemoire::chisq.multcomp(table3)
+result1 <- RVAideMemoire::chisq.multcomp(table3)
+
+result1 <- result1[["p.value"]]
+
+
+result1 <- as.data.frame(result1) %>%
+                                tibble::rownames_to_column()
+
+result1 <- result1 %>%
+    tidyr::pivot_longer(cols = -rowname) %>%
+    dplyr::filter(complete.cases(.))
+
+
+
+
+myfun <- function(i,j) {
+    if(!is.na(result1[i,j])){
+    paste0(    
+dimnames(result1)[[1]][i],
+" vs ",
+dimnames(result1)[[2]][j],
+" p= ",    
+result1[i,j])
+    }
+}
+
+for (i in 1:dim(result1)[1]) {
+for (j in 1:dim(result1)[2]) {
+    des <- myfun(i,j)
+    if(!is.null(des)) print(des)
+}
+}
+
+
+myfun1 <- function(i,j) {
+    if(!is.na(result1[i,j])){
+dimnames(result1)[[1]][i]
+    }
+}
+
+
+for (i in 1:dim(result1)[1]) {
+for (j in 1:dim(result1)[2]) {
+    des <- myfun1(i,j)
+    if(!is.null(des)) print(des)
+}
+}
+
+
+
+
+
+myfun(3,3)
+
+myfun(1,2)
+
+
+dimnames(result1)[[1]][2]
+
 
 RVAideMemoire::fisher.multcomp(table3)
 
@@ -2220,9 +2278,13 @@ RVAideMemoire::fisher.multcomp(table3)
 library(rmngb)
 x <- sample(1:2, 1e3, TRUE)
 g <- sample(1:4, 1e3, TRUE)
-rmngb::pairwise.chisq.test(x, g)
+result2 <- rmngb::pairwise.chisq.test(x, g)
 tab <- table(g, x)
-rmngb::pairwise.fisher.test(tab, p.adj = "bonf")
+
+resultrmngb <- rmngb::pairwise.fisher.test(tab, p.adj = "bonf")
+
+result2[["p.value"]]
+resultrmngb[["p.value"]]
 
 rmngb::pairwise.chisq.test(tab)
 
