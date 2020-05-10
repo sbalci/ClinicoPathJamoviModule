@@ -6,9 +6,9 @@
 #' @import rmngb
 
 
-pairchiClass <-
-    if (requireNamespace("jmvcore")) R6::R6Class("pairchiClass",
-inherit = pairchiBase, private = list(
+pairchi2Class <-
+    if (requireNamespace("jmvcore")) R6::R6Class("pairchi2Class",
+inherit = pairchi2Base, private = list(
 
 # TODO ----
 
@@ -316,6 +316,22 @@ inherit = pairchiBase, private = list(
                         pw <- private$.pairwise(mat)
 
                     self$results$pw$setContent(pw)
+
+
+
+
+                    # tablepw <- self$results$tablepw
+                    # tablepw$setRow(rowNo = 1,
+                    #                values = list(
+                    #                    method = "Pairwise Chi-Square",
+                    #                    v1 = pwrow
+                    #                    # v1 = pw[["rowname"]],
+                    #                    # v2 = pw[["name"]],
+                    #                    # vp = pw[["value"]]
+                    #                )
+                    # )
+
+
 
 
 
@@ -638,43 +654,29 @@ inherit = pairchiBase, private = list(
 
 .pairwise = function(mat) {
 
+    # pairwiseRVAideMemoire <- RVAideMemoire::chisq.multcomp(mat)
+    # pairwisermngb <- rmngb::pairwise.chisq.test(as.table(mat))
+    # pairwise <- list("RVAideMemoire" = pairwiseRVAideMemoire,
+    #                  "rmngb" = pairwisermngb)
+    # return(pairwise)
 
-    pairwiseRVAideMemoire <- RVAideMemoire::chisq.multcomp(mat)
+    # pairwiseRVAideMemoire <- RVAideMemoire::chisq.multcomp(mat)
+    # pairwiseRVAideMemoire <- pairwiseRVAideMemoire[["p.value"]]
+    # pairwiseRVAideMemoire <- as.data.frame(pairwiseRVAideMemoire) %>%
+    #     tibble::rownames_to_column()
+    # pairwiseRVAideMemoire <- pairwiseRVAideMemoire %>%
+    #     tidyr::pivot_longer(cols = -rowname) %>%
+    #     dplyr::filter(complete.cases(.))
+    # return(pairwiseRVAideMemoire)
 
     pairwisermngb <- rmngb::pairwise.chisq.test(as.table(mat))
-
-
-    pairwise <- list("RVAideMemoire" = pairwiseRVAideMemoire,
-                     "rmngb" = pairwisermngb)
-
-    return(pairwise)
-
-
-    # dims <- dim(mat)
-
-    # if (dims[1] > 2 || dims[2] > 2)
-    #     return(NULL)
-
-    # ciWidth <- self$options$ciWidth
-    # tail <- (100 - ciWidth) / 200
-    # z <- qnorm(tail, lower.tail = FALSE)
-
-    # a <- mat[1,1]
-    # b <- mat[1,2]
-    # c <- mat[2,1]
-    # d <- mat[2,2]
-
-    # p1 <- a / (a + b)
-    # p2 <- c / (c + d)
-
-    # m <- log(p1 / p2)
-    # s <- sqrt((b / (a*(a+b))) + (d / (c*(c+d))))
-    # lower <- exp(m - z*s)
-    # upper <- exp(m + z*s)
-
-    # rr <- p1 / p2
-
-    # return(list(rr=rr, lower=lower, upper=upper))
+    pairwisermngb <- pairwisermngb[["p.value"]]
+    pairwisermngb <- as.data.frame(pairwisermngb) %>%
+        tibble::rownames_to_column()
+    pairwisermngb <- pairwisermngb %>%
+        tidyr::pivot_longer(cols = -rowname) %>%
+        dplyr::filter(complete.cases(.))
+    return(pairwisermngb)
 
 },
 

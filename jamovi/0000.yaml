@@ -114,7 +114,7 @@ analyses:
     menuTitle: Decision Tree
     description: Function for making Decision Trees.
   - title: Pairwise Chi-Square Test
-    name: pairchi
+    name: pairchi2
     ns: ClinicoPath
     menuGroup: ClinicoPath2
     menuTitle: Pairwise Chi-Square Test
