@@ -2140,18 +2140,18 @@ readyfunctions <- c(
     "^agreement",
     # "^competingsurvival",
     # "^correlation",
-    "^crosstable",
-    "^decision",
+    # "^crosstable",
+    # "^decision",
     # "^decisioncalculator",
     # "^icccoeff",
-    "^multisurvival",
-    "^oddsratio",
+    # "^multisurvival",
+    # "^oddsratio",
     # "^pairchi2",
-    "^reportcat",
+    # "^reportcat",
     # "^roc",
-    "^statsplot2",
-    "^summarydata",
-    "^survival",
+    # "^statsplot2",
+    # "^summarydata",
+    # "^survival",
     "^tableone"
     # "^tree",
     # "^utils-pipe"
@@ -2290,6 +2290,80 @@ rmngb::pairwise.chisq.test(tab)
 
 
 ```
+
+
+
+ 
+formula <- jmvcore::constructFormula(terms = self$options$vars)
+formula <- paste('~', formula)
+formula <- as.formula(formula)
+table1 <- arsenal::tableby(formula, self$data,
+total = TRUE,
+digits = 1,
+digits.count = 1
+)
+myarsenal <- summary(table1, text = "html")
+myarsenal <- kableExtra::kable(myarsenal, format = "html",
+digits = 1,
+escape = TRUE) %>%
+kableExtra::kable_styling(kable_input = .,
+bootstrap_options = "striped",
+full_width = F,
+position = "left")
+
+
+```{r}
+library(dplyr)
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+varsName <- c("LVI", "PNI")
+
+tablelist <- list()
+
+                for (i in 1:length(varsName)) {
+
+                    var <- varsName[i]
+                    
+                    
+                    table <- deneme %>%
+                        janitor::tabyl(dat = ., var) %>%
+                        janitor::adorn_totals("row") %>%
+                        janitor::adorn_pct_formatting(dat = .)
+
+                    tablelist[[i]] <- table
+
+                }
+
+tablelist
+
+```
+
+
+```{r}
+library(dplyr)
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+varsName <- c("LVI", "PNI")
+
+targetName <- "Outcome"
+
+data <- dplyr::select(deneme, c(varsName, targetName))
+
+data <- jmvcore::naOmit(data)
+
+
+explore::explain_tree(data = data,
+                                      target = PNI
+                                      )
+
+iris %>% explore::explain_tree(target = Species)
+
+```
+
 
 
 

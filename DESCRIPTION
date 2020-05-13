@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.1.0012
-Date: 2020-05-08
+Version: 0.0.1.0013
+Date: 2020-05-13
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -53,20 +53,25 @@ Imports:
     magrittr,
     corrr,
     correlation,
-    RVAideMemoire
+    RVAideMemoire,
+    plotROC,
+    arsenal
 Remotes:
     ddsjoberg/gtsummary,
     ndphillips/FFTrees,
     easystats/report,
     spgarbet/tangram,
-    cran/rmngb
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
 Suggests:
     circlize,
     randomForest,
     huxtable,
     flextable,
     Hmisc,
-    rmarkdown
+    rmarkdown,
+    corpcor,
+    rARPACK
 VignetteBuilder:
     knitr
 Encoding: UTF-8

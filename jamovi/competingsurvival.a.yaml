@@ -35,10 +35,27 @@ options:
       permitted: [ numeric ]
 
     - name: outcome
-      title: 'Outcome (DOD:1, AWD:2, DOOC: 3)'
+      title: Outcome
+      # title: 'Outcome (DOD:1, AWD:2, DOOC: 3)'
       type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-
-
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      # suggested: [ continuous ]
+      # permitted: [ numeric ]
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+    - name: dooc
+      title: Dead of Other Causes
+      type: Level
+      variable: (outcome)
+    - name: awd
+      title: Alive with Disease
+      type: Level
+      variable: (outcome)
+    - name: awod
+      title: Alive without Disease
+      type: Level
+      variable: (outcome)
 ...

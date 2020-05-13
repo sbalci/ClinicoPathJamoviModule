@@ -22,6 +22,8 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot3} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

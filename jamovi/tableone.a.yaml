@@ -30,4 +30,27 @@ options:
           R: >
             a string naming the variables from `data` that contains the
             values used for the Table One.
+
+
+    - name: sty
+      title: Table Style
+      type: List
+      options:
+        - title: tableone
+          name: t1
+        - title: gtsummary
+          name: t2
+        - title: arsenal
+          name: t3
+        - title: janitor
+          name: t4
+      default: t1
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+
 ...

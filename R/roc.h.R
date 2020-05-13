@@ -57,7 +57,9 @@ rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        plot = function() private$.items[["plot"]],
+        plot3 = function() private$.items[["plot3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -72,7 +74,19 @@ rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="ROC"))}))
+                title="ROC"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                title="ROC",
+                name="plot",
+                width=600,
+                height=450,
+                renderFun=".plot",
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                title="ROC Interactive",
+                name="plot3"))}))
 
 rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "rocBase",
@@ -111,6 +125,8 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot3} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

@@ -14,3 +14,13 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sty
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl
