@@ -8,7 +8,11 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             explanatory = NULL,
             overalltime = NULL,
-            outcome = NULL, ...) {
+            outcome = NULL,
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -35,22 +39,51 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "outcome",
                 outcome,
                 suggested=list(
-                    "continuous"),
+                    "ordinal",
+                    "nominal"),
                 permitted=list(
-                    "numeric"))
+                    "factor"))
+            private$..dod <- jmvcore::OptionLevel$new(
+                "dod",
+                dod,
+                variable="(outcome)")
+            private$..dooc <- jmvcore::OptionLevel$new(
+                "dooc",
+                dooc,
+                variable="(outcome)")
+            private$..awd <- jmvcore::OptionLevel$new(
+                "awd",
+                awd,
+                variable="(outcome)")
+            private$..awod <- jmvcore::OptionLevel$new(
+                "awod",
+                awod,
+                variable="(outcome)")
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..dod)
+            self$.addOption(private$..dooc)
+            self$.addOption(private$..awd)
+            self$.addOption(private$..awod)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         overalltime = function() private$..overalltime$value,
-        outcome = function() private$..outcome$value),
+        outcome = function() private$..outcome$value,
+        dod = function() private$..dod$value,
+        dooc = function() private$..dooc$value,
+        awd = function() private$..awd$value,
+        awod = function() private$..awod$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
-        ..outcome = NA)
+        ..outcome = NA,
+        ..dod = NA,
+        ..dooc = NA,
+        ..awd = NA,
+        ..awod = NA)
 )
 
 competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -110,6 +143,10 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param explanatory .
 #' @param overalltime .
 #' @param outcome .
+#' @param dod .
+#' @param dooc .
+#' @param awd .
+#' @param awod .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -121,7 +158,11 @@ competingsurvival <- function(
     data,
     explanatory,
     overalltime,
-    outcome) {
+    outcome,
+    dod,
+    dooc,
+    awd,
+    awod) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('competingsurvival requires jmvcore to be installed (restart may be required)')
@@ -137,11 +178,16 @@ competingsurvival <- function(
             `if`( ! missing(outcome), outcome, NULL))
 
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- competingsurvivalOptions$new(
         explanatory = explanatory,
         overalltime = overalltime,
-        outcome = outcome)
+        outcome = outcome,
+        dod = dod,
+        dooc = dooc,
+        awd = awd,
+        awod = awod)
 
     analysis <- competingsurvivalClass$new(
         options = options,

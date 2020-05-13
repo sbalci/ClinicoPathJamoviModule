@@ -98,6 +98,31 @@ No need to change. Auto-updated and overwritten.
 
 
 
+### Warning, Error Messages
+
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+
+
+
+### Prepare Data For Analysis
+
+
+            varsName <- self$options$vars
+
+            data <- jmvcore::select(self$data, c(varsName))
+
+
+### Remove NA containing cases (works on selected variables)
+
+            data <- jmvcore::naOmit(data)
+
+
+
+
+
+
 
 jmvcore::toNumeric()
 https://dev.jamovi.org/tuts0202-handling-data.html
@@ -108,6 +133,12 @@ i do it in the correlation matrix for example. there's no summary i could send .
 https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143
 jamovi/corrmatrix.r.yaml:143
       requiresData: true
+
+
+
+### Prepare Data to Send to Plot Function
+
+
 
 
 
@@ -225,6 +256,19 @@ devtools::install(upgrade = FALSE, quick = TRUE)
 
 
 # General
+
+## Code Search in GitHub
+
+
+https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&type=Code
+
+
+https://github.com/search?l=&q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&type=Code
+
+```
+select repo:jamovi/jmv filename:.b.R language:R
+```
+
 
 ## YAML
 

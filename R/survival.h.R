@@ -88,7 +88,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Survival Analysis",
+                title="`Survival Analysis - ${explanatory}`",
                 refs=list(
                     "finalfit",
                     "survival",
@@ -104,7 +104,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Median Survival Summary and Table",
+                title="`Median Survival Summary and Table - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -112,7 +112,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1html",
-                title="Median Survival Table",
+                title="`Median Survival Table  - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -120,7 +120,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text5",
-                title="Cox Regression Summary and Table",
+                title="`Cox Regression Summary and Table - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -128,7 +128,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="Cox Table",
+                title="`Cox Table- ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -136,7 +136,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text7",
-                title="1, 3, 5-yr Survival Summary and Table",
+                title="`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -144,7 +144,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text6",
-                title="1, 3, 5-yr Survival",
+                title="`1, 3, 5-yr Survival  - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -152,7 +152,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text8",
-                title="Pairwise Comparison",
+                title="`Pairwise Comparison - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -160,7 +160,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text9",
-                title="Pairwise Comparison Summary",
+                title="`Pairwise Comparison Summary - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -168,7 +168,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Survival Plot",
+                title="`Survival Plot  - ${explanatory}`",
                 width=600,
                 height=450,
                 renderFun=".plot",

@@ -1,8 +1,5 @@
 #' Decision Tree
 #'
-
-
-#'
 #'
 #'
 #' @importFrom R6 R6Class
@@ -18,17 +15,17 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO
 
-            todo <- glue::glue(
-                "This Module is still under development
-                -
-                -
-                "
-            )
+            # todo <- glue::glue(
+            #     "This Module is still under development
+            #     -
+            #     -
+            #     "
+            # )
 
-            self$results$todo$setContent(todo)
+            # self$results$todo$setContent(todo)
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+            # if (nrow(self$data) == 0)
+            #     stop('Data contains no (complete) rows')
 
 
             # if (is.null(self$options$vars) || is.null(self$options$target))
@@ -76,154 +73,138 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # }))
 
 
-
-
-
-
         },
-
 
         .plot = function(image, ...) {  # <-- the plot function ----
 
             # if (is.null(self$options$vars) || is.null(self$options$target))
             #     return()
 
-            mydata <- self$data
-            myvars <- self$options$vars
-            mytarget <- self$options$target
+            varsName <- self$options$vars
+            targetName <- self$options$target
 
-            # xtarget <- jmvcore::composeTerm(components = self$options$target)
+            data <- jmvcore::select(self$data, c(varsName, targetName))
 
-            mydata <- jmvcore::naOmit(mydata)
-
-            mydata <- mydata %>%
-                dplyr::select(mytarget, myvars)
-
-            # plot <- mydata %>%
-            #     explore::explain_tree(data = .,
-            #                           target = .data[[xtarget]])
+            data <- jmvcore::naOmit(data)
 
 
-            # plot <- iris %>% explore::explain_tree(target = Species)
+            tree1 <-
+                explore::explain_tree(data = data,
+                                      target = targetName)
 
+
+            plot <- iris %>% explore::explain_tree(target = Species)
             # if (length(self$options$dep) + length(self$options$group) < 2)
-
             #     return()
 
+            # tree1 <- iris %>% explore::explain_tree(target = Species)
+            # iris$is_versicolor <- ifelse(iris$Species == "versicolor", 1, 0)
+            # tree2 <- iris %>%
+            # dplyr::select(-Species) %>%
+            # explore::explain_tree(target = is_versicolor)
+            # tree3 <- iris %>%
+            # explore::explain_tree(target = Sepal.Length)
 
-            tree1 <- iris %>% explore::explain_tree(target = Species)
-
-
-            iris$is_versicolor <- ifelse(iris$Species == "versicolor", 1, 0)
-            tree2 <- iris %>%
-            dplyr::select(-Species) %>%
-            explore::explain_tree(target = is_versicolor)
-
-            tree3 <- iris %>%
-            explore::explain_tree(target = Sepal.Length)
-
-            plot <- tree1
+            # plot <- tree1
 
             print(plot)
             TRUE
 
 
         }
+#
+#         ,
+#
+#
+#         .plot2 = function(image, ...) {  # <-- the plot2 function ----
+#
+#             # if (is.null(self$options$vars) || is.null(self$options$target))
+#             #     return()
+#
+#             mydata <- self$data
+#             myvars <- self$options$vars
+#             mytarget <- self$options$target
+#
+#             mydata <- jmvcore::naOmit(mydata)
+#
+#             mydata <- mydata %>%
+#                 dplyr::select(mytarget, myvars)
+#
+#             myformula <- jmvcore::constructFormula(terms = self$options$target)
+#
+#             myformula <- paste(myformula, '~ .')
+#
+#             myformula <- as.formula(myformula)
+#
+#             # mytree <- FFTrees::FFTrees(
+#             #     formula = myformula,
+#             #     data = mydata,
+#             #     data.test = mydata
+#             #     )
+#             #
+#             # plot2 <- plot(mytree,
+#             #      data = mydata,
+#             #      main = mydata
+#             #      )
+#
+#
+#             iris1 <- iris
+#             iris1$target <- sample(x = c(TRUE,FALSE), size = dim(iris)[1], replace = TRUE)
+#
+#
+#             iris.fft <- FFTrees::FFTrees(formula = target ~.,
+#                                          data = iris1,
+#                                  data.test = iris1,
+#                                  force = TRUE)
+#
+#             plot(iris.fft,
+#                  data = "test")
+#
+#             TRUE
+#
+#
+#         }
 
-        ,
-
-
-        .plot2 = function(image, ...) {  # <-- the plot2 function ----
-
-            # if (is.null(self$options$vars) || is.null(self$options$target))
-            #     return()
-
-            mydata <- self$data
-            myvars <- self$options$vars
-            mytarget <- self$options$target
-
-            mydata <- jmvcore::naOmit(mydata)
-
-            mydata <- mydata %>%
-                dplyr::select(mytarget, myvars)
-
-            myformula <- jmvcore::constructFormula(terms = self$options$target)
-
-            myformula <- paste(myformula, '~ .')
-
-            myformula <- as.formula(myformula)
-
-            # mytree <- FFTrees::FFTrees(
-            #     formula = myformula,
-            #     data = mydata,
-            #     data.test = mydata
-            #     )
-            #
-            # plot2 <- plot(mytree,
-            #      data = mydata,
-            #      main = mydata
-            #      )
-
-
-            iris1 <- iris
-            iris1$target <- sample(x = c(TRUE,FALSE), size = dim(iris)[1], replace = TRUE)
-
-
-            iris.fft <- FFTrees::FFTrees(formula = target ~.,
-                                         data = iris1,
-                                 data.test = iris1,
-                                 force = TRUE)
-
-            plot(iris.fft,
-                 data = "test")
-
-            TRUE
-
-
-        }
-
-        ,
-
-
-        .plot3 = function(image, ...) {  # <-- the plot3 function ----
-
-
-
-            mydata <- self$data
-            myvars <- self$options$vars
-            mytarget <- self$options$target
-
-            mydata <- jmvcore::naOmit(mydata)
-
-            mydata <- mydata %>%
-                dplyr::select(mytarget, myvars)
-
-            myformula <- jmvcore::constructFormula(terms = self$options$target)
-
-            myformula <- paste(myformula, '~ .')
-
-            myformula <- as.formula(myformula)
-
-
-            # Load rpart and rpart.plot
-            # Create a decision tree model
-            tree <- rpart::rpart(Species~., data = iris, cp = .02)
-
-            # Visualize the decision tree with rpart.plot
-            plot3 <- rpart.plot::rpart.plot(tree,
-                                            box.palette = "RdBu",
-                                            shadow.col = "gray",
-                                            nn = TRUE)
-
-
-
-
-
-            print(plot3)
-            TRUE
-
-
-        }
+        # ,
+        # .plot3 = function(image, ...) {  # <-- the plot3 function ----
+        #
+        #
+        #
+        #     mydata <- self$data
+        #     myvars <- self$options$vars
+        #     mytarget <- self$options$target
+        #
+        #     mydata <- jmvcore::naOmit(mydata)
+        #
+        #     mydata <- mydata %>%
+        #         dplyr::select(mytarget, myvars)
+        #
+        #     myformula <- jmvcore::constructFormula(terms = self$options$target)
+        #
+        #     myformula <- paste(myformula, '~ .')
+        #
+        #     myformula <- as.formula(myformula)
+        #
+        #
+        #     # Load rpart and rpart.plot
+        #     # Create a decision tree model
+        #     tree <- rpart::rpart(Species~., data = iris, cp = .02)
+        #
+        #     # Visualize the decision tree with rpart.plot
+        #     plot3 <- rpart.plot::rpart.plot(tree,
+        #                                     box.palette = "RdBu",
+        #                                     shadow.col = "gray",
+        #                                     nn = TRUE)
+        #
+        #
+        #
+        #
+        #
+        #     print(plot3)
+        #     TRUE
+        #
+        #
+        # }
 
 
         )

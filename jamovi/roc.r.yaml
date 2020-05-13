@@ -15,4 +15,32 @@ items:
       title: ROC
       type:  Preformatted
 
+
+
+    - title: ROC
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+
+    # - title: ROC Interactive
+    #   name: plot2
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot2
+    #   requiresData: true
+
+    - title: ROC Interactive
+      name: plot3
+      type: Html
+
+
+
+
+
+
 ...

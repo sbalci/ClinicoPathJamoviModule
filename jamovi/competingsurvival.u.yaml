@@ -2,7 +2,7 @@ title: Competing Survival
 name: competingsurvival
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -23,9 +23,21 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Outcome (DOD:1, AWD:2, DOOC: 3)'
+        label: Outcome
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: dod
+            enable: (outcome)
+          - type: LevelSelector
+            name: dooc
+            enable: (outcome)
+          - type: LevelSelector
+            name: awd
+            enable: (outcome)
+          - type: LevelSelector
+            name: awod
+            enable: (outcome)

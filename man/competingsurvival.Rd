@@ -4,7 +4,16 @@
 \alias{competingsurvival}
 \title{Competing Survival}
 \usage{
-competingsurvival(data, explanatory, overalltime, outcome)
+competingsurvival(
+  data,
+  explanatory,
+  overalltime,
+  outcome,
+  dod,
+  dooc,
+  awd,
+  awod
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +23,14 @@ competingsurvival(data, explanatory, overalltime, outcome)
 \item{overalltime}{.}
 
 \item{outcome}{.}
+
+\item{dod}{.}
+
+\item{dooc}{.}
+
+\item{awd}{.}
+
+\item{awod}{.}
 }
 \value{
 A results object containing:

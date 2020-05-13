@@ -6,7 +6,9 @@ tableoneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL, ...) {
+            vars = NULL,
+            sty = "t1",
+            excl = TRUE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,20 +19,42 @@ tableoneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
+            private$..sty <- jmvcore::OptionList$new(
+                "sty",
+                sty,
+                options=list(
+                    "t1",
+                    "t2",
+                    "t3",
+                    "t4"),
+                default="t1")
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
+                default=TRUE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..sty)
+            self$.addOption(private$..excl)
         }),
     active = list(
-        vars = function() private$..vars$value),
+        vars = function() private$..vars$value,
+        sty = function() private$..sty$value,
+        excl = function() private$..excl$value),
     private = list(
-        ..vars = NA)
+        ..vars = NA,
+        ..sty = NA,
+        ..excl = NA)
 )
 
 tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]]),
+        tablestyle1 = function() private$.items[["tablestyle1"]],
+        tablestyle2 = function() private$.items[["tablestyle2"]],
+        tablestyle3 = function() private$.items[["tablestyle3"]],
+        tablestyle4 = function() private$.items[["tablestyle4"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -38,17 +62,47 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Table One",
-                refs="tableone")
+                refs=list(
+                    "tableone",
+                    "gtsummary",
+                    "arsenal",
+                    "janitor"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text1",
+                name="tablestyle1",
                 title="",
                 clearWith=list(
-                    "vars")))}))
+                    "vars",
+                    "excl"),
+                visible="(sty:t1)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tablestyle2",
+                title="",
+                clearWith=list(
+                    "vars",
+                    "excl"),
+                visible="(sty:t2)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tablestyle3",
+                title="",
+                clearWith=list(
+                    "vars",
+                    "excl"),
+                visible="(sty:t3)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="tablestyle4",
+                title="",
+                clearWith=list(
+                    "vars",
+                    "excl"),
+                visible="(sty:t4)"))}))
 
 tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tableoneBase",
@@ -83,16 +137,23 @@ tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the values used for the Table One.
+#' @param sty .
+#' @param excl .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
 tableone <- function(
     data,
-    vars) {
+    vars,
+    sty = "t1",
+    excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('tableone requires jmvcore to be installed (restart may be required)')
@@ -105,7 +166,9 @@ tableone <- function(
 
 
     options <- tableoneOptions$new(
-        vars = vars)
+        vars = vars,
+        sty = sty,
+        excl = excl)
 
     analysis <- tableoneClass$new(
         options = options,

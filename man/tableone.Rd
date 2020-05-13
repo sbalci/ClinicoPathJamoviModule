@@ -4,19 +4,26 @@
 \alias{tableone}
 \title{Table One}
 \usage{
-tableone(data, vars)
+tableone(data, vars, sty = "t1", excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{vars}{a string naming the variables from \code{data} that contains
 the values used for the Table One.}
+
+\item{sty}{.}
+
+\item{excl}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{
