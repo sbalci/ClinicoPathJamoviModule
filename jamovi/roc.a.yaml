@@ -22,28 +22,13 @@ options:
             The data as a data frame.
 
 
-    - name: dep
-      title: Dependent Variable
+    - name: measurement
+      title: Measurement
       type: Variable
 
-    - name: group
-      title: Grouping Variable
+    - name: status
+      title: Disease Status
       type: Variable
 
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
 
-    - name: varEq
-      title: Assume equal variances
-      type: Bool
-      default: true
 ...

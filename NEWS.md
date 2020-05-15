@@ -1,3 +1,13 @@
+# ClinicoPath 0.0.2
+
+- version 0.0.2 is released
+- works with jamovi latest release (>=1.2.18) https://www.jamovi.org/download.html
+
+
+<img src="man/figures/jamovi-ClinicoPath-0.0.2-released.gif" align="center" width = 75% />
+
+
+
 # ClinicoPath 0.0.1.0001
 
 Added multivariate survival, and comparison plots.

@@ -47,15 +47,41 @@ options:
       type: Level
       variable: (outcome)
     - name: dooc
-      title: Dead of Other Causes
+      title: Dead of Other
       type: Level
       variable: (outcome)
     - name: awd
-      title: Alive with Disease
+      title: Alive w Disease
       type: Level
       variable: (outcome)
     - name: awod
-      title: Alive without Disease
+      title: Alive w/o Disease
       type: Level
       variable: (outcome)
+
+
+    - name: usedod
+      title: ''
+      type: Bool
+      default: false
+    - name: usedooc
+      title: ''
+      type: Bool
+      default: false
+    - name: useawd
+      title: ''
+      type: Bool
+      default: false
+    - name: useawod
+      title: ''
+      type: Bool
+      default: false
+
+
+    - name: sty
+      title: 'Style'
+      type: Bool
+      default: false
+
+
 ...

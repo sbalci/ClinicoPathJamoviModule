@@ -88,12 +88,11 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             data <- jmvcore::naOmit(data)
 
 
-            tree1 <-
-                explore::explain_tree(data = data,
-                                      target = targetName)
+            tree1 <- data %>%
+                explore::explain_tree(target = .data[[targetName]])
 
 
-            plot <- iris %>% explore::explain_tree(target = Species)
+            # plot <- iris %>% explore::explain_tree(target = Species)
             # if (length(self$options$dep) + length(self$options$group) < 2)
             #     return()
 
@@ -105,7 +104,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # tree3 <- iris %>%
             # explore::explain_tree(target = Sepal.Length)
 
-            # plot <- tree1
+            plot <- tree1
 
             print(plot)
             TRUE

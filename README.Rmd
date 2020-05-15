@@ -51,6 +51,7 @@ https://osf.io/9szud/
 
 <img src="man/figures/jamovi-library.png" align="center" width = 75% />
 
+<img src="man/figures/jamovi-ClinicoPath-0.0.2-released.gif" align="center" width = 75% />
 
 
 
@@ -70,8 +71,12 @@ https://osf.io/9szud/
 
     - b: For stable version
 
-- windows: https://library.jamovi.org/win64/R3.6.1/ClinicoPath-0.0.1.jmo
-- macOS: https://library.jamovi.org/macos/R3.6.1/ClinicoPath-0.0.1.jmo
+- windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo
+
+- macOS: https://library.jamovi.org/macos/R3.6.3/ClinicoPath-0.0.2.jmo
+
+<!-- - linux: https://library.jamovi.org/linux/R3.6.3/ClinicoPath-0.0.2.jmo -->
+
 
 
 - Step 3: And install using side-load as shown below:

@@ -172,7 +172,9 @@ so you’re best to make use of the table api … the table API has a lot more f
 
 ## function.u.yaml
 
+## LevelSelector
 
+     i have added the property allowNone to the LevelSelector control. This will allow the user to select None from the listbox.
 
 ## 0000.yaml
 
@@ -268,6 +270,50 @@ https://github.com/search?l=&q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+langua
 ```
 select repo:jamovi/jmv filename:.b.R language:R
 ```
+
+```{r generate advanced search for all jamovi library}
+jamovi_library_names <- readLines("https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml")
+
+jamovi_library_names <- stringr::str_extract(
+  string = jamovi_library_names,
+  pattern = "github.com/(.*).git")
+
+jamovi_library_names <- jamovi_library_names[!is.na(jamovi_library_names)]
+
+jamovi_library_names <- gsub(pattern = "github.com/|.git",
+                             replacement = "",
+                             x = jamovi_library_names)
+
+jamovi_library_names <- gsub(pattern = "/",
+                              replacement = "%2F",
+                              x = jamovi_library_names)
+
+query <- "type: Level"
+
+repos <- paste0("repo%3A",jamovi_library_names,"+")
+
+repos <- paste0(repos, collapse = "")
+
+repos <- gsub(pattern = "\\+$",
+              replacement = "",
+              x = repos)
+
+github_search <- paste0("https://github.com/search?q=",
+                        query,
+                        "+",
+                        repos,
+                        "&type=Code&ref=advsearch&l=&l=")
+
+cat(github_search)
+
+```
+
+
+
+## Library Development Status
+
+
+https://ci.appveyor.com/project/jonathon-love/jamovi-library/history
 
 
 ## YAML

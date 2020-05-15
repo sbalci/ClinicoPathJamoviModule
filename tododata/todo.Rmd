@@ -2137,7 +2137,7 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
 
 readyfunctions <- c(
     "refs",
-    "^agreement",
+    # "^agreement",
     # "^competingsurvival",
     # "^correlation",
     # "^crosstable",
@@ -2152,7 +2152,7 @@ readyfunctions <- c(
     # "^statsplot2",
     # "^summarydata",
     # "^survival",
-    "^tableone"
+    # "^tableone"
     # "^tree",
     # "^utils-pipe"
     # "^vartree"
