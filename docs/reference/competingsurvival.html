@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0012</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0001</span>
       </span>
     </div>
 
@@ -108,6 +108,9 @@
     </li>
     <li>
       <a href="../articles/motivation.html">Motivation</a>
+    </li>
+    <li>
+      <a href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a>
     </li>
     <li>
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
@@ -153,7 +156,21 @@
     <p>Function for Competing Survival.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>competingsurvival</span>(<span class='no'>data</span>, <span class='no'>explanatory</span>, <span class='no'>overalltime</span>, <span class='no'>outcome</span>)</pre>
+    <pre class="usage"><span class='fu'>competingsurvival</span>(
+  <span class='no'>data</span>,
+  <span class='no'>explanatory</span>,
+  <span class='no'>overalltime</span>,
+  <span class='no'>outcome</span>,
+  <span class='no'>dod</span>,
+  <span class='no'>dooc</span>,
+  <span class='no'>awd</span>,
+  <span class='no'>awod</span>,
+  <span class='kw'>usedod</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>usedooc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>useawd</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>useawod</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>sty</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -172,6 +189,42 @@
     </tr>
     <tr>
       <th>outcome</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dooc</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awd</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>usedod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>usedooc</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>useawd</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>useawod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>sty</th>
       <td><p>.</p></td>
     </tr>
     </table>

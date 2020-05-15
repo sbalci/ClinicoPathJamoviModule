@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.0012</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0001</span>
       </span>
     </div>
 
@@ -67,6 +67,9 @@
     </li>
     <li>
       <a href="../articles/motivation.html">Motivation</a>
+    </li>
+    <li>
+      <a href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a>
     </li>
     <li>
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
@@ -154,12 +157,21 @@
 <div id="preparing-development-tools" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preparing-development-tools" class="anchor"></a>preparing development tools</h2>
-<p>jmvtools should be installed from the jamovi repo</p>
+<div id="use-an-unsigned-version-of-jamovi-for-development-in-mac" class="section level3">
+<h3 class="hasAnchor">
+<a href="#use-an-unsigned-version-of-jamovi-for-development-in-mac" class="anchor"></a>use an unsigned version of jamovi for development in mac</h3>
+<p><a href="https://dev.jamovi.org/#28-02-2020" class="uri">https://dev.jamovi.org/#28-02-2020</a></p>
+<p><a href="https://www.jamovi.org/downloads/jamovi-unsigned.zip" class="uri">https://www.jamovi.org/downloads/jamovi-unsigned.zip</a></p>
+</div>
+<div id="jmvtools-should-be-installed-from-the-jamovi-repo" class="section level3">
+<h3 class="hasAnchor">
+<a href="#jmvtools-should-be-installed-from-the-jamovi-repo" class="anchor"></a>jmvtools should be installed from the jamovi repo</h3>
 <p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
 <p>You can use <code><a href="https://rdrr.io/pkg/devtools/man/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://rdrr.io/pkg/devtools/man/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
+</div>
 </div>
 <div id="add-analysis" class="section level2">
 <h2 class="hasAnchor">
@@ -192,8 +204,29 @@
 <div id="function-b-r" class="section level2">
 <h2 class="hasAnchor">
 <a href="#function-b-r" class="anchor"></a>function.b.R</h2>
+<div id="warning-error-messages" class="section level3">
+<h3 class="hasAnchor">
+<a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h3>
+<pre><code>        if (nrow(self$data) == 0) stop("Data contains no (complete) rows")</code></pre>
+</div>
+<div id="prepare-data-for-analysis" class="section level3">
+<h3 class="hasAnchor">
+<a href="#prepare-data-for-analysis" class="anchor"></a>Prepare Data For Analysis</h3>
+<pre><code>        varsName &lt;- self$options$vars
+
+        data &lt;- jmvcore::select(self$data, c(varsName))</code></pre>
+</div>
+<div id="remove-na-containing-cases-works-on-selected-variables" class="section level3">
+<h3 class="hasAnchor">
+<a href="#remove-na-containing-cases-works-on-selected-variables" class="anchor"></a>Remove NA containing cases (works on selected variables)</h3>
+<pre><code>        data &lt;- jmvcore::naOmit(data)</code></pre>
 <p>jmvcore::toNumeric() <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
 <p>can I just send whole data to plot function? you usually don’t want to, but sometimes it’s appropriate. normally you just provide a summary of the data to the plot function … just enough data for it to do it’s job. but if you need the whole data set for the plot function, then you can specify requiresData: true on the image object. that means the plot function can access self$data. i do it in the correlation matrix for example. there’s no summary i could send … the plot function needs all the data: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143</a> jamovi/corrmatrix.r.yaml:143 requiresData: true</p>
+</div>
+<div id="prepare-data-to-send-to-plot-function" class="section level3">
+<h3 class="hasAnchor">
+<a href="#prepare-data-to-send-to-plot-function" class="anchor"></a>Prepare Data to Send to Plot Function</h3>
+</div>
 </div>
 </div>
 <div id="jamovi" class="section level1">
@@ -224,6 +257,11 @@
 <div id="function-u-yaml" class="section level2">
 <h2 class="hasAnchor">
 <a href="#function-u-yaml" class="anchor"></a>function.u.yaml</h2>
+</div>
+<div id="levelselector" class="section level2">
+<h2 class="hasAnchor">
+<a href="#levelselector" class="anchor"></a>LevelSelector</h2>
+<pre><code> i have added the property allowNone to the LevelSelector control. This will allow the user to select None from the listbox.</code></pre>
 </div>
 <div id="yaml" class="section level2">
 <h2 class="hasAnchor">
@@ -281,11 +319,57 @@
 <h1 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h1>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 </div>
 <div id="general" class="section level1">
 <h1 class="hasAnchor">
 <a href="#general" class="anchor"></a>General</h1>
+<div id="code-search-in-github" class="section level2">
+<h2 class="hasAnchor">
+<a href="#code-search-in-github" class="anchor"></a>Code Search in GitHub</h2>
+<p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
+<p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
+<pre><code>select repo:jamovi/jmv filename:.b.R language:R</code></pre>
+<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span>(<span class="st">"https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml"</span>)
+
+<span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="kw pkg">stringr</span><span class="kw ns">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract</a></span>(
+  <span class="kw">string</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>,
+  <span class="kw">pattern</span> <span class="kw">=</span> <span class="st">"github.com/(.*).git"</span>)
+
+<span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="no">jamovi_library_names</span>[!<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">jamovi_library_names</span>)]
+
+<span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span>(<span class="kw">pattern</span> <span class="kw">=</span> <span class="st">"github.com/|.git"</span>,
+                             <span class="kw">replacement</span> <span class="kw">=</span> <span class="st">""</span>,
+                             <span class="kw">x</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>)
+
+<span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span>(<span class="kw">pattern</span> <span class="kw">=</span> <span class="st">"/"</span>,
+                              <span class="kw">replacement</span> <span class="kw">=</span> <span class="st">"%2F"</span>,
+                              <span class="kw">x</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>)
+
+<span class="no">query</span> <span class="kw">&lt;-</span> <span class="st">"type: Level"</span>
+
+<span class="no">repos</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"repo%3A"</span>,<span class="no">jamovi_library_names</span>,<span class="st">"+"</span>)
+
+<span class="no">repos</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="no">repos</span>, <span class="kw">collapse</span> <span class="kw">=</span> <span class="st">""</span>)
+
+<span class="no">repos</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span>(<span class="kw">pattern</span> <span class="kw">=</span> <span class="st">"\\+$"</span>,
+              <span class="kw">replacement</span> <span class="kw">=</span> <span class="st">""</span>,
+              <span class="kw">x</span> <span class="kw">=</span> <span class="no">repos</span>)
+
+<span class="no">github_search</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"https://github.com/search?q="</span>,
+                        <span class="no">query</span>,
+                        <span class="st">"+"</span>,
+                        <span class="no">repos</span>,
+                        <span class="st">"&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l="</span>)
+
+<span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="no">github_search</span>)
+<span class="co">#&gt; https://github.com/search?q=type: Level+repo%3Araviselker%2Fscatr+repo%3Ajonathon-love%2FRj+repo%3Aricharddmorey%2Fjpower+repo%3Agamlj%2Fgamlj+repo%3Ajamovi-amm%2Fjamm+repo%3Ajonathon-love%2Fjsq+repo%3Ajonathon-love%2Fjsq+repo%3Araviselker%2Fmedmod+repo%3Araviselker%2Fsurveymv+repo%3Akylehamilton%2FMAJOR+repo%3Ajamovi%2Fwalrus+repo%3ALakens%2FTOSTER+repo%3Ajonathon-love%2Fdeathwatch+repo%3Adustinfife%2Fflexplot+repo%3Ajonathon-love%2Fmoretests+repo%3AMrihs%2FdistrACTION+repo%3Adavidfoxcroft%2Flsj-data+repo%3Ajamovi%2Fr-datasets+repo%3Arivkamdevries%2FStatkat+repo%3Asbalci%2FClinicoPath+repo%3Alucasjfriesen%2FjamoviPsychoPDA+repo%3Ajonathon-love%2Fblandr+repo%3Ajamovi%2FjmvbaseR+repo%3Araviselker%2Fjmvarcade+repo%3Asjentsch%2FPartialProximity+repo%3Arcalinjageman%2Fesci&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=</span></pre></body></html></div>
+</div>
+<div id="library-development-status" class="section level2">
+<h2 class="hasAnchor">
+<a href="#library-development-status" class="anchor"></a>Library Development Status</h2>
+<p><a href="https://ci.appveyor.com/project/jonathon-love/jamovi-library/history" class="uri">https://ci.appveyor.com/project/jonathon-love/jamovi-library/history</a></p>
+</div>
 <div id="yaml-1" class="section level2">
 <h2 class="hasAnchor">
 <a href="#yaml-1" class="anchor"></a>YAML</h2>
@@ -311,7 +395,7 @@
 <p>Try to use compatible packages with the jamovi’s R version.</p>
 <p>Use: <strong>R 3.6.3</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.3.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.3.pkg</a></p>
 <p>Use packages from mran:</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
+<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
                   <span class="st">"https://cran.microsoft.com/snapshot/2020-05-01/"</span>
                   )
 )</pre></body></html></div>
@@ -320,8 +404,15 @@
 <h2 class="hasAnchor">
 <a href="#electron" class="anchor"></a>Electron</h2>
 <p>jamovi is electron based. See R, shiny, and electron based application development here: <a href="https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron">Deploying a Shiny app as a desktop application with Electron</a></p>
-<p>project structure</p>
+</div>
+<div id="project-structure" class="section level2">
+<h2 class="hasAnchor">
+<a href="#project-structure" class="anchor"></a>Project Structure</h2>
 <p><a href="https://dev.jamovi.org/info_project-structure.html" class="uri">https://dev.jamovi.org/info_project-structure.html</a></p>
+<p><a href="https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251" class="uri">https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251</a></p>
+<blockquote>
+<p>the easiest way to build jamovi on macOS is to use our dev bundle. <a href="https://www.jamovi.org/downloads/jamovi-dev.zip" class="uri">https://www.jamovi.org/downloads/jamovi-dev.zip</a> if you navigate to the <code>jamovi.app/Contents/Resources</code> folder, you’ll find a package.json which contains a bunch of different build commands. you can issue commands like: npm run build:client npm run build:server npm run build:analyses:jmv depending on which component you’re wanting to build.</p>
+</blockquote>
 </div>
 </div>
 <div id="other-codes" class="section level1">
