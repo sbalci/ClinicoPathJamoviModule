@@ -27,17 +27,48 @@ children:
         children:
           - type: VariablesListBox
             name: outcome
+            fitToGrid: true
+            margin: none
             maxItemCount: 1
             isTarget: true
-          - type: LevelSelector
-            name: dod
-            enable: (outcome)
-          - type: LevelSelector
-            name: dooc
-            enable: (outcome)
-          - type: LevelSelector
-            name: awd
-            enable: (outcome)
-          - type: LevelSelector
-            name: awod
-            enable: (outcome)
+          - type: Label
+            label: Outcome Levels
+            fitToGrid: true
+            margin: none
+            style: list-inline
+            children:
+              - type: LayoutBox
+                margin: none
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: usedod
+                  - type: CheckBox
+                    name: usedooc
+                  - type: CheckBox
+                    name: useawd
+                  - type: CheckBox
+                    name: useawod
+              - type: LayoutBox
+                margin: none
+                fitToGrid: true
+                children:
+                  - type: LevelSelector
+                    name: dod
+                    enable: (outcome && usedod)
+                  - type: LevelSelector
+                    name: dooc
+                    enable: (outcome && usedooc)
+                  - type: LevelSelector
+                    name: awd
+                    enable: (outcome && useawd)
+                  - type: LevelSelector
+                    name: awod
+                    enable: (outcome && useawod)
+  - type: CollapseBox
+    label: Options
+    collapsed: true
+    children:
+        - type: CheckBox
+          name: sty
+

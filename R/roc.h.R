@@ -6,10 +6,8 @@ rocOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            measurement = NULL,
+            status = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,46 +15,27 @@ rocOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+            private$..measurement <- jmvcore::OptionVariable$new(
+                "measurement",
+                measurement)
+            private$..status <- jmvcore::OptionVariable$new(
+                "status",
+                status)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..measurement)
+            self$.addOption(private$..status)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        measurement = function() private$..measurement$value,
+        status = function() private$..status$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..measurement = NA,
+        ..status = NA)
 )
 
 rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]]),
@@ -67,10 +46,6 @@ rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="ROC")
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -117,13 +92,10 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param measurement .
+#' @param status .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab a html \cr
@@ -132,28 +104,24 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @export
 roc <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    measurement,
+    status) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('roc requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(measurement)) measurement <- jmvcore::resolveQuo(jmvcore::enquo(measurement))
+    if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(measurement), measurement, NULL),
+            `if`( ! missing(status), status, NULL))
 
 
     options <- rocOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        measurement = measurement,
+        status = status)
 
     analysis <- rocClass$new(
         options = options,

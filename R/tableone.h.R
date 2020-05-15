@@ -61,12 +61,7 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Table One",
-                refs=list(
-                    "tableone",
-                    "gtsummary",
-                    "arsenal",
-                    "janitor"))
+                title="Table One")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -78,7 +73,8 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "excl"),
-                visible="(sty:t1)"))
+                visible="(sty:t1)",
+                refs="tableone"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle2",
@@ -86,7 +82,8 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "excl"),
-                visible="(sty:t2)"))
+                visible="(sty:t2)",
+                refs="gtsummary"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle3",
@@ -94,7 +91,8 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "excl"),
-                visible="(sty:t3)"))
+                visible="(sty:t3)",
+                refs="arsenal"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle4",
@@ -102,7 +100,8 @@ tableoneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "excl"),
-                visible="(sty:t4)"))}))
+                visible="(sty:t4)",
+                refs="janitor"))}))
 
 tableoneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tableoneBase",

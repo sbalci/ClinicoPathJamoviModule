@@ -12,7 +12,12 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dod = NULL,
             dooc = NULL,
             awd = NULL,
-            awod = NULL, ...) {
+            awod = NULL,
+            usedod = FALSE,
+            usedooc = FALSE,
+            useawd = FALSE,
+            useawod = FALSE,
+            sty = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -59,6 +64,26 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "awod",
                 awod,
                 variable="(outcome)")
+            private$..usedod <- jmvcore::OptionBool$new(
+                "usedod",
+                usedod,
+                default=FALSE)
+            private$..usedooc <- jmvcore::OptionBool$new(
+                "usedooc",
+                usedooc,
+                default=FALSE)
+            private$..useawd <- jmvcore::OptionBool$new(
+                "useawd",
+                useawd,
+                default=FALSE)
+            private$..useawod <- jmvcore::OptionBool$new(
+                "useawod",
+                useawod,
+                default=FALSE)
+            private$..sty <- jmvcore::OptionBool$new(
+                "sty",
+                sty,
+                default=FALSE)
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
@@ -67,6 +92,11 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dooc)
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
+            self$.addOption(private$..usedod)
+            self$.addOption(private$..usedooc)
+            self$.addOption(private$..useawd)
+            self$.addOption(private$..useawod)
+            self$.addOption(private$..sty)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
@@ -75,7 +105,12 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         dod = function() private$..dod$value,
         dooc = function() private$..dooc$value,
         awd = function() private$..awd$value,
-        awod = function() private$..awod$value),
+        awod = function() private$..awod$value,
+        usedod = function() private$..usedod$value,
+        usedooc = function() private$..usedooc$value,
+        useawd = function() private$..useawd$value,
+        useawod = function() private$..useawod$value,
+        sty = function() private$..sty$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
@@ -83,7 +118,12 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..dod = NA,
         ..dooc = NA,
         ..awd = NA,
-        ..awod = NA)
+        ..awod = NA,
+        ..usedod = NA,
+        ..usedooc = NA,
+        ..useawd = NA,
+        ..useawod = NA,
+        ..sty = NA)
 )
 
 competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -147,6 +187,11 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dooc .
 #' @param awd .
 #' @param awod .
+#' @param usedod .
+#' @param usedooc .
+#' @param useawd .
+#' @param useawod .
+#' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -162,7 +207,12 @@ competingsurvival <- function(
     dod,
     dooc,
     awd,
-    awod) {
+    awod,
+    usedod = FALSE,
+    usedooc = FALSE,
+    useawd = FALSE,
+    useawod = FALSE,
+    sty = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('competingsurvival requires jmvcore to be installed (restart may be required)')
@@ -187,7 +237,12 @@ competingsurvival <- function(
         dod = dod,
         dooc = dooc,
         awd = awd,
-        awod = awod)
+        awod = awod,
+        usedod = usedod,
+        usedooc = usedooc,
+        useawd = useawd,
+        useawod = useawod,
+        sty = sty)
 
     analysis <- competingsurvivalClass$new(
         options = options,
