@@ -3,7 +3,6 @@
 #' @return
 #' @export
 #'
-#' @import gtsummary
 
 gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "gtsummaryClass",

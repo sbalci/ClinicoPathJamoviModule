@@ -12,7 +12,12 @@ competingsurvival(
   dod,
   dooc,
   awd,
-  awod
+  awod,
+  usedod = FALSE,
+  usedooc = FALSE,
+  useawd = FALSE,
+  useawod = FALSE,
+  sty = FALSE
 )
 }
 \arguments{
@@ -31,6 +36,16 @@ competingsurvival(
 \item{awd}{.}
 
 \item{awod}{.}
+
+\item{usedod}{.}
+
+\item{usedooc}{.}
+
+\item{useawd}{.}
+
+\item{useawod}{.}
+
+\item{sty}{.}
 }
 \value{
 A results object containing:

@@ -17,3 +17,79 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(ClinicoPath)
 ```
+
+
+
+In this page I am going to collect the most common statistical methods used in pathology research and how can one do them in jamovi.
+
+
+Statistical Literacy Among Academic Pathologists: A Survey Study to Gauge Knowledge of Frequently Used Statistical Tests Among Trainees and Faculty.
+
+Arch Pathol Lab Med. 2017 Feb;141(2):279-287. doi: 10.5858/arpa.2016-0200-OA. Epub 2016 Dec 13.
+
+
+https://www.ncbi.nlm.nih.gov/pubmed/27959584
+
+https://www.archivesofpathology.org/doi/pdf/10.5858/arpa.2016-0200-OA
+
+
+
+
+# Student t test
+
+
+# Regression/ANOVA
+
+
+# Chi-square test
+
+
+# Mann-Whitney test (rank sum)
+
+
+# Fisher exact test
+
+
+# Survival analysis
+
+
+## Kaplan-Meier/log-rank
+
+
+## Cox regression
+
+
+# Multiple comparison adjustment
+
+## Tukey
+
+## Bonferroni
+
+## Newman-Keuls
+
+
+# Kappa Statistic
+
+
+# ROC analysis
+
+
+# Logistic regression
+
+
+# Spearman rank correlation
+
+# Kruskal-Wallis test
+
+
+# Pearson correlation statistic
+
+
+# Normality test
+
+
+# McNemar test
+
+
+
+

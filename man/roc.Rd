@@ -4,23 +4,18 @@
 \alias{roc}
 \title{ROC}
 \usage{
-roc(data, dep, group, alt = "notequal", varEq = TRUE)
+roc(data, measurement, status)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{measurement}{.}
 
-\item{group}{.}
-
-\item{alt}{.}
-
-\item{varEq}{.}
+\item{status}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab a html \cr
