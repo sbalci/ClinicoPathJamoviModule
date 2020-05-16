@@ -18,7 +18,7 @@ crosstable(data, vars, group, sty = "nejm")
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text3} \tab \tab \tab \tab \tab a html \cr
+\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

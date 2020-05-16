@@ -23,8 +23,9 @@ items:
     #   type:  Preformatted
 
     - name:  text3
-      title: CrossTable Tangram NEJM
-      type:  Html
+      title: Cross Table
+      type:  Preformatted
+      refs: tangram
 
     # - name:  text4
     #   title: CrossTable Tangram Lancet
@@ -35,9 +36,9 @@ items:
     #   type:  Preformatted
 
 
-refs:
-    - tangram
-    # - arsenal
-    # - finalfit
+# refs:
+#     - tangram
+#     # - arsenal
+#     # - finalfit
 
 ...

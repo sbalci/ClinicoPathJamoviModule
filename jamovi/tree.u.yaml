@@ -9,10 +9,16 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Explanatory Variables
+        label: Continuous Explanatory Variables
         children:
           - type: VariablesListBox
             name: vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Categorical Explanatory Variables
+        children:
+          - type: VariablesListBox
+            name: facs
             isTarget: true
       - type: TargetLayoutBox
         label: Target Variable

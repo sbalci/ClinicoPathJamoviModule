@@ -23,14 +23,26 @@ options:
 
 
     - name: vars
-      title: Explanatory Variables
+      title: Continuous Explanatory Variables
       type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
       description: >
-                  explanatory variables
+                  continuous explanatory variables
+
+    - name: facs
+      title: Categorical Explanatory Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  categorical explanatory variables
 
     - name: target
       title: Target Variable
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description: >
                   target variable
 ...

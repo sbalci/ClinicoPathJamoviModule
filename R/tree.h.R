@@ -7,6 +7,7 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
+            facs = NULL,
             target = NULL, ...) {
 
             super$initialize(
@@ -17,28 +18,47 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..facs <- jmvcore::OptionVariables$new(
+                "facs",
+                facs,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..target <- jmvcore::OptionVariable$new(
                 "target",
-                target)
+                target,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..facs)
             self$.addOption(private$..target)
         }),
     active = list(
         vars = function() private$..vars$value,
+        facs = function() private$..facs$value,
         target = function() private$..target$value),
     private = list(
         ..vars = NA,
+        ..facs = NA,
         ..target = NA)
 )
 
 treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        plot = function() private$.items[["plot"]],
+        plot1 = function() private$.items[["plot1"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]]),
     private = list(),
@@ -47,31 +67,23 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree",
-                refs=list(
-                    "explore",
-                    "FFTrees",
-                    "rpart",
-                    "rpart.plot"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do"))
-            self$add(jmvcore::Html$new(
+                title="Decision Tree")
+            self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
                 title="Decision Tree"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
+                name="plot1",
                 title="Decision Tree",
                 width=600,
                 height=450,
-                renderFun=".plot",
+                renderFun=".plot1",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "target")))
+                    "target"),
+                refs="explore"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -82,7 +94,8 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "target")))
+                    "target"),
+                refs="FFTrees"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -93,7 +106,10 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "target")))}))
+                    "target"),
+                refs=list(
+                    "rpart",
+                    "rpart.plot")))}))
 
 treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "treeBase",
@@ -124,13 +140,13 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param vars explanatory variables
+#' @param vars continuous explanatory variables
+#' @param facs categorical explanatory variables
 #' @param target target variable
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -139,22 +155,28 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 tree <- function(
     data,
     vars,
+    facs,
     target) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('tree requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(facs)) facs <- jmvcore::resolveQuo(jmvcore::enquo(facs))
     if ( ! missing(target)) target <- jmvcore::resolveQuo(jmvcore::enquo(target))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(facs), facs, NULL),
             `if`( ! missing(target), target, NULL))
 
+    for (v in facs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in target) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- treeOptions$new(
         vars = vars,
+        facs = facs,
         target = target)
 
     analysis <- treeClass$new(

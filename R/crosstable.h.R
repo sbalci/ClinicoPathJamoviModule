@@ -60,13 +60,12 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Cross Tables",
-                refs=list(
-                    "tangram"))
-            self$add(jmvcore::Html$new(
+                title="Cross Tables")
+            self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text3",
-                title="CrossTable Tangram NEJM"))}))
+                title="Cross Table",
+                refs="tangram"))}))
 
 crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstableBase",
@@ -102,7 +101,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text3} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
