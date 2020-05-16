@@ -5,24 +5,25 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Html
+    # - name:  todo
+    #   title: To Do
+    #   type:  Html
 
     - name:  text1
       title: Decision Tree
-      type:  Html
+      type:  Preformatted
 
-    - name: plot
+    - name: plot1
       title: Decision Tree
       type: Image
       width:  600
       height: 450
-      renderFun: .plot
+      renderFun: .plot1
       requiresData: true
       clearWith:
           - vars
           - target
+      refs: explore
 
 
     - name: plot2
@@ -35,6 +36,7 @@ items:
       clearWith:
           - vars
           - target
+      refs: FFTrees
 
 
     - name: plot3
@@ -47,13 +49,14 @@ items:
       clearWith:
           - vars
           - target
+      refs:
+          - rpart
+          - rpart.plot
 
 
-
-
-refs:
-    - explore
-    - FFTrees
-    - rpart
-    - rpart.plot
+# refs:
+#     - explore
+#     - FFTrees
+#     - rpart
+#     - rpart.plot
 ...

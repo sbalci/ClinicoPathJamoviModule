@@ -79,7 +79,10 @@ https://www.archivesofpathology.org/doi/pdf/10.5858/arpa.2016-0200-OA
 
 # Spearman rank correlation
 
+
 # Kruskal-Wallis test
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qfs6T311_88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 # Pearson correlation statistic

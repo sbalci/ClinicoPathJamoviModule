@@ -5,6 +5,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import tangram
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -15,9 +16,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
-
-            if ( is.null(self$options$vars) || is.null(self$options$group) )
-                return()
+            # if ( is.null(self$options$vars) || is.null(self$options$group) )
+            #     return()
 
 
             # TODO
@@ -35,8 +35,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # write explanation for the function
 
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+            # if (nrow(self$data) == 0)
+            #     stop('Data contains no (complete) rows')
 
 
 
@@ -55,13 +55,10 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            formulaR <- jmvcore::constructFormula(terms = self$options$vars)
-
-            formulaL <- jmvcore::constructFormula(terms = self$options$group)
-
-            formula <- paste(formulaL, '~', formulaR)
-
-            formula <- as.formula(formula)
+            # formulaR <- jmvcore::constructFormula(terms = self$options$vars)
+            # formulaL <- jmvcore::constructFormula(terms = self$options$group)
+            # formula <- paste(formulaL, '~', formulaR)
+            # formula <- as.formula(formula)
 
             # Arsenal Table
             # table1 <- arsenal::tableby(formula, self$data)
@@ -86,11 +83,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Tangram Table
 
 
-            mydata <- self$data
-
-            sty <- jmvcore::composeTerm(components = self$options$sty)
-
-            gr <- jmvcore::composeTerm(components = self$options$group)
+            # mydata <- self$data
+            # sty <- jmvcore::composeTerm(components = self$options$sty)
+            # gr <- jmvcore::composeTerm(components = self$options$group)
 
 
             # table3 <-
@@ -112,15 +107,20 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #         id = "tbl3")
 
 
+            formula <- as.formula("Species~Sepal.Length+Sepal.Width+Petal.Length")
 
-            table3 <- tangram::html5(
+            table3 <-
+                # tangram::html5(
                 tangram::tangram(
-                    "Species~Sepal.Length+Sepal.Width+Petal.Length",
-                    iris
-                    ),
-                style = "hmisc",
-                caption = paste0("Cross Table for Dependent "),
-                id = "tbl3")
+                    formula,
+                    iris,
+                    id = "tbl3"
+                )
+            # ,
+            #     style = "hmisc",
+            #     caption = paste0("Cross Table for Dependent ")
+            #     )
+
 
             results3 <- table3
 
