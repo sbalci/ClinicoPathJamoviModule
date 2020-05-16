@@ -55,10 +55,10 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # formulaR <- jmvcore::constructFormula(terms = self$options$vars)
-            # formulaL <- jmvcore::constructFormula(terms = self$options$group)
-            # formula <- paste(formulaL, '~', formulaR)
-            # formula <- as.formula(formula)
+            formulaR <- jmvcore::constructFormula(terms = self$options$vars)
+            formulaL <- jmvcore::constructFormula(terms = self$options$group)
+            formula <- paste(formulaL, '~', formulaR)
+            formula <- as.formula(formula)
 
             # Arsenal Table
             # table1 <- arsenal::tableby(formula, self$data)
@@ -83,7 +83,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Tangram Table
 
 
-            # mydata <- self$data
+            mydata <- self$data
             # sty <- jmvcore::composeTerm(components = self$options$sty)
             # gr <- jmvcore::composeTerm(components = self$options$group)
 
@@ -107,13 +107,13 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #         id = "tbl3")
 
 
-            formula <- as.formula("Species~Sepal.Length+Sepal.Width+Petal.Length")
+            # formula <- as.formula("Species~Sepal.Length+Sepal.Width+Petal.Length")
 
             table3 <-
                 # tangram::html5(
                 tangram::tangram(
                     formula,
-                    iris,
+                    self$data,
                     id = "tbl3"
                 )
             # ,

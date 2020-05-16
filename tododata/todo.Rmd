@@ -1941,12 +1941,19 @@ result2 <- irr::kappam.fleiss(
 ```{r}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-myvtree <- vtree::vtree
+mytree <- vtree::vtree(deneme, "LVI PNI")
 
-mytree <- myvtree(deneme, "LVI PNI")
+# write(mytree[["x"]][["diagram"]], 
+#       file = here::here("/tododata/trial1.gv"))
+
+# DiagrammeR::grViz(diagram = here::here("/tododata/trial1.gv"))
+
+diagram <- mytree[["x"]][["diagram"]]
+
+mytree2 <- DiagrammeR::grViz(diagram = diagram)
 
 
-print(mytree)
+print(mytree2)
 
 ```
 
