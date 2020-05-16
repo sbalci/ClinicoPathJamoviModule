@@ -156,7 +156,7 @@
     <p>Function for making Decision Trees.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tree</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='no'>target</span>)</pre>
+    <pre class="usage"><span class='fu'>tree</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='no'>facs</span>, <span class='no'>target</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -167,7 +167,11 @@
     </tr>
     <tr>
       <th>vars</th>
-      <td><p>explanatory variables</p></td>
+      <td><p>continuous explanatory variables</p></td>
+    </tr>
+    <tr>
+      <th>facs</th>
+      <td><p>categorical explanatory variables</p></td>
     </tr>
     <tr>
       <th>target</th>
@@ -178,9 +182,8 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>

@@ -92,6 +92,17 @@ https://osf.io/9szud/
 
 ---
 
+### Example Datasets
+
+
+<img src="man/figures/jamovi-ClinicoPath-example-datasets.gif" align="center" width = 75% />
+
+
+
+
+
+
+
 ### Descriptives
 
 #### TableOne

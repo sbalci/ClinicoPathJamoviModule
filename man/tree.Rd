@@ -4,21 +4,22 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, vars, target)
+tree(data, vars, facs, target)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{vars}{explanatory variables}
+\item{vars}{continuous explanatory variables}
+
+\item{facs}{categorical explanatory variables}
 
 \item{target}{target variable}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text1} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 }

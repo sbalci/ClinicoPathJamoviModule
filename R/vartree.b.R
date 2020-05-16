@@ -1,13 +1,13 @@
 #' Variable Tree
 #'
-
-
 #'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import vtree
+#' @import htmltools
+#' @import DiagrammeR
 #'
 
 
@@ -50,11 +50,30 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- paste0(myvars, collapse = " ")
 
-            results <- vtree::vtree(mydata, myvars, pngknit = FALSE)
+            results <- vtree::vtree(mydata, myvars)
+
+            # diagram <- results[["x"]][["diagram"]]
+            #
+            # results <- DiagrammeR::grViz(diagram = diagram)
+
+
+
+            results <-
+                DiagrammeR::create_graph() %>%
+                DiagrammeR::add_node() %>%
+                DiagrammeR::add_node() %>%
+                DiagrammeR::add_edge(from = 1, to = 2)
+
+            results <- DiagrammeR::render_graph(results, layout = "nicely")
+
 
             self$results$text1$setContent(print(results))
 
             self$results$text2$setContent(print(results))
+
+
+
+
 
 
 
@@ -78,9 +97,27 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- paste0(myvars, collapse = " ")
 
+            results <- vtree::vtree(mydata, myvars)
 
-            vtree::vtree(mydata, myvars)
+            diagram <- results[["x"]][["diagram"]]
 
+            results <- DiagrammeR::grViz(diagram = diagram)
+
+            # plot <- results
+
+
+
+
+            plot <-
+                DiagrammeR::create_graph() %>%
+                DiagrammeR::add_node() %>%
+                DiagrammeR::add_node() %>%
+                DiagrammeR::add_edge(from = 1, to = 2)
+
+            plot <- DiagrammeR::render_graph(plot, layout = "nicely")
+
+
+            print(plot)
             TRUE
 
         }
