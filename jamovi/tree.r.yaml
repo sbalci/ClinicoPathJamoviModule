@@ -8,13 +8,22 @@ items:
     # - name:  todo
     #   title: To Do
     #   type:  Html
+      # clearWith:
+      #     - vars
+      #     - facs
+      #     - target
 
     - name:  text1
       title: Decision Tree
       type:  Preformatted
+      clearWith:
+          - vars
+          - facs
+          - target
+
 
     - name: plot1
-      title: Decision Tree
+      title: Decision Tree Explore
       type: Image
       width:  600
       height: 450
@@ -22,12 +31,14 @@ items:
       requiresData: true
       clearWith:
           - vars
+          - facs
           - target
+      visible: (sty:explore)
       refs: explore
 
 
     - name: plot2
-      title: FFTrees
+      title: Decision Tree FFTrees
       type: Image
       width:  600
       height: 450
@@ -35,12 +46,14 @@ items:
       requiresData: true
       clearWith:
           - vars
+          - facs
           - target
+      visible: (sty:fftrees)
       refs: FFTrees
 
 
     - name: plot3
-      title: rpart
+      title: Decision Tree rpart
       type: Image
       width:  600
       height: 450
@@ -48,15 +61,11 @@ items:
       requiresData: true
       clearWith:
           - vars
+          - facs
           - target
+      visible: (sty:rpart)
       refs:
           - rpart
           - rpart.plot
 
-
-# refs:
-#     - explore
-#     - FFTrees
-#     - rpart
-#     - rpart.plot
 ...

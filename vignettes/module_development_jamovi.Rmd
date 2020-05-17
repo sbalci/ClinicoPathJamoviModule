@@ -284,6 +284,8 @@ jamovi_library_names <- gsub(pattern = "github.com/|.git",
                              replacement = "",
                              x = jamovi_library_names)
 
+jamovi_library_names <- c("jamovi/jmv", jamovi_library_names)
+
 jamovi_library_names <- gsub(pattern = "/",
                               replacement = "%2F",
                               x = jamovi_library_names)

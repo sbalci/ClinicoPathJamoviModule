@@ -952,6 +952,56 @@ jmvcore::decomposeTerm(term = composeTerm)
 
 
 
+---
+
+
+```{r read and write data, eval=FALSE, include=FALSE}
+BreastCancer <- readr::read_csv(file = "/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/BreastCancer.csv")
+
+usethis::use_data(BreastCancer)
+
+BreastCancer <- readr::read_csv(file = "/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/BreastCancer.csv")
+
+usethis::use_data(BreastCancer)
+
+colon <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/colon.csv")
+
+usethis::use_data(colon)
+
+
+melanoma <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/melanoma.csv")
+
+usethis::use_data(melanoma)
+
+
+rocdata <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/rocdata.csv")
+
+usethis::use_data(rocdata)
+
+histopathology <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/histopathology.csv")
+
+usethis::use_data(histopathology)
+
+
+```
+
+
+
+```{r}
+data('histopathology')
+dat <- as.data.frame(histopathology)
+ClinicoPath::tableone(
+data = dat,
+vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+sty = "t2",
+excl = TRUE)
+```
+
+
 
 
 
@@ -1692,50 +1742,6 @@ View(BreastCancer)
 ```
 
 
-```{r}
-
-mytarget <- "Class"
-myvars <- c("Cl.thickness",
-            "Cell.size",
-            "Cell.shape",
-            "Marg.adhesion",
-            "Epith.c.size",
-            "Bare.nuclei",
-            "Bl.cromatin",
-            "Normal.nucleoli",
-            "Mitoses")
-
-# mytarget <- jmvcore::composeTerms(mytarget)
-# mytarget <- jmvcore::constructFormula(terms = mytarget)
-
-BreastCancer %>%
-                dplyr::select(all_of(mytarget), all_of(myvars)) %>%
-                explore::explain_tree(target = .data[[mytarget]])
-
-
-
-```
-
-
-
-```{r}
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-varsName <- c("LVI", "PNI")
-
-targetName <- "Sex"
-
-
-data <- jmvcore::select(deneme, c(varsName, targetName))
-
-
-data <- jmvcore::naOmit(data)
-
-tree1 <- data %>%
-                explore::explain_tree(target = .data[[targetName]])
-
-
-```
 
 
 
@@ -2367,29 +2373,6 @@ tablelist
 ```
 
 
-```{r}
-library(dplyr)
-
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-
-varsName <- c("LVI", "PNI")
-
-targetName <- "Outcome"
-
-data <- dplyr::select(deneme, c(varsName, targetName))
-
-data <- jmvcore::naOmit(data)
-
-
-explore::explain_tree(data = data,
-                                      target = PNI
-                                      )
-
-iris %>% explore::explain_tree(target = Species)
-
-```
-
 
 
 
@@ -2536,4 +2519,97 @@ iris %>% explore::explain_tree(target = Species)
             # explore::explain_tree(target = is_versicolor)
             # tree3 <- iris %>%
             # explore::explain_tree(target = Sepal.Length)
+
+
+
+
+
+
+
+
+
+```{r explore}
+library(magrittr)
+# devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mydata <- deneme
+
+varsName <- "Age"
+
+# facsName <- c("LVI", "PNI")
+
+targetName <- "Outcome"
+
+mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+mydata <- jmvcore::select(mydata, c(varsName, 
+                                    # facsName, 
+                                    targetName))
+
+mydata <- jmvcore::naOmit(mydata)
+
+
+
+explore::explain_tree(data = mydata,
+                      target = targetName
+                      )
+
+mydata %>%
+explore::explain_tree(target = .data[[targetName]])
+```
+
+
+
+```{r explore 2}
+iris %>% explore::explain_tree(target = Species)
+
+
+
+
+BreastCancer %>%
+                dplyr::select(all_of(mytarget), all_of(myvars)) %>%
+                explore::explain_tree(target = .data[[mytarget]])
+
+
+
+
+ClinicoPath::tree(
+    data = data,
+    vars = Age,
+    facs = vars(LVI, PNI),
+    target = Mortality)
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+<!-- mytarget <- "Class" -->
+<!-- myvars <- c("Cl.thickness", -->
+<!--             "Cell.size", -->
+<!--             "Cell.shape", -->
+<!--             "Marg.adhesion", -->
+<!--             "Epith.c.size", -->
+<!--             "Bare.nuclei", -->
+<!--             "Bl.cromatin", -->
+<!--             "Normal.nucleoli", -->
+<!--             "Mitoses") -->
+
+<!-- # mytarget <- jmvcore::composeTerms(mytarget) -->
+<!-- # mytarget <- jmvcore::constructFormula(terms = mytarget) -->
+
+
+
+```{r}
+
+```
 

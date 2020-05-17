@@ -1,7 +1,7 @@
 #' Decision Tree
 #'
 #'
-#'
+#' @export
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
 #'
@@ -12,9 +12,13 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = treeBase,
     private = list(
 
-        # cleandata ----
 
-        .cleanData = function() {
+        # run function ----
+
+        .run = function() {
+
+
+            # Prepare Data ----
 
             varsName <- self$options$vars
 
@@ -22,31 +26,21 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             targetName <- self$options$target
 
-            data <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
 
-            data <- jmvcore::naOmit(data)
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
-            data
-        },
-
+            mydata <- jmvcore::naOmit(mydata)
 
 
-        # run function ----
-
-        .run = function() {
-
-            data <- private$.cleanData()
-
-
-            data <- list(head(data),
-                         head(as.data.frame(data)),
-                         summary(data))
+            sumdata <- list(typeof(mydata),
+                         class(mydata),
+                         head(mydata),
+                         head(as.data.frame(mydata)),
+                         summary(mydata))
 
 
-            self$results$text1$setContent(data)
-
-
-
+            self$results$text1$setContent(sumdata)
 
         }
 
@@ -54,48 +48,54 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot1 = function(image, ...) {  # <-- the plot1 function ----
 
 
+            # Prepare Data ----
+
             varsName <- self$options$vars
 
             facsName <- self$options$facs
 
             targetName <- self$options$target
 
-            data <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
 
-            for (fac in facsName)
-                data[[fac]] <- as.factor(data[[fac]])
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
-            data <- jmvcore::naOmit(data)
-
-
-            targetName <- jmvcore::composeTerm(targetName)
-
-            tree1 <- data %>%
-                explore::explain_tree(target = targetName)
+            mydata <- jmvcore::naOmit(mydata)
 
 
-            plot1 <- tree1
+            # Tree function explore ----
+
+
+            plot1 <-
+                explore::explain_tree(data = mydata,
+                                      target = .data[[targetName]]
+                                      )
 
             print(plot1)
             TRUE
-
 
         }
 
         ,
         .plot2 = function(image, ...) {  # <-- the plot2 function ----
 
-            # if (is.null(self$options$vars) || is.null(self$options$target))
-            #     return()
 
-            mydata <- self$data
-            myvars <- self$options$vars
-            mytarget <- self$options$target
+            # Prepare Data ----
+
+            varsName <- self$options$vars
+
+            facsName <- self$options$facs
+
+            targetName <- self$options$target
+
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
             mydata <- jmvcore::naOmit(mydata)
 
-            mydata <- mydata %>%
-                dplyr::select(mytarget, myvars)
+
+            # Prepare formula ----
 
             myformula <- jmvcore::constructFormula(terms = self$options$target)
 
@@ -103,44 +103,44 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myformula <- as.formula(myformula)
 
-            # mytree <- FFTrees::FFTrees(
-            #     formula = myformula,
-            #     data = mydata,
-            #     data.test = mydata
-            #     )
-            #
-            # plot2 <- plot(mytree,
-            #      data = mydata,
-            #      main = mydata
-            #      )
 
+            # Tree function FFTrees ----
 
-            iris1 <- iris
-            iris1$target <- sample(x = c(TRUE,FALSE), size = dim(iris)[1], replace = TRUE)
+            mytree.fft <- FFTrees::FFTrees(
+                formula = myformula,
+                data = mydata,
+                data.test = mydata
+                )
 
+            plot2 <- plot(mytree.fft,
+                 data = "test"
+                 )
 
-            iris.fft <- FFTrees::FFTrees(formula = target ~.,
-                                         data = iris1,
-                                 data.test = iris1,
-                                 force = TRUE)
-
-            plot(iris.fft,
-                 data = "test")
-
+            print(plot2)
             TRUE
+
         }
 
         ,
         .plot3 = function(image, ...) {  # <-- the plot3 function ----
 
-            mydata <- self$data
-            myvars <- self$options$vars
-            mytarget <- self$options$target
+            # Prepare Data ----
+
+            varsName <- self$options$vars
+
+            facsName <- self$options$facs
+
+            targetName <- self$options$target
+
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
             mydata <- jmvcore::naOmit(mydata)
 
-            mydata <- mydata %>%
-                dplyr::select(mytarget, myvars)
+
+            # Prepare formula ----
+
 
             myformula <- jmvcore::constructFormula(terms = self$options$target)
 
@@ -149,23 +149,16 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myformula <- as.formula(myformula)
 
 
-            # Load rpart and rpart.plot
-            # Create a decision tree model
-            tree <- rpart::rpart(Species~., data = iris, cp = .02)
+            tree <- rpart::rpart(myformula, data = mydata, cp = .02)
 
-            # Visualize the decision tree with rpart.plot
+
             plot3 <- rpart.plot::rpart.plot(tree,
                                             box.palette = "RdBu",
                                             shadow.col = "gray",
                                             nn = TRUE)
 
-
-
-
-
             print(plot3)
             TRUE
-
 
         }
 

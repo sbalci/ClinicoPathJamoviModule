@@ -31,8 +31,12 @@ Function for making Table One.
 }
 \examples{
 \dontrun{
+data('histopathology')
+dat <- as.data.frame(histopathology)
 ClinicoPath::tableone(
-data = data,
-vars = vars())
+data = dat,
+vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+sty = "t3",
+excl = TRUE)
 }
 }

@@ -563,47 +563,7 @@ pairchi2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Pairwise Chi-Square Test
 #'
-#' The X² test of association (not to be confused with the X² goodness of fit) 
-#' is used to test whether two categorical variables are independent or 
-#' associated. If the p-value is low, it suggests the variables are not 
-#' independent, and that there is a relationship between the two variables.
 #' 
-#'
-#' @examples
-#' data('HairEyeColor')
-#' dat <- as.data.frame(HairEyeColor)
-#'
-#' contTables(formula = Freq ~ Hair:Eye, dat)
-#'
-#' #
-#' #  CONTINGENCY TABLES
-#' #
-#' #  Contingency Tables
-#' #  -----------------------------------------------------
-#' #    Hair     Brown    Blue    Hazel    Green    Total
-#' #  -----------------------------------------------------
-#' #    Black       68      20       15        5      108
-#' #    Brown      119      84       54       29      286
-#' #    Red         26      17       14       14       71
-#' #    Blond        7      94       10       16      127
-#' #    Total      220     215       93       64      592
-#' #  -----------------------------------------------------
-#' #
-#' #
-#' #  X² Tests
-#' #  -------------------------------
-#' #          Value    df    p
-#' #  -------------------------------
-#' #    X²      138     9    < .001
-#' #    N       592
-#' #  -------------------------------
-#' #
-#'
-#' # Alternatively, omit the left of the formula (`Freq`) if each row
-#' # represents a single observation:
-#'
-#' contTables(formula = ~ Hair:Eye, dat)
-#'
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table (not
 #'   necessary when providing a formula, see the examples)

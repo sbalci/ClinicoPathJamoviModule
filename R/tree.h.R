@@ -8,7 +8,8 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             vars = NULL,
             facs = NULL,
-            target = NULL, ...) {
+            target = NULL,
+            sty = "explore", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -39,19 +40,30 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..sty <- jmvcore::OptionList$new(
+                "sty",
+                sty,
+                options=list(
+                    "explore",
+                    "fftrees",
+                    "rpart"),
+                default="explore")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
             self$.addOption(private$..target)
+            self$.addOption(private$..sty)
         }),
     active = list(
         vars = function() private$..vars$value,
         facs = function() private$..facs$value,
-        target = function() private$..target$value),
+        target = function() private$..target$value,
+        sty = function() private$..sty$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
-        ..target = NA)
+        ..target = NA,
+        ..sty = NA)
 )
 
 treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -71,42 +83,52 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Decision Tree"))
+                title="Decision Tree",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="Decision Tree",
+                title="Decision Tree Explore",
                 width=600,
                 height=450,
                 renderFun=".plot1",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
+                    "facs",
                     "target"),
+                visible="(sty:explore)",
                 refs="explore"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="FFTrees",
+                title="Decision Tree FFTrees",
                 width=600,
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
+                    "facs",
                     "target"),
+                visible="(sty:fftrees)",
                 refs="FFTrees"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
-                title="rpart",
+                title="Decision Tree rpart",
                 width=600,
                 height=450,
                 renderFun=".plot3",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
+                    "facs",
                     "target"),
+                visible="(sty:rpart)",
                 refs=list(
                     "rpart",
                     "rpart.plot")))}))
@@ -143,6 +165,7 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param vars continuous explanatory variables
 #' @param facs categorical explanatory variables
 #' @param target target variable
+#' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
@@ -156,7 +179,8 @@ tree <- function(
     data,
     vars,
     facs,
-    target) {
+    target,
+    sty = "explore") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('tree requires jmvcore to be installed (restart may be required)')
@@ -177,7 +201,8 @@ tree <- function(
     options <- treeOptions$new(
         vars = vars,
         facs = facs,
-        target = target)
+        target = target,
+        sty = sty)
 
     analysis <- treeClass$new(
         options = options,

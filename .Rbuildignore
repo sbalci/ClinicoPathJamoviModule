@@ -102,3 +102,5 @@ build
 ^\.github$
 ^clang-.*
 ^gfortran.*
+^data-raw$
+^.*\.omv$

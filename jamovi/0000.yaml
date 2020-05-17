@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0001
+version: 0.0.2.0002
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-05-14'
+date: '2020-05-17'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -171,20 +171,20 @@ datasets:
       - Data Summary
       - Survival
   - name: melanoma
-    path: melanoma.csv
+    path: melanoma.omv
     description: 'melanoma dataset obtained from {boot}.'
     tags:
       - Data Summary
       - Survival
       - Competing risks regression
   - name: colon
-    path: colon.csv
+    path: colon.omv
     description: 'colon cancer dataset, obtained from {survival}.'
     tags:
       - Data Summary
       - Survival
   - name: BreastCancer
-    path: BreastCancer.csv
+    path: BreastCancer.omv
     description: 'Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.'
     tags:
       - Classification
