@@ -28,8 +28,12 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
                           This tool will help you form a Table One, which is almost always used in clinicopathological research manuscripts.
                           <br><br>
                           Select the 'Variables' you want to include in the table. Numeric, Ordinal, and Categorical variables are allowed.
+                          Select the 'Table Style' for different package outputs.
                           <br><br>
-                          This tool uses tableone package. Please cite the packages and jamovi using references below.
+                          Missing values are excluded by default. You may reinclude them.
+                          Please note that excluded cases are removed from other variables as well.
+                          <br><br>
+                          Please cite the packages and jamovi using references below.
                           "
 
             html <- self$results$todo

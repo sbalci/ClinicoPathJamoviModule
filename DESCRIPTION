@@ -30,7 +30,7 @@ Imports:
     ggstatsplot,
     glue,
     janitor,
-    jmvcore (>= 0.8.5),
+    jmvcore,
     knitr,
     purrr,
     R6,
@@ -44,16 +44,10 @@ Imports:
     irr,
     caret,
     forcats,
-    vtree,
     explore,
     rpart,
     rpart.plot,
-    seriation,
-    epiR,
     magrittr,
-    corrr,
-    correlation,
-    RVAideMemoire,
     plotROC,
     arsenal
 Remotes:
@@ -64,6 +58,12 @@ Remotes:
     cran/rmngb,
     mixOmicsTeam/mixOmics
 Suggests:
+    corrr,
+    correlation,
+    RVAideMemoire,
+    seriation,
+    epiR,
+    vtree,
     circlize,
     randomForest,
     huxtable,

@@ -111,6 +111,9 @@ https://osf.io/9szud/
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 
 
+<img src="man/figures/jamovi-ClinicoPath-tableone.gif" align="center" width = 75% />
+
+
 
 #### Summary of Continuous Variables
 
