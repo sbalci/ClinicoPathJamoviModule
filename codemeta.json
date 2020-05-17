@@ -43,6 +43,78 @@
   "softwareSuggestions": [
     {
       "@type": "SoftwareApplication",
+      "identifier": "corrr",
+      "name": "corrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=corrr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "correlation",
+      "name": "correlation",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=correlation"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "RVAideMemoire",
+      "name": "RVAideMemoire",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=RVAideMemoire"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "seriation",
+      "name": "seriation",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=seriation"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "epiR",
+      "name": "epiR",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=epiR"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "vtree",
+      "name": "vtree",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=vtree"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "circlize",
       "name": "circlize",
       "provider": {
@@ -233,7 +305,6 @@
       "@type": "SoftwareApplication",
       "identifier": "jmvcore",
       "name": "jmvcore",
-      "version": ">= 0.8.5",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -400,18 +471,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "vtree",
-      "name": "vtree",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=vtree"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "explore",
       "name": "explore",
       "provider": {
@@ -448,30 +507,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "seriation",
-      "name": "seriation",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=seriation"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "epiR",
-      "name": "epiR",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=epiR"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "magrittr",
       "name": "magrittr",
       "provider": {
@@ -481,42 +516,6 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=magrittr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "corrr",
-      "name": "corrr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=corrr"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "correlation",
-      "name": "correlation",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=correlation"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "RVAideMemoire",
-      "name": "RVAideMemoire",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=RVAideMemoire"
     },
     {
       "@type": "SoftwareApplication",
@@ -571,6 +570,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "39264.101KB",
+  "fileSize": "56152.132KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }
