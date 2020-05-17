@@ -14,6 +14,7 @@ description:
             # example will be added
 
 
+
 options:
     - name: data
       type: Data
@@ -45,4 +46,19 @@ options:
       permitted: [ factor ]
       description: >
                   target variable
+
+
+    - name: sty
+      title: Tree Style
+      type: List
+      options:
+        - title: Explore
+          name: explore
+        - title: FFTrees
+          name: fftrees
+        - title: rpart
+          name: rpart
+      default: explore
+
+
 ...

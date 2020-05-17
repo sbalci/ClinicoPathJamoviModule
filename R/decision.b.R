@@ -1,14 +1,9 @@
 #' Medical Decision Making
 #'
-
-
-#'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import dplyr
-#' @import caret
 #'
 
 decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",

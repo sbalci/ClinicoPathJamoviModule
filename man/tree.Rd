@@ -4,7 +4,7 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, vars, facs, target)
+tree(data, vars, facs, target, sty = "explore")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +14,8 @@ tree(data, vars, facs, target)
 \item{facs}{categorical explanatory variables}
 
 \item{target}{target variable}
+
+\item{sty}{.}
 }
 \value{
 A results object containing:

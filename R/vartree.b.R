@@ -6,8 +6,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import vtree
-#' @import htmltools
-#' @import DiagrammeR
 #'
 
 

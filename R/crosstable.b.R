@@ -2,10 +2,8 @@
 #'
 #' @export
 #'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import tangram
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
