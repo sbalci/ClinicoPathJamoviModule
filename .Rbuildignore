@@ -40,6 +40,7 @@
 ^build/R/
 ^build/js/
 ^tododata/
+tododata
 ^data/
 ^vignettes/
 ^docs/
