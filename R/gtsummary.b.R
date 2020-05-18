@@ -1,7 +1,6 @@
 #' Tables via gtsummary
 #'
 #' @return
-#' @export
 #'
 
 gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(

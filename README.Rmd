@@ -328,6 +328,8 @@ Made possible via the codes, help, and guidence of
 - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
 
+See https://github.com/ClinicoPath for forked packages.
+
 
 ---
 
