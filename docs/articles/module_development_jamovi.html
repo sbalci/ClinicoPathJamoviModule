@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0002</span>
       </span>
     </div>
 
@@ -136,13 +136,7 @@
 <span class="co">#&gt;   influence.merMod                lme4</span>
 <span class="co">#&gt;   cooks.distance.influence.merMod lme4</span>
 <span class="co">#&gt;   dfbeta.influence.merMod         lme4</span>
-<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span>
-<span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span>
-<span class="co">#&gt; loading 'ClinicoPath'</span>
-<span class="co">#&gt; Warning: replacing previous import 'caret::cluster' by 'survival::cluster' when</span>
-<span class="co">#&gt; loading 'ClinicoPath'</span>
-<span class="co">#&gt; Warning: replacing previous import 'dplyr::add_row' by 'tangram::add_row' when</span>
-<span class="co">#&gt; loading 'ClinicoPath'</span></pre></body></html></div>
+<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span></pre></body></html></div>
 <div id="user2017-jamovi-a-spreadsheet-for-r" class="section level1">
 <h1 class="hasAnchor">
 <a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
@@ -170,7 +164,7 @@
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
-<p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
+<p>You can use <code><a href="https://rdrr.io/pkg/devtools/man/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://rdrr.io/pkg/devtools/man/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 </div>
 <div id="add-analysis" class="section level2">
@@ -319,7 +313,7 @@
 <h1 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h1>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 </div>
 <div id="general" class="section level1">
 <h1 class="hasAnchor">
@@ -342,6 +336,8 @@
                              <span class="kw">replacement</span> <span class="kw">=</span> <span class="st">""</span>,
                              <span class="kw">x</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>)
 
+<span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"jamovi/jmv"</span>, <span class="no">jamovi_library_names</span>)
+
 <span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span>(<span class="kw">pattern</span> <span class="kw">=</span> <span class="st">"/"</span>,
                               <span class="kw">replacement</span> <span class="kw">=</span> <span class="st">"%2F"</span>,
                               <span class="kw">x</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>)
@@ -363,7 +359,7 @@
                         <span class="st">"&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l="</span>)
 
 <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="no">github_search</span>)
-<span class="co">#&gt; https://github.com/search?q=type: Level+repo%3Araviselker%2Fscatr+repo%3Ajonathon-love%2FRj+repo%3Aricharddmorey%2Fjpower+repo%3Agamlj%2Fgamlj+repo%3Ajamovi-amm%2Fjamm+repo%3Ajonathon-love%2Fjsq+repo%3Ajonathon-love%2Fjsq+repo%3Araviselker%2Fmedmod+repo%3Araviselker%2Fsurveymv+repo%3Akylehamilton%2FMAJOR+repo%3Ajamovi%2Fwalrus+repo%3ALakens%2FTOSTER+repo%3Ajonathon-love%2Fdeathwatch+repo%3Adustinfife%2Fflexplot+repo%3Ajonathon-love%2Fmoretests+repo%3AMrihs%2FdistrACTION+repo%3Adavidfoxcroft%2Flsj-data+repo%3Ajamovi%2Fr-datasets+repo%3Arivkamdevries%2FStatkat+repo%3Asbalci%2FClinicoPath+repo%3Alucasjfriesen%2FjamoviPsychoPDA+repo%3Ajonathon-love%2Fblandr+repo%3Ajamovi%2FjmvbaseR+repo%3Araviselker%2Fjmvarcade+repo%3Asjentsch%2FPartialProximity+repo%3Arcalinjageman%2Fesci&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=</span></pre></body></html></div>
+<span class="co">#&gt; https://github.com/search?q=type: Level+repo%3Ajamovi%2Fjmv+repo%3Araviselker%2Fscatr+repo%3Ajonathon-love%2FRj+repo%3Aricharddmorey%2Fjpower+repo%3Agamlj%2Fgamlj+repo%3Ajamovi-amm%2Fjamm+repo%3Ajonathon-love%2Fjsq+repo%3Ajonathon-love%2Fjsq+repo%3Araviselker%2Fmedmod+repo%3Araviselker%2Fsurveymv+repo%3Akylehamilton%2FMAJOR+repo%3Ajamovi%2Fwalrus+repo%3ALakens%2FTOSTER+repo%3Ajonathon-love%2Fdeathwatch+repo%3Adustinfife%2Fflexplot+repo%3Ajonathon-love%2Fmoretests+repo%3AMrihs%2FdistrACTION+repo%3Adavidfoxcroft%2Flsj-data+repo%3Ajamovi%2Fr-datasets+repo%3Arivkamdevries%2FStatkat+repo%3Asbalci%2FClinicoPath+repo%3Alucasjfriesen%2FjamoviPsychoPDA+repo%3Ajonathon-love%2Fblandr+repo%3Ajamovi%2FjmvbaseR+repo%3Araviselker%2Fjmvarcade+repo%3Asjentsch%2FPartialProximity+repo%3Arcalinjageman%2Fesci&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=</span></pre></body></html></div>
 </div>
 <div id="library-development-status" class="section level2">
 <h2 class="hasAnchor">
