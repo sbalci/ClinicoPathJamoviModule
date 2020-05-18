@@ -6,12 +6,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
-
 ### Configuration
-^\.travis\.yml$
-^codecov\.yml$
-^\.gitlab-ci\.yml$
 ^_pkgdown\.yml$
+^\.github/
+^docs$
+^pkgdown$
+^img$
+^renv$
+^renv\.lock$
 
 ### pkgdown websites
 ^public/
@@ -23,6 +25,11 @@
 
 ### Uncompiled documentation files
 ^README\.Rmd$
+^.*Class.Rd$
+^.*\.gif$
+^.*\.png$
+^.*\.mp4$
+
 
 ### License
 ^LICENSE\.md$
@@ -32,7 +39,6 @@
 .jmo$
 ^build/R/
 ^build/js/
-
 ^tododata/
 ^data/
 ^vignettes/
@@ -40,55 +46,17 @@
 ^temp/
 ^build/
 ^.*\.jmo$
+^.*\.omv$
 
+### Other R codes
 ^tests$
+^data-raw$
+R/utils-pipe.R
 
-^\.github/
-^docs$
-^pkgdown$
-^img$
-
-^renv$
-^renv\.lock$
-### R user files
-.RProfile
-
-### R Studio files
-\.Rproj$
-^.*\.Rproj$
-^\.Rproj\.user$
-
-### Configuration
+### CI
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$
-^_pkgdown\.yml$
-
-### pkgdown websites
-^public/
-^docs/
-
-### Obsolete and temporary files/directories
-^delete/
-^temp/
-
-### Uncompiled documentation files
-^README\.Rmd$
-
-### License
-^LICENSE\.md$
-
-### Jamovi
-^jamovi/
-.jmo$
-^build/R/
-^build/js/
-tododata
-docs
-temp
-build
-^.*\.jmo$
-^tests$
 ^\.github/
 ^docs$
 ^tic\.R$
@@ -102,5 +70,3 @@ build
 ^\.github$
 ^clang-.*
 ^gfortran.*
-^data-raw$
-^.*\.omv$
