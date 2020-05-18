@@ -8,6 +8,32 @@
 
 
 
+- The new version of #ClinicoPath @jamovistats module is on the jamovi library.
+Requires #jamovi 1.2.18 #rstats #biostatistics #pathology #pathologists
+
+https://twitter.com/serdarbalci/status/1261256107919642629
+
+
+- #ClinicoPath #jamovi module comes with example datasets as with other #jamovi modules. Use them as example to prepare your data.
+
+https://twitter.com/serdarbalci/status/1261639212664840192
+
+
+- You can easily make 'Table One' for reports/manuscripts via #ClinicoPath 
+@jamovistats module. Uses #tableone, #arsenal, #gtsummary, and #janitor packages. #rstats #biostatistics #pathology #pathologists
+
+https://twitter.com/serdarbalci/status/1262083972328230912
+
+
+- #jamovi has very nice tables. Sometimes I prefer to read the tables automatically via #ClinicoPath @jamovistats module. Using #easystats #report package.
+#naturallanguage #data #summary
+#rstats #biostatistics #pathology #pathologists
+
+https://twitter.com/serdarbalci/status/1262354990787694599
+
+
+
+
 # ClinicoPath 0.0.1.0001
 
 Added multivariate survival, and comparison plots.
