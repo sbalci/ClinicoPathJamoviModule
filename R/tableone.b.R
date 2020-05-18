@@ -96,6 +96,7 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
                                             digits = 1,
                                             digits.count = 1
                 )
+
                 mytable <- summary(mytable, text = "html")
 
                 mytable <- kableExtra::kable(mytable, format = "html",

@@ -5,40 +5,46 @@ jrs:   '1.1'
 
 items:
 
-    # - name:  todo
-    #   title: To Do
-    #   type:  Html
+    - name:  todo
+      title: To Do
+      type:  Html
 
-    # - name:  text1
-    #   title: CrossTable Arsenal
-    #   type:  Html
+    - name:  tablestyle1
+      title: '`Cross Table - ${group}`'
+      type:  Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:arsenal)
+      refs: arsenal
 
-    # - name:  text2
-    #   title: CrossTable Tangram
-    #   type:  Preformatted
+    - name:  tablestyle2
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:finalfit)
+      refs: finalfit
 
 
-    # - name:  deneme
-    #   title: Tangram Env
-    #   type:  Preformatted
+    - name: tablestyle3
+      title: '`Cross Table - ${group}`'
+      type:  Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:gtsummary)
+      refs: gtsummary
 
-    - name:  text3
-      title: Cross Table
+
+    - name: tablestyle4
+      title: '`Cross Table - ${group}`'
       type:  Preformatted
+      clearWith:
+          - vars
+          - group
+      visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
-
-    # - name:  text4
-    #   title: CrossTable Tangram Lancet
-    #   type:  Html
-
-    # - name:  text5
-    #   title: CrossTable FinalFit
-    #   type:  Preformatted
-
-
-# refs:
-#     - tangram
-#     # - arsenal
-#     # - finalfit
 
 ...

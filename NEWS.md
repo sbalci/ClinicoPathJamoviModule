@@ -1,3 +1,10 @@
+# ClinicoPath 0.0.2.0003
+
+Added arsenal, finalfit, and gtsummary to crosstable function.
+gtsummary gives different results, due to nonparametric tests. Should add options and documentation.
+tangram still not functioning.
+
+
 # ClinicoPath 0.0.2
 
 - version 0.0.2 is released

@@ -25,6 +25,9 @@ options:
     - name: vars
       title: Dependent Variable
       type: Variables
+      description: >
+                  variable in the rows
+
 
     - name: group
       title: Grouping Variable
@@ -39,12 +42,24 @@ options:
       title: Table Style
       type: List
       options:
+        - title: arsenal
+          name: arsenal
+        - title: finalfit
+          name: finalfit
+        - title: gtsummary
+          name: gtsummary
         - title: NEJM
           name: nejm
         - title: Lancet
           name: lancet
         - title: hmisc
           name: hmisc
-      default: nejm
+      default: gtsummary
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
 
 ...
