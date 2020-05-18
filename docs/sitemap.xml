@@ -4,10 +4,16 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//index.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/BreastCancer.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreement.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreementClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/colon.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/competingsurvival.html</loc>
@@ -46,10 +52,16 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/gtsummaryClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/histopathology.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/icccoeff.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/icccoeffClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/melanoma.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/multisurvival.html</loc>

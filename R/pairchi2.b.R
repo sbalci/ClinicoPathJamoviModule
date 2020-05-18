@@ -2,7 +2,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import RVAideMemoire
 
 
 pairchi2Class <-
