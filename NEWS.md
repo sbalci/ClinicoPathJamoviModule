@@ -47,6 +47,13 @@ https://twitter.com/serdarbalci/status/1262083972328230912
 https://twitter.com/serdarbalci/status/1262354990787694599
 
 
+- With #ClinicoPath @jamovistats module it is easy to make crosstables.
+uses #tangram package
+#rstats #biostatistics #pathology #pathologists
+
+https://twitter.com/serdarbalci/status/1262691784574017536
+
+
 
 
 # ClinicoPath 0.0.1.0001

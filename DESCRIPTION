@@ -50,13 +50,6 @@ Imports:
     magrittr,
     plotROC,
     arsenal
-Remotes:
-    ddsjoberg/gtsummary,
-    ndphillips/FFTrees,
-    easystats/report,
-    spgarbet/tangram@0.3.2,
-    cran/rmngb,
-    mixOmicsTeam/mixOmics
 Suggests:
     corrr,
     correlation,
