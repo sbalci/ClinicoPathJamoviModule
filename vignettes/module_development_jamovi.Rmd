@@ -172,9 +172,16 @@ so you’re best to make use of the table api … the table API has a lot more f
 
 ## function.u.yaml
 
-## LevelSelector
+### LevelSelector
 
      i have added the property allowNone to the LevelSelector control. This will allow the user to select None from the listbox.
+
+
+### maxItemCount: 1
+
+
+
+
 
 ## 0000.yaml
 

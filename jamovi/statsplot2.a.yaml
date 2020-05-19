@@ -56,6 +56,22 @@ options:
       description:
           R: select distribution type (parametric or nonparametric)
 
+    - name: alluvsty
+      title: Alluvial Style (for repeated categorical)
+      type: List
+      options:
+        - title: ggalluvial
+          name: t1
+        - title: easyalluvial
+          name: t2
+      default: t1
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
 
     # - name: typex
     #   title: Type of grouping variable

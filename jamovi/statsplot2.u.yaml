@@ -32,3 +32,13 @@ children:
     children:
       - type: ComboBox
         name: distribution
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: alluvsty
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl

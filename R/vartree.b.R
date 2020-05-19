@@ -96,22 +96,22 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results <- vtree::vtree(mydata, myvars)
 
-            diagram <- results[["x"]][["diagram"]]
+            # diagram <- results[["x"]][["diagram"]]
 
-            results <- DiagrammeR::grViz(diagram = diagram)
+            # results <- DiagrammeR::grViz(diagram = diagram)
 
-            # plot <- results
-
-
+            plot <- results
 
 
-            plot <-
-                DiagrammeR::create_graph() %>%
-                DiagrammeR::add_node() %>%
-                DiagrammeR::add_node() %>%
-                DiagrammeR::add_edge(from = 1, to = 2)
 
-            plot <- DiagrammeR::render_graph(plot, layout = "nicely")
+
+            # plot <-
+            #     DiagrammeR::create_graph() %>%
+            #     DiagrammeR::add_node() %>%
+            #     DiagrammeR::add_node() %>%
+            #     DiagrammeR::add_edge(from = 1, to = 2)
+
+            # plot <- DiagrammeR::render_graph(plot, layout = "nicely")
 
 
             print(plot)

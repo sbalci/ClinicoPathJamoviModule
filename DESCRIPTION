@@ -49,7 +49,17 @@ Imports:
     rpart.plot,
     magrittr,
     plotROC,
-    arsenal
+    arsenal,
+    easyalluvial,
+    parcats,
+    htmlwidgets
+Remotes:
+    ddsjoberg/gtsummary,
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram@0.3.2,
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
 Suggests:
     corrr,
     correlation,

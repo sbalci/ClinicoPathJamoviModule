@@ -8,7 +8,8 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             explanatory = NULL,
             outcome = NULL,
-            overalltime = NULL, ...) {
+            overalltime = NULL,
+            sty = "t1", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -33,19 +34,29 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..sty <- jmvcore::OptionList$new(
+                "sty",
+                sty,
+                options=list(
+                    "t1",
+                    "t2"),
+                default="t1")
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
             self$.addOption(private$..overalltime)
+            self$.addOption(private$..sty)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
-        overalltime = function() private$..overalltime$value),
+        overalltime = function() private$..overalltime$value,
+        sty = function() private$..sty$value),
     private = list(
         ..explanatory = NA,
         ..outcome = NA,
-        ..overalltime = NA)
+        ..overalltime = NA,
+        ..sty = NA)
 )
 
 multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -61,10 +72,7 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Multivariate Survival Analysis",
-                refs=list(
-                    "finalfit",
-                    "ggstatsplot"))
+                title="Multivariate Survival Analysis")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -80,7 +88,8 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "overalltime")))
+                    "overalltime"),
+                refs="finalfit"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -92,7 +101,9 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "overalltime")))
+                    "overalltime"),
+                visible="(sty:t1)",
+                refs="finalfit"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -104,7 +115,9 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "overalltime")))}))
+                    "overalltime"),
+                visible="(sty:t2)",
+                refs="ggstatsplot"))}))
 
 multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "multisurvivalBase",
@@ -138,6 +151,7 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param explanatory .
 #' @param outcome .
 #' @param overalltime .
+#' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -151,7 +165,8 @@ multisurvival <- function(
     data,
     explanatory,
     outcome,
-    overalltime) {
+    overalltime,
+    sty = "t1") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('multisurvival requires jmvcore to be installed (restart may be required)')
@@ -170,7 +185,8 @@ multisurvival <- function(
     options <- multisurvivalOptions$new(
         explanatory = explanatory,
         outcome = outcome,
-        overalltime = overalltime)
+        overalltime = overalltime,
+        sty = sty)
 
     analysis <- multisurvivalClass$new(
         options = options,

@@ -22,9 +22,14 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Overall Time (in months)'
+        label: Overall Time (in months)
         children:
           - type: VariablesListBox
             name: overalltime
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sty

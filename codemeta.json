@@ -540,6 +540,42 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=arsenal"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "easyalluvial",
+      "name": "easyalluvial",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=easyalluvial"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "parcats",
+      "name": "parcats",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=parcats"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "htmlwidgets",
+      "name": "htmlwidgets",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=htmlwidgets"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -570,6 +606,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "182.026KB",
+  "fileSize": "183.765KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

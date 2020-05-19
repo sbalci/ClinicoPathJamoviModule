@@ -13,6 +13,7 @@ items:
           - group
           - direction
           - distribution
+          - excl
 
     # - name:  text1
     #   title: Variable Types
@@ -34,6 +35,7 @@ items:
           - group
           - direction
           - distribution
+          - excl
 
     # - name:  text5
     #   title: Stats Expression Formula
@@ -51,10 +53,13 @@ items:
           - group
           - direction
           - distribution
+          - alluvsty
+          - excl
 
 
 refs:
     - ggstatsplot
     - ggalluvial
+    - easyalluvial
 
 ...
