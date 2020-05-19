@@ -8,7 +8,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             vars = NULL,
             group = NULL,
-            sty = "gtsummary",
+            sty = "nejm",
             excl = TRUE, ...) {
 
             super$initialize(
@@ -38,7 +38,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nejm",
                     "lancet",
                     "hmisc"),
-                default="gtsummary")
+                default="nejm")
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -107,7 +107,7 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "group"),
                 visible="(sty:gtsummary)",
                 refs="gtsummary"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle4",
                 title="`Cross Table - ${group}`",
@@ -156,7 +156,7 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -164,7 +164,7 @@ crosstable <- function(
     data,
     vars,
     group,
-    sty = "gtsummary",
+    sty = "nejm",
     excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))

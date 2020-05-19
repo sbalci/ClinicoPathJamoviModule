@@ -1,3 +1,11 @@
+# ClinicoPath 0.0.2.0004
+
+Using `spgarbet/tangram@0.3.2` until the bug is fixed.
+
+
+
+
+
 # ClinicoPath 0.0.2.0003
 
 Added arsenal, finalfit, and gtsummary to crosstable function.

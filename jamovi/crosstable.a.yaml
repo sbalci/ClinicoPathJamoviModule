@@ -54,7 +54,7 @@ options:
           name: lancet
         - title: hmisc
           name: hmisc
-      default: gtsummary
+      default: nejm
 
 
     - name: excl

@@ -17,7 +17,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
 
-            if (is.null(self$options$vars)) {
+            if (is.null(self$options$vars) || is.null(self$options$group)) {
 
                 # ToDo Message ----
 
@@ -50,7 +50,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # formula <- paste(formulaL, '~', formulaR)
-            formula2 <- as.formula(formula)
+            formula <- as.formula(formula)
 
 
 
@@ -69,7 +69,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Arsenal Table ----
 
-                tablearsenal <- arsenal::tableby(formula = formula2,
+                tablearsenal <- arsenal::tableby(formula = formula,
                                                  data = mydata,
                                                  total = TRUE,
                                                  digits = 1,
@@ -152,18 +152,37 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (sty %in% c("nejm", "lancet", "hmisc")) {
 
-                sty <- jmvcore::composeTerm(components = self$options$sty)
+                # sty <- jmvcore::composeTerm(components = self$options$sty)
+
+
+                # Recent version, not working ----
+
+                # tabletangram <-
+                #     tangram::html5(
+                #     tangram::tangram(
+                #         formula,
+                #         mydata,
+                #         id = "tbl3"
+                #     ),
+                #     style = sty,
+                #     caption = paste0("Cross Table for Dependent ", self$options$group)
+                #     )
+
+                # spgarbet/tangram@0.3.2
+
+
+                sty <- self$options$sty
+                sty <- paste0(sty, ".css")
 
                 tabletangram <-
                     tangram::html5(
-                    tangram::tangram(
-                        formula2,
-                        mydata,
-                        id = "tbl3"
-                    ),
-                    style = sty,
-                    caption = paste0("Cross Table for Dependent ", self$options$group)
-                    )
+                        tangram::tangram(
+                            formula, mydata),
+                        fragment = TRUE,
+                        inline = sty,
+                        caption = paste0("Cross Table for Dependent ", self$options$group),
+                        id = "tbl3")
+
 
 
 
