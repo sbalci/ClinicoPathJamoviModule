@@ -276,4 +276,18 @@
         `year`=2020, 
         `title`="RVAideMemoire: Testing and Plotting Procedures for Biostatistics", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=RVAideMemoire", 
-        `url`="https://CRAN.R-project.org/package=RVAideMemoire"))
+        `url`="https://CRAN.R-project.org/package=RVAideMemoire"), 
+    `easyalluvial`=list(
+        `type`="software", 
+        `author`="Bjoern Koneswarakantha", 
+        `year`=2019, 
+        `title`="easyalluvial: Generate Alluvial Plots with a Single Line of Code.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=easyalluvial", 
+        `url`="https://CRAN.R-project.org/package=easyalluvial"), 
+    `parcats`=list(
+        `type`="software", 
+        `author`="Bjoern Koneswarakantha", 
+        `year`=2019, 
+        `title`="parcats: Interactive Parallel Categories Diagrams for 'easyalluvial'", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=parcats", 
+        `url`="https://CRAN.R-project.org/package=parcats"))

@@ -1,0 +1,50 @@
+---
+name:  alluvial
+title: Alluvial Diagrams
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+          - excl
+          - marg
+          - inter
+
+
+    # - name:  plothtml
+    #   title: Plot html
+    #   type:  Html
+    #   clearWith:
+    #       - vars
+    #       - excl
+    #       - marg
+    #       - inter
+
+
+
+
+    - title: Alluvial Diagrams
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - vars
+          - excl
+          - marg
+          - inter
+
+
+
+refs:
+    - easyalluvial
+    - parcats
+
+
+...

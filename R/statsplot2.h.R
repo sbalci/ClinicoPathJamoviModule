@@ -9,7 +9,9 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             direction = "independent",
-            distribution = "p", ...) {
+            distribution = "p",
+            alluvsty = "t1",
+            excl = TRUE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -37,22 +39,39 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "p",
                     "np"),
                 default="p")
+            private$..alluvsty <- jmvcore::OptionList$new(
+                "alluvsty",
+                alluvsty,
+                options=list(
+                    "t1",
+                    "t2"),
+                default="t1")
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..direction)
             self$.addOption(private$..distribution)
+            self$.addOption(private$..alluvsty)
+            self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         direction = function() private$..direction$value,
-        distribution = function() private$..distribution$value),
+        distribution = function() private$..distribution$value,
+        alluvsty = function() private$..alluvsty$value,
+        excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..direction = NA,
-        ..distribution = NA)
+        ..distribution = NA,
+        ..alluvsty = NA,
+        ..excl = NA)
 )
 
 statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -70,7 +89,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Graphs and Plots",
                 refs=list(
                     "ggstatsplot",
-                    "ggalluvial"))
+                    "ggalluvial",
+                    "easyalluvial"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -79,7 +99,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "direction",
-                    "distribution")))
+                    "distribution",
+                    "excl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text4",
@@ -88,7 +109,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "direction",
-                    "distribution")))
+                    "distribution",
+                    "excl")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="GGStatsPlot",
@@ -101,7 +123,9 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "direction",
-                    "distribution")))}))
+                    "distribution",
+                    "alluvsty",
+                    "excl")))}))
 
 statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Base",
@@ -136,6 +160,8 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group .
 #' @param direction select measurement type (repeated or independent)
 #' @param distribution select distribution type (parametric or nonparametric)
+#' @param alluvsty .
+#' @param excl .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -149,7 +175,9 @@ statsplot2 <- function(
     dep,
     group,
     direction = "independent",
-    distribution = "p") {
+    distribution = "p",
+    alluvsty = "t1",
+    excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('statsplot2 requires jmvcore to be installed (restart may be required)')
@@ -167,7 +195,9 @@ statsplot2 <- function(
         dep = dep,
         group = group,
         direction = direction,
-        distribution = distribution)
+        distribution = distribution,
+        alluvsty = alluvsty,
+        excl = excl)
 
     analysis <- statsplot2Class$new(
         options = options,

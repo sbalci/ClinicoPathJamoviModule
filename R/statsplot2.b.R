@@ -3,7 +3,7 @@
 
 
 #'
-#' 
+#'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -210,12 +210,22 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                 mydata <- self$data
 
-                mydep <- self$data[[self$options$dep]]
 
-                mygroup <- self$data[[self$options$group]]
+                # Exclude NA
+
+                excl <- self$options$excl
+
+                if (excl) {mydata <- jmvcore::naOmit(mydata)}
+
+
+                mydep <- mydata[[self$options$dep]]
+
+                mygroup <- mydata[[self$options$group]]
 
                 contin <- c("integer", "numeric", "double")
                 categ <- c("factor")
+
+
 
 
                 # independent ----
@@ -228,7 +238,6 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                         plotData <- data.frame(gr = mygroup,
                                                dp = jmvcore::toNumeric(mydep))
-                        plotData <- jmvcore::naOmit(plotData)
 
                         plot <- ggstatsplot::ggbetweenstats(
                             data = plotData,
@@ -246,7 +255,6 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                         plotData <-
                             data.frame(gr = jmvcore::toNumeric(mygroup),
                                        dp = jmvcore::toNumeric(mydep))
-                        plotData <- jmvcore::naOmit(plotData)
 
                         plot <- ggstatsplot::ggscatterstats(data = plotData,
                                                             x = gr,
@@ -261,7 +269,6 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                         plotData <- data.frame(gr = mygroup,
                                                dp = mydep)
 
-                        plotData <- jmvcore::naOmit(plotData)
 
                         plot <- ggstatsplot::ggbarstats(data = plotData,
                                                         main = gr,
@@ -288,7 +295,6 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                         plotData <- data.frame(gr = mygroup,
                                                dp = jmvcore::toNumeric(mydep))
-                        plotData <- jmvcore::naOmit(plotData)
 
 
                         plot <- ggstatsplot::ggwithinstats(
@@ -332,13 +338,21 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                     } else if (inherits(mygroup, "factor") &&
                                inherits(mydep, "factor")) {
+
+
+                        # Select alluvial style ----
+
+
+                        alluvsty <- self$options$alluvsty
+
+                        if (alluvsty == "t1") {
+
+                            # ggalluvial
                         # http://corybrunson.github.io/ggalluvial/
 
 
                         plotData <- data.frame(gr = mygroup,
                                                dp = mydep)
-
-                        plotData <- jmvcore::naOmit(plotData)
 
 
                         mydata_changes <- plotData %>%
@@ -430,9 +444,25 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                         # plot <- list(plot1,
                         #              plot2)
 
+
+                        } else if (alluvsty == "t2") {
+
+                            # easyalluvial
+                            # https://erblast.github.io/easyalluvial/
+
+                            plot <-
+                                easyalluvial::alluvial_wide( data = mydata,
+                                                             max_variables = 5,
+                                                             fill_by = 'first_variable'
+                                                             )
+
+
+                        }
+
+
+
+
                         # repeated, continuous, factor ----
-
-
                     } else if (inherits(mygroup, contin) &&
                                inherits(mydep, "factor")) {
                         plot <- c("Not Available")

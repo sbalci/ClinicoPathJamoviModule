@@ -891,6 +891,9 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::addAnalysis(name = "gtsummary", title = "Tables via gtsummary")
 
+# jmvtools::addAnalysis(name = "alluvial", title = "Alluvial Diagrams")
+
+
 ```
 
 
@@ -2609,7 +2612,28 @@ ClinicoPath::tree(
 
 
 
-```{r}
+```{r easyalluvial}
+# install.packages("easyalluvial")
+library(magrittr)
+# devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mydata <- deneme
+
+var1 <- "TStage"
+
+var2 <- "Grade"
+
+mydata <- jmvcore::select(df = mydata, columnNames = c(var1, var2))
+
+mydata <- jmvcore::naOmit(mydata)
+
+easyalluvial::alluvial_wide( data = mydata
+                , max_variables = 5
+                , fill_by = 'first_variable' )
+
+
+
 
 ```
 

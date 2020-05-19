@@ -1,0 +1,38 @@
+---
+name:  alluvial
+title: Alluvial Diagrams
+menuGroup: ClinicoPath2
+menuSubgroup: Descriptives
+version: '1.0.0'
+jas: '1.2'
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables
+      type: Variables
+      description:
+          R: >
+            a string naming the variables from `data` that contains the
+            values used for the Alluvial Diagram.
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+    - name: marg
+      title: Marginal Plots
+      type: Bool
+      default: false
+
+    - name: inter
+      title: Interactive
+      type: Bool
+      default: false
+
+...

@@ -99,6 +99,7 @@ analyses:
     description: >
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
+    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
   - title: Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
@@ -106,6 +107,7 @@ analyses:
     menuSubgroup: Decision
     menuTitle: Decision Calculator
     description: Function for Medical Decision Calculator.
+    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
   - title: Decision Tree
     name: tree
     ns: ClinicoPath
@@ -152,6 +154,12 @@ analyses:
     menuGroup: ClinicoPath2
     menuTitle: Tables via gtsummary
     menuSubgroup: Comparisons
+  - title: Alluvial Diagrams
+    name: alluvial
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Descriptives
+    menuTitle: Alluvial Diagrams
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

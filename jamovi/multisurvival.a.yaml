@@ -44,4 +44,16 @@ options:
     #   type: Level
     #   variable: (outcome)
 
+    - name: sty
+      title: Plot Style
+      type: List
+      options:
+        - title: finalfit
+          name: t1
+        - title: ggstatsplot
+          name: t2
+      default: t1
+
+
+
 ...
