@@ -40,7 +40,7 @@ items:
 
     - name: tablestyle4
       title: '`Cross Table - ${group}`'
-      type:  Preformatted
+      type:  Html
       clearWith:
           - vars
           - group

@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0003
+Version: 0.0.2.0004
 Date: 2020-05-19
 Authors@R: 
     person(given = "Serdar",
@@ -50,6 +50,13 @@ Imports:
     magrittr,
     plotROC,
     arsenal
+Remotes:
+    ddsjoberg/gtsummary,
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram@0.3.2,
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
 Suggests:
     corrr,
     correlation,
