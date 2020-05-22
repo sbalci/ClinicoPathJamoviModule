@@ -802,7 +802,7 @@ devtools::check()
 
 ```
 
-```{r description eval=FALSE, include=FALSE}
+```{r description, eval=FALSE, include=FALSE}
 # From CRAN
 # install.packages("attachment")
 # From github
@@ -822,7 +822,7 @@ devtools::document()
 
 codemetar::write_codemeta()
 
-rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
+# rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
 
 pkgdown::build_articles()
@@ -935,7 +935,7 @@ formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
 
 jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
 
-jmvcore::constructFormula(terms = "A")
+jmvcore::constructFormula(terms = "A B")
 
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
@@ -946,7 +946,7 @@ unlist(vars)
 
 cformula <- jmvcore::composeTerm(components = formula)
 
-jmvcore::composeTerm("A")
+jmvcore::composeTerm("A B")
 
 jmvcore::composeTerm(components = c("A", "B", "C"))
 

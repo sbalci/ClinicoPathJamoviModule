@@ -4,7 +4,7 @@
 \alias{alluvial}
 \title{Alluvial Diagrams}
 \usage{
-alluvial(data, vars, excl = TRUE, marg = FALSE, inter = FALSE)
+alluvial(data, vars, excl = TRUE, marg = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -15,8 +15,6 @@ the values used for the Alluvial Diagram.}
 \item{excl}{.}
 
 \item{marg}{.}
-
-\item{inter}{.}
 }
 \value{
 A results object containing:

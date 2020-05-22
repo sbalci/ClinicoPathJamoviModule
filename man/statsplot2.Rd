@@ -8,6 +8,7 @@ statsplot2(
   data,
   dep,
   group,
+  grvar,
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
@@ -20,6 +21,8 @@ statsplot2(
 \item{dep}{.}
 
 \item{group}{.}
+
+\item{grvar}{.}
 
 \item{direction}{select measurement type (repeated or independent)}
 

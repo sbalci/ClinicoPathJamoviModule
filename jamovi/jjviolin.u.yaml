@@ -1,5 +1,5 @@
-title: Graphs and Plots
-name: statsplot2
+title: Violin Plot
+name: jjviolin
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -9,43 +9,26 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: 'Dependent (y-axis, 1st measurement)'
+        label: Dependent Variable
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Grouping (x-axis, 2nd measurement)'
+        label: Grouping Variable
         children:
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: 'Split by:'
-        children:
-          - type: VariablesListBox
-            name: grvar
-            maxItemCount: 1
-            isTarget: true
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: direction
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: distribution
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: alluvsty
+        name: alt
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: excl
+        name: varEq

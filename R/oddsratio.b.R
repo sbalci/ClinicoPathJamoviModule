@@ -1,14 +1,10 @@
-#' Odds Ratio Table and Plot
+#' @title Odds Ratio Table and Plot
 #'
-
-
 #'
-#' 
+#'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import finalfit
-#' @import ggplot2
 #'
 
 oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(

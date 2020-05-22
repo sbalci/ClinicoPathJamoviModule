@@ -8,8 +8,7 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             vars = NULL,
             excl = TRUE,
-            marg = FALSE,
-            inter = FALSE, ...) {
+            marg = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -28,26 +27,19 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "marg",
                 marg,
                 default=FALSE)
-            private$..inter <- jmvcore::OptionBool$new(
-                "inter",
-                inter,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..excl)
             self$.addOption(private$..marg)
-            self$.addOption(private$..inter)
         }),
     active = list(
         vars = function() private$..vars$value,
         excl = function() private$..excl$value,
-        marg = function() private$..marg$value,
-        inter = function() private$..inter$value),
+        marg = function() private$..marg$value),
     private = list(
         ..vars = NA,
         ..excl = NA,
-        ..marg = NA,
-        ..inter = NA)
+        ..marg = NA)
 )
 
 alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -63,8 +55,7 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Alluvial Diagrams",
                 refs=list(
-                    "easyalluvial",
-                    "parcats"))
+                    "easyalluvial"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -116,7 +107,6 @@ alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   the values used for the Alluvial Diagram.
 #' @param excl .
 #' @param marg .
-#' @param inter .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -128,8 +118,7 @@ alluvial <- function(
     data,
     vars,
     excl = TRUE,
-    marg = FALSE,
-    inter = FALSE) {
+    marg = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('alluvial requires jmvcore to be installed (restart may be required)')
@@ -144,8 +133,7 @@ alluvial <- function(
     options <- alluvialOptions$new(
         vars = vars,
         excl = excl,
-        marg = marg,
-        inter = inter)
+        marg = marg)
 
     analysis <- alluvialClass$new(
         options = options,

@@ -14,6 +14,8 @@ items:
           - direction
           - distribution
           - excl
+          - grvar
+          # - pairw
 
     # - name:  text1
     #   title: Variable Types
@@ -36,6 +38,8 @@ items:
           - direction
           - distribution
           - excl
+          - grvar
+          # - pairw
 
 
     # - name:  text5
@@ -45,8 +49,8 @@ items:
     - title: GGStatsPlot
       name: plot
       type: Image
-      width:  600
-      height: 450
+      width:  800
+      height: 600
       renderFun: .plot
       requiresData: true
       clearWith:
@@ -56,6 +60,8 @@ items:
           - distribution
           - alluvsty
           - excl
+          - grvar
+          # - pairw
 
 
 refs:

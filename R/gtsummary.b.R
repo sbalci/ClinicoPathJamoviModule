@@ -1,4 +1,4 @@
-#' Tables via gtsummary
+#' @title Tables via gtsummary
 #'
 #' @return
 #'

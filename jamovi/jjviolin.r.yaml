@@ -1,0 +1,11 @@
+---
+name:  jjviolin
+title: Violin Plot
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Violin Plot
+      type:  Preformatted
+
+...

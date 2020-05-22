@@ -30,6 +30,12 @@ options:
       title: 'Grouping (x-axis, 2nd measurement)'
       type: Variable
 
+
+    - name: grvar
+      title: 'Split by:'
+      type: Variable
+
+
     - name: direction
       title: Measurement Type
       type: List
@@ -71,6 +77,13 @@ options:
       title: Exclude Missing (NA)
       type: Bool
       default: true
+
+
+    # - name: pairw
+    #   title: Pairwise Comparison
+    #   type: Bool
+    #   default: false
+
 
 
     # - name: typex

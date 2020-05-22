@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0005
-Date: 2020-05-20
+Version: 0.0.2.0006
+Date: 2020-05-22
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -24,6 +24,16 @@ BugReports:
 Depends:
     R (>= 3.6.0)
 Imports: 
+    jmvcore,
+    R6
+Remotes:
+    ddsjoberg/gtsummary,
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram@0.3.2,
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
+Suggests:
     dplyr,
     finalfit,
     ggalluvial,
@@ -31,10 +41,8 @@ Imports:
     ggstatsplot,
     glue,
     janitor,
-    jmvcore,
     knitr,
     purrr,
-    R6,
     scales,
     survival,
     survminer,
@@ -52,15 +60,7 @@ Imports:
     plotROC,
     arsenal,
     easyalluvial,
-    parcats
-Remotes:
-    ddsjoberg/gtsummary,
-    ndphillips/FFTrees,
-    easystats/report,
-    spgarbet/tangram@0.3.2,
-    cran/rmngb,
-    mixOmicsTeam/mixOmics
-Suggests:
+    parcats,
     corrr,
     correlation,
     RVAideMemoire,

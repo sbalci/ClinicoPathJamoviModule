@@ -8,6 +8,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
+            grvar = NULL,
             direction = "independent",
             distribution = "p",
             alluvsty = "t1",
@@ -25,6 +26,9 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group)
+            private$..grvar <- jmvcore::OptionVariable$new(
+                "grvar",
+                grvar)
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -53,6 +57,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
+            self$.addOption(private$..grvar)
             self$.addOption(private$..direction)
             self$.addOption(private$..distribution)
             self$.addOption(private$..alluvsty)
@@ -61,6 +66,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
+        grvar = function() private$..grvar$value,
         direction = function() private$..direction$value,
         distribution = function() private$..distribution$value,
         alluvsty = function() private$..alluvsty$value,
@@ -68,6 +74,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         ..dep = NA,
         ..group = NA,
+        ..grvar = NA,
         ..direction = NA,
         ..distribution = NA,
         ..alluvsty = NA,
@@ -100,7 +107,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "group",
                     "direction",
                     "distribution",
-                    "excl")))
+                    "excl",
+                    "grvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text4",
@@ -110,13 +118,14 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "group",
                     "direction",
                     "distribution",
-                    "excl")))
+                    "excl",
+                    "grvar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="GGStatsPlot",
                 name="plot",
-                width=600,
-                height=450,
+                width=800,
+                height=600,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
@@ -125,7 +134,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction",
                     "distribution",
                     "alluvsty",
-                    "excl")))}))
+                    "excl",
+                    "grvar")))}))
 
 statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Base",
@@ -158,6 +168,7 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
+#' @param grvar .
 #' @param direction select measurement type (repeated or independent)
 #' @param distribution select distribution type (parametric or nonparametric)
 #' @param alluvsty .
@@ -174,6 +185,7 @@ statsplot2 <- function(
     data,
     dep,
     group,
+    grvar,
     direction = "independent",
     distribution = "p",
     alluvsty = "t1",
@@ -184,16 +196,19 @@ statsplot2 <- function(
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(group), group, NULL),
+            `if`( ! missing(grvar), grvar, NULL))
 
 
     options <- statsplot2Options$new(
         dep = dep,
         group = group,
+        grvar = grvar,
         direction = direction,
         distribution = distribution,
         alluvsty = alluvsty,

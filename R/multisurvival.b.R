@@ -1,16 +1,8 @@
-#' Multivariate Survival Analysis
+#' @title Multivariate Survival Analysis
 #'
-
-
-#'
-#' 
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import finalfit
-#' @import survival
-#' @import survminer
-#' @import ggplot2
 #'
 
 multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(

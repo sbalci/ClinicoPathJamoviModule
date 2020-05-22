@@ -30,9 +30,55 @@ options:
       type: Bool
       default: false
 
-    - name: inter
-      title: Interactive
+
+    - name: verb
+      title: Print Plot Summary
       type: Bool
       default: false
+
+
+    - name: fill
+      title: Fill by
+      type: List
+      options:
+        - title: First Variable
+          name: first_variable
+        - title: Last Variable
+          name: last_variable
+        - title: All Flows
+          name: all_flows
+        - title: Values
+          name: values
+      default: first_variable
+      description:
+          R: >
+            A list for the argument fill for selecting the variable to be
+            represented by color. Default is 'first_variable'.
+
+    - name: bin
+      title: Bin Labels
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: Min-Max
+          name: min-max
+        - title: Cuts
+          name: cuts
+      default: default
+      description:
+          R: >
+            labels for the bins from low to high
+
+
+
+# - name: inter
+#   title: Interactive
+#   type: Bool
+#   default: false
 
 ...

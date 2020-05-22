@@ -1,4 +1,4 @@
-#' Competing Survival Analysis
+#' @title Competing Survival Analysis
 #'
 #'
 #'

@@ -1,16 +1,10 @@
-#' Plots and Graphs Based on Variable Types
+#' @title Plots and Graphs Based on Variable Types
 #'
-
-
 #'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @import ggstatsplot
-#' @import ggalluvial
-#' @importFrom ggalluvial StatStratum
 #'
 
 
@@ -195,6 +189,8 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                 # the plot function ----
 
 
+                # Error messages ----
+
                 if (is.null(self$options$dep) ||
                     is.null(self$options$group))
                     return()
@@ -202,28 +198,40 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
-                direction <- self$options$direction
 
+                # Prepare Data ----
+
+                direction <- self$options$direction
 
                 distribution <-
                     jmvcore::constructFormula(terms = self$options$distribution)
 
+                # pairw <- self$options$pairw
+
+
                 mydata <- self$data
 
 
-                # Exclude NA
+                # Exclude NA ----
 
                 excl <- self$options$excl
 
                 if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
-                mydep <- mydata[[self$options$dep]]
 
+                mydep <- mydata[[self$options$dep]]
                 mygroup <- mydata[[self$options$group]]
+                if ( ! is.null(self$options$grvar) ) {
+                    mygrvar <- mydata[[self$options$grvar]]
+                    }
+
+
+
 
                 contin <- c("integer", "numeric", "double")
                 categ <- c("factor")
+
 
 
 
@@ -302,7 +310,9 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                             data = plotData,
                             x = gr,
                             y = dp,
-                            type = distribution
+                            type = distribution,
+                            pairwise.comparisons = TRUE
+                            # pairwise.comparisons = pairw
                         )
 
                         # repeated, continuous, continuous ----
@@ -472,6 +482,89 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+                # grouped_ functions ----
+
+
+                if ( ! is.null(self$options$grvar) ) {
+
+
+
+                    plotData <- data.frame(gr = mygroup,
+                                           dp = jmvcore::toNumeric(mydep),
+                                           grvar = mygrvar )
+
+
+                    plot <- ggstatsplot::grouped_ggbetweenstats(
+                        data = plotData,
+                        x = gr,
+                        y = dp,
+                        grouping.var = grvar,
+                        pairwise.comparisons = TRUE,
+                        # pairwise.comparisons = pairw,
+                        p.adjust.method = "bonferroni"
+                    )
+
+
+
+                        # ,
+                        # ggplot.component = list(ggplot2::scale_y_continuous(sec.axis = ggplot2::dup_axis())),
+                        # k = 3,
+                        # title.prefix = "Movie genre",
+                        # caption = substitute(paste(italic("Source"), ":IMDb (Internet Movie Database)")),
+                        # palette = "default_jama",
+                        # package = "ggsci",
+                        # messages = FALSE,
+                        # plotgrid.args = list(nrow = 2),
+                        # title.text = "Differences in movie length by mpaa ratings for different genres"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                # Print Plot ----
 
                 print(plot)
                 TRUE

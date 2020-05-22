@@ -1,13 +1,10 @@
-#' Survival Analysis
+#' @title Survival Analysis
 #'
 #'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import finalfit
-#' @import survival
-#' @import survminer
 #'
 
 survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(

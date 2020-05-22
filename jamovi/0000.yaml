@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0005
+version: 0.0.2.0006
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-05-20'
+date: '2020-05-22'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -160,6 +160,20 @@ analyses:
     menuGroup: ClinicoPath2
     menuSubgroup: Descriptives
     menuTitle: Alluvial Diagrams
+  - title: Violin Plots Between
+    name: jjbetweenstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: Violin Plots Between
+    menuSubtitle: 'ggstatsplot::ggbetweenstats'
+  - title: Violin Plot
+    name: jjviolin
+    ns: ClinicoPath
+    menuGroup: R-Graph-Gallery
+    menuSubgroup: Distribution
+    menuTitle: Violin Plot
+    menuSubtitle: R Graph Gallery Violin
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv
