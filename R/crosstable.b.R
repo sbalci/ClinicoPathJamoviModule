@@ -24,7 +24,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- "
                 <br>Welcome to ClinicoPath
                           <br><br>
-                          This tool will help you form a Cross Table
+                          This tool will help you form a Cross Table.
+                          <br><br>
+                          The functions select hypothesis tests automatically. You may see different results with different tables. Please verify your data distribution and appropriateness of the test accordingly. You may find <b>Statkat module</b> useful.
                           Please cite the packages and jamovi using references below.
                           "
 

@@ -4,7 +4,7 @@
 \alias{multisurvival}
 \title{Multivariate Survival Analysis}
 \usage{
-multisurvival(data, explanatory, outcome, overalltime)
+multisurvival(data, explanatory, outcome, overalltime, sty = "t1")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +14,8 @@ multisurvival(data, explanatory, outcome, overalltime)
 \item{outcome}{.}
 
 \item{overalltime}{.}
+
+\item{sty}{.}
 }
 \value{
 A results object containing:

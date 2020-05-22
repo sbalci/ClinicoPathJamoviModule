@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0005</span>
       </span>
     </div>
 
@@ -156,7 +156,15 @@
     <p>Function for Generating Plots and Graphs Based on Variable Types.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>statsplot2</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>, <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>, <span class='kw'>distribution</span> <span class='kw'>=</span> <span class='st'>"p"</span>)</pre>
+    <pre class="usage"><span class='fu'>statsplot2</span>(
+  <span class='no'>data</span>,
+  <span class='no'>dep</span>,
+  <span class='no'>group</span>,
+  <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>,
+  <span class='kw'>distribution</span> <span class='kw'>=</span> <span class='st'>"p"</span>,
+  <span class='kw'>alluvsty</span> <span class='kw'>=</span> <span class='st'>"t1"</span>,
+  <span class='kw'>excl</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -180,6 +188,14 @@
     <tr>
       <th>distribution</th>
       <td><p>select distribution type (parametric or nonparametric)</p></td>
+    </tr>
+    <tr>
+      <th>alluvsty</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>excl</th>
+      <td><p>.</p></td>
     </tr>
     </table>
 

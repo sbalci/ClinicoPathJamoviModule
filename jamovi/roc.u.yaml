@@ -22,3 +22,16 @@ children:
             name: status
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl
+      - type: CheckBox
+        name: sty
+      - type: CheckBox
+        name: quant
+      - type: CheckBox
+        name: label
+      - type: CheckBox
+        name: inter

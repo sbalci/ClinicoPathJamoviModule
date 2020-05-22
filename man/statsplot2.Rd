@@ -4,7 +4,15 @@
 \alias{statsplot2}
 \title{Graphs and Plots}
 \usage{
-statsplot2(data, dep, group, direction = "independent", distribution = "p")
+statsplot2(
+  data,
+  dep,
+  group,
+  direction = "independent",
+  distribution = "p",
+  alluvsty = "t1",
+  excl = TRUE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +24,10 @@ statsplot2(data, dep, group, direction = "independent", distribution = "p")
 \item{direction}{select measurement type (repeated or independent)}
 
 \item{distribution}{select distribution type (parametric or nonparametric)}
+
+\item{alluvsty}{.}
+
+\item{excl}{.}
 }
 \value{
 A results object containing:

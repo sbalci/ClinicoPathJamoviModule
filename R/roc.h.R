@@ -7,7 +7,12 @@ rocOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             measurement = NULL,
-            status = NULL, ...) {
+            status = NULL,
+            excl = TRUE,
+            sty = FALSE,
+            quant = FALSE,
+            label = FALSE,
+            inter = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -21,35 +26,106 @@ rocOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..status <- jmvcore::OptionVariable$new(
                 "status",
                 status)
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
+                default=TRUE)
+            private$..sty <- jmvcore::OptionBool$new(
+                "sty",
+                sty,
+                default=FALSE)
+            private$..quant <- jmvcore::OptionBool$new(
+                "quant",
+                quant,
+                default=FALSE)
+            private$..label <- jmvcore::OptionBool$new(
+                "label",
+                label,
+                default=FALSE)
+            private$..inter <- jmvcore::OptionBool$new(
+                "inter",
+                inter,
+                default=FALSE)
 
             self$.addOption(private$..measurement)
             self$.addOption(private$..status)
+            self$.addOption(private$..excl)
+            self$.addOption(private$..sty)
+            self$.addOption(private$..quant)
+            self$.addOption(private$..label)
+            self$.addOption(private$..inter)
         }),
     active = list(
         measurement = function() private$..measurement$value,
-        status = function() private$..status$value),
+        status = function() private$..status$value,
+        excl = function() private$..excl$value,
+        sty = function() private$..sty$value,
+        quant = function() private$..quant$value,
+        label = function() private$..label$value,
+        inter = function() private$..inter$value),
     private = list(
         ..measurement = NA,
-        ..status = NA)
+        ..status = NA,
+        ..excl = NA,
+        ..sty = NA,
+        ..quant = NA,
+        ..label = NA,
+        ..inter = NA)
 )
 
 rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
+        textplot = function() private$.items[["textplot"]],
         plot = function() private$.items[["plot"]],
-        plot3 = function() private$.items[["plot3"]]),
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="ROC")
+                title="ROC",
+                refs=list(
+                    "plotROC"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "measurement",
+                    "status",
+                    "excl",
+                    "sty",
+                    "quant",
+                    "label",
+                    "inter")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="ROC"))
+                title="ROC text",
+                clearWith=list(
+                    "measurement",
+                    "status",
+                    "excl",
+                    "sty",
+                    "quant",
+                    "label",
+                    "inter")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="textplot",
+                title="ROC textplot",
+                clearWith=list(
+                    "measurement",
+                    "status",
+                    "excl",
+                    "sty",
+                    "quant",
+                    "label",
+                    "inter")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="ROC",
@@ -57,11 +133,28 @@ rocResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE))
-            self$add(jmvcore::Html$new(
+                requiresData=TRUE,
+                clearWith=list(
+                    "measurement",
+                    "status",
+                    "excl",
+                    "sty",
+                    "quant",
+                    "label",
+                    "inter")))
+            self$add(jmvcore::Image$new(
                 options=options,
                 title="ROC Interactive",
-                name="plot3"))}))
+                name="plot2",
+                width=600,
+                height=450,
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "measurement",
+                    "status",
+                    "excl"),
+                visible="(inter)"))}))
 
 rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "rocBase",
@@ -94,18 +187,30 @@ rocBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param measurement .
 #' @param status .
+#' @param excl .
+#' @param sty .
+#' @param quant .
+#' @param label .
+#' @param inter .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$textplot} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot3} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 roc <- function(
     data,
     measurement,
-    status) {
+    status,
+    excl = TRUE,
+    sty = FALSE,
+    quant = FALSE,
+    label = FALSE,
+    inter = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('roc requires jmvcore to be installed (restart may be required)')
@@ -121,7 +226,12 @@ roc <- function(
 
     options <- rocOptions$new(
         measurement = measurement,
-        status = status)
+        status = status,
+        excl = excl,
+        sty = sty,
+        quant = quant,
+        label = label,
+        inter = inter)
 
     analysis <- rocClass$new(
         options = options,

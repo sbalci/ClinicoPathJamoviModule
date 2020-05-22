@@ -8,10 +8,13 @@
   "description": "Analysis for Clinicopathological Research\n    ClinicoPath help researchers to generate natural language summaries of\n    their dataset, generate cross tables with statistical tests, and\n    survival analysis with survival tables, survival plots, and natural\n    language summaries.",
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
-  "relatedLink": "https://sbalci.github.io/ClinicoPathJamoviModule/",
+  "relatedLink": [
+    "https://sbalci.github.io/ClinicoPathJamoviModule/",
+    "https://github.com/sbalci/ClinicoPath/"
+  ],
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.2.4",
+  "version": "0.0.2.5",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -564,18 +567,6 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=parcats"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "htmlwidgets",
-      "name": "htmlwidgets",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=htmlwidgets"
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
@@ -606,6 +597,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "183.765KB",
+  "fileSize": "36566.474KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

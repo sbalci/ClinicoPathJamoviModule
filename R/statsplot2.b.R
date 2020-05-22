@@ -258,7 +258,8 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
                         plot <- ggstatsplot::ggscatterstats(data = plotData,
                                                             x = gr,
-                                                            y = dp)
+                                                            y = dp,
+                                                            type = distribution)
 
                         # independent, factor, factor ----
 

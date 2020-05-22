@@ -4,7 +4,16 @@
 \alias{roc}
 \title{ROC}
 \usage{
-roc(data, measurement, status)
+roc(
+  data,
+  measurement,
+  status,
+  excl = TRUE,
+  sty = FALSE,
+  quant = FALSE,
+  label = FALSE,
+  inter = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,13 +21,25 @@ roc(data, measurement, status)
 \item{measurement}{.}
 
 \item{status}{.}
+
+\item{excl}{.}
+
+\item{sty}{.}
+
+\item{quant}{.}
+
+\item{label}{.}
+
+\item{inter}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$textplot} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot3} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

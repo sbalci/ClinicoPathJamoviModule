@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0005</span>
       </span>
     </div>
 
@@ -156,7 +156,7 @@
     <p>Function for making Cross Tables.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>crosstable</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='no'>group</span>, <span class='kw'>sty</span> <span class='kw'>=</span> <span class='st'>"nejm"</span>)</pre>
+    <pre class="usage"><span class='fu'>crosstable</span>(<span class='no'>data</span>, <span class='no'>vars</span>, <span class='no'>group</span>, <span class='kw'>sty</span> <span class='kw'>=</span> <span class='st'>"nejm"</span>, <span class='kw'>excl</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -167,7 +167,7 @@
     </tr>
     <tr>
       <th>vars</th>
-      <td><p>.</p></td>
+      <td><p>variable in the rows</p></td>
     </tr>
     <tr>
       <th>group</th>
@@ -177,12 +177,20 @@
       <th>sty</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>excl</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$text3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$tablestyle1</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$tablestyle2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$tablestyle3</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$tablestyle4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 </table>
 
 
