@@ -49,9 +49,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results <- vtree::vtree(mydata, myvars)
 
-            # diagram <- results[["x"]][["diagram"]]
-            #
-            # results <- DiagrammeR::grViz(diagram = diagram)
+            diagram <- results[["x"]][["diagram"]]
+
+            results <- DiagrammeR::grViz(diagram = diagram)
 
 
 
@@ -62,6 +62,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 DiagrammeR::add_edge(from = 1, to = 2)
 
             results <- DiagrammeR::render_graph(results, layout = "nicely")
+
+
+            results <- knitr::asis_output(results)
 
 
             self$results$text1$setContent(print(results))
@@ -113,9 +116,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # plot <- DiagrammeR::render_graph(plot, layout = "nicely")
 
+            knitr::asis_output(plot)
 
-            print(plot)
-            TRUE
+            # print(plot)
+            # TRUE
 
         }
 

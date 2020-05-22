@@ -2,7 +2,7 @@ title: Alluvial Diagrams
 name: alluvial
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -14,7 +14,6 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-            maxItemCount: 6
   - type: LayoutBox
     margin: large
     children:

@@ -4,21 +4,27 @@
 \alias{crosstable}
 \title{Cross Tables}
 \usage{
-crosstable(data, vars, group, sty = "nejm")
+crosstable(data, vars, group, sty = "nejm", excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{vars}{.}
+\item{vars}{variable in the rows}
 
 \item{group}{variable in the column}
 
 \item{sty}{.}
+
+\item{excl}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

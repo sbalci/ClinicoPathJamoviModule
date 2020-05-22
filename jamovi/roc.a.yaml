@@ -31,4 +31,33 @@ options:
       type: Variable
 
 
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+
+    - name: sty
+      title: Style
+      type: Bool
+      default: false
+
+
+    - name: quant
+      title: Quantiles
+      type: Bool
+      default: false
+
+
+    - name: label
+      title: Label
+      type: Bool
+      default: false
+
+
+    - name: inter
+      title: Interactive
+      type: Bool
+      default: false
+
 ...

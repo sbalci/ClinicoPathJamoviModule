@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0005</span>
       </span>
     </div>
 
@@ -103,7 +103,8 @@
 
       
 
-      </header><script src="module_development_jamovi_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
+      </header><script src="module_development_jamovi_files/header-attrs-2.1/header-attrs.js"></script><script src="module_development_jamovi_files/htmlwidgets-1.5.1.9000/htmlwidgets.js"></script><script src="module_development_jamovi_files/viz-1.8.2/viz.js"></script><link href="module_development_jamovi_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="module_development_jamovi_files/grViz-binding-1.0.5/grViz.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Module Development for Jamovi</h1>
@@ -116,38 +117,41 @@
 
     
     
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ClinicoPath</span>)
-<span class="co">#&gt; Registered S3 methods overwritten by 'broom.mixed':</span>
-<span class="co">#&gt;   method         from </span>
-<span class="co">#&gt;   augment.lme    broom</span>
-<span class="co">#&gt;   augment.merMod broom</span>
-<span class="co">#&gt;   glance.lme     broom</span>
-<span class="co">#&gt;   glance.merMod  broom</span>
-<span class="co">#&gt;   glance.stanreg broom</span>
-<span class="co">#&gt;   tidy.brmsfit   broom</span>
-<span class="co">#&gt;   tidy.gamlss    broom</span>
-<span class="co">#&gt;   tidy.lme       broom</span>
-<span class="co">#&gt;   tidy.merMod    broom</span>
-<span class="co">#&gt;   tidy.rjags     broom</span>
-<span class="co">#&gt;   tidy.stanfit   broom</span>
-<span class="co">#&gt;   tidy.stanreg   broom</span>
-<span class="co">#&gt; Registered S3 methods overwritten by 'car':</span>
-<span class="co">#&gt;   method                          from</span>
-<span class="co">#&gt;   influence.merMod                lme4</span>
-<span class="co">#&gt;   cooks.distance.influence.merMod lme4</span>
-<span class="co">#&gt;   dfbeta.influence.merMod         lme4</span>
-<span class="co">#&gt;   dfbetas.influence.merMod        lme4</span></pre></body></html></div>
-<div id="user2017-jamovi-a-spreadsheet-for-r" class="section level1">
-<h1 class="hasAnchor">
-<a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
-</h1>
-<iframe src="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R/player" width="960" height="540" allowfullscreen frameborder="0" title="*jamovi*: a spreadsheet for R - Microsoft Channel 9 Video">
-</iframe>
-</div>
 <div id="a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="section level1">
 <h1 class="hasAnchor">
 <a href="#a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="anchor"></a>‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’</h1>
 <p>Official documentation is here: <a href="https://dev.jamovi.org/" class="uri">https://dev.jamovi.org/</a></p>
+<div id="tldr" class="section level2">
+<h2 class="hasAnchor">
+<a href="#tldr" class="anchor"></a>TL;DR</h2>
+<ul>
+<li>Details are here: <a href="https://dev.jamovi.org/" class="uri">https://dev.jamovi.org/</a>
+</li>
+</ul>
+<p>Briefly:</p>
+<ul>
+<li><p>Use <code>R 3.6.3</code></p></li>
+<li><p>Install jamovi from this link: <a href="https://www.jamovi.org/download.html" class="uri">https://www.jamovi.org/download.html</a> Get the latest one 1.2.19</p></li>
+<li><p>Install jmvtools package with: <code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))</a></code></p></li>
+<li><p>locate jamovi bin folder via this: <code><a href="https://rdrr.io/pkg/jmvtools/man/check.html">jmvtools::check("C://Program Files//jamovi//bin")</a></code> I recommend changing folder name from default <code>jamovi 1.2</code> to <code>jamovi</code></p></li>
+<li><p>Fork and Clone this repo: <a href="https://github.com/sbalci/ClinicoPath" class="uri">https://github.com/sbalci/ClinicoPath</a></p></li>
+<li><p>inside this repo folder in R <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code></p></li>
+<li><p>it will produce a file named ClinicoPath.jmo and install this module to jamovi</p></li>
+<li><p>The repo is like an R package except <code>jamovi</code> folder.</p></li>
+<li><p>You need to edit <code>R/crosstable.b.R</code></p></li>
+<li><p>Just edit the <code>tangram::</code> code <a href="https://dev.jamovi.org/tuts0104-implementing-an-analysis.html" class="uri">https://dev.jamovi.org/tuts0104-implementing-an-analysis.html</a> <a href="https://dev.jamovi.org/tuts0105-debugging-an-analysis.html" class="uri">https://dev.jamovi.org/tuts0105-debugging-an-analysis.html</a></p></li>
+<li><p>In DESCRIPTION file change <code>spgarbet/tangram@0.3.2</code> to the version you want to test.</p></li>
+<li><p>run <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> again.</p></li>
+</ul>
+<p>Let me know how it goes :)</p>
+</div>
+<div id="user2017-jamovi-a-spreadsheet-for-r" class="section level2">
+<h2 class="hasAnchor">
+<a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
+</h2>
+<iframe src="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R/player" width="50%" allowfullscreen frameborder="0" title="*jamovi*: a spreadsheet for R - Microsoft Channel 9 Video">
+</iframe>
+</div>
 <div id="preparing-development-tools" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preparing-development-tools" class="anchor"></a>preparing development tools</h2>
@@ -161,9 +165,9 @@
 <h3 class="hasAnchor">
 <a href="#jmvtools-should-be-installed-from-the-jamovi-repo" class="anchor"></a>jmvtools should be installed from the jamovi repo</h3>
 <p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
 <p>You can use <code><a href="https://rdrr.io/pkg/devtools/man/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://rdrr.io/pkg/devtools/man/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 </div>
@@ -172,106 +176,113 @@
 <a href="#add-analysis" class="anchor"></a>add analysis</h2>
 <pre><code><a href="https://rdrr.io/pkg/jmvtools/man/create.html">jmvtools::create('function')</a></code></pre>
 </div>
-</div>
-<div id="description" class="section level1">
-<h1 class="hasAnchor">
-<a href="#description" class="anchor"></a>DESCRIPTION</h1>
+<div id="development-files" class="section level2">
+<h2 class="hasAnchor">
+<a href="#development-files" class="anchor"></a>Development Files</h2>
+<div id="description" class="section level3">
+<h3 class="hasAnchor">
+<a href="#description" class="anchor"></a>DESCRIPTION</h3>
 <p><code>Imports</code>, <code>Depends</code>, <code>Suggests</code>, and <code>Remotes</code> have practically no difference in building jamovi modules. The <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> copies libraries under <em>build</em> folder.</p>
 <p>Under <code>Imports</code> <code>jmvcore</code> and <code>R6</code> are defaults.</p>
 <p>With Remotes one can install github packages as well. But with each <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> command it tries to check the updates, and if you are online throws an error. An <code>upgrade = FALSE, quick = TRUE</code> argument like in devtools::install() is not available, yet. One workaround is temporarily deleting Remotes from DESCRIPTION. The package folders continue to remain under build folder.</p>
 <p>One can also directly copy package folders from system R package folder (find via <code><a href="https://rdrr.io/r/base/libPaths.html">.libPaths()</a></code>) as well.</p>
 </div>
-<div id="namespace" class="section level1">
-<h1 class="hasAnchor">
-<a href="#namespace" class="anchor"></a>NAMESPACE</h1>
+<div id="namespace" class="section level3">
+<h3 class="hasAnchor">
+<a href="#namespace" class="anchor"></a>NAMESPACE</h3>
 <p>No need to change.</p>
 </div>
-<div id="r" class="section level1">
-<h1 class="hasAnchor">
-<a href="#r" class="anchor"></a>R</h1>
+<div id="r-folder" class="section level3">
+<h3 class="hasAnchor">
+<a href="#r-folder" class="anchor"></a>R folder</h3>
 <p>R folder is where the codes are present. There are two files.</p>
-<div id="function-h-r" class="section level2">
-<h2 class="hasAnchor">
-<a href="#function-h-r" class="anchor"></a>function.h.R</h2>
+<div id="function-h-r" class="section level4">
+<h4 class="hasAnchor">
+<a href="#function-h-r" class="anchor"></a>function.h.R</h4>
 <p>No need to change. Auto-updated and overwritten.</p>
 </div>
-<div id="function-b-r" class="section level2">
-<h2 class="hasAnchor">
-<a href="#function-b-r" class="anchor"></a>function.b.R</h2>
-<div id="warning-error-messages" class="section level3">
-<h3 class="hasAnchor">
-<a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h3>
+<div id="function-b-r" class="section level4">
+<h4 class="hasAnchor">
+<a href="#function-b-r" class="anchor"></a>function.b.R</h4>
+<div id="warning-error-messages" class="section level5">
+<h5 class="hasAnchor">
+<a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h5>
 <pre><code>        if (nrow(self$data) == 0) stop("Data contains no (complete) rows")</code></pre>
 </div>
-<div id="prepare-data-for-analysis" class="section level3">
-<h3 class="hasAnchor">
-<a href="#prepare-data-for-analysis" class="anchor"></a>Prepare Data For Analysis</h3>
+<div id="prepare-data-for-analysis" class="section level5">
+<h5 class="hasAnchor">
+<a href="#prepare-data-for-analysis" class="anchor"></a>Prepare Data For Analysis</h5>
 <pre><code>        varsName &lt;- self$options$vars
 
         data &lt;- jmvcore::select(self$data, c(varsName))</code></pre>
 </div>
-<div id="remove-na-containing-cases-works-on-selected-variables" class="section level3">
-<h3 class="hasAnchor">
-<a href="#remove-na-containing-cases-works-on-selected-variables" class="anchor"></a>Remove NA containing cases (works on selected variables)</h3>
+<div id="remove-na-containing-cases-works-on-selected-variables" class="section level5">
+<h5 class="hasAnchor">
+<a href="#remove-na-containing-cases-works-on-selected-variables" class="anchor"></a>Remove NA containing cases (works on selected variables)</h5>
 <pre><code>        data &lt;- jmvcore::naOmit(data)</code></pre>
 <p>jmvcore::toNumeric() <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
 <p>can I just send whole data to plot function? you usually don’t want to, but sometimes it’s appropriate. normally you just provide a summary of the data to the plot function … just enough data for it to do it’s job. but if you need the whole data set for the plot function, then you can specify requiresData: true on the image object. that means the plot function can access self$data. i do it in the correlation matrix for example. there’s no summary i could send … the plot function needs all the data: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143</a> jamovi/corrmatrix.r.yaml:143 requiresData: true</p>
 </div>
-<div id="prepare-data-to-send-to-plot-function" class="section level3">
+<div id="prepare-data-to-send-to-plot-function" class="section level5">
+<h5 class="hasAnchor">
+<a href="#prepare-data-to-send-to-plot-function" class="anchor"></a>Prepare Data to Send to Plot Function</h5>
+</div>
+</div>
+</div>
+<div id="jamovi-folder" class="section level3">
 <h3 class="hasAnchor">
-<a href="#prepare-data-to-send-to-plot-function" class="anchor"></a>Prepare Data to Send to Plot Function</h3>
+<a href="#jamovi-folder" class="anchor"></a>jamovi folder</h3>
+<div id="function-a-yaml" class="section level4">
+<h4 class="hasAnchor">
+<a href="#function-a-yaml" class="anchor"></a>function.a.yaml</h4>
 </div>
-</div>
-</div>
-<div id="jamovi" class="section level1">
-<h1 class="hasAnchor">
-<a href="#jamovi" class="anchor"></a>jamovi</h1>
-<div id="function-a-yaml" class="section level2">
-<h2 class="hasAnchor">
-<a href="#function-a-yaml" class="anchor"></a>function.a.yaml</h2>
-</div>
-<div id="function-r-yaml" class="section level2">
-<h2 class="hasAnchor">
-<a href="#function-r-yaml" class="anchor"></a>function.r.yaml</h2>
-<div id="preformatted" class="section level3">
-<h3 class="hasAnchor">
-<a href="#preformatted" class="anchor"></a>preformatted</h3>
+<div id="function-r-yaml" class="section level4">
+<h4 class="hasAnchor">
+<a href="#function-r-yaml" class="anchor"></a>function.r.yaml</h4>
+<div id="preformatted" class="section level5">
+<h5 class="hasAnchor">
+<a href="#preformatted" class="anchor"></a>preformatted</h5>
 <p>Using “preformatted” result element I get a markdown table output. Is there a way to somehow render/convert this output to html version. Or should I go with <a href="https://dev.jamovi.org/api_table.html" class="uri">https://dev.jamovi.org/api_table.html</a> table api?</p>
 <p>so you’re best to make use of the table api … the table API has a lot more features than an md table.</p>
 </div>
-<div id="p-value" class="section level3">
-<h3 class="hasAnchor">
-<a href="#p-value" class="anchor"></a>p-value</h3>
+<div id="p-value" class="section level5">
+<h5 class="hasAnchor">
+<a href="#p-value" class="anchor"></a>p-value</h5>
 <pre><code>     - name: p
        title: "p"
        type: number
        format: zto,pvalue</code></pre>
 </div>
 </div>
-<div id="function-u-yaml" class="section level2">
-<h2 class="hasAnchor">
-<a href="#function-u-yaml" class="anchor"></a>function.u.yaml</h2>
-</div>
-<div id="levelselector" class="section level2">
-<h2 class="hasAnchor">
-<a href="#levelselector" class="anchor"></a>LevelSelector</h2>
+<div id="function-u-yaml" class="section level4">
+<h4 class="hasAnchor">
+<a href="#function-u-yaml" class="anchor"></a>function.u.yaml</h4>
+<div id="levelselector" class="section level5">
+<h5 class="hasAnchor">
+<a href="#levelselector" class="anchor"></a>LevelSelector</h5>
 <pre><code> i have added the property allowNone to the LevelSelector control. This will allow the user to select None from the listbox.</code></pre>
 </div>
-<div id="yaml" class="section level2">
-<h2 class="hasAnchor">
-<a href="#yaml" class="anchor"></a>0000.yaml</h2>
+<div id="maxitemcount-1" class="section level5">
+<h5 class="hasAnchor">
+<a href="#maxitemcount-1" class="anchor"></a>maxItemCount: 1</h5>
 </div>
-<div id="refs-yaml" class="section level2">
-<h2 class="hasAnchor">
-<a href="#refs-yaml" class="anchor"></a>00refs.yaml</h2>
+</div>
+<div id="yaml" class="section level4">
+<h4 class="hasAnchor">
+<a href="#yaml" class="anchor"></a>0000.yaml</h4>
+</div>
+<div id="refs-yaml" class="section level4">
+<h4 class="hasAnchor">
+<a href="#refs-yaml" class="anchor"></a>00refs.yaml</h4>
 <p>prepare a 00refs.yaml like this: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
 <p>attach references to objects in the .r.yaml file like this:</p>
 <p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
 </div>
 </div>
-<div id="tables" class="section level1">
-<h1 class="hasAnchor">
-<a href="#tables" class="anchor"></a>Tables</h1>
+</div>
+<div id="tables" class="section level2">
+<h2 class="hasAnchor">
+<a href="#tables" class="anchor"></a>Tables</h2>
 <p>I want a long table. I tried to use following but got error.</p>
 <p>Below is my current .r.yaml - name: irrtable title: Interrater Reliability type: Table rows: 1 columns: - name: method title: ‘Method’ type: text - name: subjects title: ‘Subjects’ type: integer - name: raters title: ‘Raters’ type: integer - name: peragree title: ‘Agreement %’ type: number - name: kappa title: ‘Kappa’ type: number - name: z title: ‘z’ type: number - name: p title: ‘p-value’ type: number format: zto,pvalue</p>
 <ul>
@@ -280,51 +291,51 @@
 </li>
 </ul>
 </div>
-<div id="plots" class="section level1">
-<h1 class="hasAnchor">
-<a href="#plots" class="anchor"></a>Plots</h1>
-</div>
-<div id="build-folder" class="section level1">
-<h1 class="hasAnchor">
-<a href="#build-folder" class="anchor"></a><code>build</code> folder</h1>
-<div id="js-folder" class="section level2">
+<div id="plots" class="section level2">
 <h2 class="hasAnchor">
-<a href="#js-folder" class="anchor"></a><code>js</code> folder</h2>
-<div id="event-js" class="section level3">
+<a href="#plots" class="anchor"></a>Plots</h2>
+</div>
+<div id="build-folder" class="section level2">
+<h2 class="hasAnchor">
+<a href="#build-folder" class="anchor"></a><code>build</code> folder</h2>
+<div id="js-folder" class="section level3">
 <h3 class="hasAnchor">
-<a href="#event-js" class="anchor"></a>event.js</h3>
+<a href="#js-folder" class="anchor"></a><code>js</code> folder</h3>
+<div id="event-js" class="section level4">
+<h4 class="hasAnchor">
+<a href="#event-js" class="anchor"></a>event.js</h4>
 </div>
 </div>
-<div id="r3-6-3-macos" class="section level2">
+<div id="r3-6-3-macos" class="section level3">
+<h3 class="hasAnchor">
+<a href="#r3-6-3-macos" class="anchor"></a>R3.6.3-macos</h3>
+</div>
+</div>
+<div id="installing" class="section level2">
 <h2 class="hasAnchor">
-<a href="#r3-6-3-macos" class="anchor"></a>R3.6.3-macos</h2>
-</div>
-</div>
-<div id="installing" class="section level1">
-<h1 class="hasAnchor">
-<a href="#installing" class="anchor"></a>Installing</h1>
-</div>
-<div id="jmvtoolsinstall" class="section level1">
-<h1 class="hasAnchor">
+<a href="#installing" class="anchor"></a>Installing</h2>
+<div id="jmvtoolsinstall" class="section level3">
+<h3 class="hasAnchor">
 <a href="#jmvtoolsinstall" class="anchor"></a><code>jmvtools::install</code>
-</h1>
+</h3>
 </div>
-<div id="devtoolsinstall" class="section level1">
-<h1 class="hasAnchor">
+<div id="devtoolsinstall" class="section level3">
+<h3 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
-</h1>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+</h3>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 </div>
-<div id="general" class="section level1">
-<h1 class="hasAnchor">
-<a href="#general" class="anchor"></a>General</h1>
-<div id="code-search-in-github" class="section level2">
+</div>
+<div id="other-tips" class="section level2">
 <h2 class="hasAnchor">
-<a href="#code-search-in-github" class="anchor"></a>Code Search in GitHub</h2>
+<a href="#other-tips" class="anchor"></a>Other Tips</h2>
+<div id="code-search-in-github" class="section level3">
+<h3 class="hasAnchor">
+<a href="#code-search-in-github" class="anchor"></a>Code Search in GitHub</h3>
 <p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <pre><code>select repo:jamovi/jmv filename:.b.R language:R</code></pre>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span>(<span class="st">"https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml"</span>)
+<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span>(<span class="st">"https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml"</span>)
 
 <span class="no">jamovi_library_names</span> <span class="kw">&lt;-</span> <span class="kw pkg">stringr</span><span class="kw ns">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract</a></span>(
   <span class="kw">string</span> <span class="kw">=</span> <span class="no">jamovi_library_names</span>,
@@ -359,51 +370,51 @@
                         <span class="st">"&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l="</span>)
 
 <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="no">github_search</span>)
-<span class="co">#&gt; https://github.com/search?q=type: Level+repo%3Ajamovi%2Fjmv+repo%3Araviselker%2Fscatr+repo%3Ajonathon-love%2FRj+repo%3Aricharddmorey%2Fjpower+repo%3Agamlj%2Fgamlj+repo%3Ajamovi-amm%2Fjamm+repo%3Ajonathon-love%2Fjsq+repo%3Ajonathon-love%2Fjsq+repo%3Araviselker%2Fmedmod+repo%3Araviselker%2Fsurveymv+repo%3Akylehamilton%2FMAJOR+repo%3Ajamovi%2Fwalrus+repo%3ALakens%2FTOSTER+repo%3Ajonathon-love%2Fdeathwatch+repo%3Adustinfife%2Fflexplot+repo%3Ajonathon-love%2Fmoretests+repo%3AMrihs%2FdistrACTION+repo%3Adavidfoxcroft%2Flsj-data+repo%3Ajamovi%2Fr-datasets+repo%3Arivkamdevries%2FStatkat+repo%3Asbalci%2FClinicoPath+repo%3Alucasjfriesen%2FjamoviPsychoPDA+repo%3Ajonathon-love%2Fblandr+repo%3Ajamovi%2FjmvbaseR+repo%3Araviselker%2Fjmvarcade+repo%3Asjentsch%2FPartialProximity+repo%3Arcalinjageman%2Fesci&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=</span></pre></body></html></div>
+<span class="co">#&gt; https://github.com/search?q=type: Level+repo%3Ajamovi%2Fjmv+repo%3Araviselker%2Fscatr+repo%3Ajonathon-love%2FRj+repo%3Aricharddmorey%2Fjpower+repo%3Agamlj%2Fgamlj+repo%3Ajamovi-amm%2Fjamm+repo%3Ajonathon-love%2Fjsq+repo%3Ajonathon-love%2Fjsq+repo%3Araviselker%2Fmedmod+repo%3Arcalinjageman%2Fesci+repo%3Araviselker%2Fsurveymv+repo%3Akylehamilton%2FMAJOR+repo%3Ajamovi%2Fwalrus+repo%3ALakens%2FTOSTER+repo%3Ajonathon-love%2Fdeathwatch+repo%3Adustinfife%2Fflexplot+repo%3Ajonathon-love%2Fmoretests+repo%3AMrihs%2FdistrACTION+repo%3Adavidfoxcroft%2Flsj-data+repo%3Ajamovi%2Fr-datasets+repo%3Arivkamdevries%2FStatkat+repo%3Asbalci%2FClinicoPath+repo%3Alucasjfriesen%2FjamoviPsychoPDA+repo%3Ajonathon-love%2Fblandr+repo%3Ajamovi%2FjmvbaseR+repo%3Araviselker%2Fjmvarcade+repo%3Asjentsch%2FPartialProximity&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=</span></pre></body></html></div>
 </div>
-<div id="library-development-status" class="section level2">
-<h2 class="hasAnchor">
-<a href="#library-development-status" class="anchor"></a>Library Development Status</h2>
+<div id="library-development-status" class="section level3">
+<h3 class="hasAnchor">
+<a href="#library-development-status" class="anchor"></a>Library Development Status</h3>
 <p><a href="https://ci.appveyor.com/project/jonathon-love/jamovi-library/history" class="uri">https://ci.appveyor.com/project/jonathon-love/jamovi-library/history</a></p>
 </div>
-<div id="yaml-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#yaml-1" class="anchor"></a>YAML</h2>
+<div id="yaml-1" class="section level3">
+<h3 class="hasAnchor">
+<a href="#yaml-1" class="anchor"></a>YAML</h3>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/cdLNKUoMc6c" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 </div>
-<div id="rstudio-options" class="section level2">
-<h2 class="hasAnchor">
-<a href="#rstudio-options" class="anchor"></a>RStudio options</h2>
-</div>
-<div id="gitignore" class="section level2">
-<h2 class="hasAnchor">
-<a href="#gitignore" class="anchor"></a>.gitignore</h2>
+<div id="rstudio-options" class="section level3">
+<h3 class="hasAnchor">
+<a href="#rstudio-options" class="anchor"></a>RStudio options</h3>
+<div id="gitignore" class="section level4">
+<h4 class="hasAnchor">
+<a href="#gitignore" class="anchor"></a>.gitignore</h4>
 <p>add following to .gitignore file</p>
 <pre><code># jamovi
 /build/
 /build-*/
 *.jmo</code></pre>
 </div>
-<div id="r-version" class="section level2">
-<h2 class="hasAnchor">
-<a href="#r-version" class="anchor"></a>R version</h2>
+</div>
+<div id="r-version" class="section level3">
+<h3 class="hasAnchor">
+<a href="#r-version" class="anchor"></a>R version</h3>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
 <p>Use: <strong>R 3.6.3</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.3.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.3.pkg</a></p>
 <p>Use packages from mran:</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
+<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
                   <span class="st">"https://cran.microsoft.com/snapshot/2020-05-01/"</span>
                   )
 )</pre></body></html></div>
 </div>
-<div id="electron" class="section level2">
-<h2 class="hasAnchor">
-<a href="#electron" class="anchor"></a>Electron</h2>
+<div id="electron" class="section level3">
+<h3 class="hasAnchor">
+<a href="#electron" class="anchor"></a>Electron</h3>
 <p>jamovi is electron based. See R, shiny, and electron based application development here: <a href="https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron">Deploying a Shiny app as a desktop application with Electron</a></p>
 </div>
-<div id="project-structure" class="section level2">
-<h2 class="hasAnchor">
-<a href="#project-structure" class="anchor"></a>Project Structure</h2>
+<div id="project-structure" class="section level3">
+<h3 class="hasAnchor">
+<a href="#project-structure" class="anchor"></a>Project Structure</h3>
 <p><a href="https://dev.jamovi.org/info_project-structure.html" class="uri">https://dev.jamovi.org/info_project-structure.html</a></p>
 <p><a href="https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251" class="uri">https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251</a></p>
 <blockquote>
@@ -411,12 +422,13 @@
 </blockquote>
 </div>
 </div>
-<div id="other-codes" class="section level1">
-<h1 class="hasAnchor">
-<a href="#other-codes" class="anchor"></a>Other Codes</h1>
-<div id="datasets" class="section level2">
+<div id="other-codes" class="section level2">
 <h2 class="hasAnchor">
-<a href="#datasets" class="anchor"></a>Datasets</h2>
+<a href="#other-codes" class="anchor"></a>Other Codes</h2>
+</div>
+<div id="add-datasets" class="section level2">
+<h2 class="hasAnchor">
+<a href="#add-datasets" class="anchor"></a>Add Datasets</h2>
 <pre><code>make a data folder (same as with an R package), and then you put entries in your 0000.yaml file:
 https://github.com/gamlj/gamlj/blob/master/jamovi/0000.yaml#L47-L108
 jamovi/0000.yaml:47-108
@@ -426,85 +438,498 @@ datasets:
     description: Training hours
     tags:</code></pre>
 <p>.omv and .csv allowed. excel is also allowed but user does not see if it is csv or excel file.</p>
+<!-- ## Error messages -->
+<!-- data <- data.frame(outcome=c(1,0,0,1,NA,1)) -->
+<!-- data <- na.omit(data) -->
+<!-- if ( ! is.numeric(data$outcome) || any(data$outcome != 0 & data$outcome != 1)) -->
+<!--   stop('Outcome variable must only contains 1s and 0s') -->
+<!-- it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up. -->
+<!-- part of our philosophy is that people shouldn't have to set their data up if they can't be bothered ... because with large data sets it can take a lot of time. so i'd encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() ... more on our data philosophy here: https://dev.jamovi.org/tuts0202-handling-data.html -->
+<!-- https://youtu.be/oWZrrWc6e74 -->
+<!-- in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent. -->
+<!-- also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there. -->
+<!-- visible: (optionName) -->
+<!-- https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416 -->
+<!-- jamovi/ttestis.r.yaml:408-416 -->
+<!--             - name: qq -->
+<!--               type: Image -->
+<!--               description: Q-Q plot -->
+<!--               width: 350 -->
+<!--               height: 300 -->
+<!-- is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox? -->
+<!-- I tried to get info from a self$options$var  via lubridate::is.Date  and is.na.POSIXlt but it did not work -->
+<!-- hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack -->
+<!-- Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and  people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around. -->
+<!-- learn YAML syntax -->
+<!-- it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. -->
+<!-- you can take a look at jmv for examples: -->
+<!-- https://github.com/jamovi/jmv/tree/master/jamovi -->
+<!-- I don't think we've got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you'll find there's not that many parameter names. -->
+<!-- as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over -->
+<!-- Hi, there are scarce sources for pairwise chi-square tests. I have found  rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test() -->
+<!-- but that package has been removed from CRAN. Would you consider implementing this feature? -->
+<!-- I also thought to add these functions in a module, but I want to ask your policy about removed packages as well. -->
+<!-- 4 replies -->
+<!-- jonathon:whale2:  18 days ago -->
+<!-- provided the module can be built with an entry in REMOTES, we don’t care if it’s not on CRAN -->
+<!-- jonathon:whale2:  18 days ago -->
+<!-- … but you’re obviously taking a risk using something which isn’t maintained -->
+<!-- Serdar Balci  18 days ago -->
+<!-- Thanks. Maybe just copying that function with appropriate reference may solve maintenance issue. I will think about it. -->
+<!-- jonathon:whale2:  18 days ago -->
+<!-- oh yup -->
+<!-- --- -->
+<!-- I have a question. I want to user to enter cut points in a box and then evaluate it as a vector. -->
+<!-- the function is this: -->
+<!-- summary(km_fit, times = c(12,36,60) -->
+<!-- I want user to define times vector. -->
+<!-- I have tried the following: -->
+<!-- utimes <- jmvcore::decomposeTerms(self$options$cutp) -->
+<!-- utimes <- as.vector(utimes) -->
+<!-- summary(km_fit, times = utimes -->
+<!-- a.yaml is as follows: -->
+<!--     - name: cutp -->
+<!--       title: Define at least two cutpoints (in months) for survival table -->
+<!--       type: String -->
+<!--       default: '12, 36, 60' -->
+<!-- Would you please guide me to convert input into a vector. (edited) -->
+<!-- 3 replies -->
+<!-- Serdar Balci  13 hours ago -->
+<!-- I think this seems to work: -->
+<!-- utimes <- self$options$cutp -->
+<!-- utimes <- strsplit(utimes, ",") -->
+<!-- utimes <- purrr::reduce(utimes, as.vector) -->
+<!-- utimes <- as.numeric(utimes) -->
+<!-- (edited) -->
+<!-- jonathon:whale2:  5 hours ago -->
+<!-- yup, this will do it too: -->
+<!-- as.numeric(strsplit(utimes, ',')[[1]]) -->
+<!-- (it's better if you can avoid using purrr, because it's not really necessary, and you're better off reducing the amount of dependencies you use) -->
+<!-- Serdar Balci  5 hours ago -->
+<!-- thank you. :+1: -->
+<!-- --- -->
+<!-- so wrt width/height, you can set that in the .r.yaml like so: -->
+<!-- https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49 -->
+<!-- it’s possible to do it programmatically, with … image$setSize() -->
+<!-- --- -->
+<!-- ``` -->
+<!-- Serdar Balci  4:48 PM -->
+<!--  I think I am getting familiar with the codes :) -->
+<!-- QuickTime Movie -->
+<!-- JamoviModule.mov -->
+<!-- 4 MB QuickTime Movie— Click to download -->
+<!-- ``` -->
+<!-- ``` -->
+<!-- Serdar Balci Nov 29th, 2019 at 12:39 PM -->
+<!-- Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo -->
+<!-- 4 replies -->
+<!-- jonathon:whale2:  3 months ago -->
+<!-- It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not) -->
+<!-- jonathon:whale2:  3 months ago -->
+<!-- If there's native dependencies, then the module needs to be built separately for each os. -->
+<!-- jonathon:whale2:  3 months ago -->
+<!-- But I can take care of building it for different oses -->
+<!-- Serdar Balci  3 months ago -->
+<!-- Oh, I see. Thank you :slightly_smiling_face: -->
+<!-- ``` -->
+<!-- --- -->
+<!-- # Develop -->
+<!-- ```{r library, eval=FALSE, include=FALSE} -->
+<!-- # install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org')) -->
+<!-- # jmvtools::check("C://Program Files//jamovi//bin") -->
+<!-- # jmvtools::install(home = "C://Program Files//jamovi//bin") -->
+<!-- # -->
+<!-- # devtools::build(path = "C:\\ClinicoPathOutput") -->
+<!-- # .libPaths(new = "C:\\ClinicoPathLibrary") -->
+<!-- # devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean')) -->
+<!-- Sys.setenv(TZ="Europe/Istanbul") -->
+<!-- library("jmvtools") -->
+<!-- ``` -->
+<!-- ```{r check, eval=FALSE, include=FALSE} -->
+<!-- jmvtools::check() -->
+<!-- # rhub::check_on_macos() -->
+<!-- # rhub::check_for_cran() -->
+<!-- # codemetar::write_codemeta() -->
+<!-- devtools::check() -->
+<!-- ``` -->
+<!-- ```{r pkgdown build, eval=FALSE, include=FALSE} -->
+<!-- rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE) -->
+<!-- devtools::document() -->
+<!-- pkgdown::build_site() -->
+<!-- ``` -->
+<!-- ```{r git force push, eval=FALSE, include=FALSE} -->
+<!-- # gitUpdateCommitPush -->
+<!-- CommitMessage <- paste("updated on ", Sys.time(), sep = "") -->
+<!-- wd <- getwd() -->
+<!-- gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "") -->
+<!-- # gitCommand <- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "") -->
+<!-- system(command = gitCommand, intern = TRUE) -->
+<!-- ``` -->
+<!-- ```{r add analysis, eval=FALSE, include=FALSE} -->
+<!-- # jmvtools::install() -->
+<!-- # -->
+<!-- # jmvtools::create('SuperAwesome') -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test') -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='survival', title='survival') -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='correlation', title='correlation') -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='tableone', title='TableOne') -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='crosstable', title='CrossTable') -->
+<!-- # -->
+<!-- # -->
+<!-- # jmvtools::addAnalysis(name='writesummary', title='WriteSummary') -->
+<!-- # jmvtools::addAnalysis(name='finalfit', title='FinalFit') -->
+<!-- # jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival') -->
+<!-- # jmvtools::addAnalysis(name='report', title='Report General Features') -->
+<!-- # jmvtools::addAnalysis(name='frequencies', title='Frequencies') -->
+<!-- # jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot') -->
+<!-- # jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2') -->
+<!-- # jmvtools::addAnalysis(name='scat2', title='scat2') -->
+<!-- # jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator') -->
+<!-- # jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability') -->
+<!-- # jmvtools::addAnalysis(name='cluster', title='Cluster Analysis') -->
+<!-- # jmvtools::addAnalysis(name='tree', title='Decision Tree') -->
+<!-- ``` -->
+<!-- ```{r devtools install, eval=FALSE, include=FALSE} -->
+<!-- devtools::install() -->
+<!-- ``` -->
+<!-- ```{r jmvtools install, eval=FALSE, include=FALSE} -->
+<!-- # jmvtools::check() -->
+<!-- jmvtools::install() -->
+<!-- ``` -->
+<!-- ```{r construct, eval=FALSE, include=FALSE} -->
+<!-- formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D") -->
+<!-- jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E") -->
+<!-- jmvcore::constructFormula(terms = list("A", "B", "C")) -->
+<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
+<!-- unlist(vars) -->
+<!-- cformula <- jmvcore::composeTerm(components = formula) -->
+<!-- jmvcore::composeTerm("A") -->
+<!-- jmvcore::composeTerm(components = c("A", "B", "C")) -->
+<!-- jmvcore::decomposeTerm(term = c("A", "B", "C")) -->
+<!-- jmvcore::decomposeTerm(term = formula) -->
+<!-- jmvcore::decomposeTerm(term = cformula) -->
+<!-- composeTerm <- jmvcore::composeTerm(components = c("A", "B", "C")) -->
+<!-- jmvcore::decomposeTerm(term = composeTerm) -->
+<!-- ``` -->
+<!-- --- -->
+<!-- # Example -->
+<!-- ```{r read data, eval=FALSE, include=FALSE} -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- ``` -->
+<!-- ```{r writesummary, eval=FALSE, include=FALSE} -->
+<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- # library("ClinicoPath") -->
+<!-- deneme$Age <- as.numeric(as.character(deneme$Age)) -->
+<!-- ClinicoPath::writesummary(data = deneme, vars = Age) -->
+<!-- ggstatsplot::normality_message(deneme$Age, "Age") -->
+<!-- ClinicoPath::writesummary( -->
+<!--     data = deneme, -->
+<!--     vars = Age) -->
+<!-- ``` -->
+<!-- ```{r finalfit, eval=FALSE, include=FALSE} -->
+<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
+<!-- library(dplyr) -->
+<!-- library(survival) -->
+<!-- library(finalfit) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- ClinicoPath::finalfit(data = deneme, -->
+<!--                       explanatory = Sex, -->
+<!--                       outcome = Outcome, -->
+<!--                       overalltime = OverallTime) -->
+<!-- ``` -->
+<!-- ```{r decision, eval=FALSE, include=FALSE} -->
+<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- ClinicoPath::decision( -->
+<!--     data = deneme, -->
+<!--     gold = Outcome, -->
+<!--     goldPositive = "1", -->
+<!--     newtest = Smoker, -->
+<!--     testPositive = "TRUE") -->
+<!-- ClinicoPath::decision( -->
+<!--     data = deneme, -->
+<!--     gold = LVI, -->
+<!--     goldPositive = "Present", -->
+<!--     newtest = PNI, -->
+<!--     testPositive = "Present") -->
+<!-- ``` -->
+<!-- ```{r eval=FALSE, include=FALSE} -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- ggstatsplot::ggbetweenstats(data = deneme, -->
+<!--                             x = LVI, -->
+<!--                             y = Age) -->
+<!-- ``` -->
+<!-- ```{r statsplot, eval=FALSE, include=FALSE} -->
+<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- ClinicoPath::statsplot( -->
+<!--     data = deneme, -->
+<!--     dep = Age, -->
+<!--     group = Smoker) -->
+<!-- ``` -->
+<!-- ```{r decision 2, eval=FALSE, include=FALSE} -->
+<!-- mytable <- table(deneme$Outcome, deneme$Smoker) -->
+<!-- caret::confusionMatrix(mytable) -->
+<!-- confusionMatrix(pred, truth) -->
+<!-- confusionMatrix(xtab, prevalence = 0.25) -->
+<!-- levels(deneme$Outcome) -->
+<!-- mytable[1,2] -->
+<!-- d <- "0" -->
+<!-- mytable[d, "FALSE"] -->
+<!-- mytable[[0]] -->
+<!-- ``` -->
+<!-- ```{r construct formula, eval=FALSE, include=FALSE} -->
+<!-- formula <- jmvcore::constructFormula(terms = c("A", "B", "C")) -->
+<!-- jmvcore::constructFormula(terms = list("A", "B", "C")) -->
+<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
+<!-- vars <- jmvcore::decomposeTerms(vars) -->
+<!-- vars <- unlist(vars) -->
+<!-- formula <- as.formula(formula) -->
+<!-- my_group <- "lvi" -->
+<!-- my_dep <- "age" -->
+<!-- formula <- paste0('x = ', group, 'y = ', dep) -->
+<!-- myformula <- as.formula(formula) -->
+<!-- myformula <- glueformula::gf({my_group}, {my_dep}) -->
+<!-- myformula <- glue::glue( 'x = ' , {my_group}, ', y = ' , {my_dep}) -->
+<!-- myformula <- jmvcore::composeTerm(myformula) -->
+<!-- ``` -->
+<!-- ```{r, eval=FALSE, include=FALSE} -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- library(survival) -->
+<!-- km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme) -->
+<!-- library(dplyr) -->
+<!-- km_fit_median_df <- summary(km_fit) -->
+<!-- km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>% -->
+<!--                 janitor::clean_names(dat = ., case = "snake") %>% -->
+<!--                 tibble::rownames_to_column(.data = ., var = "LVI") -->
+<!-- ``` -->
+<!-- ```{r construct formula 2, eval=FALSE, include=FALSE} -->
+<!-- library(dplyr) -->
+<!-- library(survival) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- myoveralltime <- deneme$OverallTime -->
+<!-- myoutcome <- deneme$Outcome -->
+<!-- myexplanatory <- deneme$LVI -->
+<!-- class(myoveralltime) -->
+<!-- class(myoutcome) -->
+<!-- typeof(myexplanatory) -->
+<!-- is.ordered(myexplanatory) -->
+<!-- formula2 <- jmvcore::constructFormula(terms = "myexplanatory") -->
+<!-- # formula2 <- jmvcore::decomposeFormula(formula = formula2) -->
+<!-- # formula2 <- paste("", formula2) -->
+<!-- # formula2 <- as.formula(formula2) -->
+<!-- formula2 <- jmvcore::composeTerm(formula2) -->
+<!-- formulaL <- jmvcore::constructFormula(terms = "myoveralltime") -->
+<!-- # formulaL <- jmvcore::decomposeFormula(formula = formulaL) -->
+<!-- formulaR <- jmvcore::constructFormula(terms = "myoutcome") -->
+<!-- # formulaR <- jmvcore::decomposeFormula(formula = formulaR) -->
+<!-- formula <- paste("Surv(", formulaL, ",", formulaR, ")") -->
+<!-- # formula <- jmvcore::composeTerm(formula) -->
+<!-- # formula <- as.formula(formula) -->
+<!-- # jmvcore::constructFormula(terms = c(formula, formula2)) -->
+<!-- deneme %>% -->
+<!--   finalfit::finalfit(formula, formula2) -> tUni -->
+<!-- tUni -->
+<!-- ``` -->
+<!-- ```{r eval=FALSE, include=FALSE} -->
+<!-- library(dplyr) -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- results <- deneme %>% -->
+<!--                 ggstatsplot::ggbetweenstats(LVI, Age) -->
+<!-- results -->
+<!-- mydep <- deneme$Age -->
+<!-- mygroup <- deneme$LVI -->
+<!-- mygroup <- jmvcore::constructFormula(terms = "mygroup") -->
+<!-- mygroup <- jmvcore::composeTerm(mygroup) -->
+<!-- mydep <- jmvcore::constructFormula(terms = "mydep") -->
+<!-- mydep <- jmvcore::composeTerm(mydep) -->
+<!-- # not working -->
+<!-- # eval(mygroup) -->
+<!-- # rlang::eval_tidy(mygroup) -->
+<!-- # !!mygroup -->
+<!-- # {{mygroup}} -->
+<!-- # sym(mygroup) -->
+<!-- # quote(mygroup) -->
+<!-- # enexpr(mygroup) -->
+<!-- mygroup <- jmvcore::constructFormula(terms = "mygroup") -->
+<!-- mydep <- jmvcore::constructFormula(terms = "mydep") -->
+<!-- formula1 <- paste(mydep) -->
+<!-- formula1 <- jmvcore::composeTerm(formula1) -->
+<!-- mygroup <- paste(mygroup) -->
+<!-- mygroup <- jmvcore::composeTerm(mygroup) -->
+<!-- mydep <- deneme$Age -->
+<!-- mygroup <- deneme$LVI -->
+<!-- mydep <- jmvcore::resolveQuo(jmvcore::enquo(mydep)) -->
+<!-- mygroup <- jmvcore::resolveQuo(jmvcore::enquo(mygroup)) -->
+<!-- mydata2 <- data.frame(mygroup=mygroup, mydep=mydep) -->
+<!-- results <- mydata2 %>% -->
+<!--                 ggstatsplot::ggbetweenstats( -->
+<!-- x = mygroup, y = mydep  ) -->
+<!-- results -->
+<!-- myformula <- glue::glue('x = ', {mygroup}, ', y = ' , {mydep}) -->
+<!-- myformula <- jmvcore::composeTerm(myformula) -->
+<!-- myformula <- as.formula(myformula) -->
+<!-- mydep2 <- quote(mydep) -->
+<!-- mygroup2 <- quote(mygroup) -->
+<!-- results <- deneme %>% -->
+<!--                 ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2) -->
+<!-- results -->
+<!-- ``` -->
+<!-- ```{r construct formula 3, eval=FALSE, include=FALSE} -->
+<!-- formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome")) -->
+<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
+<!-- explanatory <- jmvcore::constructFormula(terms = c("explanatory")) -->
+<!-- explanatory <- jmvcore::decomposeFormula(formula = explanatory) -->
+<!-- explanatory <- unlist(explanatory) -->
+<!-- myformula <- paste("Surv(", vars[1], ", ", vars[2], ")") -->
+<!-- deneme %>% -->
+<!-- finalfit::finalfit(myformula, explanatory) -> tUni -->
+<!-- ``` -->
+<!-- ```{r table tangram, eval=FALSE, include=FALSE} -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- table3 <- -->
+<!--   tangram::html5( -->
+<!--     tangram::tangram( -->
+<!--       "Death ~ LVI + PNI + Age", deneme), -->
+<!--     fragment=TRUE, -->
+<!--     inline="nejm.css", -->
+<!--     caption = "HTML5 Table NEJM Style", -->
+<!--     id="tbl3") -->
+<!-- table3 -->
+<!-- mydep <- deneme$Age -->
+<!-- mygroup <- deneme$Death -->
+<!-- formulaR <- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age")) -->
+<!-- formulaL <- jmvcore::constructFormula(terms = "Death") -->
+<!-- formula <- paste(formulaL, '~', formulaR) -->
+<!-- formula <- as.formula(formula) -->
+<!-- table <- tangram::html5( -->
+<!--     tangram::tangram(formula, deneme -->
+<!--                      )) -->
+<!-- table -->
+<!-- ``` -->
+<!-- --- -->
+<!-- ## arsenal -->
+<!-- ```{r arsenal, results='asis', eval=FALSE, include=FALSE} -->
+<!-- tab1 <- arsenal::tableby(~ Age + Sex, data = deneme) -->
+<!-- results <- summary(tab1) -->
+<!-- # results$object -->
+<!-- # results$control -->
+<!-- # results$totals -->
+<!-- # results$hasStrata -->
+<!-- # results$text -->
+<!-- # results$pfootnote -->
+<!-- # results$term.name -->
+<!-- # -->
+<!-- # tab1$Call -->
+<!-- # -->
+<!-- # tab1$control -->
+<!-- tab1$tables # this is where results lie -->
+<!-- ``` -->
+<!-- ## define survival time -->
+<!-- ```{r define survival time, eval=FALSE, include=FALSE} -->
+<!-- mydata$int <- lubridate::interval( -->
+<!--   lubridate::ymd(mydata$SurgeryDate), -->
+<!--   lubridate::ymd(mydata$LastFollowUpDate) -->
+<!--   ) -->
+<!-- mydata$OverallTime <- lubridate::time_length(mydata$int, "month") -->
+<!-- mydata$OverallTime <- round(mydata$OverallTime, digits = 1) -->
+<!-- ``` -->
+<!-- ## Multivariate Analysis Survival -->
+<!-- ```{r Multivariate Analysis, eval=FALSE, include=FALSE} -->
+<!-- library(finalfit) -->
+<!-- library(survival) -->
+<!-- explanatoryMultivariate <- explanatoryKM -->
+<!-- dependentMultivariate <- dependentKM -->
+<!-- mydata %>% -->
+<!--   finalfit(dependentMultivariate, explanatoryMultivariate) -> tMultivariate -->
+<!-- knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r")) -->
+<!-- ``` -->
+<!-- --- -->
+<!-- ```{r, eval=FALSE, include=FALSE} -->
+<!-- # Find arguments in yaml -->
+<!-- list_of_yaml <- c( -->
+<!--     list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv", -->
+<!--                pattern = "\\.yaml$", -->
+<!--                full.names = TRUE, -->
+<!--                all.files = TRUE, -->
+<!--                include.dirs = TRUE, -->
+<!--                recursive = TRUE -->
+<!--     ) -->
+<!-- ) -->
+<!-- text_of_yaml_yml <- purrr::map( -->
+<!--     .x = list_of_yaml, -->
+<!--     .f = readLines -->
+<!-- ) -->
+<!-- text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml)) -->
+<!-- arglist <- -->
+<!--     stringr::str_extract( -->
+<!--         string = text_of_yaml_yml, -->
+<!--         pattern = -->
+<!--             "([[:alnum:]]*):" -->
+<!--     ) -->
+<!-- arglist <- arglist[!is.na(arglist)] -->
+<!-- arglist <- unique(arglist) -->
+<!-- arglist <- gsub(pattern = ":", # remove some characters -->
+<!--                     replacement = "", -->
+<!--                     x = arglist) -->
+<!-- arglist <- trimws(arglist) # remove whitespace -->
+<!-- cat(arglist, sep = "\n") -->
+<!-- ``` -->
+<!-- <!-- # -->
+<p>–&gt; <!-- <!-- #                 # tUni_df_descr <- paste0("When ", --> –&gt; <!-- <!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --> –&gt; <!-- <!-- #                 #                         " is ", --> –&gt; <!-- <!-- #                 #                         tUni_df$x[2], --> –&gt; <!-- <!-- #                 #                         ", there is ", --> –&gt; <!-- <!-- #                 #                         tUni_df$hr_univariable[2], --> –&gt; <!-- <!-- #                 #                         " times risk than ", --> –&gt; <!-- <!-- #                 #                         "when ", --> –&gt; <!-- <!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --> –&gt; <!-- <!-- #                 #                         " is ", --> –&gt; <!-- <!-- #                 #                         tUni_df$x[1], --> –&gt; <!-- <!-- #                 #                         "." --> –&gt; <!-- <!-- #                 # ) --> –&gt; <!-- <!-- # --> –&gt; <!-- <!-- #                 # results5 <- tUni_df_descr --> –&gt;</p>
+<!-- ```{r, eval=FALSE, include=FALSE} -->
+<!-- boot::melanoma -->
+<!-- rio::export(x = boot::melanoma, file = "data/melanoma.csv") -->
+<!-- survival::colon -->
+<!-- rio::export(x = survival::colon, file = "data/colon.csv") -->
+<!-- # BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data" -->
+<!-- # -->
+<!-- # BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names" -->
+<!-- # -->
+<!-- # BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE, -->
+<!-- #                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") ) -->
+<!-- library(mlbench) -->
+<!-- data("BreastCancer") -->
+<!-- BreastCancer -->
+<!-- rio::export(x = BreastCancer, file = "data/BreastCancer.csv") -->
+<!-- ``` -->
+<!-- ```{r pairwise, eval=FALSE, include=FALSE} -->
+<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+<!-- # names(deneme) -->
+<!-- mypairwise <-  survminer::pairwise_survdiff( -->
+<!--                             formula = survival::Surv(OverallTime, Outcome) ~ TStage, -->
+<!--                             data = deneme, -->
+<!--                             p.adjust.method = "BH" -->
+<!--                             ) -->
+<!-- mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>% -->
+<!--   tibble::rownames_to_column() -->
+<!-- mypairwise2 %>% -->
+<!--   tidyr::pivot_longer(cols = -rowname) %>% -->
+<!--   dplyr::filter(complete.cases(.)) %>% -->
+<!--   dplyr::mutate(description = -->
+<!--                             glue::glue( -->
+<!--                                 "The comparison between {rowname} and {name} has a p-value of {round(value, 2)}." -->
+<!--                             ) -->
+<!--                     ) %>% -->
+<!--                     dplyr::select(description) %>% -->
+<!--                     dplyr::pull() -> mypairwisedescription -->
+<!-- mypairwisedescription <- unlist(mypairwisedescription) -->
+<!-- mypairwisedescription <- c( -->
+<!-- "In the pairwise comparison of", -->
+<!-- mypairwisedescription) -->
+<!-- ``` -->
 </div>
-</div>
-<div id="here" class="section level1">
-<h1 class="hasAnchor">
-<a href="#here" class="anchor"></a>Here</h1>
-<div id="error-messages" class="section level2">
+<div id="diagrams" class="section level2">
 <h2 class="hasAnchor">
-<a href="#error-messages" class="anchor"></a>Error messages</h2>
-<p>data &lt;- data.frame(outcome=c(1,0,0,1,NA,1)) data &lt;- na.omit(data) if ( ! is.numeric(data<span class="math inline">\(outcome) || any(data\)</span>outcome != 0 &amp; data$outcome != 1)) stop(‘Outcome variable must only contains 1s and 0s’)</p>
-<p>it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up.</p>
-<p>part of our philosophy is that people shouldn’t have to set their data up if they can’t be bothered … because with large data sets it can take a lot of time. so i’d encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() … more on our data philosophy here: <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
-<p><a href="https://youtu.be/oWZrrWc6e74" class="uri">https://youtu.be/oWZrrWc6e74</a></p>
-<p>in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent. also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there.</p>
-<p>visible: (optionName) <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416</a> jamovi/ttestis.r.yaml:408-416 - name: qq type: Image description: Q-Q plot width: 350 height: 300</p>
-<p>is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox? I tried to get info from a self<span class="math inline">\(options\)</span>var via lubridate::is.Date and is.na.POSIXlt but it did not work hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack</p>
-<p>Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around.</p>
-<p>learn YAML syntax</p>
-<p>it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. you can take a look at jmv for examples: <a href="https://github.com/jamovi/jmv/tree/master/jamovi" class="uri">https://github.com/jamovi/jmv/tree/master/jamovi</a></p>
-<p>I don’t think we’ve got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you’ll find there’s not that many parameter names.</p>
-<p>as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over</p>
-<p>Hi, there are scarce sources for pairwise chi-square tests. I have found rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test() but that package has been removed from CRAN. Would you consider implementing this feature? I also thought to add these functions in a module, but I want to ask your policy about removed packages as well. 4 replies</p>
-<p>jonathon:whale2: 18 days ago provided the module can be built with an entry in REMOTES, we don’t care if it’s not on CRAN</p>
-<p>jonathon:whale2: 18 days ago … but you’re obviously taking a risk using something which isn’t maintained</p>
-<p>Serdar Balci 18 days ago Thanks. Maybe just copying that function with appropriate reference may solve maintenance issue. I will think about it.</p>
-<p>jonathon:whale2: 18 days ago oh yup</p>
-<hr>
-<p>I have a question. I want to user to enter cut points in a box and then evaluate it as a vector. the function is this: summary(km_fit, times = c(12,36,60) I want user to define times vector. I have tried the following: utimes &lt;- jmvcore::decomposeTerms(self<span class="math inline">\(options\)</span>cutp) utimes &lt;- as.vector(utimes) summary(km_fit, times = utimes a.yaml is as follows: - name: cutp title: Define at least two cutpoints (in months) for survival table type: String default: ‘12, 36, 60’ Would you please guide me to convert input into a vector. (edited) 3 replies</p>
-<p>Serdar Balci 13 hours ago I think this seems to work: utimes &lt;- self<span class="math inline">\(options\)</span>cutp utimes &lt;- strsplit(utimes, “,”) utimes &lt;- purrr::reduce(utimes, as.vector) utimes &lt;- as.numeric(utimes) (edited)</p>
-<p>jonathon:whale2: 5 hours ago yup, this will do it too: as.numeric(strsplit(utimes, ‘,’)[[1]]) (it’s better if you can avoid using purrr, because it’s not really necessary, and you’re better off reducing the amount of dependencies you use)</p>
-<p>Serdar Balci 5 hours ago thank you. :+1:</p>
-<hr>
-<p>so wrt width/height, you can set that in the .r.yaml like so: <a href="https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49" class="uri">https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49</a> it’s possible to do it programmatically, with … image$setSize()</p>
-<hr>
-<pre><code>Serdar Balci  4:48 PM
- I think I am getting familiar with the codes :)
-QuickTime Movie
-JamoviModule.mov
-4 MB QuickTime Movie— Click to download</code></pre>
-<pre><code>Serdar Balci Nov 29th, 2019 at 12:39 PM
-Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo
-
-4 replies
-
-jonathon:whale2:  3 months ago
-It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not)
-
-jonathon:whale2:  3 months ago
-If there's native dependencies, then the module needs to be built separately for each os.
-
-jonathon:whale2:  3 months ago
-But I can take care of building it for different oses
-
-Serdar Balci  3 months ago
-Oh, I see. Thank you :slightly_smiling_face:</code></pre>
-<hr>
-</div>
-</div>
-<div id="develop" class="section level1">
-<h1 class="hasAnchor">
-<a href="#develop" class="anchor"></a>Develop</h1>
-<hr>
-</div>
-<div id="example" class="section level1">
-<h1 class="hasAnchor">
-<a href="#example" class="anchor"></a>Example</h1>
-<hr>
-<div id="arsenal" class="section level2">
-<h2 class="hasAnchor">
-<a href="#arsenal" class="anchor"></a>arsenal</h2>
-</div>
-<div id="define-survival-time" class="section level2">
-<h2 class="hasAnchor">
-<a href="#define-survival-time" class="anchor"></a>define survival time</h2>
-</div>
-<div id="multivariate-analysis-survival" class="section level2">
-<h2 class="hasAnchor">
-<a href="#multivariate-analysis-survival" class="anchor"></a>Multivariate Analysis Survival</h2>
-<hr>
-<!-- # --><!-- #                 # tUni_df_descr <- paste0("When ", --><!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --><!-- #                 #                         " is ", --><!-- #                 #                         tUni_df$x[2], --><!-- #                 #                         ", there is ", --><!-- #                 #                         tUni_df$hr_univariable[2], --><!-- #                 #                         " times risk than ", --><!-- #                 #                         "when ", --><!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --><!-- #                 #                         " is ", --><!-- #                 #                         tUni_df$x[1], --><!-- #                 #                         "." --><!-- #                 # ) --><!-- # --><!-- #                 # results5 <- tUni_df_descr -->
+<a href="#diagrams" class="anchor"></a>Diagrams</h2>
+<div id="htmlwidget-803b860f6894e094d5b8" style="width:700px;height:200px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-803b860f6894e094d5b8">{"x":{"diagram":"digraph markdown {\n\n  A -> B\n\n\n  }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
   </div>

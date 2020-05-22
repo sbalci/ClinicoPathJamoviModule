@@ -802,14 +802,14 @@ devtools::check()
 
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r description eval=FALSE, include=FALSE}
 # From CRAN
 # install.packages("attachment")
 # From github
 # remotes::install_github("ThinkR-open/attachment")
 
 # If you correctly called the package dependencies in the {roxygen2} skeleton, in your functions, in your Rmarkdown vignettes and in your tests, you only need to run attachment::att_to_description()just before devtools::check(). And that’s it, there is nothing else to remember !
-attachment::att_to_description()
+# attachment::att_to_description()
 
 ```
 
@@ -817,11 +817,25 @@ attachment::att_to_description()
 
 
 ```{r pkgdown build, include=FALSE}
-rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
 devtools::document()
 
+codemetar::write_codemeta()
+
+rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
+
+
+pkgdown::build_articles()
+# pkgdown::build_favicons()
+pkgdown::build_home()
+pkgdown::build_news()
+pkgdown::build_reference()
+# pkgdown::build_reference_index()
+# pkgdown::build_tutorials()
+
 pkgdown::build_site()
+
+
 ```
 
 
@@ -2168,6 +2182,11 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
                 #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
 ```
 
+
+
+
+
+
 ```{r update project for release}
 
 readyfunctions <- c(
@@ -2175,26 +2194,23 @@ readyfunctions <- c(
     # "^agreement",
     # "^competingsurvival",
     # "^correlation",
-    # "^crosstable",
+    "^crosstable",
     # "^decision",
     # "^decisioncalculator",
     # "^icccoeff",
     # "^multisurvival",
     # "^oddsratio",
     # "^pairchi2",
-    # "^reportcat",
+    "^reportcat",
     # "^roc",
-    # "^statsplot2",
-    # "^summarydata",
+    "^statsplot2",
+    "^summarydata",
     # "^survival",
-    # "^tableone"
+    "^tableone"
     # "^tree",
     # "^utils-pipe"
     # "^vartree"
 )
-
-
-
 
 
 readyfunctions <- paste0(readyfunctions, collapse = "|")
@@ -2211,6 +2227,13 @@ files_jamovi <-
         full.names = TRUE
     )
 
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
 file.copy(from = files_R,
           to = "~/ClinicoPath/R/",
           overwrite = TRUE)
@@ -2220,7 +2243,21 @@ file.copy(from = files_jamovi,
           to = "~/ClinicoPath/jamovi/",
           overwrite = TRUE)
 
+
+file.copy(from = files_data,
+          to = "~/ClinicoPath/data/",
+          overwrite = TRUE)
+
+file.copy(from = files_data,
+          to = "~/histopathRprojects/ClinicoPath/inst/extdata/",
+          overwrite = TRUE)
+
 ```
+
+
+
+
+
 
 ```{r decision}
 
