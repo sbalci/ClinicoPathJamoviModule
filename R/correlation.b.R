@@ -1,4 +1,4 @@
-#' Correlation Analysis
+#' @title Correlation Analysis
 #'
 #'
 #'

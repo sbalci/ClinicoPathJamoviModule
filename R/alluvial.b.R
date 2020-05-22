@@ -153,7 +153,28 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- jmvcore::select(self$data, c(varsName))
 
+            fill <- jmvcore::composeTerm(self$options$fill)
 
+
+
+            # verbose ----
+
+            verbose <- FALSE
+
+            if (isTRUE(verb)) verbose <- TRUE
+
+            # fill_by ----
+
+            jmvcore::composeTerm(self$options$fill)
+
+            self$options$fill
+
+
+            #bin
+
+            bin <- self$options$bin
+
+            if (bin = "default") bin <- 'c("LL", "ML", "M", "MH", "HH")'
 
             # Exclude NA ----
 
@@ -168,7 +189,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <-
                 easyalluvial::alluvial_wide( data = mydata,
                                              max_variables = 6,
-                                             fill_by = 'first_variable'
+                                             fill_by = fill,
+                                             verbose = verbose,
+                                             bin_labels = bin
                 )
 
 
@@ -183,15 +206,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Interactive ----
-
-            inter <- self$options$inter
-
-            if (inter) {
-                plot <-
-                    parcats::parcats(plot,
-                                     data_input = mydata)
-            }
+            # # Interactive ----
+            #
+            # inter <- self$options$inter
+            #
+            # if (inter) {
+            #     plot <-
+            #         parcats::parcats(plot,
+            #                          data_input = mydata)
+            # }
 
 
 

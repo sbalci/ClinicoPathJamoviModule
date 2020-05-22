@@ -1,4 +1,4 @@
-#' Variable Tree
+#' @title Variable Tree
 #'
 #'
 #'

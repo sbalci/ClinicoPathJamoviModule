@@ -1,10 +1,7 @@
-#' Interrater Reliability Analysis
+#' @title Interrater Reliability Analysis
 #' @return Table
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom irr kappa2
-#' @importFrom irr kappam.fleiss
-#' @importFrom irr agree
 #'
 
 

@@ -1,13 +1,10 @@
-#' Summary of Continuous Variables
+#' @title Summary of Continuous Variables
 #'
-
-
 #'
 #'
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom purrr map
 #'
 
 summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataClass",

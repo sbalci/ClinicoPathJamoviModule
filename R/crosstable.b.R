@@ -1,4 +1,4 @@
-#' Cross Table
+#' @title Cross Table
 #'
 #'
 #' @importFrom R6 R6Class

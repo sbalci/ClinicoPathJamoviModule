@@ -2,8 +2,16 @@
 % Please edit documentation in R/icccoeff.b.R
 \name{icccoeffClass}
 \alias{icccoeffClass}
-\title{Interclass Correlation Coefficient}
+\title{Interclass Correlation Coefficient
+
+Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}}
 \description{
+Interclass Correlation Coefficient
+
+Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
+
+Interclass Correlation Coefficient
+
 Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
 }
 \section{Super classes}{

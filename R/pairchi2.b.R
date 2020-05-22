@@ -1,4 +1,4 @@
-#' Pairwise Chi-Square Test
+#' @title Pairwise Chi-Square Test
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore

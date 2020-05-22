@@ -1,4 +1,4 @@
-#' Medical Decision Making
+#' @title Medical Decision Making
 #'
 #'
 #'
