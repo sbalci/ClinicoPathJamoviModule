@@ -160,6 +160,10 @@ https://osf.io/9szud/
 #### Graphs and Plots
 
 
+
+<img src="man/figures/jamovi-ClinicoPath-ggstatsplot-alluvial-plots.gif" align="center" width = 75% />
+
+
 <img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
 
 

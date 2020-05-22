@@ -54,6 +54,14 @@ uses #tangram package
 https://twitter.com/serdarbalci/status/1262691784574017536
 
 
+- You can make different plots based on variable type via #jamovi #ClinicoPath module. Using #rstats @jamovistats #ggstatsplot #ggalluvial #easyalluvial packages #pathology #pathologists #datavisualisation
+
+https://www.youtube.com/watch?v=m3uInetiC8w
+
+https://twitter.com/serdarbalci/status/1263191858454413312
+
+
+
 
 
 # ClinicoPath 0.0.1.0001
