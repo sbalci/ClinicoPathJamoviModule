@@ -220,6 +220,11 @@ https://osf.io/9szud/
 #### Odds Ratio Table and Plot 
 
 
+<img src="man/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width = 75% />
+
+
+
+
 
 #### Competing Survival
 
@@ -349,8 +354,9 @@ See https://github.com/ClinicoPath for forked packages.
 
 ---
 
-<a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow @serdarbalci</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy me a coffee</span></a>
+<a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow @serdarbalci</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
+
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy me a coffee</span></a>  
 
 https://paypal.me/serdarbalci
 
@@ -473,4 +479,9 @@ https://paypal.me/serdarbalci
 ![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fsbalci.github.io%2FClinicoPathJamoviModule%2F)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+
+
+## Videos
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 

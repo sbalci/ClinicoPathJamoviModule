@@ -1007,15 +1007,85 @@ usethis::use_data(histopathology)
 ```
 
 
+## force git
 
-```{r}
-data('histopathology')
-dat <- as.data.frame(histopathology)
-ClinicoPath::tableone(
-data = dat,
-vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-sty = "t2",
-excl = TRUE)
+```{r force git, eval=FALSE, include=FALSE}
+# gitUpdateCommitPush
+CommitMessage <- paste("updated on ", Sys.time(), sep = "")
+wd <- getwd()
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+system(command = gitCommand, intern = TRUE)
+
+```
+
+
+## update project for release
+
+```{r update project for release}
+
+readyfunctions <- c(
+    "refs",
+    # "^agreement",
+    # "^competingsurvival",
+    # "^correlation",
+    "^crosstable",
+    # "^decision",
+    # "^decisioncalculator",
+    # "^icccoeff",
+    "^multisurvival",
+    "^oddsratio",
+    # "^pairchi2",
+    "^reportcat",
+    # "^roc",
+    "^statsplot2",
+    "^summarydata",
+    "^survival",
+    "^tableone"
+    # "^tree",
+    # "^utils-pipe"
+    # "^vartree"
+)
+
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
+file.copy(from = files_R,
+          to = "~/ClinicoPath/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/ClinicoPath/jamovi/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_data,
+          to = "~/ClinicoPath/data/",
+          overwrite = TRUE)
+
+file.copy(from = files_data,
+          to = "~/histopathRprojects/ClinicoPath/inst/extdata/",
+          overwrite = TRUE)
+
 ```
 
 
@@ -1033,7 +1103,7 @@ deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-templa
 ```
 
 
-```{r}
+```{r report}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 library(magrittr)
@@ -1052,11 +1122,11 @@ corx <- deneme %>%
 
 
 
-```{r}
+```{r inherits}
 inherits(deneme$Sex, "character")
 ```
 
-```{r}
+```{r betweenstats}
 ggstatsplot::ggbetweenstats(data = deneme,
                             x = Sex,
                             y = Age,
@@ -1491,16 +1561,6 @@ plot <-
 
 # Other Codes
 
-## force git
-
-```{r force git, eval=FALSE, include=FALSE}
-# gitUpdateCommitPush
-CommitMessage <- paste("updated on ", Sys.time(), sep = "")
-wd <- getwd()
-gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
-system(command = gitCommand, intern = TRUE)
-
-```
 
 
 ## arsenal
@@ -2183,76 +2243,6 @@ https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
 ```
 
 
-
-
-
-
-```{r update project for release}
-
-readyfunctions <- c(
-    "refs",
-    # "^agreement",
-    # "^competingsurvival",
-    # "^correlation",
-    "^crosstable",
-    # "^decision",
-    # "^decisioncalculator",
-    # "^icccoeff",
-    # "^multisurvival",
-    # "^oddsratio",
-    # "^pairchi2",
-    "^reportcat",
-    # "^roc",
-    "^statsplot2",
-    "^summarydata",
-    # "^survival",
-    "^tableone"
-    # "^tree",
-    # "^utils-pipe"
-    # "^vartree"
-)
-
-
-readyfunctions <- paste0(readyfunctions, collapse = "|")
-
-files_R <-
-    list.files(path = here::here("R"),
-               pattern = readyfunctions,
-               full.names = TRUE)
-
-files_jamovi <-
-    list.files(
-        path = here::here("jamovi"),
-        pattern = readyfunctions,
-        full.names = TRUE
-    )
-
-files_data <-
-    list.files(
-        path = here::here("data"),
-        full.names = TRUE
-    )
-
-
-file.copy(from = files_R,
-          to = "~/ClinicoPath/R/",
-          overwrite = TRUE)
-
-
-file.copy(from = files_jamovi,
-          to = "~/ClinicoPath/jamovi/",
-          overwrite = TRUE)
-
-
-file.copy(from = files_data,
-          to = "~/ClinicoPath/data/",
-          overwrite = TRUE)
-
-file.copy(from = files_data,
-          to = "~/histopathRprojects/ClinicoPath/inst/extdata/",
-          overwrite = TRUE)
-
-```
 
 
 
