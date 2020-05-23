@@ -2665,10 +2665,15 @@ mydata <- jmvcore::select(df = mydata, columnNames = c(var1, var2))
 
 mydata <- jmvcore::naOmit(mydata)
 
+plot <- 
 easyalluvial::alluvial_wide( data = mydata
                 , max_variables = 5
-                , fill_by = 'first_variable' )
+                , fill_by = 'first_variable'
+                , verbose = TRUE
+                )
 
+plot %>% 
+    easyalluvial::add_marginal_histograms(mydata)
 
 
 

@@ -131,6 +131,18 @@ https://osf.io/9szud/
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 
+
+
+#### Alluvial Diagrams
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+
+<img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
+
+
+
+
 ---
 
 ### Comparisons

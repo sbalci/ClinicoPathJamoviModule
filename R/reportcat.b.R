@@ -1,10 +1,9 @@
 #' @title Summary of Categorical Variables
-#'
-#'
-#'
+#' @return Text
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom magrittr %>%
 #'
 
 reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(

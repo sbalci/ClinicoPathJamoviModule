@@ -1,3 +1,10 @@
+#' @title Alluvial Plot
+#' @return Alluvial Plot
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @importFrom magrittr %>%
+#'
+
 
 # This file is a generated template, your changes will not be overwritten
 
@@ -32,15 +39,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -106,29 +104,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # html$setContent(plothtml)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             }
 
         }
@@ -161,20 +136,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             verbose <- FALSE
 
+            verb <- self$options$verb
+
             if (isTRUE(verb)) verbose <- TRUE
 
             # fill_by ----
 
-            jmvcore::composeTerm(self$options$fill)
-
-            self$options$fill
+            fill <- jmvcore::composeTerm(self$options$fill)
 
 
             #bin
 
             bin <- self$options$bin
 
-            if (bin = "default") bin <- 'c("LL", "ML", "M", "MH", "HH")'
+            if (bin == "default") bin <- c("LL", "ML", "M", "MH", "HH")
 
             # Exclude NA ----
 
@@ -223,5 +198,48 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot)
             TRUE
 
-        })
+        }
+
+
+        ,
+
+        .plot2 = function(image, ...) {
+            # the plot function ----
+
+            #Errors ----
+
+            if (is.null(self$options$condensationvar) )
+                return()
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+            # Prepare Data ----
+
+            condvarName <- self$options$condensationvar
+
+            condvarName <- jmvcore::composeTerm(components = condvarName)
+
+
+
+            plot2 <- self$data %>%
+                easyalluvial::plot_condensation(df = .,
+                                                first = .data[[condvarName]])
+
+
+            # Print Plot ----
+
+            print(plot2)
+            TRUE
+
+
+
+
+        }
+
+
+
+
+
+        )
 )

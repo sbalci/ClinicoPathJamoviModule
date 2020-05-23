@@ -144,7 +144,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formulaR <- jmvcore::toNumeric(formulaR)
 
 
-            myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
+            myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
 
 
             # https://finalfit.org/reference/hr_plot.html
@@ -204,7 +204,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
-            formula3 <- paste("Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+            formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
 
             formula3 <- as.formula(formula3)
 

@@ -104,7 +104,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # myvars <- unlist(myvars)
 
                 mydata %>%
-                    summary_factorlist(dependent = self$options$group,
+                    finalfit::summary_factorlist(
+                        .data = .,
+                        dependent = self$options$group,
                                        explanatory = myvars,
                                        # column = TRUE,
                                        total_col = TRUE,

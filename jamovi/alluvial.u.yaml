@@ -15,10 +15,61 @@ children:
             name: vars
             isTarget: true
             maxItemCount: 6
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Options
+    stretchFactor: 1
+    collapsed: true
     children:
-      - type: CheckBox
-        name: excl
-      - type: CheckBox
-        name: marg
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: ''
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: excl
+                  - type: CheckBox
+                    name: marg
+                  - type: CheckBox
+                    name: verb
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: ''
+                fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
+                children:
+                  - type: ComboBox
+                    name: fill
+                  - type: ComboBox
+                    name: bin
+  - type: CollapseBox
+    label: Condensation Variable
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Condensation Variable
+            children:
+              - type: VariablesListBox
+                name: condensationvar
+                maxItemCount: 1
+                isTarget: true

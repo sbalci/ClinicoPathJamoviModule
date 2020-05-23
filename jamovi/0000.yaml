@@ -211,6 +211,6 @@ datasets:
     tags:
       - Classification
 usesNative: true
-minApp: 1.3.0
+minApp: 1.2.19
 
 ...
