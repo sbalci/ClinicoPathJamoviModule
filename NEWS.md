@@ -61,6 +61,54 @@ https://www.youtube.com/watch?v=m3uInetiC8w
 https://twitter.com/serdarbalci/status/1263191858454413312
 
 
+- Some examples of survival analysis via @jamovistats #ClinicoPath module.
+Using #rstats #finalfit by @ewenharrison #survival #survminer #ggstatsplot in #jamovi
+#biostatistics #pathology #pathologists 
+https://www.youtube.com/watch?v=gIPf4xIKAOU
+
+https://www.linkedin.com/pulse/survival-analysis-via-jamovi-clinicopath-module-serdar-balc%25C4%25B1 #datavisualisation #datascience #patoloji #analysis #datascientist #data #clinicaltrials #clinicalstudies #clinicaltrial #clinicalresearch 
+
+
+https://twitter.com/serdarbalci/status/1264153665386004480
+
+It is generating natural language summaries to make easy to read the tables:
+"Median Survival:
+When LVI is Absent, median survival is 26 [20.1 - 32.3,”95% CI] months.
+When LVI is Present, median survival is 9.3 [8.8 - 10.6, 95% CI] months."
+
+https://twitter.com/serdarbalci/status/1264153686508478465
+
+“Hazard:
+When LVI is Present, there is 2.55 (1.85-3.51, p<0.001) times risk than when LVI is Absent.”
+
+https://twitter.com/serdarbalci/status/1264153695715053568
+
+"1, 3, 5-yr Survival:
+When LVI Absent, 12 month survival is 70.9% [63.36%-79.3%, 95% CI]. When LVI Absent, 24 month survival is 54.2% [45.85%-64.1%, When LVI Present, 12 month survival is 28.4% [20.03%-40.3%, 95% CI]. When LVI Present, 24 month survival is 14.4% …”
+
+https://twitter.com/serdarbalci/status/1264153698764312577
+
+"pairwise comparison of Grade:
+The comparison between Grade 2 and Grade 1 has a p-value of 0.87."
+Note for myself: The wording should be better.
+
+https://twitter.com/serdarbalci/status/1264153700114862080
+
+You can do multivariate survival analysis
+
+https://twitter.com/serdarbalci/status/1264153711087140864
+
+And also make Odds Ratio Tables and Plots.
+When you change the order of variables in jamovi data, the analysis also changes.
+
+https://twitter.com/serdarbalci/status/1264153752015122432
+
+
+https://github.com/sbalci/ClinicoPathJamoviModule
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 
 
