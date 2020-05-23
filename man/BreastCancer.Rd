@@ -11,7 +11,7 @@ A data frame
 mlbench package
 }
 \usage{
-BreastCancer
+data(BreastCancer)
 }
 \description{
 Wisconsin Breast Cancer Database dataset.

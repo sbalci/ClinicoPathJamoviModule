@@ -8,7 +8,7 @@
 A data frame
 }
 \usage{
-histopathology
+data(histopathology)
 }
 \description{
 Fake histopathology research data.

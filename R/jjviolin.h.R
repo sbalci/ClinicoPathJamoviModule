@@ -8,8 +8,8 @@ jjviolinOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            col = NULL,
+            excl = TRUE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -23,51 +23,65 @@ jjviolinOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+            private$..col <- jmvcore::OptionVariable$new(
+                "col",
+                col)
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
                 default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..col)
+            self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        col = function() private$..col$value,
+        excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..col = NA,
+        ..excl = NA)
 )
 
 jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        todo = function() private$.items[["todo"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Violin Plot")
-            self$add(jmvcore::Preformatted$new(
+                title="Violin Plot",
+                refs=list(
+                    "RGraphGallery"))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Violin Plot"))}))
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "col")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="`Violin Plot ${group} - {dep}`",
+                width=600,
+                height=450,
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "col")))}))
 
 jjviolinBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjviolinBase",
@@ -95,11 +109,12 @@ jjviolinBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param dep .
 #' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param col .
+#' @param excl .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -107,26 +122,28 @@ jjviolin <- function(
     data,
     dep,
     group,
-    alt = "notequal",
-    varEq = TRUE) {
+    col,
+    excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjviolin requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(col)) col <- jmvcore::resolveQuo(jmvcore::enquo(col))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(group), group, NULL),
+            `if`( ! missing(col), col, NULL))
 
 
     options <- jjviolinOptions$new(
         dep = dep,
         group = group,
-        alt = alt,
-        varEq = varEq)
+        col = col,
+        excl = excl)
 
     analysis <- jjviolinClass$new(
         options = options,

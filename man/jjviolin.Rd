@@ -4,7 +4,7 @@
 \alias{jjviolin}
 \title{Violin Plot}
 \usage{
-jjviolin(data, dep, group, alt = "notequal", varEq = TRUE)
+jjviolin(data, dep, group, col, excl = TRUE)
 }
 \arguments{
 \item{data}{.}
@@ -13,14 +13,15 @@ jjviolin(data, dep, group, alt = "notequal", varEq = TRUE)
 
 \item{group}{.}
 
-\item{alt}{.}
+\item{col}{.}
 
-\item{varEq}{.}
+\item{excl}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

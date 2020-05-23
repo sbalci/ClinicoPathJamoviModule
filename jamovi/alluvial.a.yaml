@@ -20,17 +20,12 @@ options:
             a string naming the variables from `data` that contains the
             values used for the Alluvial Diagram.
 
-
-
     - name: condensationvar
       title: Condensation Variable
       type: Variable
       description:
           R: >
             The primary variable to be used for condensation.
-
-
-
 
     - name: excl
       title: Exclude Missing (NA)

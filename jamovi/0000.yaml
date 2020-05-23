@@ -210,6 +210,11 @@ datasets:
     description: 'Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.'
     tags:
       - Classification
+  - name: rocdata
+    path: rocdata.omv
+    description: 'Example data for ROC analysis.'
+    tags:
+      - ROC
 usesNative: true
 minApp: 1.2.19
 

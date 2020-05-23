@@ -19,20 +19,15 @@ options:
       title: Grouping Variable
       type: Variable
 
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
+    - name: col
+      title: Color Variable
+      type: Variable
 
-    - name: varEq
-      title: Assume equal variances
+
+    - name: excl
+      title: Exclude Missing (NA)
       type: Bool
       default: true
+
+
 ...
