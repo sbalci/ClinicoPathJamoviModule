@@ -4,7 +4,16 @@
 \alias{alluvial}
 \title{Alluvial Diagrams}
 \usage{
-alluvial(data, vars, excl = TRUE, marg = FALSE)
+alluvial(
+  data,
+  vars,
+  condensationvar,
+  excl = TRUE,
+  marg = FALSE,
+  verb = FALSE,
+  fill = "first_variable",
+  bin = "default"
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,15 +21,25 @@ alluvial(data, vars, excl = TRUE, marg = FALSE)
 \item{vars}{a string naming the variables from \code{data} that contains
 the values used for the Alluvial Diagram.}
 
+\item{condensationvar}{The primary variable to be used for condensation.}
+
 \item{excl}{.}
 
 \item{marg}{.}
+
+\item{verb}{.}
+
+\item{fill}{A list for the argument fill for selecting the variable to be
+represented by color. Default is 'first_variable'.}
+
+\item{bin}{labels for the bins from low to high}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

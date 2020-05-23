@@ -7,8 +7,12 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
+            condensationvar = NULL,
             excl = TRUE,
-            marg = FALSE, ...) {
+            marg = FALSE,
+            verb = FALSE,
+            fill = "first_variable",
+            bin = "default", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -19,6 +23,9 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
+            private$..condensationvar <- jmvcore::OptionVariable$new(
+                "condensationvar",
+                condensationvar)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -27,26 +34,62 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "marg",
                 marg,
                 default=FALSE)
+            private$..verb <- jmvcore::OptionBool$new(
+                "verb",
+                verb,
+                default=FALSE)
+            private$..fill <- jmvcore::OptionList$new(
+                "fill",
+                fill,
+                options=list(
+                    "first_variable",
+                    "last_variable",
+                    "all_flows",
+                    "values"),
+                default="first_variable")
+            private$..bin <- jmvcore::OptionList$new(
+                "bin",
+                bin,
+                options=list(
+                    "default",
+                    "mean",
+                    "median",
+                    "min_max",
+                    "cuts"),
+                default="default")
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..condensationvar)
             self$.addOption(private$..excl)
             self$.addOption(private$..marg)
+            self$.addOption(private$..verb)
+            self$.addOption(private$..fill)
+            self$.addOption(private$..bin)
         }),
     active = list(
         vars = function() private$..vars$value,
+        condensationvar = function() private$..condensationvar$value,
         excl = function() private$..excl$value,
-        marg = function() private$..marg$value),
+        marg = function() private$..marg$value,
+        verb = function() private$..verb$value,
+        fill = function() private$..fill$value,
+        bin = function() private$..bin$value),
     private = list(
         ..vars = NA,
+        ..condensationvar = NA,
         ..excl = NA,
-        ..marg = NA)
+        ..marg = NA,
+        ..verb = NA,
+        ..fill = NA,
+        ..bin = NA)
 )
 
 alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -64,7 +107,9 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "vars",
                     "excl",
                     "marg",
-                    "inter")))
+                    "verb",
+                    "fill",
+                    "bin")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Alluvial Diagrams",
@@ -77,7 +122,20 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "vars",
                     "excl",
                     "marg",
-                    "inter")))}))
+                    "verb",
+                    "fill",
+                    "bin")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                title="`Condensation Plot ${condensationvar}`",
+                name="plot2",
+                width=600,
+                height=450,
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "condensationvar"),
+                visible="(condensationvar)"))}))
 
 alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "alluvialBase",
@@ -105,35 +163,51 @@ alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the values used for the Alluvial Diagram.
+#' @param condensationvar The primary variable to be used for condensation.
 #' @param excl .
 #' @param marg .
+#' @param verb .
+#' @param fill A list for the argument fill for selecting the variable to be
+#'   represented by color. Default is 'first_variable'.
+#' @param bin labels for the bins from low to high
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 alluvial <- function(
     data,
     vars,
+    condensationvar,
     excl = TRUE,
-    marg = FALSE) {
+    marg = FALSE,
+    verb = FALSE,
+    fill = "first_variable",
+    bin = "default") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('alluvial requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(condensationvar)) condensationvar <- jmvcore::resolveQuo(jmvcore::enquo(condensationvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(condensationvar), condensationvar, NULL))
 
 
     options <- alluvialOptions$new(
         vars = vars,
+        condensationvar = condensationvar,
         excl = excl,
-        marg = marg)
+        marg = marg,
+        verb = verb,
+        fill = fill,
+        bin = bin)
 
     analysis <- alluvialClass$new(
         options = options,
