@@ -4,8 +4,9 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+
   - type: VariableSupplier
-    persistentItems: false
+    persistentItems: true
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -15,6 +16,15 @@ children:
             name: vars
             isTarget: true
             maxItemCount: 6
+      - type: TargetLayoutBox
+        label: Condensation Variable
+        children:
+          - type: VariablesListBox
+            name: condensationvar
+            isTarget: true
+            maxItemCount: 1
+
+
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -57,19 +67,3 @@ children:
                     name: fill
                   - type: ComboBox
                     name: bin
-  - type: CollapseBox
-    label: Condensation Variable
-    stretchFactor: 1
-    collapsed: true
-    children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Condensation Variable
-            children:
-              - type: VariablesListBox
-                name: condensationvar
-                maxItemCount: 1
-                isTarget: true

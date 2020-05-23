@@ -344,4 +344,13 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plotROC'
         url: https://CRAN.R-project.org/package=plotROC
 
+
+    RGraphGallery:
+        type: 'website'
+        author: Holtz Yan
+        year: 2020
+        title: "The R Graph Gallery"
+        publisher: 'A website that displays hundreds of R charts https://www.r-graph-gallery.com'
+        url: https://github.com/holtzy/R-graph-gallery
+
 ...

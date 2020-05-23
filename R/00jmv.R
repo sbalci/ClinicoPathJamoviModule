@@ -297,4 +297,11 @@
         `year`=2017, 
         `title`="plotROC: A Tool for Plotting ROC Curves.Journal of Statistical Software, Code Snippets, 79(2), 1-19. doi:10.18637/jss.v079.c02", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=plotROC", 
-        `url`="https://CRAN.R-project.org/package=plotROC"))
+        `url`="https://CRAN.R-project.org/package=plotROC"), 
+    `RGraphGallery`=list(
+        `type`="website", 
+        `author`="Holtz Yan", 
+        `year`=2020, 
+        `title`="The R Graph Gallery", 
+        `publisher`="A website that displays hundreds of R charts https://www.r-graph-gallery.com", 
+        `url`="https://github.com/holtzy/R-graph-gallery"))

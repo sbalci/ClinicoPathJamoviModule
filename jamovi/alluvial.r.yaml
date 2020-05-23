@@ -36,7 +36,7 @@ items:
       requiresData: true
       clearWith:
           - condensationvar
-      visible: (condensationvar)
+      # visible: (condensationvar)
 
 
     - title: Alluvial Diagrams

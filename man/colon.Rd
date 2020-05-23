@@ -11,7 +11,7 @@ A data frame
 survival package
 }
 \usage{
-colon
+data(colon)
 }
 \description{
 colon cancer dataset.

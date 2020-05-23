@@ -4,8 +4,30 @@ title: Violin Plot
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: Violin Plot
-      type:  Preformatted
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - dep
+          - group
+          - col
+          - excl
+
+    - name: plot
+      title: '`Violin Plot ${group} - {dep}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - col
+          - excl
+
+refs:
+    - RGraphGallery
 
 ...

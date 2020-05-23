@@ -42,7 +42,6 @@
 ^tododata/
 /tododata/
 tododata
-^data/
 ^vignettes/
 ^docs/
 ^temp/
