@@ -49,6 +49,9 @@ https://osf.io/9szud/
 ## Installation in [jamovi](https://www.jamovi.org)
 
 
+You can install this module directly inside the jamovi, using library.
+
+
 <img src="man/figures/jamovi-library.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-ClinicoPath-0.0.2-released.gif" align="center" width = 75% />
