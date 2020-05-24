@@ -69,7 +69,8 @@ jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "group",
-                    "col")))
+                    "col",
+                    "excl")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -81,7 +82,8 @@ jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "group",
-                    "col")))}))
+                    "col",
+                    "excl")))}))
 
 jjviolinBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjviolinBase",

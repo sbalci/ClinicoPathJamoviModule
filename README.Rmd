@@ -345,7 +345,8 @@ Made possible via the codes, help, and guidence of
 - [report](https://easystats.github.io/report/) , 
 - [tableone](https://github.com/kaz-yos/tableone), 
 - [survival](https://github.com/therneau/survival), 
-- [survminer](https://github.com/kassambara/survminer), and
+- [survminer](https://github.com/kassambara/survminer),
+- [easyalluvial](https://github.com/erblast/easyalluvial), developer [Björn Oettinghaus](https://github.com/erblast), and
 - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
 

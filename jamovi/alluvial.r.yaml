@@ -17,7 +17,6 @@ items:
           - bin
 
 
-
     # - name:  plothtml
     #   title: Plot html
     #   type:  Html
@@ -27,16 +26,6 @@ items:
     #       - marg
     #       - inter
 
-    - title: '`Condensation Plot ${condensationvar}`'
-      name: plot2
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot2
-      requiresData: true
-      clearWith:
-          - condensationvar
-      # visible: (condensationvar)
 
 
     - title: Alluvial Diagrams
@@ -55,11 +44,17 @@ items:
           - bin
 
 
-
-
-
-
-
+    - title: '`Condensation Plot ${condensationvar}`'
+      name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - vars
+          - condensationvar
+      visible: (condensationvar)
 
 
 refs:

@@ -150,6 +150,8 @@ DOI 10.17605/OSF.IO/9SZUD
 
 #### Odds Ratio Table and Plot
 
+<img src="man/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width = 75% />
+
 #### Competing Survival
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
@@ -246,7 +248,9 @@ Made possible via the codes, help, and guidence of
   - [report](https://easystats.github.io/report/) ,
   - [tableone](https://github.com/kaz-yos/tableone),
   - [survival](https://github.com/therneau/survival),
-  - [survminer](https://github.com/kassambara/survminer), and
+  - [survminer](https://github.com/kassambara/survminer),
+  - [easyalluvial](https://github.com/erblast/easyalluvial), developer
+    [Björn Oettinghaus](https://github.com/erblast), and
   - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
 See <https://github.com/ClinicoPath> for forked packages.
@@ -316,7 +320,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -399,7 +403,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -440,3 +444,9 @@ URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fsbalci.gi
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub
 watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+
+## Videos
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>

@@ -2,7 +2,7 @@ title: Decision Tree
 name: tree
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -27,8 +27,16 @@ children:
             name: target
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: targetLevel
+            enable: (target)
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: sty
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: sc

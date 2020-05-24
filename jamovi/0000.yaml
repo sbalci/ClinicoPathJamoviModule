@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0006
+version: 0.0.2.0007
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-05-22'
+date: '2020-05-24'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -212,7 +212,7 @@ datasets:
       - Classification
   - name: rocdata
     path: rocdata.omv
-    description: 'Example data for ROC analysis.'
+    description: Example data for ROC analysis.
     tags:
       - ROC
 usesNative: true

@@ -13,8 +13,6 @@ description:
         usage: |
             # example will be added
 
-
-
 options:
     - name: data
       type: Data
@@ -47,6 +45,16 @@ options:
       description: >
                   target variable
 
+    - name: targetLevel
+      title: Target Level
+      type: Level
+      variable: (target)
+
+
+    - name: sc
+      title: Show Plot
+      type: Bool
+      default: false
 
     - name: sty
       title: Tree Style
@@ -59,6 +67,9 @@ options:
         - title: rpart
           name: rpart
       default: explore
+
+
+
 
 
 ...

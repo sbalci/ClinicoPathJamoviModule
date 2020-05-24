@@ -133,9 +133,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # easyalluvial ----
 
-            plot2 <- plot(mydata2)
-                # easyalluvial::plot_condensation(df = mydata2,
-                #                                 first = condvarName)
+            plot2 <-
+                easyalluvial::plot_condensation(df = mydata2,
+                                                first = .data[[condvarName]])
 
             # Print Plot ----
             print(plot2)
