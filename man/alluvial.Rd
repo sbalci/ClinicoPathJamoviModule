@@ -12,7 +12,10 @@ alluvial(
   marg = FALSE,
   verb = FALSE,
   fill = "first_variable",
-  bin = "default"
+  bin = "default",
+  flip = FALSE,
+  usetitle = FALSE,
+  mytitle = "Alluvial Plot"
 )
 }
 \arguments{
@@ -33,6 +36,12 @@ the values used for the Alluvial Diagram.}
 represented by color. Default is 'first_variable'.}
 
 \item{bin}{labels for the bins from low to high}
+
+\item{flip}{.}
+
+\item{usetitle}{.}
+
+\item{mytitle}{.}
 }
 \value{
 A results object containing:

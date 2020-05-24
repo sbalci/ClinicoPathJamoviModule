@@ -4,7 +4,7 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, vars, facs, target, targetLevel, sc = FALSE, sty = "explore")
+tree(data, vars, facs, target, targetLevel, sty = "explore")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,8 +16,6 @@ tree(data, vars, facs, target, targetLevel, sc = FALSE, sty = "explore")
 \item{target}{target variable}
 
 \item{targetLevel}{.}
-
-\item{sc}{.}
 
 \item{sty}{.}
 }

@@ -82,6 +82,22 @@ options:
             labels for the bins from low to high
 
 
+    - name: flip
+      title: Flip Plot
+      type: Bool
+      default: false
+
+    - name: usetitle
+      title: Use Title
+      type: Bool
+      default: false
+
+    - name: mytitle
+      title: >
+          Title of the Plot
+      type: String
+      default: 'Alluvial Plot'
+
 
 # - name: inter
 #   title: Interactive
