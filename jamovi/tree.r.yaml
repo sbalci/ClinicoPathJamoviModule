@@ -5,13 +5,16 @@ jrs:   '1.1'
 
 items:
 
-    # - name:  todo
-    #   title: To Do
-    #   type:  Html
-      # clearWith:
-      #     - vars
-      #     - facs
-      #     - target
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - sty
+
 
     - name:  text1
       title: Decision Tree
@@ -20,52 +23,75 @@ items:
           - vars
           - facs
           - target
+          - targetLevel
+          - sty
 
 
-    - name: plot1
-      title: Decision Tree Explore
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot1
-      requiresData: true
-      clearWith:
-          - vars
-          - facs
-          - target
-      visible: (sty:explore)
-      refs: explore
-
-
-    - name: plot2
-      title: Decision Tree FFTrees
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot2
-      requiresData: true
-      clearWith:
-          - vars
-          - facs
-          - target
-      visible: (sty:fftrees)
-      refs: FFTrees
-
-
-    - name: plot3
+    - name:  text2
       title: Decision Tree rpart
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot3
-      requiresData: true
+      type:  Preformatted
       clearWith:
           - vars
           - facs
           - target
-      visible: (sty:rpart)
+          - targetLevel
+          - sty
+      visible: (sty:rpart || sty:fftrees)
       refs:
           - rpart
           - rpart.plot
+
+
+    # - name: plot1
+    #   title: Decision Tree Explore
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot1
+    #   requiresData: true
+    #   clearWith:
+    #       - vars
+    #       - facs
+    #       - target
+    #       - targetLevel
+    #       - sty
+    #   visible: (sty:explore)
+    #   refs: explore
+
+
+    # - name: plot2
+    #   title: Decision Tree FFTrees
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   clearWith:
+    #       - vars
+    #       - facs
+    #       - target
+    #       - targetLevel
+    #       - sty
+    #   visible: (sty:fftrees)
+    #   refs: FFTrees
+
+
+    # - name: plot3
+    #   title: Decision Tree rpart
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot3
+    #   requiresData: true
+    #   clearWith:
+    #       - vars
+    #       - facs
+    #       - target
+    #       - targetLevel
+    #       - sty
+    #   visible: (sty:rpart)
+    #   refs:
+    #       - rpart
+    #       - rpart.plot
 
 ...

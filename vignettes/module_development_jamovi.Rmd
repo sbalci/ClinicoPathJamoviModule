@@ -2,9 +2,9 @@
 title: "Module Development for Jamovi"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Module Development for Jamovi}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntryModule Development for Jamovi
+  %\VignetteEngineknitr::rmarkdown
+  %\VignetteEncodingUTF-8
 ---
 
 ```{r, include = FALSE}
@@ -104,14 +104,14 @@ You can use `devtools::install()` to use your codes as a usual R package, submit
 
 ## add analysis
 
-```
+```r
 jmvtools::create('function')
 ```
 
 
 ## Development Files
 
-### DESCRIPTION
+### `DESCRIPTION` file
 
 `Imports`, `Depends`, `Suggests`, and `Remotes` have practically no difference in building jamovi modules. The `jmvtools::install()` copies libraries under *build* folder.
 
@@ -122,28 +122,29 @@ With Remotes one can install github packages as well. But with each `jmvtools::i
 One can also directly copy package folders from system R package folder (find via `.libPaths()`) as well.
 
 
-### NAMESPACE
+### `NAMESPACE` file
 
 No need to change.
 
 
-### R folder
+### `R` folder
 
 R folder is where the codes are present. There are two files.
 
-#### function.h.R
+#### `function.h.R`
 
 No need to change. Auto-updated and overwritten.
 
-#### function.b.R
+#### `function.b.R`
 
 
 
 ##### Warning, Error Messages
 
 
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
+```r
+if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+```
 
 
 
@@ -201,7 +202,7 @@ so you’re best to make use of the table api … the table API has a lot more f
 
 ##### p-value
 
-```
+```yaml
      - name: p
        title: "p"
        type: number
@@ -319,7 +320,8 @@ https://github.com/search?l=&q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+langua
 select repo:jamovi/jmv filename:.b.R language:R
 ```
 
-```{r generate advanced search for all jamovi library}
+```r
+generate advanced search for all jamovi library
 jamovi_library_names <- readLines("https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml")
 
 jamovi_library_names <- stringr::str_extract(
@@ -469,37 +471,39 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- ## Error messages -->
-<!-- data <- data.frame(outcome=c(1,0,0,1,NA,1)) -->
-<!-- data <- na.omit(data) -->
-<!-- if ( ! is.numeric(data$outcome) || any(data$outcome != 0 & data$outcome != 1)) -->
-<!--   stop('Outcome variable must only contains 1s and 0s') -->
+## Error messages
 
+```r
+data <- data.frame(outcome=c(1,0,0,1,NA,1))
+data <- na.omit(data)
+if ( ! is.numeric(data$outcome) || any(data$outcome != 0 & data$outcome != 1))
+  stop('Outcome variable must only contains 1s and 0s')
+```
 
 
 
 
 
 
-<!-- it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up. -->
+it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up.
 
-<!-- part of our philosophy is that people shouldn't have to set their data up if they can't be bothered ... because with large data sets it can take a lot of time. so i'd encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() ... more on our data philosophy here: https://dev.jamovi.org/tuts0202-handling-data.html -->
+part of our philosophy is that people shouldn't have to set their data up if they can't be bothered ... because with large data sets it can take a lot of time. so i'd encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() ... more on our data philosophy here: https://dev.jamovi.org/tuts0202-handling-data.html
 
 
-<!-- https://youtu.be/oWZrrWc6e74 -->
+https://youtu.be/oWZrrWc6e74
 
 
-<!-- in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent. -->
-<!-- also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there. -->
+in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent.
+also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there.
 
-<!-- visible: (optionName) -->
-<!-- https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416 -->
-<!-- jamovi/ttestis.r.yaml:408-416 -->
-<!--             - name: qq -->
-<!--               type: Image -->
-<!--               description: Q-Q plot -->
-<!--               width: 350 -->
-<!--               height: 300 -->
+visible: (optionName)
+https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416
+jamovi/ttestis.r.yaml:408-416
+            - name: qq
+              type: Image
+              description: Q-Q plot
+              width: 350
+              height: 300
 
 
 
@@ -512,21 +516,21 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox? -->
-<!-- I tried to get info from a self$options$var  via lubridate::is.Date  and is.na.POSIXlt but it did not work -->
-<!-- hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack -->
+is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox?
+I tried to get info from a self$options$var  via lubridate::is.Date  and is.na.POSIXlt but it did not work
+hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack
 
-<!-- Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and  people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around. -->
+Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and  people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around.
 
 
 
-<!-- learn YAML syntax -->
+learn YAML syntax
 
-<!-- it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. -->
-<!-- you can take a look at jmv for examples: -->
-<!-- https://github.com/jamovi/jmv/tree/master/jamovi -->
+it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it.
+you can take a look at jmv for examples:
+https://github.com/jamovi/jmv/tree/master/jamovi
 
-<!-- I don't think we've got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you'll find there's not that many parameter names. -->
+I don't think we've got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you'll find there's not that many parameter names.
 
 
 
@@ -534,7 +538,7 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over -->
+as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over
 
 
 
@@ -542,67 +546,67 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- Hi, there are scarce sources for pairwise chi-square tests. I have found  rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test() -->
-<!-- but that package has been removed from CRAN. Would you consider implementing this feature? -->
-<!-- I also thought to add these functions in a module, but I want to ask your policy about removed packages as well. -->
-<!-- 4 replies -->
+Hi, there are scarce sources for pairwise chi-square tests. I have found  rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test()
+but that package has been removed from CRAN. Would you consider implementing this feature?
+I also thought to add these functions in a module, but I want to ask your policy about removed packages as well.
+4 replies
 
-<!-- jonathon:whale2:  18 days ago -->
-<!-- provided the module can be built with an entry in REMOTES, we don’t care if it’s not on CRAN -->
+jonathon:whale2:  18 days ago
+provided the module can be built with an entry in REMOTES, we don’t care if it’s not on CRAN
 
-<!-- jonathon:whale2:  18 days ago -->
-<!-- … but you’re obviously taking a risk using something which isn’t maintained -->
+jonathon:whale2:  18 days ago
+… but you’re obviously taking a risk using something which isn’t maintained
 
-<!-- Serdar Balci  18 days ago -->
-<!-- Thanks. Maybe just copying that function with appropriate reference may solve maintenance issue. I will think about it. -->
+Serdar Balci  18 days ago
+Thanks. Maybe just copying that function with appropriate reference may solve maintenance issue. I will think about it.
 
-<!-- jonathon:whale2:  18 days ago -->
-<!-- oh yup -->
+jonathon:whale2:  18 days ago
+oh yup
 
 
-<!-- --- -->
+---
 
-<!-- I have a question. I want to user to enter cut points in a box and then evaluate it as a vector. -->
-<!-- the function is this: -->
-<!-- summary(km_fit, times = c(12,36,60) -->
-<!-- I want user to define times vector. -->
-<!-- I have tried the following: -->
-<!-- utimes <- jmvcore::decomposeTerms(self$options$cutp) -->
-<!-- utimes <- as.vector(utimes) -->
-<!-- summary(km_fit, times = utimes -->
-<!-- a.yaml is as follows: -->
-<!--     - name: cutp -->
-<!--       title: Define at least two cutpoints (in months) for survival table -->
-<!--       type: String -->
-<!--       default: '12, 36, 60' -->
-<!-- Would you please guide me to convert input into a vector. (edited) -->
-<!-- 3 replies -->
+I have a question. I want to user to enter cut points in a box and then evaluate it as a vector.
+the function is this:
+summary(km_fit, times = c(12,36,60)
+I want user to define times vector.
+I have tried the following:
+utimes <- jmvcore::decomposeTerms(self$options$cutp)
+utimes <- as.vector(utimes)
+summary(km_fit, times = utimes
+a.yaml is as follows:
+    - name: cutp
+      title: Define at least two cutpoints (in months) for survival table
+      type: String
+      default: '12, 36, 60'
+Would you please guide me to convert input into a vector. (edited)
+3 replies
 
-<!-- Serdar Balci  13 hours ago -->
-<!-- I think this seems to work: -->
-<!-- utimes <- self$options$cutp -->
-<!-- utimes <- strsplit(utimes, ",") -->
-<!-- utimes <- purrr::reduce(utimes, as.vector) -->
-<!-- utimes <- as.numeric(utimes) -->
-<!-- (edited) -->
+Serdar Balci  13 hours ago
+I think this seems to work:
+utimes <- self$options$cutp
+utimes <- strsplit(utimes, ",")
+utimes <- purrr::reduce(utimes, as.vector)
+utimes <- as.numeric(utimes)
+(edited)
 
-<!-- jonathon:whale2:  5 hours ago -->
-<!-- yup, this will do it too: -->
-<!-- as.numeric(strsplit(utimes, ',')[[1]]) -->
-<!-- (it's better if you can avoid using purrr, because it's not really necessary, and you're better off reducing the amount of dependencies you use) -->
+jonathon:whale2:  5 hours ago
+yup, this will do it too:
+as.numeric(strsplit(utimes, ',')[[1]])
+(it's better if you can avoid using purrr, because it's not really necessary, and you're better off reducing the amount of dependencies you use)
 
-<!-- Serdar Balci  5 hours ago -->
-<!-- thank you. :+1: -->
+Serdar Balci  5 hours ago
+thank you. :+1:
 
-<!-- --- -->
+---
 
 
-<!-- so wrt width/height, you can set that in the .r.yaml like so: -->
-<!-- https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49 -->
-<!-- it’s possible to do it programmatically, with … image$setSize() -->
+so wrt width/height, you can set that in the .r.yaml like so:
+https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49
+it’s possible to do it programmatically, with … image$setSize()
 
 
-<!-- --- -->
+---
 
 
 
@@ -610,36 +614,36 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- ``` -->
-<!-- Serdar Balci  4:48 PM -->
-<!--  I think I am getting familiar with the codes :) -->
-<!-- QuickTime Movie -->
-<!-- JamoviModule.mov -->
-<!-- 4 MB QuickTime Movie— Click to download -->
-<!-- ``` -->
+```
+Serdar Balci  4:48 PM
+ I think I am getting familiar with the codes :)
+QuickTime Movie
+JamoviModule.mov
+4 MB QuickTime Movie— Click to download
+```
 
 
 
 
 
-<!-- ``` -->
-<!-- Serdar Balci Nov 29th, 2019 at 12:39 PM -->
-<!-- Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo -->
+```
+Serdar Balci Nov 29th, 2019 at 12:39 PM
+Module names now have R version and OS in them. Does it mean that this will not work in windows Installing ClinicoPath_0.0.1-macos-R3.3.0.jmo
 
-<!-- 4 replies -->
+4 replies
 
-<!-- jonathon:whale2:  3 months ago -->
-<!-- It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not) -->
+jonathon:whale2:  3 months ago
+It depends on whether there are any native R packages in your modules dependencies. Most modules do, but some don't. (You'll notice there's a "uses native" property there now too ... my intention is to use that to determine if a module can be used cross platform or not)
 
-<!-- jonathon:whale2:  3 months ago -->
-<!-- If there's native dependencies, then the module needs to be built separately for each os. -->
+jonathon:whale2:  3 months ago
+If there's native dependencies, then the module needs to be built separately for each os.
 
-<!-- jonathon:whale2:  3 months ago -->
-<!-- But I can take care of building it for different oses -->
+jonathon:whale2:  3 months ago
+But I can take care of building it for different oses
 
-<!-- Serdar Balci  3 months ago -->
-<!-- Oh, I see. Thank you :slightly_smiling_face: -->
-<!-- ``` -->
+Serdar Balci  3 months ago
+Oh, I see. Thank you :slightly_smiling_face:
+```
 
 
 
@@ -649,278 +653,293 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- --- -->
+---
 
-<!-- # Develop -->
+# Develop
 
 
 
-<!-- ```{r library, eval=FALSE, include=FALSE} -->
-<!-- # install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org')) -->
+```r
+library, eval=FALSE, include=FALSE
+# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 
-<!-- # jmvtools::check("C://Program Files//jamovi//bin") -->
+# jmvtools::check("C://Program Files//jamovi//bin")
 
-<!-- # jmvtools::install(home = "C://Program Files//jamovi//bin") -->
-<!-- # -->
-<!-- # devtools::build(path = "C:\\ClinicoPathOutput") -->
+# jmvtools::install(home = "C://Program Files//jamovi//bin")
+#
+# devtools::build(path = "C:\\ClinicoPathOutput")
 
-<!-- # .libPaths(new = "C:\\ClinicoPathLibrary") -->
+# .libPaths(new = "C:\\ClinicoPathLibrary")
 
-<!-- # devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean')) -->
+# devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))
 
-<!-- Sys.setenv(TZ="Europe/Istanbul") -->
+Sys.setenv(TZ="Europe/Istanbul")
 
-<!-- library("jmvtools") -->
-<!-- ``` -->
+library("jmvtools")
+```
 
 
-<!-- ```{r check, eval=FALSE, include=FALSE} -->
-<!-- jmvtools::check() -->
 
-<!-- # rhub::check_on_macos() -->
+```r
 
-<!-- # rhub::check_for_cran() -->
+check, eval=FALSE, include=FALSE
 
-<!-- # codemetar::write_codemeta() -->
+jmvtools::check()
 
+# rhub::check_on_macos()
 
-<!-- devtools::check() -->
+# rhub::check_for_cran()
 
-<!-- ``` -->
+# codemetar::write_codemeta()
 
 
-<!-- ```{r pkgdown build, eval=FALSE, include=FALSE} -->
-<!-- rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE) -->
+devtools::check()
 
-<!-- devtools::document() -->
+```
 
-<!-- pkgdown::build_site() -->
-<!-- ``` -->
 
+```r
+pkgdown build, eval=FALSE, include=FALSE
+rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
-<!-- ```{r git force push, eval=FALSE, include=FALSE} -->
-<!-- # gitUpdateCommitPush -->
-<!-- CommitMessage <- paste("updated on ", Sys.time(), sep = "") -->
-<!-- wd <- getwd() -->
-<!-- gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "") -->
-<!-- # gitCommand <- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "") -->
-<!-- system(command = gitCommand, intern = TRUE) -->
+devtools::document()
 
-<!-- ``` -->
+pkgdown::build_site()
+```
 
 
+```r
+git force push, eval=FALSE, include=FALSE
+# gitUpdateCommitPush
+CommitMessage <- paste("updated on ", Sys.time(), sep = "")
+wd <- getwd()
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+# gitCommand <- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+system(command = gitCommand, intern = TRUE)
 
-<!-- ```{r add analysis, eval=FALSE, include=FALSE} -->
+```
 
-<!-- # jmvtools::install() -->
-<!-- # -->
-<!-- # jmvtools::create('SuperAwesome') -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test') -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='survival', title='survival') -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='correlation', title='correlation') -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='tableone', title='TableOne') -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='crosstable', title='CrossTable') -->
-<!-- # -->
-<!-- # -->
-<!-- # jmvtools::addAnalysis(name='writesummary', title='WriteSummary') -->
 
-<!-- # jmvtools::addAnalysis(name='finalfit', title='FinalFit') -->
 
-<!-- # jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival') -->
+```r
+add analysis, eval=FALSE, include=FALSE
 
-<!-- # jmvtools::addAnalysis(name='report', title='Report General Features') -->
+# jmvtools::install()
+#
+# jmvtools::create('SuperAwesome')
+#
+# jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
+#
+# jmvtools::addAnalysis(name='survival', title='survival')
+#
+# jmvtools::addAnalysis(name='correlation', title='correlation')
+#
+# jmvtools::addAnalysis(name='tableone', title='TableOne')
+#
+# jmvtools::addAnalysis(name='crosstable', title='CrossTable')
+#
+#
+# jmvtools::addAnalysis(name='writesummary', title='WriteSummary')
 
-<!-- # jmvtools::addAnalysis(name='frequencies', title='Frequencies') -->
+# jmvtools::addAnalysis(name='finalfit', title='FinalFit')
 
-<!-- # jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot') -->
+# jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival')
 
-<!-- # jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2') -->
+# jmvtools::addAnalysis(name='report', title='Report General Features')
 
-<!-- # jmvtools::addAnalysis(name='scat2', title='scat2') -->
+# jmvtools::addAnalysis(name='frequencies', title='Frequencies')
 
-<!-- # jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator') -->
+# jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')
 
-<!-- # jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability') -->
+# jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')
 
-<!-- # jmvtools::addAnalysis(name='cluster', title='Cluster Analysis') -->
+# jmvtools::addAnalysis(name='scat2', title='scat2')
 
-<!-- # jmvtools::addAnalysis(name='tree', title='Decision Tree') -->
+# jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
 
-<!-- ``` -->
+# jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')
 
+# jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
 
+# jmvtools::addAnalysis(name='tree', title='Decision Tree')
 
+```
 
 
 
-<!-- ```{r devtools install, eval=FALSE, include=FALSE} -->
-<!-- devtools::install() -->
-<!-- ``` -->
 
 
-<!-- ```{r jmvtools install, eval=FALSE, include=FALSE} -->
-<!-- # jmvtools::check() -->
-<!-- jmvtools::install() -->
-<!-- ``` -->
 
+```r
+devtools install, eval=FALSE, include=FALSE
+devtools::install()
+```
 
 
-<!-- ```{r construct, eval=FALSE, include=FALSE} -->
-<!-- formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D") -->
+```r
+jmvtools install, eval=FALSE, include=FALSE
+# jmvtools::check()
+jmvtools::install()
+```
 
-<!-- jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E") -->
 
 
-<!-- jmvcore::constructFormula(terms = list("A", "B", "C")) -->
+```r
+construct, eval=FALSE, include=FALSE
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
 
-<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
+jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
 
-<!-- unlist(vars) -->
 
-<!-- cformula <- jmvcore::composeTerm(components = formula) -->
+jmvcore::constructFormula(terms = list("A", "B", "C"))
 
-<!-- jmvcore::composeTerm("A") -->
+vars <- jmvcore::decomposeFormula(formula = formula)
 
-<!-- jmvcore::composeTerm(components = c("A", "B", "C")) -->
+unlist(vars)
 
-<!-- jmvcore::decomposeTerm(term = c("A", "B", "C")) -->
+cformula <- jmvcore::composeTerm(components = formula)
 
-<!-- jmvcore::decomposeTerm(term = formula) -->
+jmvcore::composeTerm("A")
 
-<!-- jmvcore::decomposeTerm(term = cformula) -->
+jmvcore::composeTerm(components = c("A", "B", "C"))
 
+jmvcore::decomposeTerm(term = c("A", "B", "C"))
 
+jmvcore::decomposeTerm(term = formula)
 
-<!-- composeTerm <- jmvcore::composeTerm(components = c("A", "B", "C")) -->
+jmvcore::decomposeTerm(term = cformula)
 
-<!-- jmvcore::decomposeTerm(term = composeTerm) -->
 
 
-<!-- ``` -->
+composeTerm <- jmvcore::composeTerm(components = c("A", "B", "C"))
 
+jmvcore::decomposeTerm(term = composeTerm)
 
 
+```
 
 
 
 
 
 
-<!-- --- -->
 
-<!-- # Example -->
 
 
-<!-- ```{r read data, eval=FALSE, include=FALSE} -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
-<!-- ``` -->
+---
 
+# Example
 
-<!-- ```{r writesummary, eval=FALSE, include=FALSE} -->
-<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
 
-<!-- # library("ClinicoPath") -->
+```r
+read data, eval=FALSE, include=FALSE
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+```
 
-<!-- deneme$Age <- as.numeric(as.character(deneme$Age)) -->
 
-<!-- ClinicoPath::writesummary(data = deneme, vars = Age) -->
+```r
+writesummary, eval=FALSE, include=FALSE
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-<!-- ggstatsplot::normality_message(deneme$Age, "Age") -->
+# library("ClinicoPath")
 
+deneme$Age <- as.numeric(as.character(deneme$Age))
 
-<!-- ClinicoPath::writesummary( -->
-<!--     data = deneme, -->
-<!--     vars = Age) -->
+ClinicoPath::writesummary(data = deneme, vars = Age)
 
+ggstatsplot::normality_message(deneme$Age, "Age")
 
-<!-- ``` -->
 
+ClinicoPath::writesummary(
+    data = deneme,
+    vars = Age)
 
 
-<!-- ```{r finalfit, eval=FALSE, include=FALSE} -->
-<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
-<!-- library(dplyr) -->
-<!-- library(survival) -->
-<!-- library(finalfit) -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
-<!-- ClinicoPath::finalfit(data = deneme, -->
-<!--                       explanatory = Sex, -->
-<!--                       outcome = Outcome, -->
-<!--                       overalltime = OverallTime) -->
-<!-- ``` -->
+```
 
 
 
-<!-- ```{r decision, eval=FALSE, include=FALSE} -->
-<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+```r
+finalfit, eval=FALSE, include=FALSE
+devtools::install(upgrade = FALSE, quick = TRUE)
+library(dplyr)
+library(survival)
+library(finalfit)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::finalfit(data = deneme,
+                      explanatory = Sex,
+                      outcome = Outcome,
+                      overalltime = OverallTime)
+```
 
-<!-- ClinicoPath::decision( -->
-<!--     data = deneme, -->
-<!--     gold = Outcome, -->
-<!--     goldPositive = "1", -->
-<!--     newtest = Smoker, -->
-<!--     testPositive = "TRUE") -->
 
-<!-- ClinicoPath::decision( -->
-<!--     data = deneme, -->
-<!--     gold = LVI, -->
-<!--     goldPositive = "Present", -->
-<!--     newtest = PNI, -->
-<!--     testPositive = "Present") -->
-<!-- ``` -->
 
-<!-- ```{r eval=FALSE, include=FALSE} -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
-<!-- ggstatsplot::ggbetweenstats(data = deneme, -->
-<!--                             x = LVI, -->
-<!--                             y = Age) -->
+```r
+decision, eval=FALSE, include=FALSE
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-<!-- ``` -->
+ClinicoPath::decision(
+    data = deneme,
+    gold = Outcome,
+    goldPositive = "1",
+    newtest = Smoker,
+    testPositive = "TRUE")
 
+ClinicoPath::decision(
+    data = deneme,
+    gold = LVI,
+    goldPositive = "Present",
+    newtest = PNI,
+    testPositive = "Present")
+```
 
+```r
+eval=FALSE, include=FALSE
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ggstatsplot::ggbetweenstats(data = deneme,
+                            x = LVI,
+                            y = Age)
 
+```
 
 
-<!-- ```{r statsplot, eval=FALSE, include=FALSE} -->
-<!-- devtools::install(upgrade = FALSE, quick = TRUE) -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
-<!-- ClinicoPath::statsplot( -->
-<!--     data = deneme, -->
-<!--     dep = Age, -->
-<!--     group = Smoker) -->
-<!-- ``` -->
 
 
 
+```r
+statsplot, eval=FALSE, include=FALSE
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::statsplot(
+    data = deneme,
+    dep = Age,
+    group = Smoker)
+```
 
-<!-- ```{r decision 2, eval=FALSE, include=FALSE} -->
-<!-- mytable <- table(deneme$Outcome, deneme$Smoker) -->
 
-<!-- caret::confusionMatrix(mytable) -->
-<!-- confusionMatrix(pred, truth) -->
-<!-- confusionMatrix(xtab, prevalence = 0.25) -->
 
-<!-- levels(deneme$Outcome) -->
 
-<!-- mytable[1,2] -->
+```r
+decision 2, eval=FALSE, include=FALSE
+mytable <- table(deneme$Outcome, deneme$Smoker)
 
-<!-- d <- "0" -->
+caret::confusionMatrix(mytable)
+confusionMatrix(pred, truth)
+confusionMatrix(xtab, prevalence = 0.25)
 
-<!-- mytable[d, "FALSE"] -->
+levels(deneme$Outcome)
 
-<!-- mytable[[0]] -->
+mytable[1,2]
 
-<!-- ``` -->
+d <- "0"
 
+mytable[d, "FALSE"]
 
+mytable[[0]]
 
+```
 
 
 
@@ -929,160 +948,170 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
-<!-- ```{r construct formula, eval=FALSE, include=FALSE} -->
-<!-- formula <- jmvcore::constructFormula(terms = c("A", "B", "C")) -->
 
-<!-- jmvcore::constructFormula(terms = list("A", "B", "C")) -->
 
-<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
 
-<!-- vars <- jmvcore::decomposeTerms(vars) -->
+```r
+construct formula, eval=FALSE, include=FALSE
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"))
 
+jmvcore::constructFormula(terms = list("A", "B", "C"))
 
-<!-- vars <- unlist(vars) -->
+vars <- jmvcore::decomposeFormula(formula = formula)
 
-<!-- formula <- as.formula(formula) -->
+vars <- jmvcore::decomposeTerms(vars)
 
 
-<!-- my_group <- "lvi" -->
-<!-- my_dep <- "age" -->
+vars <- unlist(vars)
 
-<!-- formula <- paste0('x = ', group, 'y = ', dep) -->
-<!-- myformula <- as.formula(formula) -->
+formula <- as.formula(formula)
 
-<!-- myformula <- glueformula::gf({my_group}, {my_dep}) -->
 
-<!-- myformula <- glue::glue( 'x = ' , {my_group}, ', y = ' , {my_dep}) -->
+my_group <- "lvi"
+my_dep <- "age"
 
-<!-- myformula <- jmvcore::composeTerm(myformula) -->
+formula <- paste0('x = ', group, 'y = ', dep)
+myformula <- as.formula(formula)
 
+myformula <- glueformula::gf(my_group, my_dep)
 
-<!-- ``` -->
+myformula <- glue::glue( 'x = ' , my_group, ', y = ' , my_dep)
 
+myformula <- jmvcore::composeTerm(myformula)
 
-<!-- ```{r, eval=FALSE, include=FALSE} -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
 
-<!-- library(survival) -->
-<!-- km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme) -->
+```
 
-<!-- library(dplyr) -->
-<!-- km_fit_median_df <- summary(km_fit) -->
-<!-- km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>% -->
-<!--                 janitor::clean_names(dat = ., case = "snake") %>% -->
-<!--                 tibble::rownames_to_column(.data = ., var = "LVI") -->
 
-<!-- ``` -->
+```r
+eval=FALSE, include=FALSE
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
+library(survival)
+km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
 
+library(dplyr)
+km_fit_median_df <- summary(km_fit)
+km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+                janitor::clean_names(dat = ., case = "snake") %>%
+                tibble::rownames_to_column(.data = ., var = "LVI")
 
-<!-- ```{r construct formula 2, eval=FALSE, include=FALSE} -->
-<!-- library(dplyr) -->
-<!-- library(survival) -->
+```
 
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
 
-<!-- myoveralltime <- deneme$OverallTime -->
-<!-- myoutcome <- deneme$Outcome -->
-<!-- myexplanatory <- deneme$LVI -->
 
-<!-- class(myoveralltime) -->
-<!-- class(myoutcome) -->
-<!-- typeof(myexplanatory) -->
+```r
+construct formula 2, eval=FALSE, include=FALSE
+library(dplyr)
+library(survival)
 
-<!-- is.ordered(myexplanatory) -->
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-<!-- formula2 <- jmvcore::constructFormula(terms = "myexplanatory") -->
-<!-- # formula2 <- jmvcore::decomposeFormula(formula = formula2) -->
-<!-- # formula2 <- paste("", formula2) -->
-<!-- # formula2 <- as.formula(formula2) -->
-<!-- formula2 <- jmvcore::composeTerm(formula2) -->
+myoveralltime <- deneme$OverallTime
+myoutcome <- deneme$Outcome
+myexplanatory <- deneme$LVI
 
+class(myoveralltime)
+class(myoutcome)
+typeof(myexplanatory)
 
-<!-- formulaL <- jmvcore::constructFormula(terms = "myoveralltime") -->
-<!-- # formulaL <- jmvcore::decomposeFormula(formula = formulaL) -->
+is.ordered(myexplanatory)
 
-<!-- formulaR <- jmvcore::constructFormula(terms = "myoutcome") -->
-<!-- # formulaR <- jmvcore::decomposeFormula(formula = formulaR) -->
+formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
+# formula2 <- jmvcore::decomposeFormula(formula = formula2)
+# formula2 <- paste("", formula2)
+# formula2 <- as.formula(formula2)
+formula2 <- jmvcore::composeTerm(formula2)
 
-<!-- formula <- paste("Surv(", formulaL, ",", formulaR, ")") -->
-<!-- # formula <- jmvcore::composeTerm(formula) -->
-<!-- # formula <- as.formula(formula) -->
-<!-- # jmvcore::constructFormula(terms = c(formula, formula2)) -->
 
-<!-- deneme %>% -->
-<!--   finalfit::finalfit(formula, formula2) -> tUni -->
+formulaL <- jmvcore::constructFormula(terms = "myoveralltime")
+# formulaL <- jmvcore::decomposeFormula(formula = formulaL)
 
-<!-- tUni -->
-<!-- ``` -->
+formulaR <- jmvcore::constructFormula(terms = "myoutcome")
+# formulaR <- jmvcore::decomposeFormula(formula = formulaR)
 
+formula <- paste("Surv(", formulaL, ",", formulaR, ")")
+# formula <- jmvcore::composeTerm(formula)
+# formula <- as.formula(formula)
+# jmvcore::constructFormula(terms = c(formula, formula2))
 
-<!-- ```{r eval=FALSE, include=FALSE} -->
-<!-- library(dplyr) -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+deneme %>%
+  finalfit::finalfit(formula, formula2) -> tUni
 
-<!-- results <- deneme %>% -->
-<!--                 ggstatsplot::ggbetweenstats(LVI, Age) -->
-<!-- results -->
+tUni
+```
 
-<!-- mydep <- deneme$Age -->
-<!-- mygroup <- deneme$LVI -->
 
+```r
+eval=FALSE, include=FALSE
+library(dplyr)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-<!-- mygroup <- jmvcore::constructFormula(terms = "mygroup") -->
-<!-- mygroup <- jmvcore::composeTerm(mygroup) -->
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(LVI, Age)
+results
 
-<!-- mydep <- jmvcore::constructFormula(terms = "mydep") -->
-<!-- mydep <- jmvcore::composeTerm(mydep) -->
+mydep <- deneme$Age
+mygroup <- deneme$LVI
 
 
-<!-- # not working -->
-<!-- # eval(mygroup) -->
-<!-- # rlang::eval_tidy(mygroup) -->
-<!-- # !!mygroup -->
-<!-- # {{mygroup}} -->
-<!-- # sym(mygroup) -->
-<!-- # quote(mygroup) -->
-<!-- # enexpr(mygroup) -->
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mygroup <- jmvcore::composeTerm(mygroup)
 
-<!-- mygroup <- jmvcore::constructFormula(terms = "mygroup") -->
-<!-- mydep <- jmvcore::constructFormula(terms = "mydep") -->
+mydep <- jmvcore::constructFormula(terms = "mydep")
+mydep <- jmvcore::composeTerm(mydep)
 
-<!-- formula1 <- paste(mydep) -->
-<!-- formula1 <- jmvcore::composeTerm(formula1) -->
 
+# not working
+# eval(mygroup)
+# rlang::eval_tidy(mygroup)
+# !!mygroup
+# mygroup
+# sym(mygroup)
+# quote(mygroup)
+# enexpr(mygroup)
 
-<!-- mygroup <- paste(mygroup) -->
-<!-- mygroup <- jmvcore::composeTerm(mygroup) -->
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mydep <- jmvcore::constructFormula(terms = "mydep")
 
-<!-- mydep <- deneme$Age -->
-<!-- mygroup <- deneme$LVI -->
+formula1 <- paste(mydep)
+formula1 <- jmvcore::composeTerm(formula1)
 
-<!-- mydep <- jmvcore::resolveQuo(jmvcore::enquo(mydep)) -->
-<!-- mygroup <- jmvcore::resolveQuo(jmvcore::enquo(mygroup)) -->
 
-<!-- mydata2 <- data.frame(mygroup=mygroup, mydep=mydep) -->
+mygroup <- paste(mygroup)
+mygroup <- jmvcore::composeTerm(mygroup)
 
-<!-- results <- mydata2 %>% -->
-<!--                 ggstatsplot::ggbetweenstats( -->
-<!-- x = mygroup, y = mydep  ) -->
+mydep <- deneme$Age
+mygroup <- deneme$LVI
 
-<!-- results -->
+mydep <- jmvcore::resolveQuo(jmvcore::enquo(mydep))
+mygroup <- jmvcore::resolveQuo(jmvcore::enquo(mygroup))
 
+mydata2 <- data.frame(mygroup=mygroup, mydep=mydep)
 
+results <- mydata2 %>%
+                ggstatsplot::ggbetweenstats(
+x = mygroup, y = mydep  )
 
-<!-- myformula <- glue::glue('x = ', {mygroup}, ', y = ' , {mydep}) -->
+results
 
-<!-- myformula <- jmvcore::composeTerm(myformula) -->
 
-<!-- myformula <- as.formula(myformula) -->
 
+myformula <- glue::glue('x = ', mygroup, ', y = ' , mydep)
 
+myformula <- jmvcore::composeTerm(myformula)
 
+myformula <- as.formula(myformula)
 
 
+mydep2 <- quote(mydep)
+mygroup2 <- quote(mygroup)
 
 
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2)
+results
+```
 
 
 
@@ -1091,276 +1120,262 @@ excel is also allowed but user does not see if it is csv or excel file.
 
 
 
+```r
+construct formula 3, eval=FALSE, include=FALSE
+formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
 
-<!-- mydep2 <- quote(mydep) -->
-<!-- mygroup2 <- quote(mygroup) -->
+vars <- jmvcore::decomposeFormula(formula = formula)
 
 
-<!-- results <- deneme %>% -->
-<!--                 ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2) -->
-<!-- results -->
-<!-- ``` -->
+explanatory <- jmvcore::constructFormula(terms = c("explanatory"))
 
+explanatory <- jmvcore::decomposeFormula(formula = explanatory)
 
+explanatory <- unlist(explanatory)
 
+myformula <- paste("Surv(", vars[1], ", ", vars[2], ")")
 
 
 
+deneme %>%
+finalfit::finalfit(myformula, explanatory) -> tUni
 
+```
 
-<!-- ```{r construct formula 3, eval=FALSE, include=FALSE} -->
-<!-- formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome")) -->
 
-<!-- vars <- jmvcore::decomposeFormula(formula = formula) -->
+```r
+table tangram, eval=FALSE, include=FALSE
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 
-<!-- explanatory <- jmvcore::constructFormula(terms = c("explanatory")) -->
+table3 <-
+  tangram::html5(
+    tangram::tangram(
+      "Death ~ LVI + PNI + Age", deneme),
+    fragment=TRUE,
+    inline="nejm.css",
+    caption = "HTML5 Table NEJM Style",
+    id="tbl3")
 
-<!-- explanatory <- jmvcore::decomposeFormula(formula = explanatory) -->
+table3
 
-<!-- explanatory <- unlist(explanatory) -->
+mydep <- deneme$Age
+mygroup <- deneme$Death
 
-<!-- myformula <- paste("Surv(", vars[1], ", ", vars[2], ")") -->
 
+formulaR <- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age"))
 
+formulaL <- jmvcore::constructFormula(terms = "Death")
 
-<!-- deneme %>% -->
-<!-- finalfit::finalfit(myformula, explanatory) -> tUni -->
+formula <- paste(formulaL, '~', formulaR)
 
-<!-- ``` -->
+formula <- as.formula(formula)
 
 
-<!-- ```{r table tangram, eval=FALSE, include=FALSE} -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
+table <- tangram::html5(
+    tangram::tangram(formula, deneme
+                     ))
 
+table
 
-<!-- table3 <- -->
-<!--   tangram::html5( -->
-<!--     tangram::tangram( -->
-<!--       "Death ~ LVI + PNI + Age", deneme), -->
-<!--     fragment=TRUE, -->
-<!--     inline="nejm.css", -->
-<!--     caption = "HTML5 Table NEJM Style", -->
-<!--     id="tbl3") -->
 
-<!-- table3 -->
+```
 
-<!-- mydep <- deneme$Age -->
-<!-- mygroup <- deneme$Death -->
 
 
-<!-- formulaR <- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age")) -->
 
-<!-- formulaL <- jmvcore::constructFormula(terms = "Death") -->
 
-<!-- formula <- paste(formulaL, '~', formulaR) -->
 
-<!-- formula <- as.formula(formula) -->
+---
 
 
-<!-- table <- tangram::html5( -->
-<!--     tangram::tangram(formula, deneme -->
-<!--                      )) -->
 
-<!-- table -->
 
+## arsenal
 
-<!-- ``` -->
+```r
+arsenal, results='asis', eval=FALSE, include=FALSE
 
+tab1 <- arsenal::tableby(~ Age + Sex, data = deneme)
 
+results <- summary(tab1)
 
 
+# results$object
+# results$control
+# results$totals
+# results$hasStrata
+# results$text
+# results$pfootnote
+# results$term.name
+#
+# tab1$Call
+#
+# tab1$control
 
+tab1$tables # this is where results lie
 
-<!-- --- -->
 
+```
 
 
+## define survival time
 
-<!-- ## arsenal -->
+```r
+define survival time, eval=FALSE, include=FALSE
+mydata$int <- lubridate::interval(
+  lubridate::ymd(mydata$SurgeryDate),
+  lubridate::ymd(mydata$LastFollowUpDate)
+  )
+mydata$OverallTime <- lubridate::time_length(mydata$int, "month")
+mydata$OverallTime <- round(mydata$OverallTime, digits = 1)
+```
 
-<!-- ```{r arsenal, results='asis', eval=FALSE, include=FALSE} -->
 
-<!-- tab1 <- arsenal::tableby(~ Age + Sex, data = deneme) -->
 
-<!-- results <- summary(tab1) -->
 
+## Multivariate Analysis Survival
 
-<!-- # results$object -->
-<!-- # results$control -->
-<!-- # results$totals -->
-<!-- # results$hasStrata -->
-<!-- # results$text -->
-<!-- # results$pfootnote -->
-<!-- # results$term.name -->
-<!-- # -->
-<!-- # tab1$Call -->
-<!-- # -->
-<!-- # tab1$control -->
 
-<!-- tab1$tables # this is where results lie -->
+```r
+Multivariate Analysis, eval=FALSE, include=FALSE
+library(finalfit)
+library(survival)
+explanatoryMultivariate <- explanatoryKM
+dependentMultivariate <- dependentKM
 
+mydata %>%
+  finalfit(dependentMultivariate, explanatoryMultivariate) -> tMultivariate
 
-<!-- ``` -->
+knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))
+```
 
 
-<!-- ## define survival time -->
+---
 
-<!-- ```{r define survival time, eval=FALSE, include=FALSE} -->
-<!-- mydata$int <- lubridate::interval( -->
-<!--   lubridate::ymd(mydata$SurgeryDate), -->
-<!--   lubridate::ymd(mydata$LastFollowUpDate) -->
-<!--   ) -->
-<!-- mydata$OverallTime <- lubridate::time_length(mydata$int, "month") -->
-<!-- mydata$OverallTime <- round(mydata$OverallTime, digits = 1) -->
-<!-- ``` -->
+```r
+eval=FALSE, include=FALSE
+# Find arguments in yaml
 
+list_of_yaml <- c(
+    list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv",
+               pattern = "\\.yaml$",
+               full.names = TRUE,
+               all.files = TRUE,
+               include.dirs = TRUE,
+               recursive = TRUE
+    )
+)
 
 
+text_of_yaml_yml <- purrr::map(
+    .x = list_of_yaml,
+    .f = readLines
+)
 
-<!-- ## Multivariate Analysis Survival -->
+text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml))
 
+arglist <-
+    stringr::str_extract(
+        string = text_of_yaml_yml,
+        pattern =
+            "([[:alnum:]]*):"
+    )
 
-<!-- ```{r Multivariate Analysis, eval=FALSE, include=FALSE} -->
-<!-- library(finalfit) -->
-<!-- library(survival) -->
-<!-- explanatoryMultivariate <- explanatoryKM -->
-<!-- dependentMultivariate <- dependentKM -->
+arglist <- arglist[!is.na(arglist)]
+arglist <- unique(arglist)
+arglist <- gsub(pattern = ":", # remove some characters
+                    replacement = "",
+                    x = arglist)
+arglist <- trimws(arglist) # remove whitespace
 
-<!-- mydata %>% -->
-<!--   finalfit(dependentMultivariate, explanatoryMultivariate) -> tMultivariate -->
+cat(arglist, sep = "\n")
 
-<!-- knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r")) -->
-<!-- ``` -->
+```
 
 
-<!-- --- -->
 
-<!-- ```{r, eval=FALSE, include=FALSE} -->
-<!-- # Find arguments in yaml -->
 
-<!-- list_of_yaml <- c( -->
-<!--     list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv", -->
-<!--                pattern = "\\.yaml$", -->
-<!--                full.names = TRUE, -->
-<!--                all.files = TRUE, -->
-<!--                include.dirs = TRUE, -->
-<!--                recursive = TRUE -->
-<!--     ) -->
-<!-- ) -->
 
+```r
+#
+#                 # tUni_df_descr <- paste0("When ",
+#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
+#                 #                         " is ",
+#                 #                         tUni_df$x[2],
+#                 #                         ", there is ",
+#                 #                         tUni_df$hr_univariable[2],
+#                 #                         " times risk than ",
+#                 #                         "when ",
+#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
+#                 #                         " is ",
+#                 #                         tUni_df$x[1],
+#                 #                         "."
+#                 # )
+#
+#                 # results5 <- tUni_df_descr
+```
 
-<!-- text_of_yaml_yml <- purrr::map( -->
-<!--     .x = list_of_yaml, -->
-<!--     .f = readLines -->
-<!-- ) -->
+```r
+eval=FALSE, include=FALSE
+boot::melanoma
+rio::export(x = boot::melanoma, file = "data/melanoma.csv")
 
-<!-- text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml)) -->
+survival::colon
+rio::export(x = survival::colon, file = "data/colon.csv")
 
-<!-- arglist <- -->
-<!--     stringr::str_extract( -->
-<!--         string = text_of_yaml_yml, -->
-<!--         pattern = -->
-<!--             "([[:alnum:]]*):" -->
-<!--     ) -->
+# BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
+#
+# BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
+#
+# BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE,
+#                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )
 
-<!-- arglist <- arglist[!is.na(arglist)] -->
-<!-- arglist <- unique(arglist) -->
-<!-- arglist <- gsub(pattern = ":", # remove some characters -->
-<!--                     replacement = "", -->
-<!--                     x = arglist) -->
-<!-- arglist <- trimws(arglist) # remove whitespace -->
+library(mlbench)
 
-<!-- cat(arglist, sep = "\n") -->
+data("BreastCancer")
+BreastCancer
 
-<!-- ``` -->
+rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
 
+```
 
 
 
 
+```r
+pairwise, eval=FALSE, include=FALSE
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+# names(deneme)
 
-<!-- <!-- # --> -->
-<!-- <!-- #                 # tUni_df_descr <- paste0("When ", --> -->
-<!-- <!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --> -->
-<!-- <!-- #                 #                         " is ", --> -->
-<!-- <!-- #                 #                         tUni_df$x[2], --> -->
-<!-- <!-- #                 #                         ", there is ", --> -->
-<!-- <!-- #                 #                         tUni_df$hr_univariable[2], --> -->
-<!-- <!-- #                 #                         " times risk than ", --> -->
-<!-- <!-- #                 #                         "when ", --> -->
-<!-- <!-- #                 #                         tUni_df$dependent_surv_overall_time_outcome[1], --> -->
-<!-- <!-- #                 #                         " is ", --> -->
-<!-- <!-- #                 #                         tUni_df$x[1], --> -->
-<!-- <!-- #                 #                         "." --> -->
-<!-- <!-- #                 # ) --> -->
-<!-- <!-- # --> -->
-<!-- <!-- #                 # results5 <- tUni_df_descr --> -->
+mypairwise <-  survminer::pairwise_survdiff(
+                            formula = survival::Surv(OverallTime, Outcome) ~ TStage,
+                            data = deneme,
+                            p.adjust.method = "BH"
+                            )
 
 
-<!-- ```{r, eval=FALSE, include=FALSE} -->
-<!-- boot::melanoma -->
-<!-- rio::export(x = boot::melanoma, file = "data/melanoma.csv") -->
+mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>%
+  tibble::rownames_to_column()
 
-<!-- survival::colon -->
-<!-- rio::export(x = survival::colon, file = "data/colon.csv") -->
+mypairwise2 %>%
+  tidyr::pivot_longer(cols = -rowname) %>%
+  dplyr::filter(complete.cases(.)) %>%
+  dplyr::mutate(description =
+                            glue::glue(
+                                "The comparison between rowname and name has a p-value of round(value, 2)."
+                            )
+                    ) %>%
+                    dplyr::select(description) %>%
+                    dplyr::pull() -> mypairwisedescription
 
-<!-- # BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data" -->
-<!-- # -->
-<!-- # BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names" -->
-<!-- # -->
-<!-- # BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE, -->
-<!-- #                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") ) -->
+mypairwisedescription <- unlist(mypairwisedescription)
 
-<!-- library(mlbench) -->
+mypairwisedescription <- c(
+"In the pairwise comparison of",
+mypairwisedescription)
 
-<!-- data("BreastCancer") -->
-<!-- BreastCancer -->
-
-<!-- rio::export(x = BreastCancer, file = "data/BreastCancer.csv") -->
-
-
-
-<!-- ``` -->
-
-
-
-
-<!-- ```{r pairwise, eval=FALSE, include=FALSE} -->
-<!-- deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx")) -->
-<!-- # names(deneme) -->
-
-<!-- mypairwise <-  survminer::pairwise_survdiff( -->
-<!--                             formula = survival::Surv(OverallTime, Outcome) ~ TStage, -->
-<!--                             data = deneme, -->
-<!--                             p.adjust.method = "BH" -->
-<!--                             ) -->
-
-
-<!-- mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>% -->
-<!--   tibble::rownames_to_column() -->
-
-<!-- mypairwise2 %>% -->
-<!--   tidyr::pivot_longer(cols = -rowname) %>% -->
-<!--   dplyr::filter(complete.cases(.)) %>% -->
-<!--   dplyr::mutate(description = -->
-<!--                             glue::glue( -->
-<!--                                 "The comparison between {rowname} and {name} has a p-value of {round(value, 2)}." -->
-<!--                             ) -->
-<!--                     ) %>% -->
-<!--                     dplyr::select(description) %>% -->
-<!--                     dplyr::pull() -> mypairwisedescription -->
-
-<!-- mypairwisedescription <- unlist(mypairwisedescription) -->
-
-<!-- mypairwisedescription <- c( -->
-<!-- "In the pairwise comparison of", -->
-<!-- mypairwisedescription) -->
-
-
-
-
-<!-- ``` -->
+```
 
 
 
@@ -1370,7 +1385,8 @@ excel is also allowed but user does not see if it is csv or excel file.
 ## Diagrams
 
 
-```{r, echo=FALSE}
+```r
+echo=FALSE
 DiagrammeR::grViz(
   diagram = here::here("vignettes/graph.gv"),
   height = 200
@@ -1379,10 +1395,2325 @@ DiagrammeR::grViz(
 
 
 
-```{r eval=FALSE, include=FALSE, echo=FALSE}
+```r
+eval=FALSE, include=FALSE, echo=FALSE
 DiagrammeR::mermaid(
   diagram = here::here("vignettes/graph.mmd"),
   height = 200
 )
 ```
+
+
+
+
+
+
+```
+
+
+Remotes:
+
+    easystats/correlation,
+    easystats/report
+
+# Future Works:
+
+## ndphillips/FFTrees
+
+            # gtsummary
+
+            # myvars <- jmvcore::constructFormula(terms = self$options$vars)
+            # myvars <- jmvcore::decomposeFormula(formula = myvars)
+            # myvars <- unlist(myvars)
+            # mytableone2 <- self$data %>%
+            #     dplyr::select(myvars)
+            # mytableone2 <- gtsummary::tbl_summary(mytableone2)
+            # self$results$text2$setContent(mytableone2)
+
+
+
+    # - name: outcomeLevel
+    #   title: |
+    #       Select Event (Death, Recurrence)
+    #   type: Level
+    #   variable: (outcome)
+
+
+,
+arsenal,
+
+rlang,
+knitr,
+remotes,
+kableExtra,
+
+caret,
+irr
+Remotes:
+
+
+easystats/bayestestR,
+easystats/performance,
+easystats/parameters,
+easystats/report
+Suggests:
+    effectsize,
+emmeans,
+rmarkdown,
+igraph,
+iterators,
+rms,
+commonmark,
+sass
+
+
+# #
+# #
+# #     if (is.null(self$options$dep) || is.null(self$options$group))
+# #         return()
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #
+# #     # klass <- print(
+# #     #     list(
+# #     #         "mydep" = c(typeof(mydep), class(mydep)),
+# #     #         "mygroup" = c(typeof(mygroup), class(mygroup))
+# #     #         )
+# #     #     )
+# #
+# #
+# #     # self$results$text1$setContent(klass)
+# #
+# #
+# #     # plotData <- data.frame(gr = mygroup,
+# #     #                        dp = mydep)
+# #     # plotData <- jmvcore::naOmit(plotData)
+# #     # mydata_changes <- plotData %>%
+# #     #     dplyr::group_by(gr, dp) %>%
+# #     #     dplyr::tally(x = .)
+# #     #
+# #     # self$results$text2$setContent(mydata_changes)
+# #     #
+# #     # plotData <- data.frame(gr = mygroup,
+# #     #                        dp = mydep)
+# #     #
+# #     # plotData <- jmvcore::naOmit(plotData)
+# #     #
+# #     #
+# #     # mydata_changes <- plotData %>%
+# #     #     dplyr::group_by(gr, dp) %>%
+# #     #     dplyr::tally(x = .)
+# #     #
+# #     #
+# #     # deneme <- ggalluvial::is_alluvia_form(
+# #     #     as.data.frame(mydata_changes),
+# #     #     axes = 1:2, silent = TRUE)
+# #
+# #     # nodes = data.frame("name" =
+# #     #                        c(self$options$group,
+# #     #                          self$options$dep))
+# #     #
+# #     # links <- mydata_changes
+# #     #
+# #     # names(links) = c("source", "target", "value")
+# #     #
+# #     # deneme <- networkD3::sankeyNetwork(Links = links, Nodes = nodes,
+# #     #                                  Source = "source", Target = "target",
+# #     #                                  Value = "value", NodeID = "name",
+# #     #                                  fontSize= 12, nodeWidth = 30)
+# #
+# #
+# #
+# #     # self$results$text3$setContent(deneme)
+# #
+# #
+# #
+# #
+# #     # Prepare Data for Plot ----
+# #
+# #     direction <- self$options$direction
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #     contin <- c("integer", "numeric", "double")
+# #     categ <- c("factor")
+# #
+# # # independent, factor, continuous ----
+# # # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #
+# # # independent, continuous, continuous ----
+# # # ggscatterstats 	scatterplots 	for correlations between two variables
+# #
+# #     if (direction == "independent" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = jmvcore::toNumeric(mygroup),
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #
+# #
+# # # independent, factor, factor ----
+# # # ggbarstats 	bar charts 	for categorical data
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = mydep)
+# #
+# #
+# #
+# #     # independent, continuous, factor ----
+# #
+# #     if (direction == "independent" && class(mygroup) %in% contin && class(mydep) == "factor") {
+# #
+# #         stop("Please switch the values: factor variable should be on x-axis and continuous variable should be on y-axis")
+# #         }
+# #
+# #
+# #
+# #     # repeated, factor, continuous ----
+# #     # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+# #
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = jmvcore::toNumeric(mydep))
+# #
+# #
+# #
+# #
+# #     # repeated, continuous, continuous ----
+# #     # rmcorr::rmcorr()
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #
+# #
+# #         stop("Currently this module does not support repeated measures correlation.")
+# #
+# #     }
+# #
+# #
+# #     # repeated, factor, factor ----
+# #     # http://corybrunson.github.io/ggalluvial/
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #             plotData <- data.frame(gr = mygroup,
+# #                                    dp = mydep)
+# #
+# #
+# #
+# #     # repeated, continuous, factor ----
+# #
+# #     if (direction == "repeated" && class(mygroup) %in% contin && class(mydep) == "factor") {
+# #
+# 
+# 
+# 
+# 
+# 
+# # Results ----
+# 
+# 
+# 
+# # Send Data to Plot ----
+# 
+# # plotData <- jmvcore::naOmit(plotData)
+# # image <- self$results$plot
+# # image$setState(plotData)
+# 
+# 
+# # }
+# 
+# 
+# # ,
+# #
+# # .plot = function(image, ...) {  # <-- the plot function ----
+# #
+# #
+# #     if (is.null(self$options$dep) || is.null(self$options$group))
+# #         return()
+# #
+# #
+# #     plotData <- image$state
+# #
+# #     direction <- self$options$direction
+# #
+# #     mydata <- self$data
+# #
+# #     mydep <- self$data[[self$options$dep]]
+# #
+# #     mygroup <- self$data[[self$options$group]]
+# #
+# #     contin <- c("integer", "numeric", "double")
+# #     categ <- c("factor")
+# #
+# #     # independent, factor, continuous ----
+# #     # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+# #
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #
+# #             plot <- ggstatsplot::ggbetweenstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #         }
+# #
+# #     # independent, continuous, continuous ----
+# #     # ggscatterstats 	scatterplots 	for correlations between two variables
+# #
+# #
+# #         if (direction == "independent" && class(mygroup) %in% contin && class(mydep) %in% contin) {
+# #
+# #             plot <- ggstatsplot::ggscatterstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #
+# #         }
+# #
+# #     # independent, factor, factor ----
+# #     # ggbarstats 	bar charts 	for categorical data
+# #
+# #
+# #     if (direction == "independent" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #
+# #
+# #             plot <- ggstatsplot::ggbarstats(
+# #                                     data = plotData,
+# #                                     main = gr,
+# #                                     condition = dp
+# #                                 )
+# #         }
+# #
+# #     # repeated, factor, continuous ----
+# #     # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+# #
+# #
+# # if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) %in% contin) {
+# #
+# #
+# #             plot <- ggstatsplot::ggwithinstats(
+# #                 data = plotData,
+# #                 x = gr,
+# #                 y = dp
+# #             )
+# #
+# #         }
+# #
+# #     # repeated, continuous, continuous ----
+# #     # rmcorr::rmcorr()
+# #
+# #             # my.rmc <- rmcorr::rmcorr(participant = Subject,
+# #             #                          measure1 = PacO2,
+# #             #                          measure2 = pH,
+# #             #                          dataset = rmcorr::bland1995)
+# #             #
+# #             # plot(my.rmc, overall = TRUE)
+# #             #
+# #             # ggplot2::ggplot(rmcorr::bland1995,
+# #             #                 ggplot2::aes(x = PacO2,
+# #             #                              y = pH,
+# #             #                              group = factor(Subject),
+# #             #                              color = factor(Subject)
+# #             #                 )
+# #             # ) +
+# #             #     ggplot2::geom_point(ggplot2::aes(colour = factor(Subject))) +
+# #             #     ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1)
+# #
+# #
+# #
+# #     # repeated, factor, factor ----
+# #     # http://corybrunson.github.io/ggalluvial/
+# #     # networkD3
+# #
+# #
+# #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
+# #
+# #
+# #             mydata_changes <- plotData %>%
+# #                 dplyr::group_by(gr, dp) %>%
+# #                 dplyr::tally(x = .)
+# #
+# #
+# #             # head(as.data.frame(UCBAdmissions), n = 12)
+# #
+# #             # ggalluvial::is_alluvia_form(
+# #             #     as.data.frame(UCBAdmissions),
+# #             #     axes = 1:3, silent = TRUE)
+# #
+# #
+# #
+# #             # plot <- ggplot(as.data.frame(UCBAdmissions),
+# #             #        aes(y = Freq, axis1 = Gender, axis2 = Dept)) +
+# #             #     geom_alluvium(aes(fill = Admit), width = 1/12) +
+# #             #     geom_stratum(width = 1/12, fill = "black", color = "grey") +
+# #             #     geom_label(stat = "stratum", infer.label = TRUE) +
+# #             #     scale_x_discrete(limits = c("Gender", "Dept"), expand = c(.05, .05)) +
+# #             #     scale_fill_brewer(type = "qual", palette = "Set1") +
+# #             #     ggtitle("UC Berkeley admissions and rejections, by sex and department")
+# #
+# #
+# #
+# #
+# #
+# #             stratum <- ggalluvial::StatStratum
+# #
+# #             plot <- ggplot2::ggplot(data = mydata_changes,
+# #                                     ggplot2::aes(axis1 = gr,
+# #                        axis2 = dp,
+# #                        y = n)) +
+# #                 ggplot2::scale_x_discrete(limits = c(self$options$group, self$options$dep),
+# #                                  expand = c(.1, .05)
+# #                 ) +
+# #                 ggplot2::xlab(self$options$group) +
+# #                 ggalluvial::geom_alluvium(ggplot2::aes(fill = gr,
+# #                                   colour = gr
+# #                 )) +
+# #                 ggalluvial::geom_stratum() +
+# #                 ggalluvial::stat_stratum(geom = "stratum") +
+# #                 ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
+# #
+# #                 # ggalluvial::geom_stratum(stat = "stratum", label.strata = TRUE) +
+# #                 # ggplot2::geom_text(stat = "stratum", infer.label = TRUE) +
+# #                 # ggplot2::geom_text(label.strata = TRUE) +
+# #                 # ggalluvial::geom_stratum()
+# #                 ggplot2::theme_minimal()
+# #                 # ggplot2::ggtitle(paste0("Changes in ", self$options$group))
+# #             #
+# #             #
+# #             # nodes = data.frame("name" =
+# #             #                        c(self$options$group,
+# #             #                          self$options$dep))
+# #             #
+# #             # links <- mydata_changes
+# #             #
+# #             # names(links) = c("source", "target", "value")
+# #             #
+# #             # plot <- networkD3::sankeyNetwork(Links = links, Nodes = nodes,
+# #             #               Source = "source", Target = "target",
+# #             #               Value = "value", NodeID = "name",
+# #             #               fontSize= 12, nodeWidth = 30)
+# #
+# #             # library(networkD3)
+# #             # nodes = data.frame("name" =
+# #             #                        c("Node A", # Node 0
+# #             #                          "Node B", # Node 1
+# #             #                          "Node C", # Node 2
+# #             #                          "Node D"))# Node 3
+# #             # links = as.data.frame(matrix(c(
+# #             #     0, 1, 10, # Each row represents a link. The first number
+# #             #     0, 2, 20, # represents the node being conntected from.
+# #             #     1, 3, 30, # the second number represents the node connected to.
+# #             #     2, 3, 40),# The third number is the value of the node
+# #             #     byrow = TRUE, ncol = 3))
+# #             # names(links) = c("source", "target", "value")
+# #             # sankeyNetwork(Links = links, Nodes = nodes,
+# #             #               Source = "source", Target = "target",
+# #             #               Value = "value", NodeID = "name",
+# #             #               fontSize= 12, nodeWidth = 30)
+# #
+# #             # plot <- c("Under Construction")
+# #
+# #             # plot <- list(plot1,
+# #             #              plot2)
+# #
+# #
+# #
+# #         }
+# #
+# #
+# #
+# #     print(plot)
+# #     TRUE
+# #
+# # }
+# #
+# #         )
+# # )
+
+
+# Packages
+
+
+Imports: 
+    jmvcore (>= 0.8.5),
+    R6,
+    dplyr,
+    survival,
+    survminer,
+    finalfit,
+    arsenal,
+    purrr,
+    glue,
+    janitor,
+    ggplot2,
+    forcats,
+    ggstatsplot,
+    tableone,
+    explore,
+    tangram,
+    irr,
+    rlang,
+    tidyselect,
+    knitr
+
+
+
+Remotes:
+    easystats/correlation,
+    neuropsychology/psycho.R@0.4.0
+
+
+Suggests:
+    rmarkdown,
+    remotes,
+    devtools,
+    lubridate,
+    broom, 
+    GGally, 
+    gridExtra, 
+    Hmisc, 
+    lme4, 
+    magrittr, 
+    mice, 
+    pillar, 
+    pROC, 
+    scales, 
+    stringr, 
+    tibble, 
+    tidyr, 
+    covr, 
+    cmprsk, 
+    readr, 
+    rstan, 
+    survey, 
+    testthat, 
+    backports, 
+    generics, 
+    assertthat, 
+    pkgconfig, 
+    Rcpp, 
+    BH, 
+    plogr, 
+    ellipsis, 
+    gtable, 
+    progress, 
+    RColorBrewer, 
+    reshape, 
+    digest, 
+    lazyeval, 
+    viridisLite, 
+    withr, 
+    Formula, 
+    latticeExtra, 
+    acepack, 
+    data.table, 
+    htmlTable, 
+    viridis, 
+    htmltools, 
+    base64enc, 
+    minqa, 
+    nloptr, 
+    RcppEigen, 
+    mitml, 
+    cli, 
+    crayon, 
+    fansi, 
+    utf8, 
+    vctrs, 
+    farver, 
+    labeling, 
+    munsell, 
+    lifecycle, 
+    stringi, 
+    ggpubr, 
+    maxstat, 
+    survMisc, 
+    jsonlite, 
+    rex, 
+    evaluate, 
+    highr, 
+    markdown, 
+    xfun, 
+    hms, 
+    clipr, 
+    mime, 
+    tinytex, 
+    StanHeaders, 
+    inline, 
+    loo, 
+    pkgbuild, 
+    numDeriv, 
+    mitools, 
+    pkgload, 
+    praise, 
+    zeallot, 
+    colorspace, 
+    prettyunits, 
+    checkmate, 
+    htmlwidgets, 
+    pan, 
+    jomo, 
+    ordinal, 
+    ucminf, 
+    ggrepel,
+    ggsci, 
+    cowplot, 
+    ggsignif,
+    polynom, 
+    exactRankTests,
+    mvtnorm, 
+    KMsurv, 
+    zoo, 
+    km.ci,
+    xtable,
+    curl, 
+    openssl, 
+    askpass, 
+    sys, 
+    matrixStats,
+    callr, 
+    desc,
+    rprojroot,
+    processx, 
+    ps, 
+    DBI,
+    png, 
+    jpeg, 
+    boot, 
+    grid, 
+    snakecase,
+    caret,
+    iterators,
+    timeDate,
+    foreach,
+    plyr,
+    ModelMetrics,
+    nlme,
+    reshape2,
+    recipes,
+    BradleyTerry2,
+    e1071,
+    earth,
+    fastICA,
+    gam,
+    ipred,
+    kernlab,
+    klaR,
+    MASS,
+    ellipse,
+    mda,
+    mgcv,
+    mlbench,
+    MLmetrics,
+    nnet,
+    party,
+    pls,
+    proxy,
+    randomForest,
+    RANN,
+    spls,
+    subselect,
+    pamr,
+    superpc,
+    Cubist,
+    rpart,
+    qgraph,
+    nFactors,
+    ppcor,
+    rstanarm,
+    MuMIn,
+    blavaan,
+    
+    
+    
+    
+    
+
+
+
+# Develop
+
+
+
+# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+
+# jmvtools::check("C://Program Files//jamovi//bin")
+
+# jmvtools::install(home = "C://Program Files//jamovi//bin")
+# 
+# jmvtools::install(pkg = "C://ClinicoPath", home = "C://Program Files//jamovi//bin")
+
+# devtools::build(path = "C:\\ClinicoPathOutput")
+
+# .libPaths(new = "C:\\ClinicoPathLibrary")
+
+# devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))
+
+Sys.setenv(TZ = "Europe/Istanbul")
+
+library("jmvtools")
+
+jmvtools::check()
+
+# rhub::check_on_macos()
+
+# rhub::check_for_cran()
+
+# codemetar::write_codemeta()
+
+
+devtools::check()
+
+
+# From CRAN
+# install.packages("attachment")
+# From github
+# remotes::install_github("ThinkR-open/attachment")
+
+# If you correctly called the package dependencies in the {roxygen2} skeleton, in your functions, in your Rmarkdown vignettes and in your tests, you only need to run attachment::att_to_description()just before devtools::check(). And that’s it, there is nothing else to remember !
+# attachment::att_to_description()
+
+
+
+devtools::document()
+
+codemetar::write_codemeta()
+
+# rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
+
+
+pkgdown::build_articles()
+# pkgdown::build_favicons()
+pkgdown::build_home()
+pkgdown::build_news()
+pkgdown::build_reference()
+# pkgdown::build_reference_index()
+# pkgdown::build_tutorials()
+
+pkgdown::build_site()
+
+# devtools::github_release()
+
+
+# gitUpdateCommitPush
+CommitMessage <- paste("updated on ", Sys.time(), sep = "")
+wd <- getwd()
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' --no-verify \n git push origin master \n", sep = "")
+# gitCommand <- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+system(command = gitCommand, intern = TRUE)
+
+
+
+# jmvtools::install()
+# 
+# jmvtools::create('SuperAwesome')
+# 
+# jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
+# 
+# jmvtools::addAnalysis(name='survival', title='survival')
+# 
+# jmvtools::addAnalysis(name='correlation', title='correlation')
+# 
+# jmvtools::addAnalysis(name='tableone', title='TableOne')
+# 
+# jmvtools::addAnalysis(name='crosstable', title='CrossTable')
+# 
+# 
+# jmvtools::addAnalysis(name='writesummary', title='WriteSummary')
+
+# jmvtools::addAnalysis(name='finalfit', title='FinalFit')
+
+# jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival')
+
+# jmvtools::addAnalysis(name='report', title='Report General Features')
+
+# jmvtools::addAnalysis(name='frequencies', title='Frequencies')
+
+# jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')
+
+# jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')
+
+# jmvtools::addAnalysis(name='statsplotbetween', title='Stats Plot Between')
+
+# jmvtools::addAnalysis(name='competingsurvival', title='Competing Survival')
+
+
+# jmvtools::addAnalysis(name='scat2', title='scat2')
+
+# jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
+
+# jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')
+
+# jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
+
+# jmvtools::addAnalysis(name='tree', title='Decision Tree')
+# 
+# jmvtools::addAnalysis(name='oddsratio', title='Odds Ratio Table and Plot')
+
+# jmvtools::addAnalysis(name='roc', title='ROC')
+
+# jmvtools::addAnalysis(name = "icccoeff", title = "ICC coefficients")
+
+# jmvtools::addAnalysis(name = "gtsummary", title = "Tables via gtsummary")
+
+# jmvtools::addAnalysis(name = "alluvial", title = "Alluvial Diagrams")
+
+
+
+Sys.unsetenv("R_PROFILE_USER")
+devtools::check()
+
+devtools::install()
+
+# jmvtools::check()
+jmvtools::install()
+
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
+
+jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
+
+jmvcore::constructFormula(terms = "A B")
+
+
+jmvcore::constructFormula(terms = list("A", "B", "C"))
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+unlist(vars)
+
+cformula <- jmvcore::composeTerm(components = formula)
+
+jmvcore::composeTerm("A B")
+
+jmvcore::composeTerm(components = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = formula)
+
+jmvcore::decomposeTerm(term = cformula)
+
+
+
+composeTerm <- jmvcore::composeTerm(components = c("A", "B", "C"))
+
+jmvcore::decomposeTerm(term = composeTerm)
+
+
+
+
+BreastCancer <- readr::read_csv(file = "/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/BreastCancer.csv")
+
+usethis::use_data(BreastCancer)
+
+BreastCancer <- readr::read_csv(file = "/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/BreastCancer.csv")
+
+usethis::use_data(BreastCancer)
+
+colon <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/colon.csv")
+
+usethis::use_data(colon)
+
+
+melanoma <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/melanoma.csv")
+
+usethis::use_data(melanoma)
+
+
+rocdata <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/rocdata.csv")
+
+usethis::use_data(rocdata)
+
+histopathology <- readr::read_csv(file = 
+"/Users/serdarbalciold/histopathRprojects/ClinicoPath/data/histopathology.csv")
+
+usethis::use_data(histopathology)
+
+
+
+
+## force git
+
+
+# gitUpdateCommitPush
+CommitMessage <- paste("updated on ", Sys.time(), sep = "")
+wd <- getwd()
+gitCommand <- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
+system(command = gitCommand, intern = TRUE)
+
+
+
+
+## update project for release
+
+
+
+readyfunctions <- c(
+    "refs",
+    # "^agreement",
+    # "^competingsurvival",
+    # "^correlation",
+    "^crosstable",
+    # "^decision",
+    # "^decisioncalculator",
+    # "^icccoeff",
+    "^multisurvival",
+    "^oddsratio",
+    # "^pairchi2",
+    "^reportcat",
+    # "^roc",
+    "^statsplot2",
+    "^summarydata",
+    "^survival",
+    "^tableone"
+    # "^tree",
+    # "^utils-pipe"
+    # "^vartree"
+)
+
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
+file.copy(from = files_R,
+          to = "~/ClinicoPath/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/ClinicoPath/jamovi/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_data,
+          to = "~/ClinicoPath/data/",
+          overwrite = TRUE)
+
+file.copy(from = files_data,
+          to = "~/histopathRprojects/ClinicoPath/inst/extdata/",
+          overwrite = TRUE)
+
+
+# Example
+
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+library(magrittr)
+
+corx <- deneme %>%
+                dplyr::select(Age, OverallTime) %>% 
+                stats::cor(method = "spearman") %>%
+                report::report()
+
+
+
+
+
+
+
+
+
+
+
+inherits(deneme$Sex, "character")
+
+
+
+ggstatsplot::ggbetweenstats(data = deneme,
+                            x = Sex,
+                            y = Age,
+                            type = "p")
+
+ClinicoPath::statsplot2(
+    data = deneme,
+    dep = Age,
+    group = Sex)
+
+
+
+
+
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+# library("ClinicoPath")
+
+deneme$Age <- as.numeric(as.character(deneme$Age))
+
+ClinicoPath::writesummary(data = deneme, vars = Age)
+
+ggstatsplot::normality_message(deneme$Age, "Age")
+
+
+ClinicoPath::writesummary(
+    data = deneme,
+    vars = Age)
+
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+library(dplyr)
+library(survival)
+library(finalfit)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::finalfit(data = deneme,
+                      explanatory = Sex,
+                      outcome = Outcome,
+                      overalltime = OverallTime)
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+ClinicoPath::decision(
+    data = deneme,
+    gold = Outcome,
+    goldPositive = "1",
+    newtest = Smoker,
+    testPositive = "TRUE")
+
+ClinicoPath::decision(
+    data = deneme,
+    gold = LVI,
+    goldPositive = "Present",
+    newtest = PNI,
+    testPositive = "Present")
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ggstatsplot::ggbetweenstats(data = deneme, 
+                            x = LVI,
+                            y = Age)
+
+
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+ClinicoPath::statsplot(
+    data = deneme,
+    dep = Age,
+    group = Smoker)
+
+mytable <- table(deneme$Outcome, deneme$Smoker)
+
+caret::confusionMatrix(mytable)
+confusionMatrix(pred, truth)
+confusionMatrix(xtab, prevalence = 0.25)
+
+levels(deneme$Outcome)
+
+mytable[1,2]
+
+d <- "0"
+
+mytable[d, "FALSE"]
+
+mytable[[0]]
+
+
+formula <- jmvcore::constructFormula(terms = c("A", "B", "C"))
+
+jmvcore::constructFormula(terms = list("A", "B", "C"))
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+vars <- jmvcore::decomposeTerms(vars)
+
+
+vars <- unlist(vars)
+
+formula <- as.formula(formula)
+
+
+my_group <- "lvi"
+
+jmvcore::composeTerm(my_group)
+
+
+my_dep <- "age"
+
+formula <- paste0('x = ', group, 'y = ', dep)
+myformula <- as.formula(formula)
+
+myformula <- glueformula::gf({my_group}, {my_dep})
+
+myformula <- glue::glue( 'x = ' , {my_group}, ', y = ' , {my_dep})
+
+myformula <- jmvcore::composeTerm(myformula)
+
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+library(survival)
+km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
+
+library(dplyr)
+km_fit_median_df <- summary(km_fit)
+km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+                janitor::clean_names(dat = ., case = "snake") %>%
+                tibble::rownames_to_column(.data = ., var = "LVI")
+
+
+library(dplyr)
+library(survival)
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+myoveralltime <- deneme$OverallTime
+myoutcome <- deneme$Outcome
+myexplanatory <- deneme$LVI
+
+class(myoveralltime)
+class(myoutcome)
+typeof(myexplanatory)
+
+is.ordered(myexplanatory)
+
+formula2 <- jmvcore::constructFormula(terms = "myexplanatory")
+# formula2 <- jmvcore::decomposeFormula(formula = formula2)
+# formula2 <- paste("", formula2)
+# formula2 <- as.formula(formula2)
+formula2 <- jmvcore::composeTerm(formula2)
+
+
+formulaL <- jmvcore::constructFormula(terms = "myoveralltime")
+# formulaL <- jmvcore::decomposeFormula(formula = formulaL)
+
+formulaR <- jmvcore::constructFormula(terms = "myoutcome")
+# formulaR <- jmvcore::decomposeFormula(formula = formulaR)
+
+formula <- paste("Surv(", formulaL, ",", formulaR, ")")
+# formula <- jmvcore::composeTerm(formula)
+# formula <- as.formula(formula)
+# jmvcore::constructFormula(terms = c(formula, formula2))
+
+deneme %>%
+  finalfit::finalfit(formula, formula2) -> tUni
+
+tUni
+
+library(dplyr)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(LVI, Age)
+results
+
+mydep <- deneme$Age
+mygroup <- deneme$LVI
+
+
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mygroup <- jmvcore::composeTerm(mygroup)
+
+mydep <- jmvcore::constructFormula(terms = "mydep")
+mydep <- jmvcore::composeTerm(mydep)
+
+
+# not working
+# eval(mygroup)
+# rlang::eval_tidy(mygroup)
+# !!mygroup
+# {{mygroup}}
+# sym(mygroup)
+# quote(mygroup)
+# enexpr(mygroup)
+
+mygroup <- jmvcore::constructFormula(terms = "mygroup")
+mydep <- jmvcore::constructFormula(terms = "mydep")
+
+formula1 <- paste(mydep)
+formula1 <- jmvcore::composeTerm(formula1)
+
+
+mygroup <- paste(mygroup)
+mygroup <- jmvcore::composeTerm(mygroup)
+
+mydep <- deneme$Age
+mygroup <- deneme$LVI
+
+mydep <- jmvcore::resolveQuo(jmvcore::enquo(mydep))
+mygroup <- jmvcore::resolveQuo(jmvcore::enquo(mygroup))
+
+mydata2 <- data.frame(mygroup=mygroup, mydep=mydep)
+
+results <- mydata2 %>%
+                ggstatsplot::ggbetweenstats(
+x = mygroup, y = mydep  )
+
+results
+
+
+
+myformula <- glue::glue('x = ', {mygroup}, ', y = ' , {mydep})
+
+myformula <- jmvcore::composeTerm(myformula)
+
+myformula <- as.formula(myformula)
+
+
+
+mydep2 <- quote(mydep)
+mygroup2 <- quote(mygroup)
+
+
+results <- deneme %>%
+                ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2)
+results
+
+
+formula <- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
+
+vars <- jmvcore::decomposeFormula(formula = formula) 
+
+
+explanatory <- jmvcore::constructFormula(terms = c("explanatory"))    
+
+explanatory <- jmvcore::decomposeFormula(formula = explanatory)
+
+explanatory <- unlist(explanatory)
+
+myformula <- paste("Surv(", vars[1], ", ", vars[2], ")")
+
+
+
+deneme %>%
+finalfit::finalfit(myformula, explanatory) -> tUni
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+table3 <-
+  tangram::html5(
+    tangram::tangram(
+      "Death ~ LVI + PNI + Age", deneme),
+    fragment=TRUE,
+    # style = "hmisc",
+    style = "nejm",
+    # inline="nejm.css",
+    caption = "HTML5 Table",
+    id="tbl3")
+
+table3
+
+mydep <- deneme$Age
+mygroup <- deneme$Death
+
+
+formulaR <- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age"))
+
+formulaL <- jmvcore::constructFormula(terms = "Death")
+
+formula <- paste(formulaL, '~', formulaR)
+
+# formula <- as.formula(formula)
+
+sty <- jmvcore::composeTerm(components = "nejm")
+
+gr <- jmvcore::composeTerm(components = "Death")
+
+
+table <- tangram::html5(
+    tangram::tangram(formula, deneme
+                     ),
+    fragment=TRUE,
+    # style = "hmisc",
+    # style = "nejm",
+    style = sty,
+    # inline="nejm.css",
+    caption = paste0("HTML5 Table ", gr),
+    id="tbl4")
+
+table
+
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+mydata <- deneme
+
+formula2 <- jmvcore::constructFormula(terms = c("LVI", "PNI", "Age"))
+
+formulaR <- jmvcore::constructFormula(terms = "Death")
+
+formulaR <- jmvcore::toNumeric(formulaR)
+
+
+
+plot <-
+                finalfit::or_plot(
+                    .data = mydata,
+                    dependent = formulaR,
+                    explanatory = formula2,
+                    remove_ref = FALSE,
+                    table_text_size = 4,
+                    title_text_size = 14,
+                    random_effect = NULL,
+                    factorlist = NULL,
+                    glmfit = NULL,
+                    confint_type = NULL,
+                    breaks = NULL,
+                    column_space = c(-0.5, 0, 0.5),
+                    dependent_label = "Death",
+                    prefix = "",
+                    suffix = ": OR (95% CI, p-value)",
+                    table_opts = NULL,
+                    plot_opts = list(
+                    ggplot2::xlab("OR, 95% CI"),
+                    ggplot2::theme(
+                    axis.title = ggplot2::element_text(size = 12)
+                    )
+                    )
+                    )
+
+
+
+# Other Codes
+
+
+
+## arsenal
+
+
+tab1 <- arsenal::tableby(~ Age + Sex, data = deneme)
+
+results <- summary(tab1)
+
+
+# results$object
+# results$control
+# results$totals
+# results$hasStrata
+# results$text
+# results$pfootnote
+# results$term.name
+# 
+# tab1$Call
+# 
+# tab1$control
+
+tab1$tables # this is where results lie
+
+
+
+
+
+## define survival time
+
+
+mydata$int <- lubridate::interval(
+  lubridate::ymd(mydata$SurgeryDate),
+  lubridate::ymd(mydata$LastFollowUpDate)
+  )
+mydata$OverallTime <- lubridate::time_length(mydata$int, "month")
+mydata$OverallTime <- round(mydata$OverallTime, digits = 1)
+
+
+
+
+
+## Multivariate Analysis Survival
+
+
+
+library(finalfit)
+library(survival)
+explanatoryMultivariate <- explanatoryKM
+dependentMultivariate <- dependentKM
+
+mydata %>%
+  finalfit(dependentMultivariate, explanatoryMultivariate) -> tMultivariate
+
+knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))
+
+
+# Find arguments in yaml
+
+list_of_yaml <- c(
+    list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv",
+               pattern = "\\.yaml$",
+               full.names = TRUE,
+               all.files = TRUE,
+               include.dirs = TRUE,
+               recursive = TRUE
+    )
+)
+
+
+text_of_yaml_yml <- purrr::map(
+    .x = list_of_yaml,
+    .f = readLines
+)
+
+text_of_yaml_yml <- as.vector(unlist(text_of_yaml_yml)) 
+
+arglist <-
+    stringr::str_extract(
+        string = text_of_yaml_yml, 
+        pattern = 
+            "([[:alnum:]]*):"
+    )
+
+arglist <- arglist[!is.na(arglist)]
+arglist <- unique(arglist)
+arglist <- gsub(pattern = ":", # remove some characters
+                    replacement = "",
+                    x = arglist)
+arglist <- trimws(arglist) # remove whitespace
+
+cat(arglist, sep = "\n")
+
+
+#
+#                 # tUni_df_descr <- paste0("When ",
+#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
+#                 #                         " is ",
+#                 #                         tUni_df$x[2],
+#                 #                         ", there is ",
+#                 #                         tUni_df$hr_univariable[2],
+#                 #                         " times risk than ",
+#                 #                         "when ",
+#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
+#                 #                         " is ",
+#                 #                         tUni_df$x[1],
+#                 #                         "."
+#                 # )
+#
+#                 # results5 <- tUni_df_descr
+
+
+
+boot::melanoma
+rio::export(x = boot::melanoma, file = "data/melanoma.csv")
+
+survival::colon
+rio::export(x = survival::colon, file = "data/colon.csv")
+
+# BreastCancerData <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
+# 
+# BreastCancerNames <- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
+# 
+# BreastCancerData <- read.csv(file = BreastCancerData, header = FALSE,
+#                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )
+
+library(mlbench)
+
+data("BreastCancer")
+BreastCancer
+
+rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
+
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+# names(deneme)
+
+mypairwise <-  survminer::pairwise_survdiff(
+                            formula = survival::Surv(OverallTime, Outcome) ~ TStage,
+                            data = deneme,
+                            p.adjust.method = "BH"
+                            )
+
+
+mypairwise2 <- as.data.frame(mypairwise[["p.value"]]) %>% 
+  tibble::rownames_to_column()
+
+mypairwise2 %>% 
+  tidyr::pivot_longer(cols = -rowname) %>% 
+  dplyr::filter(complete.cases(.)) %>% 
+  dplyr::mutate(description =
+                            glue::glue(
+                                "The comparison between {rowname} and {name} has a p-value of {round(value, 2)}."
+                            )
+                    ) %>% 
+                    dplyr::select(description) %>%
+                    dplyr::pull() -> mypairwisedescription
+
+mypairwisedescription <- unlist(mypairwisedescription)
+
+mypairwisedescription <- c(
+"In the pairwise comparison of",
+mypairwisedescription)
+
+
+
+            # mydata <- self$data
+
+            # mydep <- self$data[[self$options$dep]]
+            # mygroup <- self$data[[self$options$group]]
+            #
+            #
+            # plotData <- data.frame(gr = mygroup, dp = jmvcore::toNumeric(mydep))
+            # plotData <- jmvcore::naOmit(plotData)
+            #
+            # image <- self$results$plot
+            #
+            # image$setState(plotData)
+
+
+            # self$results$text1$setContent(plotData)
+
+
+            # mydepType <- data.frame(vclass = class(mydep),
+            #                         vtypeof = typeof(mydep),
+            #                         vordered = is.ordered(mydep),
+            #                         vfactor = is.factor(mydep),
+            #                         vnumeric = is.numeric(mydep),
+            #                         vdouble = is.double(mydep),
+            #                         vcharacter = is.character(mydep),
+            #                         vdate = lubridate::is.Date(mydep),
+            #                         vdate2 = is.na.POSIXlt(mydep)
+            #                         )
+            # mygroupType <- class(mygroup)
+            # variableTypes <- list(mydepType, mygroupType)
+            # self$results$text1$setContent(variableTypes)
+
+            # plotData <- image$state
+
+
+            # https://indrajeetpatil.github.io/ggstatsplot/
+            # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+            # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+            #
+            # ggdotplotstats 	dot plots/charts 	for distribution about labeled numeric variable
+            #
+            # ggbarstats 	bar charts 	for categorical data
+            #
+            # ggscatterstats 	scatterplots 	for correlations between two variables
+
+            # http://corybrunson.github.io/ggalluvial/
+
+
+            # plot <- ggplot(plotData, aes(x = gr,
+            #                              y = dp)) +
+            #     geom_point()
+
+            # plot <- plotData %>%
+            #     ggstatsplot::ggbetweenstats(
+            #         x = gr,
+            #         y = dp
+            #         )
+
+library(readr)
+BreastCancer <- read_csv("data/BreastCancer.csv")
+View(BreastCancer)
+
+
+
+mytarget <- "Class"
+myvars <- c("Cl.thickness",
+            "Cell.size",
+            "Cell.shape",
+            "Marg.adhesion",
+            "Epith.c.size",
+            "Bare.nuclei",
+            "Bl.cromatin",
+            "Normal.nucleoli",
+            "Mitoses")
+
+mydata <- BreastCancer %>% 
+    select(mytarget, myvars)
+
+formula <- jmvcore::constructFormula(terms = mytarget)
+
+formula <- paste(formula, '~ .')
+
+formula <- as.formula(formula)
+
+ # Create an FFTrees object from the data
+ FFTrees.fft <- FFTrees::FFTrees(
+     formula = formula,
+     data = mydata
+     )
+
+ # Plot the best tree applied to the test data
+ plot2 <- plot(FFTrees.fft,
+      data = mydata
+      # ,
+      # main = "Heart Disease",
+      # decision.labels = c("Healthy", "Disease")
+                 )
+
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+ClinicoPath::statsplotbetween(
+    data = deneme,
+    dep = LVI,
+    group = PNI)
+
+myirr <- data.frame(
+          Rater1 = c(0L,1L,1L,0L,0L,0L,1L,1L,1L,0L,1L,
+                 1L,1L,1L,1L,0L,NA,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,
+                 1L,1L,0L,1L,1L,1L,0L,0L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 1L,1L,0L,1L,0L,1L,1L,0L,0L,1L,0L,1L,1L,1L,0L,0L,
+                 0L,0L,1L,1L,1L,0L,0L,1L,1L,1L,1L,0L,0L,0L,1L,0L,
+                 0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,
+                 0L,1L,1L,1L,0L,1L,1L,1L,0L,1L,1L,0L,0L,1L,0L,1L,
+                 1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,0L,0L,
+                 1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 0L,0L,1L,1L,0L,1L,1L,0L,1L,0L,1L,1L,1L,0L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,
+                 0L,0L,1L,1L,1L,1L,0L,0L,1L,1L,0L,1L,1L,1L,0L,1L,
+                 0L,1L,1L,1L,1L,0L,0L,0L,0L,1L,0L,1L,1L,1L,0L,
+                 0L,1L,1L,1L,0L,1L,0L,0L,0L,1L,1L,1L,0L,1L,0L,0L,
+                 0L,1L,1L),
+          Rater2 = c(0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,
+                 0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,0L,1L,1L,1L,0L,
+                 1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,
+                 1L,1L,0L,1L,1L,1L,0L,0L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 1L,1L,0L,1L,0L,1L,1L,0L,0L,1L,0L,1L,1L,1L,0L,0L,
+                 0L,0L,1L,1L,1L,0L,0L,1L,1L,1L,1L,0L,0L,0L,1L,0L,
+                 0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,0L,1L,1L,
+                 0L,1L,1L,1L,0L,1L,1L,1L,0L,1L,1L,0L,0L,1L,0L,1L,
+                 1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,1L,1L,1L,1L,0L,0L,
+                 1L,0L,1L,1L,1L,1L,1L,0L,0L,1L,1L,1L,1L,1L,0L,
+                 0L,0L,1L,1L,0L,1L,1L,0L,1L,0L,1L,1L,1L,0L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,
+                 0L,0L,1L,1L,1L,1L,0L,0L,1L,1L,0L,1L,1L,1L,1L,1L,
+                 1L,1L,1L,1L,1L,1L,1L,1L,1L,1L,0L,1L,1L,1L,0L,
+                 0L,1L,1L,1L,0L,1L,0L,0L,0L,1L,1L,1L,0L,1L,0L,0L,
+                 0L,1L,1L)
+)
+
+myirr <- myirr %>% 
+    dplyr::mutate(
+        RaterA = dplyr::case_when(
+            Rater1 == 0 ~ "Negative",
+            Rater1 == 1 ~ "Positive"
+        )
+    ) %>% 
+    dplyr::mutate(
+        RaterB = dplyr::case_when(
+            Rater2 == 0 ~ "Negative",
+            Rater2 == 1 ~ "Positive"
+        )
+    ) %>% 
+    dplyr::select(RaterA, RaterB) %>% 
+    mutate(RaterA = as.factor(RaterA)) %>% 
+    mutate(RaterB = as.factor(RaterB))
+
+table <- myirr %$% 
+table(RaterA, RaterB)
+
+mymatrix <- caret::confusionMatrix(table, positive = "Positive")
+mymatrix
+
+caret::sensitivity(table, positive = "Positive")
+
+
+mymatrix2 <- caret::confusionMatrix(table, positive = "Positive", prevalence = 0.25)
+mymatrix2
+
+
+ dat <- as.table(
+                matrix(c(670,202,74,640),
+                       nrow = 2,
+                       byrow = TRUE)
+                )
+
+            colnames(dat) <- c("Dis+","Dis-")
+            rownames(dat) <- c("Test+","Test-")
+
+            rval <- epiR::epi.tests(dat, conf.level = 0.95)
+
+            rval <- list(
+                dat,
+                rval,
+                print(rval),
+                summary(rval)
+                         )
+
+devtools::install(upgrade = FALSE, quick = TRUE)
+library(dplyr)
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+ratings <- deneme %>% 
+    dplyr::select(LVI, PNI, Age, ID)
+
+
+f <- unlist(lapply(ratings, class))
+
+any(f == "numeric")
+
+all(f == "numeric")
+
+
+xtitle <- names(ratings)[1]
+ytitle <- names(ratings)[2]
+
+result <- table(ratings[,1], ratings[,2],
+                dnn = list(xtitle, ytitle))
+
+table(ratings)
+
+
+
+result1 <- irr::agree(ratings)
+
+
+result2 <- irr::kappa2(ratings)
+
+
+ClinicoPath::agreement(
+    data = deneme,
+    vars = c(LVI,PNI)
+)
+
+
+result2 <- irr::kappam.fleiss(
+                    ratings = ratings,
+                    exact = FALSE,
+                    detail = TRUE)
+
+
+
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mytree <- vtree::vtree(deneme, "LVI PNI")
+
+# write(mytree[["x"]][["diagram"]], 
+#       file = here::here("/tododata/trial1.gv"))
+
+# DiagrammeR::grViz(diagram = here::here("/tododata/trial1.gv"))
+
+diagram <- mytree[["x"]][["diagram"]]
+
+mytree2 <- DiagrammeR::grViz(diagram = diagram)
+
+
+print(mytree2)
+
+
+
+# Packages for Development
+
+
+
+
+
+## rpkgtools
+
+
+devtools::install_github("IndrajeetPatil/rpkgtools")
+
+
+
+## available
+
+
+Check if a package name is available to use https://docs.ropensci.org/available
+
+
+https://github.com/r-lib/available
+
+
+
+available::available("clinicopath")
+available::available("lens2r")
+
+
+
+
+
+## bench
+
+
+High Precision Timing of R Expressions http://bench.r-lib.org/
+
+https://github.com/r-lib/bench
+
+
+
+
+
+
+## desc
+
+
+Manipulate DESCRIPTION files
+https://github.com/r-lib/desc
+
+
+
+## pkgverse
+
+pkgverse: Build a Meta-Package Universe
+https://pkgverse.mikewk.com/
+
+
+
+## pkgbuild
+
+pkgbuild: Find Tools Needed to Build R Packages
+https://github.com/r-lib/pkgbuild
+
+
+## pkgload
+
+pkgload: Simulate Package Installation and Attach
+https://github.com/r-lib/pkgload
+
+
+## rcmdcheck
+
+rcmdcheck: Run 'R CMD check' from 'R' and Capture Results
+https://github.com/r-lib/rcmdcheck
+
+
+
+
+## remotes
+
+
+## sessioninfo
+
+Print Session Information
+
+https://github.com/r-lib/sessioninfo
+
+
+
+## "covr
+
+
+
+
+## "exampletestr
+
+
+## "covrpage",
+
+
+## "gramr",
+
+
+## "lintr",
+
+
+## "goodpractice",
+
+
+## "pkgdown",
+
+
+## "usethis",
+
+
+## "testthat",
+
+
+## "spelling",
+
+
+## "RTest",
+
+https://towardsdatascience.com/rtest-pretty-testing-of-r-packages-50f50b135650
+
+
+## "rhub",
+
+
+## "roxygen2",
+
+
+## "sinew",
+
+
+## "styler",
+
+
+
+## "vdiffr"
+
+
+
+
+## "attachment (https://github.com/ThinkR-open/attachment)
+## "covrpage (https://github.com/yonicd/covrpage)
+## "defender (https://github.com/ropenscilabs/defender)
+## "gramr (https://github.com/ropenscilabs/gramr)
+## "packagemetrics (https://github.com/ropenscilabs/packagemetrics)
+## "pRojects (https://github.com/lockedata/pRojects)
+## "revdepcheck (https://github.com/r-lib/revdepcheck)
+## "roxygen2Comment (https://github.com/csgillespie/roxygen2Comment)
+## "roxygen2md (https://github.com/r-lib/roxygen2md)
+## "testdown (https://github.com/ThinkR-open/testdown)
+## "tic (https://github.com/ropenscilabs/tic)
+
+
+
+
+
+            # Table1 <- table(mydata[[testVariable]], mydata[[goldVariable]])
+
+
+            # Table1 <- mydata %>%
+            #     janitor::tabyl(.data[[testVariable]], .data[[goldVariable]]) %>%
+            #     janitor::adorn_totals(dat = ., where = c("row", "col")) %>%
+            #     janitor::adorn_percentages(dat = ., denominator = "row") %>%
+            #     janitor::adorn_percentages(dat = ., denominator = "col") %>%
+            #     janitor::adorn_pct_formatting(dat = ., rounding = "half up", digits = 1) %>%
+            #     janitor::adorn_ns(dat = .) %>%
+            #     janitor::adorn_title("combined")
+            # results1 <- Table1
+
+                # results1 <- summary(km_fit)$table
+
+                # km_fit_median_df <- summary(km_fit)
+                # km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
+                #     janitor::clean_names(dat = ., case = "snake") %>%
+                #     tibble::rownames_to_column(.data = .)
+
+                # results1 <- tibble::as_tibble(results1,
+                #                              .name_repair = "minimal") %>%
+                #     janitor::clean_names(dat = ., case = "snake") %>%
+                #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+
+
+table2 <- matrix(c(80, 20, 30, 70), nrow = 2, ncol = 2, byrow = TRUE, dimnames = list(c("Positive", "Negative"), c("Positive","Negative")))
+
+            table3 <- as.table(table2)
+
+            names(attributes(table3)$dimnames) <- c("Test","Gold Standart")
+
+caretresult <- caret::confusionMatrix(table3, mode = "everything")
+
+
+
+table3 <- matrix(c(80L, 20L, 25L, 30L, 70L, 75L), nrow = 2, ncol = 3, byrow = TRUE)
+
+
+# RVAideMemoire::chisq.multcomp() RVAideMemoire::fisher.multcomp()
+
+result1 <- RVAideMemoire::chisq.multcomp(table3)
+
+result1 <- result1[["p.value"]]
+
+
+result1 <- as.data.frame(result1) %>%
+                                tibble::rownames_to_column()
+
+result1 <- result1 %>%
+    tidyr::pivot_longer(cols = -rowname) %>%
+    dplyr::filter(complete.cases(.))
+
+
+
+
+myfun <- function(i,j) {
+    if(!is.na(result1[i,j])){
+    paste0(    
+dimnames(result1)[[1]][i],
+" vs ",
+dimnames(result1)[[2]][j],
+" p= ",    
+result1[i,j])
+    }
+}
+
+for (i in 1:dim(result1)[1]) {
+for (j in 1:dim(result1)[2]) {
+    des <- myfun(i,j)
+    if(!is.null(des)) print(des)
+}
+}
+
+
+myfun1 <- function(i,j) {
+    if(!is.na(result1[i,j])){
+dimnames(result1)[[1]][i]
+    }
+}
+
+
+for (i in 1:dim(result1)[1]) {
+for (j in 1:dim(result1)[2]) {
+    des <- myfun1(i,j)
+    if(!is.null(des)) print(des)
+}
+}
+
+
+
+
+
+myfun(3,3)
+
+myfun(1,2)
+
+
+dimnames(result1)[[1]][2]
+
+
+RVAideMemoire::fisher.multcomp(table3)
+
+
+# rmngb::pairwise.chisq.test(x, ...)  rmngb::pairwise.fisher.test(x, ...)
+
+
+library(rmngb)
+x <- sample(1:2, 1e3, TRUE)
+g <- sample(1:4, 1e3, TRUE)
+result2 <- rmngb::pairwise.chisq.test(x, g)
+tab <- table(g, x)
+
+resultrmngb <- rmngb::pairwise.fisher.test(tab, p.adj = "bonf")
+
+result2[["p.value"]]
+resultrmngb[["p.value"]]
+
+rmngb::pairwise.chisq.test(tab)
+
+
+
+
+
+ 
+formula <- jmvcore::constructFormula(terms = self$options$vars)
+formula <- paste('~', formula)
+formula <- as.formula(formula)
+table1 <- arsenal::tableby(formula, self$data,
+total = TRUE,
+digits = 1,
+digits.count = 1
+)
+myarsenal <- summary(table1, text = "html")
+myarsenal <- kableExtra::kable(myarsenal, format = "html",
+digits = 1,
+escape = TRUE) %>%
+kableExtra::kable_styling(kable_input = .,
+bootstrap_options = "striped",
+full_width = F,
+position = "left")
+
+
+
+library(dplyr)
+
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+
+varsName <- c("LVI", "PNI")
+
+tablelist <- list()
+
+                for (i in 1:length(varsName)) {
+
+                    var <- varsName[i]
+                    
+                    
+                    table <- deneme %>%
+                        janitor::tabyl(dat = ., var) %>%
+                        janitor::adorn_totals("row") %>%
+                        janitor::adorn_pct_formatting(dat = .)
+
+                    tablelist[[i]] <- table
+
+                }
+
+tablelist
+
+
+
+
+
+
+            data <- self$data
+
+            vars <- self$options$vars
+
+            facs <- self$options$facs
+
+            target <- self$options$target
+
+            # data <- jmvcore::select(data, c(vars, facs, target))
+
+
+            if ( ! is.null(vars))
+            for (var in vars)
+                data[[var]] <- jmvcore::toNumeric(data[[var]])
+
+            if ( ! is.null(facs))
+            for (fac in facs)
+                data[[fac]] <- as.factor(data[[fac]])
+
+
+            data[[target]] <- as.factor(data[[target]])
+
+            data <- jmvcore::naOmit(data)
+            
+            
+            
+            
+            
+
+            # TODO
+
+            # todo <- glue::glue(
+            #     "This Module is still under development
+            #     -
+            #     -
+            #     "
+            # )
+
+            # self$results$todo$setContent(todo)
+
+            # if (nrow(self$data) == 0)
+            #     stop('Data contains no (complete) rows')
+
+
+            # if (is.null(self$options$vars) || is.null(self$options$target))
+            #     return()
+
+
+            # prepare data for explore ----
+            # https://cran.r-project.org/web/packages/explore/vignettes/explore.html
+
+
+            # result1 <- iris %>% explore::explain_tree(target = Species)
+            #
+            # self$results$text1$setContent(result1)
+
+
+            # image <- self$results$plot
+
+            # image$setState(plotData)
+
+
+
+            # from https://forum.jamovi.org/viewtopic.php?f=2&t=1287
+            # library(caret)
+            # library(partykit)
+            # detach("package:partykit", unload=TRUE)
+            # library(party)
+
+            # Conditional Trees
+
+            # set.seed(3456)
+            # model <- train(
+            #     yvar ~ .,
+            #     data = df,
+            #     method = 'ctree2',
+            #     trControl = trainControl("cv", number = 10, classProbs = FALSE),
+            #     tuneGrid = expand.grid(maxdepth = 3, mincriterion = 0.95)
+            # )
+            # plot(model$finalModel)
+            #
+            # t(sapply(unique(where(model$finalModel)), function(x) {
+            #     n <- nodes(model$finalModel, x)[[1]]
+            #     yvar <- df[as.logical(n$weights), "yvar"]
+            #     cbind.data.frame("Node" = as.integer(x),
+            #                      psych::describe(yvar, quant=c(.25,.50,.75), skew = FALSE))
+            # }))
+            
+            
+            
+            
+            
+
+
+            # data <- private$.cleanData()
+
+            # vars <- self$options$vars
+            # facs <- self$options$facs
+            # target <- self$options$target
+
+            # tree1 <- data %>%
+            #     explore::explain_tree(target = .data[[target]])
+
+
+
+
+            # if (is.null(self$options$vars) || is.null(self$options$target))
+            #     return()
+
+
+            # varsName <- self$options$vars
+            #
+            # facsName <- self$options$facs
+            #
+            # targetName <- self$options$target
+            #
+            # data <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+            #
+            # data[[varsName]] <- jmvcore::toNumeric(data[[varsName]])
+            #
+            # for (fac in facsName)
+            #     data[[facsName]] <- as.factor(data[[facsName]])
+            #
+            # data <- jmvcore::naOmit(data)
+
+
+
+
+            # tree1 <- data %>%
+            #     explore::explain_tree(target = .data[[targetName]])
+
+
+            # plot <- iris %>% explore::explain_tree(target = Species)
+            # if (length(self$options$dep) + length(self$options$group) < 2)
+            #     return()
+
+            # tree1 <- iris %>% explore::explain_tree(target = Species)
+            # iris$is_versicolor <- ifelse(iris$Species == "versicolor", 1, 0)
+            # tree2 <- iris %>%
+            # dplyr::select(-Species) %>%
+            # explore::explain_tree(target = is_versicolor)
+            # tree3 <- iris %>%
+            # explore::explain_tree(target = Sepal.Length)
+
+
+
+library(magrittr)
+# devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mydata <- deneme
+
+varsName <- "Age"
+
+# facsName <- c("LVI", "PNI")
+
+targetName <- "Outcome"
+
+mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+mydata <- jmvcore::select(mydata, c(varsName, 
+                                    # facsName, 
+                                    targetName))
+
+mydata <- jmvcore::naOmit(mydata)
+
+
+
+explore::explain_tree(data = mydata,
+                      target = targetName
+                      )
+
+mydata %>%
+explore::explain_tree(target = .data[[targetName]])
+
+
+
+
+iris %>% explore::explain_tree(target = Species)
+
+
+
+
+BreastCancer %>%
+                dplyr::select(all_of(mytarget), all_of(myvars)) %>%
+                explore::explain_tree(target = .data[[mytarget]])
+
+
+
+
+ClinicoPath::tree(
+    data = data,
+    vars = Age,
+    facs = vars(LVI, PNI),
+    target = Mortality)
+
+
+mytarget <- "Class"
+myvars <- c("Cl.thickness",
+            "Cell.size",
+            "Cell.shape",
+            "Marg.adhesion",
+            "Epith.c.size",
+            "Bare.nuclei",
+            "Bl.cromatin",
+            "Normal.nucleoli",
+            "Mitoses")
+
+# mytarget <- jmvcore::composeTerms(mytarget)
+# mytarget <- jmvcore::constructFormula(terms = mytarget)
+
+
+
+# install.packages("easyalluvial")
+library(magrittr)
+# devtools::install(upgrade = FALSE, quick = TRUE)
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mydata <- deneme
+
+var1 <- "TStage"
+
+var2 <- "Grade"
+
+mydata <- jmvcore::select(df = mydata, columnNames = c(var1, var2))
+
+mydata <- jmvcore::naOmit(mydata)
+
+plot <- 
+easyalluvial::alluvial_wide( data = mydata
+                , max_variables = 5
+                , fill_by = 'first_variable'
+                , verbose = TRUE
+                )
+
+plot %>% 
+    easyalluvial::add_marginal_histograms(mydata)
+
+
+
+```
+
 

@@ -17,6 +17,26 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
+            # Error Message ----
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
+                # ToDo Message ----
+                todo <- "
+                <br>Welcome to ClinicoPath
+                          <br><br>
+                          This tool will help you form an Alluvial Plots.
+                          "
+                html <- self$results$todo
+                html$setContent(todo)
+
+            } else {
+                todo <- ""
+                html <- self$results$todo
+                html$setContent(todo)
+
+
             # Prepare Data ----
 
             varsName <- self$options$vars
@@ -41,58 +61,16 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text1$setContent(sumdata)
 
-        }
-
-        ,
-        .plot1 = function(image, ...) {  # <-- the plot1 function ----
 
 
-            # Prepare Data ----
+            # Select Graph Style ----
 
-            varsName <- self$options$vars
-
-            facsName <- self$options$facs
-
-            targetName <- self$options$target
-
-            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
-
-            mydata[[targetName]] <- as.factor(mydata[[targetName]])
-
-            mydata <- jmvcore::naOmit(mydata)
+            sty <- self$options$sty
 
 
-            # Tree function explore ----
+            # rpart ----
 
-
-            plot1 <-
-                explore::explain_tree(data = mydata,
-                                      target = .data[[targetName]]
-                                      )
-
-            print(plot1)
-            TRUE
-
-        }
-
-        ,
-        .plot2 = function(image, ...) {  # <-- the plot2 function ----
-
-
-            # Prepare Data ----
-
-            varsName <- self$options$vars
-
-            facsName <- self$options$facs
-
-            targetName <- self$options$target
-
-            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
-
-            mydata[[targetName]] <- as.factor(mydata[[targetName]])
-
-            mydata <- jmvcore::naOmit(mydata)
-
+            if (sty == "rpart") {
 
             # Prepare formula ----
 
@@ -103,7 +81,134 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myformula <- as.formula(myformula)
 
 
-            # Tree function FFTrees ----
+            # rpart function ----
+
+            tree <- rpart::rpart(myformula, data = mydata, cp = .02)
+
+            self$results$text2$setContent(tree)
+
+
+            # FFTrees ----
+            } else if (sty == "fftrees") {
+
+
+                # Prepare Data ----
+
+                varsName <- self$options$vars
+
+                facsName <- self$options$facs
+
+                targetName <- self$options$target
+
+                targetLevel <- self$options$targetLevel
+
+                mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+
+                mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+                mydata[["targetName2"]] <- ifelse(
+                    mydata[[targetName]] == targetLevel, TRUE, FALSE)
+
+                mydata <- jmvcore::naOmit(mydata)
+
+
+
+                self$results$text2$setContent(mydata)
+
+
+
+
+
+
+
+
+
+
+
+            }
+
+
+            }
+        }
+
+        ,
+        .plot1 = function(image, ...) {  # <-- the plot1 function ----
+
+
+
+            # Error Message ----
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) )
+                return()
+
+
+            # Prepare Data ----
+
+            varsName <- self$options$vars
+
+            facsName <- self$options$facs
+
+            targetName <- self$options$target
+
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+            mydata <- jmvcore::naOmit(mydata)
+
+
+            # Explore ----
+
+
+            plot1 <-
+                explore::explain_tree(data = mydata,
+                                      target = .data[[targetName]]
+                                      )
+
+            print(plot1)
+            TRUE
+        }
+
+        ,
+        .plot2 = function(image, ...) {  # <-- the plot2 function ----
+
+            # Error Message ----
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) )
+                return()
+
+            # Prepare Data ----
+
+            varsName <- self$options$vars
+
+            facsName <- self$options$facs
+
+            targetName <- self$options$target
+
+            targetLevel <- self$options$targetLevel
+
+            mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
+
+            mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+            mydata[[targetName]] <- ifelse(
+                mydata[[targetName]] == targetLevel, TRUE, FALSE)
+
+            mydata <- jmvcore::naOmit(mydata)
+
+            # Prepare formula ----
+
+            myformula <- jmvcore::constructFormula(terms = self$options$target)
+
+            myformula <- paste(myformula, '~ .')
+
+            myformula <- as.formula(myformula)
+
+            # FFTrees ----
 
             mytree.fft <- FFTrees::FFTrees(
                 formula = myformula,
@@ -123,6 +228,14 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .plot3 = function(image, ...) {  # <-- the plot3 function ----
 
+
+            # Error Message ----
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) )
+                return()
+
             # Prepare Data ----
 
             varsName <- self$options$vars
@@ -137,9 +250,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- jmvcore::naOmit(mydata)
 
-
-            # Prepare formula ----
-
+            # rpart ----
 
             myformula <- jmvcore::constructFormula(terms = self$options$target)
 
@@ -160,8 +271,6 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             TRUE
 
         }
-
-
         )
 )
 

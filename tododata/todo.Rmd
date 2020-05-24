@@ -835,6 +835,7 @@ pkgdown::build_reference()
 
 pkgdown::build_site()
 
+# devtools::github_release()
 
 ```
 
@@ -1837,7 +1838,7 @@ myvars <- c("Cl.thickness",
             "Mitoses")
 
 mydata <- BreastCancer %>% 
-    select(mytarget, myvars)
+    select(., c(mytarget, myvars))
 
 formula <- jmvcore::constructFormula(terms = mytarget)
 
@@ -1845,15 +1846,24 @@ formula <- paste(formula, '~ .')
 
 formula <- as.formula(formula)
 
+datn <- round(dim(mydata)[1] /10)
+
+mydata_train <- mydata[1:datn, ]
+
+mydata_test <- mydata[(datn+1):(dim(mydata)[1]), ]
+
+
  # Create an FFTrees object from the data
  FFTrees.fft <- FFTrees::FFTrees(
      formula = formula,
-     data = mydata
+     data = mydata_train,
+     data.test = mydata_test,
+     main = mydata
      )
 
  # Plot the best tree applied to the test data
  plot2 <- plot(FFTrees.fft,
-      data = mydata
+      data = mydata_test
       # ,
       # main = "Heart Disease",
       # decision.labels = c("Healthy", "Disease")
@@ -2668,4 +2678,35 @@ plot %>%
 
 
 ```
+
+
+
+
+## Diagrams
+
+
+```{r eval=FALSE, include=FALSE}
+echo=FALSE
+DiagrammeR::grViz(
+  diagram = here::here("vignettes/graph.gv"),
+  height = 200
+)
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+DiagrammeR::mermaid(
+  diagram = here::here("vignettes/graph.mmd"),
+  height = 200
+)
+```
+
+
+
+
+
+
+
+
 

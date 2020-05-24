@@ -4,7 +4,7 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, vars, facs, target, sty = "explore")
+tree(data, vars, facs, target, targetLevel, sty = "explore")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -15,12 +15,16 @@ tree(data, vars, facs, target, sty = "explore")
 
 \item{target}{target variable}
 
+\item{targetLevel}{.}
+
 \item{sty}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

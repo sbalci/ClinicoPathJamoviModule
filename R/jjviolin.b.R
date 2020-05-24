@@ -69,8 +69,9 @@ jjviolinClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <- mydata %>%
                 ggplot2::ggplot(.,
                                 ggplot2::aes(x = .data[[group]],
-                                             y = .data[[dep]]
-                                             # , fill = .data[[col]]
+                                             y = .data[[dep]],
+                                             fill = NULL
+                                                 # .data[[col]]
                                             )
                                     ) +
                 ggplot2::geom_violin()
