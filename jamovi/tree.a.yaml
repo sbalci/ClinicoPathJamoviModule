@@ -50,12 +50,6 @@ options:
       type: Level
       variable: (target)
 
-
-    # - name: sc
-    #   title: Show Plot
-    #   type: Bool
-    #   default: false
-
     - name: sty
       title: Tree Style
       type: List
