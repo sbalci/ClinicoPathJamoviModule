@@ -10,7 +10,6 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             facs = NULL,
             target = NULL,
             targetLevel = NULL,
-            sc = FALSE,
             sty = "explore", ...) {
 
             super$initialize(
@@ -46,10 +45,6 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "targetLevel",
                 targetLevel,
                 variable="(target)")
-            private$..sc <- jmvcore::OptionBool$new(
-                "sc",
-                sc,
-                default=FALSE)
             private$..sty <- jmvcore::OptionList$new(
                 "sty",
                 sty,
@@ -63,7 +58,6 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..facs)
             self$.addOption(private$..target)
             self$.addOption(private$..targetLevel)
-            self$.addOption(private$..sc)
             self$.addOption(private$..sty)
         }),
     active = list(
@@ -71,14 +65,12 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         facs = function() private$..facs$value,
         target = function() private$..target$value,
         targetLevel = function() private$..targetLevel$value,
-        sc = function() private$..sc$value,
         sty = function() private$..sty$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
         ..target = NA,
         ..targetLevel = NA,
-        ..sc = NA,
         ..sty = NA)
 )
 
@@ -163,7 +155,6 @@ treeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param facs categorical explanatory variables
 #' @param target target variable
 #' @param targetLevel .
-#' @param sc .
 #' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -179,7 +170,6 @@ tree <- function(
     facs,
     target,
     targetLevel,
-    sc = FALSE,
     sty = "explore") {
 
     if ( ! requireNamespace('jmvcore'))
@@ -203,7 +193,6 @@ tree <- function(
         facs = facs,
         target = target,
         targetLevel = targetLevel,
-        sc = sc,
         sty = sty)
 
     analysis <- treeClass$new(
