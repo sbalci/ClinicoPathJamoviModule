@@ -35,8 +35,3 @@ children:
     children:
       - type: ComboBox
         name: sty
-  # - type: LayoutBox
-  #   margin: large
-  #   children:
-  #     - type: CheckBox
-  #       name: sc
