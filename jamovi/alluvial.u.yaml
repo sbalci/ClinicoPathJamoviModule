@@ -4,7 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-
   - type: VariableSupplier
     persistentItems: true
     stretchFactor: 1
@@ -23,8 +22,6 @@ children:
             name: condensationvar
             isTarget: true
             maxItemCount: 1
-
-
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -50,6 +47,8 @@ children:
                     name: marg
                   - type: CheckBox
                     name: verb
+                  - type: CheckBox
+                    name: flip
           - type: LayoutBox
             cell:
               column: 1
@@ -67,3 +66,15 @@ children:
                     name: fill
                   - type: ComboBox
                     name: bin
+                  - type: CheckBox
+                    name: flip
+                  - type: TextBox
+                    name: mytitle
+                    format: string
+                    width: large
+                    enable: (flip)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: usetitle

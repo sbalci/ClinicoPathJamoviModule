@@ -10,12 +10,6 @@ items:
       type:  Html
       clearWith:
           - vars
-          - excl
-          - marg
-          - verb
-          - fill
-          - bin
-
 
     # - name:  plothtml
     #   title: Plot html
@@ -25,8 +19,6 @@ items:
     #       - excl
     #       - marg
     #       - inter
-
-
 
     - title: Alluvial Diagrams
       name: plot
@@ -42,6 +34,8 @@ items:
           - verb
           - fill
           - bin
+          - flip
+          - mytitle
 
 
     - title: '`Condensation Plot ${condensationvar}`'

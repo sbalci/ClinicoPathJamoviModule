@@ -110,6 +110,30 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     easyalluvial::add_marginal_histograms(mydata)
                     }
 
+
+            # flip coord ----
+
+            flip <- self$options$flip
+
+            if (flip) {
+                plot <- plot +
+                    ggplot2::coord_flip() +
+                    ggplot2::theme_minimal()
+            }
+
+
+            # add title ----
+
+            mytitle <- self$options$mytitle
+
+            usetitle <- self$options$usetitle
+
+            if (usetitle) {
+                plot <- plot +
+                    ggplot2::ggtitle(mytitle)
+            }
+
+
             # Print Plot ----
             print(plot)
             TRUE
