@@ -296,6 +296,7 @@ ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovi
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/58d3ac13dcff4dc09542bb3d77e4ac8e)](https://app.codacy.com/manual/drserdarbalci/ClinicoPathJamoviModule?utm_source=github.com&utm_medium=referral&utm_content=sbalci/ClinicoPathJamoviModule&utm_campaign=Badge_Grade_Dashboard)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/)
 [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/joethorley/stability-badges#experimental)
 [![GitHub
