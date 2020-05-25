@@ -94,6 +94,25 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # https://finalfit.org/articles/survival.html#death-status
 
 
+               dod <- self$options$dod
+
+               dooc <- self$options$dooc
+
+               awd <- self$options$awd
+
+               awod <- self$options$awod
+
+
+               results <- list("Dead of disease" = dod,
+                    "Dead of other causes" = dooc,
+                    "Alive with Disease" = awd,
+                    "Alive wo Disease" = awod)
+
+
+               self$results$text1$setContent(results)
+
+
+
 }
 
         })

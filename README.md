@@ -33,6 +33,12 @@ DOI 10.17605/OSF.IO/9SZUD
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
+You can install this module after installing jamovi version \>= 1.2.19
+from here: <https://www.jamovi.org/download.html>
+
+Then you can install this module directly inside the jamovi, using
+library.
+
 <img src="man/figures/jamovi-library.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-ClinicoPath-0.0.2-released.gif" align="center" width = 75% />
@@ -320,7 +326,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--25-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last
@@ -403,7 +409,7 @@ Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/deps
 version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--05--25-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub last

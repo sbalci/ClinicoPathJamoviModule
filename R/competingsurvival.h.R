@@ -13,10 +13,6 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dooc = NULL,
             awd = NULL,
             awod = NULL,
-            usedod = FALSE,
-            usedooc = FALSE,
-            useawd = FALSE,
-            useawod = FALSE,
             sty = FALSE, ...) {
 
             super$initialize(
@@ -51,35 +47,23 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..dod <- jmvcore::OptionLevel$new(
                 "dod",
                 dod,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..dooc <- jmvcore::OptionLevel$new(
                 "dooc",
                 dooc,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..awd <- jmvcore::OptionLevel$new(
                 "awd",
                 awd,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..awod <- jmvcore::OptionLevel$new(
                 "awod",
                 awod,
-                variable="(outcome)")
-            private$..usedod <- jmvcore::OptionBool$new(
-                "usedod",
-                usedod,
-                default=FALSE)
-            private$..usedooc <- jmvcore::OptionBool$new(
-                "usedooc",
-                usedooc,
-                default=FALSE)
-            private$..useawd <- jmvcore::OptionBool$new(
-                "useawd",
-                useawd,
-                default=FALSE)
-            private$..useawod <- jmvcore::OptionBool$new(
-                "useawod",
-                useawod,
-                default=FALSE)
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..sty <- jmvcore::OptionBool$new(
                 "sty",
                 sty,
@@ -92,10 +76,6 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dooc)
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
-            self$.addOption(private$..usedod)
-            self$.addOption(private$..usedooc)
-            self$.addOption(private$..useawd)
-            self$.addOption(private$..useawod)
             self$.addOption(private$..sty)
         }),
     active = list(
@@ -106,10 +86,6 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         dooc = function() private$..dooc$value,
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
-        usedod = function() private$..usedod$value,
-        usedooc = function() private$..usedooc$value,
-        useawd = function() private$..useawd$value,
-        useawod = function() private$..useawod$value,
         sty = function() private$..sty$value),
     private = list(
         ..explanatory = NA,
@@ -119,10 +95,6 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..dooc = NA,
         ..awd = NA,
         ..awod = NA,
-        ..usedod = NA,
-        ..usedooc = NA,
-        ..useawd = NA,
-        ..useawod = NA,
         ..sty = NA)
 )
 
@@ -130,7 +102,7 @@ competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text = function() private$.items[["text"]]),
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -148,7 +120,7 @@ competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
+                name="text1",
                 title="Competing Survival"))}))
 
 competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -187,15 +159,11 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dooc .
 #' @param awd .
 #' @param awod .
-#' @param usedod .
-#' @param usedooc .
-#' @param useawd .
-#' @param useawod .
 #' @param sty .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
@@ -208,10 +176,6 @@ competingsurvival <- function(
     dooc,
     awd,
     awod,
-    usedod = FALSE,
-    usedooc = FALSE,
-    useawd = FALSE,
-    useawod = FALSE,
     sty = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -238,10 +202,6 @@ competingsurvival <- function(
         dooc = dooc,
         awd = awd,
         awod = awod,
-        usedod = usedod,
-        usedooc = usedooc,
-        useawd = useawd,
-        useawod = useawod,
         sty = sty)
 
     analysis <- competingsurvivalClass$new(

@@ -26,7 +26,8 @@ Depends:
 Imports: 
     jmvcore,
     R6,
-    magrittr
+    magrittr,
+    ggplot2
 Remotes:
     ddsjoberg/gtsummary,
     ndphillips/FFTrees,
@@ -38,7 +39,6 @@ Suggests:
     dplyr,
     finalfit,
     ggalluvial,
-    ggplot2,
     ggstatsplot,
     glue,
     janitor,
@@ -74,7 +74,8 @@ Suggests:
     Hmisc,
     rmarkdown,
     corpcor,
-    rARPACK
+    rARPACK,
+    pkgnet
 VignetteBuilder:
     knitr
 Encoding: UTF-8

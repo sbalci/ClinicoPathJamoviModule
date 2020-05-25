@@ -13,7 +13,7 @@ items:
           - outcome
           - overalltime
 
-    - name:  text
+    - name:  text1
       title: Competing Survival
       type:  Preformatted
 
