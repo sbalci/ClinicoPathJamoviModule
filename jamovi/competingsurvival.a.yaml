@@ -6,6 +6,7 @@ menuSubgroup: Survival
 version: '1.0.0'
 jas: '1.2'
 
+
 description:
     main: Function for Competing Survival.
     R:
@@ -46,36 +47,44 @@ options:
       title: Dead of Disease
       type: Level
       variable: (outcome)
+      allowNone: true
+      # default: NULL
     - name: dooc
       title: Dead of Other
       type: Level
       variable: (outcome)
+      allowNone: true
+      # default: NULL
     - name: awd
       title: Alive w Disease
       type: Level
       variable: (outcome)
+      allowNone: true
+      # default: NULL
     - name: awod
       title: Alive w/o Disease
       type: Level
       variable: (outcome)
+      allowNone: true
+      # default: NULL
 
 
-    - name: usedod
-      title: ''
-      type: Bool
-      default: false
-    - name: usedooc
-      title: ''
-      type: Bool
-      default: false
-    - name: useawd
-      title: ''
-      type: Bool
-      default: false
-    - name: useawod
-      title: ''
-      type: Bool
-      default: false
+    # - name: usedod
+    #   title: ''
+    #   type: Bool
+    #   default: false
+    # - name: usedooc
+    #   title: ''
+    #   type: Bool
+    #   default: false
+    # - name: useawd
+    #   title: ''
+    #   type: Bool
+    #   default: false
+    # - name: useawod
+    #   title: ''
+    #   type: Bool
+    #   default: false
 
 
     - name: sty

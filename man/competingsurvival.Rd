@@ -13,10 +13,6 @@ competingsurvival(
   dooc,
   awd,
   awod,
-  usedod = FALSE,
-  usedooc = FALSE,
-  useawd = FALSE,
-  useawod = FALSE,
   sty = FALSE
 )
 }
@@ -37,21 +33,13 @@ competingsurvival(
 
 \item{awod}{.}
 
-\item{usedod}{.}
-
-\item{usedooc}{.}
-
-\item{useawd}{.}
-
-\item{useawod}{.}
-
 \item{sty}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

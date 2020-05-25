@@ -37,34 +37,34 @@ children:
             margin: none
             style: list-inline
             children:
-              - type: LayoutBox
-                margin: none
-                fitToGrid: true
-                children:
-                  - type: CheckBox
-                    name: usedod
-                  - type: CheckBox
-                    name: usedooc
-                  - type: CheckBox
-                    name: useawd
-                  - type: CheckBox
-                    name: useawod
+              # - type: LayoutBox
+              #   margin: none
+              #   fitToGrid: true
+              #   children:
+              #     - type: CheckBox
+              #       name: usedod
+              #     - type: CheckBox
+              #       name: usedooc
+              #     - type: CheckBox
+              #       name: useawd
+              #     - type: CheckBox
+              #       name: useawod
               - type: LayoutBox
                 margin: none
                 fitToGrid: true
                 children:
                   - type: LevelSelector
                     name: dod
-                    enable: (outcome && usedod)
+                    enable: (outcome)
                   - type: LevelSelector
                     name: dooc
-                    enable: (outcome && usedooc)
+                    enable: (outcome)
                   - type: LevelSelector
                     name: awd
-                    enable: (outcome && useawd)
+                    enable: (outcome)
                   - type: LevelSelector
                     name: awod
-                    enable: (outcome && useawod)
+                    enable: (outcome)
   - type: CollapseBox
     label: Options
     collapsed: true

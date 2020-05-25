@@ -2,6 +2,7 @@
 #' @return Alluvial Plot
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import ggplot2
 #' @importFrom magrittr %>%
 #'
 
@@ -64,12 +65,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # verbose ----
-
-            verbose <- FALSE
-
+            # verbose <- FALSE
             verb <- self$options$verb
-
-            if (isTRUE(verb)) verbose <- TRUE
+            # if (isTRUE(verb)) verbose <- TRUE
 
             # fill_by ----
 
@@ -96,7 +94,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 easyalluvial::alluvial_wide( data = mydata,
                                              max_variables = 6,
                                              fill_by = fill,
-                                             verbose = verbose,
+                                             verbose = verb,
                                              bin_labels = bin
                 )
 
@@ -125,6 +123,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # add title ----
 
             mytitle <- self$options$mytitle
+
+            # mytitle <- jmvcore::composeTerm(components = mytitle)
 
             usetitle <- self$options$usetitle
 
