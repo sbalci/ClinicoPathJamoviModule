@@ -23,28 +23,24 @@ children:
             maxItemCount: 1
             isTarget: true
 
+
   - type: CollapseBox
     label: Options
     stretchFactor: 1
     collapsed: true
     children:
-
       - type: LayoutBox
         margin: large
-        cell:
-          column: 1
-          row: 0
         stretchFactor: 1
         children:
-
           - type: LayoutBox
-            margin: large
+            cell:
+              column: 0
+              row: 0
             stretchFactor: 1
             children:
-
               - type: Label
-                margin: large
-                label: ''
+                label: Options1
                 fitToGrid: true
                 children:
                     - type: CheckBox
@@ -56,20 +52,22 @@ children:
                     - type: CheckBox
                       name: flip
           - type: LayoutBox
-            margin: large
+            cell:
+              column: 1
+              row: 0
             stretchFactor: 1
             children:
               - type: Label
-                label: ''
+                label: Options2
                 fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
                 children:
                     - type: ComboBox
                       name: fill
-
                     - type: ComboBox
                       name: bin
-
-
                     - type: CheckBox
                       name: usetitle
                     - type: TextBox

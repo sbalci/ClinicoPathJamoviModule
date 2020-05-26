@@ -1,8 +1,9 @@
 ---
 name:  competingsurvival
 title: Competing Survival
-menuGroup: ClinicoPath2
-menuSubgroup: Survival
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Survival for Competing Risks'
 version: '1.0.0'
 jas: '1.2'
 

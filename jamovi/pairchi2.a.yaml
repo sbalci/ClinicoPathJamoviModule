@@ -1,7 +1,7 @@
 ---
 name: pairchi2
 title: Pairwise Chi-Square Test
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Comparisons
 menuTitle: Pairwise Chi-Square Test
 menuSubtitle: Pairwise Chi-Square Test

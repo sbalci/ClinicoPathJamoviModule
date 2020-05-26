@@ -1,8 +1,8 @@
 ---
 name:  alluvial
 title: Alluvial Diagrams
-menuGroup: ClinicoPath2
-menuSubgroup: Descriptives
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
 version: '1.0.0'
 jas: '1.2'
 options:

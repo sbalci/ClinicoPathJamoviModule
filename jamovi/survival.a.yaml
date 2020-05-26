@@ -1,8 +1,9 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: ClinicoPath
-menuSubgroup: Survival
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
 version: '1.0.0'
 jas: '1.2'
 

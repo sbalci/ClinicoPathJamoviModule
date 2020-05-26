@@ -1,8 +1,9 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: ClinicoPath
-menuSubgroup: Survival
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Odds Ratio for Binary Outcomes'
 version: '1.0.0'
 jas: '1.2'
 

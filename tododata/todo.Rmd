@@ -788,12 +788,12 @@ library("jmvtools")
 ```
 
 
-```{r check, include=FALSE}
+```{r check, eval=FALSE, include=FALSE}
 jmvtools::check()
 
 # rhub::check_on_macos()
 
-# rhub::check_for_cran()
+rhub::check_for_cran()
 
 # codemetar::write_codemeta()
 
@@ -1026,25 +1026,36 @@ system(command = gitCommand, intern = TRUE)
 
 readyfunctions <- c(
     "refs",
-    # "^agreement",
-    # "^competingsurvival",
-    # "^correlation",
+    # "^utils-pipe"
+
+# Descriptives
+    "^tableone",
+    "^summarydata",
+    "^reportcat",
+    "^alluvial",
+    # "^vartree"
+
+# Comparisons
     "^crosstable",
-    # "^decision",
-    # "^decisioncalculator",
-    # "^icccoeff",
+    "^statsplot2",
+    # "^pairchi2",
+    # "^correlation",
+    
+# Survival
+    "^survival",
     "^multisurvival",
     "^oddsratio",
-    # "^pairchi2",
-    "^reportcat",
+    # "^competingsurvival",
+    
+# Agreement
+    "^agreement"
+    # "^icccoeff",
+
+# Decision
+    # "^decision",
+    # "^decisioncalculator",
     # "^roc",
-    "^statsplot2",
-    "^summarydata",
-    "^survival",
-    "^tableone"
-    # "^tree",
-    # "^utils-pipe"
-    # "^vartree"
+    # "^tree"
 )
 
 

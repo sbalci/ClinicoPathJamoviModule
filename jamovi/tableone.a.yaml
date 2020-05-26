@@ -1,8 +1,8 @@
 ---
 name:  tableone
 title: Table One
-menuGroup: ClinicoPath
-menuSubgroup: Descriptives
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
 version: '0.0.1'
 jas: '1.2'
 
