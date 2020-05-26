@@ -1,7 +1,7 @@
 ---
 name:  icccoeff
 title: ICC coefficients
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Agreement
 version: '1.0.0'
 jas: '1.2'

@@ -1,7 +1,7 @@
 ---
 name:  roc
 title: ROC
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: Decision
 version: '1.0.0'
 jas: '1.2'

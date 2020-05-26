@@ -16,22 +16,22 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Descriptives
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: Function for making Table One.
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Descriptives
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: Function for Generating Summaries for Continuous Variables.
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Descriptives
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: Function for Generating Summaries for Categorical Variables.
   - title: Cross Tables
@@ -51,24 +51,27 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     description: Function for Generating Summaries for Survival Analysis.
+    menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
   - title: Multivariate Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariate Survival Analysis
     description: Function for Multivariate Survival Analysis using Cox-regression.
+    menuSubtitle: Cox-regression
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Survival
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
     menuTitle: Odds Ratio Table and Plot
     description: Function for Odds Ratio Table and Plot.
+    menuSubtitle: Odds Ratio for Binary Outcomes
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
@@ -79,10 +82,11 @@ analyses:
   - title: Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Survival
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
     menuTitle: Competing Survival
     description: Function for Competing Survival.
+    menuSubtitle: Survival for Competing Risks
   - title: Correlation
     name: correlation
     ns: ClinicoPath
@@ -111,14 +115,14 @@ analyses:
   - title: Decision Tree
     name: tree
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuSubgroup: Decision
     menuTitle: Decision Tree
     description: Function for making Decision Trees.
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuTitle: Pairwise Chi-Square Test
     menuSubgroup: Comparisons
     description: >
@@ -137,14 +141,14 @@ analyses:
   - title: ROC
     name: roc
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuSubgroup: Decision
     menuTitle: ROC
     description: Function for ROC Analysis.
   - title: ICC coefficients
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: ClinicoPath
     menuSubgroup: Agreement
     menuTitle: ICC coefficients
     description: Function for Interclass Correlation Coefficient Calculation.
@@ -157,8 +161,8 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
-    menuSubgroup: Descriptives
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
     menuTitle: Alluvial Diagrams
   - title: Violin Plots Between
     name: jjbetweenstats
