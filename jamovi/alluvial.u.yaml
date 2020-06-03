@@ -14,7 +14,7 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-            maxItemCount: 6
+
       - type: TargetLayoutBox
         label: Condensation Variable
         children:

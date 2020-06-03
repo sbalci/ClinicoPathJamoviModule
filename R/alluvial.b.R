@@ -92,7 +92,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             plot <-
                 easyalluvial::alluvial_wide( data = mydata,
-                                             max_variables = 6,
+                                             max_variables = 8,
                                              fill_by = fill,
                                              verbose = verb,
                                              bin_labels = bin
@@ -146,7 +146,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             #Errors ----
 
-            if (is.null(self$options$condensationvar) )
+            if (is.null(self$options$condensationvar) || is.null(self$options$vars))
                 return()
 
             if (nrow(self$data) == 0)
@@ -158,13 +158,13 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             condvarName <- jmvcore::composeTerm(components = condvarName)
 
-            mydata2 <- self$data
+            mydata <- self$data
 
 
             # easyalluvial ----
 
             plot2 <-
-                easyalluvial::plot_condensation(df = mydata2,
+                easyalluvial::plot_condensation(df = mydata,
                                                 first = .data[[condvarName]])
 
             # Print Plot ----

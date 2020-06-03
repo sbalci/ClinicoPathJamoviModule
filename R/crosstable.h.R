@@ -75,11 +75,14 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Cross Tables")
+                title="`Cross Table - ${group}`")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "vars",
+                    "group")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle1",

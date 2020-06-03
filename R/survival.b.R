@@ -61,7 +61,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 Survival should be numeric, continuous, and in months.
                 <br><br>
                 This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                                   "
+                <br><hr>"
                 )
 
                 html <- self$results$todo
@@ -79,8 +79,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
-
-
 
 
                 # Check if outcome variable is suitable or stop ----
@@ -345,7 +343,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 dplyr::filter(complete.cases(.)) %>%
                                 dplyr::mutate(description =
                                                   glue::glue(
-                                                      "The comparison between ", self$options$explanatory, " {rowname} and ", self$options$explanatory," {name} has a p-value of {round(value, 2)}."
+                                                      "The comparison between ", self$options$explanatory, " {rowname} and ", self$options$explanatory," {name} has a p-value of {format.pval(value, digits = 3, eps = 0.001)}."
                                                   )
                                 ) %>%
                                 dplyr::select(description) %>%

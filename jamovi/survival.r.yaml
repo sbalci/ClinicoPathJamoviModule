@@ -75,7 +75,7 @@ items:
 
     - name:  text9
       title: '`Pairwise Comparison Summary - ${explanatory}`'
-      type:  Html
+      type:  Preformatted
       clearWith:
           - explanatory
           - outcome

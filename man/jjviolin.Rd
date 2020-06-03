@@ -4,7 +4,19 @@
 \alias{jjviolin}
 \title{Violin Plot}
 \usage{
-jjviolin(data, dep, group, col, excl = TRUE)
+jjviolin(
+  data,
+  dep,
+  group,
+  col,
+  fill,
+  excl = TRUE,
+  flip = FALSE,
+  themex = "ipsum",
+  usexlabel = FALSE,
+  xlabel = "",
+  ylabel = ""
+)
 }
 \arguments{
 \item{data}{.}
@@ -15,7 +27,19 @@ jjviolin(data, dep, group, col, excl = TRUE)
 
 \item{col}{.}
 
+\item{fill}{.}
+
 \item{excl}{.}
+
+\item{flip}{.}
+
+\item{themex}{.}
+
+\item{usexlabel}{.}
+
+\item{xlabel}{.}
+
+\item{ylabel}{.}
 }
 \value{
 A results object containing:

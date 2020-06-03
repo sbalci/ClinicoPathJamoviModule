@@ -19,7 +19,13 @@ options:
       title: Grouping Variable
       type: Variable
 
+
     - name: col
+      title: Color Variable
+      type: Variable
+
+
+    - name: fill
       title: Color Variable
       type: Variable
 
@@ -28,6 +34,61 @@ options:
       title: Exclude Missing (NA)
       type: Bool
       default: true
+
+
+    - name: flip
+      title: Flip Coordinates
+      type: Bool
+      default: false
+
+    - name: themex
+      title: Theme
+      type: List
+      options:
+        - title: ipsum
+          name: ipsum
+        - title: grey
+          name: grey
+        - title: gray
+          name: gray
+        - title: bw
+          name: bw
+        - title: linedraw
+          name: linedraw
+        - title: light
+          name: light
+        - title: dark
+          name: dark
+        - title: minimal
+          name: minimal
+        - title: classic
+          name: classic
+        - title: void
+          name: void
+        - title: test
+          name: test
+      default: ipsum
+
+
+
+    - name: usexlabel
+      title: Use xlabel
+      type: Bool
+      default: false
+
+    - name: xlabel
+      title: >
+          x-axis label
+      type: String
+      default: ''
+
+
+    - name: ylabel
+      title: >
+          y-axis label
+      type: String
+      default: ''
+
 
 
 ...

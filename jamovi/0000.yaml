@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0007
+version: 0.0.2.0009
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-05-24'
+date: '2020-06-01'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -90,7 +90,7 @@ analyses:
   - title: Correlation
     name: correlation
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: Drafts
     menuSubgroup: Correlation
     menuTitle: Correlation
     description: Function for Correlation.
@@ -134,7 +134,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: Drafts
     menuSubgroup: Descriptives
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
@@ -155,7 +155,7 @@ analyses:
   - title: Tables via gtsummary
     name: gtsummary
     ns: ClinicoPath
-    menuGroup: ClinicoPath2
+    menuGroup: Drafts
     menuTitle: Tables via gtsummary
     menuSubgroup: Comparisons
   - title: Alluvial Diagrams
@@ -220,6 +220,6 @@ datasets:
     tags:
       - ROC
 usesNative: true
-minApp: 1.2.19
+minApp: 1.2.22
 
 ...
