@@ -12,7 +12,9 @@ items:
           - dep
           - group
           - col
+          - fill
           - excl
+          - flip
 
     - name: plot
       title: '`Violin Plot ${group} - {dep}`'
@@ -25,9 +27,16 @@ items:
           - dep
           - group
           - col
+          - fill
           - excl
+          - flip
+          - themex
+          - xlabel
+          - ylabel
 
 refs:
+    - ggplot2
     - RGraphGallery
+    - hrbrthemes
 
 ...

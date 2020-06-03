@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0007
-Date: 2020-05-24
+Version: 0.0.2.0009
+Date: 2020-06-01
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -28,13 +28,6 @@ Imports:
     R6,
     magrittr,
     ggplot2
-Remotes:
-    ddsjoberg/gtsummary,
-    ndphillips/FFTrees,
-    easystats/report,
-    spgarbet/tangram@0.3.2,
-    cran/rmngb,
-    mixOmicsTeam/mixOmics
 Suggests:
     dplyr,
     finalfit,
@@ -75,7 +68,16 @@ Suggests:
     rmarkdown,
     corpcor,
     rARPACK,
-    pkgnet
+    pkgnet,
+    hrbrthemes
+Remotes:
+    r-lib/rlang,
+    ddsjoberg/gtsummary,
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram@0.3.2,
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
 VignetteBuilder:
     knitr
 Encoding: UTF-8

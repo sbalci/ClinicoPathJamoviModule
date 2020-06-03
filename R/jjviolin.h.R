@@ -9,7 +9,13 @@ jjviolinOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             col = NULL,
-            excl = TRUE, ...) {
+            fill = NULL,
+            excl = TRUE,
+            flip = FALSE,
+            themex = "ipsum",
+            usexlabel = FALSE,
+            xlabel = "",
+            ylabel = "", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -26,26 +32,79 @@ jjviolinOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..col <- jmvcore::OptionVariable$new(
                 "col",
                 col)
+            private$..fill <- jmvcore::OptionVariable$new(
+                "fill",
+                fill)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..flip <- jmvcore::OptionBool$new(
+                "flip",
+                flip,
+                default=FALSE)
+            private$..themex <- jmvcore::OptionList$new(
+                "themex",
+                themex,
+                options=list(
+                    "ipsum",
+                    "grey",
+                    "gray",
+                    "bw",
+                    "linedraw",
+                    "light",
+                    "dark",
+                    "minimal",
+                    "classic",
+                    "void",
+                    "test"),
+                default="ipsum")
+            private$..usexlabel <- jmvcore::OptionBool$new(
+                "usexlabel",
+                usexlabel,
+                default=FALSE)
+            private$..xlabel <- jmvcore::OptionString$new(
+                "xlabel",
+                xlabel,
+                default="")
+            private$..ylabel <- jmvcore::OptionString$new(
+                "ylabel",
+                ylabel,
+                default="")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..col)
+            self$.addOption(private$..fill)
             self$.addOption(private$..excl)
+            self$.addOption(private$..flip)
+            self$.addOption(private$..themex)
+            self$.addOption(private$..usexlabel)
+            self$.addOption(private$..xlabel)
+            self$.addOption(private$..ylabel)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         col = function() private$..col$value,
-        excl = function() private$..excl$value),
+        fill = function() private$..fill$value,
+        excl = function() private$..excl$value,
+        flip = function() private$..flip$value,
+        themex = function() private$..themex$value,
+        usexlabel = function() private$..usexlabel$value,
+        xlabel = function() private$..xlabel$value,
+        ylabel = function() private$..ylabel$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..col = NA,
-        ..excl = NA)
+        ..fill = NA,
+        ..excl = NA,
+        ..flip = NA,
+        ..themex = NA,
+        ..usexlabel = NA,
+        ..xlabel = NA,
+        ..ylabel = NA)
 )
 
 jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -61,7 +120,9 @@ jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="",
                 title="Violin Plot",
                 refs=list(
-                    "RGraphGallery"))
+                    "ggplot2",
+                    "RGraphGallery",
+                    "hrbrthemes"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -70,7 +131,9 @@ jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "col",
-                    "excl")))
+                    "fill",
+                    "excl",
+                    "flip")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -83,7 +146,12 @@ jjviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "col",
-                    "excl")))}))
+                    "fill",
+                    "excl",
+                    "flip",
+                    "themex",
+                    "xlabel",
+                    "ylabel")))}))
 
 jjviolinBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjviolinBase",
@@ -112,7 +180,13 @@ jjviolinBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param col .
+#' @param fill .
 #' @param excl .
+#' @param flip .
+#' @param themex .
+#' @param usexlabel .
+#' @param xlabel .
+#' @param ylabel .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -125,7 +199,13 @@ jjviolin <- function(
     dep,
     group,
     col,
-    excl = TRUE) {
+    fill,
+    excl = TRUE,
+    flip = FALSE,
+    themex = "ipsum",
+    usexlabel = FALSE,
+    xlabel = "",
+    ylabel = "") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjviolin requires jmvcore to be installed (restart may be required)')
@@ -133,19 +213,27 @@ jjviolin <- function(
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(col)) col <- jmvcore::resolveQuo(jmvcore::enquo(col))
+    if ( ! missing(fill)) fill <- jmvcore::resolveQuo(jmvcore::enquo(fill))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL),
-            `if`( ! missing(col), col, NULL))
+            `if`( ! missing(col), col, NULL),
+            `if`( ! missing(fill), fill, NULL))
 
 
     options <- jjviolinOptions$new(
         dep = dep,
         group = group,
         col = col,
-        excl = excl)
+        fill = fill,
+        excl = excl,
+        flip = flip,
+        themex = themex,
+        usexlabel = usexlabel,
+        xlabel = xlabel,
+        ylabel = ylabel)
 
     analysis <- jjviolinClass$new(
         options = options,

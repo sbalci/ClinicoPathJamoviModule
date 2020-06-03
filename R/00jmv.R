@@ -304,4 +304,11 @@
         `year`=2020, 
         `title`="The R Graph Gallery", 
         `publisher`="A website that displays hundreds of R charts https://www.r-graph-gallery.com", 
-        `url`="https://github.com/holtzy/R-graph-gallery"))
+        `url`="https://github.com/holtzy/R-graph-gallery"), 
+    `hrbrthemes`=list(
+        `type`="software", 
+        `author`="Bob Rudis", 
+        `year`=2020, 
+        `title`="hrbrthemes: Additional Themes, Theme Components and Utilities for 'ggplot2'.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=hrbrthemes", 
+        `url`="https://CRAN.R-project.org/package=hrbrthemes"))

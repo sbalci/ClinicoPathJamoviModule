@@ -62,4 +62,9 @@ options:
       type: Bool
       default: true
 
+    # - name: excl2
+    #   title: Exclude Missing per Variable (NA)
+    #   type: Bool
+    #   default: true
+
 ...

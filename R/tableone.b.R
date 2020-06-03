@@ -63,27 +63,30 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
 
             sty <- self$options$sty
 
+            # tableone ----
+
             if (sty == "t1") {
 
-            # tableone ----
 
             mytable <- tableone::CreateTableOne(data = data)
 
             self$results$tablestyle1$setContent(mytable)
 
+                # gtsummary ----
 
             } else if (sty == "t2") {
 
 
-            # gtsummary ----
 
                 mytable <- gtsummary::tbl_summary(data = data)
                 mytable <- gtsummary::as_kable_extra(mytable)
 
                 self$results$tablestyle2$setContent(mytable)
 
+            # arsenal ----
 
             } else if (sty == "t3") {
+
 
 
                 formula <- jmvcore::constructFormula(terms = self$options$vars)
@@ -93,7 +96,8 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
                                             data = data,
                                             total = TRUE,
                                             digits = 1,
-                                            digits.count = 1
+                                            digits.count = 0,
+                                            digits.pct = 1
                 )
 
                 mytable <- summary(mytable, text = "html")
@@ -108,6 +112,7 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
             }  else if (sty == "t4") {
 
 
+                # janitor ----
 
                 tablelist <- list()
 

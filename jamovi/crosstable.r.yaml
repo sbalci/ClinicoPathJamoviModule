@@ -1,6 +1,6 @@
 ---
 name:  crosstable
-title: Cross Tables
+title: '`Cross Table - ${group}`'
 jrs:   '1.1'
 
 items:
@@ -8,6 +8,10 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - vars
+          - group
+
 
     - name:  tablestyle1
       title: '`Cross Table - ${group}`'
@@ -17,6 +21,7 @@ items:
           - group
       visible: (sty:arsenal)
       refs: arsenal
+
 
     - name:  tablestyle2
       title: '`Cross Table - ${group}`'

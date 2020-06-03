@@ -157,7 +157,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text9",
                 title="`Pairwise Comparison Summary - ${explanatory}`",
@@ -224,7 +224,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text6} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text9} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

@@ -12,26 +12,20 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # Error Message ----
-
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
 
             if (is.null(self$options$vars) || is.null(self$options$group)) {
 
                 # ToDo Message ----
 
-                todo <- "
-                <br>Welcome to ClinicoPath
-                          <br><br>
-                          This tool will help you form a Cross Table.
-                          <br><br>
-                          The functions select hypothesis tests automatically. You may see different results with different tables. Please verify your data distribution and appropriateness of the test accordingly. You may find <b>Statkat module</b> useful.
-                          Please cite the packages and jamovi using references below.
-                          "
+                todo <- glue::glue("
+                <br>Welcome to ClinicoPath.<br>
+                This tool will help you form a Cross Table.<br>
+                The functions select hypothesis tests automatically. You may see different results with different tables. Please verify your data distribution and appropriateness of the test accordingly. You may find Statkat module useful.<br>
+                Please cite the packages and jamovi using references below.<br><hr>")
 
                 html <- self$results$todo
                 html$setContent(todo)
+                return()
 
             } else {
 
@@ -39,6 +33,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html <- self$results$todo
                 html$setContent(todo)
 
+                # Error Message ----
+
+                if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
                 # Prepare Data ----
 
@@ -47,8 +44,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # formulaR <- jmvcore::constructFormula(terms = self$options$vars)
             # formulaL <- jmvcore::constructFormula(terms = self$options$group)
 
-            formula <- jmvcore::constructFormula(terms = self$options$vars,
-                                                 dep = self$options$group)
+            formula <- jmvcore::constructFormula(
+                terms = self$options$vars,
+                dep = self$options$group)
 
 
             # formula <- paste(formulaL, '~', formulaR)
@@ -56,7 +54,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Exclude NA
+            # Exclude NA ----
 
             excl <- self$options$excl
 
@@ -92,7 +90,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (sty == "finalfit") {
 
-                # Table FinalFit ----
+                # FinalFit ----
                 # https://finalfit.org/articles/tables_gallery.html#cross-tables
 
 
@@ -148,7 +146,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                      ) %>%
                     gtsummary::add_q()
 
-                tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
+                tablegtsummary <-
+                    gtsummary::as_kable_extra(tablegtsummary)
 
 
                 self$results$tablestyle3$setContent(tablegtsummary)
@@ -158,6 +157,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # sty <- jmvcore::composeTerm(components = self$options$sty)
 
+
+                # tangram ----
 
                 # Recent version, not working ----
 
@@ -174,7 +175,6 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # spgarbet/tangram@0.3.2
 
-
                 sty <- self$options$sty
                 sty <- paste0(sty, ".css")
 
@@ -184,17 +184,14 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             formula, mydata),
                         fragment = TRUE,
                         inline = sty,
-                        caption = paste0("Cross Table for Dependent ", self$options$group),
+                        caption = paste0(
+                            "Cross Table for Dependent ",
+                            self$options$group),
                         id = "tbl3")
-
-
-
 
                 self$results$tablestyle4$setContent(tabletangram)
 
 }
 }
-
-
         })
 )
