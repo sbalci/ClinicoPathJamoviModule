@@ -18,6 +18,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ToDo Message ----
 
                 todo <- glue::glue("
+                <br>
+                21:02
                 <br>Welcome to ClinicoPath.<br>
                 This tool will help you form a Cross Table.<br>
                 The functions select hypothesis tests automatically. You may see different results with different tables. Please verify your data distribution and appropriateness of the test accordingly. You may find Statkat module useful.<br>
@@ -155,35 +157,22 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (sty %in% c("nejm", "lancet", "hmisc")) {
 
-                # sty <- jmvcore::composeTerm(components = self$options$sty)
+                sty <- jmvcore::composeTerm(components = self$options$sty)
 
 
                 # tangram ----
 
-                # Recent version, not working ----
-
-                # tabletangram <-
-                #     tangram::html5(
-                #     tangram::tangram(
-                #         formula,
-                #         mydata,
-                #         id = "tbl3"
-                #     ),
-                #     style = sty,
-                #     caption = paste0("Cross Table for Dependent ", self$options$group)
-                #     )
-
-                # spgarbet/tangram@0.3.2
-
-                sty <- self$options$sty
-                sty <- paste0(sty, ".css")
 
                 tabletangram <-
                     tangram::html5(
                         tangram::tangram(
-                            formula, mydata),
+                            formula,
+                            mydata,
+                            transform=tangram::hmisc,
+                            id = "tbl3"
+                        ),
                         fragment = TRUE,
-                        inline = sty,
+                        style = sty,
                         caption = paste0(
                             "Cross Table for Dependent ",
                             self$options$group),

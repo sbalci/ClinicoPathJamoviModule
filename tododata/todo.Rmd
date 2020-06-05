@@ -1118,6 +1118,7 @@ file.copy(from = files_data,
 
 readyfunctions <- c(
     "refs",
+    "statsplot2",
     
 # Functions
     "^jjbarstats"
