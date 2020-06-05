@@ -75,7 +75,7 @@ Suggests:
 Remotes:
     ndphillips/FFTrees,
     easystats/report,
-    spgarbet/tangram@0.3.2,
+    spgarbet/tangram,
     cran/rmngb
 VignetteBuilder:
     knitr

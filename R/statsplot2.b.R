@@ -310,8 +310,8 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
 
                         plot <- ggstatsplot::ggbarstats(data = plotData,
-                                                        main = gr,
-                                                        condition = dp)
+                                                        main = dp,
+                                                        condition = gr)
 
                         # independent, continuous, factor ----
 

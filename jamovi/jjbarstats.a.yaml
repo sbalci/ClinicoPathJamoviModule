@@ -23,21 +23,28 @@ options:
           R: >
             The data as a data frame.
 
+
     - name: dep
       title: Dependent Variable
-      type: Variables
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
     - name: group
       title: Grouping Variable
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
     - name: grvar
       title: 'Split by: (Optional)'
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
 
     - name: direction
-      title: Measurement Type
+      title: 'Measurement Type (no affect with Split)'
       type: List
       options:
         - title: Repeated (within groups)
