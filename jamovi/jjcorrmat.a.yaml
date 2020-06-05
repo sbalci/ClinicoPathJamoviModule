@@ -1,9 +1,9 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjcorrmat
+title: jjcorrmat
 menuGroup: JJStatsPlot
 menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubtitle: ggstatsplot::jjcorrmat
 version: '1.0.0'
 jas: '1.2'
 
@@ -54,8 +54,6 @@ options:
 
 
 ...
-
-
 
 # options:
 #     - name: data

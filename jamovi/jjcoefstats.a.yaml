@@ -1,25 +1,15 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjcoefstats
+title: Dot-and-whisker
 menuGroup: JJStatsPlot
 menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubtitle: ggstatsplot::jjcoefstats
 version: '1.0.0'
 jas: '1.2'
-
-description:
-    main: 'Function for Generating Plots and Graphs Based on Variable Types.'
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
 
 options:
     - name: data
       type: Data
-      description:
-          R: >
-            The data as a data frame.
 
     - name: dep
       title: Dependent Variable
@@ -28,46 +18,6 @@ options:
     - name: group
       title: Grouping Variable
       type: Variable
-
-    - name: grvar
-      title: 'Split by:'
-      type: Variable
-
-
-    - name: direction
-      title: Measurement Type
-      type: List
-      options:
-        - title: Repeated (within groups)
-          name: repeated
-        - title: Independent (between groups)
-          name: independent
-      default: independent
-      description:
-          ui: options for measurement type
-          R: select measurement type (repeated or independent)
-
-    - name: excl
-      title: Exclude Missing (NA)
-      type: Bool
-      default: true
-
-
-...
-
-
-
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
 
 #     - name: alt
 #       title: Alternative hypothesis
@@ -186,6 +136,7 @@ options:
 #
 #
 # ...
+#
 # ---
 # name:  jviolin
 # title: Violin Plot
@@ -398,4 +349,6 @@ options:
     #   default: continuous
     #   description:
     #       R: select type of dependent variable
+
+...
 

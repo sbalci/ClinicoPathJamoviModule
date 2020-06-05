@@ -404,6 +404,27 @@ options(repos = c('https://repo.jamovi.org',
 )
 ```
 
+### Base R packages within jamovi
+
+
+```
+jamovi.app/Contents/Resources/modules/base/R
+
+this folder contains base R packages used for jamovi.
+
+jmvtools::install() prevent the packages already installed in base/R from being installed into your module. 
+
+(jmvtools is an R package which is a thin wrapper around the jamovi-compiler. The jamovi-compiler is written in javascript)
+
+That cause problems if you are using different package versions. So it is best to keep up with suggested 'mran' version. 
+```
+
+
+
+
+
+
+
 
 
 ### Electron

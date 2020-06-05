@@ -1,5 +1,5 @@
 ---
-name:  jjviolin
+name:  jviolin
 title: Violin Plot
 jrs:   '1.1'
 
@@ -11,10 +11,6 @@ items:
       clearWith:
           - dep
           - group
-          - col
-          - fill
-          - excl
-          - flip
 
     - name: plot
       title: '`Violin Plot ${group} - {dep}`'
@@ -31,7 +27,9 @@ items:
           - excl
           - flip
           - themex
+          - usexlabel
           - xlabel
+          - useylabel
           - ylabel
 
 refs:

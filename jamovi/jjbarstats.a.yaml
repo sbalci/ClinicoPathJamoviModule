@@ -1,14 +1,16 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjbarstats
+title: Bar Charts
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubgroup: 'Categorical vs Categorical'
+menuSubtitle: 'Bar Charts, Grouped Bar Charts'
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: 'Function for Generating Plots and Graphs Based on Variable Types.'
+    main: |
+        'Wrapper Function for ggstatsplot::ggbarstats and
+        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
     R:
         dontrun: true
         usage: |
@@ -47,27 +49,43 @@ options:
           ui: options for measurement type
           R: select measurement type (repeated or independent)
 
+
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
       default: true
 
-
 ...
 
 
 
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
+
+
+
+    # - name: distribution
+    #   title: Distribution of Data
+    #   type: List
+    #   options:
+    #     - title: Parametric (normal distribution)
+    #       name: p
+    #     - title: Nonparametric
+    #       name: np
+    #   default: p
+    #   description:
+    #       R: select distribution type (parametric or nonparametric)
+
+    # - name: alluvsty
+    #   title: Alluvial Style (for repeated categorical)
+    #   type: List
+    #   options:
+    #     - title: ggalluvial
+    #       name: t1
+    #     - title: easyalluvial
+    #       name: t2
+    #   default: t1
+
+
+
 
 #     - name: alt
 #       title: Alternative hypothesis
@@ -85,29 +103,6 @@ options:
 #       title: Assume equal variances
 #       type: Bool
 #       default: true
-# ...
-#
-# ---
-# name:  jviolin
-# title: Violin Plot
-# menuGroup: R-Graph-Gallery
-# menuSubgroup: Distribution
-# menuSubtitle: R Graph Gallery Violin
-# version: '1.0.0'
-# jas: '1.2'
-#
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
-#
 #
 #     - name: col
 #       title: Color Variable
@@ -184,145 +179,10 @@ options:
 #       default: ''
 #
 #
+
 #
-# ...
-# ---
-# name:  jviolin
-# title: Violin Plot
-# menuGroup: R-Graph-Gallery
-# menuSubgroup: Distribution
-# menuSubtitle: R Graph Gallery Violin
-# version: '1.0.0'
-# jas: '1.2'
-#
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
-#
-#
-#     - name: col
-#       title: Color Variable
-#       type: Variable
-#
-#
-#     - name: fill
-#       title: Color Variable
-#       type: Variable
-#
-#
-#     - name: excl
-#       title: Exclude Missing (NA)
-#       type: Bool
-#       default: true
-#
-#
-#     - name: flip
-#       title: Flip Coordinates
-#       type: Bool
-#       default: false
-#
-#     - name: themex
-#       title: Theme
-#       type: List
-#       options:
-#         - title: ipsum
-#           name: ipsum
-#         - title: grey
-#           name: grey
-#         - title: gray
-#           name: gray
-#         - title: bw
-#           name: bw
-#         - title: linedraw
-#           name: linedraw
-#         - title: light
-#           name: light
-#         - title: dark
-#           name: dark
-#         - title: minimal
-#           name: minimal
-#         - title: classic
-#           name: classic
-#         - title: void
-#           name: void
-#         - title: test
-#           name: test
-#       default: ipsum
-#
-#
-#
-#     - name: usexlabel
-#       title: Use xlabel
-#       type: Bool
-#       default: false
-#
-#     - name: xlabel
-#       title: >
-#           x-axis label
-#       type: String
-#       default: ''
-#
-#     - name: useylabel
-#       title: Use ylabel
-#       type: Bool
-#       default: false
-#
-#
-#     - name: ylabel
-#       title: >
-#           y-axis label
-#       type: String
-#       default: ''
-#
-#
-#
-# ...
-# ---
-# name:  statsplot2
-# title: Graphs and Plots
-# menuGroup: ClinicoPath
-# menuSubgroup: Comparisons
-# version: '1.0.0'
-# jas: '1.2'
-#
-# description:
-#     main: 'Function for Generating Plots and Graphs Based on Variable Types.'
-#     R:
-#         dontrun: true
-#         usage: |
-#             # example will be added
-#
-#
-# options:
-#     - name: data
-#       type: Data
-#       description:
-#           R: >
-#             The data as a data frame.
-#
-#
-#     - name: dep
-#       title: 'Dependent (y-axis, 1st measurement)'
-#       type: Variable
-#
-#     - name: group
-#       title: 'Grouping (x-axis, 2nd measurement)'
-#       type: Variable
-#
-#
-#     - name: grvar
-#       title: 'Split by:'
-#       type: Variable
-#
-#
+
+
 #     - name: direction
 #       title: Measurement Type
 #       type: List
@@ -358,12 +218,9 @@ options:
 #         - title: easyalluvial
 #           name: t2
 #       default: t1
-#
-#
-#     - name: excl
-#       title: Exclude Missing (NA)
-#       type: Bool
-#       default: true
+
+
+
 
 
     # - name: pairw
@@ -398,4 +255,5 @@ options:
     #   default: continuous
     #   description:
     #       R: select type of dependent variable
+
 

@@ -1,6 +1,6 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjcoefstats
+title: Dot-and-whisker
 jrs:   '1.1'
 
 items:
@@ -31,7 +31,6 @@ refs:
     - ggstatsplot
 
 ...
-
 
 # ---
 # name:  jviolin

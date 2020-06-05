@@ -1,11 +1,12 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjscatterstats
+title: jjscatterstats
 menuGroup: JJStatsPlot
 menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubtitle: ggstatsplot::jjscatterstats
 version: '1.0.0'
 jas: '1.2'
+
 
 description:
     main: 'Function for Generating Plots and Graphs Based on Variable Types.'
@@ -56,7 +57,6 @@ options:
 ...
 
 
-
 # options:
 #     - name: data
 #       type: Data
@@ -68,7 +68,7 @@ options:
 #     - name: group
 #       title: Grouping Variable
 #       type: Variable
-
+#
 #     - name: alt
 #       title: Alternative hypothesis
 #       type: List
@@ -86,6 +86,7 @@ options:
 #       type: Bool
 #       default: true
 # ...
+#
 #
 # ---
 # name:  jviolin
@@ -186,6 +187,8 @@ options:
 #
 #
 # ...
+#
+#
 # ---
 # name:  jviolin
 # title: Violin Plot

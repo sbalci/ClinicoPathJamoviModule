@@ -1,0 +1,102 @@
+---
+name:  jjwithinstats
+title: Violin Plots
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: jjwithinstats
+      type:  Preformatted
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - dep
+          - group
+
+    - name: plot
+      title: '`Violin Plot ${group} - {dep}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - col
+          - fill
+          - excl
+          - flip
+          - themex
+          - usexlabel
+          - xlabel
+          - useylabel
+          - ylabel
+
+
+    # - name:  todo
+    #   title: To Do
+    #   type:  Html
+    #   clearWith:
+    #       - dep
+    #       - group
+    #       - direction
+    #       - distribution
+    #       - excl
+    #       - grvar
+    #       # - pairw
+
+    # - name:  text1
+    #   title: Variable Types
+    #   type:  Preformatted
+
+    # - name:  text2
+    #   title: GGStatsPlot
+    #   type:  Preformatted
+
+    # - name:  text3
+    #   title: GGStatsPlot
+    #   type:  Preformatted
+
+    - name:  text4
+      title: Explanation
+      type:  Preformatted
+      clearWith:
+          - dep
+          - group
+          - direction
+          - distribution
+          - excl
+          - grvar
+          # - pairw
+
+
+    # - name:  text5
+    #   title: Stats Expression Formula
+    #   type:  Preformatted
+
+    - title: GGStatsPlot
+      name: plot2
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - direction
+          - distribution
+          - alluvsty
+          - excl
+          - grvar
+          # - pairw
+
+refs:
+    - ggplot2
+    - ggstatsplot
+
+
+...

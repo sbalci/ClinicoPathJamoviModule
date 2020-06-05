@@ -1,6 +1,6 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjpiestats
+title: Pie Charts
 jrs:   '1.1'
 
 items:
@@ -33,6 +33,14 @@ refs:
 ...
 
 
+
+
+
+    # - name:  text
+    #   title: jjpiestats
+    #   type:  Preformatted
+#
+# ...
 # ---
 # name:  jviolin
 # title: Violin Plot
@@ -144,5 +152,4 @@ refs:
 #     - ggstatsplot
 #     - ggalluvial
 #     - easyalluvial
-#
-# ...
+

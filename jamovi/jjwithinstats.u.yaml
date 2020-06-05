@@ -1,5 +1,5 @@
-title: Violin Plots Between
-name: jjbetweenstats
+title: jjwithinstats
+name: ViolinPlots
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -22,24 +22,11 @@ children:
             name: group
             maxItemCount: 1
             isTarget: true
-  - type: VariableSupplier
-    persistentItems: true
-    stretchFactor: 1
+  - type: LayoutBox
+    margin: large
     children:
-      - type: TargetLayoutBox
-        label: Dependent Variable
-        children:
-          - type: VariablesListBox
-            name: dep
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Grouping Variable
-        children:
-          - type: VariablesListBox
-            name: group
-            maxItemCount: 1
-            isTarget: true
+      - type: CheckBox
+        name: excl
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -56,8 +43,3 @@ children:
     children:
       - type: ComboBox
         name: direction
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: excl

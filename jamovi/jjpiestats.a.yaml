@@ -1,14 +1,14 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjpiestats
+title: Pie Charts
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubgroup: 'Categorical vs Categorical'
+menuSubtitle: 'Pie Charts'
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: 'Function for Generating Plots and Graphs Based on Variable Types.'
+    main: 'Wrapper Function for ggstatsplot::ggpiestats to generate Pie Charts.'
     R:
         dontrun: true
         usage: |
@@ -47,15 +47,34 @@ options:
           ui: options for measurement type
           R: select measurement type (repeated or independent)
 
+
+    # - name: distribution
+    #   title: Distribution of Data
+    #   type: List
+    #   options:
+    #     - title: Parametric (normal distribution)
+    #       name: p
+    #     - title: Nonparametric
+    #       name: np
+    #   default: p
+    #   description:
+    #       R: select distribution type (parametric or nonparametric)
+
+
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
       default: true
 
 
+
+
+
+
+
+
+
 ...
-
-
 
 # options:
 #     - name: data
@@ -186,6 +205,7 @@ options:
 #
 #
 # ...
+#
 # ---
 # name:  jviolin
 # title: Violin Plot
