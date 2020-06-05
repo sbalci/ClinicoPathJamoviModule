@@ -18,7 +18,7 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
+            private$..dep <- jmvcore::OptionVariables$new(
                 "dep",
                 dep)
             private$..group <- jmvcore::OptionVariable$new(
@@ -63,6 +63,7 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        todo2 = function() private$.items[["todo2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -77,6 +78,14 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
+                title="To Do",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="todo2",
                 title="To Do",
                 clearWith=list(
                     "dep",
@@ -134,6 +143,7 @@ jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$todo2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
