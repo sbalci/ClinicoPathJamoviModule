@@ -1,5 +1,5 @@
-title: Violin Plots Between
-name: jjbetweenstats
+title: Pie Charts
+name: jjpiestats
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -22,28 +22,6 @@ children:
             name: group
             maxItemCount: 1
             isTarget: true
-  - type: VariableSupplier
-    persistentItems: true
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Dependent Variable
-        children:
-          - type: VariablesListBox
-            name: dep
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Grouping Variable
-        children:
-          - type: VariablesListBox
-            name: group
-            maxItemCount: 1
-            isTarget: true
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
       - type: TargetLayoutBox
         label: 'Split by:'
         children:

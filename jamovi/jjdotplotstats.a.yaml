@@ -1,9 +1,9 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjdotplotstats
+title: jjdotplotstats
 menuGroup: JJStatsPlot
 menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubtitle: ggstatsplot::jjdotplotstats
 version: '1.0.0'
 jas: '1.2'
 
@@ -186,6 +186,7 @@ options:
 #
 #
 # ...
+#
 # ---
 # name:  jviolin
 # title: Violin Plot

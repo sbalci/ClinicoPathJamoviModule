@@ -1,9 +1,9 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjwithinstats
+title: Violin Plots
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::ggbetweenstats
+menuSubgroup: Categorical vs Numeric
+menuSubtitle: ggstatsplot::jjwithinstats
 version: '1.0.0'
 jas: '1.2'
 
@@ -57,45 +57,7 @@ options:
 
 
 
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
 
-#     - name: alt
-#       title: Alternative hypothesis
-#       type: List
-#       options:
-#         - title: Not equal
-#           name:  notequal
-#         - title: One greater
-#           name:  onegreater
-#         - title: Two greater
-#           name:  twogreater
-#       default: notequal
-#
-#     - name: varEq
-#       title: Assume equal variances
-#       type: Bool
-#       default: true
-# ...
-#
-# ---
-# name:  jviolin
-# title: Violin Plot
-# menuGroup: R-Graph-Gallery
-# menuSubgroup: Distribution
-# menuSubtitle: R Graph Gallery Violin
-# version: '1.0.0'
-# jas: '1.2'
-#
 # options:
 #     - name: data
 #       type: Data
@@ -108,22 +70,18 @@ options:
 #       title: Grouping Variable
 #       type: Variable
 #
-#
 #     - name: col
 #       title: Color Variable
 #       type: Variable
 #
-#
 #     - name: fill
-#       title: Color Variable
+#       title: Filling Color Variable
 #       type: Variable
-#
 #
 #     - name: excl
 #       title: Exclude Missing (NA)
 #       type: Bool
 #       default: true
-#
 #
 #     - name: flip
 #       title: Flip Coordinates
@@ -182,123 +140,10 @@ options:
 #           y-axis label
 #       type: String
 #       default: ''
-#
-#
-#
-# ...
-# ---
-# name:  jviolin
-# title: Violin Plot
-# menuGroup: R-Graph-Gallery
-# menuSubgroup: Distribution
-# menuSubtitle: R Graph Gallery Violin
-# version: '1.0.0'
-# jas: '1.2'
-#
-# options:
-#     - name: data
-#       type: Data
-#
-#     - name: dep
-#       title: Dependent Variable
-#       type: Variable
-#
-#     - name: group
-#       title: Grouping Variable
-#       type: Variable
-#
-#
-#     - name: col
-#       title: Color Variable
-#       type: Variable
-#
-#
-#     - name: fill
-#       title: Color Variable
-#       type: Variable
-#
-#
-#     - name: excl
-#       title: Exclude Missing (NA)
-#       type: Bool
-#       default: true
-#
-#
-#     - name: flip
-#       title: Flip Coordinates
-#       type: Bool
-#       default: false
-#
-#     - name: themex
-#       title: Theme
-#       type: List
-#       options:
-#         - title: ipsum
-#           name: ipsum
-#         - title: grey
-#           name: grey
-#         - title: gray
-#           name: gray
-#         - title: bw
-#           name: bw
-#         - title: linedraw
-#           name: linedraw
-#         - title: light
-#           name: light
-#         - title: dark
-#           name: dark
-#         - title: minimal
-#           name: minimal
-#         - title: classic
-#           name: classic
-#         - title: void
-#           name: void
-#         - title: test
-#           name: test
-#       default: ipsum
-#
-#
-#
-#     - name: usexlabel
-#       title: Use xlabel
-#       type: Bool
-#       default: false
-#
-#     - name: xlabel
-#       title: >
-#           x-axis label
-#       type: String
-#       default: ''
-#
-#     - name: useylabel
-#       title: Use ylabel
-#       type: Bool
-#       default: false
-#
-#
-#     - name: ylabel
-#       title: >
-#           y-axis label
-#       type: String
-#       default: ''
-#
-#
-#
-# ...
-# ---
-# name:  statsplot2
-# title: Graphs and Plots
-# menuGroup: ClinicoPath
-# menuSubgroup: Comparisons
-# version: '1.0.0'
-# jas: '1.2'
-#
-# description:
-#     main: 'Function for Generating Plots and Graphs Based on Variable Types.'
-#     R:
-#         dontrun: true
-#         usage: |
-#             # example will be added
+
+
+
+
 #
 #
 # options:

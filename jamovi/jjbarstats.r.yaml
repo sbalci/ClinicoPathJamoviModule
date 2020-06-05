@@ -1,0 +1,34 @@
+---
+name:  jjbarstats
+title: Bar Charts
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - dep
+          - group
+          - grvar
+
+
+    - name: plot
+      title: '`Bar Chart ${group} - {dep}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+
+
+refs:
+    - ggplot2
+    - ggstatsplot
+
+...

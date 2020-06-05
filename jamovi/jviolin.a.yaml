@@ -1,5 +1,5 @@
 ---
-name:  jjviolin
+name:  jviolin
 title: Violin Plot
 menuGroup: R-Graph-Gallery
 menuSubgroup: Distribution
@@ -81,6 +81,11 @@ options:
           x-axis label
       type: String
       default: ''
+
+    - name: useylabel
+      title: Use ylabel
+      type: Bool
+      default: false
 
 
     - name: ylabel

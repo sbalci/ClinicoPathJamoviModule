@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0009
+version: 0.0.2.0010
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-06-01'
+date: '2020-06-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -164,6 +164,23 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Alluvial Diagrams
+  - title: Violin Plot
+    name: jviolin
+    ns: ClinicoPath
+    menuGroup: R-Graph-Gallery
+    menuSubgroup: Distribution
+    menuTitle: Violin Plot
+    menuSubtitle: R Graph Gallery Violin
+  - title: Bar Charts
+    name: jjbarstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuTitle: Bar Charts
+    menuSubgroup: Categorical vs Categorical
+    menuSubtitle: 'Bar Charts, Grouped Bar Charts'
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: Violin Plots Between
     name: jjbetweenstats
     ns: ClinicoPath
@@ -171,13 +188,62 @@ analyses:
     menuSubgroup: Violin
     menuTitle: Violin Plots Between
     menuSubtitle: 'ggstatsplot::ggbetweenstats'
-  - title: Violin Plot
-    name: jjviolin
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: Dot-and-whisker
+    name: jjcoefstats
     ns: ClinicoPath
-    menuGroup: R-Graph-Gallery
-    menuSubgroup: Distribution
-    menuTitle: Violin Plot
-    menuSubtitle: R Graph Gallery Violin
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: Dot-and-whisker
+    menuSubtitle: 'ggstatsplot::jjcoefstats'
+  - title: jjcorrmat
+    name: jjcorrmat
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: jjcorrmat
+    menuSubtitle: 'ggstatsplot::jjcorrmat'
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: jjdotplotstats
+    name: jjdotplotstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: jjdotplotstats
+    menuSubtitle: 'ggstatsplot::jjdotplotstats'
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: jjhistostats
+    name: jjhistostats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: jjhistostats
+    menuSubtitle: 'ggstatsplot::jjhistostats'
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: Pie Charts
+    name: jjpiestats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Categorical
+    menuTitle: Pie Charts
+    menuSubtitle: Pie Charts
+    description: 'Wrapper Function for ggstatsplot::ggpiestats to generate Pie Charts.'
+  - title: jjscatterstats
+    name: jjscatterstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Violin
+    menuTitle: jjscatterstats
+    menuSubtitle: 'ggstatsplot::jjscatterstats'
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: Violin Plots
+    name: jjwithinstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Numeric
+    menuTitle: Violin Plots
+    menuSubtitle: 'ggstatsplot::jjwithinstats'
+    description: Function for Generating Plots and Graphs Based on Variable Types.
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

@@ -1,6 +1,6 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots Between
+name:  jjscatterstats
+title: jjscatterstats
 jrs:   '1.1'
 
 items:
@@ -32,7 +32,7 @@ refs:
 
 ...
 
-
+# ...
 # ---
 # name:  jviolin
 # title: Violin Plot
@@ -144,5 +144,3 @@ refs:
 #     - ggstatsplot
 #     - ggalluvial
 #     - easyalluvial
-#
-# ...
