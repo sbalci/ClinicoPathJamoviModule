@@ -12,11 +12,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjbarstatsClass",
     inherit = jjbarstatsBase,
     private = list(
+
         .run = function() {
 
                 # Initial Message ----
-                if (is.null(self$options$dep) ||
-                    is.null(self$options$group)) {
+                if ( is.null(self$options$dep) ) {
                     # TODO ----
 
                     todo <- glue::glue(
@@ -46,15 +46,37 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (nrow(self$data) == 0)
                         stop('Data contains no (complete) rows')
 
+
+
+
+
+
+                    mydata <- self$data
+                    mydep <- self$options$dep
+
+                    mydata <- jmvcore::select(mydata, c(mydep))
+
+
+
+
+
+                    todo2 <- head(mydata)
+
+
+                    self$results$todo2$setContent(todo2)
+
+
                 }
         }
+
+
+
 ,
             .plot = function(image, ...) {
                 # the plot function ----
                 # Error messages ----
 
-                if (is.null(self$options$dep) ||
-                    is.null(self$options$group))
+                if ( is.null(self$options$dep) )
                     return()
 
                 if (nrow(self$data) == 0)
@@ -97,11 +119,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 mydep <- mydata[[self$options$dep]]
+
+                mydep <- unlist(mydep)
+
                 mygroup <- mydata[[self$options$group]]
 
-                # if ( !is.null(self$options$grvar) ) {
-                #     mygrvar <- mydata[[self$options$grvar]]
-                # }
+                if ( !is.null(self$options$grvar) ) {
+                    mygrvar <- mydata[[self$options$grvar]]
+                }
 
 
 
@@ -109,6 +134,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ggbarstats ----
                 # bar charts for categorical data
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
+
+
+
+
+                if (length(self$options$dep) == 1 && !is.null(self$options$group)) {
+
 
                 plotData <- data.frame(gr = mygroup,
                                        dp = mydep)
@@ -151,33 +182,6 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = NULL
                 )
 
-
-
-
-
-
-                if (length(self$options$dep > 1) && !is.nul(self$options$group)) {
-
-
-
-                # running the same analysis on two different columns (creates a list of plots)
-                plotlist <-
-                    purrr::pmap(
-                        .l = list(
-                            data = list(movies_long),
-                            x = "mpaa",
-                            y = list("rating", "length"),
-                            title = list("IMDB score by MPAA rating", "Movie length by MPAA rating"),
-                            messages = FALSE
-                        ),
-                        .f = ggstatsplot::ggbetweenstats
-                    )
-
-                # combine plots using `patchwork`
-
-                plot <- plotlist[[1]] + plotlist[[2]]
-
-
                 }
 
 
@@ -186,8 +190,29 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-
-
+                # if ((length(self$options$dep) > 1) && !is.null(self$options$group)) {
+                #
+                #
+                #
+                # # running the same analysis on two different columns (creates a list of plots)
+                # plotlist <-
+                #     purrr::pmap(
+                #         .l = list(
+                #             data = plotData,
+                #             x = gr,
+                #             y = dp,
+                #
+                #             messages = FALSE
+                #         ),
+                #         .f = ggstatsplot::ggbarstats
+                #     )
+                #
+                # # combine plots using `patchwork`
+                #
+                # plot <- plotlist[[1]] + plotlist[[2]]
+                #
+                #
+                # }
 
 
 

@@ -14,14 +14,14 @@
   ],
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.2.9",
+  "version": "0.0.2.11",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "version": "3.6.3",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.6.3 Patched (2020-04-28 r78572)",
+  "runtimePlatform": "R version 3.6.3 (2020-02-29)",
   "author": [
     {
       "@type": "Person",
@@ -70,18 +70,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "ggalluvial",
-      "name": "ggalluvial",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=ggalluvial"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "ggstatsplot",
       "name": "ggstatsplot",
       "provider": {
@@ -91,6 +79,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggalluvial",
+      "name": "ggalluvial",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggalluvial"
     },
     {
       "@type": "SoftwareApplication",
@@ -334,18 +334,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "parcats",
-      "name": "parcats",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=parcats"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "corrr",
       "name": "corrr",
       "provider": {
@@ -535,6 +523,42 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=hrbrthemes"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "gtsummary",
+      "name": "gtsummary",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=gtsummary"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "vctrs",
+      "name": "vctrs",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=vctrs"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "patchwork",
+      "name": "patchwork",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=patchwork"
     }
   ],
   "softwareRequirements": [
@@ -621,6 +645,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "284.932KB",
+  "fileSize": "297.052KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }
