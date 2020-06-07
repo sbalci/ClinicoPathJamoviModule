@@ -22,15 +22,14 @@ jjwithinstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
-Function for Generating Plots and Graphs Based on Variable Types.
+'Wrapper Function for ggstatsplot::ggbarstats and
+ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 }
 \examples{
 \dontrun{

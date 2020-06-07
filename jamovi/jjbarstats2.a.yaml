@@ -1,13 +1,11 @@
 ---
-name:  jjwithinstats
-title: Violin Plots
-menuGroup: JJStatsPlot
-menuSubgroup: Categorical vs Numeric
-menuSubtitle: ggstatsplot::jjwithinstats
+name:  jjbarstats2
+title: Bar Charts
+menuGroup: Drafts
+menuSubgroup: 'Categorical vs Categorical'
+menuSubtitle: 'Bar Charts, Grouped Bar Charts'
 version: '1.0.0'
 jas: '1.2'
-
-
 
 description:
     main: |
@@ -28,7 +26,7 @@ options:
 
     - name: dep
       title: Dependent Variable
-      type: Variable
+      type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
@@ -65,4 +63,3 @@ options:
       default: true
 
 ...
-

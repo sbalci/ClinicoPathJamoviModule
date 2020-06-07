@@ -181,29 +181,26 @@ analyses:
     description: |
       'Wrapper Function for ggstatsplot::ggbarstats and
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-  - title: Violin Plots Between
+  - title: Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
     menuGroup: JJStatsPlot
-    menuSubgroup: Violin
-    menuTitle: Violin Plots Between
-    menuSubtitle: 'ggstatsplot::ggbetweenstats'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
-  - title: Dot-and-whisker
-    name: jjcoefstats
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Violin
-    menuTitle: Dot-and-whisker
-    menuSubtitle: 'ggstatsplot::jjcoefstats'
+    menuSubgroup: Categorical vs Numeric
+    menuTitle: Violin Plots to Compare Between Groups
+    menuSubtitle: Independent Samples
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: jjcorrmat
     name: jjcorrmat
     ns: ClinicoPath
     menuGroup: JJStatsPlot
-    menuSubgroup: Violin
+    menuSubgroup: Continious vs Continious
     menuTitle: jjcorrmat
-    menuSubtitle: 'ggstatsplot::jjcorrmat'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
+    menuSubtitle: Correlation Matrix
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: jjdotplotstats
     name: jjdotplotstats
     ns: ClinicoPath
@@ -211,7 +208,9 @@ analyses:
     menuSubgroup: Violin
     menuTitle: jjdotplotstats
     menuSubtitle: 'ggstatsplot::jjdotplotstats'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: jjhistostats
     name: jjhistostats
     ns: ClinicoPath
@@ -219,7 +218,9 @@ analyses:
     menuSubgroup: Violin
     menuTitle: jjhistostats
     menuSubtitle: 'ggstatsplot::jjhistostats'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
@@ -227,7 +228,9 @@ analyses:
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     menuSubtitle: Pie Charts
-    description: 'Wrapper Function for ggstatsplot::ggpiestats to generate Pie Charts.'
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: jjscatterstats
     name: jjscatterstats
     ns: ClinicoPath
@@ -235,7 +238,9 @@ analyses:
     menuSubgroup: Violin
     menuTitle: jjscatterstats
     menuSubtitle: 'ggstatsplot::jjscatterstats'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: Violin Plots
     name: jjwithinstats
     ns: ClinicoPath
@@ -243,7 +248,19 @@ analyses:
     menuSubgroup: Categorical vs Numeric
     menuTitle: Violin Plots
     menuSubtitle: 'ggstatsplot::jjwithinstats'
-    description: Function for Generating Plots and Graphs Based on Variable Types.
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+  - title: Bar Charts
+    name: jjbarstats2
+    ns: ClinicoPath
+    menuGroup: Drafts
+    menuSubgroup: Categorical vs Categorical
+    menuTitle: Bar Charts
+    menuSubtitle: 'Bar Charts, Grouped Bar Charts'
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 datasets:
   - name: histopathology including analysis
     path: histopathologyanalysis.omv

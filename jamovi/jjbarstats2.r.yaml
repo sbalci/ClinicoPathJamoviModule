@@ -1,9 +1,13 @@
 ---
-name:  jjbarstats
-title: Bar Charts
+name:  jjbarstats2
+title: jjbarstats2
 jrs:   '1.1'
 
 items:
+    - name:  text
+      title: jjbarstats2
+      type:  Preformatted
+
 
     - name:  todo
       title: To Do
@@ -47,5 +51,8 @@ items:
 refs:
     - ggplot2
     - ggstatsplot
+
+
+
 
 ...

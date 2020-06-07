@@ -20,13 +20,28 @@ jjscatterstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
-                dep)
+                dep,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group)
+                group,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
-                grvar)
+                grvar,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -63,6 +78,7 @@ jjscatterstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -81,19 +97,35 @@ jjscatterstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "group",
-                    "grvar")))
+                    "grvar",
+                    "direction")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot2",
+                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                width=800,
+                height=600,
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "direction"),
+                visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Pie Chart ${group} - {dep}`",
-                width=600,
-                height=450,
+                title="`Bar Chart ${group} - {dep}`",
+                width=800,
+                height=600,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
                     "group",
-                    "grvar")))}))
+                    "grvar",
+                    "direction")))}))
 
 jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjscatterstatsBase",
@@ -117,7 +149,9 @@ jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' jjscatterstats
 #'
-#' Function for Generating Plots and Graphs Based on Variable Types.
+#' 'Wrapper Function for ggstatsplot::ggbarstats and
+#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 
 #'
 #' @examples
 #' \dontrun{
@@ -132,6 +166,7 @@ jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -157,6 +192,9 @@ jjscatterstats <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
+    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjscatterstatsOptions$new(
         dep = dep,
