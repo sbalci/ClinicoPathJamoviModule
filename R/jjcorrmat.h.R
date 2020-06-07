@@ -7,7 +7,6 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             dep = NULL,
-            group = NULL,
             grvar = NULL,
             direction = "independent",
             excl = TRUE, ...) {
@@ -18,15 +17,21 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
+            private$..dep <- jmvcore::OptionVariables$new(
                 "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
+                dep,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
-                grvar)
+                grvar,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -40,20 +45,17 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 default=TRUE)
 
             self$.addOption(private$..dep)
-            self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..direction)
             self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
-        group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         direction = function() private$..direction$value,
         excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
-        ..group = NA,
         ..grvar = NA,
         ..direction = NA,
         ..excl = NA)
@@ -80,20 +82,20 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "dep",
-                    "group",
-                    "grvar")))
+                    "grvar",
+                    "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Pie Chart ${group} - {dep}`",
-                width=600,
-                height=450,
+                title="`Bar Chart ${group} - {dep}`",
+                width=800,
+                height=600,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
-                    "group",
-                    "grvar")))}))
+                    "grvar",
+                    "direction")))}))
 
 jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjcorrmatBase",
@@ -117,7 +119,9 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' jjcorrmat
 #'
-#' Function for Generating Plots and Graphs Based on Variable Types.
+#' 'Wrapper Function for ggstatsplot::ggbarstats and
+#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 
 #'
 #' @examples
 #' \dontrun{
@@ -125,7 +129,6 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'}
 #' @param data The data as a data frame.
 #' @param dep .
-#' @param group .
 #' @param grvar .
 #' @param direction select measurement type (repeated or independent)
 #' @param excl .
@@ -139,7 +142,6 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 jjcorrmat <- function(
     data,
     dep,
-    group,
     grvar,
     direction = "independent",
     excl = TRUE) {
@@ -148,19 +150,17 @@ jjcorrmat <- function(
         stop('jjcorrmat requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
+    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjcorrmatOptions$new(
         dep = dep,
-        group = group,
         grvar = grvar,
         direction = direction,
         excl = excl)

@@ -78,8 +78,8 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]]),
+        plot2 = function() private$.items[["plot2"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -101,19 +101,6 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
-                title="`Bar Chart ${group} - {dep}`",
-                width=800,
-                height=600,
-                renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction")))
-            self$add(jmvcore::Image$new(
-                options=options,
                 name="plot2",
                 title="`Bar Chart ${group} - {dep} by {grvar}`",
                 width=800,
@@ -125,7 +112,20 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "group",
                     "grvar",
                     "direction"),
-                visible="(grvar)"))}))
+                visible="(grvar)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="`Bar Chart ${group} - {dep}`",
+                width=800,
+                height=600,
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "direction")))}))
 
 jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjbarstatsBase",
@@ -166,8 +166,8 @@ jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

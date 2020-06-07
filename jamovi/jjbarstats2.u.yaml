@@ -1,11 +1,11 @@
-title: Dot-and-whisker
-name: jjcoefstats
+title: Bar Charts
+name: jjbarstats2
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
-    persistentItems: true
+    persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -13,7 +13,6 @@ children:
         children:
           - type: VariablesListBox
             name: dep
-            maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
         label: Grouping Variable
@@ -22,21 +21,20 @@ children:
             name: group
             maxItemCount: 1
             isTarget: true
-  - type: VariableSupplier
-    persistentItems: true
-    stretchFactor: 1
+      - type: TargetLayoutBox
+        label: 'Split by: (Optional)'
+        children:
+          - type: VariablesListBox
+            name: grvar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
     children:
-      - type: TargetLayoutBox
-        label: Dependent Variable
-        children:
-          - type: VariablesListBox
-            name: dep
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Grouping Variable
-        children:
-          - type: VariablesListBox
-            name: group
-            maxItemCount: 1
-            isTarget: true
+      - type: ComboBox
+        name: direction
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl

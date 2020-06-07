@@ -72,11 +72,6 @@ Suggests:
     gtsummary,
     vctrs,
     patchwork
-Remotes:
-    ndphillips/FFTrees,
-    easystats/report,
-    spgarbet/tangram,
-    cran/rmngb
 VignetteBuilder:
     knitr
 Encoding: UTF-8

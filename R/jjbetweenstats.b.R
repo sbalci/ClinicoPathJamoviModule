@@ -24,9 +24,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "
                 <br>Welcome to ClinicoPath
                 <br><br>
-                This tool will help you generate Bar Plots.
+                This tool will help you generate Box Violin Plots.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>here</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>here</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -52,6 +52,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
         .plot = function(image, ...) {
+
             # the plot function ----
             # Error messages ----
 
@@ -65,13 +66,39 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Prepare Data ----
 
+
+            # direction, paired ----
+
             direction <- self$options$direction
+
+            if (direction == "repeated") {
+
+                paired <- TRUE
+
+            } else if (direction == "independent") {
+
+                paired <- FALSE
+
+            }
 
             # distribution <-
             #     jmvcore::constructFormula(terms = self$options$distribution)
 
             # pairw <- self$options$pairw
 
+
+            # distribution ----
+
+
+            # distribution <-
+            #     jmvcore::constructFormula(terms = self$options$distribution)
+
+            # pairw <- self$options$pairw
+
+
+
+
+            # read data ----
 
             mydata <- self$data
 
@@ -83,109 +110,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # read arguments ----
 
-            mydep <- mydata[[self$options$dep]]
-            mygroup <- mydata[[self$options$group]]
+            dep <- self$options$dep
 
-            if ( !is.null(self$options$grvar) ) {
-                mygrvar <- mydata[[self$options$grvar]]
-            }
+            group <- self$options$group
+
+
+            dep <- jmvcore::composeTerm(components = dep)
+
+            group <- jmvcore::composeTerm(components = group)
 
 
             # ggbetweenstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
 
 
-            plotData <- data.frame(gr = mygroup,
-                                   dp = jmvcore::toNumeric(mydep))
-
             plot <- ggstatsplot::ggbetweenstats(
-                data = plotData,
-                x = gr,
-                y = dp,
-                type = distribution
+                data = mydata,
+                x = !!group,
+                y = !!dep
+                # ,
+                # type = distribution
             )
-
-
-
-            # ggbetweenstats(
-            #     data,
-            #     x,
-            #     y,
-            #     plot.type = "boxviolin",
-            #     type = "parametric",
-            #     pairwise.comparisons = FALSE,
-            #     pairwise.display = "significant",
-            #     p.adjust.method = "holm",
-            #     effsize.type = "unbiased",
-            #     partial = TRUE,
-            #     bf.prior = 0.707,
-            #     bf.message = TRUE,
-            #     results.subtitle = TRUE,
-            #     xlab = NULL,
-            #     ylab = NULL,
-            #     caption = NULL,
-            #     title = NULL,
-            #     subtitle = NULL,
-            #     sample.size.label = TRUE,
-            #     k = 2,
-            #     var.equal = FALSE,
-            #     conf.level = 0.95,
-            #     nboot = 100,
-            #     tr = 0.1,
-            #     mean.plotting = TRUE,
-            #     mean.ci = FALSE,
-            #     mean.point.args = list(size = 5, color = "darkred"),
-            #     mean.label.args = list(size = 3),
-            #     notch = FALSE,
-            #     notchwidth = 0.5,
-            #     outlier.tagging = FALSE,
-            #     outlier.label = NULL,
-            #     outlier.coef = 1.5,
-            #     outlier.shape = 19,
-            #     outlier.color = "black",
-            #     outlier.label.args = list(size = 3),
-            #     outlier.point.args = list(),
-            #     point.args = list(position = ggplot2::position_jitterdodge(dodge.width = 0.6), alpha
-            #                       = 0.4, size = 3, stroke = 0),
-            #     violin.args = list(width = 0.5, alpha = 0.2),
-            #     ggtheme = ggplot2::theme_bw(),
-            #     ggstatsplot.layer = TRUE,
-            #     package = "RColorBrewer",
-            #     palette = "Dark2",
-            #     ggplot.component = NULL,
-            #     output = "plot",
-            #     messages = TRUE,
-            #     ...
-            # )
-
-
-
-
-            # grouped_ggbetweenstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html
-
-
-            # grouped_ggbetweenstats(
-            #     data,
-            #     x,
-            #     y,
-            #     grouping.var,
-            #     outlier.label = NULL,
-            #     title.prefix = NULL,
-            #     output = "plot",
-            #     ...,
-            #     plotgrid.args = list(),
-            #     title.text = NULL,
-            #     title.args = list(size = 16, fontface = "bold"),
-            #     caption.text = NULL,
-            #     caption.args = list(size = 10),
-            #     sub.text = NULL,
-            #     sub.args = list(size = 12)
-            # )
-
-
-
 
 
             # Print Plot ----
@@ -194,5 +141,106 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             TRUE
 
         }
+
+
+        ,
+        .plot2 = function(image, ...) {
+
+            # the plot function ----
+            # Error messages ----
+
+            if (is.null(self$options$dep) ||
+                is.null(self$options$group) || is.null(self$options$grvar))
+                return()
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+
+            # Prepare Data ----
+
+
+            # direction, paired ----
+
+            direction <- self$options$direction
+
+            if (direction == "repeated") {
+
+                paired <- TRUE
+
+            } else if (direction == "independent") {
+
+                paired <- FALSE
+
+            }
+
+            # distribution <-
+            #     jmvcore::constructFormula(terms = self$options$distribution)
+
+            # pairw <- self$options$pairw
+
+
+            # distribution ----
+
+
+            # distribution <-
+            #     jmvcore::constructFormula(terms = self$options$distribution)
+
+            # pairw <- self$options$pairw
+
+
+
+
+            # read data ----
+
+            mydata <- self$data
+
+
+            # Exclude NA ----
+
+            excl <- self$options$excl
+
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+
+
+            # read arguments ----
+
+            dep <- self$options$dep
+
+            group <- self$options$group
+
+
+            dep <- jmvcore::composeTerm(components = dep)
+
+            group <- jmvcore::composeTerm(components = group)
+
+
+
+            # grouped_ggbetweenstats
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html
+
+
+            if ( !is.null(self$options$grvar) ) {
+
+                grvar <- self$options$grvar
+
+                plot2 <- ggstatsplot::grouped_ggbetweenstats(
+                    data = mydata,
+                    x = !!group,
+                    y = !! dep,
+                    grouping.var = !!grvar)
+
+            }
+
+            # Print Plot ----
+
+            print(plot2)
+            TRUE
+
+        }
+
+
+
+
     )
 )

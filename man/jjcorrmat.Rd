@@ -4,14 +4,12 @@
 \alias{jjcorrmat}
 \title{jjcorrmat}
 \usage{
-jjcorrmat(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjcorrmat(data, dep, grvar, direction = "independent", excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{dep}{.}
-
-\item{group}{.}
 
 \item{grvar}{.}
 
@@ -23,11 +21,13 @@ jjcorrmat(data, dep, group, grvar, direction = "independent", excl = TRUE)
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
-Function for Generating Plots and Graphs Based on Variable Types.
+'Wrapper Function for ggstatsplot::ggbarstats and
+ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 }
 \examples{
 \dontrun{

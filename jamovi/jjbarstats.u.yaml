@@ -2,7 +2,7 @@ title: Bar Charts
 name: jjbarstats
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -34,8 +34,6 @@ children:
     children:
       - type: ComboBox
         name: direction
-        enable: (!grvar)
-
   - type: LayoutBox
     margin: large
     children:

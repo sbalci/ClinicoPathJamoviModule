@@ -3,6 +3,7 @@ name:  jjhistostats
 title: jjhistostats
 jrs:   '1.1'
 
+
 items:
 
     - name:  todo
@@ -12,137 +13,40 @@ items:
           - dep
           - group
           - grvar
+          - direction
+
+
+
+
+    - name: plot2
+      title: '`Bar Chart ${group} - {dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+      visible: (grvar)
 
     - name: plot
-      title: '`Pie Chart ${group} - {dep}`'
+      title: '`Bar Chart ${group} - {dep}`'
       type: Image
-      width:  600
-      height: 450
+      width:  800
+      height: 600
       renderFun: .plot
       requiresData: true
       clearWith:
           - dep
           - group
           - grvar
-
+          - direction
 
 refs:
     - ggplot2
     - ggstatsplot
 
 ...
-
-
-# ---
-# name:  jviolin
-# title: Violin Plot
-# jrs:   '1.1'
-#
-# items:
-#
-#     - name:  todo
-#       title: To Do
-#       type:  Html
-#       clearWith:
-#           - dep
-#           - group
-#
-#     - name: plot
-#       title: '`Violin Plot ${group} - {dep}`'
-#       type: Image
-#       width:  600
-#       height: 450
-#       renderFun: .plot
-#       requiresData: true
-#       clearWith:
-#           - dep
-#           - group
-#           - col
-#           - fill
-#           - excl
-#           - flip
-#           - themex
-#           - usexlabel
-#           - xlabel
-#           - useylabel
-#           - ylabel
-#
-# refs:
-#     - ggplot2
-#     - RGraphGallery
-#     - hrbrthemes
-#
-# ...
-#
-# ---
-# name:  statsplot2
-# title: Graphs and Plots
-# jrs:   '1.1'
-#
-# items:
-#
-#     - name:  todo
-#       title: To Do
-#       type:  Html
-#       clearWith:
-#           - dep
-#           - group
-#           - direction
-#           - distribution
-#           - excl
-#           - grvar
-#           # - pairw
-#
-#     # - name:  text1
-#     #   title: Variable Types
-#     #   type:  Preformatted
-#
-#     # - name:  text2
-#     #   title: GGStatsPlot
-#     #   type:  Preformatted
-#
-#     # - name:  text3
-#     #   title: GGStatsPlot
-#     #   type:  Preformatted
-#
-#     - name:  text4
-#       title: Explanation
-#       type:  Preformatted
-#       clearWith:
-#           - dep
-#           - group
-#           - direction
-#           - distribution
-#           - excl
-#           - grvar
-#           # - pairw
-#
-#
-#     # - name:  text5
-#     #   title: Stats Expression Formula
-#     #   type:  Preformatted
-#
-#     - title: GGStatsPlot
-#       name: plot
-#       type: Image
-#       width:  800
-#       height: 600
-#       renderFun: .plot
-#       requiresData: true
-#       clearWith:
-#           - dep
-#           - group
-#           - direction
-#           - distribution
-#           - alluvsty
-#           - excl
-#           - grvar
-#           # - pairw
-#
-#
-# refs:
-#     - ggstatsplot
-#     - ggalluvial
-#     - easyalluvial
-#
-# ...

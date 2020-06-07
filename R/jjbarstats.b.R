@@ -20,8 +20,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # TODO ----
 
                     todo <- glue::glue(
-                        "
-                <br>Welcome to ClinicoPath
+                "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate Bar Charts.
                 <br><br>
@@ -98,9 +97,18 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                mydep <- mydata[[self$options$dep]]
+                # mydep <- mydata[[self$options$dep]]
+                # mygroup <- mydata[[self$options$group]]
 
-                mygroup <- mydata[[self$options$group]]
+
+                dep <- self$options$dep
+
+                group <- self$options$group
+
+
+                dep <- jmvcore::composeTerm(components = dep)
+
+                group <- jmvcore::composeTerm(components = group)
 
 
                 # ggbarstats ----
@@ -108,17 +116,18 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
 
 
-                plotData <- data.frame(gr = mygroup,
-                                       dp = mydep)
 
+                plot <-
+                    ggstatsplot::ggbarstats(
+                    data = mydata,
+                    main = !!dep,
+                    condition = !!group,
 
-                plot <- ggstatsplot::ggbarstats(data = plotData,
-                                                main = dp,
-                                                condition = gr,
+                    paired = paired,
+
 
                     counts = NULL,
                     ratio = NULL,
-                    paired = paired,
                     results.subtitle = TRUE,
                     sample.size.label = TRUE,
                     label = "percentage",
@@ -171,10 +180,22 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Prepare Data ----
 
-
-
     mydata <- self$data
 
+
+    # direction, paired ----
+
+    direction <- self$options$direction
+
+    if (direction == "repeated") {
+
+        paired <- TRUE
+
+    } else if (direction == "independent") {
+
+        paired <- FALSE
+
+    }
 
     # Exclude NA ----
 
@@ -184,9 +205,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-    mydep <- mydata[[self$options$dep]]
+    dep <- self$options$dep
 
-    mygroup <- mydata[[self$options$group]]
+    group <- self$options$group
+
+
+    dep <- jmvcore::composeTerm(components = dep)
+
+    group <- jmvcore::composeTerm(components = group)
+
+
+
 
     # grouped_ggbarstats ----
     # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
@@ -194,23 +223,18 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
     if ( !is.null(self$options$grvar) ) {
-        mygrvar <- mydata[[self$options$grvar]]
-    }
-
-
-    if ( !is.null(self$options$grvar) ) {
-
-        plotData <- data.frame(gr = mygroup,
-                               dp = mydep,
-                               grvar = mygrvar)
-
+        grvar <- self$options$grvar
 
         plot2 <- ggstatsplot::grouped_ggbarstats(
-            data = plotData,
-            main = dp,
-            condition = gr,
+            data = mydata,
+            main = !!dep,
+            condition = !!group,
+            grouping.var = !!grvar,
+
+            paired = paired,
+
+
             counts = NULL,
-            grouping.var = grvar,
             title.prefix = NULL,
             output = "plot",
             x = NULL,

@@ -44,7 +44,7 @@ options:
 
 
     - name: direction
-      title: 'Measurement Type (no affect with Split)'
+      title: 'Measurement Type'
       type: List
       options:
         - title: Repeated (within groups)
