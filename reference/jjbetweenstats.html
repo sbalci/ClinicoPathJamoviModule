@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Violin Plots Between — jjbetweenstats • ClinicoPath</title>
+<title>Violin Plots to Compare Between Groups — jjbetweenstats • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Violin Plots Between — jjbetweenstats" />
-<meta property="og:description" content="Violin Plots Between" />
+<meta property="og:title" content="Violin Plots to Compare Between Groups — jjbetweenstats" />
+<meta property="og:description" content="'Wrapper Function for ggstatsplot::ggbarstats and
+ggstatsplot::grouped_ggbarstats to generate Bar Charts.'" />
 
 
 
@@ -72,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0009</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0011</span>
       </span>
     </div>
 
@@ -147,23 +148,24 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Violin Plots Between</h1>
+    <h1>Violin Plots to Compare Between Groups</h1>
     <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/jjbetweenstats.h.R'><code>R/jjbetweenstats.h.R</code></a></small>
     <div class="hidden name"><code>jjbetweenstats.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Violin Plots Between</p>
+    <p>'Wrapper Function for ggstatsplot::ggbarstats and
+ggstatsplot::grouped_ggbarstats to generate Bar Charts.'</p>
     </div>
 
-    <pre class="usage"><span class='fu'>jjbetweenstats</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>, <span class='kw'>alt</span> <span class='kw'>=</span> <span class='st'>"notequal"</span>, <span class='kw'>varEq</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>jjbetweenstats</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>, <span class='no'>grvar</span>, <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>, <span class='kw'>excl</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>data</th>
-      <td><p>.</p></td>
+      <td><p>The data as a data frame.</p></td>
     </tr>
     <tr>
       <th>dep</th>
@@ -174,11 +176,15 @@
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>alt</th>
+      <th>grvar</th>
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>varEq</th>
+      <th>direction</th>
+      <td><p>select measurement type (repeated or independent)</p></td>
+    </tr>
+    <tr>
+      <th>excl</th>
       <td><p>.</p></td>
     </tr>
     </table>
@@ -186,11 +192,17 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='co'># example will be added</span>
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
