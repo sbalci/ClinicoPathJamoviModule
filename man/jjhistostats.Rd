@@ -2,16 +2,14 @@
 % Please edit documentation in R/jjhistostats.h.R
 \name{jjhistostats}
 \alias{jjhistostats}
-\title{jjhistostats}
+\title{Histogram}
 \usage{
-jjhistostats(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjhistostats(data, dep, grvar, direction = "independent", excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{dep}{.}
-
-\item{group}{.}
 
 \item{grvar}{.}
 
@@ -28,8 +26,8 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggbarstats and
-ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+'Wrapper Function for ggstatsplot::gghistostats and
+ggstatsplot::grouped_gghistostats to generate Bar Charts.'
 }
 \examples{
 \dontrun{

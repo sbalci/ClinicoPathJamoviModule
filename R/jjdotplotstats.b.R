@@ -1,6 +1,4 @@
-#' @title jjdotplotstats
-#'
-#'
+#' @title Dot Chart
 #'
 #'
 #' @importFrom R6 R6Class
@@ -16,188 +14,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
             # Initial Message ----
-            if (is.null(self$options$dep) ||
-                is.null(self$options$group)) {
-                # TODO ----
-
-                todo <- glue::glue(
-                    "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you generate Bar Plots.
-                <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>here</a>.
-                <br>
-                Please cite jamovi and the packages as given below.
-                <br><hr>"
-                )
-
-                self$results$todo$setContent(todo)
-
-                return()
-
-            } else {
-
-                todo <- glue::glue(
-                    "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
-
-                self$results$todo$setContent(todo)
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-            }
-        }
-
-
-        ,
-        .plot = function(image, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if (is.null(self$options$dep) ||
-                is.null(self$options$group))
-                return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
-            # Prepare Data ----
-
-            direction <- self$options$direction
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
-
-            mydata <- self$data
-
-
-            # Exclude NA ----
-
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-
-
-            mydep <- mydata[[self$options$dep]]
-            mygroup <- mydata[[self$options$group]]
-
-            if ( !is.null(self$options$grvar) ) {
-                mygrvar <- mydata[[self$options$grvar]]
-            }
-
-
-            # ggdotplotstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html
-
-
-
-            ggdotplotstats(
-                data,
-                x,
-                y,
-                xlab = NULL,
-                ylab = NULL,
-                title = NULL,
-                subtitle = NULL,
-                caption = NULL,
-                type = "parametric",
-                test.value = 0,
-                bf.prior = 0.707,
-                bf.message = TRUE,
-                effsize.type = "g",
-                conf.level = 0.95,
-                nboot = 100,
-                k = 2,
-                results.subtitle = TRUE,
-                point.args = list(color = "black", size = 3, shape = 16),
-                test.k = 0,
-                test.value.line = FALSE,
-                test.value.line.args = list(size = 1),
-                test.value.label.args = list(size = 3),
-                centrality.parameter = "mean",
-                centrality.k = 2,
-                centrality.line.args = list(color = "blue", size = 1),
-                centrality.label.args = list(color = "blue", size = 3),
-                ggplot.component = NULL,
-                ggtheme = ggplot2::theme_bw(),
-                ggstatsplot.layer = TRUE,
-                output = "plot",
-                messages = TRUE,
-                ...
-            )
-
-
-
-
-            # grouped_ggdotplotstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html
-
-            grouped_ggdotplotstats(
-                data,
-                x,
-                y,
-                grouping.var,
-                title.prefix = NULL,
-                output = "plot",
-                ...,
-                plotgrid.args = list(),
-                title.text = NULL,
-                title.args = list(size = 16, fontface = "bold"),
-                caption.text = NULL,
-                caption.args = list(size = 10),
-                sub.text = NULL,
-                sub.args = list(size = 12)
-            )
-
-
-
-
-
-
-
-
-            # Print Plot ----
-
-            print(plot)
-            TRUE
-
-        }
-    )
-)
-
-#' @title Bar Charts
-#'
-#'
-#'
-#' @importFrom R6 R6Class
-#' @import jmvcore
-#'
-
-
-jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "jjbarstatsClass",
-    inherit = jjbarstatsBase,
-    private = list(
-
-        .run = function() {
-
-            # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
                 # TODO ----
 
                 todo <- glue::glue(
-                    "<br>Welcome to ClinicoPath
+                "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate Bar Charts.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>here</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html' target='_blank'>ggdotplotstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html' target='_blank'>grouped_ggdotplotstats</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -211,7 +37,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # TODO ----
                 todo <- glue::glue(
-                    "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
+                    "<br>You have selected to use a Dot Plot to compare continious variables by groups.<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -220,7 +46,6 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
         }
-
 
 
         ,
@@ -269,10 +94,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
-
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
+            # define main arguments ----
 
             dep <- self$options$dep
 
@@ -284,51 +106,44 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- jmvcore::composeTerm(components = group)
 
 
-            # ggbarstats ----
-            # bar charts for categorical data
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
+            # ggdotplotstats ----
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html
 
 
 
             plot <-
-                ggstatsplot::ggbarstats(
+                ggstatsplot::ggdotplotstats(
                     data = mydata,
-                    main = !!dep,
-                    condition = !!group,
-
-                    paired = paired,
-
-
-                    counts = NULL,
-                    ratio = NULL,
-                    results.subtitle = TRUE,
-                    sample.size.label = TRUE,
-                    label = "percentage",
-                    perc.k = 0,
-                    label.args = list(alpha = 1, fill = "white"),
-                    bf.message = TRUE,
-                    sampling.plan = "indepMulti",
-                    fixed.margin = "rows",
-                    prior.concentration = 1,
+                    x = !!dep,
+                    y = !!group,
+                    xlab = NULL,
+                    ylab = NULL,
                     title = NULL,
                     subtitle = NULL,
                     caption = NULL,
+                    type = "parametric",
+                    test.value = 0,
+                    bf.prior = 0.707,
+                    bf.message = TRUE,
+                    effsize.type = "g",
                     conf.level = 0.95,
                     nboot = 100,
-                    legend.title = NULL,
-                    xlab = NULL,
-                    ylab = NULL,
                     k = 2,
-                    proportion.test = TRUE,
+                    results.subtitle = TRUE,
+                    point.args = list(color = "black", size = 3, shape = 16),
+                    test.k = 0,
+                    test.value.line = FALSE,
+                    test.value.line.args = list(size = 1),
+                    test.value.label.args = list(size = 3),
+                    centrality.parameter = "mean",
+                    centrality.k = 2,
+                    centrality.line.args = list(color = "blue", size = 1),
+                    centrality.label.args = list(color = "blue", size = 3),
+                    ggplot.component = NULL,
                     ggtheme = ggplot2::theme_bw(),
                     ggstatsplot.layer = TRUE,
-                    package = "RColorBrewer",
-                    palette = "Dark2",
-                    ggplot.component = NULL,
                     output = "plot",
-                    messages = TRUE,
-                    x = NULL,
-                    y = NULL
+                    messages = TRUE
                 )
 
 
@@ -340,7 +155,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
 
-        ,             .plot2 = function(image, ...) {
+        ,
+
+        .plot2 = function(image, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -377,6 +194,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # define main arguments ----
+
 
             dep <- self$options$dep
 
@@ -390,28 +209,21 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # grouped_ggbarstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
+            # grouped_ggdotplotstats ----
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html
 
 
 
             if ( !is.null(self$options$grvar) ) {
                 grvar <- self$options$grvar
 
-                plot2 <- ggstatsplot::grouped_ggbarstats(
+                plot2 <- ggstatsplot::grouped_ggdotplotstats(
                     data = mydata,
-                    main = !!dep,
-                    condition = !!group,
+                    x = !!dep,
+                    y = !!group,
                     grouping.var = !!grvar,
-
-                    paired = paired,
-
-
-                    counts = NULL,
                     title.prefix = NULL,
                     output = "plot",
-                    x = NULL,
-                    y = NULL,
                     plotgrid.args = list(),
                     title.text = NULL,
                     title.args = list(size = 16, fontface = "bold"),
@@ -420,6 +232,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.text = NULL,
                     sub.args = list(size = 12)
                 )
+
 
             }
 

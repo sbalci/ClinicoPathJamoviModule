@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjdotplotstats.b.R
 \name{jjdotplotstatsClass}
 \alias{jjdotplotstatsClass}
-\title{jjdotplotstats}
+\title{Dot Chart}
 \description{
-jjdotplotstats
+Dot Chart
 
-jjdotplotstats
+Dot Chart
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjdotplotstatsBase]{ClinicoPath::jjdotplotstatsBase}} -> \code{jjdotplotstatsClass}

@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjbetweenstats.b.R
 \name{jjbetweenstatsClass}
 \alias{jjbetweenstatsClass}
-\title{jjbetweenstats}
+\title{Violin Plots to Compare Between Groups}
 \description{
-jjbetweenstats
+Violin Plots to Compare Between Groups
 
-jjbetweenstats
+Violin Plots to Compare Between Groups
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjbetweenstatsBase]{ClinicoPath::jjbetweenstatsBase}} -> \code{jjbetweenstatsClass}

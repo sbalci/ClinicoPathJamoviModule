@@ -1,6 +1,6 @@
 ---
 name:  jjwithinstats
-title: Violin Plots
+title: Violin Plots to Compare Between Groups
 jrs:   '1.1'
 
 items:
@@ -18,7 +18,7 @@ items:
 
 
     - name: plot2
-      title: '`Bar Chart ${group} - {dep} by {grvar}`'
+      title: '`Violin Plot ${group} - {dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -32,7 +32,7 @@ items:
       visible: (grvar)
 
     - name: plot
-      title: '`Bar Chart ${group} - {dep}`'
+      title: '`Violin Plot ${group} - {dep}`'
       type: Image
       width:  800
       height: 600

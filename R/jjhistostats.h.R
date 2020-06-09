@@ -7,7 +7,6 @@ jjhistostatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             dep = NULL,
-            group = NULL,
             grvar = NULL,
             direction = "independent",
             excl = TRUE, ...) {
@@ -22,18 +21,9 @@ jjhistostatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "dep",
                 dep,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
@@ -55,20 +45,17 @@ jjhistostatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 default=TRUE)
 
             self$.addOption(private$..dep)
-            self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..direction)
             self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
-        group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         direction = function() private$..direction$value,
         excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
-        ..group = NA,
         ..grvar = NA,
         ..direction = NA,
         ..excl = NA)
@@ -86,7 +73,7 @@ jjhistostatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="jjhistostats",
+                title="Histogram",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot"))
@@ -102,7 +89,7 @@ jjhistostatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                title="`Histogram ${dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -116,7 +103,7 @@ jjhistostatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                title="`Histogram ${dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -147,10 +134,10 @@ jjhistostatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' jjhistostats
+#' Histogram
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 'Wrapper Function for ggstatsplot::gghistostats and
+#' ggstatsplot::grouped_gghistostats to generate Bar Charts.'
 #' 
 #'
 #' @examples
@@ -159,7 +146,6 @@ jjhistostatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'}
 #' @param data The data as a data frame.
 #' @param dep .
-#' @param group .
 #' @param grvar .
 #' @param direction select measurement type (repeated or independent)
 #' @param excl .
@@ -174,7 +160,6 @@ jjhistostatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 jjhistostats <- function(
     data,
     dep,
-    group,
     grvar,
     direction = "independent",
     excl = TRUE) {
@@ -183,22 +168,17 @@ jjhistostats <- function(
         stop('jjhistostats requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjhistostatsOptions$new(
         dep = dep,
-        group = group,
         grvar = grvar,
         direction = direction,
         excl = excl)

@@ -1,4 +1,4 @@
-#' @title jjbetweenstats
+#' @title Violin Plots to Compare Between Groups
 #'
 #'
 #'

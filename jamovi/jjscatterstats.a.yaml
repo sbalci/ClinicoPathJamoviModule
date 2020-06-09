@@ -1,18 +1,18 @@
 ---
 name:  jjscatterstats
-title: jjscatterstats
+title: Scatter Plot
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::jjscatterstats
+menuSubgroup: Continious vs Continious
+menuSubtitle: Scatter Plot
 version: '1.0.0'
 jas: '1.2'
 
 
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggscatterstats and
+    #     ggstatsplot::grouped_ggscatterstats to generate Scatter Plot.'
     R:
         dontrun: true
         usage: |
@@ -29,14 +29,14 @@ options:
     - name: dep
       title: Dependent Variable
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     - name: group
       title: Grouping Variable
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     - name: grvar
       title: 'Split by: (Optional)'

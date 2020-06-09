@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjcorrmat.h.R
 \name{jjcorrmat}
 \alias{jjcorrmat}
-\title{jjcorrmat}
+\title{Correlation Matrix}
 \usage{
 jjcorrmat(data, dep, grvar, direction = "independent", excl = TRUE)
 }

@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjscatterstats.b.R
 \name{jjscatterstatsClass}
 \alias{jjscatterstatsClass}
-\title{jjscatterstats}
+\title{Scatter Plot}
 \description{
-jjscatterstats
+Scatter Plot
 
-jjscatterstats
+Scatter Plot
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjscatterstatsBase]{ClinicoPath::jjscatterstatsBase}} -> \code{jjscatterstatsClass}

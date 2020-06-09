@@ -1,4 +1,4 @@
-#' @title jjcorrmat
+#' @title Correlation Matrix
 #'
 #'
 #' @importFrom R6 R6Class
@@ -14,16 +14,16 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
             # Initial Message ----
-            if ( is.null(self$options$dep) ) {
+            if ( length(self$options$dep) <= 1 ) {
 
                 # TODO ----
 
                 todo <- glue::glue(
-                    "<br>Welcome to ClinicoPath
+                "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate Bar Charts.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>here</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -54,7 +54,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the plot function ----
             # Error messages ----
 
-            if ( is.null(self$options$dep) )
+            if ( length(self$options$dep) <= 1 )
                 return()
 
             if (nrow(self$data) == 0)
@@ -74,6 +74,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # define main arguments ----
 
             myvars <- jmvcore::constructFormula(terms = self$options$dep)
 
@@ -123,96 +124,89 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         }
 
-#
-#         ,
-#
-#         .plot2 = function(image, ...) {
-#             # the plot function ----
-#             # Error messages ----
-#
-#             if ( is.null(self$options$dep) || is.null(self$options$grvar))
-#                 return()
-#
-#             if (nrow(self$data) == 0)
-#                 stop('Data contains no (complete) rows')
-#
-#
-#             # Prepare Data ----
-#
-#             mydata <- self$data
-#
-#
-#             # direction, paired ----
-#
-#             direction <- self$options$direction
-#
-#             if (direction == "repeated") {
-#
-#                 paired <- TRUE
-#
-#             } else if (direction == "independent") {
-#
-#                 paired <- FALSE
-#
-#             }
-#
-#             # Exclude NA ----
-#
-#             excl <- self$options$excl
-#
-#             if (excl) {mydata <- jmvcore::naOmit(mydata)}
-#
-#
-#
-#             dep <- self$options$dep
-#
-#
-#
-#             dep <- jmvcore::composeTerm(components = dep)
-#
-#
-#
-#
-#
-#
-#             # grouped_ggcorrmat
-#             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html
-#
-#
-#
-#             if ( !is.null(self$options$grvar) ) {
-#                 grvar <- self$options$grvar
-#
-#                 plot2 <- ggstatsplot::grouped_ggcorrmat(
-#                     data,
-#                     cor.vars = NULL,
-#                     cor.vars.names = NULL,
-#                     grouping.var,
-#                     title.prefix = NULL,
-#                     output = "plot",
-#                     ...,
-#                     plotgrid.args = list(),
-#                     title.text = NULL,
-#                     title.args = list(size = 16, fontface = "bold"),
-#                     caption.text = NULL,
-#                     caption.args = list(size = 10),
-#                     sub.text = NULL,
-#                     sub.args = list(size = 12)
-#                 )
-#
-#
-#             }
-#
-#             # Print Plot ----
-#
-#             print(plot2)
-#             TRUE
-#
-#         }
-#
+
+        ,
+
+        .plot2 = function(image, ...) {
+            # the plot function ----
+            # Error messages ----
+
+            if ( is.null(self$options$dep) || is.null(self$options$grvar))
+                return()
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+
+            # Prepare Data ----
+
+            mydata <- self$data
+
+
+            # direction, paired ----
+
+            direction <- self$options$direction
+
+            if (direction == "repeated") {
+
+                paired <- TRUE
+
+            } else if (direction == "independent") {
+
+                paired <- FALSE
+
+            }
+
+            # Exclude NA ----
+
+            excl <- self$options$excl
+
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+
+
+            # define main arguments ----
+
+            myvars <- jmvcore::constructFormula(terms = self$options$dep)
+
+            myvars <- jmvcore::decomposeFormula(formula = myvars)
+
+            myvars <- unlist(myvars)
+
+
+            # grouped_ggcorrmat ----
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html
 
 
 
+            if ( !is.null(self$options$grvar) ) {
+
+                grvar <- self$options$grvar
+
+                plot2 <- ggstatsplot::grouped_ggcorrmat(
+                    data = mydata,
+                    cor.vars = myvars,
+                    cor.vars.names = NULL,
+                    grouping.var = !!grvar,
+                    title.prefix = NULL,
+                    output = "plot",
+                    plotgrid.args = list(),
+                    title.text = NULL,
+                    title.args = list(size = 16, fontface = "bold"),
+                    caption.text = NULL,
+                    caption.args = list(size = 10),
+                    sub.text = NULL,
+                    sub.args = list(size = 12)
+                )
+
+
+            }
+
+            # Print Plot ----
+
+            print(plot2)
+            TRUE
+
+        }
 
     )
 )

@@ -17,9 +17,40 @@ items:
 
 
 
+    - name: plot4
+      title: '`Pie Chart ${group} - {dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot4
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+      visible: (grvar)
+      # visible: (dep && group && grvar)
+
+
+
+    - name: plot3
+      title: '`Pie Chart ${dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot3
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+      visible: (grvar)
+
 
     - name: plot2
-      title: '`Bar Chart ${group} - {dep} by {grvar}`'
+      title: '`Pie Chart ${group} - {dep}`'
       type: Image
       width:  800
       height: 600
@@ -30,20 +61,25 @@ items:
           - group
           - grvar
           - direction
-      visible: (grvar)
+      visible: (group)
+      # visible: (dep && group)
 
-    - name: plot
-      title: '`Bar Chart ${group} - {dep}`'
+
+
+    - name: plot1
+      title: '`Pie Chart ${dep}`'
       type: Image
       width:  800
       height: 600
-      renderFun: .plot
+      renderFun: .plot1
       requiresData: true
       clearWith:
           - dep
           - group
           - grvar
           - direction
+      visible: (dep)
+
 
 refs:
     - ggplot2

@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjpiestats.b.R
 \name{jjpiestatsClass}
 \alias{jjpiestatsClass}
-\title{jjpiestats}
+\title{Pie Charts}
 \description{
-jjpiestats
+Pie Charts
 
-jjpiestats
+Pie Charts
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjpiestatsBase]{ClinicoPath::jjpiestatsBase}} -> \code{jjpiestatsClass}

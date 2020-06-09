@@ -19,36 +19,6 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 StatStratum <- ggalluvial::StatStratum
 
 
-                # # Error Message ----
-                #
-                # if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-                #
-                # if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
-                #     # ToDo Message ----
-                #     todo <- "
-                #         <br>Welcome to ClinicoPath
-                #                   <br><br>
-                #                   This tool will help you form an Alluvial Plots.
-                #                   "
-                #     html <- self$results$todo
-                #     html$setContent(todo)
-                #
-                # } else {
-                #     todo <- ""
-                #     html <- self$results$todo
-                #     html$setContent(todo)
-                #
-                #
-                #
-                # }
-
-
-
-
-
-
-
-
                 # If no variable selected Initial Message ----
                 if (is.null(self$options$dep) ||
                     is.null(self$options$group)) {
@@ -77,6 +47,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         stop('Data contains no (complete) rows')
 
 
+                    # prepare main arguments ----
+
                     # mydata <- self$data
 
                     mydep <- self$data[[self$options$dep]]
@@ -93,25 +65,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     direction <- jmvcore::composeTerm(direction)
 
 
-                    # klass <- print(list(
-                    #     "mydep" = c(typeof(mydep), class(mydep)),
-                    #     "mydep2" = c(
-                    #         inherits(mydep, "factor"),
-                    #         inherits(mydep, "character"),
-                    #         inherits(mydep, "integer"),
-                    #         inherits(mydep, "numeric"),
-                    #         inherits(mydep, contin)
-                    #     ),
-                    #     "mygroup" = c(typeof(mygroup), class(mygroup)),
-                    #     "a" = c(distribution, direction)
-                    # ))
-                    #
-                    #
-                    # self$results$text1$setContent(klass)
 
 
-
-                    # independent ----
+                # independent ----
 
                     if (direction == "independent") {
                         # independent, factor, continuous ----
@@ -153,12 +109,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # independent, continuous, factor ----
                         } else if (inherits(mygroup, contin) &&
                                    inherits(mydep, "factor")) {
-stat_exp <- glue::glue("Please switch the variables to generate a plot.")
+stat_exp <- glue::glue("<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
                         }
-                        # repeated ----
+
+
+                    # repeated ----
+
                     } else if (direction == "repeated") {
                         # repeated, factor, continuous ----
-                        if (inherits(mygroup, "factor") &&
+
+                    if (inherits(mygroup, "factor") &&
                             inherits(mydep, contin)) {
                             # ggwithinstats 	violin plots 	for comparisons within groups/conditions
                             # stat_exp <-
@@ -229,15 +189,18 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                     stop('Data contains no (complete) rows')
 
 
-                # Prepare Data ----
+                # direction ----
 
                 direction <- self$options$direction
+
+
+                # distribution
 
                 distribution <-
                     jmvcore::constructFormula(terms = self$options$distribution)
 
-                # pairw <- self$options$pairw
 
+                # read data ----
 
                 mydata <- self$data
 
@@ -249,21 +212,35 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                 if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+                # define main arguments
 
-                mydep <- mydata[[self$options$dep]]
-                mygroup <- mydata[[self$options$group]]
+                # mydep <- mydata[[self$options$dep]]
+                # mygroup <- mydata[[self$options$group]]
+
+                dep <- self$options$dep
+
+                group <- self$options$group
+
+                dep <- jmvcore::composeTerms(listOfComponents = dep)
+
+                group <- jmvcore::composeTerm(components = group)
+
+
+
+                # if ( ! is.null(self$options$grvar) ) {
+                #     mygrvar <- mydata[[self$options$grvar]]
+                #     }
+
+
                 if ( ! is.null(self$options$grvar) ) {
-                    mygrvar <- mydata[[self$options$grvar]]
-                    }
+                    grvar <- self$options$grvar
+                }
 
 
-
+                # define variable types ----
 
                 contin <- c("integer", "numeric", "double")
                 categ <- c("factor")
-
-
-
 
 
                 # independent ----
@@ -274,13 +251,13 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                     if (inherits(mygroup, "factor") && inherits(mydep, contin)) {
                         # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
 
-                        plotData <- data.frame(gr = mygroup,
-                                               dp = jmvcore::toNumeric(mydep))
+                        # plotData <- data.frame(gr = mygroup,
+                        #                        dp = jmvcore::toNumeric(mydep))
 
                         plot <- ggstatsplot::ggbetweenstats(
-                            data = plotData,
-                            x = gr,
-                            y = dp,
+                            data = mydata,
+                            x = !!group,
+                            y = !!dep,
                             type = distribution
                         )
 
@@ -290,14 +267,16 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                                inherits(mydep, contin)) {
                         # ggscatterstats 	scatterplots 	for correlations between two variables
 
-                        plotData <-
-                            data.frame(gr = jmvcore::toNumeric(mygroup),
-                                       dp = jmvcore::toNumeric(mydep))
+                        # plotData <-
+                        #     data.frame(gr = jmvcore::toNumeric(mygroup),
+                        #                dp = jmvcore::toNumeric(mydep))
 
-                        plot <- ggstatsplot::ggscatterstats(data = plotData,
-                                                            x = gr,
-                                                            y = dp,
-                                                            type = distribution)
+                        plot <- ggstatsplot::ggscatterstats(
+                            data = mydata,
+                            x = !!group,
+                            y = !!dep,
+                            type = distribution)
+
 
                         # independent, factor, factor ----
 
@@ -305,19 +284,24 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                                inherits(mydep, "factor")) {
                         # ggbarstats 	bar charts 	for categorical data
 
-                        plotData <- data.frame(gr = mygroup,
-                                               dp = mydep)
+                        # plotData <- data.frame(gr = mygroup,
+                        #                        dp = mydep)
 
 
-                        plot <- ggstatsplot::ggbarstats(data = plotData,
-                                                        main = dp,
-                                                        condition = gr)
+                        plot <- ggstatsplot::ggbarstats(
+                            data = mydata,
+                            main = !!dep,
+                            condition = !!group)
 
                         # independent, continuous, factor ----
 
                     } else if (inherits(mygroup, contin) &&
                                inherits(mydep, "factor")) {
-                        plot <- "Not Available"
+
+                        plot <- ggstatsplot::ggdotplotstats(
+                            data = mydata,
+                            x = !!dep,
+                            y = !!group)
 
                     }
 
@@ -332,14 +316,14 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
                         inherits(mydep, contin)) {
                         # ggwithinstats 	violin plots 	for comparisons within groups/conditions
 
-                        plotData <- data.frame(gr = mygroup,
-                                               dp = jmvcore::toNumeric(mydep))
+                        # plotData <- data.frame(gr = mygroup,
+                        #                        dp = jmvcore::toNumeric(mydep))
 
 
                         plot <- ggstatsplot::ggwithinstats(
-                            data = plotData,
-                            x = gr,
-                            y = dp,
+                            data = mydata,
+                            x = !!group,
+                            y = !!dep,
                             type = distribution,
                             pairwise.comparisons = TRUE
                             # pairwise.comparisons = pairw
@@ -532,16 +516,16 @@ stat_exp <- glue::glue("Please switch the variables to generate a plot.")
 
 
 
-                    plotData <- data.frame(gr = mygroup,
-                                           dp = jmvcore::toNumeric(mydep),
-                                           grvar = mygrvar )
+                    # plotData <- data.frame(gr = mygroup,
+                    #                        dp = jmvcore::toNumeric(mydep),
+                    #                        grvar = mygrvar )
 
 
                     plot <- ggstatsplot::grouped_ggbetweenstats(
-                        data = plotData,
-                        x = gr,
-                        y = dp,
-                        grouping.var = grvar,
+                        data = mydata,
+                        x = !!group,
+                        y = !!dep,
+                        grouping.var = !!grvar,
                         pairwise.comparisons = TRUE,
                         # pairwise.comparisons = pairw,
                         p.adjust.method = "bonferroni"

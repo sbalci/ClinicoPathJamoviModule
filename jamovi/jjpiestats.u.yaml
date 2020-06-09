@@ -2,10 +2,10 @@ title: Pie Charts
 name: jjpiestats
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
-    persistentItems: true
+    persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -16,14 +16,14 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable
+        label: 'Grouping Variable: (Optional)'
         children:
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Split by:'
+        label: 'Split by: (Optional)'
         children:
           - type: VariablesListBox
             name: grvar

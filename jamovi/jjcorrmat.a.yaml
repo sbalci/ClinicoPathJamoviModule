@@ -1,6 +1,6 @@
 ---
 name:  jjcorrmat
-title: jjcorrmat
+title: Correlation Matrix
 menuGroup: JJStatsPlot
 menuSubgroup: Continious vs Continious
 menuSubtitle: Correlation Matrix
@@ -10,9 +10,9 @@ jas: '1.2'
 
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggcorrmat and
+    #     ggstatsplot::grouped_ggcorrmat to generate Correlation Matrix.'
     R:
         dontrun: true
         usage: |

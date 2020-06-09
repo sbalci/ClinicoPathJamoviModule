@@ -1,6 +1,6 @@
 ---
 name:  jjcorrmat
-title: jjcorrmat
+title: Correlation Matrix
 jrs:   '1.1'
 
 
@@ -14,21 +14,21 @@ items:
           - grvar
           - direction
 
-    # - name: plot2
-    #   title: '`Bar Chart ${group} - {dep} by {grvar}`'
-    #   type: Image
-    #   width:  800
-    #   height: 600
-    #   renderFun: .plot2
-    #   requiresData: true
-    #   clearWith:
-    #       - dep
-    #       - grvar
-    #       - direction
-    #   visible: (grvar)
+    - name: plot2
+      title: Chart
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - dep
+          - grvar
+          - direction
+      visible: (grvar)
 
     - name: plot
-      title: '`Bar Chart ${group} - {dep}`'
+      title: Chart
       type: Image
       width:  800
       height: 600

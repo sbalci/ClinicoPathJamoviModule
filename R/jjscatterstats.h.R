@@ -22,18 +22,16 @@ jjscatterstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "dep",
                 dep,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
@@ -86,7 +84,7 @@ jjscatterstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="jjscatterstats",
+                title="Scatter Plot",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot"))
@@ -102,7 +100,7 @@ jjscatterstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                title="`Scatter Plot ${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -116,7 +114,7 @@ jjscatterstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                title="`Scatter Plot ${group} - {dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -147,10 +145,10 @@ jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' jjscatterstats
+#' Scatter Plot
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 'Wrapper Function for ggstatsplot::ggscatterstats and
+#' ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
 #' 
 #'
 #' @examples
@@ -192,8 +190,6 @@ jjscatterstats <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjscatterstatsOptions$new(

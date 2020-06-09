@@ -93,7 +93,7 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Graphs and Plots",
+                title="Variable Type Based Graphs and Plots",
                 refs=list(
                     "ggstatsplot",
                     "ggalluvial",
@@ -122,7 +122,7 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "grvar")))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="GGStatsPlot",
+                title="Variable Type Based Graphs and Plots",
                 name="plot",
                 width=800,
                 height=600,

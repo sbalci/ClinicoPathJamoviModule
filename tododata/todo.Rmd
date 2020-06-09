@@ -17,7 +17,11 @@ Remotes:
 ## ndphillips/FFTrees
 
 
-
+Remotes:
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram,
+    cran/rmngb
 
 
 
@@ -1037,6 +1041,8 @@ system(command = gitCommand, intern = TRUE)
 
 readyfunctions <- c(
     "refs",
+    "data",
+    "-package"
     # "^utils-pipe"
 
 # Descriptives
@@ -1048,7 +1054,6 @@ readyfunctions <- c(
 
 # Comparisons
     "^crosstable",
-    "^statsplot2",
     # "^pairchi2",
     # "^correlation",
     
@@ -1057,7 +1062,18 @@ readyfunctions <- c(
     "^multisurvival",
     "^oddsratio",
     # "^competingsurvival",
-    
+
+# JJ Functions
+    "statsplot2",
+    "^jjbarstats",
+    "^jjbetweenstats",
+    "^jjcorrmat",
+    "^jjdotplotstats",
+    "^jjhistostats",
+    "^jjpiestats",
+    "^jjscatterstats",
+    "^jjwithinstats",
+
 # Agreement
     "^agreement"
     # "^icccoeff",
@@ -1119,11 +1135,22 @@ file.copy(from = files_data,
 
 readyfunctions <- c(
     "refs",
-    "statsplot2",
+    "^data",
     
-# Functions
-    "^jjbarstats",
-    "^jjbetweenstats"
+# JJ Functions
+    "statsplot2",
+    "^jjbarstats\\.",
+    "^jjbetweenstats",
+    "^jjcorrmat",
+    "^jjdotplotstats",
+    "^jjhistostats",
+    "^jjpiestats",
+    "^jjscatterstats",
+    "^jjwithinstats"
+
+# jjbarstats2.b.R
+
+
 )
 
 
