@@ -10,9 +10,9 @@ jas: '1.2'
 
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggpiestats and
+    #     ggstatsplot::grouped_ggpiestats to generate Pie Charts.'
     R:
         dontrun: true
         usage: |
@@ -33,7 +33,7 @@ options:
       permitted: [ factor ]
 
     - name: group
-      title: Grouping Variable
+      title: 'Grouping Variable: (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0011
-Date: 2020-06-05
+Version: 0.0.2.0012
+Date: 2020-06-09
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -72,6 +72,11 @@ Suggests:
     gtsummary,
     vctrs,
     patchwork
+Remotes:
+    ndphillips/FFTrees,
+    easystats/report,
+    spgarbet/tangram,
+    cran/rmngb
 VignetteBuilder:
     knitr
 Encoding: UTF-8

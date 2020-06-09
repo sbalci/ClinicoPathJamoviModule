@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjscatterstats.h.R
 \name{jjscatterstats}
 \alias{jjscatterstats}
-\title{jjscatterstats}
+\title{Scatter Plot}
 \usage{
 jjscatterstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 }
@@ -28,8 +28,8 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggbarstats and
-ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+'Wrapper Function for ggstatsplot::ggscatterstats and
+ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
 }
 \examples{
 \dontrun{

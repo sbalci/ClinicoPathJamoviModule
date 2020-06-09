@@ -22,10 +22,9 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "dep",
                 dep,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
@@ -86,7 +85,7 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="jjdotplotstats",
+                title="Dot Chart",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot"))
@@ -102,7 +101,7 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                title="`Dot Chart ${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -116,7 +115,7 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                title="`Dot Chart ${group} - {dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -147,10 +146,10 @@ jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' jjdotplotstats
+#' Dot Chart
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 'Wrapper Function for ggstatsplot::ggdotplotstats and
+#' ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
 #' 
 #'
 #' @examples
@@ -192,7 +191,6 @@ jjdotplotstats <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 

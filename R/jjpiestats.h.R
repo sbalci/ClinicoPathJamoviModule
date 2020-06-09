@@ -78,8 +78,10 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        plot4 = function() private$.items[["plot4"]],
+        plot3 = function() private$.items[["plot3"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot1 = function() private$.items[["plot1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -101,11 +103,11 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                name="plot4",
+                title="`Pie Chart ${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
-                renderFun=".plot2",
+                renderFun=".plot4",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
@@ -115,17 +117,46 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                name="plot3",
+                title="`Pie Chart ${dep} by {grvar}`",
                 width=800,
                 height=600,
-                renderFun=".plot",
+                renderFun=".plot3",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))}))
+                    "direction"),
+                visible="(grvar)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot2",
+                title="`Pie Chart ${group} - {dep}`",
+                width=800,
+                height=600,
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "direction"),
+                visible="(group)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot1",
+                title="`Pie Chart ${dep}`",
+                width=800,
+                height=600,
+                renderFun=".plot1",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "direction"),
+                visible="(dep)"))}))
 
 jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjpiestatsBase",
@@ -149,8 +180,8 @@ jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Pie Charts
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' 'Wrapper Function for ggstatsplot::ggpiestats and
+#' ggstatsplot::grouped_ggpiestats to generate Bar Charts.'
 #' 
 #'
 #' @examples
@@ -166,8 +197,10 @@ jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

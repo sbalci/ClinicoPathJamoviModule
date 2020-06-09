@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjhistostats.b.R
 \name{jjhistostatsClass}
 \alias{jjhistostatsClass}
-\title{jjhistostats}
+\title{Histogram}
 \description{
-jjhistostats
+Histogram
 
-jjhistostats
+Histogram
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjhistostatsBase]{ClinicoPath::jjhistostatsBase}} -> \code{jjhistostatsClass}

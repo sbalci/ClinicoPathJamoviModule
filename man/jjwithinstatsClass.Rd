@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjwithinstats.b.R
 \name{jjwithinstatsClass}
 \alias{jjwithinstatsClass}
-\title{jjwithinstats}
+\title{Violin Plots to Compare Within Group}
 \description{
-jjwithinstats
+Violin Plots to Compare Within Group
 
-jjwithinstats
+Violin Plots to Compare Within Group
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjwithinstatsBase]{ClinicoPath::jjwithinstatsBase}} -> \code{jjwithinstatsClass}

@@ -1,18 +1,18 @@
 ---
 name:  jjhistostats
-title: jjhistostats
+title: Histogram
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::jjhistostats
+menuSubgroup: Continious
+menuSubtitle: Histogram
 version: '1.0.0'
 jas: '1.2'
 
 
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    # main: |
+    #     'Wrapper Function for ggstatsplot::gghistostats and
+    #     ggstatsplot::grouped_gghistostats to generate Histogram.'
     R:
         dontrun: true
         usage: |
@@ -29,14 +29,8 @@ options:
     - name: dep
       title: Dependent Variable
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-
-    - name: group
-      title: Grouping Variable
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     - name: grvar
       title: 'Split by: (Optional)'

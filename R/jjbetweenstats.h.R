@@ -22,10 +22,9 @@ jjbetweenstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "dep",
                 dep,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
@@ -191,7 +190,6 @@ jjbetweenstats <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 

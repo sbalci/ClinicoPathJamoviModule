@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjdotplotstats.h.R
 \name{jjdotplotstats}
 \alias{jjdotplotstats}
-\title{jjdotplotstats}
+\title{Dot Chart}
 \usage{
 jjdotplotstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 }
@@ -28,8 +28,8 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggbarstats and
-ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+'Wrapper Function for ggstatsplot::ggdotplotstats and
+ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
 }
 \examples{
 \dontrun{

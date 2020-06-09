@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjwithinstats.h.R
 \name{jjwithinstats}
 \alias{jjwithinstats}
-\title{Violin Plots}
+\title{Violin Plots to Compare Between Groups}
 \usage{
 jjwithinstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 }

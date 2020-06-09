@@ -1,18 +1,18 @@
 ---
 name:  jjdotplotstats
-title: jjdotplotstats
+title: Dot Chart
 menuGroup: JJStatsPlot
-menuSubgroup: Violin
-menuSubtitle: ggstatsplot::jjdotplotstats
+menuSubgroup: Categorical vs Numeric
+menuSubtitle: Dot Chart
 version: '1.0.0'
 jas: '1.2'
 
 
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggdotplotstats and
+    #     ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
     R:
         dontrun: true
         usage: |
@@ -29,8 +29,9 @@ options:
     - name: dep
       title: Dependent Variable
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
 
     - name: group
       title: Grouping Variable

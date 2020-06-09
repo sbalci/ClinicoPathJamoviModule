@@ -1,6 +1,6 @@
 ---
 name:  jjhistostats
-title: jjhistostats
+title: Histogram
 jrs:   '1.1'
 
 
@@ -19,7 +19,7 @@ items:
 
 
     - name: plot2
-      title: '`Bar Chart ${group} - {dep} by {grvar}`'
+      title: '`Histogram ${dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -33,7 +33,7 @@ items:
       visible: (grvar)
 
     - name: plot
-      title: '`Bar Chart ${group} - {dep}`'
+      title: '`Histogram ${dep}`'
       type: Image
       width:  800
       height: 600

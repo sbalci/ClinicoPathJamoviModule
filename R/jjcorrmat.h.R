@@ -65,6 +65,7 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -72,7 +73,7 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="jjcorrmat",
+                title="Correlation Matrix",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot"))
@@ -86,8 +87,21 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="plot2",
+                title="Chart",
+                width=800,
+                height=600,
+                renderFun=".plot2",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dep",
+                    "grvar",
+                    "direction"),
+                visible="(grvar)"))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                title="Chart",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -117,7 +131,7 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' jjcorrmat
+#' Correlation Matrix
 #'
 #' 'Wrapper Function for ggstatsplot::ggbarstats and
 #' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
@@ -135,6 +149,7 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

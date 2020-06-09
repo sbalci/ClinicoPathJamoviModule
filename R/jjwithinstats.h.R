@@ -22,10 +22,9 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "dep",
                 dep,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "numeric"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
@@ -86,7 +85,7 @@ jjwithinstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Violin Plots",
+                title="Violin Plots to Compare Between Groups",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot"))
@@ -102,7 +101,7 @@ jjwithinstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                title="`Violin Plot ${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -116,7 +115,7 @@ jjwithinstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                title="`Violin Plot ${group} - {dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -147,7 +146,7 @@ jjwithinstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Violin Plots
+#' Violin Plots to Compare Between Groups
 #'
 #' 'Wrapper Function for ggstatsplot::ggbarstats and
 #' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
@@ -192,7 +191,6 @@ jjwithinstats <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 

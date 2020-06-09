@@ -1,6 +1,6 @@
 ---
 name:  statsplot2
-title: Graphs and Plots
+title: Variable Type Based Graphs and Plots
 jrs:   '1.1'
 
 items:
@@ -46,7 +46,7 @@ items:
     #   title: Stats Expression Formula
     #   type:  Preformatted
 
-    - title: GGStatsPlot
+    - title: Variable Type Based Graphs and Plots
       name: plot
       type: Image
       width:  800

@@ -1,11 +1,11 @@
-title: jjwithinstats
-name: ViolinPlots
+title: Violin Plots to Compare Between Groups
+name: jjwithinstats
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
-    persistentItems: true
+    persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -22,17 +22,8 @@ children:
             name: group
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: excl
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
       - type: TargetLayoutBox
-        label: 'Split by:'
+        label: 'Split by: (Optional)'
         children:
           - type: VariablesListBox
             name: grvar
@@ -43,3 +34,8 @@ children:
     children:
       - type: ComboBox
         name: direction
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl

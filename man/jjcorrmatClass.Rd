@@ -2,11 +2,11 @@
 % Please edit documentation in R/jjcorrmat.b.R
 \name{jjcorrmatClass}
 \alias{jjcorrmatClass}
-\title{jjcorrmat}
+\title{Correlation Matrix}
 \description{
-jjcorrmat
+Correlation Matrix
 
-jjcorrmat
+Correlation Matrix
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:jjcorrmatBase]{ClinicoPath::jjcorrmatBase}} -> \code{jjcorrmatClass}
