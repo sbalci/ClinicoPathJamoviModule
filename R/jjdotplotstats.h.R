@@ -148,8 +148,6 @@ jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Dot Chart
 #'
-#' 'Wrapper Function for ggstatsplot::ggdotplotstats and
-#' ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
 #' 
 #'
 #' @examples

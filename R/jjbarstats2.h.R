@@ -20,28 +20,13 @@ jjbarstats2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$..dep <- jmvcore::OptionVariables$new(
                 "dep",
-                dep,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                dep)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                group)
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
-                grvar,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                grvar)
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -79,8 +64,8 @@ jjbarstats2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         text = function() private$.items[["text"]],
         todo = function() private$.items[["todo"]],
-        plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -106,25 +91,24 @@ jjbarstats2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot2",
-                title="`Bar Chart ${group} - {dep} by {grvar}`",
+                name="plot",
+                title="Bar Chart",
                 width=800,
                 height=600,
-                renderFun=".plot2",
+                renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
-                visible="(grvar)"))
+                    "direction")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
-                title="`Bar Chart ${group} - {dep}`",
+                name="plot2",
+                title="Bar Chart",
                 width=800,
                 height=600,
-                renderFun=".plot",
+                renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
                     "dep",
@@ -172,8 +156,8 @@ jjbarstats2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -198,9 +182,6 @@ jjbarstats2 <- function(
             `if`( ! missing(group), group, NULL),
             `if`( ! missing(grvar), grvar, NULL))
 
-    for (v in dep) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjbarstats2Options$new(
         dep = dep,

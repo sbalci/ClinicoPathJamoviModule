@@ -28,8 +28,7 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggdotplotstats and
-ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
+Dot Chart
 }
 \examples{
 \dontrun{

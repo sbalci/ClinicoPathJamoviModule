@@ -67,6 +67,11 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             sty <- self$options$sty
 
+
+            # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
+
+
+
             if (sty == "arsenal") {
 
                 # Arsenal Table ----

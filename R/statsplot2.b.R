@@ -8,7 +8,6 @@
 #'
 
 
-
 statsplot2Class <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "statsplot2Class",
@@ -25,13 +24,13 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # TODO ----
 
                     todo <- glue::glue(
-                        "
+                "
                 <br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate plots based on variable types.
                 <br><br>
                 This function uses ggstatsplot and ggalluvial packages. Please cite jamovi and the packages as given below.
-                                   "
+                "
                     )
 
                     self$results$todo$setContent(todo)
@@ -187,6 +186,27 @@ stat_exp <- glue::glue("<br>You have selected to use a barplot to compare a cate
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
+
+
+                # prepare main arguments ----
+
+                # mydata <- self$data
+
+                mydep <- self$data[[self$options$dep]]
+
+                mygroup <- self$data[[self$options$group]]
+
+                contin <- c("integer", "numeric", "double")
+                # categ <- c("factor")
+
+                # distribution <- self$options$distribution
+                # distribution <- jmvcore::composeTerm(distribution)
+
+                # direction <- self$options$direction
+                # direction <- jmvcore::composeTerm(direction)
+
+
+
 
 
                 # direction ----

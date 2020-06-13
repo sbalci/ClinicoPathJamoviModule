@@ -5,7 +5,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
-
+#'
 
 jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjbarstats2Class",
@@ -14,248 +14,205 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-
             todo <- glue::glue(
                 "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
 
             self$results$todo$setContent(todo)
 
-
-
-            mydata <- self$data
-
+            # mydata <- self$data
 
             dep <- self$options$dep
 
-            # group <- self$options$group
+            dep2 <- jmvcore::composeTerms(listOfComponents = dep)
 
+            group <- self$options$group
 
+            group <- jmvcore::composeTerm(components = group)
 
-            dep <- unlist(dep)
+            group2 <- group %||% "NULL"
 
-            deneme <- paste0(dep)
+            deneme <- list(
+                "self$options$dep" = self$options$dep,
+                "typeof" = typeof(self$options$dep),
+                "class" = class(self$options$dep),
+                "print" = print(self$options$dep),
+                "is.null" = is.null(self$options$dep),
+                "as.vector" = as.vector(self$options$dep),
+                "unlist" = unlist(self$options$dep),
+
+                "dep" = dep,
+                "typeof" = typeof(dep),
+                "class" = class(dep),
+                "print" = print(dep),
+                "is.null" = is.null(dep),
+                "as.vector" = as.vector(dep),
+                "unlist" = unlist(dep),
+
+                "dep2" = dep2,
+                "typeof" = typeof(dep2),
+                "class" = class(dep2),
+                "print" = print(dep2),
+                "is.null" = is.null(dep2),
+                "as.vector" = as.vector(dep2),
+                "unlist" = unlist(dep2),
+
+                "self$options$group" = self$options$group,
+                "typeof" = typeof(self$options$group),
+                "class" = class(self$options$group),
+                "print" = print(self$options$group),
+                "is.null" = is.null(self$options$group),
+                "as.vector" = as.vector(self$options$group),
+                "unlist" = unlist(self$options$group),
+
+                "group" = group,
+                "typeof" = typeof(group),
+                "class" = class(group),
+                "print" = print(group),
+                "is.null" = is.null(group),
+                "as.vector" = as.vector(group),
+                "unlist" = unlist(group),
+
+                "group2" = group2,
+                "typeof" = typeof(group2),
+                "class" = class(group2),
+                "print" = print(group2),
+                "is.null" = is.null(group2),
+                "as.vector" = as.vector(group2),
+                "unlist" = unlist(group2),
+
+                "paste" = paste0("dep: ", dep, " and ", "group: ", group)
+            )
 
             self$results$text$setContent(deneme)
 
-
-
-
-
-
         }
+
+        # ,
+        # .plot = function(image, ...) {
+        #
+        #     mydata <- self$data
+        #
+        #     dep <- self$options$dep
+        #
+        #     dep <- jmvcore::composeTerms(listOfComponents = dep)
+        #
+        #     group <- self$options$group
+        #
+        #     group <- jmvcore::composeTerm(components = group)
+        #
+        #     if (group == "") group <- NULL
+        #
+        #     plot <-
+        #         ggstatsplot::ggpiestats(
+        #             data = mydata,
+        #             main = !!dep,
+        #             condition = !!group
+        #             )
+        #
+        #     # Print Plot ----
+        #
+        #     print(plot)
+        #     TRUE
+        #
+        # }
+
+
+
+        # Repeating function execution across multiple columns in a dataframe
+
+        # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/purrr_examples.html#repeating-function-execution-across-multiple-columns-in-a-dataframe-1
 
 
 
         ,
-        .plot = function(image, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group))
-                return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
-            # Prepare Data ----
-
-
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
-
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
+        .plot2 = function(image, ...) {
 
             mydata <- self$data
 
-
-            # Exclude NA ----
-
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-
-
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
-
             dep <- self$options$dep
+
+            dep1 <- jmvcore::composeTerms(listOfComponents = dep)
+
 
             group <- self$options$group
 
-
-            dep <- jmvcore::composeTerms(listOfComponents = dep)
-
             group <- jmvcore::composeTerm(components = group)
 
-
-            # ggbarstats ----
-            # bar charts for categorical data
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
+            if (group == "") group <- NULL
 
 
+            if ( length(self$options$dep) == 1 ) {
 
-            plot <-
-                ggstatsplot::ggbarstats(
+            plot2 <-
+                ggstatsplot::ggpiestats(
                     data = mydata,
-                    main = !!dep,
-                    condition = !!group,
-
-                    paired = paired,
-
-
-                    counts = NULL,
-                    ratio = NULL,
-                    results.subtitle = TRUE,
-                    sample.size.label = TRUE,
-                    label = "percentage",
-                    perc.k = 0,
-                    label.args = list(alpha = 1, fill = "white"),
-                    bf.message = TRUE,
-                    sampling.plan = "indepMulti",
-                    fixed.margin = "rows",
-                    prior.concentration = 1,
-                    title = NULL,
-                    subtitle = NULL,
-                    caption = NULL,
-                    conf.level = 0.95,
-                    nboot = 100,
-                    legend.title = NULL,
-                    xlab = NULL,
-                    ylab = NULL,
-                    k = 2,
-                    proportion.test = TRUE,
-                    ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = TRUE,
-                    package = "RColorBrewer",
-                    palette = "Dark2",
-                    ggplot.component = NULL,
-                    output = "plot",
-                    messages = TRUE,
-                    x = NULL,
-                    y = NULL
+                    main = !!dep1,
+                    condition = !!group
                 )
-
-
-            # Print Plot ----
-
-            print(plot)
-            TRUE
-
-        }
-
-
-        ,             .plot2 = function(image, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
-                return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
             }
 
-            # Exclude NA ----
 
-            excl <- self$options$excl
+            if ( length(self$options$dep) > 1 ) {
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+                dep2 <- as.list(self$options$dep)
+
+                # running the same analysis on two different columns (creates a list of plots)
+                plotlist <-
+                    purrr::pmap(
+                        .l = list(
+                            main = dep2,
+                            # title = list(dep),
+                            messages = FALSE
+                        ),
+                        .f = ggstatsplot::ggpiestats,
+                        data = mydata,
+                        condition = !!group
+                    )
+
+                # combine plots using `patchwork`
+                # plot2 <- plotlist[[1]] + plotlist[[2]]
+
+                # plotname <- "plotlist[[1]] + "
+
+                # if ( length(plotlist) > 1 ) {
+                    # for (i in 2:length(plotlist)) {
+                    #     newplot <- paste0("plotlist[[", i, "]]")
+                    #     plotname <- paste(plotname, newplot, sep = " + ")
+                    # }
+
+                # plot2 <- eval(parse(text = plotname))
+
+                plot2 <- ggstatsplot::combine_plots(
+                    plotlist = plotlist,
+                    nrow = 2
+                    # ncol = 1
+                    )
+                                # }
+                            }
 
 
 
-            dep <- self$options$dep
+            # movies_long <- ggstatsplot::movies_long
 
-            group <- self$options$group
-
-
-            dep <- jmvcore::composeTerm(components = dep)
-
-            group <- jmvcore::composeTerm(components = group)
-
-
-
-
-            # grouped_ggbarstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
-
-
-
-            if ( !is.null(self$options$grvar) ) {
-                grvar <- self$options$grvar
-
-                plot2 <- ggstatsplot::grouped_ggbarstats(
-                    data = mydata,
-                    main = !!dep,
-                    condition = !!group,
-                    grouping.var = !!grvar,
-
-                    paired = paired,
-
-
-                    counts = NULL,
-                    title.prefix = NULL,
-                    output = "plot",
-                    x = NULL,
-                    y = NULL,
-                    plotgrid.args = list(),
-                    title.text = NULL,
-                    title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
-                    caption.args = list(size = 10),
-                    sub.text = NULL,
-                    sub.args = list(size = 12)
-                )
-
-            }
+            # # running the same analysis on two different columns (creates a list of plots)
+            # plotlist <-
+            #     purrr::pmap(
+            #         .l = list(
+            #             data = list(movies_long),
+            #             x = "mpaa",
+            #             y = list("rating", "length"),
+            #             title = list("IMDB score by MPAA rating", "Movie length by MPAA rating"),
+            #             messages = FALSE
+            #         ),
+            #         .f = ggstatsplot::ggbetweenstats
+            #     )
+            #
+            # # combine plots using `patchwork`
+            # plot2 <- plotlist[[1]] + plotlist[[2]]
 
             # Print Plot ----
-
             print(plot2)
             TRUE
-
         }
-
-
-
-
-
     )
 )

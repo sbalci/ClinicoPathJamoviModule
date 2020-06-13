@@ -26,8 +26,7 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggbarstats and
-ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+Correlation Matrix
 }
 \examples{
 \dontrun{

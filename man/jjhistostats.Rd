@@ -26,8 +26,7 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::gghistostats and
-ggstatsplot::grouped_gghistostats to generate Bar Charts.'
+Histogram
 }
 \examples{
 \dontrun{

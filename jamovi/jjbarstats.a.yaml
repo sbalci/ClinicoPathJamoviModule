@@ -26,7 +26,7 @@ options:
 
     - name: dep
       title: Dependent Variable
-      type: Variable
+      type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
@@ -41,6 +41,12 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+
+    - name: counts
+      title: 'Counts: (Optional)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
 
     - name: direction
@@ -61,5 +67,131 @@ options:
       title: Exclude Missing (NA)
       type: Bool
       default: true
+
+
+    - name: ratio
+      title: >
+          Expected Proportions
+      type: String
+      default: ''
+
+    - name: results.subtitle
+      title: results.subtitle
+      type: Bool
+      default: true
+
+    - name: sample.size.label
+      title: sample.size.label
+      type: Bool
+      default: true
+
+    - name: label
+      title: label
+      type: List
+      options:
+        - title: percentage
+          name: percentage
+        - title: counts
+          name: counts
+        - title: both
+          name: both
+      default: percentage
+      description:
+          R: >
+            label
+
+    - name: perc.k
+      title: perc.k
+      type: Integer
+      default: 0
+
+    - name: bf.message
+      title: bf.message
+      type: Bool
+      default: true
+
+
+    - name: sampling.plan
+      title: sampling.plan
+      type: List
+      options:
+        - title: indepMulti
+          name: indepMulti
+        - title: poisson
+          name: poisson
+        - title: jointMulti
+          name: jointMulti
+        - title: hypergeom
+          name: hypergeom
+      default: indepMulti
+      description:
+          R: >
+            sampling.plan
+
+
+    - name: fixed.margin
+      title: fixed.margin
+      type: List
+      options:
+        - title: rows
+          name: rows
+        - title: cols
+          name: cols
+      default: rows
+      description:
+          R: >
+            fixed.margin
+
+
+
+# prior.concentration
+# Specifies the prior concentration parameter, set to 1 by default. It indexes the expected deviation from the null hypothesis under the alternative, and corresponds to Gunel and Dickey's (1974) "a" parameter.
+#
+# title
+# The text for the plot title.
+#
+# subtitle
+# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
+#
+# caption
+# The text for the plot caption.
+#
+# conf.level
+# Scalar between 0 and 1. If unspecified, the defaults return 95% lower and upper confidence intervals (0.95).
+#
+# nboot
+# Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
+#
+# legend.title
+# Title text for the legend.
+#
+# xlab
+# Custom text for the x axis label (Default: NULL, which will cause the x axis label to be the x variable).
+#
+# ylab
+# Custom text for the y axis label (Default: NULL).
+#
+# k
+# Number of digits after decimal point (should be an integer) (Default: k = 2).
+#
+# proportion.test
+# Decides whether proportion test for main variable is to be carried out for each level of y (Default: TRUE).
+#
+# ggtheme
+# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
+#
+# ggstatsplot.layer
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+#
+# package
+# Name of package from which the palette is desired as string or symbol.
+#
+# palette
+# Name of palette as string or symbol.
+#
+# output
+# Character that describes what is to be returned: can be "plot" (default) or "subtitle" or "caption". Setting this to "subtitle" will return the expression containing statistical results. If you have set results.subtitle = FALSE, then this will return a NULL. Setting this to "caption" will return the expression containing details about Bayes Factor analysis, but valid only when type = "parametric" and bf.message = TRUE, otherwise this will return a NULL. For functions ggpiestats and ggbarstats, setting output = "proptest" will return a dataframe containing results from proportion tests.
+
+
 
 ...

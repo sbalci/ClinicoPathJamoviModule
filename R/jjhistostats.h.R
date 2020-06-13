@@ -136,8 +136,6 @@ jjhistostatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Histogram
 #'
-#' 'Wrapper Function for ggstatsplot::gghistostats and
-#' ggstatsplot::grouped_gghistostats to generate Bar Charts.'
 #' 
 #'
 #' @examples

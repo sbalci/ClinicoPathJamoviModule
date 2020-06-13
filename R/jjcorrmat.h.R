@@ -133,8 +133,6 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Correlation Matrix
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 #' 
 #'
 #' @examples
