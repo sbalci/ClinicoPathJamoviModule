@@ -4,7 +4,23 @@
 \alias{jjbarstats}
 \title{Bar Charts}
 \usage{
-jjbarstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjbarstats(
+  data,
+  dep,
+  group,
+  grvar,
+  counts,
+  direction = "independent",
+  excl = TRUE,
+  ratio = "",
+  results.subtitle = TRUE,
+  sample.size.label = TRUE,
+  label = "percentage",
+  perc.k = 0,
+  bf.message = TRUE,
+  sampling.plan = "indepMulti",
+  fixed.margin = "rows"
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -15,15 +31,32 @@ jjbarstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 
 \item{grvar}{.}
 
+\item{counts}{.}
+
 \item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
+
+\item{ratio}{.}
+
+\item{results.subtitle}{.}
+
+\item{sample.size.label}{.}
+
+\item{label}{label}
+
+\item{perc.k}{.}
+
+\item{bf.message}{.}
+
+\item{sampling.plan}{sampling.plan}
+
+\item{fixed.margin}{fixed.margin}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

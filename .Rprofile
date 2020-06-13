@@ -1,4 +1,5 @@
 options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
+
 # source("renv/activate.R")
 
 # 'https://repo.jamovi.org'
@@ -6,7 +7,7 @@ options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 # "/Users/serdarbalciold/Library/R/3.6/library"
 # "/Library/Frameworks/R.framework/Versions/3.6/Resources/library"
 
-.libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
+# .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
 
 # source(
 #     "renv/activate.R"
@@ -35,12 +36,12 @@ options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 # }
 
 
-.First <- function(){
-    cat("\nWelcome to ClinicoPath", date(), "\n")
-}
+# .First <- function(){
+#     cat("\nWelcome to ClinicoPath", date(), "\n")
+# }
 
 
-.Last <- function(){
-    cat("\nGoodbye at ", date(), "\n")
-}
+# .Last <- function(){
+#     cat("\nGoodbye at ", date(), "\n")
+# }
 

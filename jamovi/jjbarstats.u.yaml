@@ -13,7 +13,6 @@ children:
         children:
           - type: VariablesListBox
             name: dep
-            maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
         label: Grouping Variable
@@ -29,6 +28,13 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: 'Counts: (Optional)'
+        children:
+          - type: VariablesListBox
+            name: counts
+            maxItemCount: 1
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -39,3 +45,42 @@ children:
     children:
       - type: CheckBox
         name: excl
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ratio
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: results.subtitle
+      - type: CheckBox
+        name: sample.size.label
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: label
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: perc.k
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: bf.message
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sampling.plan
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: fixed.margin

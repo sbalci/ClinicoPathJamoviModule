@@ -147,8 +147,6 @@ jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Scatter Plot
 #'
-#' 'Wrapper Function for ggstatsplot::ggscatterstats and
-#' ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
 #' 
 #'
 #' @examples

@@ -15,24 +15,27 @@ items:
           - direction
 
 
+      # title: '`Bar Chart ${group} - {dep} by {grvar}`'
 
+    # - name: plot2
+    #   title: Bar Chart Splitted
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   clearWith:
+    #       - dep
+    #       - group
+    #       - grvar
+    #       - direction
+    #   visible: (grvar)
 
-    - name: plot2
-      title: '`Bar Chart ${group} - {dep} by {grvar}`'
-      type: Image
-      width:  800
-      height: 600
-      renderFun: .plot2
-      requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-      visible: (grvar)
+      # title: '`Bar Chart ${group} - {dep}`'
+
 
     - name: plot
-      title: '`Bar Chart ${group} - {dep}`'
+      title: Bar Chart
       type: Image
       width:  800
       height: 600

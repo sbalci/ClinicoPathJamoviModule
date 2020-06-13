@@ -25,22 +25,22 @@ options:
 
 
     - name: dep
-      title: Dependent Variable
+      title: '(Dependent) Variables'
       type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      # suggested: [ ordinal, nominal ]
+      # permitted: [ factor ]
 
     - name: group
-      title: Grouping Variable
+      title: 'Grouping Variable: (Optional)'
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      # suggested: [ ordinal, nominal ]
+      # permitted: [ factor ]
 
     - name: grvar
       title: 'Split by: (Optional)'
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      # suggested: [ ordinal, nominal ]
+      # permitted: [ factor ]
 
 
     - name: direction

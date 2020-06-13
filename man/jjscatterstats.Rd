@@ -28,8 +28,7 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggscatterstats and
-ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
+Scatter Plot
 }
 \examples{
 \dontrun{

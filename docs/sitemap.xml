@@ -7,6 +7,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/BreastCancer.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/ClinicoPath-package.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreement.html</loc>
   </url>
   <url>
@@ -14,6 +17,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/alluvial.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/alluvialClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/colon.html</loc>
@@ -64,10 +70,64 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/icccoeffClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbarstats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbarstats2.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbarstats2Class.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbarstatsClass.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbetweenstats.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjviolin.html</loc>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjbetweenstatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjcorrmat.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjcorrmatClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjdotplotstats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjdotplotstatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjhistostats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjhistostatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjpiestats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjpiestatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjscatterstats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjscatterstatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstats.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstatsClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jviolin.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jviolinClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/melanoma.html</loc>
@@ -101,6 +161,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/rocClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/rocdata.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/statsplot2.html</loc>

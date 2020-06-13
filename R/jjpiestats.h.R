@@ -180,8 +180,6 @@ jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #' Pie Charts
 #'
-#' 'Wrapper Function for ggstatsplot::ggpiestats and
-#' ggstatsplot::grouped_ggpiestats to generate Bar Charts.'
 #' 
 #'
 #' @examples

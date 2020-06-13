@@ -21,7 +21,8 @@ Remotes:
     ndphillips/FFTrees,
     easystats/report,
     spgarbet/tangram,
-    cran/rmngb
+    cran/rmngb,
+    mixOmicsTeam/mixOmics
 
 
 
@@ -1042,7 +1043,7 @@ system(command = gitCommand, intern = TRUE)
 readyfunctions <- c(
     "refs",
     "data",
-    "-package"
+    "-package",
     # "^utils-pipe"
 
 # Descriptives
@@ -1065,7 +1066,7 @@ readyfunctions <- c(
 
 # JJ Functions
     "statsplot2",
-    "^jjbarstats",
+    "^jjbarstats\\.",
     "^jjbetweenstats",
     "^jjcorrmat",
     "^jjdotplotstats",
@@ -2826,6 +2827,497 @@ plot <- deneme %>%
 ```
 
 
+```{r}
+library(ggstatsplot)
+library(patchwork)
 
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+
+mydata <- deneme
+
+dep <- c("LVI", "PNI", "Death")
+
+dep <- as.vector(dep)
+
+group <- "PreinvasiveComponent"
+
+group <- jmvcore::composeTerm(components = group)
+
+
+# running the same analysis on two different columns (creates a list of plots)
+
+plotlist <-
+purrr::pmap(
+    .l = list(
+        main = dep,
+        # title = list(dep),
+        messages = FALSE
+    ),
+    .f = ggstatsplot::ggpiestats,
+    data = mydata,
+    condition = !!group
+)
+
+
+
+
+
+
+# combine plots using `patchwork`
+# plot2 <- plotlist[[1]] / plotlist[[2]]
+
+plotname <- "plotlist[[1]] + "
+
+if ( length(plotlist) > 1 ) {
+    
+for (i in 2:length(plotlist)) {
+    newplot <- paste0("plotlist[[", i, "]]")
+    plotname <- paste(plotname, newplot, sep = " + ")
+}
+    
+}
+
+
+# plotname
+
+# plot2 <- paste0("plotlist[[1]] ", "+", " plotlist[[2]]")
+
+plot2 <- eval(parse(text = plotname))
+
+plot2
+
+# if (group == "") group <- NULL
+# plot2 <-
+#     ggstatsplot::ggpiestats(
+#         data = mydata,
+#         main = !!dep,
+#         condition = !!group
+#     )
+
+
+# 
+# dp <- "LVI"
+# 
+# dp <- jmvcore::composeTerm(components = dp)
+# 
+# gr <- "PNI"
+# 
+# gr <- jmvcore::composeTerm(components = gr)
+
+
+
+```
+
+
+# Introduction to tableone
+
+
+```{r, message = FALSE, tidy = FALSE, echo = F}
+## Create a header using devtools::use_vignette("my-vignette")
+## knitr configuration: http://yihui.name/knitr/options#chunk_options
+library(knitr)
+showMessage <- FALSE
+showWarning <- TRUE
+set_alias(w = "fig.width", h = "fig.height", res = "results")
+opts_chunk$set(comment = "", error= TRUE, warning = showWarning, message = showMessage,
+               tidy = FALSE, cache = F, echo = T,
+               fig.width = 7, fig.height = 7, dev.args = list(family = "sans"))
+
+## R configuration
+options(width = 116, scipen = 5)
+```
+
+## What is tableone?
+
+The tableone package is an R package that eases the construction of "Table 1", *i.e.*, patient baseline characteristics table commonly found in biomedical research papers. The packages can summarize both continuous and categorical variables mixed within one table. Categorical variables can be summarized as counts and/or percentages. Continuous variables can be summarized in the "normal" way (means and standard deviations) or "nonnormal" way (medians and interquartile ranges).
+
+
+## Load packages
+
+```{r}
+## tableone package itself
+library(tableone)
+## survival pcakge for Mayo Clinic's PBC data
+library(survival)
+data(pbc)
+```
+
+## Single group summary
+
+### Simplest use case
+
+The simplest use case is summarizing the whole dataset. You can just feed in the data frame to the main workhorse function CreateTableOne(). You can see there are 418 patients in the dataset.
+```{r}
+CreateTableOne(data = pbc)
+```
+
+### Categorical variable conversion
+
+Most of the categorical variables are coded numerically, so we either have to transform them to factors in the dataset or use factorVars argument to transform them on-the-fly. Also it's a better practice to specify which variables to summarize by the vars argument, and exclude the ID variable(s). How do we know which ones are numerically-coded categorical variables? Please check your data dictionary (in this case help(pbc)). This time I am saving the result object in a variable.
+
+```{r}
+## Get variables names
+dput(names(pbc))
+## Vector of variables to summarize
+myVars <- c("time", "status", "trt", "age", "sex", "ascites", "hepato",
+          "spiders", "edema", "bili", "chol", "albumin", "copper", "alk.phos",
+          "ast", "trig", "platelet", "protime", "stage")
+## Vector of categorical variables that need transformation
+catVars <- c("status", "trt", "ascites", "hepato",
+             "spiders", "edema", "stage")
+## Create a TableOne object
+tab2 <- CreateTableOne(vars = myVars, data = pbc, factorVars = catVars)
+```
+
+OK. It's more interpretable now. Binary categorical variables are summarized as counts and percentages of the second level. For example, if it is coded as 0 and 1, the "1" level is summarized. For 3+ category variable all levels are summarized. Please bear in mind, the percentages are calculated after excluding missing values.
+
+```{r}
+tab2
+```
+
+### Showing all levels for categorical variables
+
+If you want to show all levels, you can use showAllLevels argument to the print() method.
+
+```{r}
+print(tab2, showAllLevels = TRUE)
+```
+
+### Detailed information including missingness
+
+If you need more detailed information including the number/proportion missing. Use the summary() method on the result object. The continuous variables are shown first, and the categorical variables are shown second.
+
+```{r}
+summary(tab2)
+```
+
+### Summarizing nonnormal variables
+
+It looks like most of the continuous variables are highly skewed except time, age, albumin, and platelet (biomarkers are usually distributed with strong positive skews). Summarizing them as such may please your future peer reviewer(s). Let's do it with the nonnormal argument to the print() method. Can you see the difference. If you just say nonnormal = TRUE, all variables are summarized the "nonnormal" way.
+
+```{r}
+biomarkers <- c("bili","chol","copper","alk.phos","ast","trig","protime")
+print(tab2, nonnormal = biomarkers)
+```
+
+### Fine tuning
+
+If you want to fine tune the table further, please check out ?print.TableOne for the full list of options.
+
+
+## Multiple group summary
+
+Often you want to group patients and summarize group by group. It's also pretty simple. Grouping by exposure categories is probably the most common way, so let's do it by the treatment variable. According to ?pbc, it is coded as (1) D-penicillmain (it's really "D-penicillamine"), (2) placebo, and (NA) not randomized. NA's do not function as a grouping variable, so it is dropped. If you do want to show the result for the NA group, then you need to recoded it something other than NA.
+
+```{r}
+tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
+tab3
+```
+
+### Testing
+
+As you can see in the previous table, when there are two or more groups group comparison p-values are printed along with the table (well, let's not argue the appropriateness of hypothesis testing for table 1 in an RCT for now.). Very small p-values are shown with the less than sign. The hypothesis test functions used by default are chisq.test() for categorical variables (with continuity correction) and oneway.test() for continous variables (with equal variance assumption, i.e., regular ANOVA). Two-group ANOVA is equivalent of t-test.
+
+You may be worried about the nonnormal variables and small cell counts in the stage variable. In such a situation, you can use the nonnormal argument like before as well as the exact (test) argument in the print() method. Now kruskal.test() is used for the nonnormal continous variables and fisher.test() is used for categorical variables specified in the exact argument. kruskal.test() is equivalent to wilcox.test() in the two-group case. The column named test is to indicate which p-values were calculated using the non-default tests.
+
+To also show standardized mean differences, use the smd option.
+
+```{r}
+print(tab3, nonnormal = biomarkers, exact = "stage", smd = TRUE)
+```
+
+## Exporting
+
+My typical next step is to export the table to Excel for editing, and then to Word (clinical medical journals usually do not offer LaTeX submission).
+
+
+### Quick and dirty way
+
+The quick and dirty way that I usually use is copy and paste. Use the quote = TRUE argument to show the quotes and noSpaces = TRUE to remove spaces used to align text in the R console (the latter is optional). Now you can just copy and paste the whole thing to an Excel spread sheet. After pasting, click the small pasting icon to choose Use Text Import Wizard..., in the dialogue you can just click finish to fit the values in the appropriate cells. Then you can edit or re-align things as you like. I usualy center-align the group summaries, and right-aligh the p-values.
+
+```{r}
+print(tab3, nonnormal = biomarkers, exact = "stage", quote = TRUE, noSpaces = TRUE)
+```
+
+### Real export way
+
+If you do not like the manual labor of copy-and-paste, you can potentially automate the task by the following way. The print() method for a TableOne object invisibly return a matrix identical to what you see. You can capture this by assignment to a variable (here tab3Mat). Do not use the quote argument in this case, the noSpaces argument is again optional. The self-contradictory printToggle = FALSE for the print() method avoids unnecessary printing if you wish. Then you can save the object to a CSV file. As it is a regular matrix object, you can save it to an Excel file using packages such as XLConnect.
+
+```{r, eval = FALSE}
+tab3Mat <- print(tab3, nonnormal = biomarkers, exact = "stage", quote = FALSE, noSpaces = TRUE, printToggle = FALSE)
+## Save to a CSV file
+write.csv(tab3Mat, file = "myTable.csv")
+```
+
+## Miscellaneous
+
+### Categorical or continous variables-only
+
+You may want to see the categorical or continous variables only. You can do this by accessing the CatTable part and ContTable part of the TableOne object as follows. summary() methods are defined for both as well as print() method with various arguments. Please see ?print.CatTable and ?print.ContTable for details.
+
+```{r}
+## Categorical part only
+tab3$CatTable
+## Continous part only
+print(tab3$ContTable, nonnormal = biomarkers)
+```
+
+--------------------
+- Authored by Kazuki Yoshida
+- CRAN page: https://cran.r-project.org/package=tableone
+- github page: https://github.com/kaz-yos/tableone
+
+
+
+# Using standardized mean differences
+
+
+```{r, message = FALSE, tidy = FALSE, echo = F}
+## Create a header using devtools::use_vignette("my-vignette")
+## knitr configuration: http://yihui.name/knitr/options#chunk_options
+library(knitr)
+showMessage <- FALSE
+showWarning <- FALSE
+set_alias(w = "fig.width", h = "fig.height", res = "results")
+opts_chunk$set(comment = "", error= TRUE, warning = showWarning, message = showMessage,
+               tidy = FALSE, cache = F, echo = T,
+               fig.width = 10, fig.height = 10, dev.args = list(family = "sans"))
+
+## R configuration
+options(width = 130, scipen = 5)
+```
+
+## Standardized mean difference
+
+The standardized (mean) difference is a measure of distance between two group means in terms of one or more variables. In practice it is often used as a balance measure of individual covariates before and after propensity score matching. As it is standardized, comparison across variables on different scales is possible. For definitions see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3144483/#s11title .
+
+
+Standardized mean differences can be easily calculated with tableone. All standardized mean differences in this package are absolute values, thus, there is no directionality.
+
+
+## Load packages
+
+```{r}
+
+## tableone package itself
+library(tableone)
+## PS matching
+library(Matching)
+## Weighted analysis
+library(survey)
+## Reorganizing data
+library(reshape2)
+## plotting
+library(ggplot2)
+
+```
+
+
+## Load data
+
+The right heart catheterization dataset is available at http://biostat.mc.vanderbilt.edu/wiki/Main/DataSets . This dataset was originally used in Connors *et al*. JAMA 1996;276:889-897, and has been made publicly available.
+
+```{r}
+
+## Right heart cath dataset
+rhc <- read.csv("http://biostat.mc.vanderbilt.edu/wiki/pub/Main/DataSets/rhc.csv")
+
+```
+
+
+## Unmatched table
+
+Out of the 50 covariates, 32 have standardized mean differences of greater than 0.1, which is often considered the sign of important covariate imbalance (http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3144483/#s11title ).
+
+```{r}
+
+## Covariates
+vars <- c("age","sex","race","edu","income","ninsclas","cat1","das2d3pc","dnr1",
+          "ca","surv2md1","aps1","scoma1","wtkilo1","temp1","meanbp1","resp1",
+          "hrt1","pafi1","paco21","ph1","wblc1","hema1","sod1","pot1","crea1",
+          "bili1","alb1","resp","card","neuro","gastr","renal","meta","hema",
+          "seps","trauma","ortho","cardiohx","chfhx","dementhx","psychhx",
+          "chrpulhx","renalhx","liverhx","gibledhx","malighx","immunhx",
+          "transhx","amihx")
+
+## Construct a table
+tabUnmatched <- CreateTableOne(vars = vars, strata = "swang1", data = rhc, test = FALSE)
+## Show table with SMD
+print(tabUnmatched, smd = TRUE)
+## Count covariates with important imbalance
+addmargins(table(ExtractSmd(tabUnmatched) > 0.1))
+
+```
+
+
+## Propensity score estimation
+
+Usually a logistic regression model is used to estimate individual propensity scores. The model here is taken from "How To Use Propensity Score Analysis" (http://www.mc.vanderbilt.edu/crc/workshop_files/2008-04-11.pdf ). Predicted probabilities of being assigned to right heart catherterization, being assigned no right heart catherterization, being assigned to the true assignment, as well as the smaller of the probabilities of being assigned to right heart catherterization or no right heart catherterization are calculated for later use in propensity score matching and weighting.
+
+```{r}
+
+## Fit model
+psModel <- glm(formula = swang1 ~ age + sex + race + edu + income + ninsclas +
+                         cat1 + das2d3pc + dnr1 + ca + surv2md1 + aps1 + scoma1 +
+                         wtkilo1 + temp1 + meanbp1 + resp1 + hrt1 + pafi1 +
+                         paco21 + ph1 + wblc1 + hema1 + sod1 + pot1 + crea1 +
+                         bili1 + alb1 + resp + card + neuro + gastr + renal +
+                         meta + hema + seps + trauma + ortho + cardiohx + chfhx +
+                         dementhx + psychhx + chrpulhx + renalhx + liverhx + gibledhx +
+                         malighx + immunhx + transhx + amihx,
+               family  = binomial(link = "logit"),
+               data    = rhc)
+
+## Predicted probability of being assigned to RHC
+rhc$pRhc <- predict(psModel, type = "response")
+## Predicted probability of being assigned to no RHC
+rhc$pNoRhc <- 1 - rhc$pRhc
+
+## Predicted probability of being assigned to the
+## treatment actually assigned (either RHC or no RHC)
+rhc$pAssign <- NA
+rhc$pAssign[rhc$swang1 == "RHC"]    <- rhc$pRhc[rhc$swang1   == "RHC"]
+rhc$pAssign[rhc$swang1 == "No RHC"] <- rhc$pNoRhc[rhc$swang1 == "No RHC"]
+## Smaller of pRhc vs pNoRhc for matching weight
+rhc$pMin <- pmin(rhc$pRhc, rhc$pNoRhc)
+
+```
+
+
+## Propensity score matching
+
+The Matching package can be used for propensity score matching. The logit of propensity score is often used as the matching scale, and the matchign caliper is often 0.2 $\times$ SD(logit(PS)). See http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3144483/#s5title for suggestions. After matching, all the standardized mean differences are below 0.1.
+
+```{r}
+
+listMatch <- Match(Tr       = (rhc$swang1 == "RHC"),      # Need to be in 0,1
+                   ## logit of PS,i.e., log(PS/(1-PS)) as matching scale
+                   X        = log(rhc$pRhc / rhc$pNoRhc),
+                   ## 1:1 matching
+                   M        = 1,
+                   ## caliper = 0.2 * SD(logit(PS))
+                   caliper  = 0.2,
+                   replace  = FALSE,
+                   ties     = TRUE,
+                   version  = "fast")
+## Extract matched data
+rhcMatched <- rhc[unlist(listMatch[c("index.treated","index.control")]), ]
+
+## Construct a table
+tabMatched <- CreateTableOne(vars = vars, strata = "swang1", data = rhcMatched, test = FALSE)
+## Show table with SMD
+print(tabMatched, smd = TRUE)
+## Count covariates with important imbalance
+addmargins(table(ExtractSmd(tabMatched) > 0.1))
+
+```
+
+
+## Propensity score matching weight
+
+The matching weight method is a weighting analogue to the 1:1 pairwise algorithmic matching (http://www.ncbi.nlm.nih.gov/pubmed/23902694 ). The matching weight is defined as the smaller of the predicted probabilities of receiving or not receiving the treatment over the predicted probability of being assigned to the arm the patient is actually in. After weighting, all the standardized mean differences are below 0.1. The standardized mean differences in weighted data are explained in http://onlinelibrary.wiley.com/doi/10.1002/sim.6607/full .
+
+```{r}
+
+## Matching weight
+rhc$mw <- rhc$pMin / rhc$pAssign
+## Weighted data
+rhcSvy <- svydesign(ids = ~ 1, data = rhc, weights = ~ mw)
+
+## Construct a table (This is a bit slow.)
+tabWeighted <- svyCreateTableOne(vars = vars, strata = "swang1", data = rhcSvy, test = FALSE)
+## Show table with SMD
+print(tabWeighted, smd = TRUE)
+## Count covariates with important imbalance
+addmargins(table(ExtractSmd(tabWeighted) > 0.1))
+
+```
+
+
+## Assessing balance before and after matching/weighting
+
+A plot showing covariate balance is often constructed to demonstrate the balancing effect of matching and/or weighting. Given the same propensity score model, the matching weight method often achieves better covariate balance than matching.
+
+```{r}
+
+## Construct a data frame containing variable name and SMD from all methods
+dataPlot <- data.frame(variable  = names(ExtractSmd(tabUnmatched)),
+                       Unmatched = ExtractSmd(tabUnmatched),
+                       Matched   = ExtractSmd(tabMatched),
+                       Weighted  = ExtractSmd(tabWeighted))
+
+## Create long-format data for ggplot2
+dataPlotMelt <- melt(data          = dataPlot,
+                     id.vars       = c("variable"),
+                     variable.name = "Method",
+                     value.name    = "SMD")
+
+## Order variable names by magnitude of SMD
+varNames <- as.character(dataPlot$variable)[order(dataPlot$Unmatched)]
+
+## Order factor levels in the same order
+dataPlotMelt$variable <- factor(dataPlotMelt$variable,
+                                levels = varNames)
+
+## Plot using ggplot2
+ggplot(data = dataPlotMelt, mapping = aes(x = variable, y = SMD,
+                                          group = Method, color = Method)) +
+geom_line() +
+geom_point() +
+geom_hline(yintercept = 0.1, color = "black", size = 0.1) +
+coord_flip() +
+theme_bw() + theme(legend.key = element_blank())
+
+```
+
+To construct a side-by-side table, data can be extracted as a matrix and combined using the print() method, which actually invisibly returns a matrix.
+
+```{r}
+
+## Column bind tables
+resCombo <- cbind(print(tabUnmatched, printToggle = FALSE),
+                  print(tabMatched,   printToggle = FALSE),
+                  print(tabWeighted,  printToggle = FALSE))
+
+## Add group name row, and rewrite column names
+resCombo <- rbind(Group = rep(c("No RHC","RHC"), 3), resCombo)
+colnames(resCombo) <- c("Unmatched","","Matched","","Weighted","")
+print(resCombo, quote = FALSE)
+
+```
+
+
+## Outcome analysis
+
+The final analysis can be conducted using matched and weighted data. The results from the matching and matching weight are similar. ShowRegTable() function may come in handly.
+
+
+```{r}
+
+## Unmatched model (unadjsuted)
+glmUnmatched <- glm(formula = (death == "Yes") ~ swang1,
+                    family  = binomial(link = "logit"),
+                    data    = rhc)
+## Matched model
+glmMatched <- glm(formula = (death == "Yes") ~ swang1,
+                  family  = binomial(link = "logit"),
+                  data    = rhcMatched)
+## Weighted model
+glmWeighted <- svyglm(formula = (death == "Yes") ~ swang1,
+                      family  = binomial(link = "logit"),
+                      design    = rhcSvy)
+
+## Show results together
+resTogether <- list(Unmatched = ShowRegTable(glmUnmatched, printToggle = FALSE),
+                    Matched   = ShowRegTable(glmMatched, printToggle = FALSE),
+                    Weighted  = ShowRegTable(glmWeighted, printToggle = FALSE))
+print(resTogether, quote = FALSE)
+
+```
+
+--------------------
+- Authored by Kazuki Yoshida
+- CRAN page: https://cran.r-project.org/package=tableone
+- github page: https://github.com/kaz-yos/tableone
 
 
