@@ -149,6 +149,7 @@ jobs:
 
       - name: "Install non-default packages"
         run: |
+          Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
           Rscript -e "if (!requireNamespace('jmvtools')) install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))"
           Rscript -e "if (!requireNamespace('finalfit')) install.packages('finalfit', type = 'source')"
           Rscript -e "if (!requireNamespace('ggstatsplot')) install.packages('ggstatsplot', type = 'source')"
