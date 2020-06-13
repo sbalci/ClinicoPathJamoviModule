@@ -73,7 +73,7 @@ ggstatsplot::grouped_ggbarstats to generate Bar Charts.'" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0012</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0013</span>
       </span>
     </div>
 
@@ -158,7 +158,23 @@ ggstatsplot::grouped_ggbarstats to generate Bar Charts.'" />
 ggstatsplot::grouped_ggbarstats to generate Bar Charts.'</p>
     </div>
 
-    <pre class="usage"><span class='fu'>jjbarstats</span>(<span class='no'>data</span>, <span class='no'>dep</span>, <span class='no'>group</span>, <span class='no'>grvar</span>, <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>, <span class='kw'>excl</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>jjbarstats</span>(
+  <span class='no'>data</span>,
+  <span class='no'>dep</span>,
+  <span class='no'>group</span>,
+  <span class='no'>grvar</span>,
+  <span class='no'>counts</span>,
+  <span class='kw'>direction</span> <span class='kw'>=</span> <span class='st'>"independent"</span>,
+  <span class='kw'>excl</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>ratio</span> <span class='kw'>=</span> <span class='st'>""</span>,
+  <span class='kw'>results.subtitle</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>sample.size.label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"percentage"</span>,
+  <span class='kw'>perc.k</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>bf.message</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>sampling.plan</span> <span class='kw'>=</span> <span class='st'>"indepMulti"</span>,
+  <span class='kw'>fixed.margin</span> <span class='kw'>=</span> <span class='st'>"rows"</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -180,6 +196,10 @@ ggstatsplot::grouped_ggbarstats to generate Bar Charts.'</p>
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>counts</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>direction</th>
       <td><p>select measurement type (repeated or independent)</p></td>
     </tr>
@@ -187,13 +207,44 @@ ggstatsplot::grouped_ggbarstats to generate Bar Charts.'</p>
       <th>excl</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>ratio</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>results.subtitle</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>sample.size.label</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>label</th>
+      <td><p>label</p></td>
+    </tr>
+    <tr>
+      <th>perc.k</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>bf.message</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>sampling.plan</th>
+      <td><p>sampling.plan</p></td>
+    </tr>
+    <tr>
+      <th>fixed.margin</th>
+      <td><p>fixed.margin</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
