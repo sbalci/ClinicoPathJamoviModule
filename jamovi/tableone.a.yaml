@@ -57,4 +57,10 @@ options:
       default: true
 
 
+    # - name: alllevels
+    #   title: Show All Levels
+    #   type: Bool
+    #   default: false
+
+
 ...

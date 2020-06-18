@@ -55,8 +55,6 @@ children:
     margin: large
     children:
       - type: CheckBox
-        name: results.subtitle
-      - type: CheckBox
         name: sample.size.label
   - type: LayoutBox
     margin: large
@@ -84,3 +82,32 @@ children:
     children:
       - type: ComboBox
         name: fixed.margin
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: results.subtitle
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: subtitle
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: caption
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: conf.level
+        format: number

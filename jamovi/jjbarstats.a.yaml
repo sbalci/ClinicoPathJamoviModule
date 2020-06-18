@@ -17,6 +17,7 @@ description:
             # example will be added
 
 options:
+
     - name: data
       type: Data
       description:
@@ -74,11 +75,6 @@ options:
           Expected Proportions
       type: String
       default: ''
-
-    - name: results.subtitle
-      title: results.subtitle
-      type: Bool
-      default: true
 
     - name: sample.size.label
       title: sample.size.label
@@ -143,21 +139,36 @@ options:
             fixed.margin
 
 
+    - name: title
+      title: >
+          Plot Title
+      type: String
+      default: ''
 
-# prior.concentration
-# Specifies the prior concentration parameter, set to 1 by default. It indexes the expected deviation from the null hypothesis under the alternative, and corresponds to Gunel and Dickey's (1974) "a" parameter.
-#
-# title
-# The text for the plot title.
-#
-# subtitle
-# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
-#
-# caption
-# The text for the plot caption.
-#
-# conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% lower and upper confidence intervals (0.95).
+    - name: results.subtitle
+      title: results.subtitle
+      type: Bool
+      default: true
+
+    - name: subtitle
+      title: >
+          Plot Subtitle
+      type: String
+      default: ''
+
+    - name: caption
+      title: >
+          Plot Caption
+      type: String
+      default: ''
+
+    - name: conf.level
+      title: conf.level
+      type: Number
+      default: 0.95
+      min: 0.00
+      max: 1.00
+
 #
 # nboot
 # Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).

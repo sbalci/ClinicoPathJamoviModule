@@ -13,13 +13,17 @@ jjbarstats(
   direction = "independent",
   excl = TRUE,
   ratio = "",
-  results.subtitle = TRUE,
   sample.size.label = TRUE,
   label = "percentage",
   perc.k = 0,
   bf.message = TRUE,
   sampling.plan = "indepMulti",
-  fixed.margin = "rows"
+  fixed.margin = "rows",
+  title = "",
+  results.subtitle = TRUE,
+  subtitle = "",
+  caption = "",
+  conf.level = 0.95
 )
 }
 \arguments{
@@ -39,8 +43,6 @@ jjbarstats(
 
 \item{ratio}{.}
 
-\item{results.subtitle}{.}
-
 \item{sample.size.label}{.}
 
 \item{label}{label}
@@ -52,6 +54,16 @@ jjbarstats(
 \item{sampling.plan}{sampling.plan}
 
 \item{fixed.margin}{fixed.margin}
+
+\item{title}{.}
+
+\item{results.subtitle}{.}
+
+\item{subtitle}{.}
+
+\item{caption}{.}
+
+\item{conf.level}{.}
 }
 \value{
 A results object containing:

@@ -67,19 +67,6 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
 
             if (sty == "t1") {
 
-
-                # tableone
-
-                # showAllLevels = TRUE
-
-                # nonnormal = TRUE
-
-
-                # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
-
-
-
-
             mytable <- tableone::CreateTableOne(data = data)
 
             self$results$tablestyle1$setContent(mytable)

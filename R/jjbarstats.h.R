@@ -13,13 +13,17 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             direction = "independent",
             excl = TRUE,
             ratio = "",
-            results.subtitle = TRUE,
             sample.size.label = TRUE,
             label = "percentage",
             perc.k = 0,
             bf.message = TRUE,
             sampling.plan = "indepMulti",
-            fixed.margin = "rows", ...) {
+            fixed.margin = "rows",
+            title = "",
+            results.subtitle = TRUE,
+            subtitle = "",
+            caption = "",
+            conf.level = 0.95, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -73,10 +77,6 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ratio",
                 ratio,
                 default="")
-            private$..results.subtitle <- jmvcore::OptionBool$new(
-                "results.subtitle",
-                results.subtitle,
-                default=TRUE)
             private$..sample.size.label <- jmvcore::OptionBool$new(
                 "sample.size.label",
                 sample.size.label,
@@ -113,6 +113,28 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "rows",
                     "cols"),
                 default="rows")
+            private$..title <- jmvcore::OptionString$new(
+                "title",
+                title,
+                default="")
+            private$..results.subtitle <- jmvcore::OptionBool$new(
+                "results.subtitle",
+                results.subtitle,
+                default=TRUE)
+            private$..subtitle <- jmvcore::OptionString$new(
+                "subtitle",
+                subtitle,
+                default="")
+            private$..caption <- jmvcore::OptionString$new(
+                "caption",
+                caption,
+                default="")
+            private$..conf.level <- jmvcore::OptionNumber$new(
+                "conf.level",
+                conf.level,
+                default=0.95,
+                min=0,
+                max=1)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -121,13 +143,17 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..direction)
             self$.addOption(private$..excl)
             self$.addOption(private$..ratio)
-            self$.addOption(private$..results.subtitle)
             self$.addOption(private$..sample.size.label)
             self$.addOption(private$..label)
             self$.addOption(private$..perc.k)
             self$.addOption(private$..bf.message)
             self$.addOption(private$..sampling.plan)
             self$.addOption(private$..fixed.margin)
+            self$.addOption(private$..title)
+            self$.addOption(private$..results.subtitle)
+            self$.addOption(private$..subtitle)
+            self$.addOption(private$..caption)
+            self$.addOption(private$..conf.level)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -137,13 +163,17 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         direction = function() private$..direction$value,
         excl = function() private$..excl$value,
         ratio = function() private$..ratio$value,
-        results.subtitle = function() private$..results.subtitle$value,
         sample.size.label = function() private$..sample.size.label$value,
         label = function() private$..label$value,
         perc.k = function() private$..perc.k$value,
         bf.message = function() private$..bf.message$value,
         sampling.plan = function() private$..sampling.plan$value,
-        fixed.margin = function() private$..fixed.margin$value),
+        fixed.margin = function() private$..fixed.margin$value,
+        title = function() private$..title$value,
+        results.subtitle = function() private$..results.subtitle$value,
+        subtitle = function() private$..subtitle$value,
+        caption = function() private$..caption$value,
+        conf.level = function() private$..conf.level$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -152,13 +182,17 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..direction = NA,
         ..excl = NA,
         ..ratio = NA,
-        ..results.subtitle = NA,
         ..sample.size.label = NA,
         ..label = NA,
         ..perc.k = NA,
         ..bf.message = NA,
         ..sampling.plan = NA,
-        ..fixed.margin = NA)
+        ..fixed.margin = NA,
+        ..title = NA,
+        ..results.subtitle = NA,
+        ..subtitle = NA,
+        ..caption = NA,
+        ..conf.level = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -237,13 +271,17 @@ jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param direction select measurement type (repeated or independent)
 #' @param excl .
 #' @param ratio .
-#' @param results.subtitle .
 #' @param sample.size.label .
 #' @param label label
 #' @param perc.k .
 #' @param bf.message .
 #' @param sampling.plan sampling.plan
 #' @param fixed.margin fixed.margin
+#' @param title .
+#' @param results.subtitle .
+#' @param subtitle .
+#' @param caption .
+#' @param conf.level .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -260,13 +298,17 @@ jjbarstats <- function(
     direction = "independent",
     excl = TRUE,
     ratio = "",
-    results.subtitle = TRUE,
     sample.size.label = TRUE,
     label = "percentage",
     perc.k = 0,
     bf.message = TRUE,
     sampling.plan = "indepMulti",
-    fixed.margin = "rows") {
+    fixed.margin = "rows",
+    title = "",
+    results.subtitle = TRUE,
+    subtitle = "",
+    caption = "",
+    conf.level = 0.95) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjbarstats requires jmvcore to be installed (restart may be required)')
@@ -295,13 +337,17 @@ jjbarstats <- function(
         direction = direction,
         excl = excl,
         ratio = ratio,
-        results.subtitle = results.subtitle,
         sample.size.label = sample.size.label,
         label = label,
         perc.k = perc.k,
         bf.message = bf.message,
         sampling.plan = sampling.plan,
-        fixed.margin = fixed.margin)
+        fixed.margin = fixed.margin,
+        title = title,
+        results.subtitle = results.subtitle,
+        subtitle = subtitle,
+        caption = caption,
+        conf.level = conf.level)
 
     analysis <- jjbarstatsClass$new(
         options = options,
