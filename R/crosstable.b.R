@@ -71,10 +71,10 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
 
 
+            # Arsenal Table ----
 
             if (sty == "arsenal") {
 
-                # Arsenal Table ----
 
                 tablearsenal <- arsenal::tableby(formula = formula,
                                                  data = mydata,
@@ -83,13 +83,18 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                  digits.count = 1
                 )
 
-                tablearsenal <- summary(tablearsenal, text = 'html')
+                tablearsenal <- summary(tablearsenal,
+                                        text = 'html',
+                                        pfootnote = TRUE
+                                        )
 
 
-                tablearsenal <- kableExtra::kable(tablearsenal,
-                                             format = "html",
-                                             digits = 1,
-                                             escape = FALSE)
+                tablearsenal <-
+                    kableExtra::kable(tablearsenal,
+                                      format = "html",
+                                      digits = 1,
+                                      escape = FALSE
+                                      )
 
 
                 self$results$tablestyle1$setContent(tablearsenal)
@@ -112,12 +117,14 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     finalfit::summary_factorlist(
                         .data = .,
                         dependent = self$options$group,
-                                       explanatory = myvars,
-                                       # column = TRUE,
-                                       total_col = TRUE,
-                                       p = TRUE,
-                                       add_dependent_label = TRUE,
-                                       na_include = FALSE
+                        explanatory = myvars,
+                        # column = TRUE,
+                        total_col = TRUE,
+                        p = TRUE,
+                        add_dependent_label = TRUE,
+                        na_include = FALSE,
+                        na_to_p = FALSE
+
                                        # catTest = catTestfisher
                 ) -> tablefinalfit
 
@@ -135,6 +142,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 # gtsummary ----
+
                 # http://www.danieldsjoberg.com/gtsummary/articles/gallery.html
 
 
@@ -174,7 +182,9 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             formula,
                             mydata,
                             transform=tangram::hmisc,
-                            id = "tbl3"
+                            id = "tbl3",
+                            digits = 1,
+                            include_p = TRUE
                         ),
                         fragment = TRUE,
                         style = sty,
@@ -184,8 +194,17 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         id = "tbl3")
 
                 self$results$tablestyle4$setContent(tabletangram)
+            }
 
-}
-}
+
+
+
+                # tableone ----
+                # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
+
+
+
+
+            }
         })
 )

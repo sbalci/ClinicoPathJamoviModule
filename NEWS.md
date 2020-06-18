@@ -1,9 +1,15 @@
+# ClinicoPath 0.0.2.0012
+
+- jjstatsplot is the wrapper functions for using ggstatsplot in jamovi.
+- I thought it might be a nice separate module too. I have prepared it to ask opinions.
+- Use attached `.jmo`files to install via side load in jamovi.
+- Requires latest jamovi >=1.2.22 https://www.jamovi.org/download.html
+- tangram error is fixed, but it does not reveal statistical test results.
+- arsenal's footnote is not visible in Html output
+
 # ClinicoPath 0.0.2.0004
 
 Using `spgarbet/tangram@0.3.2` until the bug is fixed.
-
-
-
 
 
 # ClinicoPath 0.0.2.0003

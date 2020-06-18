@@ -11,17 +11,12 @@
 language summaries of their dataset, generate cross tables with statistical
 tests, and survival analysis with survival tables, survival plots,
 and natural language summaries.
-}
-\details{
-\code{ClinicoPath}
-
-The main functions are-
-\itemize{
-\item \code{\link[tableone]{tableone}} function to produce Table One.
-}
 
 For more documentation, see the
 \href{https://sbalci.github.io/ClinicoPathJamoviModule/}{Website}.
+}
+\details{
+\code{ClinicoPath}
 }
 \seealso{
 Useful links:

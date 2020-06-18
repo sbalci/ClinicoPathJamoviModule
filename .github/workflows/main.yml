@@ -156,9 +156,11 @@ jobs:
           Rscript -e "if (!requireNamespace('tableone')) install.packages('tableone', type = 'source')"
           Rscript -e "if (!requireNamespace('kableExtra')) install.packages('kableExtra', type = 'source')"
           Rscript -e "if (!requireNamespace('caret')) install.packages('caret', type = 'source')"
-          Rscript -e "if (!requireNamespace('vtree')) install.packages('vtree', type = 'source')"
           Rscript -e "if (!requireNamespace('correlation')) install.packages('correlation', type = 'source')"
           Rscript -e "if (!requireNamespace('vtree')) remotes::install_github('nbarrowman/vtree')"
+          Rscript -e "if (!requireNamespace('flextable')) remotes::install_github('davidgohel/flextable')"
+          Rscript -e "if (!requireNamespace('hrbrthemes')) remotes::install_github('hrbrmstr/hrbrthemes')"
+
 
 
       - name: "[Stage] Script"

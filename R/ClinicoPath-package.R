@@ -7,10 +7,10 @@
 #' tests, and survival analysis with survival tables, survival plots,
 #' and natural language summaries.
 #'
-#' @details The main functions are-
-#' \itemize{
-#'   \item \code{\link[tableone]{tableone}} function to produce Table One.
-#'  }
+# @details The main functions are-
+# \itemize{
+#   \item \code{\link[tableone]{tableone}} function to produce Table One.
+#  }
 #'
 #' For more documentation, see the
 #' \href{https://sbalci.github.io/ClinicoPathJamoviModule/}{Website}.

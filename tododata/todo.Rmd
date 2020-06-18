@@ -11,7 +11,6 @@ Remotes:
 
 
 
-
 # Future Works:
 
 ## ndphillips/FFTrees
@@ -1669,10 +1668,41 @@ plot <-
 ## arsenal
 
 ```{r arsenal, results='asis'}
+deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
-tab1 <- arsenal::tableby(~ Age + Sex, data = deneme)
+tab1 <- arsenal::tableby(
+    LVI~ Age + Sex
+    , data = deneme
+                         )
 
-results <- summary(tab1)
+# results <- summary(tab1
+#                    , pfootnote = TRUE)
+# 
+# 
+tablearsenal <- tab1
+
+tablearsenal2 <- summary(tablearsenal,
+                                        text = 'html',
+                                        pfootnote = TRUE)
+
+
+gregexpr(pattern = "^</table>\n.*$", text = tablearsenal2, perl = TRUE)
+
+
+tablearsenal3 <-
+kableExtra::kable(tablearsenal2,
+format = "html",
+digits = 1,
+escape = TRUE
+)
+```
+
+
+```{r arsenal, results='asis'}
+sumtab <- summary(tab1
+        , pfootnote = TRUE)
+
+printsumtab <- print(sumtab)
 
 
 # results$object
