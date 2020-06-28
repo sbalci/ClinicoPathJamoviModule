@@ -9,7 +9,9 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars = NULL,
             group = NULL,
             sty = "nejm",
-            excl = TRUE, ...) {
+            excl = TRUE,
+            cont = "mean",
+            pcat = "chisq", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -43,22 +45,42 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..cont <- jmvcore::OptionList$new(
+                "cont",
+                cont,
+                options=list(
+                    "mean",
+                    "median"),
+                default="mean")
+            private$..pcat <- jmvcore::OptionList$new(
+                "pcat",
+                pcat,
+                options=list(
+                    "chisq",
+                    "fisher"),
+                default="chisq")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
             self$.addOption(private$..sty)
             self$.addOption(private$..excl)
+            self$.addOption(private$..cont)
+            self$.addOption(private$..pcat)
         }),
     active = list(
         vars = function() private$..vars$value,
         group = function() private$..group$value,
         sty = function() private$..sty$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        cont = function() private$..cont$value,
+        pcat = function() private$..pcat$value),
     private = list(
         ..vars = NA,
         ..group = NA,
         ..sty = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..cont = NA,
+        ..pcat = NA)
 )
 
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -82,7 +104,9 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "vars",
-                    "group")))
+                    "group",
+                    "cont",
+                    "pcat")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle1",
@@ -98,7 +122,9 @@ crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="`Cross Table - ${group}`",
                 clearWith=list(
                     "vars",
-                    "group"),
+                    "group",
+                    "cont",
+                    "pcat"),
                 visible="(sty:finalfit)",
                 refs="finalfit"))
             self$add(jmvcore::Html$new(
@@ -153,6 +179,8 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group variable in the column
 #' @param sty .
 #' @param excl .
+#' @param cont .
+#' @param pcat .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -168,7 +196,9 @@ crosstable <- function(
     vars,
     group,
     sty = "nejm",
-    excl = TRUE) {
+    excl = TRUE,
+    cont = "mean",
+    pcat = "chisq") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('crosstable requires jmvcore to be installed (restart may be required)')
@@ -187,7 +217,9 @@ crosstable <- function(
         vars = vars,
         group = group,
         sty = sty,
-        excl = excl)
+        excl = excl,
+        cont = cont,
+        pcat = pcat)
 
     analysis <- crosstableClass$new(
         options = options,

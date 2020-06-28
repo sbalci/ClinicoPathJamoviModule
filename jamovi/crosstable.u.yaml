@@ -2,7 +2,7 @@ title: Cross Tables
 name: crosstable
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -31,3 +31,15 @@ children:
     children:
       - type: CheckBox
         name: excl
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cont
+        enable: (sty:finalfit)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: pcat
+        enable: (sty:finalfit)

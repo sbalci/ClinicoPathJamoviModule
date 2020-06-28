@@ -118,7 +118,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             finalfit::finalfit(.data = mydata,
                                dependent = myformula,
                                explanatory = formula2,
-                               # ,
+
                                # metrics = TRUE
                                ) -> tMultivariate
 

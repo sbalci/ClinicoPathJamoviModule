@@ -1,0 +1,17 @@
+---
+name:  retracted
+title: Find Retracted Papers from DOI
+menuGroup: Drafts
+menuSubgroup: Bibliometrics
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: doi
+      title: Select DOI Variable
+      type: Variable
+
+...

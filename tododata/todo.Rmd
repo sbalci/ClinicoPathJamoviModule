@@ -924,6 +924,8 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::addAnalysis(name = "jjbarstats2", title = "jjbarstats2")
 
+# jmvtools::addAnalysis(name = "retracted", title = "Find Retracted Papers from DOI")
+
 ```
 
 
@@ -1560,6 +1562,30 @@ finalfit::finalfit(myformula, explanatory) -> tUni
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 
+
+tabletangram <-
+                    tangram::html5(
+                        tangram::tangram(
+                            "Death ~ LVI + PNI + Age", deneme,
+                            transform=tangram::hmisc,
+                            id = "tbl3",
+                            digits = 1,
+                            test = TRUE,
+                            include_p = TRUE
+                        ),
+                        fragment = TRUE,
+                        style = "nejm",
+                        caption = paste0(
+                            "Cross Table for Dependent "
+                            ),
+                        id = "tbl3")
+
+tabletangram
+
+```
+
+
+```{r table tangram}
 table3 <-
   tangram::html5(
     tangram::tangram(
@@ -1667,6 +1693,21 @@ plot <-
 
 ## arsenal
 
+```{r}
+library(arsenal)
+
+summary(tableby(sex ~ age + arm, data = mockstudy),
+        text = "html",
+        pfootnote = "html")
+
+
+
+
+```
+
+
+
+
 ```{r arsenal, results='asis'}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -1683,10 +1724,14 @@ tablearsenal <- tab1
 
 tablearsenal2 <- summary(tablearsenal,
                                         text = 'html',
-                                        pfootnote = TRUE)
+                                        pfootnote = 'html')
 
 
-gregexpr(pattern = "^</table>\n.*$", text = tablearsenal2, perl = TRUE)
+# gregexpr(pattern = "^</table>\n.*$", text = tablearsenal2, perl = TRUE)
+
+tablearsenal2 <- capture.output(tablearsenal2)
+
+
 
 
 tablearsenal3 <-
@@ -3349,5 +3394,107 @@ print(resTogether, quote = FALSE)
 - Authored by Kazuki Yoshida
 - CRAN page: https://cran.r-project.org/package=tableone
 - github page: https://github.com/kaz-yos/tableone
+
+
+
+```{r}
+doi_list <- c(
+    "10.4103/IJPM.IJPM_85_17",
+    "10.5146/tjpath.2017.01404",
+    "10.1038/modpathol.2017.106",
+    "10.1038/modpathol.2017.60",
+    "10.1097/PAS.0000000000000863",
+    "10.1097/PHM.0000000000000727",
+    "10.1038/modpathol.2016.223",
+    "10.1097/PAS.0000000000000782",
+    "10.1007/s00428-016-2014-x",
+    "10.1038/modpathol.2016.125",
+    "10.1111/cup.12790",
+    "10.1038/modpathol.2016.174",
+    "10.1016/j.ijscr.2016.04.003",
+    "10.1038/modpathol.2016.124",
+    "10.1038/modpathol.2016.105",
+    "10.1016/j.anndiagpath.2016.04.002",
+    "10.1097/PAI.0000000000000353",
+    "10.1016/j.jmoldx.2015.11.006",
+    "10.1245/s10434-015-4861-0",
+    "10.1097/MEG.0000000000000463",
+    "10.4103/0970-9371.160549",
+    "10.1038/modpathol.2015.61",
+    "10.1245/s10434-015-4499-y",
+    "10.1097/PAS.0000000000000408",
+    "10.1016/j.ijrobp.2014.11.004",
+    "10.1053/j.semdp.2014.08.009",
+    "10.1038/modpathol.2014.156",
+    "10.18632/oncotarget.1682",
+    "10.1371/journal.pone.0088525",
+    "10.1097/PAS.0000000000000165",
+    "10.1309/AJCP0FKDP7ENVKEV",
+    "10.1007/s12022-013-9295-2",
+    "10.1007/s11102-013-0551-8",
+    "10.1007/s12022-013-9275-6",
+    "10.1016/j.ajg.2013.08.008",
+    "10.1631/jzus.B1300016",
+    "10.1111/cyt.12093",
+    "10.2214/AJR.12.9139",
+    "10.3109/0886022X.2012.745115",
+    "10.1111/cyt.12021",
+    "10.1053/j.semdp.2012.08.010",
+    "10.1097/PAS.0b013e31826399d8",
+    "10.5146/tjpath.2012.01125",
+    "10.1016/j.urolonc.2012.06.014",
+    "10.1097/COC.0b013e3182467efa",
+    "10.1038/modpathol.2012.37",
+    "10.1007/s00701-011-1241-9",
+    "10.3171/2011.5.SPINE10303",
+    "10.1007/s00296-011-1866-2",
+    "10.1097/MPA.0b013e318201c935",
+    "10.1016/j.jaapos.2010.01.013",
+    "10.1007/s00701-010-0677-7",
+    "10.1097/PGP.0b013e3181b70176",
+    "10.1155/2018/1072403",
+    "10.1155/2013/157456",
+    "10.1155/2019/4301528",
+    "10.1155/2014/943162",
+    "10.1155/2017/4583434",
+    "10.3892/mmr.2017.6299",
+    "10.1002/job.1787",
+    "10.1111/j.1365-2044.2012.07128.x"
+)
+
+retracted_list <-
+                retractcheck::retractcheck(
+                    dois = doi_list,
+                    database = "rw",
+                    return = "all"
+                )
+
+
+(table_retracted_list <- kableExtra::kable(
+                retracted_list,
+                format = "html"
+                )
+)
+
+```
+
+```{r}
+            info_list <-
+            RefManageR::GetBibEntryWithDOI(doi = doi_list)
+
+
+            table_info_list <- kableExtra::kable(
+                info_list,
+                format = "html"
+            )
+```
+
+```{r}
+
+ids <- rcrossref::id_converter(x = doi_list)
+
+ids[["records"]]
+
+```
 
 

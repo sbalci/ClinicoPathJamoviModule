@@ -52,14 +52,14 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::naOmit(mydata)
 
 
-            sumdata <- list(typeof(mydata),
-                         class(mydata),
-                         head(mydata),
-                         head(as.data.frame(mydata)),
-                         summary(mydata))
+            # sumdata <- list(typeof(mydata),
+            #              class(mydata),
+            #              head(mydata),
+            #              head(as.data.frame(mydata)),
+            #              summary(mydata))
 
 
-            self$results$text1$setContent(sumdata)
+            # self$results$text1$setContent(sumdata)
 
 
 
@@ -85,7 +85,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tree <- rpart::rpart(myformula, data = mydata, cp = .02)
 
-            self$results$text2$setContent(tree)
+            # self$results$text2$setContent(tree)
 
 
             # FFTrees ----
@@ -113,16 +113,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                self$results$text2$setContent(mydata)
-
-
-
-
-
-
-
-
-
+                # self$results$text2$setContent(mydata)
 
 
             }
