@@ -1,3 +1,22 @@
+# ClinicoPath 0.0.2.0015
+
+- Added tangram statistical results
+- Added options to finalfit crosstables
+fixes: https://github.com/sbalci/ClinicoPathJamoviModule/issues/24
+fixes: https://github.com/jamovi/jamovi/issues/901
+fixes: https://github.com/ewenharrison/finalfit/issues/52
+
+- Added experimental biblometrics functions
+- includes experimental changes
+
+
+
+# ClinicoPath 0.0.2.0014
+
+- Added footnote to arsenal crosstable
+
+
+
 # ClinicoPath 0.0.2.0012
 
 - jjstatsplot is the wrapper functions for using ggstatsplot in jamovi.

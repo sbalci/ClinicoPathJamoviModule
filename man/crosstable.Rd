@@ -4,7 +4,15 @@
 \alias{crosstable}
 \title{Cross Tables}
 \usage{
-crosstable(data, vars, group, sty = "nejm", excl = TRUE)
+crosstable(
+  data,
+  vars,
+  group,
+  sty = "nejm",
+  excl = TRUE,
+  cont = "mean",
+  pcat = "chisq"
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +24,10 @@ crosstable(data, vars, group, sty = "nejm", excl = TRUE)
 \item{sty}{.}
 
 \item{excl}{.}
+
+\item{cont}{.}
+
+\item{pcat}{.}
 }
 \value{
 A results object containing:

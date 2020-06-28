@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0013
-Date: 2020-06-12
+Version: 0.0.2.0015
+Date: 2020-06-28
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -51,7 +51,6 @@ Suggests:
     rpart,
     rpart.plot,
     plotROC,
-    arsenal,
     easyalluvial,
     corrr,
     correlation,
@@ -70,13 +69,17 @@ Suggests:
     pkgnet,
     hrbrthemes,
     gtsummary,
-    vctrs
+    vctrs,
+    retractcheck,
+    RefManageR,
+    rcrossref
 Remotes:
     ndphillips/FFTrees,
     easystats/report,
     spgarbet/tangram,
     cran/rmngb,
-    mixOmicsTeam/mixOmics
+    mixOmicsTeam/mixOmics,
+    mayoverse/arsenal
 VignetteBuilder:
     knitr
 Encoding: UTF-8

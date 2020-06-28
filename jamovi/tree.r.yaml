@@ -42,56 +42,56 @@ items:
           - rpart.plot
 
 
-    # - name: plot1
-    #   title: Decision Tree Explore
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot1
-    #   requiresData: true
-    #   clearWith:
-    #       - vars
-    #       - facs
-    #       - target
-    #       - targetLevel
-    #       - sty
-    #   visible: (sty:explore)
-    #   refs: explore
+    - name: plot1
+      title: Decision Tree Explore
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - sty
+      visible: (sty:explore)
+      refs: explore
 
 
-    # - name: plot2
-    #   title: Decision Tree FFTrees
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot2
-    #   requiresData: true
-    #   clearWith:
-    #       - vars
-    #       - facs
-    #       - target
-    #       - targetLevel
-    #       - sty
-    #   visible: (sty:fftrees)
-    #   refs: FFTrees
+    - name: plot2
+      title: Decision Tree FFTrees
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - sty
+      visible: (sty:fftrees)
+      refs: FFTrees
 
 
-    # - name: plot3
-    #   title: Decision Tree rpart
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot3
-    #   requiresData: true
-    #   clearWith:
-    #       - vars
-    #       - facs
-    #       - target
-    #       - targetLevel
-    #       - sty
-    #   visible: (sty:rpart)
-    #   refs:
-    #       - rpart
-    #       - rpart.plot
+    - name: plot3
+      title: Decision Tree rpart
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot3
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - sty
+      visible: (sty:rpart)
+      refs:
+          - rpart
+          - rpart.plot
 
 ...

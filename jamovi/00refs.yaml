@@ -363,5 +363,31 @@ refs:
         url: https://CRAN.R-project.org/package=hrbrthemes
 
 
+    retractcheck:
+        type: 'software'
+        author:
+        year:
+        title: ""
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
+        url: https://CRAN.R-project.org/package=
+
+
+    RefManageR:
+        type: 'software'
+        author:
+        year:
+        title: ""
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
+        url: https://CRAN.R-project.org/package=
+
+
+    rcrossref:
+        type: 'software'
+        author:
+        year:
+        title: ""
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
+        url: https://CRAN.R-project.org/package=
+
 
 ...

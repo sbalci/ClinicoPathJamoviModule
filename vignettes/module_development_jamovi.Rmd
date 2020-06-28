@@ -138,6 +138,45 @@ No need to change. Auto-updated and overwritten.
 #### `function.b.R`
 
 
+##### Write Formula
+
+
+https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html
+
+```r
+jmv::ANOVA(formula = len ~ supp * dose, ToothGrowth)
+```
+
+```r
+jmv::ANOVA(ToothGrowth, len, vars(supp, dose))
+```
+
+```r
+jmv::ANOVA(..., emMeans = ~ supp + dose:supp)
+```
+
+```r
+jmv::ANOVA(ToothGrowth, 'len', c('supp', 'dose'))
+```
+
+
+> In this case, jmv will look for variables in ToothGrowth called 'dep' or 'factors'. This is tidy evaluation. To instruct jmv to use the contents of it's arguments, rather than the symbol name, prefix them with the !! signifier. For example:
+
+
+```r
+dep <- 'len'
+factors <- c('supp', 'dose')
+
+jmv::ANOVA(ToothGrowth, !!dep, !!factors)
+```
+
+
+
+
+
+
+
+
 
 ##### Warning, Error Messages
 

@@ -56,11 +56,39 @@ options:
           name: hmisc
       default: nejm
 
-
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
       default: true
+
+
+    - name: cont
+      title: Mean vs Median
+      type: List
+      options:
+        - title: mean
+          name: mean
+        - title: median
+          name: median
+      default: mean
+
+
+    - name: pcat
+      title: ChiSq vs Fisher
+      type: List
+      options:
+        - title: chisq
+          name: chisq
+        - title: fisher
+          name: fisher
+      default: chisq
+
+
+
+
+
+
+
 
     # - name: excl2
     #   title: Exclude Missing per Variable (NA)

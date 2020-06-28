@@ -311,4 +311,25 @@
         `year`=2020, 
         `title`="hrbrthemes: Additional Themes, Theme Components and Utilities for 'ggplot2'.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=hrbrthemes", 
-        `url`="https://CRAN.R-project.org/package=hrbrthemes"))
+        `url`="https://CRAN.R-project.org/package=hrbrthemes"), 
+    `retractcheck`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=", 
+        `url`="https://CRAN.R-project.org/package="), 
+    `RefManageR`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=", 
+        `url`="https://CRAN.R-project.org/package="), 
+    `rcrossref`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=", 
+        `url`="https://CRAN.R-project.org/package="))
