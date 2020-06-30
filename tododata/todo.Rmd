@@ -1065,24 +1065,13 @@ readyfunctions <- c(
     "^oddsratio",
     # "^competingsurvival",
 
-# JJ Functions
-    "statsplot2",
-    "^jjbarstats\\.",
-    "^jjbetweenstats",
-    "^jjcorrmat",
-    "^jjdotplotstats",
-    "^jjhistostats",
-    "^jjpiestats",
-    "^jjscatterstats",
-    "^jjwithinstats",
-
 # Agreement
-    "^agreement"
+    "^agreement",
     # "^icccoeff",
 
 # Decision
-    # "^decision",
-    # "^decisioncalculator",
+    "^decision",
+    "^decisioncalculator"
     # "^roc",
     # "^tree"
 )

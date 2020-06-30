@@ -365,29 +365,30 @@ refs:
 
     retractcheck:
         type: 'software'
-        author:
-        year:
-        title: ""
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
-        url: https://CRAN.R-project.org/package=
+        author: Chris Hartgerink and Frederik Aust
+        year: 2019
+        title: "retractcheck: Retraction Scanner"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=retractcheck'
+        url: https://CRAN.R-project.org/package=retractcheck
 
 
     RefManageR:
         type: 'software'
-        author:
-        year:
-        title: ""
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
-        url: https://CRAN.R-project.org/package=
+        author: McLean MW
+        year: 2017
+        title: 'RefManageR: Import and Manage BibTeX and BibLaTeX References in R. The Journal of Open Source Software.'
+        doi: 10.21105/joss.00338
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RefManageR'
+        url: https://CRAN.R-project.org/package=RefManageR
 
 
     rcrossref:
         type: 'software'
-        author:
-        year:
-        title: ""
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package='
-        url: https://CRAN.R-project.org/package=
+        author: Scott Chamberlain and Hao Zhu and Najko Jahn and Carl Boettiger and Karthik Ram
+        year: 2020
+        title: "rcrossref: Client for Various 'CrossRef' 'APIs'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rcrossref'
+        url: https://CRAN.R-project.org/package=rcrossref
 
 
 ...

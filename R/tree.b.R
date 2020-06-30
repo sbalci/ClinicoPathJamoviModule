@@ -85,7 +85,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tree <- rpart::rpart(myformula, data = mydata, cp = .02)
 
-            # self$results$text2$setContent(tree)
+            self$results$text2$setContent(tree)
 
 
             # FFTrees ----
@@ -113,7 +113,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                # self$results$text2$setContent(mydata)
+                self$results$text2$setContent(mydata)
 
 
             }
@@ -200,6 +200,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myformula <- as.formula(myformula)
 
             # FFTrees ----
+            # https://ndphillips.github.io/useR2017_pres/#1
 
             mytree.fft <- FFTrees::FFTrees(
                 formula = myformula,
@@ -250,7 +251,9 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myformula <- as.formula(myformula)
 
 
-            tree <- rpart::rpart(myformula, data = mydata, cp = .02)
+            tree <- rpart::rpart(myformula,
+                                 data = mydata,
+                                 cp = .02)
 
 
             plot3 <- rpart.plot::rpart.plot(tree,

@@ -1,9 +1,24 @@
+# ClinicoPath 0.0.2.0016
+
+- See: https://github.com/sbalci/jjstatsplot/releases/
+
+- See: https://github.com/sbalci/ClinicoPath/releases/
+
+- crosstable function partially resolves https://github.com/jamovi/jamovi/issues/443
+
+- survival function resolves https://github.com/jonathon-love/deathwatch/issues/2
+
+- added export html to crosstables to bypass https://github.com/jamovi/jamovi/issues/892
+
+
+
+
 # ClinicoPath 0.0.2.0015
 
 - Added tangram statistical results
 - Added options to finalfit crosstables
 fixes: https://github.com/sbalci/ClinicoPathJamoviModule/issues/24
-fixes: https://github.com/jamovi/jamovi/issues/901
+Partially fixes: https://github.com/jamovi/jamovi/issues/901
 fixes: https://github.com/ewenharrison/finalfit/issues/52
 
 - Added experimental biblometrics functions
