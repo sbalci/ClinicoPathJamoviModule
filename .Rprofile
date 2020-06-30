@@ -9,6 +9,26 @@ options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 
 # .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
 
+
+# options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
+
+# .libPaths(new = "C:\\ClinicoPathLibrary")
+
+# Sys.setenv(TZ = "Europe/Istanbul")
+
+# Sys.setenv(TEMP = "C:\\temp")
+
+# Sys.setenv(TMP = "C:\\temp")
+
+
+# jmvtools::check("C://Program Files//jamovi//bin")
+# jmvtools::install(home = "C://Program Files//jamovi//bin")
+#
+#
+#
+
+
+
 # source(
 #     "renv/activate.R"
 # "~/histopathRprojects/ClinicoPath/renv/activate.R"
