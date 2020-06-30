@@ -248,7 +248,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         tangram::tangram(
                             formula,
                             mydata,
-                            transform=tangram::hmisc,
+                            transform = tangram::hmisc,
                             id = "tbl3",
                             test = TRUE,
                             digits = 1,
@@ -262,6 +262,19 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         id = "tbl3")
 
                 self$results$tablestyle4$setContent(tabletangram)
+
+
+                export <- self$options$export
+
+                if (export)
+                {
+                    write(x = tabletangram,
+                          file = "~/Documents/ClinicoPathCrossTable.html"
+
+                          )
+                }
+
+
             }
                 # tableone ----
                 # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
