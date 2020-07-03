@@ -51,4 +51,36 @@ items:
       refs: ggstatsplot
 
 
+
+    - name: plot3
+      title: Forest Plot
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot3
+      requiresData: true
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+      visible: (sty:t3)
+      refs: survminer
+
+    - name: plot4
+      title: Show Adjusted Survival Curve
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot4
+      requiresData: true
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - adjexplanatory
+      visible: (ac)
+      refs: survminer
+
+
+
 ...

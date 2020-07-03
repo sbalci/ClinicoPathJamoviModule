@@ -10,7 +10,9 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             overalltime = NULL,
             outcome = NULL,
             cutp = "12, 36, 60",
-            sc = FALSE, ...) {
+            sc = FALSE,
+            ce = FALSE,
+            ch = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -48,25 +50,39 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "sc",
                 sc,
                 default=FALSE)
+            private$..ce <- jmvcore::OptionBool$new(
+                "ce",
+                ce,
+                default=FALSE)
+            private$..ch <- jmvcore::OptionBool$new(
+                "ch",
+                ch,
+                default=FALSE)
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
             self$.addOption(private$..outcome)
             self$.addOption(private$..cutp)
             self$.addOption(private$..sc)
+            self$.addOption(private$..ce)
+            self$.addOption(private$..ch)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         overalltime = function() private$..overalltime$value,
         outcome = function() private$..outcome$value,
         cutp = function() private$..cutp$value,
-        sc = function() private$..sc$value),
+        sc = function() private$..sc$value,
+        ce = function() private$..ce$value,
+        ch = function() private$..ch$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
         ..outcome = NA,
         ..cutp = NA,
-        ..sc = NA)
+        ..sc = NA,
+        ..ce = NA,
+        ..ch = NA)
 )
 
 survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -81,7 +97,9 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text6 = function() private$.items[["text6"]],
         text8 = function() private$.items[["text8"]],
         text9 = function() private$.items[["text9"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plot2 = function() private$.items[["plot2"]],
+        plot3 = function() private$.items[["plot3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -178,6 +196,34 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "sc",
                     "explanatory",
                     "outcome",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot2",
+                title="`Cumulative Events  - ${explanatory}`",
+                width=600,
+                height=450,
+                renderFun=".plot2",
+                visible="(ce)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "ce",
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot3",
+                title="`Cumulative Hazard  - ${explanatory}`",
+                width=600,
+                height=450,
+                renderFun=".plot3",
+                visible="(ch)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "ch",
+                    "explanatory",
+                    "outcome",
                     "overalltime")))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -214,6 +260,8 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param outcome .
 #' @param cutp .
 #' @param sc .
+#' @param ce .
+#' @param ch .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -226,6 +274,8 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
@@ -235,7 +285,9 @@ survival <- function(
     overalltime,
     outcome,
     cutp = "12, 36, 60",
-    sc = FALSE) {
+    sc = FALSE,
+    ce = FALSE,
+    ch = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('survival requires jmvcore to be installed (restart may be required)')
@@ -257,7 +309,9 @@ survival <- function(
         overalltime = overalltime,
         outcome = outcome,
         cutp = cutp,
-        sc = sc)
+        sc = sc,
+        ce = ce,
+        ch = ch)
 
     analysis <- survivalClass$new(
         options = options,

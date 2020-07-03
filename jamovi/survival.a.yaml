@@ -108,4 +108,17 @@ options:
       type: Bool
       default: false
 
+
+    - name: ce
+      title: Cumulative Events Plot
+      type: Bool
+      default: false
+
+
+    - name: ch
+      title: Cumulative Hazard Plot
+      type: Bool
+      default: false
+
+
 ...

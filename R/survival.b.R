@@ -458,5 +458,164 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 }
 
+
+
+# https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
+,
+.plot2=function(image, ...) {  # <-- the plot function ----
+
+    # plotData <- image$state
+
+    if (nrow(self$data) == 0)
+        stop('Data contains no (complete) rows')
+
+    if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+        return()
+
+    ce <- self$options$ce
+
+    if(!ce)
+        return()
+
+
+
+    uoveralltime <- self$options$overalltime
+
+    uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
+
+    uthefactor <- self$options$explanatory
+
+    uthefactor <- self$data[[uthefactor]]
+
+    uoutcome <- self$options$outcome
+
+    uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
+
+
+
+
+    mydata <- data.frame(myoveralltime = uoveralltime,
+                         thefactor = uthefactor,
+                         myoutcome = uoutcome)
+
+    mydata <- na.omit(mydata)
+
+    names(mydata) <- c(self$options$overalltime,
+                       self$options$explanatory,
+                       self$options$outcome)
+
+
+    formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+    formula2 <- jmvcore::composeTerm(formula2)
+
+    formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+    formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+    myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
+
+    plot2 <- mydata %>%
+        finalfit::surv_plot(.data = .,
+                            dependent = myformula,
+                            explanatory = formula2,
+                            xlab = 'Time (months)',
+                            # pval = TRUE,
+                            legend = 'none',
+                            break.time.by = 12,
+                            xlim = c(0,60),
+                            title = paste0("Cumulative Events ", self$options$explanatory),
+                            # subtitle = "Based on Kaplan-Meier estimates",
+                            fun = "event"
+
+        )
+
+
+    print(plot2)
+    TRUE
+
+
+
+}
+
+
+,
+.plot3=function(image, ...) {  # <-- the plot function ----
+
+    # plotData <- image$state
+
+    if (nrow(self$data) == 0)
+        stop('Data contains no (complete) rows')
+
+    if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+        return()
+
+    ch <- self$options$ch
+
+    if(!ch)
+        return()
+
+
+
+    uoveralltime <- self$options$overalltime
+
+    uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
+
+    uthefactor <- self$options$explanatory
+
+    uthefactor <- self$data[[uthefactor]]
+
+    uoutcome <- self$options$outcome
+
+    uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
+
+
+
+
+    mydata <- data.frame(myoveralltime = uoveralltime,
+                         thefactor = uthefactor,
+                         myoutcome = uoutcome)
+
+    mydata <- na.omit(mydata)
+
+    names(mydata) <- c(self$options$overalltime,
+                       self$options$explanatory,
+                       self$options$outcome)
+
+
+    formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+    formula2 <- jmvcore::composeTerm(formula2)
+
+    formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+    formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+    myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
+
+    plot3 <- mydata %>%
+        finalfit::surv_plot(.data = .,
+                            dependent = myformula,
+                            explanatory = formula2,
+                            xlab = 'Time (months)',
+                            # pval = TRUE,
+                            legend = 'none',
+                            break.time.by = 12,
+                            xlim = c(0,60),
+                            title = paste0("Cumulative Hazard ", self$options$explanatory),
+                            # subtitle = "Based on Kaplan-Meier estimates"
+                            fun = "cumhaz"
+        )
+
+
+    print(plot3)
+    TRUE
+
+
+
+}
+
+
+
         )
 )

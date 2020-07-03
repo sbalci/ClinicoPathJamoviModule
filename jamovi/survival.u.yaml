@@ -34,6 +34,10 @@ children:
     children:
       - type: CheckBox
         name: sc
+      - type: CheckBox
+        name: ce
+      - type: CheckBox
+        name: ch
   - type: LayoutBox
     margin: large
     children:

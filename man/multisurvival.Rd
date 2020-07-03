@@ -4,7 +4,15 @@
 \alias{multisurvival}
 \title{Multivariate Survival Analysis}
 \usage{
-multisurvival(data, explanatory, outcome, overalltime, sty = "t1")
+multisurvival(
+  data,
+  explanatory,
+  outcome,
+  overalltime,
+  sty = "t1",
+  ac = FALSE,
+  adjexplanatory
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +24,10 @@ multisurvival(data, explanatory, outcome, overalltime, sty = "t1")
 \item{overalltime}{.}
 
 \item{sty}{.}
+
+\item{ac}{.}
+
+\item{adjexplanatory}{.}
 }
 \value{
 A results object containing:
@@ -24,6 +36,8 @@ A results object containing:
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
