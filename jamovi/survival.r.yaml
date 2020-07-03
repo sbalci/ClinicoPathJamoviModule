@@ -96,6 +96,38 @@ items:
           - overalltime
 
 
+
+    - name: plot2
+      title: '`Cumulative Events  - ${explanatory}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      visible: (ce)
+      requiresData: true
+      clearWith:
+          - ce
+          - explanatory
+          - outcome
+          - overalltime
+
+
+    - name: plot3
+      title: '`Cumulative Hazard  - ${explanatory}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot3
+      visible: (ch)
+      requiresData: true
+      clearWith:
+          - ch
+          - explanatory
+          - outcome
+          - overalltime
+
+
+
 refs:
     - finalfit
     - survival

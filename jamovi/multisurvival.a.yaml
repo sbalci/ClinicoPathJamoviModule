@@ -53,7 +53,20 @@ options:
           name: t1
         - title: ggstatsplot
           name: t2
+        - title: survminer forestplot
+          name: t3
       default: t1
+
+
+    - name: ac
+      title: Adjusted Survival Curve
+      type: Bool
+      default: false
+
+
+    - name: adjexplanatory
+      title: Variable for Adjusted Survival Curve
+      type: Variable
 
 
 

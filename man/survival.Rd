@@ -10,7 +10,9 @@ survival(
   overalltime,
   outcome,
   cutp = "12, 36, 60",
-  sc = FALSE
+  sc = FALSE,
+  ce = FALSE,
+  ch = FALSE
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ survival(
 \item{cutp}{.}
 
 \item{sc}{.}
+
+\item{ce}{.}
+
+\item{ch}{.}
 }
 \value{
 A results object containing:
@@ -39,6 +45,8 @@ A results object containing:
 \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

@@ -50,7 +50,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
-                        Outcome variable should be coded binary (0 or 1).
+                        Outcome variable should be coded binary (0 or 1):
                     <br><br>
                         If patient is dead or event (recurrence) occured it is 1.
                     <br><br>
@@ -58,7 +58,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         Survival should be numeric, continuous, and in months.
                     <br><br>
-                        This function uses finalfit and ggstatsplot packages. Please cite jamovi and the packages as given below.
+                        This function uses finalfit, survival, survminer and ggstatsplot packages. Please cite jamovi and the packages as given below.
                     <br><br>
                     ")
                 # https://finalfit.org/articles/all_tables_examples.html#cox-proportional-hazards-model-survival-time-to-event
@@ -249,6 +249,168 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             TRUE
 
             }
+
+
+,
+        .plot3 = function(image, ...) {  # <-- the plot function ----
+
+            # plotData <- image$state
+
+            if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+                return()
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+            # Check if outcome variable is suitable or stop ----
+            myoutcome2 <- self$options$outcome
+            myoutcome2 <- self$data[[myoutcome2]]
+            myoutcome2 <- na.omit(myoutcome2)
+
+            if (class(myoutcome2) == "factor")
+                stop("Please use a continuous variable for outcome.")
+
+            if (any(myoutcome2 != 0 & myoutcome2 != 1))
+                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+
+
+            mydata <- self$data
+
+            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+            formulaL <- jmvcore::toNumeric(formulaL)
+
+            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+            formulaR <- jmvcore::toNumeric(formulaR)
+
+            formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+            formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+
+            formula3 <- as.formula(formula3)
+
+            mod <-
+                survival::coxph(
+                    formula = formula3,
+                    data = mydata
+                )
+
+            # plot
+
+        # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
+
+
+        # The function ggforest() from the survminer package creates a forest plot for a Cox regression model fit. Hazard ratio estimates along with confiden- ce intervals and p-values are plotter for each variable.
+
+        # lung$age <- ifelse(lung$age > 70, ">70","<= 70")
+        # fit <- coxph( Surv(time, status) ~ sex + ph.ecog + age, data = lung)
+        # ggforest(fit)
+
+            plot3 <- survminer::ggforest(model = mod,
+                                         data = mydata)
+
+            print(plot3)
+            TRUE
+
+        }
+
+
+,
+.plot4 = function(image, ...) {  # <-- the plot function ----
+
+    # plotData <- image$state
+
+    if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) || is.null(self$options$adjexplanatory))
+        return()
+
+    if (nrow(self$data) == 0)
+        stop('Data contains no (complete) rows')
+
+    # Check if outcome variable is suitable or stop ----
+    myoutcome2 <- self$options$outcome
+    myoutcome2 <- self$data[[myoutcome2]]
+    myoutcome2 <- na.omit(myoutcome2)
+
+    if (class(myoutcome2) == "factor")
+        stop("Please use a continuous variable for outcome.")
+
+    if (any(myoutcome2 != 0 & myoutcome2 != 1))
+        stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+
+
+    mydata <- self$data
+
+    formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+
+    formulaL <- jmvcore::toNumeric(formulaL)
+
+    formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+
+    formulaR <- jmvcore::toNumeric(formulaR)
+
+    formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+    formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+
+    formula3 <- as.formula(formula3)
+
+    mod <-
+        survival::coxph(
+            formula = formula3,
+            data = mydata
+        )
+
+    # plot
+
+    # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
+
+
+    # The function ggadjustedcurves() from the survminer package plots Adjusted Survival Curves for Cox Proportional Hazards Model. Adjusted Survival Curves show how a selected factor influences survival estimated from a Cox model.
+    # Note that these curves differ from Kaplan Meier estimates since they present expected ssurvival based on given Cox model.
+
+    # lung$sex <- ifelse(lung$sex == 1, "Male", "Female")
+
+    # fit <- coxph(Surv(time, status) ~ sex + ph.ecog + age +
+    #                  strata(sex), data = lung)
+    # ggcoxadjustedcurves(fit, data=lung)
+
+
+    # Note that it is not necessary to include the grouping factor in the Cox model. Survival curves are estimated from Cox model for each group defined by the factor independently.
+
+    # lung$age3 <- cut(lung$age,
+    #                  c(35,55,65,85))
+
+
+    # ggcoxadjustedcurves(fit, data=lung,
+    #                     variable=”lage3”)
+
+
+    adjexplanatory <- self$options$adjexplanatory
+
+    adjexplanatory <- jmvcore::composeTerm(components = adjexplanatory)
+
+
+
+    plot4 <- survminer::ggadjustedcurves(fit = mod,
+                                         data = mydata,
+                                         variable = adjexplanatory
+                                         # method = ,
+                                         # fun =
+
+                                         )
+
+
+
+    print(plot4)
+    TRUE
+
+}
+
+
+
 
         )
 )
