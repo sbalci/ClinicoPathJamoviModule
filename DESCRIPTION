@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0018
-Date: 2020-07-03
+Version: 0.0.2.0019
+Date: 2020-07-04
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -75,10 +75,8 @@ Suggests:
     rcrossref
 Remotes:
     ndphillips/FFTrees,
-    easystats/report,
     spgarbet/tangram,
     cran/rmngb,
-    mixOmicsTeam/mixOmics,
     mayoverse/arsenal
 VignetteBuilder:
     knitr

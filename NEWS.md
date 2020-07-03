@@ -1,3 +1,9 @@
+# ClinicoPath 0.0.2.0019
+
+- rewrote summary of categorical values to decrease dependencies
+
+
+
 # ClinicoPath 0.0.2.0018
 
 -   added cumulative events and cumulative hazard plots to survival

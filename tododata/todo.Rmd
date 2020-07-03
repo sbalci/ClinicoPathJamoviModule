@@ -1196,6 +1196,82 @@ deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-templa
 ```
 
 
+```{r}
+library(magrittr)
+
+myvar <- deneme$LVI
+
+
+# The data contains 250 observations of the following variables:
+#   - Group: 2 levels: Control (n = 120, 48.00%); Treatment (n = 129, 51.60%) and missing (n = 1, 0.40%)
+#   - Sex: 2 levels: Male (n = 128, 51.20%); Female (n = 121, 48.40%) and missing (n = 1, 0.40%)
+
+
+
+
+
+unique(deneme$LVI)
+
+leng <- length(deneme$LVI)
+
+for (fac in facs)
+            data[[fac]] <- as.factor(data[[fac]])
+
+miss <- sum(is.na(deneme$LVI))
+
+valid <- leng - miss
+
+nlev <- nlevels(as.factor(deneme$LVI))
+
+unique(as.factor(deneme$LVI))
+
+
+
+summar <- summary(as.factor(deneme$LVI)) %>% 
+as.table() %>%
+  tibble::as_tibble(.name_repair = "unique") %>% 
+    dplyr::filter(.[[1]] != "NA's") 
+
+summar$validtotal <- valid
+
+
+description <- summar %>% 
+    dplyr::mutate(
+        percent = n/validtotal
+        ) %>% 
+    dplyr::mutate(
+        description = glue::glue(
+            "{...1}: n = {n}, {scales::percent(percent)}"
+                            )
+                    ) %>%
+                    dplyr::select(description) %>%
+                    dplyr::pull()
+
+
+
+paste0(
+    myvar, " has ", leng, " observations and ", nlev, " levels.",
+    unlist(description),
+    "There are ", miss, "missing values."
+       )
+
+
+# catsummary function
+catsummary <- function(myvar) {
+
+    
+    
+
+
+
+            }
+```
+
+
+
+
+
+
 ```{r report}
 deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -3485,5 +3561,13 @@ ids <- rcrossref::id_converter(x = doi_list)
 ids[["records"]]
 
 ```
+
+
+
+
+
+
+
+
 
 
