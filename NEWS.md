@@ -1,3 +1,19 @@
+# ClinicoPath 0.0.2.0017
+
+- added alluvial diagrams using easyalluvial package to Descriptives (under Explore menu)  
+https://github.com/sbalci/ClinicoPathJamoviModule/issues/19  
+https://github.com/erblast/easyalluvial/issues/19  
+
+- added easyalluvial as an option to Graphs and Plots (under JJStatsPlot menu) for repeated categorical measurements.
+
+
+
+
+
+
+
+
+
 # ClinicoPath 0.0.2.0016
 
 - See: https://github.com/sbalci/jjstatsplot/releases/
