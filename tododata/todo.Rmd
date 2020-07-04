@@ -1149,9 +1149,20 @@ files_jamovi <-
         full.names = TRUE
     )
 
+
+
+readydata <- c(
+    "histopathologySurvival"
+    )
+
+
+readyfunctions <- paste0(readydata, collapse = "|")
+
+
 files_data <-
     list.files(
         path = here::here("data"),
+        pattern = readydata,
         full.names = TRUE
     )
 
@@ -1177,7 +1188,7 @@ file.copy(from = files_data,
 
 
 
-```{r ClinicoPath Descriptives update project for release}
+```{r Descriptives ClinicoPath update project for release}
 
 readyfunctions <- c(
     "refs",
@@ -1210,11 +1221,22 @@ files_jamovi <-
         full.names = TRUE
     )
 
+
+readydata <- c(
+    "histopathologyDescriptives"
+    )
+
+
+readyfunctions <- paste0(readydata, collapse = "|")
+
+
 files_data <-
     list.files(
         path = here::here("data"),
+        pattern = readydata,
         full.names = TRUE
     )
+
 
 
 file.copy(from = files_R,
@@ -1274,11 +1296,22 @@ files_jamovi <-
         full.names = TRUE
     )
 
+
+readydata <- c(
+    "histopathologyGraphsPlots"
+    )
+
+
+readyfunctions <- paste0(readydata, collapse = "|")
+
+
 files_data <-
     list.files(
         path = here::here("data"),
+        pattern = readydata,
         full.names = TRUE
     )
+
 
 
 file.copy(from = files_R,
@@ -1336,11 +1369,23 @@ files_jamovi <-
         full.names = TRUE
     )
 
+
+
+readydata <- c(
+    "histopathologyMedicalDecision"
+    )
+
+
+readyfunctions <- paste0(readydata, collapse = "|")
+
+
 files_data <-
     list.files(
         path = here::here("data"),
+        pattern = readydata,
         full.names = TRUE
     )
+
 
 
 file.copy(from = files_R,

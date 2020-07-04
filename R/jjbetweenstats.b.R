@@ -39,7 +39,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
 
                 todo <- glue::glue(
-                    "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
+                    "<br>You have selected to use a Violin Plot to compare continious variables between groups.<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -67,19 +67,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
             # distribution <-
             #     jmvcore::constructFormula(terms = self$options$distribution)
@@ -160,19 +160,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
             # distribution <-
             #     jmvcore::constructFormula(terms = self$options$distribution)

@@ -37,31 +37,31 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
-    - name: grvar
-      title: 'Split by: (Optional)'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+    # - name: grvar
+    #   title: 'Split by: (Optional)'
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
 
-    - name: counts
-      title: 'Counts: (Optional)'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
+    # - name: counts
+    #   title: 'Counts: (Optional)'
+    #   type: Variable
+    #   suggested: [ continuous ]
+    #   permitted: [ numeric ]
 
 
-    - name: direction
-      title: 'Measurement Type'
-      type: List
-      options:
-        - title: Repeated (within groups)
-          name: repeated
-        - title: Independent (between groups)
-          name: independent
-      default: independent
-      description:
-          ui: options for measurement type
-          R: select measurement type (repeated or independent)
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
 
 
     - name: excl
@@ -70,104 +70,104 @@ options:
       default: true
 
 
-    - name: ratio
-      title: >
-          Expected Proportions
-      type: String
-      default: ''
+    # - name: ratio
+    #   title: >
+    #       Expected Proportions
+    #   type: String
+    #   default: ''
 
-    - name: sample.size.label
-      title: sample.size.label
-      type: Bool
-      default: true
+    # - name: sample.size.label
+    #   title: sample.size.label
+    #   type: Bool
+    #   default: true
 
-    - name: label
-      title: label
-      type: List
-      options:
-        - title: percentage
-          name: percentage
-        - title: counts
-          name: counts
-        - title: both
-          name: both
-      default: percentage
-      description:
-          R: >
-            label
+    # - name: label
+    #   title: label
+    #   type: List
+    #   options:
+    #     - title: percentage
+    #       name: percentage
+    #     - title: counts
+    #       name: counts
+    #     - title: both
+    #       name: both
+    #   default: percentage
+    #   description:
+    #       R: >
+    #         label
 
-    - name: perc.k
-      title: perc.k
-      type: Integer
-      default: 0
+    # - name: perc.k
+    #   title: perc.k
+    #   type: Integer
+    #   default: 0
 
-    - name: bf.message
-      title: bf.message
-      type: Bool
-      default: true
-
-
-    - name: sampling.plan
-      title: sampling.plan
-      type: List
-      options:
-        - title: indepMulti
-          name: indepMulti
-        - title: poisson
-          name: poisson
-        - title: jointMulti
-          name: jointMulti
-        - title: hypergeom
-          name: hypergeom
-      default: indepMulti
-      description:
-          R: >
-            sampling.plan
+    # - name: bf.message
+    #   title: bf.message
+    #   type: Bool
+    #   default: true
 
 
-    - name: fixed.margin
-      title: fixed.margin
-      type: List
-      options:
-        - title: rows
-          name: rows
-        - title: cols
-          name: cols
-      default: rows
-      description:
-          R: >
-            fixed.margin
+    # - name: sampling.plan
+    #   title: sampling.plan
+    #   type: List
+    #   options:
+    #     - title: indepMulti
+    #       name: indepMulti
+    #     - title: poisson
+    #       name: poisson
+    #     - title: jointMulti
+    #       name: jointMulti
+    #     - title: hypergeom
+    #       name: hypergeom
+    #   default: indepMulti
+    #   description:
+    #       R: >
+    #         sampling.plan
 
 
-    - name: title
-      title: >
-          Plot Title
-      type: String
-      default: ''
+    # - name: fixed.margin
+    #   title: fixed.margin
+    #   type: List
+    #   options:
+    #     - title: rows
+    #       name: rows
+    #     - title: cols
+    #       name: cols
+    #   default: rows
+    #   description:
+    #       R: >
+    #         fixed.margin
 
-    - name: results.subtitle
-      title: results.subtitle
-      type: Bool
-      default: true
 
-    - name: subtitle
-      title: >
-          Plot Subtitle
-      type: String
-      default: ''
+    # - name: title
+    #   title: >
+    #       Plot Title
+    #   type: String
+    #   default: ''
 
-    - name: caption
-      title: >
-          Plot Caption
-      type: String
-      default: ''
+    # - name: results.subtitle
+    #   title: results.subtitle
+    #   type: Bool
+    #   default: true
 
-    - name: conf.level
-      title: conf.level
-      type: Number
-      default: 0.95
-      min: 0.00
-      max: 1.00
+    # - name: subtitle
+    #   title: >
+    #       Plot Subtitle
+    #   type: String
+    #   default: ''
+
+    # - name: caption
+    #   title: >
+    #       Plot Caption
+    #   type: String
+    #   default: ''
+
+    # - name: conf.level
+    #   title: conf.level
+    #   type: Number
+    #   default: 0.95
+    #   min: 0.00
+    #   max: 1.00
 
 #
 # nboot

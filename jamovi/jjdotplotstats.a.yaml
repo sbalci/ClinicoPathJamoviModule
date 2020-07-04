@@ -46,18 +46,18 @@ options:
       permitted: [ factor ]
 
 
-    - name: direction
-      title: 'Measurement Type'
-      type: List
-      options:
-        - title: Repeated (within groups)
-          name: repeated
-        - title: Independent (between groups)
-          name: independent
-      default: independent
-      description:
-          ui: options for measurement type
-          R: select measurement type (repeated or independent)
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
 
 
     - name: excl

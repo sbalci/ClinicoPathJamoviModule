@@ -67,19 +67,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
 
             # distribution <-
@@ -184,19 +184,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
 
             # distribution <-
@@ -296,19 +296,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
             # Exclude NA ----
 
@@ -389,19 +389,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
             # Exclude NA ----
 

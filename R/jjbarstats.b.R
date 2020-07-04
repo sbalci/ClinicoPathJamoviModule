@@ -65,19 +65,19 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Prepare Data ----
 
 
-                # direction, paired ----
-
-                direction <- self$options$direction
-
-                if (direction == "repeated") {
-
-                    paired <- TRUE
-
-                } else if (direction == "independent") {
-
-                    paired <- FALSE
-
-                }
+                # # direction, paired ----
+                #
+                # direction <- self$options$direction
+                #
+                # if (direction == "repeated") {
+                #
+                #     paired <- TRUE
+                #
+                # } else if (direction == "independent") {
+                #
+                #     paired <- FALSE
+                #
+                # }
 
 
                 # distribution <-

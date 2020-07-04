@@ -1,9 +1,9 @@
 ---
 name:  jjwithinstats
-title: Violin Plots to Compare Between Groups
+title: Violin Plots to Compare Within Groups
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Numeric
-menuSubtitle: ggstatsplot::jjwithinstats
+menuSubtitle: Repeated Measurements
 version: '1.0.0'
 jas: '1.2'
 
@@ -45,18 +45,18 @@ options:
       permitted: [ factor ]
 
 
-    - name: direction
-      title: 'Measurement Type'
-      type: List
-      options:
-        - title: Repeated (within groups)
-          name: repeated
-        - title: Independent (between groups)
-          name: independent
-      default: independent
-      description:
-          ui: options for measurement type
-          R: select measurement type (repeated or independent)
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
 
 
     - name: excl
