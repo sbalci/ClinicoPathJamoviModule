@@ -102,6 +102,20 @@ jmvtools::install()
 You can use `devtools::install()` to use your codes as a usual R package, submit to github or CRAN. `devtools::check()` does not like some jamovi folders so be sure to add them under `.Rbuildignore`
 
 
+
+## Creating a Module
+
+https://dev.jamovi.org/tuts0102-creating-a-module.html
+
+
+```r
+jmvtools::create(path = "~/ClinicoPathDescriptives")
+```
+
+
+
+
+
 ## add analysis
 
 ```r

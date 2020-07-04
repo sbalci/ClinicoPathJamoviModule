@@ -8,6 +8,8 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - vars
 
     - name:  text
       title: ''

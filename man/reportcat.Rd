@@ -10,8 +10,7 @@ reportcat(data, vars)
 \item{data}{the data as a data frame}
 
 \item{vars}{string naming the variables from \code{data} that contains the
-values used for the report. Uses report::report() function. Refer to
-report.data.frame {report} documentation.}
+values used for the report.}
 }
 \value{
 A results object containing:

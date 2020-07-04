@@ -41,7 +41,6 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sty,
                 options=list(
                     "t1",
-                    "t2",
                     "t3"),
                 default="t1")
             private$..ac <- jmvcore::OptionBool$new(
@@ -81,7 +80,6 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot4 = function() private$.items[["plot4"]]),
     private = list(),
@@ -124,22 +122,8 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs="finalfit"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot2",
-                title="Hazards Regression Plot",
-                width=800,
-                height=600,
-                renderFun=".plot2",
-                requiresData=TRUE,
-                clearWith=list(
-                    "explanatory",
-                    "outcome",
-                    "overalltime"),
-                visible="(sty:t2)",
-                refs="ggstatsplot"))
-            self$add(jmvcore::Image$new(
-                options=options,
                 name="plot3",
-                title="Forest Plot",
+                title="Hazards Regression (Forest) Plot",
                 width=800,
                 height=600,
                 renderFun=".plot3",
@@ -206,7 +190,6 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 #' }

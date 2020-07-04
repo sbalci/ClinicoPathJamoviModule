@@ -1043,7 +1043,7 @@ system(command = gitCommand, intern = TRUE)
 
 readyfunctions <- c(
     "refs",
-    "data",
+    "^data$",
     "-package",
     # "^utils-pipe"
 
@@ -1120,13 +1120,128 @@ file.copy(from = files_data,
 
 
 
+```{r jsurvival update project for release}
+
+readyfunctions <- c(
+    "refs",
+    "^data$",
+    "-package",
+    # "^utils-pipe"
+
+# Survival
+    "^survival",
+    "^multisurvival",
+    "^oddsratio"
+    # "^competingsurvival",
+)
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
+file.copy(from = files_R,
+          to = "~/jsurvival/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/jsurvival/jamovi/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_data,
+          to = "~/jsurvival/data/",
+          overwrite = TRUE)
+
+```
+
+
+
+
+
+
+```{r ClinicoPath Descriptives update project for release}
+
+readyfunctions <- c(
+    "refs",
+    "^data$",
+    "-package",
+    # "^utils-pipe"
+
+# Descriptives
+    "^tableone",
+    "^summarydata",
+    "^reportcat",
+    "^alluvial",
+    # "^vartree"
+    "^crosstable"
+
+)
+
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
+file.copy(from = files_R,
+          to = "~/ClinicoPathDescriptives/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/ClinicoPathDescriptives/jamovi/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_data,
+          to = "~/ClinicoPathDescriptives/data/",
+          overwrite = TRUE)
+
+```
+
+
+
 
 
 ```{r jjstatsplot update project for release}
 
 readyfunctions <- c(
     "refs",
-    "^data",
+    "^data$",
     
 # JJ Functions
     "statsplot2",
@@ -1179,6 +1294,69 @@ file.copy(from = files_jamovi,
 file.copy(from = files_data,
           to = "~/jjstatsplot/data/",
           overwrite = TRUE)
+
+```
+
+
+
+
+
+
+```{r meddecide ClinicoPath project for release}
+
+readyfunctions <- c(
+    "refs",
+    "^data$",
+    "-package",
+    # "^utils-pipe"
+    
+# Agreement
+    "^agreement",
+    # "^icccoeff",
+
+# Decision
+    "^decision",
+    "^decisioncalculator"
+    # "^roc",
+    # "^tree"
+)
+
+
+readyfunctions <- paste0(readyfunctions, collapse = "|")
+
+files_R <-
+    list.files(path = here::here("R"),
+               pattern = readyfunctions,
+               full.names = TRUE)
+
+files_jamovi <-
+    list.files(
+        path = here::here("jamovi"),
+        pattern = readyfunctions,
+        full.names = TRUE
+    )
+
+files_data <-
+    list.files(
+        path = here::here("data"),
+        full.names = TRUE
+    )
+
+
+file.copy(from = files_R,
+          to = "~/meddecide/R/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_jamovi,
+          to = "~/meddecide/jamovi/",
+          overwrite = TRUE)
+
+
+file.copy(from = files_data,
+          to = "~/meddecide/data/",
+          overwrite = TRUE)
+
 
 ```
 

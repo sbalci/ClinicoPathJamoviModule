@@ -51,8 +51,8 @@ options:
       options:
         - title: finalfit
           name: t1
-        - title: ggstatsplot
-          name: t2
+        # - title: ggstatsplot
+        #   name: t2
         - title: survminer forestplot
           name: t3
       default: t1

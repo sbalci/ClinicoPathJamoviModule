@@ -147,12 +147,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         # Populate Table
 
-        manualtable <- self$results$manualtable
-        manualtable$setRow(rowNo = 1, values = list(tablename = "Decision Test Statistics",
-            TotalPop = TotalPop, DiseaseP = DiseaseP, DiseaseN = DiseaseN,
-            TestP = TestP, TestN = TestN, TestT = TestT, TestW = TestW, Sens = Sens,
-            Spec = Spec, AccurT = AccurT, PrevalenceD = PrevalenceD, PPV = PPV,
-            NPV = NPV, PostTestProbDisease = PostTestProbDisease, PostTestProbHealthy = PostTestProbHealthy))
+        # manualtable <- self$results$manualtable
+        # manualtable$setRow(rowNo = 1, values = list(tablename = "Decision Test Statistics",
+        #     TotalPop = TotalPop, DiseaseP = DiseaseP, DiseaseN = DiseaseN,
+        #     TestP = TestP, TestN = TestN, TestT = TestT, TestW = TestW, Sens = Sens,
+        #     Spec = Spec, AccurT = AccurT, PrevalenceD = PrevalenceD, PPV = PPV,
+        #     NPV = NPV, PostTestProbDisease = PostTestProbDisease, PostTestProbHealthy = PostTestProbHealthy))
 
 
 

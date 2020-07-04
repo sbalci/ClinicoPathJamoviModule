@@ -18,6 +18,7 @@ Description: Analysis for Clinicopathological Research
 License: GPL-3
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/,
     https://github.com/sbalci/ClinicoPath/,
+    https://github.com/sbalci/ClinicoPathDescriptives/,
     https://sbalci.github.io/ClinicoPathJamoviModule/
 BugReports: 
     https://github.com/sbalci/ClinicoPathJamoviModule/issues/
@@ -77,7 +78,8 @@ Remotes:
     ndphillips/FFTrees,
     spgarbet/tangram,
     cran/rmngb,
-    mayoverse/arsenal
+    mayoverse/arsenal,
+    mixOmicsTeam/mixOmics
 VignetteBuilder:
     knitr
 Encoding: UTF-8

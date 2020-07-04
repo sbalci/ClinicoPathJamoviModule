@@ -47,7 +47,9 @@ reportcatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -83,8 +85,7 @@ reportcatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'}
 #' @param data the data as a data frame
 #' @param vars string naming the variables from \code{data} that contains the
-#'   values used for the report. Uses report::report() function. Refer to
-#'   report.data.frame {report} documentation.
+#'   values used for the report.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

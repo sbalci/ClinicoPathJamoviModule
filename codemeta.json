@@ -10,7 +10,8 @@
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": [
     "https://sbalci.github.io/ClinicoPathJamoviModule/",
-    "https://github.com/sbalci/ClinicoPath/"
+    "https://github.com/sbalci/ClinicoPath/",
+    "https://github.com/sbalci/ClinicoPathDescriptives/"
   ],
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
@@ -657,6 +658,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "304.534KB",
+  "fileSize": "304.57KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

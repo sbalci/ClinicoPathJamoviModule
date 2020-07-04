@@ -36,24 +36,24 @@ items:
       visible: (sty:t1)
       refs: finalfit
 
-    - name: plot2
-      title: Hazards Regression Plot
-      type: Image
-      width:  800
-      height: 600
-      renderFun: .plot2
-      requiresData: true
-      clearWith:
-          - explanatory
-          - outcome
-          - overalltime
-      visible: (sty:t2)
-      refs: ggstatsplot
+    # - name: plot2
+    #   title: Hazards Regression Plot
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   clearWith:
+    #       - explanatory
+    #       - outcome
+    #       - overalltime
+    #   visible: (sty:t2)
+    #   refs: ggstatsplot
 
 
 
     - name: plot3
-      title: Forest Plot
+      title: Hazards Regression (Forest) Plot
       type: Image
       width:  800
       height: 600
