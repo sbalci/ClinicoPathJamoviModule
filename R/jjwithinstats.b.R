@@ -21,7 +21,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
                 <br><br>
-                This tool will help you generate Bar Charts.
+                This tool will help you generate Violin Plots for repeated measurements.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggwithinstats.html' target='_blank'>grouped_ggwithinstats</a>.
                 <br>
@@ -37,7 +37,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # TODO ----
                 todo <- glue::glue(
-                "<br>You have selected to use a Violin Plots to Compare Between Groups.<br><hr>")
+                "<br>You have selected to use a Violin Plots to Compare repeated measurements.<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -64,19 +64,19 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
 
             # distribution <-
@@ -193,19 +193,19 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
-            # direction, paired ----
-
-            direction <- self$options$direction
-
-            if (direction == "repeated") {
-
-                paired <- TRUE
-
-            } else if (direction == "independent") {
-
-                paired <- FALSE
-
-            }
+            # # direction, paired ----
+            #
+            # direction <- self$options$direction
+            #
+            # if (direction == "repeated") {
+            #
+            #     paired <- TRUE
+            #
+            # } else if (direction == "independent") {
+            #
+            #     paired <- FALSE
+            #
+            # }
 
             # Exclude NA ----
 
