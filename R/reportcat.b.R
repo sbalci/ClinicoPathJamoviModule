@@ -44,6 +44,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             if (length(self$options$vars) == 0) {
+                # ToDo Message ----
+
                 todo <- "
                 <br>Welcome to ClinicoPath
                           <br><br>
@@ -51,8 +53,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                               in your data.
                           <br><br>
                           Select the 'Variables' you want to include in the summary. Nominal, Ordinal and Categorical variables are allowed.
-                          <br><br>
-                          This tool uses report package. Please cite the packages and jamovi using references below.
+                          <hr><br>
                           "
 
                 html <- self$results$todo

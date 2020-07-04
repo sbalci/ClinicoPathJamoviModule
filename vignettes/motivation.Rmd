@@ -21,7 +21,7 @@ library(ClinicoPath)
 
 
 
- I have started collecting R codes for my research. Then I started converting the results into natural language sentences.
+I have started collecting R codes for my research. Then I started converting the results into natural language sentences.
 My colleagues are used to spss like point to click software. jamovi is a very good, R based open source project, but it still requires statistical literacy. Here I tried to make a stepwise, easy research analysis workflow.
 
 

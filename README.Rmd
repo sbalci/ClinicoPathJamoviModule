@@ -88,12 +88,36 @@ https://github.com/sbalci/ClinicoPath
 https://github.com/sbalci/ClinicoPath/releases
 
 
+- ClinicoPathDescriptives
+
+
+https://github.com/sbalci/ClinicoPathDescriptives/
+
+https://github.com/sbalci/ClinicoPathDescriptives/releases/
+
+
 - JJStatsPlot: 
 
 
 https://github.com/sbalci/jjstatsplot
 
 https://github.com/sbalci/jjstatsplot/releases/
+
+
+- jsurvival:
+
+https://github.com/sbalci/jsurvival
+
+https://github.com/sbalci/jsurvival/releases/
+
+
+- meddecide
+
+https://github.com/sbalci/meddecide/
+
+
+https://github.com/sbalci/meddecide/releases/
+
 
 
 *c: For stable version*  

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0013</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0019</span>
       </span>
     </div>
 
@@ -170,10 +170,16 @@
 <p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 </div>
+<div id="creating-a-module" class="section level2">
+<h2 class="hasAnchor">
+<a href="#creating-a-module" class="anchor"></a>Creating a Module</h2>
+<p><a href="https://dev.jamovi.org/tuts0102-creating-a-module.html" class="uri">https://dev.jamovi.org/tuts0102-creating-a-module.html</a></p>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="kw">path</span> <span class="kw">=</span> <span class="st">"~/ClinicoPathDescriptives"</span>)</pre></body></html></div>
+</div>
 <div id="add-analysis" class="section level2">
 <h2 class="hasAnchor">
 <a href="#add-analysis" class="anchor"></a>add analysis</h2>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="st">'function'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="st">'function'</span>)</pre></body></html></div>
 </div>
 <div id="development-files" class="section level2">
 <h2 class="hasAnchor">
@@ -205,10 +211,26 @@
 <h4 class="hasAnchor">
 <a href="#function-b-r" class="anchor"></a><code>function.b.R</code>
 </h4>
+<div id="write-formula" class="section level5">
+<h5 class="hasAnchor">
+<a href="#write-formula" class="anchor"></a>Write Formula</h5>
+<p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="kw">formula</span> <span class="kw">=</span> <span class="no">len</span> ~ <span class="no">supp</span> * <span class="no">dose</span>, <span class="no">ToothGrowth</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="no">len</span>, <span class="fu">vars</span>(<span class="no">supp</span>, <span class="no">dose</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">...</span>, <span class="kw">emMeans</span> <span class="kw">=</span> ~ <span class="no">supp</span> + <span class="no">dose</span>:<span class="no">supp</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>))</pre></body></html></div>
+<blockquote>
+<p>In this case, jmv will look for variables in ToothGrowth called ‘dep’ or ‘factors’. This is tidy evaluation. To instruct jmv to use the contents of it’s arguments, rather than the symbol name, prefix them with the !! signifier. For example:</p>
+</blockquote>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">dep</span> <span class="kw">&lt;-</span> <span class="st">'len'</span>
+<span class="no">factors</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>)
+
+<span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, !!<span class="no">dep</span>, !!<span class="no">factors</span>)</pre></body></html></div>
+</div>
 <div id="warning-error-messages" class="section level5">
 <h5 class="hasAnchor">
 <a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h5>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw">if</span> (<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">self</span>$<span class="no">data</span>) <span class="kw">==</span> <span class="fl">0</span>) <span class="fu"><a href="https://rdrr.io/r/base/stop.html">stop</a></span>(<span class="st">"Data contains no (complete) rows"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="kw">if</span> (<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">self</span>$<span class="no">data</span>) <span class="kw">==</span> <span class="fl">0</span>) <span class="fu"><a href="https://rdrr.io/r/base/stop.html">stop</a></span>(<span class="st">"Data contains no (complete) rows"</span>)</pre></body></html></div>
 </div>
 <div id="prepare-data-for-analysis" class="section level5">
 <h5 class="hasAnchor">
@@ -249,10 +271,10 @@
 <div id="p-value" class="section level5">
 <h5 class="hasAnchor">
 <a href="#p-value" class="anchor"></a>p-value</h5>
-<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1"></a><span class="at">     </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> p</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a><span class="at">       </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"p"</span></span>
-<span id="cb8-3"><a href="#cb8-3"></a><span class="at">       </span><span class="fu">type</span><span class="kw">:</span><span class="at"> number</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="at">       </span><span class="fu">format</span><span class="kw">:</span><span class="at"> zto,pvalue</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1"></a><span class="at">     </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> p</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="at">       </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"p"</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="at">       </span><span class="fu">type</span><span class="kw">:</span><span class="at"> number</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="at">       </span><span class="fu">format</span><span class="kw">:</span><span class="at"> zto,pvalue</span></span></code></pre></div>
 </div>
 </div>
 <div id="function-u-yaml" class="section level4">
@@ -324,7 +346,7 @@
 <h3 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h3>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 </div>
 </div>
 <div id="other-tips" class="section level2">
@@ -336,7 +358,7 @@
 <p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <pre><code>select repo:jamovi/jmv filename:.b.R language:R</code></pre>
-<div class="sourceCode" id="cb12"><html><body><pre class="r">generate advanced search for all jamovi library
+<div class="sourceCode" id="cb18"><html><body><pre class="r">generate advanced search for all jamovi library
 jamovi_library_names &lt;- readLines("https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml")
 
 jamovi_library_names &lt;- stringr::str_extract(
@@ -403,7 +425,7 @@ cat(github_search)</pre></body></html></div>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
 <p>Use: <strong>R 3.6.3</strong> <a href="https://cran.r-project.org/bin/macosx/R-3.6.3.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-3.6.3.pkg</a></p>
 <p>Use packages from mran:</p>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
+<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="kw">repos</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>,
                   <span class="st">"https://cran.microsoft.com/snapshot/2020-05-01/"</span>
                   )
 )</pre></body></html></div>
@@ -456,7 +478,7 @@ datasets:
 <div id="error-messages" class="section level2">
 <h2 class="hasAnchor">
 <a href="#error-messages" class="anchor"></a>Error messages</h2>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="kw">outcome</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">NA</span>,<span class="fl">1</span>))
+<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="kw">outcome</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">NA</span>,<span class="fl">1</span>))
 <span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span>(<span class="no">data</span>)
 <span class="kw">if</span> ( ! <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span>(<span class="no">data</span>$<span class="no">outcome</span>) <span class="kw">||</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span>(<span class="no">data</span>$<span class="no">outcome</span> <span class="kw">!=</span> <span class="fl">0</span> <span class="kw">&amp;</span> <span class="no">data</span>$<span class="no">outcome</span> <span class="kw">!=</span> <span class="fl">1</span>))
   <span class="fu"><a href="https://rdrr.io/r/base/stop.html">stop</a></span>(<span class="st">'Outcome variable must only contains 1s and 0s'</span>)</pre></body></html></div>
@@ -511,7 +533,7 @@ Oh, I see. Thank you :slightly_smiling_face:</code></pre>
 <div id="develop" class="section level1">
 <h1 class="hasAnchor">
 <a href="#develop" class="anchor"></a>Develop</h1>
-<div class="sourceCode" id="cb20"><html><body><pre class="r">library, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb26"><html><body><pre class="r">library, eval=FALSE, include=FALSE
 # install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 
 # jmvtools::check("C://Program Files//jamovi//bin")
@@ -527,7 +549,7 @@ Oh, I see. Thank you :slightly_smiling_face:</code></pre>
 Sys.setenv(TZ="Europe/Istanbul")
 
 library("jmvtools")</pre></body></html></div>
-<div class="sourceCode" id="cb21"><html><body><pre class="r">
+<div class="sourceCode" id="cb27"><html><body><pre class="r">
 check, eval=FALSE, include=FALSE
 
 jmvtools::check()
@@ -540,20 +562,20 @@ jmvtools::check()
 
 
 devtools::check()</pre></body></html></div>
-<div class="sourceCode" id="cb22"><html><body><pre class="r">pkgdown build, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb28"><html><body><pre class="r">pkgdown build, eval=FALSE, include=FALSE
 rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
 
 devtools::document()
 
 pkgdown::build_site()</pre></body></html></div>
-<div class="sourceCode" id="cb23"><html><body><pre class="r">git force push, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb29"><html><body><pre class="r">git force push, eval=FALSE, include=FALSE
 # gitUpdateCommitPush
 CommitMessage &lt;- paste("updated on ", Sys.time(), sep = "")
 wd &lt;- getwd()
 gitCommand &lt;- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
 # gitCommand &lt;- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "")
 system(command = gitCommand, intern = TRUE)</pre></body></html></div>
-<div class="sourceCode" id="cb24"><html><body><pre class="r">add analysis, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb30"><html><body><pre class="r">add analysis, eval=FALSE, include=FALSE
 
 # jmvtools::install()
 #
@@ -593,12 +615,12 @@ system(command = gitCommand, intern = TRUE)</pre></body></html></div>
 # jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
 
 # jmvtools::addAnalysis(name='tree', title='Decision Tree')</pre></body></html></div>
-<div class="sourceCode" id="cb25"><html><body><pre class="r">devtools install, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb31"><html><body><pre class="r">devtools install, eval=FALSE, include=FALSE
 devtools::install()</pre></body></html></div>
-<div class="sourceCode" id="cb26"><html><body><pre class="r">jmvtools install, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb32"><html><body><pre class="r">jmvtools install, eval=FALSE, include=FALSE
 # jmvtools::check()
 jmvtools::install()</pre></body></html></div>
-<div class="sourceCode" id="cb27"><html><body><pre class="r">construct, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb33"><html><body><pre class="r">construct, eval=FALSE, include=FALSE
 formula &lt;- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
 
 jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
@@ -633,9 +655,9 @@ jmvcore::decomposeTerm(term = composeTerm)
 <div id="example" class="section level1">
 <h1 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h1>
-<div class="sourceCode" id="cb28"><html><body><pre class="r">read data, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb34"><html><body><pre class="r">read data, eval=FALSE, include=FALSE
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))</pre></body></html></div>
-<div class="sourceCode" id="cb29"><html><body><pre class="r">writesummary, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb35"><html><body><pre class="r">writesummary, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -652,7 +674,7 @@ ClinicoPath::writesummary(
     data = deneme,
     vars = Age)
 </pre></body></html></div>
-<div class="sourceCode" id="cb30"><html><body><pre class="r">finalfit, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb36"><html><body><pre class="r">finalfit, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
 library(survival)
@@ -662,7 +684,7 @@ ClinicoPath::finalfit(data = deneme,
                       explanatory = Sex,
                       outcome = Outcome,
                       overalltime = OverallTime)</pre></body></html></div>
-<div class="sourceCode" id="cb31"><html><body><pre class="r">decision, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb37"><html><body><pre class="r">decision, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -679,19 +701,19 @@ ClinicoPath::decision(
     goldPositive = "Present",
     newtest = PNI,
     testPositive = "Present")</pre></body></html></div>
-<div class="sourceCode" id="cb32"><html><body><pre class="r">eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb38"><html><body><pre class="r">eval=FALSE, include=FALSE
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ggstatsplot::ggbetweenstats(data = deneme,
                             x = LVI,
                             y = Age)</pre></body></html></div>
-<div class="sourceCode" id="cb33"><html><body><pre class="r">statsplot, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb39"><html><body><pre class="r">statsplot, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::statsplot(
     data = deneme,
     dep = Age,
     group = Smoker)</pre></body></html></div>
-<div class="sourceCode" id="cb34"><html><body><pre class="r">decision 2, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb40"><html><body><pre class="r">decision 2, eval=FALSE, include=FALSE
 mytable &lt;- table(deneme$Outcome, deneme$Smoker)
 
 caret::confusionMatrix(mytable)
@@ -707,7 +729,7 @@ d &lt;- "0"
 mytable[d, "FALSE"]
 
 mytable[[0]]</pre></body></html></div>
-<div class="sourceCode" id="cb35"><html><body><pre class="r">construct formula, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb41"><html><body><pre class="r">construct formula, eval=FALSE, include=FALSE
 formula &lt;- jmvcore::constructFormula(terms = c("A", "B", "C"))
 
 jmvcore::constructFormula(terms = list("A", "B", "C"))
@@ -734,7 +756,7 @@ myformula &lt;- glue::glue( 'x = ' , my_group, ', y = ' , my_dep)
 
 myformula &lt;- jmvcore::composeTerm(myformula)
 </pre></body></html></div>
-<div class="sourceCode" id="cb36"><html><body><pre class="r">eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb42"><html><body><pre class="r">eval=FALSE, include=FALSE
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 library(survival)
@@ -745,7 +767,7 @@ km_fit_median_df &lt;- summary(km_fit)
 km_fit_median_df &lt;- as.data.frame(km_fit_median_df$table) %&gt;%
                 janitor::clean_names(dat = ., case = "snake") %&gt;%
                 tibble::rownames_to_column(.data = ., var = "LVI")</pre></body></html></div>
-<div class="sourceCode" id="cb37"><html><body><pre class="r">construct formula 2, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb43"><html><body><pre class="r">construct formula 2, eval=FALSE, include=FALSE
 library(dplyr)
 library(survival)
 
@@ -783,7 +805,7 @@ deneme %&gt;%
   finalfit::finalfit(formula, formula2) -&gt; tUni
 
 tUni</pre></body></html></div>
-<div class="sourceCode" id="cb38"><html><body><pre class="r">eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb44"><html><body><pre class="r">eval=FALSE, include=FALSE
 library(dplyr)
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
@@ -851,7 +873,7 @@ mygroup2 &lt;- quote(mygroup)
 results &lt;- deneme %&gt;%
                 ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2)
 results</pre></body></html></div>
-<div class="sourceCode" id="cb39"><html><body><pre class="r">construct formula 3, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb45"><html><body><pre class="r">construct formula 3, eval=FALSE, include=FALSE
 formula &lt;- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
 
 vars &lt;- jmvcore::decomposeFormula(formula = formula)
@@ -869,7 +891,7 @@ myformula &lt;- paste("Surv(", vars[1], ", ", vars[2], ")")
 
 deneme %&gt;%
 finalfit::finalfit(myformula, explanatory) -&gt; tUni</pre></body></html></div>
-<div class="sourceCode" id="cb40"><html><body><pre class="r">table tangram, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb46"><html><body><pre class="r">table tangram, eval=FALSE, include=FALSE
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 
 
@@ -907,7 +929,7 @@ table
 <div id="arsenal" class="section level2">
 <h2 class="hasAnchor">
 <a href="#arsenal" class="anchor"></a>arsenal</h2>
-<div class="sourceCode" id="cb41"><html><body><pre class="r">arsenal, results='asis', eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb47"><html><body><pre class="r">arsenal, results='asis', eval=FALSE, include=FALSE
 
 tab1 &lt;- arsenal::tableby(~ Age + Sex, data = deneme)
 
@@ -932,7 +954,7 @@ tab1$tables # this is where results lie
 <div id="define-survival-time" class="section level2">
 <h2 class="hasAnchor">
 <a href="#define-survival-time" class="anchor"></a>define survival time</h2>
-<div class="sourceCode" id="cb42"><html><body><pre class="r">define survival time, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb48"><html><body><pre class="r">define survival time, eval=FALSE, include=FALSE
 mydata$int &lt;- lubridate::interval(
   lubridate::ymd(mydata$SurgeryDate),
   lubridate::ymd(mydata$LastFollowUpDate)
@@ -943,7 +965,7 @@ mydata$OverallTime &lt;- round(mydata$OverallTime, digits = 1)</pre></body></htm
 <div id="multivariate-analysis-survival" class="section level2">
 <h2 class="hasAnchor">
 <a href="#multivariate-analysis-survival" class="anchor"></a>Multivariate Analysis Survival</h2>
-<div class="sourceCode" id="cb43"><html><body><pre class="r">Multivariate Analysis, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb49"><html><body><pre class="r">Multivariate Analysis, eval=FALSE, include=FALSE
 library(finalfit)
 library(survival)
 explanatoryMultivariate &lt;- explanatoryKM
@@ -954,7 +976,7 @@ mydata %&gt;%
 
 knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))</pre></body></html></div>
 <hr>
-<div class="sourceCode" id="cb44"><html><body><pre class="r">eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb50"><html><body><pre class="r">eval=FALSE, include=FALSE
 # Find arguments in yaml
 
 list_of_yaml &lt;- c(
@@ -990,7 +1012,7 @@ arglist &lt;- gsub(pattern = ":", # remove some characters
 arglist &lt;- trimws(arglist) # remove whitespace
 
 cat(arglist, sep = "\n")</pre></body></html></div>
-<div class="sourceCode" id="cb45"><html><body><pre class="r">#
+<div class="sourceCode" id="cb51"><html><body><pre class="r">#
 #                 # tUni_df_descr &lt;- paste0("When ",
 #                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
 #                 #                         " is ",
@@ -1006,7 +1028,7 @@ cat(arglist, sep = "\n")</pre></body></html></div>
 #                 # )
 #
 #                 # results5 &lt;- tUni_df_descr</pre></body></html></div>
-<div class="sourceCode" id="cb46"><html><body><pre class="r">eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb52"><html><body><pre class="r">eval=FALSE, include=FALSE
 boot::melanoma
 rio::export(x = boot::melanoma, file = "data/melanoma.csv")
 
@@ -1026,7 +1048,7 @@ data("BreastCancer")
 BreastCancer
 
 rio::export(x = BreastCancer, file = "data/BreastCancer.csv")</pre></body></html></div>
-<div class="sourceCode" id="cb47"><html><body><pre class="r">pairwise, eval=FALSE, include=FALSE
+<div class="sourceCode" id="cb53"><html><body><pre class="r">pairwise, eval=FALSE, include=FALSE
 deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
 # names(deneme)
 
@@ -1060,12 +1082,12 @@ mypairwisedescription)</pre></body></html></div>
 <div id="diagrams" class="section level2">
 <h2 class="hasAnchor">
 <a href="#diagrams" class="anchor"></a>Diagrams</h2>
-<div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="no">echo</span><span class="kw">=</span><span class="fl">FALSE</span>
+<div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="no">echo</span><span class="kw">=</span><span class="fl">FALSE</span>
 <span class="kw pkg">DiagrammeR</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/DiagrammeR/man/grViz.html">grViz</a></span>(
   <span class="kw">diagram</span> <span class="kw">=</span> <span class="kw pkg">here</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"vignettes/graph.gv"</span>),
   <span class="kw">height</span> <span class="kw">=</span> <span class="fl">200</span>
 )</pre></body></html></div>
-<div class="sourceCode" id="cb49"><html><body><pre class="r">eval=FALSE, include=FALSE, echo=FALSE
+<div class="sourceCode" id="cb55"><html><body><pre class="r">eval=FALSE, include=FALSE, echo=FALSE
 DiagrammeR::mermaid(
   diagram = here::here("vignettes/graph.mmd"),
   height = 200

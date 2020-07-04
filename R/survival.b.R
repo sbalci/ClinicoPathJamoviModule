@@ -5,6 +5,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import magrittr
 #'
 
 survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(

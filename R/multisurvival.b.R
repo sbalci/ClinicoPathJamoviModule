@@ -192,66 +192,64 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         },
 
-            .plot2 = function(image, ...) {  # <-- the plot function ----
+            # .plot2 = function(image, ...) {  # <-- the plot function ----
+            #
+            # # plotData <- image$state
+            #
+            #     if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+            #         return()
+            #
+            # if (nrow(self$data) == 0)
+            #     stop('Data contains no (complete) rows')
+            #
+            # # Check if outcome variable is suitable or stop ----
+            # myoutcome2 <- self$options$outcome
+            # myoutcome2 <- self$data[[myoutcome2]]
+            # myoutcome2 <- na.omit(myoutcome2)
+            #
+            # if (class(myoutcome2) == "factor")
+            #     stop("Please use a continuous variable for outcome.")
+            #
+            # if (any(myoutcome2 != 0 & myoutcome2 != 1))
+            #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+            #
+            # # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#cox-proportional-hazards-regression-model-coxph
+            # # fit a stratified model
+            #
+            # mydata <- self$data
+            #
+            # formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+            #
+            # formulaL <- jmvcore::toNumeric(formulaL)
+            #
+            # formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+            #
+            # formulaR <- jmvcore::toNumeric(formulaR)
+            #
+            # formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+            #
+            # formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+            #
+            # formula3 <- as.formula(formula3)
+            #
+            # mod <-
+            #     survival::coxph(
+            #         formula = formula3,
+            #         data = mydata
+            #     )
+            #
+            # # plot
+            # plot2 <- ggstatsplot::ggcoefstats(
+            #     x = mod,
+            #     exponentiate = TRUE,
+            #     title = "Cox proportional hazards regression model"
+            # )
+            #
+            # print(plot2)
+            # TRUE
+            #
+            # },
 
-            # plotData <- image$state
-
-                if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
-                    return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-            # Check if outcome variable is suitable or stop ----
-            myoutcome2 <- self$options$outcome
-            myoutcome2 <- self$data[[myoutcome2]]
-            myoutcome2 <- na.omit(myoutcome2)
-
-            if (class(myoutcome2) == "factor")
-                stop("Please use a continuous variable for outcome.")
-
-            if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-
-            # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#cox-proportional-hazards-regression-model-coxph
-            # fit a stratified model
-
-            mydata <- self$data
-
-            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
-
-            formulaL <- jmvcore::toNumeric(formulaL)
-
-            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-
-            formulaR <- jmvcore::toNumeric(formulaR)
-
-            formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
-
-            formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
-
-            formula3 <- as.formula(formula3)
-
-            mod <-
-                survival::coxph(
-                    formula = formula3,
-                    data = mydata
-                )
-
-            # plot
-            plot2 <- ggstatsplot::ggcoefstats(
-                x = mod,
-                exponentiate = TRUE,
-                title = "Cox proportional hazards regression model"
-            )
-
-            print(plot2)
-            TRUE
-
-            }
-
-
-,
         .plot3 = function(image, ...) {  # <-- the plot function ----
 
             # plotData <- image$state

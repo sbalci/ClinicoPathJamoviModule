@@ -19,9 +19,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ToDo Message ----
                 todo <- "
                 <br>Welcome to ClinicoPath
-                          <br><br>
-                          This tool will help you form an Alluvial Plots.
-                          "
+                <br><br>
+                This tool will help you form Alluvial Plots.
+                <hr><br>
+                "
+
                 html <- self$results$todo
                 html$setContent(todo)
 

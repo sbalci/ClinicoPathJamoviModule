@@ -27,10 +27,13 @@ options:
       description:
           R: >
             string naming the variables from `data` that contains the
-            values used for the report. Uses report::report() function.
-            Refer to report.data.frame {report}	documentation.
+            values used for the report.
 
-#
+
+
+# Uses report::report() function.
+# Refer to report.data.frame {report}	documentation.
+
     # - name: med
     #   title: Median
     #   type: Bool
