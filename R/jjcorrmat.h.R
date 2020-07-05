@@ -8,7 +8,6 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             grvar = NULL,
-            direction = "independent",
             excl = TRUE, ...) {
 
             super$initialize(
@@ -32,13 +31,6 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..direction <- jmvcore::OptionList$new(
-                "direction",
-                direction,
-                options=list(
-                    "repeated",
-                    "independent"),
-                default="independent")
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -46,18 +38,15 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..direction)
             self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
-        direction = function() private$..direction$value,
         excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
-        ..direction = NA,
         ..excl = NA)
 )
 
@@ -142,7 +131,6 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param grvar .
-#' @param direction select measurement type (repeated or independent)
 #' @param excl .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -156,7 +144,6 @@ jjcorrmat <- function(
     data,
     dep,
     grvar,
-    direction = "independent",
     excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -175,7 +162,6 @@ jjcorrmat <- function(
     options <- jjcorrmatOptions$new(
         dep = dep,
         grvar = grvar,
-        direction = direction,
         excl = excl)
 
     analysis <- jjcorrmatClass$new(

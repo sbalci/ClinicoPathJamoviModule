@@ -9,7 +9,6 @@ jjscatterstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            direction = "independent",
             excl = TRUE, ...) {
 
             super$initialize(
@@ -40,13 +39,6 @@ jjscatterstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..direction <- jmvcore::OptionList$new(
-                "direction",
-                direction,
-                options=list(
-                    "repeated",
-                    "independent"),
-                default="independent")
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -55,20 +47,17 @@ jjscatterstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..direction)
             self$.addOption(private$..excl)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        direction = function() private$..direction$value,
         excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..direction = NA,
         ..excl = NA)
 )
 
@@ -157,7 +146,6 @@ jjscatterstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param direction select measurement type (repeated or independent)
 #' @param excl .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -172,7 +160,6 @@ jjscatterstats <- function(
     dep,
     group,
     grvar,
-    direction = "independent",
     excl = TRUE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -194,7 +181,6 @@ jjscatterstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        direction = direction,
         excl = excl)
 
     analysis <- jjscatterstatsClass$new(

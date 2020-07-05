@@ -24,14 +24,7 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 A results object containing:
 \tabular{llllll}{
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$manualtable} \tab \tab \tab \tab \tab a table \cr
 }
-
-Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-
-\code{results$manualtable$asDF}
-
-\code{as.data.frame(results$manualtable)}
 }
 \description{
 Function for Medical Decision Calculator.

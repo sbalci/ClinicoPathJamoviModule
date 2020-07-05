@@ -72,8 +72,7 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text2 = function() private$.items[["text2"]],
-        manualtable = function() private$.items[["manualtable"]]),
+        text2 = function() private$.items[["text2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -86,88 +85,6 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="text2",
                 title="Decision Calculator",
-                clearWith=list(
-                    "pp",
-                    "pprob")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="manualtable",
-                title="Decision Test Statistics",
-                swapRowsColumns=TRUE,
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="tablename", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="TotalPop", 
-                        `title`="Total Number of Subjects", 
-                        `type`="number"),
-                    list(
-                        `name`="DiseaseP", 
-                        `title`="Total Number of Subjects with Disease", 
-                        `type`="number"),
-                    list(
-                        `name`="DiseaseN", 
-                        `title`="Total Number of Healthy Subjects", 
-                        `type`="number"),
-                    list(
-                        `name`="TestP", 
-                        `title`="Total Number of Positive Tests", 
-                        `type`="number"),
-                    list(
-                        `name`="TestN", 
-                        `title`="Total Number of Negative Tests", 
-                        `type`="number"),
-                    list(
-                        `name`="TestT", 
-                        `title`="Total Number of True Test Results", 
-                        `type`="number"),
-                    list(
-                        `name`="TestW", 
-                        `title`="Total Number of Wrong Test Results", 
-                        `type`="number"),
-                    list(
-                        `name`="Sens", 
-                        `title`="Sensitivity (True Positives among Diseased)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="Spec", 
-                        `title`="Specificity (True Negatives among Healthy)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="AccurT", 
-                        `title`="Accuracy (True Test Result Ratio)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PrevalenceD", 
-                        `title`="Disease Prevalence in this experimental population", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PPV", 
-                        `title`="Positive Predictive Value (Probability of having disease after a positive test using this experimental population)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="NPV", 
-                        `title`="Negative Predictive Value (Probability of being healthy after a negative test using this experimental population)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbDisease", 
-                        `title`="Post-test Probability of Having Disease  (Probability of having disease after a positive test using known Population Prevalence)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbHealthy", 
-                        `title`="Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)", 
-                        `type`="number", 
-                        `format`="pc")),
                 clearWith=list(
                     "pp",
                     "pprob")))}))
@@ -210,14 +127,7 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$manualtable} \tab \tab \tab \tab \tab a table \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$manualtable$asDF}
-#'
-#' \code{as.data.frame(results$manualtable)}
 #'
 #' @export
 decisioncalculator <- function(

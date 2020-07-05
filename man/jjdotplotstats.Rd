@@ -4,7 +4,7 @@
 \alias{jjdotplotstats}
 \title{Dot Chart}
 \usage{
-jjdotplotstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjdotplotstats(data, dep, group, grvar, excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,8 +14,6 @@ jjdotplotstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 \item{group}{.}
 
 \item{grvar}{.}
-
-\item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
 }

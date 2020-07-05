@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0019
+version: 0.0.2.0020
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-07-04'
+date: '2020-07-05'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -37,8 +37,8 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Comparisons
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
   - title: Graphs and Plots
@@ -75,7 +75,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -90,14 +90,14 @@ analyses:
   - title: Correlation
     name: correlation
     ns: ClinicoPath
-    menuGroup: Drafts
+    menuGroup: ClinicoPath
     menuSubgroup: Correlation
     menuTitle: Correlation
     description: Function for Correlation.
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision
     description: >
@@ -107,7 +107,7 @@ analyses:
   - title: Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Decision Calculator
     description: Function for Medical Decision Calculator.
@@ -134,7 +134,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: Drafts
+    menuGroup: ClinicoPath
     menuSubgroup: Descriptives
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
@@ -155,7 +155,7 @@ analyses:
   - title: Tables via gtsummary
     name: gtsummary
     ns: ClinicoPath
-    menuGroup: Drafts
+    menuGroup: ClinicoPath
     menuTitle: Tables via gtsummary
     menuSubgroup: Comparisons
   - title: Alluvial Diagrams
@@ -241,20 +241,20 @@ analyses:
     description: |
       'Wrapper Function for ggstatsplot::ggscatterstats and
       ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
-  - title: Violin Plots to Compare Between Groups
+  - title: Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Numeric
-    menuTitle: Violin Plots to Compare Between Groups
-    menuSubtitle: 'ggstatsplot::jjwithinstats'
+    menuTitle: Violin Plots to Compare Within Groups
+    menuSubtitle: Repeated Measurements
     description: |
       'Wrapper Function for ggstatsplot::ggbarstats and
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
   - title: Bar Charts
     name: jjbarstats2
     ns: ClinicoPath
-    menuGroup: Drafts
+    menuGroup: ClinicoPath
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     menuSubtitle: 'Bar Charts, Grouped Bar Charts'
@@ -264,20 +264,42 @@ analyses:
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
-    menuGroup: Drafts
+    menuGroup: ClinicoPath
     menuTitle: Find Retracted Papers from DOI
     menuSubgroup: Bibliometrics
 datasets:
   - name: histopathology including analysis
-    path: histopathologyanalysis.omv
-    description: >-
-      Fake histopathology research data for ClinicoPath module, includes
-      analysis
+    path: histopathologyDescriptives.omv
+    description: Example analysis for descriptive functions.
     tags:
       - Table One
       - Data Summary
+      - Cross Tables
+      - Alluvial Diagrams
+  - name: histopathology including analysis
+    path: histopathologySurvival.omv
+    description: Example survival analysis for histopathology data
+    tags:
       - Survival
       - Natural Language
+  - name: histopathology including analysis
+    path: histopathologyMedicalDecision.omv
+    description: Example analysis for Medical Decision Tests.
+    tags:
+      - Kappa
+      - Sensitivity
+  - name: histopathology including analysis
+    path: histopathologyGraphsPlots.omv
+    description: Examples for Graphs and Plots
+    tags:
+      - GGStatsPlot
+      - Histogram
+      - Violin Plots
+      - Bar Charts
+      - Pie Charts
+      - Dot Charts
+      - Scatter Plots
+      - Correlation Matrix
   - name: histopathology data only
     path: histopathology.omv
     description: Fake histopathology research data for ClinicoPath module
