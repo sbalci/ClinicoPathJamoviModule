@@ -4,7 +4,7 @@
 \alias{jjbetweenstats}
 \title{Violin Plots to Compare Between Groups}
 \usage{
-jjbetweenstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjbetweenstats(data, dep, group, grvar, excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,8 +14,6 @@ jjbetweenstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 \item{group}{.}
 
 \item{grvar}{.}
-
-\item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
 }

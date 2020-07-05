@@ -2,9 +2,9 @@
 % Please edit documentation in R/jjwithinstats.h.R
 \name{jjwithinstats}
 \alias{jjwithinstats}
-\title{Violin Plots to Compare Between Groups}
+\title{Violin Plots to Compare Within Groups}
 \usage{
-jjwithinstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjwithinstats(data, dep, group, grvar, excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,8 +14,6 @@ jjwithinstats(data, dep, group, grvar, direction = "independent", excl = TRUE)
 \item{group}{.}
 
 \item{grvar}{.}
-
-\item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
 }
@@ -28,7 +26,7 @@ A results object containing:
 }
 }
 \description{
-Violin Plots to Compare Between Groups
+Violin Plots to Compare Within Groups
 }
 \examples{
 \dontrun{

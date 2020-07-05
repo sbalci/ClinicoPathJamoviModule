@@ -4,7 +4,7 @@
 \alias{jjcorrmat}
 \title{Correlation Matrix}
 \usage{
-jjcorrmat(data, dep, grvar, direction = "independent", excl = TRUE)
+jjcorrmat(data, dep, grvar, excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,8 +12,6 @@ jjcorrmat(data, dep, grvar, direction = "independent", excl = TRUE)
 \item{dep}{.}
 
 \item{grvar}{.}
-
-\item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
 }
