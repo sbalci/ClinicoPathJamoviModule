@@ -13,7 +13,7 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dooc = NULL,
             awd = NULL,
             awod = NULL,
-            sty = FALSE, ...) {
+            analysistype = "overall", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -64,10 +64,14 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 awod,
                 variable="(outcome)",
                 allowNone=TRUE)
-            private$..sty <- jmvcore::OptionBool$new(
-                "sty",
-                sty,
-                default=FALSE)
+            private$..analysistype <- jmvcore::OptionList$new(
+                "analysistype",
+                analysistype,
+                options=list(
+                    "overall",
+                    "cause",
+                    "compete"),
+                default="overall")
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
@@ -76,7 +80,7 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dooc)
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
-            self$.addOption(private$..sty)
+            self$.addOption(private$..analysistype)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
@@ -86,7 +90,7 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         dooc = function() private$..dooc$value,
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
-        sty = function() private$..sty$value),
+        analysistype = function() private$..analysistype$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
@@ -95,7 +99,7 @@ competingsurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..dooc = NA,
         ..awd = NA,
         ..awod = NA,
-        ..sty = NA)
+        ..analysistype = NA)
 )
 
 competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -109,7 +113,7 @@ competingsurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Competing Survival")
+                title="Overall, Cause Specific, and Competing Survival")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -143,9 +147,9 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Competing Survival
+#' Overall, Cause Specific, and Competing Survival
 #'
-#' Function for Competing Survival.
+#' Overall, Cause Specific, and Competing Survival.
 #'
 #' @examples
 #' \dontrun{
@@ -159,7 +163,7 @@ competingsurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dooc .
 #' @param awd .
 #' @param awod .
-#' @param sty .
+#' @param analysistype .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -176,7 +180,7 @@ competingsurvival <- function(
     dooc,
     awd,
     awod,
-    sty = FALSE) {
+    analysistype = "overall") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('competingsurvival requires jmvcore to be installed (restart may be required)')
@@ -202,7 +206,7 @@ competingsurvival <- function(
         dooc = dooc,
         awd = awd,
         awod = awod,
-        sty = sty)
+        analysistype = analysistype)
 
     analysis <- competingsurvivalClass$new(
         options = options,

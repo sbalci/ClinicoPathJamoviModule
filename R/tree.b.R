@@ -52,6 +52,16 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::naOmit(mydata)
 
 
+            # Select Graph Style ----
+
+            sty <- self$options$sty
+
+
+            # explore ----
+            if (sty == "explore") {
+
+
+
             # sumdata <- list(typeof(mydata),
             #              class(mydata),
             #              head(mydata),
@@ -63,14 +73,11 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Select Graph Style ----
-
-            sty <- self$options$sty
 
 
             # rpart ----
 
-            if (sty == "rpart") {
+            } else if (sty == "rpart") {
 
             # Prepare formula ----
 
@@ -126,6 +133,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot1 = function(image, ...) {  # <-- the plot1 function ----
 
 
+            # explore ----
 
             # Error Message ----
 
@@ -147,6 +155,14 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
+
+            for (fac in facsName)
+                mydata[[fac]] <- as.factor(mydata[[fac]])
+
+            for (cov in varsName)
+                mydata[[cov]] <- jmvcore::toNumeric(mydata[[cov]])
+
+
             mydata <- jmvcore::naOmit(mydata)
 
 
@@ -164,6 +180,9 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
         .plot2 = function(image, ...) {  # <-- the plot2 function ----
+
+
+            # FFTrees ----
 
             # Error Message ----
 
@@ -221,6 +240,9 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot3 = function(image, ...) {  # <-- the plot3 function ----
 
 
+            # rpart ----
+
+
             # Error Message ----
 
             if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
@@ -236,9 +258,22 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             targetName <- self$options$target
 
+            targetLevel <- self$options$targetLevel
+
             mydata <- jmvcore::select(self$data, c(varsName, facsName, targetName))
 
             mydata[[targetName]] <- as.factor(mydata[[targetName]])
+
+            mydata[[targetName]] <- ifelse(
+                mydata[[targetName]] == targetLevel, "Target", "Others")
+
+            for (fac in facsName)
+                mydata[[fac]] <- as.factor(mydata[[fac]])
+
+            for (cov in varsName)
+                mydata[[cov]] <- jmvcore::toNumeric(mydata[[cov]])
+
+
 
             mydata <- jmvcore::naOmit(mydata)
 
