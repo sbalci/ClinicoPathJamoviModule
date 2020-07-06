@@ -1,6 +1,6 @@
 options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 
-# .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
+.libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
 
 
 
