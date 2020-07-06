@@ -1,14 +1,14 @@
 options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 
+# .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
+
+
 # source("renv/activate.R")
 
 # 'https://repo.jamovi.org'
 
 # "/Users/serdarbalciold/Library/R/3.6/library"
 # "/Library/Frameworks/R.framework/Versions/3.6/Resources/library"
-
-# .libPaths(new = "~/histopathRprojects/ClinicoPathLibrary")
-
 
 # options(repos = c("https://cran.microsoft.com/snapshot/2020-05-01"))
 

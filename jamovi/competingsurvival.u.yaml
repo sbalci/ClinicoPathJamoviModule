@@ -1,4 +1,4 @@
-title: Competing Survival
+title: Overall, Cause Specific, and Competing Survival
 name: competingsurvival
 jus: '3.0'
 stage: 0
@@ -37,18 +37,6 @@ children:
             margin: none
             style: list-inline
             children:
-              # - type: LayoutBox
-              #   margin: none
-              #   fitToGrid: true
-              #   children:
-              #     - type: CheckBox
-              #       name: usedod
-              #     - type: CheckBox
-              #       name: usedooc
-              #     - type: CheckBox
-              #       name: useawd
-              #     - type: CheckBox
-              #       name: useawod
               - type: LayoutBox
                 margin: none
                 fitToGrid: true
@@ -65,10 +53,8 @@ children:
                   - type: LevelSelector
                     name: awod
                     enable: (outcome)
-  - type: CollapseBox
-    label: Options
-    collapsed: true
+  - type: LayoutBox
+    margin: large
     children:
-        - type: CheckBox
-          name: sty
-
+      - type: ComboBox
+        name: analysistype

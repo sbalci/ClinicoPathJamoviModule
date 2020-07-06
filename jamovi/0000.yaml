@@ -79,14 +79,14 @@ analyses:
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
-  - title: Competing Survival
+  - title: 'Overall, Cause Specific, and Competing Survival'
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: ClinicoPath
     menuSubgroup: ClinicoPath Survival
-    menuTitle: Competing Survival
-    description: Function for Competing Survival.
-    menuSubtitle: Survival for Competing Risks
+    menuTitle: 'Overall, Cause Specific, and Competing Survival'
+    description: 'Overall, Cause Specific, and Competing Survival.'
+    menuSubtitle: Survival for Different Outcomes
   - title: Correlation
     name: correlation
     ns: ClinicoPath
