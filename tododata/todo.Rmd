@@ -1024,7 +1024,6 @@ usethis::use_data(histopathology)
 
 ```
 
-
 ## force git
 
 ```{r force git, eval=FALSE, include=FALSE}
