@@ -21,6 +21,9 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # mydata <- self$data
 
+            originaltheme <- self$options$originaltheme
+
+
             dep <- self$options$dep
 
             dep2 <- jmvcore::composeTerms(listOfComponents = dep)
@@ -88,7 +91,7 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # ,
-        # .plot = function(image, ...) {
+        # .plot = function(image, ggtheme, theme, ...) {
         #
         #     mydata <- self$data
         #
@@ -107,6 +110,7 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
         #             data = mydata,
         #             main = !!dep,
         #             condition = !!group
+        #           , ggtheme = ggtheme
         #             )
         #
         #     # Print Plot ----
@@ -125,7 +129,7 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot2 = function(image, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
 
             mydata <- self$data
 
@@ -148,6 +152,8 @@ jjbarstats2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     main = !!dep1,
                     condition = !!group
+                    , ggtheme = ggtheme
+
                 )
             }
 

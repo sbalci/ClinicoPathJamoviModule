@@ -38,7 +38,7 @@ options:
       permitted: [ factor ]
 
     # - name: grvar
-    #   title: 'Split by: (Optional)'
+    #   title: 'Split By (Optional)'
     #   type: Variable
     #   suggested: [ ordinal, nominal ]
     #   permitted: [ factor ]
@@ -68,6 +68,12 @@ options:
       title: Exclude Missing (NA)
       type: Bool
       default: true
+      
+    - name: originaltheme
+      title: Add GGStatsPlot Layer
+      type: Bool
+      default: false
+
 
 
     # - name: ratio

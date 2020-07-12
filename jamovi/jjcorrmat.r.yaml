@@ -13,6 +13,8 @@ items:
           - dep
           - grvar
           - direction
+          - originaltheme
+
 
     - name: plot2
       title: Chart
@@ -25,6 +27,7 @@ items:
           - dep
           - grvar
           - direction
+          - originaltheme
       visible: (grvar)
 
     - name: plot
@@ -38,6 +41,8 @@ items:
           - dep
           - grvar
           - direction
+          - originaltheme
+
 
 refs:
     - ggplot2

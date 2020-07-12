@@ -13,7 +13,7 @@ items:
           - group
 
     - name: plot
-      title: '`Violin Plot ${group} - {dep}`'
+      title: '`${group} - {dep}`'
       type: Image
       width:  600
       height: 450

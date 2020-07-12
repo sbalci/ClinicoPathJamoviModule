@@ -50,7 +50,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot = function(image, ...) {
+        .plot = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -67,11 +67,21 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
+
+
+
+
             # Exclude NA ----
 
             excl <- self$options$excl
 
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
+
+
+
+
+
+
 
 
             # define main arguments ----
@@ -81,6 +91,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myvars <- jmvcore::decomposeFormula(formula = myvars)
 
             myvars <- unlist(myvars)
+
+            originaltheme <- self$options$originaltheme
 
 
             # ggcorrmat ----
@@ -107,8 +119,10 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 package = "RColorBrewer",
                 palette = "Dark2",
                 colors = c("#E69F00", "white", "#009E73"),
-                ggtheme = ggplot2::theme_bw(),
-                ggstatsplot.layer = TRUE,
+                ggtheme = ggtheme,
+
+                # ggtheme = ggplot2::theme_bw(),
+                ggstatsplot.layer = originaltheme,
                 ggplot.component = NULL,
                 title = NULL,
                 subtitle = NULL,
@@ -127,7 +141,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
 
-        .plot2 = function(image, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -158,6 +172,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
+            originaltheme <- self$options$originaltheme
+
 
             # grouped_ggcorrmat ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html
@@ -182,6 +198,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
+                    , ggtheme = ggtheme
+
                 )
 
 

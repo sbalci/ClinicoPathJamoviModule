@@ -14,11 +14,13 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 
 
     - name: plot4
-      title: '`Pie Chart ${group} - {dep} by {grvar}`'
+      title: '`${group} - {dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -29,13 +31,14 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (grvar)
       # visible: (dep && group && grvar)
 
 
 
     - name: plot3
-      title: '`Pie Chart ${dep} by {grvar}`'
+      title: '`${dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -46,11 +49,12 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (grvar)
 
 
     - name: plot2
-      title: '`Pie Chart ${group} - {dep}`'
+      title: '`${group} - {dep}`'
       type: Image
       width:  800
       height: 600
@@ -61,13 +65,14 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (group)
       # visible: (dep && group)
 
 
 
     - name: plot1
-      title: '`Pie Chart ${dep}`'
+      title: '`${dep}`'
       type: Image
       width:  800
       height: 600
@@ -78,6 +83,7 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (dep)
 
 

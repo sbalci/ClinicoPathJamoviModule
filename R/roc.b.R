@@ -180,9 +180,11 @@ rocClass <- if (requireNamespace("jmvcore")) R6::R6Class("rocClass", inherit = r
 }
 
 
-    },
+    }
 
-    .plot=function(image, ...) {
+,
+
+    .plot=function(image, ggtheme, theme, ...) {
 
 
         # Error Messages
@@ -287,7 +289,7 @@ rocClass <- if (requireNamespace("jmvcore")) R6::R6Class("rocClass", inherit = r
 
     ,
 
-    .plot2=function(image, ...) {
+    .plot2=function(image, ggtheme, theme, ...) {
 
 
 

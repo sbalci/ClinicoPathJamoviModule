@@ -12,7 +12,8 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
             direction = "independent",
             distribution = "p",
             alluvsty = "t1",
-            excl = TRUE, ...) {
+            excl = TRUE,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -54,6 +55,10 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -62,6 +67,7 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..distribution)
             self$.addOption(private$..alluvsty)
             self$.addOption(private$..excl)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -70,7 +76,8 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
         direction = function() private$..direction$value,
         distribution = function() private$..distribution$value,
         alluvsty = function() private$..alluvsty$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -78,7 +85,8 @@ statsplot2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..direction = NA,
         ..distribution = NA,
         ..alluvsty = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..originaltheme = NA)
 )
 
 statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -108,7 +116,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction",
                     "distribution",
                     "excl",
-                    "grvar")))
+                    "grvar",
+                    "originaltheme")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text4",
@@ -119,7 +128,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "direction",
                     "distribution",
                     "excl",
-                    "grvar")))
+                    "grvar",
+                    "originaltheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Variable Type Based Graphs and Plots",
@@ -135,7 +145,8 @@ statsplot2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "distribution",
                     "alluvsty",
                     "excl",
-                    "grvar")))}))
+                    "grvar",
+                    "originaltheme")))}))
 
 statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "statsplot2Base",
@@ -173,6 +184,7 @@ statsplot2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param distribution select distribution type (parametric or nonparametric)
 #' @param alluvsty .
 #' @param excl .
+#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -189,7 +201,8 @@ statsplot2 <- function(
     direction = "independent",
     distribution = "p",
     alluvsty = "t1",
-    excl = TRUE) {
+    excl = TRUE,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('statsplot2 requires jmvcore to be installed (restart may be required)')
@@ -212,7 +225,8 @@ statsplot2 <- function(
         direction = direction,
         distribution = distribution,
         alluvsty = alluvsty,
-        excl = excl)
+        excl = excl,
+        originaltheme = originaltheme)
 
     analysis <- statsplot2Class$new(
         options = options,

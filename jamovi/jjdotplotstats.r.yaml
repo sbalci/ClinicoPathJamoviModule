@@ -14,12 +14,14 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 
 
 
     - name: plot2
-      title: '`Dot Chart ${group} - {dep} by {grvar}`'
+      title: '`${group} - {dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -30,10 +32,11 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (grvar)
 
     - name: plot
-      title: '`Dot Chart ${group} - {dep}`'
+      title: '`${group} - {dep}`'
       type: Image
       width:  800
       height: 600
@@ -44,6 +47,8 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 refs:
     - ggplot2

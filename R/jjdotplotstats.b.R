@@ -49,7 +49,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot = function(image, ...) {
+        .plot = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -87,6 +87,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
+            vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+
+
             # Exclude NA ----
 
             excl <- self$options$excl
@@ -99,6 +106,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep
 
             group <- self$options$group
+
+            originaltheme <- self$options$originaltheme
 
 
             dep <- jmvcore::composeTerm(components = dep)
@@ -140,8 +149,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     centrality.line.args = list(color = "blue", size = 1),
                     centrality.label.args = list(color = "blue", size = 3),
                     ggplot.component = NULL,
-                    ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = TRUE,
+                    ggtheme = ggtheme,
+                    # ggtheme = ggplot2::theme_bw(),
+                    ggstatsplot.layer = originaltheme,
                     output = "plot",
                     messages = TRUE
                 )
@@ -157,7 +167,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
 
-        .plot2 = function(image, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -171,6 +181,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
             mydata <- self$data
+
+
+            vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
 
 
             # # direction, paired ----
@@ -202,6 +219,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- self$options$group
 
 
+            originaltheme <- self$options$originaltheme
+
+
             dep <- jmvcore::composeTerm(components = dep)
 
             group <- jmvcore::composeTerm(components = group)
@@ -231,6 +251,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
+                    , ggtheme = ggtheme
+
                 )
 
 

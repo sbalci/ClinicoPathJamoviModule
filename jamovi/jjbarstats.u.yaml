@@ -26,3 +26,5 @@ children:
     children:
       - type: CheckBox
         name: excl
+      - type: CheckBox
+        name: originaltheme

@@ -52,7 +52,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot = function(image, ...) {
+        .plot = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -87,8 +87,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # pairw <- self$options$pairw
 
 
+            # read data ----
+
             mydata <- self$data
 
+            dep <- self$options$dep
 
             # Exclude NA ----
 
@@ -135,7 +138,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     conf.level = 0.95,
                     nboot = 100,
                     k = 2L,
-                    ggtheme = ggplot2::theme_bw(),
+                    ggtheme = ggtheme,
+
+                    # ggtheme = ggplot2::theme_bw(),
                     ggstatsplot.layer = TRUE,
                     bar.fill = "grey50",
                     results.subtitle = TRUE,
@@ -164,7 +169,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
 
-        ,             .plot2 = function(image, ...) {
+        ,
+        .plot2 = function(image, ggtheme, theme, ...) {
             # the plot function ----
             # Error messages ----
 
@@ -179,6 +185,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
+            vars <- self$options$dep
 
             # direction, paired ----
 
@@ -212,6 +219,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # group <- jmvcore::composeTerm(components = group)
 
 
+            originaltheme <- self$options$originaltheme
+
 
 
             # grouped_gghistostats ----
@@ -237,6 +246,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
+                    , ggtheme = ggtheme
+
                 )
 
 

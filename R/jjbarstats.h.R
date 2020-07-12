@@ -8,7 +8,8 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            excl = TRUE, ...) {
+            excl = TRUE,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -36,19 +37,26 @@ jjbarstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..excl)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..originaltheme = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -74,7 +82,8 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))
+                    "direction",
+                    "originaltheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -87,7 +96,8 @@ jjbarstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))}))
+                    "direction",
+                    "originaltheme")))}))
 
 jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjbarstatsBase",
@@ -123,6 +133,7 @@ jjbarstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param excl .
+#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -134,7 +145,8 @@ jjbarstats <- function(
     data,
     dep,
     group,
-    excl = TRUE) {
+    excl = TRUE,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjbarstats requires jmvcore to be installed (restart may be required)')
@@ -153,7 +165,8 @@ jjbarstats <- function(
     options <- jjbarstatsOptions$new(
         dep = dep,
         group = group,
-        excl = excl)
+        excl = excl,
+        originaltheme = originaltheme)
 
     analysis <- jjbarstatsClass$new(
         options = options,

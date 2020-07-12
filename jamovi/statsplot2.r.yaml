@@ -15,6 +15,7 @@ items:
           - distribution
           - excl
           - grvar
+          - originaltheme
           # - pairw
 
     # - name:  text1
@@ -39,6 +40,7 @@ items:
           - distribution
           - excl
           - grvar
+          - originaltheme
           # - pairw
 
 
@@ -61,6 +63,7 @@ items:
           - alluvsty
           - excl
           - grvar
+          - originaltheme
           # - pairw
 
 

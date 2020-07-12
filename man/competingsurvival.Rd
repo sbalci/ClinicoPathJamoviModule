@@ -2,7 +2,7 @@
 % Please edit documentation in R/competingsurvival.h.R
 \name{competingsurvival}
 \alias{competingsurvival}
-\title{Competing Survival}
+\title{Overall, Cause Specific, and Competing Survival}
 \usage{
 competingsurvival(
   data,
@@ -13,7 +13,7 @@ competingsurvival(
   dooc,
   awd,
   awod,
-  sty = FALSE
+  analysistype = "overall"
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ competingsurvival(
 
 \item{awod}{.}
 
-\item{sty}{.}
+\item{analysistype}{.}
 }
 \value{
 A results object containing:
@@ -43,7 +43,7 @@ A results object containing:
 }
 }
 \description{
-Function for Competing Survival.
+Overall, Cause Specific, and Competing Survival.
 }
 \examples{
 \dontrun{

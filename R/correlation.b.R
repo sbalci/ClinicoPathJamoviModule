@@ -241,7 +241,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         },
-        .plot = function(image, ...) {  # <-- the plot function
+        .plot = function(image, ggtheme, theme, ...) {  # <-- the plot function
 
             if (length(self$options$vars) < 2)
                 return()
@@ -253,7 +253,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot)
             TRUE
         },
-.plot2 = function(image, ...) {  # <-- the plot2 function
+.plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot2 function
 
     if (length(self$options$vars) < 2)
         return()

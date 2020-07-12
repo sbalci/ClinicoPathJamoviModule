@@ -130,7 +130,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ,
-        .plot1 = function(image, ...) {  # <-- the plot1 function ----
+        .plot1 = function(image, ggtheme, theme, ...) {  # <-- the plot1 function ----
 
 
             # explore ----
@@ -179,7 +179,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ,
-        .plot2 = function(image, ...) {  # <-- the plot2 function ----
+        .plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot2 function ----
 
 
             # FFTrees ----
@@ -237,7 +237,7 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ,
-        .plot3 = function(image, ...) {  # <-- the plot3 function ----
+        .plot3 = function(image, ggtheme, theme, ...) {  # <-- the plot3 function ----
 
 
             # rpart ----

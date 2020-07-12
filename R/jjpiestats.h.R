@@ -9,7 +9,8 @@ jjpiestatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE, ...) {
+            excl = TRUE,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -45,22 +46,29 @@ jjpiestatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..excl)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..originaltheme = NA)
 )
 
 jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -89,11 +97,12 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))
+                    "direction",
+                    "originaltheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot4",
-                title="`Pie Chart ${group} - {dep} by {grvar}`",
+                title="`${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot4",
@@ -102,12 +111,13 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
+                    "direction",
+                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
-                title="`Pie Chart ${dep} by {grvar}`",
+                title="`${dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot3",
@@ -116,12 +126,13 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
+                    "direction",
+                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Pie Chart ${group} - {dep}`",
+                title="`${group} - {dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -130,12 +141,13 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
+                    "direction",
+                    "originaltheme"),
                 visible="(group)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="`Pie Chart ${dep}`",
+                title="`${dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot1",
@@ -144,7 +156,8 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
+                    "direction",
+                    "originaltheme"),
                 visible="(dep)"))}))
 
 jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -180,6 +193,7 @@ jjpiestatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group .
 #' @param grvar .
 #' @param excl .
+#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -195,7 +209,8 @@ jjpiestats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE) {
+    excl = TRUE,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjpiestats requires jmvcore to be installed (restart may be required)')
@@ -218,7 +233,8 @@ jjpiestats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        excl = excl)
+        excl = excl,
+        originaltheme = originaltheme)
 
     analysis <- jjpiestatsClass$new(
         options = options,

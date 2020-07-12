@@ -174,7 +174,7 @@ stat_exp <- glue::glue("<br>You have selected to use a barplot to compare a cate
                 }
             },
 
-            .plot = function(image, ...) {
+            .plot = function(image, ggtheme, theme, ...) {
                 # the plot function ----
 
 

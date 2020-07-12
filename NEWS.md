@@ -1,3 +1,45 @@
+# ClinicoPath 0.0.2.0021
+
+
+
+
+# ClinicoPath 0.0.2.0020
+
+- made submodules:
+
+
+- ClinicoPathDescriptives
+
+
+https://github.com/sbalci/ClinicoPathDescriptives/
+
+https://github.com/sbalci/ClinicoPathDescriptives/releases/
+
+
+- JJStatsPlot: 
+
+
+https://github.com/sbalci/jjstatsplot
+
+https://github.com/sbalci/jjstatsplot/releases/
+
+
+- jsurvival:
+
+https://github.com/sbalci/jsurvival
+
+https://github.com/sbalci/jsurvival/releases/
+
+
+- meddecide
+
+https://github.com/sbalci/meddecide/
+
+
+https://github.com/sbalci/meddecide/releases/
+
+
+
 # ClinicoPath 0.0.2.0019
 
 - rewrote summary of categorical values to decrease dependencies

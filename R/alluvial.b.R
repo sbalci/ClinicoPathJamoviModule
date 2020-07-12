@@ -44,7 +44,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             ,
 
-            .plot = function(image, ...) {
+            .plot = function(image, ggtheme, theme, ...) {
                 # the plot function ----
 
 
@@ -143,7 +143,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
 
-        .plot2 = function(image, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
             # the plot function ----
 
             #Errors ----

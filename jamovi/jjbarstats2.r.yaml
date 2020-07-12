@@ -17,6 +17,7 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
 
 
 
@@ -32,6 +33,8 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 
     - name: plot2
@@ -46,6 +49,8 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 
 refs:
