@@ -13,6 +13,7 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
 
 
       # title: '`Bar Chart ${group} - {dep} by {grvar}`'
@@ -29,6 +30,7 @@ items:
     #       - group
     #       - grvar
     #       - direction
+    #       - originaltheme
     #   visible: (grvar)
 
       # title: '`Bar Chart ${group} - {dep}`'
@@ -46,6 +48,8 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 refs:
     - ggplot2

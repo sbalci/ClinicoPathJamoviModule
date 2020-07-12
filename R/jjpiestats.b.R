@@ -53,7 +53,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot1 = function(image, ...) {
+        .plot1 = function(image, ggtheme, theme, ...) {
 
             # Error messages ----
 
@@ -114,6 +114,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # group <- jmvcore::composeTerm(components = group)
 
 
+            originaltheme <- self$options$originaltheme
+
 
 
 
@@ -146,8 +148,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     legend.title = NULL,
                     k = 2,
                     proportion.test = TRUE,
-                    ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = TRUE,
+                    ggtheme = ggtheme,
+
+                    # ggtheme = ggplot2::theme_bw(),
+                    ggstatsplot.layer = originaltheme,
                     package = "RColorBrewer",
                     palette = "Dark2",
                     ggplot.component = NULL,
@@ -170,7 +174,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # the plot2 function ----
 
 
-        , .plot2 = function(image, ...) {
+        , .plot2 = function(image, ggtheme, theme, ...) {
 
             # Error messages ----
 
@@ -224,6 +228,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
+            originaltheme <- self$options$originaltheme
+
 
             dep <- jmvcore::composeTerm(components = dep)
 
@@ -257,8 +263,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     legend.title = NULL,
                     k = 2,
                     proportion.test = TRUE,
-                    ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = TRUE,
+                    ggtheme = ggtheme,
+
+                    # ggtheme = ggplot2::theme_bw(),
+                    ggstatsplot.layer = originaltheme,
                     package = "RColorBrewer",
                     palette = "Dark2",
                     ggplot.component = NULL,
@@ -280,7 +288,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        , .plot3 = function(image, ...) {
+        , .plot3 = function(image, ggtheme, theme, ...) {
 
             # Error messages ----
 
@@ -328,6 +336,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+            originaltheme <- self$options$originaltheme
+
 
             # grouped_ggpiestats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html
@@ -357,6 +367,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
+                    , ggtheme = ggtheme
+
                 )
 }
 
@@ -373,7 +385,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        , .plot4 = function(image, ...) {
+        , .plot4 = function(image, ggtheme, theme, ...) {
 
             # Error messages ----
 
@@ -415,6 +427,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
+            originaltheme <- self$options$originaltheme
+
 
             dep <- jmvcore::composeTerm(components = dep)
 
@@ -448,6 +462,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
+                    , ggtheme = ggtheme
+
                 )
             }
 

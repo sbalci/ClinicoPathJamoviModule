@@ -385,7 +385,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 },
 
-.plot=function(image, ...) {  # <-- the plot function ----
+.plot=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
     # plotData <- image$state
 
@@ -463,7 +463,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
 ,
-.plot2=function(image, ...) {  # <-- the plot function ----
+.plot2=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
     # plotData <- image$state
 
@@ -541,7 +541,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 ,
-.plot3=function(image, ...) {  # <-- the plot function ----
+.plot3=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
     # plotData <- image$state
 

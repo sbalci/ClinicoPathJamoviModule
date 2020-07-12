@@ -83,7 +83,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
 
-        .plot = function(image, ...) {  # <-- the plot function ----
+        .plot = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
             mydata <- self$data
 

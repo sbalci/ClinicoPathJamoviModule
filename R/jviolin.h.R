@@ -141,7 +141,7 @@ jviolinResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Violin Plot ${group} - {dep}`",
+                title="`${group} - {dep}`",
                 width=600,
                 height=450,
                 renderFun=".plot",

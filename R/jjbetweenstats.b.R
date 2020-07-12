@@ -51,7 +51,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot = function(image, ...) {
+        .plot = function(image, ggtheme, theme, ...) {
 
             # the plot function ----
             # Error messages ----
@@ -103,6 +103,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
+            vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+
+
             # Exclude NA ----
 
             excl <- self$options$excl
@@ -116,11 +123,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
+            originaltheme <- self$options$originaltheme
+
 
             dep <- jmvcore::composeTerm(components = dep)
 
             group <- jmvcore::composeTerm(components = group)
-
 
             # ggbetweenstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
@@ -132,6 +140,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 y = !!dep
                 # ,
                 # type = distribution
+                , ggtheme = ggtheme
             )
 
 
@@ -144,7 +153,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ,
-        .plot2 = function(image, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
 
             # the plot function ----
             # Error messages ----
@@ -196,6 +205,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
+            vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+
+
             # Exclude NA ----
 
             excl <- self$options$excl
@@ -209,6 +225,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
+            originaltheme <- self$options$originaltheme
+
 
             dep <- jmvcore::composeTerm(components = dep)
 
@@ -216,7 +234,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # grouped_ggbetweenstats
+
+            # grouped_ggbetweenstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html
 
 
@@ -228,7 +247,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!group,
                     y = !! dep,
-                    grouping.var = !!grvar)
+                    grouping.var = !!grvar
+                    , ggtheme = ggtheme
+                )
 
             }
 

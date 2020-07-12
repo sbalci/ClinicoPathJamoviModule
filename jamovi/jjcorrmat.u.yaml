@@ -15,7 +15,7 @@ children:
             name: dep
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Split by: (Optional)'
+        label: Split By (Optional)
         children:
           - type: VariablesListBox
             name: grvar
@@ -26,3 +26,5 @@ children:
     children:
       - type: CheckBox
         name: excl
+      - type: CheckBox
+        name: originaltheme

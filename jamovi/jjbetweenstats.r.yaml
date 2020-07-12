@@ -12,12 +12,14 @@ items:
           - dep
           - group
           - grvar
+          - originaltheme
+
 
 
 
 
     - name: plot2
-      title: '`Violin Plot ${group} - {dep} by {grvar}`'
+      title: '`${group} - {dep} by {grvar}`'
       type: Image
       width:  800
       height: 600
@@ -28,10 +30,11 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
       visible: (grvar)
 
     - name: plot
-      title: '`Violin Plot ${group} - {dep}`'
+      title: '`${group} - {dep}`'
       type: Image
       width:  800
       height: 600
@@ -42,6 +45,8 @@ items:
           - group
           - grvar
           - direction
+          - originaltheme
+
 
 
 refs:

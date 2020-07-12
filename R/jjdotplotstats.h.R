@@ -9,7 +9,8 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE, ...) {
+            excl = TRUE,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -44,22 +45,29 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..excl)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..originaltheme = NA)
 )
 
 jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -86,11 +94,12 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))
+                    "direction",
+                    "originaltheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Dot Chart ${group} - {dep} by {grvar}`",
+                title="`${group} - {dep} by {grvar}`",
                 width=800,
                 height=600,
                 renderFun=".plot2",
@@ -99,12 +108,13 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction"),
+                    "direction",
+                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`Dot Chart ${group} - {dep}`",
+                title="`${group} - {dep}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -113,7 +123,8 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction")))}))
+                    "direction",
+                    "originaltheme")))}))
 
 jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjdotplotstatsBase",
@@ -148,6 +159,7 @@ jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group .
 #' @param grvar .
 #' @param excl .
+#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -161,7 +173,8 @@ jjdotplotstats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE) {
+    excl = TRUE,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('jjdotplotstats requires jmvcore to be installed (restart may be required)')
@@ -183,7 +196,8 @@ jjdotplotstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        excl = excl)
+        excl = excl,
+        originaltheme = originaltheme)
 
     analysis <- jjdotplotstatsClass$new(
         options = options,

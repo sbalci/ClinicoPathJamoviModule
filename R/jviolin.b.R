@@ -61,7 +61,7 @@ jviolinClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
 
-        .plot = function(image, ...) {
+        .plot = function(image, ggtheme, theme, ...) {
 
             # plotData <- image$state
 
@@ -150,6 +150,10 @@ jviolinClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Themes ----
 
             themex <- self$options$themex
+
+
+            # , ggtheme = ggtheme
+
 
             # plot <- plot + eval(parse(text=self$options$themex))
 
