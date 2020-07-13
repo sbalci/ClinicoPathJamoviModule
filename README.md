@@ -121,7 +121,7 @@ from**
 
 #### Summary of Continuous Variables
 
-<img src="man/figures/jamovi-write-summary-continious-variables.gif" align="center" width = 75% />
+<img src="man/figures/jamovi-write-summary-continuous-variables.gif" align="center" width = 75% />
 
 #### Summary of Categorical Variables
 

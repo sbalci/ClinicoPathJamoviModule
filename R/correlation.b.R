@@ -205,7 +205,7 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 # # https://easystats.github.io/report/articles/interpret_metrics.html
 #
 #             mydata %>%
-#                 select(continiousVariables,
+#                 select(continuousVariables,
 #                        -dateVariables) %>%
 #                 visdat::vis_cor()
 

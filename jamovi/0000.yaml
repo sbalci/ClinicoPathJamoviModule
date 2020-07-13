@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0021
+version: 0.0.2.0022
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-07-11'
+date: '2020-07-12'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -41,13 +41,6 @@ analyses:
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
-  - title: Graphs and Plots
-    name: statsplot2
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Variable Type Based Graphs and Plots
-    menuTitle: Graphs and Plots
-    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
@@ -171,6 +164,66 @@ analyses:
     menuSubgroup: Distribution
     menuTitle: Violin Plot
     menuSubtitle: R Graph Gallery Violin
+  - title: Histogram
+    name: jjhistostats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous
+    menuTitle: Histogram
+    menuSubtitle: Histogram
+    description: |
+      'Wrapper Function for ggstatsplot::gghistostats and
+      ggstatsplot::grouped_gghistostats to generate Histogram.'
+  - title: Scatter Plot
+    name: jjscatterstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous vs Continuous
+    menuTitle: Scatter Plot
+    menuSubtitle: Scatter Plot
+    description: |
+      'Wrapper Function for ggstatsplot::ggscatterstats and
+      ggstatsplot::grouped_ggscatterstats to generate Scatter Plot.'
+  - title: Correlation Matrix
+    name: jjcorrmat
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous vs Continuous
+    menuTitle: Correlation Matrix
+    menuSubtitle: Correlation Matrix
+    description: |
+      'Wrapper Function for ggstatsplot::ggcorrmat and
+      ggstatsplot::grouped_ggcorrmat to generate Correlation Matrix.'
+  - title: Violin Plots to Compare Between Groups
+    name: jjbetweenstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Violin Plots to Compare Between Groups
+    menuSubtitle: Independent Samples
+    description: |
+      'Wrapper Function for ggstatsplot::ggbetweenstats and
+      ggstatsplot::grouped_ggbetweenstats to generate Violin Plots.'
+  - title: Violin Plots to Compare Within Groups
+    name: jjwithinstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Violin Plots to Compare Within Groups
+    menuSubtitle: Repeated Measurements
+    description: |
+      'Wrapper Function for ggstatsplot::ggwithinstats and
+      ggstatsplot::grouped_ggwithinstats to generate Violin Plots.'
+  - title: Dot Chart
+    name: jjdotplotstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Dot Chart
+    menuSubtitle: Dot Chart
+    description: |
+      'Wrapper Function for ggstatsplot::ggdotplotstats and
+      ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
@@ -181,46 +234,6 @@ analyses:
     description: |
       'Wrapper Function for ggstatsplot::ggbarstats and
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-  - title: Violin Plots to Compare Between Groups
-    name: jjbetweenstats
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Categorical vs Numeric
-    menuTitle: Violin Plots to Compare Between Groups
-    menuSubtitle: Independent Samples
-    description: |
-      'Wrapper Function for ggstatsplot::ggbarstats and
-      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-  - title: Correlation Matrix
-    name: jjcorrmat
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Continious vs Continious
-    menuTitle: Correlation Matrix
-    menuSubtitle: Correlation Matrix
-    description: |
-      'Wrapper Function for ggstatsplot::ggbarstats and
-      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-  - title: Dot Chart
-    name: jjdotplotstats
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Categorical vs Numeric
-    menuTitle: Dot Chart
-    menuSubtitle: Dot Chart
-    description: |
-      'Wrapper Function for ggstatsplot::ggdotplotstats and
-      ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
-  - title: Histogram
-    name: jjhistostats
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Continious
-    menuTitle: Histogram
-    menuSubtitle: Histogram
-    description: |
-      'Wrapper Function for ggstatsplot::gghistostats and
-      ggstatsplot::grouped_gghistostats to generate Bar Charts.'
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
@@ -230,27 +243,14 @@ analyses:
     menuSubtitle: Pie Charts
     description: |
       'Wrapper Function for ggstatsplot::ggpiestats and
-      ggstatsplot::grouped_ggpiestats to generate Bar Charts.'
-  - title: Scatter Plot
-    name: jjscatterstats
+      ggstatsplot::grouped_ggpiestats to generate Pie Charts.'
+  - title: Graphs and Plots
+    name: statsplot2
     ns: ClinicoPath
     menuGroup: JJStatsPlot
-    menuSubgroup: Continious vs Continious
-    menuTitle: Scatter Plot
-    menuSubtitle: Scatter Plot
-    description: |
-      'Wrapper Function for ggstatsplot::ggscatterstats and
-      ggstatsplot::grouped_ggscatterstats to generate Bar Charts.'
-  - title: Violin Plots to Compare Within Groups
-    name: jjwithinstats
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Categorical vs Numeric
-    menuTitle: Violin Plots to Compare Within Groups
-    menuSubtitle: Repeated Measurements
-    description: |
-      'Wrapper Function for ggstatsplot::ggbarstats and
-      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    menuSubgroup: Variable Type Based Graphs and Plots
+    menuTitle: Graphs and Plots
+    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Bar Charts
     name: jjbarstats2
     ns: ClinicoPath

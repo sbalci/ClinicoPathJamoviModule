@@ -1,5 +1,9 @@
+# ClinicoPath 0.0.2.0022
+
+
 # ClinicoPath 0.0.2.0021
 
+- updating jjstatsplot for release
 
 
 

@@ -39,7 +39,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
 
                 todo <- glue::glue(
-                    "<br>You have selected to use a Violin Plot to compare continious variables between groups.<br><hr>")
+                    "<br>You have selected to use a Violin Plot to compare continuous variables between groups.<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -141,6 +141,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ,
                 # type = distribution
                 , ggtheme = ggtheme
+                , ggstatsplot.layer = originaltheme
+
             )
 
 
@@ -249,6 +251,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = !! dep,
                     grouping.var = !!grvar
                     , ggtheme = ggtheme
+                    , ggstatsplot.layer = originaltheme
+
                 )
 
             }

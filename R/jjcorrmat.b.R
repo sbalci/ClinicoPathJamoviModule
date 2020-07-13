@@ -199,6 +199,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.text = NULL,
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
+                    , ggstatsplot.layer = originaltheme,
+
 
                 )
 
