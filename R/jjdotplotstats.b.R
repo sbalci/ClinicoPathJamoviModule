@@ -37,7 +37,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # TODO ----
                 todo <- glue::glue(
-                    "<br>You have selected to use a Dot Plot to compare continious variables by groups.<br><hr>")
+                    "<br>You have selected to use a Dot Plot to compare continuous variables by groups.<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -252,6 +252,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.text = NULL,
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
+                    , ggstatsplot.layer = originaltheme
 
                 )
 

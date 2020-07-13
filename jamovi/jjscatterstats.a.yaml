@@ -2,7 +2,7 @@
 name:  jjscatterstats
 title: Scatter Plot
 menuGroup: JJStatsPlot
-menuSubgroup: Continious vs Continious
+menuSubgroup: Continuous vs Continuous
 menuSubtitle: Scatter Plot
 version: '1.0.0'
 jas: '1.2'

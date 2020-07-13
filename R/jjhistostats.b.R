@@ -54,6 +54,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .plot = function(image, ggtheme, theme, ...) {
             # the plot function ----
+
             # Error messages ----
 
             if ( is.null(self$options$dep) )
@@ -91,7 +92,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
-            dep <- self$options$dep
+            vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+
+
 
             # Exclude NA ----
 
@@ -100,6 +107,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # arguments ----
 
             # mydep <- mydata[[self$options$dep]]
             # mygroup <- mydata[[self$options$group]]
@@ -172,6 +180,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .plot2 = function(image, ggtheme, theme, ...) {
             # the plot function ----
+
             # Error messages ----
 
             if ( is.null(self$options$dep) || is.null(self$options$grvar))
@@ -183,9 +192,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Prepare Data ----
 
+            # read data ----
+
             mydata <- self$data
 
             vars <- self$options$dep
+
+
+            for (var in vars)
+                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+
+
 
             # direction, paired ----
 
@@ -218,8 +235,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # group <- jmvcore::composeTerm(components = group)
 
-
-            originaltheme <- self$options$originaltheme
 
 
 
