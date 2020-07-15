@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0020</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0022</span>
       </span>
     </div>
 
@@ -103,7 +103,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="module_development_jamovi_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Module Development for Jamovi</h1>
@@ -181,6 +181,14 @@
 <a href="#add-analysis" class="anchor"></a>add analysis</h2>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="st">'function'</span>)</pre></body></html></div>
 </div>
+</div>
+<div id="structure" class="section level1">
+<h1 class="hasAnchor">
+<a href="#structure" class="anchor"></a>Structure</h1>
+<hr>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTfA7dL5y_PzY5L-f8FRxaqvKMME5pcDCbXtWk5-FUNCGJyFKpGJEp8ES9rAge0CbI3Gcbi7Emv4e-S/embed?start=false&amp;loop=true&amp;delayms=3000" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">
+</iframe>
+<hr>
 <div id="development-files" class="section level2">
 <h2 class="hasAnchor">
 <a href="#development-files" class="anchor"></a>Development Files</h2>
@@ -215,17 +223,17 @@
 <h5 class="hasAnchor">
 <a href="#write-formula" class="anchor"></a>Write Formula</h5>
 <p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="kw">formula</span> <span class="kw">=</span> <span class="no">len</span> ~ <span class="no">supp</span> * <span class="no">dose</span>, <span class="no">ToothGrowth</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="no">len</span>, <span class="fu">vars</span>(<span class="no">supp</span>, <span class="no">dose</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">...</span>, <span class="kw">emMeans</span> <span class="kw">=</span> ~ <span class="no">supp</span> + <span class="no">dose</span>:<span class="no">supp</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu">ANOVA</span>(<span class="kw">formula</span> <span class="kw">=</span> <span class="no">len</span> ~ <span class="no">supp</span> * <span class="no">dose</span>, <span class="no">ToothGrowth</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu">ANOVA</span>(<span class="no">ToothGrowth</span>, <span class="no">len</span>, <span class="fu">vars</span>(<span class="no">supp</span>, <span class="no">dose</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu">ANOVA</span>(<span class="no">...</span>, <span class="kw">emMeans</span> <span class="kw">=</span> ~ <span class="no">supp</span> + <span class="no">dose</span>:<span class="no">supp</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu">ANOVA</span>(<span class="no">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>))</pre></body></html></div>
 <blockquote>
 <p>In this case, jmv will look for variables in ToothGrowth called ‘dep’ or ‘factors’. This is tidy evaluation. To instruct jmv to use the contents of it’s arguments, rather than the symbol name, prefix them with the !! signifier. For example:</p>
 </blockquote>
 <div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">dep</span> <span class="kw">&lt;-</span> <span class="st">'len'</span>
 <span class="no">factors</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>)
 
-<span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, !!<span class="no">dep</span>, !!<span class="no">factors</span>)</pre></body></html></div>
+<span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu">ANOVA</span>(<span class="no">ToothGrowth</span>, !!<span class="no">dep</span>, !!<span class="no">factors</span>)</pre></body></html></div>
 </div>
 <div id="warning-error-messages" class="section level5">
 <h5 class="hasAnchor">
