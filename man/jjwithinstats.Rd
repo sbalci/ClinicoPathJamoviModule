@@ -4,7 +4,7 @@
 \alias{jjwithinstats}
 \title{Violin Plots to Compare Within Groups}
 \usage{
-jjwithinstats(data, dep, group, grvar, excl = TRUE)
+jjwithinstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +16,8 @@ jjwithinstats(data, dep, group, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

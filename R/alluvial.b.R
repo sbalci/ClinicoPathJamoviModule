@@ -111,7 +111,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
 
-            # flip coord ----
+            # flip coordinates ----
 
             flip <- self$options$flip
 
@@ -128,6 +128,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # mytitle <- jmvcore::composeTerm(components = mytitle)
 
+
+            # use title ----
+
             usetitle <- self$options$usetitle
 
             if (usetitle) {
@@ -135,6 +138,47 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot2::ggtitle(mytitle)
             }
 
+            # select theme ----
+
+            themex <- self$options$themex
+
+
+            if (themex == "jamovi") {
+                plot <- plot + ggtheme
+            } else if (themex == "easyalluvial") {
+                plot <- plot
+            # } else if (themex == "ipsum") {
+            #     plot <- plot + hrbrthemes::theme_ipsum()
+            } else if (themex == "grey") {
+                plot <- plot + ggplot2::theme_grey()
+            } else if (themex == "gray") {
+                plot <- plot + ggplot2::theme_gray()
+            } else if (themex == "bw") {
+                plot <- plot + ggplot2::theme_bw()
+            } else if (themex == "linedraw") {
+                plot <- plot + ggplot2::theme_linedraw()
+            } else if (themex == "light") {
+                plot <- plot + ggplot2::theme_light()
+            } else if (themex == "dark") {
+                plot <- plot + ggplot2::theme_dark()
+            } else if (themex == "minimal") {
+                plot <- plot + ggplot2::theme_minimal()
+            } else if (themex == "classic") {
+                plot <- plot + ggplot2::theme_classic()
+            } else if (themex == "void") {
+                plot <- plot + ggplot2::theme_void()
+            } else if (themex == "test") {
+                plot <- plot + ggplot2::theme_test()
+            }
+
+
+
+
+            # originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # }
 
             # Print Plot ----
             print(plot)

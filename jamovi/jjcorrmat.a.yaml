@@ -3,7 +3,7 @@ name:  jjcorrmat
 title: Correlation Matrix
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
-menuSubtitle: Correlation Matrix
+# menuSubtitle: Correlation Matrix
 version: '1.0.0'
 jas: '1.2'
 

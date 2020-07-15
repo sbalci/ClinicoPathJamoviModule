@@ -17,9 +17,6 @@ items:
           - originaltheme
 
 
-
-
-
     - name: plot2
       title: '`${dep} by {grvar}`'
       type: Image

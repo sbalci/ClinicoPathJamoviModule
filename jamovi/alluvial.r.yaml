@@ -37,6 +37,8 @@ items:
           - flip
           - usetitle
           - mytitle
+          - themex
+          # - originaltheme
 
 
     - title: '`Condensation Plot ${condensationvar}`'
@@ -49,6 +51,8 @@ items:
       clearWith:
           - vars
           - condensationvar
+          - themex
+          # - originaltheme
       visible: (condensationvar)
 
 

@@ -65,7 +65,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         table3 <- as.table(table2)
 
-        names(attributes(table3)$dimnames) <- c("Test", "Gold Standart")
+        names(attributes(table3)$dimnames) <- c("Test", "Golden Standard")
 
         # Prior Probability ----
 

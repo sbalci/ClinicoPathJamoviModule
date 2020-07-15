@@ -4,7 +4,7 @@
 \alias{jjpiestats}
 \title{Pie Charts}
 \usage{
-jjpiestats(data, dep, group, grvar, excl = TRUE)
+jjpiestats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +16,8 @@ jjpiestats(data, dep, group, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

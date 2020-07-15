@@ -99,6 +99,44 @@ options:
       default: 'Alluvial Plot'
 
 
+    # - name: originaltheme
+    #   title: Easy Alluvial Theme
+    #   type: Bool
+    #   default: false
+
+
+    - name: themex
+      title: Theme
+      type: List
+      options:
+        - title: jamovi
+          name: jamovi
+        - title: easyalluvial
+          name: easyalluvial
+        # - title: ipsum
+        #   name: ipsum
+        - title: grey
+          name: grey
+        - title: gray
+          name: gray
+        - title: bw
+          name: bw
+        - title: linedraw
+          name: linedraw
+        - title: light
+          name: light
+        - title: dark
+          name: dark
+        - title: minimal
+          name: minimal
+        - title: classic
+          name: classic
+        - title: void
+          name: void
+        - title: test
+          name: test
+      default: easyalluvial
+
 # - name: inter
 #   title: Interactive
 #   type: Bool

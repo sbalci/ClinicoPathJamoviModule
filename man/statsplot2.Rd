@@ -12,7 +12,8 @@ statsplot2(
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
-  excl = TRUE
+  excl = TRUE,
+  originaltheme = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ statsplot2(
 \item{alluvsty}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

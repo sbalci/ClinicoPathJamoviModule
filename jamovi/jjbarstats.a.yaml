@@ -3,7 +3,7 @@ name:  jjbarstats
 title: Bar Charts
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
-menuSubtitle: 'Bar Charts, Grouped Bar Charts'
+# menuSubtitle: 'Bar Charts, Grouped Bar Charts'
 version: '1.0.0'
 jas: '1.2'
 

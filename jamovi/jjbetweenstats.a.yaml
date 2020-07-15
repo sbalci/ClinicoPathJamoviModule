@@ -2,7 +2,7 @@
 name:  jjbetweenstats
 title: Violin Plots to Compare Between Groups
 menuGroup: JJStatsPlot
-menuSubgroup: 'Categorical vs Numeric'
+menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
 version: '1.0.0'
 jas: '1.2'

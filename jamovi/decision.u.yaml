@@ -10,7 +10,7 @@ children:
 
     children:
       - type: TargetLayoutBox
-        label: Gold Standart
+        label: Golden Standard
 
         children:
           - type: VariablesListBox

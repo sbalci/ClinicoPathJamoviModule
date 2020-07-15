@@ -79,14 +79,6 @@ Then you can install this module directly inside the jamovi, using library.
 *b: For smaller modules*
 
 
-- ClinicoPath:
-
-
-https://github.com/sbalci/ClinicoPath
-
-
-https://github.com/sbalci/ClinicoPath/releases
-
 
 - ClinicoPathDescriptives
 
@@ -98,6 +90,11 @@ https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
 - JJStatsPlot: 
 
+GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu
+
+JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)
+
+https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo
 
 https://github.com/sbalci/jjstatsplot
 
