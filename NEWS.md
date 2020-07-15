@@ -1,5 +1,12 @@
 # ClinicoPath 0.0.2.0022
 
+- GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu
+
+JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)
+
+https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+
+
 
 # ClinicoPath 0.0.2.0021
 

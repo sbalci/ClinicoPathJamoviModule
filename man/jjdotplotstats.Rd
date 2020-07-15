@@ -4,7 +4,7 @@
 \alias{jjdotplotstats}
 \title{Dot Chart}
 \usage{
-jjdotplotstats(data, dep, group, grvar, excl = TRUE)
+jjdotplotstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +16,8 @@ jjdotplotstats(data, dep, group, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

@@ -3,7 +3,7 @@ name:  jjbarstats2
 title: Bar Charts
 menuGroup: ClinicoPath
 menuSubgroup: 'Categorical vs Categorical'
-menuSubtitle: 'Bar Charts, Grouped Bar Charts'
+# menuSubtitle: 'Bar Charts, Grouped Bar Charts'
 version: '1.0.0'
 jas: '1.2'
 

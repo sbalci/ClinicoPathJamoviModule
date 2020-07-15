@@ -2,8 +2,8 @@
 name:  jjdotplotstats
 title: Dot Chart
 menuGroup: JJStatsPlot
-menuSubgroup: Categorical vs Numeric
-menuSubtitle: Dot Chart
+menuSubgroup: Categorical vs Continuous
+# menuSubtitle: Dot Chart
 version: '1.0.0'
 jas: '1.2'
 

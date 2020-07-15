@@ -4,7 +4,7 @@
 \alias{jjscatterstats}
 \title{Scatter Plot}
 \usage{
-jjscatterstats(data, dep, group, grvar, excl = TRUE)
+jjscatterstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +16,8 @@ jjscatterstats(data, dep, group, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

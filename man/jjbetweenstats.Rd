@@ -4,7 +4,7 @@
 \alias{jjbetweenstats}
 \title{Violin Plots to Compare Between Groups}
 \usage{
-jjbetweenstats(data, dep, group, grvar, excl = TRUE)
+jjbetweenstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +16,8 @@ jjbetweenstats(data, dep, group, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

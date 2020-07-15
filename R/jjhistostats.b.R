@@ -1,10 +1,9 @@
 #' @title Histogram
 #'
 #'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import ggplot2
 #'
 
 
@@ -21,7 +20,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # TODO ----
 
                 todo <- glue::glue(
-                    "<br>Welcome to ClinicoPath
+                    "<br>
+                    update 18:03<br>
+
+                    Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate Bar Charts.
                 <br><br>
@@ -123,6 +125,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # group <- jmvcore::composeTerm(components = group)
 
 
+            # originaltheme <- self$options$originaltheme
+
+
             # gghistostats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html
 
@@ -132,44 +137,53 @@ jjhistostatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggstatsplot::gghistostats(
                     data = mydata,
                     x = !!dep,
-                    binwidth = NULL,
-                    bar.measure = "count",
-                    xlab = NULL,
-                    title = NULL,
-                    subtitle = NULL,
-                    caption = NULL,
-                    type = "parametric",
-                    test.value = 0,
-                    bf.prior = 0.707,
-                    bf.message = TRUE,
-                    effsize.type = "g",
-                    conf.level = 0.95,
-                    nboot = 100,
-                    k = 2L,
-                    ggtheme = ggtheme,
-
-                    # ggtheme = ggplot2::theme_bw(),
+                    # binwidth = NULL,
+                    # bar.measure = "count",
+                    # xlab = NULL,
+                    # title = NULL,
+                    # subtitle = NULL,
+                    # caption = NULL,
+                    # type = "parametric",
+                    # test.value = 0,
+                    # bf.prior = 0.707,
+                    # bf.message = TRUE,
+                    # effsize.type = "g",
+                    # conf.level = 0.95,
+                    # nboot = 100,
+                    # k = 2L,
+                    # ggtheme = NULL,
+                    ggtheme = ggplot2::theme_bw(),
+                    # ggstatsplot.layer = FALSE,
                     ggstatsplot.layer = TRUE,
-                    bar.fill = "grey50",
-                    results.subtitle = TRUE,
-                    test.k = 0,
-                    test.value.line = FALSE,
-                    test.value.line.args = list(size = 1),
-                    test.value.label.args = list(size = 3),
-                    centrality.parameter = "mean",
-                    centrality.k = 2,
-                    centrality.line.args = list(size = 1, color = "blue"),
-                    centrality.label.args = list(color = "blue", size = 3),
-                    normal.curve = FALSE,
-                    normal.curve.args = list(size = 3),
-                    ggplot.component = NULL,
-                    output = "plot",
-                    messages = TRUE
+                    # ggstatsplot.layer = originaltheme,
+                    # bar.fill = "grey50",
+                    # results.subtitle = TRUE,
+                    # test.k = 0,
+                    # test.value.line = FALSE,
+                    # test.value.line.args = list(size = 1),
+                    # test.value.label.args = list(size = 3),
+                    # centrality.parameter = "mean",
+                    # centrality.k = 2,
+                    # centrality.line.args = list(size = 1, color = "blue"),
+                    # centrality.label.args = list(color = "blue", size = 3),
+                    # normal.curve = FALSE,
+                    # normal.curve.args = list(size = 3),
+                    # ggplot.component = NULL,
+                    # output = "plot",
+                    # messages = TRUE
                 )
 
 
+            # plot <- ggstatsplot::gghistostats(iris,
+            #                                   x = Sepal.Length ,
+            #                                   ggtheme = NULL,
+            #                                   ggstatsplot.layer = FALSE
+            # )
+
 
             # Print Plot ----
+
+            # plot <- plot + ggtheme
 
             print(plot)
             TRUE

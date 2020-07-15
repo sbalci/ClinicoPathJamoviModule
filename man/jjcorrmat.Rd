@@ -4,7 +4,7 @@
 \alias{jjcorrmat}
 \title{Correlation Matrix}
 \usage{
-jjcorrmat(data, dep, grvar, excl = TRUE)
+jjcorrmat(data, dep, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +14,8 @@ jjcorrmat(data, dep, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

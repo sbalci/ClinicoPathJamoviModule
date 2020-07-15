@@ -4,7 +4,15 @@
 \alias{jjbarstats2}
 \title{Bar Charts}
 \usage{
-jjbarstats2(data, dep, group, grvar, direction = "independent", excl = TRUE)
+jjbarstats2(
+  data,
+  dep,
+  group,
+  grvar,
+  direction = "independent",
+  excl = TRUE,
+  originaltheme = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -18,6 +26,8 @@ jjbarstats2(data, dep, group, grvar, direction = "independent", excl = TRUE)
 \item{direction}{select measurement type (repeated or independent)}
 
 \item{excl}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:

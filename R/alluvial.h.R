@@ -15,7 +15,8 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             bin = "default",
             flip = FALSE,
             usetitle = FALSE,
-            mytitle = "Alluvial Plot", ...) {
+            mytitle = "Alluvial Plot",
+            themex = "easyalluvial", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -72,6 +73,23 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "mytitle",
                 mytitle,
                 default="Alluvial Plot")
+            private$..themex <- jmvcore::OptionList$new(
+                "themex",
+                themex,
+                options=list(
+                    "jamovi",
+                    "easyalluvial",
+                    "grey",
+                    "gray",
+                    "bw",
+                    "linedraw",
+                    "light",
+                    "dark",
+                    "minimal",
+                    "classic",
+                    "void",
+                    "test"),
+                default="easyalluvial")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
@@ -83,6 +101,7 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..flip)
             self$.addOption(private$..usetitle)
             self$.addOption(private$..mytitle)
+            self$.addOption(private$..themex)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -94,7 +113,8 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         bin = function() private$..bin$value,
         flip = function() private$..flip$value,
         usetitle = function() private$..usetitle$value,
-        mytitle = function() private$..mytitle$value),
+        mytitle = function() private$..mytitle$value,
+        themex = function() private$..themex$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
@@ -105,7 +125,8 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..bin = NA,
         ..flip = NA,
         ..usetitle = NA,
-        ..mytitle = NA)
+        ..mytitle = NA,
+        ..themex = NA)
 )
 
 alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -146,7 +167,8 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "bin",
                     "flip",
                     "usetitle",
-                    "mytitle")))
+                    "mytitle",
+                    "themex")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -157,7 +179,8 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "condensationvar"),
+                    "condensationvar",
+                    "themex"),
                 visible="(condensationvar)"))}))
 
 alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -196,6 +219,7 @@ alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param flip .
 #' @param usetitle .
 #' @param mytitle .
+#' @param themex .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -215,7 +239,8 @@ alluvial <- function(
     bin = "default",
     flip = FALSE,
     usetitle = FALSE,
-    mytitle = "Alluvial Plot") {
+    mytitle = "Alluvial Plot",
+    themex = "easyalluvial") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('alluvial requires jmvcore to be installed (restart may be required)')
@@ -239,7 +264,8 @@ alluvial <- function(
         bin = bin,
         flip = flip,
         usetitle = usetitle,
-        mytitle = mytitle)
+        mytitle = mytitle,
+        themex = themex)
 
     analysis <- alluvialClass$new(
         options = options,

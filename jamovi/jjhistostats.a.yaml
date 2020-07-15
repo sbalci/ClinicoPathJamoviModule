@@ -3,7 +3,7 @@ name:  jjhistostats
 title: Histogram
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous
-menuSubtitle: Histogram
+# menuSubtitle: Histogram
 version: '1.0.0'
 jas: '1.2'
 
@@ -58,7 +58,7 @@ options:
       type: Bool
       default: true
 
-  
+
     # - name: originaltheme
     #   title: Add GGStatsPlot Layer
     #   type: Bool

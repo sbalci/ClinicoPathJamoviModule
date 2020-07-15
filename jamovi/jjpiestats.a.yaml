@@ -3,7 +3,7 @@ name:  jjpiestats
 title: Pie Charts
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
-menuSubtitle: 'Pie Charts'
+# menuSubtitle: 'Pie Charts'
 version: '1.0.0'
 jas: '1.2'
 

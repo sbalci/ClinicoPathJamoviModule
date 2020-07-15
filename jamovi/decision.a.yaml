@@ -26,7 +26,7 @@ options:
 
 
     - name: gold
-      title: Gold Standart
+      title: Golden Standard
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
