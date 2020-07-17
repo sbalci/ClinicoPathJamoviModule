@@ -84,10 +84,10 @@ options:
       default: chisq
 
 
-    - name: export
-      title: Export Html
-      type: Bool
-      default: false
+    # - name: export
+    #   title: Export Html
+    #   type: Bool
+    #   default: false
 
 
 

@@ -57,11 +57,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
-                        Outcome variable should be coded binary (0 or 1).
-                    <br><br>
-                        If patient is dead or event (recurrence) occured it is 1.
-                    <br><br>
-                        If censored (patient is alive or free of disease) at the last visit it is 0.
+                        Outcome variable should be coded binary, defining whether the patient is dead or event (recurrence) occured
+                    or censored (patient is alive or free of disease) at the last visit.
                     <br><br>
                         This function uses finalfit package. Please cite jamovi and the packages as given below.
                     <br><br>

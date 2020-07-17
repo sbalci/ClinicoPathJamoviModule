@@ -264,34 +264,21 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$tablestyle4$setContent(tabletangram)
 
 
-                export <- self$options$export
-
-                if (export)
-                {
-
-
-
-                    if (.Platform$OS.type == "windows") {
-
-                        stopifnot(file.exists("C:\\temp2"))
-
-                        write(
-                            x = tabletangram,
-                            file = "C:\\temp2\\ClinicoPathCrossTable.html"
-                        )
-
-
-                    } else {
-
-
-                    write(x = tabletangram,
-                          file = "~/Documents/ClinicoPathCrossTable.html"
-                          )
-
-                    }
-
-
-                }
+                # export <- self$options$export
+                # if (export)
+                # {
+                #     if (.Platform$OS.type == "windows") {
+                #         stopifnot(file.exists("C:\\temp2"))
+                #         write(
+                #             x = tabletangram,
+                #             file = "C:\\temp2\\ClinicoPathCrossTable.html"
+                #         )
+                #     } else {
+                #     write(x = tabletangram,
+                #           file = "~/Documents/ClinicoPathCrossTable.html"
+                #           )
+                #     }
+                # }
 
 
             }

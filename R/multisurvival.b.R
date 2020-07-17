@@ -50,9 +50,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br><br>
                         Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
-                        Outcome variable should be coded binary (0 or 1):
+                    Select outcome level from Outcome variable.
                     <br><br>
-                        If patient is dead or event (recurrence) occured it is 1.
+                    Outcome Level: if patient is dead or event (recurrence) occured.
                     <br><br>
                         If censored (patient is alive or free of disease) at the last visit it is 0.
                     <br><br>
@@ -75,22 +75,63 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Check if outcome variable is suitable or stop ----
-
-            myoutcome2 <- self$options$outcome
-            myoutcome2 <- self$data[[myoutcome2]]
-            myoutcome2 <- na.omit(myoutcome2)
-
-            if (class(myoutcome2) == "factor")
-                stop("Please use a continuous variable for outcome.")
-
-            if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+            # Check if outcome variable is suitable or stop
+            # myoutcome2 <- self$options$outcome
+            # myoutcome2 <- self$data[[myoutcome2]]
+            # myoutcome2 <- na.omit(myoutcome2)
+            # if (class(myoutcome2) == "factor")
+            #     stop("Please use a continuous variable for outcome.")
+            # if (any(myoutcome2 != 0 & myoutcome2 != 1))
+            #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
 
             # prepare data ----
 
             mydata <- self$data
+
+            # outcome1 <- self$options$outcome
+            # outcome1 <- mydata[[outcome1]]
+
+
+
+
+            contin <- c("integer", "numeric", "double")
+
+
+            outcome1 <- self$options$outcome
+
+            outcome1 <- self$data[[outcome1]]
+
+            if (inherits(outcome1, contin)) {
+
+                if ( !any(outcome1 != 0, na.rm = TRUE) || !any(outcome1 != 1, na.rm = TRUE) ) {
+                    stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+                }
+
+                mydata[["Outcome"]] <- mydata[[self$options$outcome]]
+
+            } else if (inherits(outcome1, "factor")) {
+
+
+
+
+            outcomeLevel <- self$options$outcomeLevel
+
+            mydata[["Outcome"]] <-
+                ifelse(
+                    test = mydata[[self$options$outcome]] == outcomeLevel,
+                    yes = 1,
+                    no = 0
+                )
+
+
+
+            }
+
+            # resultsdeneme <- mydata
+            # self$results$text2$setContent(resultsdeneme)
+
 
             # prepare formula ----
 
@@ -100,23 +141,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             formulaL <- jmvcore::toNumeric(formulaL)
 
-            # formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
-            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+            # formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
 
-            formulaR <- jmvcore::toNumeric(formulaR)
+            # formulaR <- jmvcore::toNumeric(formulaR)
 
 
-            myformula <- paste("Surv(", formulaL, ",", formulaR, ")")
+            myformula <- paste("Surv(", formulaL, ",", "Outcome", ")")
 
-            # results1 <- list(
+            # resultsdeneme2 <- list(
             #     formula2,
             #     formulaL,
-            #     formulaR,
+            #     # formulaR,
             #     myformula
             # )
-            #
-            # self$results$text$setContent(results1)
+
+            # self$results$text3$setContent(resultsdeneme2)
 
             # finalfit multivariate table ----
 
@@ -181,8 +222,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
-        },
+        }
 
+
+        ,
         .plot = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
             # plotData <- image$state
@@ -193,34 +236,66 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-            # Check if outcome variable is suitable or stop ----
-            myoutcome2 <- self$options$outcome
-            myoutcome2 <- self$data[[myoutcome2]]
-            myoutcome2 <- na.omit(myoutcome2)
-
-            if (class(myoutcome2) == "factor")
-                stop("Please use a continuous variable for outcome.")
 
 
-            if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+            # prepare data ----
 
             mydata <- self$data
 
+            outcomeLevel <- self$options$outcomeLevel
+
+
+
+            contin <- c("integer", "numeric", "double")
+
+
+            outcome1 <- self$options$outcome
+
+            outcome1 <- self$data[[outcome1]]
+
+            if (inherits(outcome1, contin)) {
+
+                if ( !any(outcome1 != 0, na.rm = TRUE) || !any(outcome1 != 1, na.rm = TRUE) ) {
+                    stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+                }
+
+                mydata[["Outcome"]] <- mydata[[self$options$outcome]]
+
+            } else if (inherits(outcome1, "factor")) {
+
+
+
+
+                outcomeLevel <- self$options$outcomeLevel
+
+                mydata[["Outcome"]] <-
+                    ifelse(
+                        test = mydata[[self$options$outcome]] == outcomeLevel,
+                        yes = 1,
+                        no = 0
+                    )
+
+
+
+            }
+
+            # prepare formula ----
+
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+            # formula2 <- as.vector(self$options$explanatory)
 
             formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
             formulaL <- jmvcore::toNumeric(formulaL)
 
-            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
-            formulaR <- jmvcore::toNumeric(formulaR)
-
-
-            myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
+            myformula <- paste("survival::Surv(", formulaL, ",", "Outcome", ")")
 
 
+            # hr_plot ----
             # https://finalfit.org/reference/hr_plot.html
 
             plot <-
@@ -237,69 +312,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              ggplot2::element_text(size = 12)
                                                )))
 
+
+            # print plot ----
+
             print(plot)
             TRUE
 
-        },
+        }
 
-            # .plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
-            #
-            # # plotData <- image$state
-            #
-            #     if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
-            #         return()
-            #
-            # if (nrow(self$data) == 0)
-            #     stop('Data contains no (complete) rows')
-            #
-            # # Check if outcome variable is suitable or stop ----
-            # myoutcome2 <- self$options$outcome
-            # myoutcome2 <- self$data[[myoutcome2]]
-            # myoutcome2 <- na.omit(myoutcome2)
-            #
-            # if (class(myoutcome2) == "factor")
-            #     stop("Please use a continuous variable for outcome.")
-            #
-            # if (any(myoutcome2 != 0 & myoutcome2 != 1))
-            #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-            #
-            # # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#cox-proportional-hazards-regression-model-coxph
-            # # fit a stratified model
-            #
-            # mydata <- self$data
-            #
-            # formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
-            #
-            # formulaL <- jmvcore::toNumeric(formulaL)
-            #
-            # formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-            #
-            # formulaR <- jmvcore::toNumeric(formulaR)
-            #
-            # formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
-            #
-            # formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
-            #
-            # formula3 <- as.formula(formula3)
-            #
-            # mod <-
-            #     survival::coxph(
-            #         formula = formula3,
-            #         data = mydata
-            #     )
-            #
-            # # plot
-            # plot2 <- ggstatsplot::ggcoefstats(
-            #     x = mod,
-            #     exponentiate = TRUE,
-            #     title = "Cox proportional hazards regression model"
-            # )
-            #
-            # print(plot2)
-            # TRUE
-            #
-            # },
 
+        ,
         .plot3 = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
             # plotData <- image$state
@@ -310,32 +332,67 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-            # Check if outcome variable is suitable or stop ----
-            myoutcome2 <- self$options$outcome
-            myoutcome2 <- self$data[[myoutcome2]]
-            myoutcome2 <- na.omit(myoutcome2)
-
-            if (class(myoutcome2) == "factor")
-                stop("Please use a continuous variable for outcome.")
-
-            if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
 
+
+            # prepare data ----
 
             mydata <- self$data
+
+            outcomeLevel <- self$options$outcomeLevel
+
+
+            contin <- c("integer", "numeric", "double")
+
+
+            outcome1 <- self$options$outcome
+
+            outcome1 <- self$data[[outcome1]]
+
+            if (inherits(outcome1, contin)) {
+
+                if ( !any(outcome1 != 0, na.rm = TRUE) || !any(outcome1 != 1, na.rm = TRUE) ) {
+                    stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+                }
+
+                mydata[["Outcome"]] <- mydata[[self$options$outcome]]
+
+            } else if (inherits(outcome1, "factor")) {
+
+
+
+
+                outcomeLevel <- self$options$outcomeLevel
+
+                mydata[["Outcome"]] <-
+                    ifelse(
+                        test = mydata[[self$options$outcome]] == outcomeLevel,
+                        yes = 1,
+                        no = 0
+                    )
+
+
+
+            }
+
+
+
+            # prepare formula ----
+
+            formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+            # formula2 <- as.vector(self$options$explanatory)
 
             formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
             formulaL <- jmvcore::toNumeric(formulaL)
 
-            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-
-            formulaR <- jmvcore::toNumeric(formulaR)
+            formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
-            formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+            formula3 <- paste("survival::Surv(", formulaL, ",", "Outcome", ") ~ ", formula2)
 
             formula3 <- as.formula(formula3)
 
@@ -356,8 +413,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # fit <- coxph( Surv(time, status) ~ sex + ph.ecog + age, data = lung)
         # ggforest(fit)
 
+
+            # ggforest ----
             plot3 <- survminer::ggforest(model = mod,
                                          data = mydata)
+
+
+            # print plot ----
 
             print(plot3)
             TRUE
@@ -376,40 +438,76 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     if (nrow(self$data) == 0)
         stop('Data contains no (complete) rows')
 
-    # Check if outcome variable is suitable or stop ----
-    myoutcome2 <- self$options$outcome
-    myoutcome2 <- self$data[[myoutcome2]]
-    myoutcome2 <- na.omit(myoutcome2)
 
-    if (class(myoutcome2) == "factor")
-        stop("Please use a continuous variable for outcome.")
-
-    if (any(myoutcome2 != 0 & myoutcome2 != 1))
-        stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-
-
+    # prepare data ----
 
     mydata <- self$data
+
+    outcomeLevel <- self$options$outcomeLevel
+
+
+
+    contin <- c("integer", "numeric", "double")
+
+
+    outcome1 <- self$options$outcome
+
+    outcome1 <- self$data[[outcome1]]
+
+    if (inherits(outcome1, contin)) {
+
+        if ( !any(outcome1 != 0, na.rm = TRUE) || !any(outcome1 != 1, na.rm = TRUE) ) {
+            stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+        }
+
+        mydata[["Outcome"]] <- mydata[[self$options$outcome]]
+
+    } else if (inherits(outcome1, "factor")) {
+
+
+
+
+        outcomeLevel <- self$options$outcomeLevel
+
+        mydata[["Outcome"]] <-
+            ifelse(
+                test = mydata[[self$options$outcome]] == outcomeLevel,
+                yes = 1,
+                no = 0
+            )
+
+
+
+    }
+
+
+    # prepare formula ----
+
+    formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+    # formula2 <- as.vector(self$options$explanatory)
 
     formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
     formulaL <- jmvcore::toNumeric(formulaL)
 
-    formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-
-    formulaR <- jmvcore::toNumeric(formulaR)
+    formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
 
     formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
-    formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+    formula3 <- paste("survival::Surv(", formulaL, ",", "Outcome", ") ~ ", formula2)
 
     formula3 <- as.formula(formula3)
+
+    # get fitted model ----
 
     mod <-
         survival::coxph(
             formula = formula3,
             data = mydata
         )
+
 
     # plot
 
@@ -436,11 +534,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     #                     variable=”lage3”)
 
 
+    # select adjexplanatory ----
+
     adjexplanatory <- self$options$adjexplanatory
 
     adjexplanatory <- jmvcore::composeTerm(components = adjexplanatory)
 
 
+    # ggadjustedcurves ----
 
     plot4 <- survminer::ggadjustedcurves(fit = mod,
                                          data = mydata,
@@ -451,6 +552,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          )
 
 
+    # print plot -----
 
     print(plot4)
     TRUE
@@ -462,3 +564,65 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         )
 )
+
+
+
+
+# ,
+# .plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot function
+#
+# # plotData <- image$state
+#
+#     if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) )
+#         return()
+#
+# if (nrow(self$data) == 0)
+#     stop('Data contains no (complete) rows')
+#
+# # Check if outcome variable is suitable or stop
+# myoutcome2 <- self$options$outcome
+# myoutcome2 <- self$data[[myoutcome2]]
+# myoutcome2 <- na.omit(myoutcome2)
+#
+# if (class(myoutcome2) == "factor")
+#     stop("Please use a continuous variable for outcome.")
+#
+# if (any(myoutcome2 != 0 & myoutcome2 != 1))
+#     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+#
+# # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#cox-proportional-hazards-regression-model-coxph
+# # fit a stratified model
+#
+# mydata <- self$data
+#
+# formulaL <- jmvcore::constructFormula(terms = self$options$overalltime)
+#
+# formulaL <- jmvcore::toNumeric(formulaL)
+#
+# formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+#
+# formulaR <- jmvcore::toNumeric(formulaR)
+#
+# formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+#
+# formula3 <- paste("survival::Surv(", formulaL, ",", formulaR, ") ~ ", formula2)
+#
+# formula3 <- as.formula(formula3)
+#
+# mod <-
+#     survival::coxph(
+#         formula = formula3,
+#         data = mydata
+#     )
+#
+# # plot
+# plot2 <- ggstatsplot::ggcoefstats(
+#     x = mod,
+#     exponentiate = TRUE,
+#     title = "Cox proportional hazards regression model"
+# )
+#
+# print(plot2)
+# TRUE
+#
+# }

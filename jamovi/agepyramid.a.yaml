@@ -1,0 +1,30 @@
+---
+name:  agepyramid
+title: Age Pyramid
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: age
+      title: Age
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: gender
+      title: Gender
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: female
+      title: Select Female
+      type: Level
+      variable: (gender)
+
+...

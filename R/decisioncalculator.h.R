@@ -11,7 +11,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             FP = 30,
             FN = 20,
             pp = FALSE,
-            pprob = 0.3, ...) {
+            pprob = 0.3,
+            fnote = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -45,6 +46,10 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 default=0.3,
                 min=0.001,
                 max=0.999)
+            private$..fnote <- jmvcore::OptionBool$new(
+                "fnote",
+                fnote,
+                default=FALSE)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -52,6 +57,7 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..FN)
             self$.addOption(private$..pp)
             self$.addOption(private$..pprob)
+            self$.addOption(private$..fnote)
         }),
     active = list(
         TP = function() private$..TP$value,
@@ -59,20 +65,25 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         FP = function() private$..FP$value,
         FN = function() private$..FN$value,
         pp = function() private$..pp$value,
-        pprob = function() private$..pprob$value),
+        pprob = function() private$..pprob$value,
+        fnote = function() private$..fnote$value),
     private = list(
         ..TP = NA,
         ..TN = NA,
         ..FP = NA,
         ..FN = NA,
         ..pp = NA,
-        ..pprob = NA)
+        ..pprob = NA,
+        ..fnote = NA)
 )
 
 decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        nTable = function() private$.items[["nTable"]],
+        ratioTable = function() private$.items[["ratioTable"]],
+        text3 = function() private$.items[["text3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -87,7 +98,115 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Decision Calculator",
                 clearWith=list(
                     "pp",
-                    "pprob")))}))
+                    "pprob")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nTable",
+                title="Decision Test Statistics",
+                swapRowsColumns=TRUE,
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="tablename", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="TotalPop", 
+                        `title`="Total", 
+                        `type`="number"),
+                    list(
+                        `name`="DiseaseP", 
+                        `title`="Diseased", 
+                        `type`="number"),
+                    list(
+                        `name`="DiseaseN", 
+                        `title`="Healthy", 
+                        `type`="number"),
+                    list(
+                        `name`="TestP", 
+                        `title`="Positive Tests", 
+                        `type`="number"),
+                    list(
+                        `name`="TestN", 
+                        `title`="Negative Tests", 
+                        `type`="number"),
+                    list(
+                        `name`="TestT", 
+                        `title`="True Test", 
+                        `type`="number"),
+                    list(
+                        `name`="TestW", 
+                        `title`="Wrong Test", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ratioTable",
+                title="Decision Test Statistics",
+                swapRowsColumns=TRUE,
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="tablename", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="Sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="Spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="AccurT", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PrevalenceD", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PPV", 
+                        `title`="Positive Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="NPV", 
+                        `title`="Negative Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PostTestProbDisease", 
+                        `title`="Post-test Disease Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PostTestProbHealthy", 
+                        `title`="Post-test Health Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="LRP", 
+                        `title`="Positive Likelihood Ratio", 
+                        `type`="number"),
+                    list(
+                        `name`="LRN", 
+                        `title`="Negative Likelihood Ratio", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text3",
+                title="epiR"))}))
 
 decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisioncalculatorBase",
@@ -124,10 +243,20 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param pp .
 #' @param pprob Prior probability (disease prevelance in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
+#' @param fnote .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$nTable$asDF}
+#'
+#' \code{as.data.frame(results$nTable)}
 #'
 #' @export
 decisioncalculator <- function(
@@ -136,7 +265,8 @@ decisioncalculator <- function(
     FP = 30,
     FN = 20,
     pp = FALSE,
-    pprob = 0.3) {
+    pprob = 0.3,
+    fnote = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('decisioncalculator requires jmvcore to be installed (restart may be required)')
@@ -148,7 +278,8 @@ decisioncalculator <- function(
         FP = FP,
         FN = FN,
         pp = pp,
-        pprob = pprob)
+        pprob = pprob,
+        fnote = fnote)
 
     analysis <- decisioncalculatorClass$new(
         options = options,

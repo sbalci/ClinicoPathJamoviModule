@@ -11,8 +11,7 @@ crosstable(
   sty = "nejm",
   excl = TRUE,
   cont = "mean",
-  pcat = "chisq",
-  export = FALSE
+  pcat = "chisq"
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ crosstable(
 \item{cont}{.}
 
 \item{pcat}{.}
-
-\item{export}{.}
 }
 \value{
 A results object containing:

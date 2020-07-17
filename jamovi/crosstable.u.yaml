@@ -48,9 +48,9 @@ children:
             name: pcat
             enable: (sty:finalfit)
 
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: export
-            enable: (sty:nejm || sty:lancet || sty:hmisc)
+      # - type: LayoutBox
+      #   margin: large
+      #   children:
+      #     - type: CheckBox
+      #       name: export
+      #       enable: (sty:nejm || sty:lancet || sty:hmisc)

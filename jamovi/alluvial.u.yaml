@@ -14,7 +14,6 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-
       - type: TargetLayoutBox
         label: Condensation Variable
         children:
@@ -22,8 +21,6 @@ children:
             name: condensationvar
             maxItemCount: 1
             isTarget: true
-
-
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -40,17 +37,17 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Options1
+                label: Output
                 fitToGrid: true
                 children:
-                    - type: CheckBox
-                      name: excl
-                    - type: CheckBox
-                      name: marg
-                    - type: CheckBox
-                      name: verb
-                    - type: CheckBox
-                      name: flip
+                  - type: CheckBox
+                    name: excl
+                  - type: CheckBox
+                    name: marg
+                    enable: '(!themex:jamovi)'
+                  - type: CheckBox
+                    name: flip
+                    enable: (!marg)
           - type: LayoutBox
             cell:
               column: 1
@@ -58,25 +55,26 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Options2
+                label: Plots
                 fitToGrid: true
                 cell:
                   column: 1
                   row: 0
                 children:
-                    - type: ComboBox
-                      name: themex
-                    # - type: CheckBox
-                    #   name: originaltheme
-                    - type: ComboBox
-                      name: fill
-                      enable: (!themex:jamovi)
-                    - type: ComboBox
-                      name: bin
-                    - type: CheckBox
-                      name: usetitle
-                    - type: TextBox
-                      name: mytitle
-                      format: string
-                      width: large
-                      enable: (usetitle)
+                  - type: ComboBox
+                    name: themex
+                    enable: (!marg)
+                  - type: ComboBox
+                    name: fill
+                    enable: '(marg || !themex:jamovi)'
+                  - type: ComboBox
+                    name: bin
+                  - type: CheckBox
+                    name: usetitle
+                    enable: (!marg)
+                    children:
+                      - type: TextBox
+                        name: mytitle
+                        format: string
+                        width: large
+                        enable: (usetitle)

@@ -20,7 +20,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- "
                 <br>Welcome to ClinicoPath
                 <br><br>
-                This tool will help you form Alluvial Plots.
+                This tool will help you form Alluvial Diagrams (Alluvial Plots).
                 <hr><br>
                 "
 
@@ -65,10 +65,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fill <- jmvcore::composeTerm(self$options$fill)
 
 
+            # Exclude NA ----
+
+            excl <- self$options$excl
+
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
             # verbose ----
             # verbose <- FALSE
-            verb <- self$options$verb
+            # verb <- self$options$verb
             # if (isTRUE(verb)) verbose <- TRUE
 
             # fill_by ----
@@ -82,11 +87,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (bin == "default") bin <- c("LL", "ML", "M", "MH", "HH")
 
-            # Exclude NA ----
-
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
             # easyalluvial ----
@@ -96,7 +96,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 easyalluvial::alluvial_wide( data = mydata,
                                              max_variables = 8,
                                              fill_by = fill,
-                                             verbose = verb,
+                                             verbose = TRUE,
+                                             # verbose = verb,
                                              bin_labels = bin
                 )
 
@@ -106,8 +107,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             marg <- self$options$marg
 
             if (marg) {
-                plot <- plot %>%
-                    easyalluvial::add_marginal_histograms(mydata)
+                plot <- easyalluvial::add_marginal_histograms(p = plot,
+                                                              data_input = mydata,
+                                                              keep_labels = TRUE,
+                                                              top = TRUE,
+                                                              plot = TRUE)
                     }
 
 
@@ -117,26 +121,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (flip) {
                 plot <- plot +
-                    ggplot2::coord_flip() +
-                    ggplot2::theme_minimal()
+                    ggplot2::coord_flip()
+                    # ggplot2::theme_minimal()
             }
 
 
-            # add title ----
 
-            mytitle <- self$options$mytitle
-
-            # mytitle <- jmvcore::composeTerm(components = mytitle)
-
-
-            # use title ----
-
-            usetitle <- self$options$usetitle
-
-            if (usetitle) {
-                plot <- plot +
-                    ggplot2::ggtitle(mytitle)
-            }
 
             # select theme ----
 
@@ -145,7 +135,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (themex == "jamovi") {
                 plot <- plot + ggtheme
-            } else if (themex == "easyalluvial") {
+            } else if (marg || themex == "easyalluvial") {
                 plot <- plot
             # } else if (themex == "ipsum") {
             #     plot <- plot + hrbrthemes::theme_ipsum()
@@ -171,14 +161,30 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot + ggplot2::theme_test()
             }
 
-
-
-
             # originaltheme <- self$options$originaltheme
             #
             # if (!originaltheme) {
             #     plot <- plot + ggtheme
             # }
+
+
+            # add title ----
+
+            mytitle <- self$options$mytitle
+
+            # mytitle <- jmvcore::composeTerm(components = mytitle)
+
+
+            # use title ----
+
+            usetitle <- self$options$usetitle
+
+            if (usetitle) {
+                plot <- plot +
+                    ggplot2::ggtitle(mytitle)
+            }
+
+
 
             # Print Plot ----
             print(plot)

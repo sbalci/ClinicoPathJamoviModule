@@ -88,6 +88,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         # Self Calculation https://cran.r-project.org/web/packages/caret/caret.pdf
         # https://online.stat.psu.edu/stat509/node/150/
 
+        # https://en.wikipedia.org/wiki/Sensitivity_and_specificity
 
         TotalPop <- TP + TN + FP + FN
 
@@ -136,27 +137,96 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        LRP <- Sens/(1 - Spec)
+        LRP <- Sens / (1 - Spec)
 
-        LRN <- (1 - Sens)/Spec
-
-
+        LRN <- (1 - Sens) / Spec
 
 
 
 
-        # Populate Table
-
-        # manualtable <- self$results$manualtable
-        # manualtable$setRow(rowNo = 1, values = list(tablename = "Decision Test Statistics",
-        #     TotalPop = TotalPop, DiseaseP = DiseaseP, DiseaseN = DiseaseN,
-        #     TestP = TestP, TestN = TestN, TestT = TestT, TestW = TestW, Sens = Sens,
-        #     Spec = Spec, AccurT = AccurT, PrevalenceD = PrevalenceD, PPV = PPV,
-        #     NPV = NPV, PostTestProbDisease = PostTestProbDisease, PostTestProbHealthy = PostTestProbHealthy))
 
 
+        # Populate Table ----
+
+        nTable <- self$results$nTable
+        nTable$setRow(rowNo = 1,
+                           values = list(
+            tablename = "n",
+            TotalPop = TotalPop,
+            DiseaseP = DiseaseP,
+            DiseaseN = DiseaseN,
+            TestP = TestP,
+            TestN = TestN,
+            TestT = TestT,
+            TestW = TestW
+                           )
+        )
+
+        ratioTable <- self$results$ratioTable
+        ratioTable$setRow(rowNo = 1,
+                      values = list(
+            tablename = "Ratios",
+            Sens = Sens,
+            Spec = Spec,
+            AccurT = AccurT,
+            PrevalenceD = PrevalenceD,
+            PPV = PPV,
+            NPV = NPV,
+            PostTestProbDisease = PostTestProbDisease,
+            PostTestProbHealthy = PostTestProbHealthy,
+            LRP = LRP,
+            LRN = LRN
+            )
+            )
+
+        # footnotes ----
+
+        if (self$options$fnote) {
+
+        # nTable$addFootnote(rowKey = "1", col = "TotalPop", "Total Population")
+
+        nTable$addFootnote(rowNo = 1, col = "TotalPop", "Total Number of Subjects")
+
+        nTable$addFootnote(rowNo = 1, col = "DiseaseP", "Total Number of Subjects with Disease")
+
+        nTable$addFootnote(rowNo = 1, col = "DiseaseN", "Total Number of Healthy Subjects")
+
+        nTable$addFootnote(rowNo = 1, col = "TestP", "Total Number of Positive Tests")
+
+        nTable$addFootnote(rowNo = 1, col = "TestN", "Total Number of Negative Tests")
+
+        nTable$addFootnote(rowNo = 1, col = "TestT", "Total Number of True Test Results")
+
+        nTable$addFootnote(rowNo = 1, col = "TestW", "Total Number of Wrong Test Results")
 
 
+        }
+
+
+        if (self$options$fnote) {
+
+        ratioTable$addFootnote(rowNo = 1, col = "Sens", "Sensitivity (True Positives among Diseased)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "Spec", "Specificity (True Negatives among Healthy)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "AccurT", "Accuracy (True Test Result Ratio)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "PrevalenceD", "Disease Prevalence in this population")
+
+        ratioTable$addFootnote(rowNo = 1, col = "PPV", "Positive Predictive Value (Probability of having disease after a positive test using this experimental population)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "NPV", "Negative Predictive Value (Probability of being healthy after a negative test using this experimental population)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", "Post-test Probability of Having Disease  (Probability of having disease after a positive test using known Population Prevalence)")
+
+        ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)")
+
+        # ratioTable$addFootnote(rowNo = 1, col = "LRP", "")
+
+        # ratioTable$addFootnote(rowNo = 1, col = "LRN", "")
+
+
+        }
 
 
 
@@ -192,7 +262,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # use epiR
+        # use epiR ----
+
+        epirresult <- epiR::epi.tests(dat = table3)
+        self$results$text3$setContent(epirresult)
+
+
+        # epirresult[[1]]
+        # epirresult[[2]]
+        # epirresult[[2]][["conf.level"]]
+        # epirresult[[2]][["elements"]]
+        # epirresult[[2]][["rval"]]
+        # epirresult[[2]][["tab"]]
+        # epirresult[[4]]
+
 
 
 

@@ -13,6 +13,16 @@ items:
           - outcome
           - overalltime
 
+
+    # - name:  text3
+    #   title: Deneme
+    #   type:  Preformatted
+
+    # - name:  text2
+    #   title: Deneme
+    #   type:  Preformatted
+
+
     - name:  text
       title: Multivariate Survival
       type:  Html
@@ -33,7 +43,7 @@ items:
           - explanatory
           - outcome
           - overalltime
-      visible: (sty:t1)
+      visible: (hr && sty:t1)
       refs: finalfit
 
     # - name: plot2
@@ -53,7 +63,7 @@ items:
 
 
     - name: plot3
-      title: Hazards Regression (Forest) Plot
+      title: Hazards Regression Plot
       type: Image
       width:  800
       height: 600
@@ -63,7 +73,7 @@ items:
           - explanatory
           - outcome
           - overalltime
-      visible: (sty:t3)
+      visible: (hr && sty:t3)
       refs: survminer
 
     - name: plot4

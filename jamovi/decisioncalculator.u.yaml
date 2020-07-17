@@ -34,7 +34,6 @@ children:
               - type: TextBox
                 name: TN
                 format: number
-
   - type: Label
     label: Options
     children:
@@ -48,3 +47,8 @@ children:
             label: ''
             format: number
             enable: (pp)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fnote

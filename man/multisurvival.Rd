@@ -7,8 +7,10 @@
 multisurvival(
   data,
   explanatory,
-  outcome,
   overalltime,
+  outcome,
+  outcomeLevel,
+  hr = FALSE,
   sty = "t1",
   ac = FALSE,
   adjexplanatory
@@ -19,9 +21,13 @@ multisurvival(
 
 \item{explanatory}{.}
 
+\item{overalltime}{.}
+
 \item{outcome}{.}
 
-\item{overalltime}{.}
+\item{outcomeLevel}{.}
+
+\item{hr}{.}
 
 \item{sty}{.}
 

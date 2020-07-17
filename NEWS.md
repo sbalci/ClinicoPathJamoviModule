@@ -1,3 +1,13 @@
+# ClinicoPath 0.0.2.0023
+
+- added Age Pyramid
+
+- survival status can be selected from levels
+
+- WIP decisioncalculator
+
+
+
 # ClinicoPath 0.0.2.0022
 
 - GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu

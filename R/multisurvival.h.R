@@ -7,8 +7,10 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             explanatory = NULL,
-            outcome = NULL,
             overalltime = NULL,
+            outcome = NULL,
+            outcomeLevel = NULL,
+            hr = FALSE,
             sty = "t1",
             ac = FALSE,
             adjexplanatory = NULL, ...) {
@@ -22,13 +24,6 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
                 explanatory)
-            private$..outcome <- jmvcore::OptionVariable$new(
-                "outcome",
-                outcome,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
                 overalltime,
@@ -36,6 +31,17 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..outcome <- jmvcore::OptionVariable$new(
+                "outcome",
+                outcome)
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(outcome)")
+            private$..hr <- jmvcore::OptionBool$new(
+                "hr",
+                hr,
+                default=FALSE)
             private$..sty <- jmvcore::OptionList$new(
                 "sty",
                 sty,
@@ -52,23 +58,29 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 adjexplanatory)
 
             self$.addOption(private$..explanatory)
-            self$.addOption(private$..outcome)
             self$.addOption(private$..overalltime)
+            self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..hr)
             self$.addOption(private$..sty)
             self$.addOption(private$..ac)
             self$.addOption(private$..adjexplanatory)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
-        outcome = function() private$..outcome$value,
         overalltime = function() private$..overalltime$value,
+        outcome = function() private$..outcome$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        hr = function() private$..hr$value,
         sty = function() private$..sty$value,
         ac = function() private$..ac$value,
         adjexplanatory = function() private$..adjexplanatory$value),
     private = list(
         ..explanatory = NA,
-        ..outcome = NA,
         ..overalltime = NA,
+        ..outcome = NA,
+        ..outcomeLevel = NA,
+        ..hr = NA,
         ..sty = NA,
         ..ac = NA,
         ..adjexplanatory = NA)
@@ -118,12 +130,12 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime"),
-                visible="(sty:t1)",
+                visible="(hr && sty:t1)",
                 refs="finalfit"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
-                title="Hazards Regression (Forest) Plot",
+                title="Hazards Regression Plot",
                 width=800,
                 height=600,
                 renderFun=".plot3",
@@ -132,7 +144,7 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "overalltime"),
-                visible="(sty:t3)",
+                visible="(hr && sty:t3)",
                 refs="survminer"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -180,8 +192,10 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'}
 #' @param data The data as a data frame.
 #' @param explanatory .
-#' @param outcome .
 #' @param overalltime .
+#' @param outcome .
+#' @param outcomeLevel .
+#' @param hr .
 #' @param sty .
 #' @param ac .
 #' @param adjexplanatory .
@@ -198,8 +212,10 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 multisurvival <- function(
     data,
     explanatory,
-    outcome,
     overalltime,
+    outcome,
+    outcomeLevel,
+    hr = FALSE,
     sty = "t1",
     ac = FALSE,
     adjexplanatory) {
@@ -208,22 +224,24 @@ multisurvival <- function(
         stop('multisurvival requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
-    if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(overalltime)) overalltime <- jmvcore::resolveQuo(jmvcore::enquo(overalltime))
+    if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(adjexplanatory)) adjexplanatory <- jmvcore::resolveQuo(jmvcore::enquo(adjexplanatory))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(explanatory), explanatory, NULL),
-            `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(overalltime), overalltime, NULL),
+            `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(adjexplanatory), adjexplanatory, NULL))
 
 
     options <- multisurvivalOptions$new(
         explanatory = explanatory,
-        outcome = outcome,
         overalltime = overalltime,
+        outcome = outcome,
+        outcomeLevel = outcomeLevel,
+        hr = hr,
         sty = sty,
         ac = ac,
         adjexplanatory = adjexplanatory)
