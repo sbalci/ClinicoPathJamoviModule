@@ -27,26 +27,31 @@ options:
       title: Explanatory Variables
       type: Variables
 
-    - name: outcome
-      title: 'Outcome (event:1, censored:0)'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-
     - name: overalltime
-      title: 'Overall Time (in months)'
+      title: 'Time (in months)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-    # - name: outcomeLevel
-    #   title: |
-    #       Select Event (Death, Recurrence)
-    #   type: Level
-    #   variable: (outcome)
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+
+    - name: outcomeLevel
+      title: Select Event Level
+      type: Level
+      variable: (outcome)
+
+
+    - name: hr
+      title: Show Hazards Regression Plot
+      type: Bool
+      default: false
+
 
     - name: sty
-      title: Plot Style
+      title: Select Plot Style
       type: List
       options:
         - title: finalfit
@@ -59,7 +64,7 @@ options:
 
 
     - name: ac
-      title: Adjusted Survival Curve
+      title: Show Adjusted Survival Curve
       type: Bool
       default: false
 

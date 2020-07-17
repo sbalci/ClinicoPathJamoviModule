@@ -11,8 +11,7 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             sty = "nejm",
             excl = TRUE,
             cont = "mean",
-            pcat = "chisq",
-            export = FALSE, ...) {
+            pcat = "chisq", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -60,10 +59,6 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "chisq",
                     "fisher"),
                 default="chisq")
-            private$..export <- jmvcore::OptionBool$new(
-                "export",
-                export,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -71,7 +66,6 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..excl)
             self$.addOption(private$..cont)
             self$.addOption(private$..pcat)
-            self$.addOption(private$..export)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -79,16 +73,14 @@ crosstableOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         sty = function() private$..sty$value,
         excl = function() private$..excl$value,
         cont = function() private$..cont$value,
-        pcat = function() private$..pcat$value,
-        export = function() private$..export$value),
+        pcat = function() private$..pcat$value),
     private = list(
         ..vars = NA,
         ..group = NA,
         ..sty = NA,
         ..excl = NA,
         ..cont = NA,
-        ..pcat = NA,
-        ..export = NA)
+        ..pcat = NA)
 )
 
 crosstableResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -189,7 +181,6 @@ crosstableBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param excl .
 #' @param cont .
 #' @param pcat .
-#' @param export .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -207,8 +198,7 @@ crosstable <- function(
     sty = "nejm",
     excl = TRUE,
     cont = "mean",
-    pcat = "chisq",
-    export = FALSE) {
+    pcat = "chisq") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('crosstable requires jmvcore to be installed (restart may be required)')
@@ -229,8 +219,7 @@ crosstable <- function(
         sty = sty,
         excl = excl,
         cont = cont,
-        pcat = pcat,
-        export = export)
+        pcat = pcat)
 
     analysis <- crosstableClass$new(
         options = options,

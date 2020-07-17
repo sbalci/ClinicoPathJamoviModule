@@ -15,24 +15,32 @@ children:
             name: explanatory
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Outcome (event:1, censored:0)'
-        children:
-          - type: VariablesListBox
-            name: outcome
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Overall Time (in months)
+        label: Time (in months)
         children:
           - type: VariablesListBox
             name: overalltime
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: 'Outcome'
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome)
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: sty
+      - type: CheckBox
+        name: hr
+        children:
+          - type: ComboBox
+            name: sty
+            enable: (hr)
+
   - type: LayoutBox
     margin: large
     children:
@@ -43,7 +51,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Use Variable for Adjusted Survival Curve
+        label: Variable for Adjusted Survival Curve
         children:
           - type: VariablesListBox
             name: adjexplanatory

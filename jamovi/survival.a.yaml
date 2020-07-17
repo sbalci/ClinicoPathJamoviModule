@@ -45,21 +45,19 @@ options:
       permitted: [ factor ]
 
     - name: overalltime
-      title: 'Overall Time (in months)'
+      title: 'Time (in months)'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: outcome
-      title: 'Outcome (event:1, censored:0)'
+      title: 'Outcome'
       type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
 
-    # - name: outcomeLevel
-    #   title: Outcome Level
-    #   type: Level
-    #   variable: (outcome)
+    - name: outcomeLevel
+      title: Select Event Level
+      type: Level
+      variable: (outcome)
 
 
     - name: cutp

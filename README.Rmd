@@ -79,7 +79,6 @@ Then you can install this module directly inside the jamovi, using library.
 *b: For smaller modules*
 
 
-
 - ClinicoPathDescriptives
 
 

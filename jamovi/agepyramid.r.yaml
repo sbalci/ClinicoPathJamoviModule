@@ -1,0 +1,26 @@
+---
+name:  agepyramid
+title: Age Pyramid
+jrs:   '1.1'
+
+items:
+
+    - name:  text
+      title: Age Pyramid
+      type:  Html
+
+
+    - name: plot
+      title: 'Age Pyramid'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - age
+          - gender
+          - female
+
+
+...

@@ -10,7 +10,6 @@ alluvial(
   condensationvar,
   excl = TRUE,
   marg = FALSE,
-  verb = FALSE,
   fill = "first_variable",
   bin = "default",
   flip = FALSE,
@@ -30,8 +29,6 @@ the values used for the Alluvial Diagram.}
 \item{excl}{.}
 
 \item{marg}{.}
-
-\item{verb}{.}
 
 \item{fill}{A list for the argument fill for selecting the variable to be
 represented by color. Default is 'first_variable'.}

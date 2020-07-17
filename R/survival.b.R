@@ -14,34 +14,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-
-            # # Error Message ----
-            #
-            # if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-            #
-            # if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
-            #     # ToDo Message ----
-            #     todo <- "
-            #         <br>Welcome to ClinicoPath
-            #                   <br><br>
-            #                   This tool will help you form an Alluvial Plots.
-            #                   "
-            #     html <- self$results$todo
-            #     html$setContent(todo)
-            #
-            # } else {
-            #     todo <- ""
-            #     html <- self$results$todo
-            #     html$setContent(todo)
-            #
-            #
-            #
-            # }
-
-
-
-
-
             # If no variable selected Initial Message ----
 
             if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) ) {
@@ -53,11 +25,9 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 Explanatory variable should be categorical (ordinal or nominal).
                 <br><br>
-                Outcome variable should be coded binary (0 or 1).
+                Select outcome level from Outcome variable.
                 <br><br>
-                If patient is dead or event (recurrence) occured it is 1.
-                <br><br>
-                If censored (patient is alive or free of disease) at the last visit it is 0.
+                Outcome Level: if patient is dead or event (recurrence) occured.
                 <br><br>
                 Survival should be numeric, continuous, and in months.
                 <br><br>
@@ -82,28 +52,15 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     stop('Data contains no (complete) rows')
 
 
-                # Check if outcome variable is suitable or stop ----
-
-
-                myoutcome2 <- self$options$outcome
-
-                myoutcome2 <- self$data[[myoutcome2]]
-
-                myoutcome2 <- na.omit(myoutcome2)
-
-
-
-                # if ( !is.numeric(myoutcome2) || any(myoutcome2 != 0 & myoutcome2 != 1))
-                if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                    stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-
-
-
-
-                # self$results$deneme$setContent(head(mydata))
-                #
-                # self$results$deneme2$setContent(head(mydata))
-
+    # # Check if outcome variable is suitable or stop
+                # myoutcome2 <- self$options$outcome
+                # myoutcome2 <- self$data[[myoutcome2]]
+                # myoutcome2 <- na.omit(myoutcome2)
+                # # if ( !is.numeric(myoutcome2) || any(myoutcome2 != 0 & myoutcome2 != 1))
+                # if (any(myoutcome2 != 0 & myoutcome2 != 1))
+                #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+                # # self$results$deneme$setContent(head(mydata))
+                # # self$results$deneme2$setContent(head(mydata))
 
 
                 # Read Data ----
@@ -118,14 +75,44 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 uthefactor <- self$data[[uthefactor]]
 
-                uoutcome <- self$options$outcome
 
-                uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
-
+                contin <- c("integer", "numeric", "double")
 
 
-                # # myoutcomelevel <- self$options$outcomeLevel
-                # myoutcome <- ifelse(self$data[[myoutcome]] == self$options$outcomeLevel, 1, 0)
+                outcome1 <- self$options$outcome
+
+                outcome1 <- self$data[[outcome1]]
+
+                if (inherits(outcome1, contin)) {
+
+                    if ( !any(outcome1 != 0, na.rm = TRUE) || !any(outcome1 != 1, na.rm = TRUE) ) {
+                        stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+
+                    }
+
+                    uoutcome <- outcome1
+
+                } else if (inherits(outcome1, "factor")) {
+                    outcomeLevel <- self$options$outcomeLevel
+
+                    uoutcome <-
+                        ifelse(test = outcome1 == outcomeLevel,
+                               yes = 1,
+                               no = 0)
+                }
+
+
+
+
+
+
+               # self$results$textdeneme$setContent(
+               #     list(
+               #         uoutcome,
+               #         outcomeLevel,
+               #         outcome2
+               #         )
+               # )
 
 
 
@@ -133,10 +120,11 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                      thefactor = uthefactor,
                                      myoutcome = uoutcome)
 
-                mydata <- na.omit(mydata)
+                mydata <- jmvcore::naOmit(mydata)
 
 
                 # # Run code for analysis ----
+
                 # self$results$deneme3$setContent(mydata[[myoutcome]])
                 # self$results$deneme4$setContent(mydata)
 
@@ -160,7 +148,13 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              row.names = FALSE,
                                              align = c('l', rep('r', 9)),
                                              format = "html",
-                                             digits = 1)
+                                             digits = 1
+                                             )
+
+
+
+
+
 
                 # results 2 median survival summary ----
 
@@ -173,7 +167,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dplyr::mutate(
                         description =
                             glue::glue(
-                                "When ", self$options$explanatory, "{.data[[self$options$explanatory]]}, median survival is {median} [{x0_95lcl} - {x0_95ucl}, 95% CI] months."
+                                "When ", self$options$explanatory, "{.data[[self$options$explanatory]]}, median survival is {round(median, digits = 1)} [{round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}, 95% CI] months."
                             )
                     ) %>%
                     dplyr::mutate(
@@ -315,7 +309,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                     # results 8 pairwise comparison ----
+        # results 8 pairwise comparison ----
 
                 if(n_level < 3) {
 
@@ -378,16 +372,26 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 # Prepare Data For Plot ----
 
-                # plotData <- mydata
-                # image <- self$results$plot
-                # image$setState(plotData)
+                plotData <- mydata
+
+                image <- self$results$plot
+                image$setState(plotData)
+
+                image2 <- self$results$plot2
+                image2$setState(plotData)
+
+                image3 <- self$results$plot3
+                image3$setState(plotData)
+
 
             }
 },
 
-.plot=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
 
-    # plotData <- image$state
+
+.plot = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
+
+    plotData <- image$state
 
     if (nrow(self$data) == 0)
         stop('Data contains no (complete) rows')
@@ -401,31 +405,21 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         return()
 
 
+    #     uoveralltime <- self$options$overalltime
+    #     uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
+    #     uthefactor <- self$options$explanatory
+    #     uthefactor <- self$data[[uthefactor]]
+    #     uoutcome <- self$options$outcome
+    #     uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
+    #     mydata <- data.frame(myoveralltime = uoveralltime,
+    #                          thefactor = uthefactor,
+    #                          myoutcome = uoutcome)
+    #     mydata <- na.omit(mydata)
 
-    uoveralltime <- self$options$overalltime
+    # names(mydata) <- c(self$options$overalltime,
+    #                    self$options$explanatory,
+    #                    self$options$outcome)
 
-    uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
-
-    uthefactor <- self$options$explanatory
-
-    uthefactor <- self$data[[uthefactor]]
-
-    uoutcome <- self$options$outcome
-
-    uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
-
-
-
-
-    mydata <- data.frame(myoveralltime = uoveralltime,
-                         thefactor = uthefactor,
-                         myoutcome = uoutcome)
-
-    mydata <- na.omit(mydata)
-
-    names(mydata) <- c(self$options$overalltime,
-                       self$options$explanatory,
-                       self$options$outcome)
 
 
     formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
@@ -438,7 +432,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
 
-    plot <- mydata %>%
+
+    plot <- plotData %>%
         finalfit::surv_plot(.data = .,
                             dependent = myformula,
                             explanatory = formula2,
@@ -451,6 +446,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             subtitle = "Based on Kaplan-Meier estimates"
         )
 
+    # plot <- plot + ggtheme
 
     print(plot)
     TRUE
@@ -461,11 +457,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+
 # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
 ,
-.plot2=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
+.plot2 = function(image2, ggtheme, theme, ...) {  # <-- the plot function ----
 
-    # plotData <- image$state
+    plotData <- image2$state
 
     if (nrow(self$data) == 0)
         stop('Data contains no (complete) rows')
@@ -479,33 +476,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         return()
 
 
-
-    uoveralltime <- self$options$overalltime
-
-    uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
-
-    uthefactor <- self$options$explanatory
-
-    uthefactor <- self$data[[uthefactor]]
-
-    uoutcome <- self$options$outcome
-
-    uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
-
-
-
-
-    mydata <- data.frame(myoveralltime = uoveralltime,
-                         thefactor = uthefactor,
-                         myoutcome = uoutcome)
-
-    mydata <- na.omit(mydata)
-
-    names(mydata) <- c(self$options$overalltime,
-                       self$options$explanatory,
-                       self$options$outcome)
-
-
     formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
     formula2 <- jmvcore::composeTerm(formula2)
@@ -516,7 +486,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
 
-    plot2 <- mydata %>%
+
+    plot2 <- plotData %>%
         finalfit::surv_plot(.data = .,
                             dependent = myformula,
                             explanatory = formula2,
@@ -525,9 +496,9 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             legend = 'none',
                             break.time.by = 12,
                             xlim = c(0,60),
-                            title = paste0("Cumulative Events ", self$options$explanatory),
+                            title = paste0("Cumulative Events ", self$options$explanatory)
                             # subtitle = "Based on Kaplan-Meier estimates",
-                            fun = "event"
+                            , fun = "event"
 
         )
 
@@ -541,9 +512,9 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 ,
-.plot3=function(image, ggtheme, theme, ...) {  # <-- the plot function ----
+.plot3 = function(image3, ggtheme, theme, ...) {  # <-- the plot function ----
 
-    # plotData <- image$state
+    plotData <- image3$state
 
     if (nrow(self$data) == 0)
         stop('Data contains no (complete) rows')
@@ -557,33 +528,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         return()
 
 
-
-    uoveralltime <- self$options$overalltime
-
-    uoveralltime <- jmvcore::toNumeric(self$data[[uoveralltime]])
-
-    uthefactor <- self$options$explanatory
-
-    uthefactor <- self$data[[uthefactor]]
-
-    uoutcome <- self$options$outcome
-
-    uoutcome <- jmvcore::toNumeric(self$data[[uoutcome]])
-
-
-
-
-    mydata <- data.frame(myoveralltime = uoveralltime,
-                         thefactor = uthefactor,
-                         myoutcome = uoutcome)
-
-    mydata <- na.omit(mydata)
-
-    names(mydata) <- c(self$options$overalltime,
-                       self$options$explanatory,
-                       self$options$outcome)
-
-
     formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
 
     formula2 <- jmvcore::composeTerm(formula2)
@@ -594,7 +538,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     myformula <- paste("survival::Surv(", formulaL, ",", formulaR, ")")
 
-    plot3 <- mydata %>%
+    plot3 <- plotData %>%
         finalfit::surv_plot(.data = .,
                             dependent = myformula,
                             explanatory = formula2,

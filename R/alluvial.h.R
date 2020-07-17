@@ -10,7 +10,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             condensationvar = NULL,
             excl = TRUE,
             marg = FALSE,
-            verb = FALSE,
             fill = "first_variable",
             bin = "default",
             flip = FALSE,
@@ -37,10 +36,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..marg <- jmvcore::OptionBool$new(
                 "marg",
                 marg,
-                default=FALSE)
-            private$..verb <- jmvcore::OptionBool$new(
-                "verb",
-                verb,
                 default=FALSE)
             private$..fill <- jmvcore::OptionList$new(
                 "fill",
@@ -95,7 +90,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..condensationvar)
             self$.addOption(private$..excl)
             self$.addOption(private$..marg)
-            self$.addOption(private$..verb)
             self$.addOption(private$..fill)
             self$.addOption(private$..bin)
             self$.addOption(private$..flip)
@@ -108,7 +102,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         condensationvar = function() private$..condensationvar$value,
         excl = function() private$..excl$value,
         marg = function() private$..marg$value,
-        verb = function() private$..verb$value,
         fill = function() private$..fill$value,
         bin = function() private$..bin$value,
         flip = function() private$..flip$value,
@@ -120,7 +113,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..condensationvar = NA,
         ..excl = NA,
         ..marg = NA,
-        ..verb = NA,
         ..fill = NA,
         ..bin = NA,
         ..flip = NA,
@@ -212,7 +204,6 @@ alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param condensationvar The primary variable to be used for condensation.
 #' @param excl .
 #' @param marg .
-#' @param verb .
 #' @param fill A list for the argument fill for selecting the variable to be
 #'   represented by color. Default is 'first_variable'.
 #' @param bin labels for the bins from low to high
@@ -234,7 +225,6 @@ alluvial <- function(
     condensationvar,
     excl = TRUE,
     marg = FALSE,
-    verb = FALSE,
     fill = "first_variable",
     bin = "default",
     flip = FALSE,
@@ -259,7 +249,6 @@ alluvial <- function(
         condensationvar = condensationvar,
         excl = excl,
         marg = marg,
-        verb = verb,
         fill = fill,
         bin = bin,
         flip = flip,

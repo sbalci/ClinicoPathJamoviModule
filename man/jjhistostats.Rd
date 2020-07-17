@@ -4,7 +4,7 @@
 \alias{jjhistostats}
 \title{Histogram}
 \usage{
-jjhistostats(data, dep, grvar, excl = TRUE, originaltheme = FALSE)
+jjhistostats(data, dep, grvar, excl = TRUE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,8 +14,6 @@ jjhistostats(data, dep, grvar, excl = TRUE, originaltheme = FALSE)
 \item{grvar}{.}
 
 \item{excl}{.}
-
-\item{originaltheme}{.}
 }
 \value{
 A results object containing:

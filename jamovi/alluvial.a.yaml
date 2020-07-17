@@ -28,31 +28,31 @@ options:
             The primary variable to be used for condensation.
 
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude missing (NA)
       type: Bool
       default: true
 
     - name: marg
-      title: Marginal Plots
+      title: Marginal plots
       type: Bool
       default: false
 
 
-    - name: verb
-      title: Print Plot Summary
-      type: Bool
-      default: false
+    # - name: verb
+    #   title: Print plot summary
+    #   type: Bool
+    #   default: false
 
 
     - name: fill
       title: Fill by
       type: List
       options:
-        - title: First Variable
+        - title: First variable
           name: first_variable
-        - title: Last Variable
+        - title: Last variable
           name: last_variable
-        - title: All Flows
+        - title: All flows
           name: all_flows
         - title: Values
           name: values
@@ -63,7 +63,7 @@ options:
             represented by color. Default is 'first_variable'.
 
     - name: bin
-      title: Bin Labels
+      title: Bin labels
       type: List
       options:
         - title: Default
@@ -83,18 +83,17 @@ options:
 
 
     - name: flip
-      title: Flip Plot
+      title: Flip plot
       type: Bool
       default: false
 
     - name: usetitle
-      title: Use Title
+      title: Custom title
       type: Bool
       default: false
 
     - name: mytitle
-      title: >
-          Title of the Plot
+      title: Title
       type: String
       default: 'Alluvial Plot'
 

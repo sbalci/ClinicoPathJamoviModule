@@ -9,6 +9,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             explanatory = NULL,
             overalltime = NULL,
             outcome = NULL,
+            outcomeLevel = NULL,
             cutp = "12, 36, 60",
             sc = FALSE,
             ce = FALSE,
@@ -37,11 +38,11 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "numeric"))
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
-                outcome,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
+                outcome)
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(outcome)")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -62,6 +63,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..cutp)
             self$.addOption(private$..sc)
             self$.addOption(private$..ce)
@@ -71,6 +73,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         explanatory = function() private$..explanatory$value,
         overalltime = function() private$..overalltime$value,
         outcome = function() private$..outcome$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
         cutp = function() private$..cutp$value,
         sc = function() private$..sc$value,
         ce = function() private$..ce$value,
@@ -79,6 +82,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..explanatory = NA,
         ..overalltime = NA,
         ..outcome = NA,
+        ..outcomeLevel = NA,
         ..cutp = NA,
         ..sc = NA,
         ..ce = NA,
@@ -95,8 +99,8 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text4 = function() private$.items[["text4"]],
         text7 = function() private$.items[["text7"]],
         text6 = function() private$.items[["text6"]],
-        text8 = function() private$.items[["text8"]],
         text9 = function() private$.items[["text9"]],
+        text8 = function() private$.items[["text8"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]]),
@@ -169,16 +173,16 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text8",
-                title="`Pairwise Comparison - ${explanatory}`",
+                name="text9",
+                title="`Pairwise Comparison Summary and Table - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "overalltime")))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text9",
-                title="`Pairwise Comparison Summary - ${explanatory}`",
+                name="text8",
+                title="`Pairwise Comparison - ${explanatory}`",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -258,6 +262,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param explanatory .
 #' @param overalltime .
 #' @param outcome .
+#' @param outcomeLevel .
 #' @param cutp .
 #' @param sc .
 #' @param ce .
@@ -271,8 +276,8 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text6} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text8} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -284,6 +289,7 @@ survival <- function(
     explanatory,
     overalltime,
     outcome,
+    outcomeLevel,
     cutp = "12, 36, 60",
     sc = FALSE,
     ce = FALSE,
@@ -308,6 +314,7 @@ survival <- function(
         explanatory = explanatory,
         overalltime = overalltime,
         outcome = outcome,
+        outcomeLevel = outcomeLevel,
         cutp = cutp,
         sc = sc,
         ce = ce,

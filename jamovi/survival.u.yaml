@@ -16,19 +16,22 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Overall Time (in months)
+        label: Time (in months)
         children:
           - type: VariablesListBox
             name: overalltime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Outcome (event:1, censored:0)'
+        label: 'Outcome'
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome)
   - type: LayoutBox
     margin: large
     children:
