@@ -76,6 +76,8 @@ Modules and jamovi library)
 
 <https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo>
 
+<https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo>
+
 ##### JJStatsPlot
 
 GGStatsPlot functions are separately added to jamovi library under

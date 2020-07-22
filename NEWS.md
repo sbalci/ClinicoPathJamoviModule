@@ -6,6 +6,11 @@ ClinicoPathDescriptives module can be downloaded inside jamovi (click Modules an
 
 https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo
 
+https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo
+
+https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo
+
+
 
 # ClinicoPath 0.0.2.0023
 
