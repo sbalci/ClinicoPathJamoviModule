@@ -5,9 +5,27 @@ jrs:   '1.1'
 
 items:
 
-    - name:  text
-      title: Age Pyramid
-      type:  Html
+
+    - name:  pyramidTable
+      title: 'Population Data'
+      type: Table
+      rows: 0
+      columns:
+      # columns: &idcols
+        - name: Pop
+          title: "Population"
+          type: text
+        - name: Female
+          title: "Female"
+          type: number
+        - name: Male
+          title: "Male"
+          type: number
+      clearWith:
+          - age
+          - gender
+          - female
+
 
 
     - name: plot

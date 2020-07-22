@@ -83,26 +83,28 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text2 = function() private$.items[["text2"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
-        text3 = function() private$.items[["text3"]]),
+        epirTable_ratio = function() private$.items[["epirTable_ratio"]],
+        epirTable_number = function() private$.items[["epirTable_number"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Calculator",
-                refs="caret")
+                title="Decision Calculator")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
                 title="Decision Calculator",
                 clearWith=list(
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fnote"),
+                refs="caret"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
-                title="Decision Test Statistics",
+                title="",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
@@ -140,11 +142,13 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fnote"),
+                refs="caret"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
-                title="Decision Test Statistics",
+                title="",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
@@ -202,11 +206,66 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob")))
-            self$add(jmvcore::Preformatted$new(
+                    "pprob",
+                    "fnote"),
+                refs="caret"))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text3",
-                title="epiR"))}))
+                name="epirTable_ratio",
+                title="",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="statsnames", 
+                        `title`="Decision Statistics", 
+                        `type`="text"),
+                    list(
+                        `name`="est", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote"),
+                refs="epiR"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="epirTable_number",
+                title="",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="statsnames", 
+                        `title`="Decision Statistics", 
+                        `type`="text"),
+                    list(
+                        `name`="est", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote"),
+                refs="epiR"))}))
 
 decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisioncalculatorBase",
@@ -249,7 +308,8 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

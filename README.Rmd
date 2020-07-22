@@ -64,50 +64,69 @@ Then you can install this module directly inside the jamovi, using library.
 ## Installation via sideload [jamovi](https://www.jamovi.org)
 
 
-**Step 1: Download and install [jamovi](https://www.jamovi.org).**  
+### Step 1:
+
+**Download and install [jamovi](https://www.jamovi.org).**  
 
 
-**Step 2: Download the relevant `jmo` file for your operating system from**  
+### Step 2:
 
-*a: For development version*
+**Download the relevant `jmo` file for your operating system from**  
+
+#### a: For development version
 
 
 - [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
 - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
 
-*b: For smaller modules*
+#### b: For smaller modules
 
 
-- ClinicoPathDescriptives
+##### ClinicoPathDescriptives
+
+ClinicoPathDescriptives functions are separately added to jamovi library under Exploration menu
+
+
+ClinicoPathDescriptives module can be downloaded inside jamovi (click Modules and jamovi library)
 
 
 https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
+https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo
 
-- JJStatsPlot: 
+https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo
+
+
+##### JJStatsPlot  
 
 GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu
 
 JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)
 
+
 https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+
+https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+
+https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+
 
 https://github.com/sbalci/jjstatsplot
 
 https://github.com/sbalci/jjstatsplot/releases/
 
 
-- jsurvival:
+##### jsurvival
 
 https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
 
-- meddecide
+##### meddecide
 
 https://github.com/sbalci/meddecide/
 
@@ -116,8 +135,7 @@ https://github.com/sbalci/meddecide/releases/
 
 
 
-*c: For stable version*  
-
+#### c: For stable version   
 
 
 - windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo
@@ -184,11 +202,14 @@ https://github.com/sbalci/meddecide/releases/
 
 #### Alluvial Diagrams
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 
 <img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
 
+
+#### Age Pyramid
+
+
+<img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
 
 
 

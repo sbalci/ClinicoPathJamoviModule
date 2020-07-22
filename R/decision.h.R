@@ -9,7 +9,8 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             gold = NULL,
             goldPositive = NULL,
             newtest = NULL,
-            testPositive = NULL, ...) {
+            testPositive = NULL,
+            fnote = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -39,37 +40,45 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "testPositive",
                 testPositive,
                 variable="(newtest)")
+            private$..fnote <- jmvcore::OptionBool$new(
+                "fnote",
+                fnote,
+                default=FALSE)
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..newtest)
             self$.addOption(private$..testPositive)
+            self$.addOption(private$..fnote)
         }),
     active = list(
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
         newtest = function() private$..newtest$value,
-        testPositive = function() private$..testPositive$value),
+        testPositive = function() private$..testPositive$value,
+        fnote = function() private$..fnote$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
         ..newtest = NA,
-        ..testPositive = NA)
+        ..testPositive = NA,
+        ..fnote = NA)
 )
 
 decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        epirTable_ratio = function() private$.items[["epirTable_ratio"]],
+        epirTable_number = function() private$.items[["epirTable_number"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Medical Decision",
-                refs="caret")
+                title="Medical Decision")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -77,7 +86,65 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Decision Tests"))}))
+                title="Decision Tests",
+                refs="caret"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="epirTable_ratio",
+                title="",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="statsnames", 
+                        `title`="Decision Statistics", 
+                        `type`="text"),
+                    list(
+                        `name`="est", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote"),
+                refs="epiR"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="epirTable_number",
+                title="",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="statsnames", 
+                        `title`="Decision Statistics", 
+                        `type`="text"),
+                    list(
+                        `name`="est", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote"),
+                refs="epiR"))}))
 
 decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisionBase",
@@ -114,11 +181,20 @@ decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param goldPositive .
 #' @param newtest .
 #' @param testPositive .
+#' @param fnote .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$epirTable_ratio$asDF}
+#'
+#' \code{as.data.frame(results$epirTable_ratio)}
 #'
 #' @export
 decision <- function(
@@ -126,7 +202,8 @@ decision <- function(
     gold,
     goldPositive,
     newtest,
-    testPositive) {
+    testPositive,
+    fnote = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('decision requires jmvcore to be installed (restart may be required)')
@@ -146,7 +223,8 @@ decision <- function(
         gold = gold,
         goldPositive = goldPositive,
         newtest = newtest,
-        testPositive = testPositive)
+        testPositive = testPositive,
+        fnote = fnote)
 
     analysis <- decisionClass$new(
         options = options,

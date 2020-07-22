@@ -4,7 +4,7 @@
 \alias{decision}
 \title{Medical Decision}
 \usage{
-decision(data, gold, goldPositive, newtest, testPositive)
+decision(data, gold, goldPositive, newtest, testPositive, fnote = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,13 +16,23 @@ decision(data, gold, goldPositive, newtest, testPositive)
 \item{newtest}{.}
 
 \item{testPositive}{.}
+
+\item{fnote}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
+\code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$epirTable_ratio$asDF}
+
+\code{as.data.frame(results$epirTable_ratio)}
 }
 \description{
 Function for Medical Decision Analysis. Sensitivity, specificity, positive

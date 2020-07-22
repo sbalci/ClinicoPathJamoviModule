@@ -53,7 +53,7 @@ agepyramidOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 agepyramidResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
+        pyramidTable = function() private$.items[["pyramidTable"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -62,10 +62,28 @@ agepyramidResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="Age Pyramid")
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text",
-                title="Age Pyramid"))
+                name="pyramidTable",
+                title="Population Data",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="Pop", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="Female", 
+                        `title`="Female", 
+                        `type`="number"),
+                    list(
+                        `name`="Male", 
+                        `title`="Male", 
+                        `type`="number")),
+                clearWith=list(
+                    "age",
+                    "gender",
+                    "female")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -108,9 +126,15 @@ agepyramidBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param female .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$pyramidTable$asDF}
+#'
+#' \code{as.data.frame(results$pyramidTable)}
 #'
 #' @export
 agepyramid <- function(

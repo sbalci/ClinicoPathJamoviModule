@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0019</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0025</span>
       </span>
     </div>
 
@@ -161,6 +161,7 @@
   <span class='no'>explanatory</span>,
   <span class='no'>overalltime</span>,
   <span class='no'>outcome</span>,
+  <span class='no'>outcomeLevel</span>,
   <span class='kw'>cutp</span> <span class='kw'>=</span> <span class='st'>"12, 36, 60"</span>,
   <span class='kw'>sc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ce</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
@@ -187,6 +188,10 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>outcomeLevel</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>cutp</th>
       <td><p>.</p></td>
     </tr>
@@ -209,19 +214,22 @@
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text1html</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$text5</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
+<tr><td><code>results$uniTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$text7</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text6</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$text8</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$text9</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text8</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 
+<p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
+<p><code>results$medianTable$asDF</code></p>
+<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$medianTable)</a></code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {

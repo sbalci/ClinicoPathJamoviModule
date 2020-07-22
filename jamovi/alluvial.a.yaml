@@ -82,10 +82,25 @@ options:
             labels for the bins from low to high
 
 
-    - name: flip
-      title: Flip plot
-      type: Bool
-      default: false
+    - name: orient
+      title: Plot orientation
+      type: List
+      options:
+        - title: Horizontal
+          name: horr
+        - title: Vertical
+          name: vert
+      default: vert
+
+
+
+
+#     - name: flip
+#       title: Flip plot
+#       type: Bool
+#       default: false
+
+
 
     - name: usetitle
       title: Custom title
@@ -104,37 +119,37 @@ options:
     #   default: false
 
 
-    - name: themex
-      title: Theme
-      type: List
-      options:
-        - title: jamovi
-          name: jamovi
-        - title: easyalluvial
-          name: easyalluvial
-        # - title: ipsum
-        #   name: ipsum
-        - title: grey
-          name: grey
-        - title: gray
-          name: gray
-        - title: bw
-          name: bw
-        - title: linedraw
-          name: linedraw
-        - title: light
-          name: light
-        - title: dark
-          name: dark
-        - title: minimal
-          name: minimal
-        - title: classic
-          name: classic
-        - title: void
-          name: void
-        - title: test
-          name: test
-      default: easyalluvial
+    # - name: themex
+    #   title: Theme
+    #   type: List
+    #   options:
+    #     - title: jamovi
+    #       name: jamovi
+    #     - title: easyalluvial
+    #       name: easyalluvial
+    #     # - title: ipsum
+    #     #   name: ipsum
+    #     - title: grey
+    #       name: grey
+    #     - title: gray
+    #       name: gray
+    #     - title: bw
+    #       name: bw
+    #     - title: linedraw
+    #       name: linedraw
+    #     - title: light
+    #       name: light
+    #     - title: dark
+    #       name: dark
+    #     - title: minimal
+    #       name: minimal
+    #     - title: classic
+    #       name: classic
+    #     - title: void
+    #       name: void
+    #     - title: test
+    #       name: test
+    #   default: easyalluvial
 
 # - name: inter
 #   title: Interactive

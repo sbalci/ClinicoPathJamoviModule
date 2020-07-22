@@ -17,6 +17,60 @@ items:
     - name:  text2
       title: Decision Tests
       type:  Preformatted
+      refs: caret
+
+
+    - name: epirTable_ratio
+      title: ''
+      # title: 'EpiR Table Ratios'
+      type: Table
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+          format: pc
+        - name: lower
+          title: "Lower 95% CI"
+          type: number
+          format: pc
+        - name: upper
+          title: "Upper 95% CI"
+          type: number
+          format: pc
+      clearWith:
+          - pp
+          - pprob
+          - fnote
+      refs: epiR
+
+    - name: epirTable_number
+      title: ''
+      # title: 'EpiR Table Numbers'
+      type: Table
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+        - name: lower
+          title: "Lower 95% CI"
+          type: number
+        - name: upper
+          title: "Upper 95% CI"
+          type: number
+      clearWith:
+          - pp
+          - pprob
+          - fnote
+      refs: epiR
+
 
 
     # - name:  text3
@@ -32,7 +86,5 @@ items:
     # - name:  text5
     #   title: Medical Decision epiR
     #   type:  Preformatted
-
-refs: caret
 
 ...

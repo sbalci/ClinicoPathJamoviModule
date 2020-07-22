@@ -34,10 +34,10 @@ items:
           - verb
           - fill
           - bin
-          - flip
+          - orient
           - usetitle
           - mytitle
-          - themex
+          # - themex
           # - originaltheme
 
 
@@ -51,7 +51,7 @@ items:
       clearWith:
           - vars
           - condensationvar
-          - themex
+          # - themex
           # - originaltheme
       visible: (condensationvar)
 

@@ -127,6 +127,137 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
         self$results$text2$setContent(results_caret)
 
 
+        # epiR ----
+
+
+        epirresult <- epiR::epi.tests(dat = conf_table)
+
+
+        epirresult2 <- summary(epirresult)
+        epirresult2 <- as.data.frame(epirresult2) %>%
+            tibble::rownames_to_column(.data = ., var = 'statsabv')
+
+
+        epirresult2$statsnames <-
+            c(
+                "Apparent prevalence",
+                "True prevalence",
+                "Test sensitivity",
+                "Test specificity",
+                "Diagnostic accuracy",
+                "Diagnostic odds ratio",
+                "Number needed to diagnose",
+                "Youden's index",
+                "Positive predictive value",
+                "Negative predictive value",
+                "Likelihood ratio of a positive test",
+                "Likelihood ratio of a negative test",
+                "Proportion of subjects with the outcome ruled out",
+                "Proportion of subjects with the outcome ruled in",
+                "Proportion of false positives",
+                "Proportion of false negative"
+            )
+
+        ratiorows <- c(
+            "aprev",
+            "tprev",
+            "se",
+            "sp",
+            "diag.acc",
+            "ppv",
+            "npv",
+            "pro",
+            "pri",
+            "pfp",
+            "pfn"
+        )
+
+
+        numberrows <- c(
+            "diag.or",
+            "nnd",
+            "youden",
+            "plr",
+            "nlr"
+        )
+
+        epirresult_number <- epirresult2[epirresult2$statsabv %in% numberrows, ]
+
+        epirresult_ratio <- epirresult2[epirresult2$statsabv %in% ratiorows, ]
+
+
+
+
+
+        # epirTable_ratio -----
+
+        epirTable_ratio <- self$results$epirTable_ratio
+
+        data_frame <- epirresult_ratio
+        for(i in seq_along(data_frame[,1,drop=T])) {
+            epirTable_ratio$addRow(rowKey = i, values = c(data_frame[i,])) # This code produces a named vector/list, which is what the values argument expects
+        }
+
+
+
+        # epirTable_ratio footnotes ----
+
+        if (self$options$fnote) {
+
+            epirTable_ratio$addFootnote(
+                rowNo = 5,
+                col = "statsnames",
+                "Proportion of all tests that give a correct result."
+            )
+        }
+
+
+
+
+
+
+        # epirTable_number ----
+
+
+        epirTable_number <- self$results$epirTable_number
+
+        data_frame <- epirresult_number
+        for(i in seq_along(data_frame[,1,drop=T])) {
+            epirTable_number$addRow(rowKey = i, values = c(data_frame[i,]))
+        }
+
+
+
+        # epirTable_number footnotes ----
+
+        if (self$options$fnote) {
+
+
+            epirTable_number$addFootnote(
+                rowNo = 1,
+                col = "statsnames",
+                "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
+            )
+
+            epirTable_number$addFootnote(
+                rowNo = 2,
+                col = "statsnames",
+                "Number of patients that need to be tested to give one correct positive test."
+            )
+
+
+            epirTable_number$addFootnote(
+                rowNo = 3,
+                col = "statsnames",
+                "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
+
+            )
+
+        }
+
+           # drafts ----
+
+
         # matrixdetails <- list(results_caret[["positive"]], results_caret[["table"]],
         #     results_caret[["overall"]], results_caret[["overall"]][["Accuracy"]],
         #     results_caret[["overall"]][["Kappa"]], results_caret[["overall"]][["AccuracyLower"]],
@@ -143,7 +274,7 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
         # self$results$text3$setContent(matrixdetails)
 
 
-        # Individual analysis ----
+        # Individual analysis
 
         # sens <- caret::sensitivity(conf_table, positive = 'Positive')
 
@@ -173,7 +304,7 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
 
 
 
-        # Prior Probability ----
+        # Prior Probability
 
         # lvs <- c('normal', 'abnormal') truth <- factor(rep(lvs, times = c(86,
         # 258)), levels = rev(lvs)) pred <- factor( c( rep(lvs, times = c(54,

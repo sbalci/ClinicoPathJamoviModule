@@ -114,52 +114,66 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                               plot = TRUE)
                     }
 
+            # Plot orientation ----
 
-            # flip coordinates ----
 
-            flip <- self$options$flip
+            orient <- self$options$orient
 
-            if (flip) {
+            if (orient == "vert") {
+                plot <- plot
+            } else {
                 plot <- plot +
                     ggplot2::coord_flip()
-                    # ggplot2::theme_minimal()
             }
 
 
 
 
-            # select theme ----
+            # # flip coordinates
+            #
+            # flip <- self$options$flip
+            #
+            # if (flip) {
+            #     plot <- plot +
+            #         ggplot2::coord_flip()
+            #         # ggplot2::theme_minimal()
+            # }
 
-            themex <- self$options$themex
 
 
-            if (themex == "jamovi") {
-                plot <- plot + ggtheme
-            } else if (marg || themex == "easyalluvial") {
-                plot <- plot
-            # } else if (themex == "ipsum") {
-            #     plot <- plot + hrbrthemes::theme_ipsum()
-            } else if (themex == "grey") {
-                plot <- plot + ggplot2::theme_grey()
-            } else if (themex == "gray") {
-                plot <- plot + ggplot2::theme_gray()
-            } else if (themex == "bw") {
-                plot <- plot + ggplot2::theme_bw()
-            } else if (themex == "linedraw") {
-                plot <- plot + ggplot2::theme_linedraw()
-            } else if (themex == "light") {
-                plot <- plot + ggplot2::theme_light()
-            } else if (themex == "dark") {
-                plot <- plot + ggplot2::theme_dark()
-            } else if (themex == "minimal") {
-                plot <- plot + ggplot2::theme_minimal()
-            } else if (themex == "classic") {
-                plot <- plot + ggplot2::theme_classic()
-            } else if (themex == "void") {
-                plot <- plot + ggplot2::theme_void()
-            } else if (themex == "test") {
-                plot <- plot + ggplot2::theme_test()
-            }
+
+            # # select theme ----
+            #
+            # themex <- self$options$themex
+            #
+            #
+            # if (themex == "jamovi") {
+            #     plot <- plot + ggtheme
+            # } else if (marg || themex == "easyalluvial") {
+            #     plot <- plot
+            # # } else if (themex == "ipsum") {
+            # #     plot <- plot + hrbrthemes::theme_ipsum()
+            # } else if (themex == "grey") {
+            #     plot <- plot + ggplot2::theme_grey()
+            # } else if (themex == "gray") {
+            #     plot <- plot + ggplot2::theme_gray()
+            # } else if (themex == "bw") {
+            #     plot <- plot + ggplot2::theme_bw()
+            # } else if (themex == "linedraw") {
+            #     plot <- plot + ggplot2::theme_linedraw()
+            # } else if (themex == "light") {
+            #     plot <- plot + ggplot2::theme_light()
+            # } else if (themex == "dark") {
+            #     plot <- plot + ggplot2::theme_dark()
+            # } else if (themex == "minimal") {
+            #     plot <- plot + ggplot2::theme_minimal()
+            # } else if (themex == "classic") {
+            #     plot <- plot + ggplot2::theme_classic()
+            # } else if (themex == "void") {
+            #     plot <- plot + ggplot2::theme_void()
+            # } else if (themex == "test") {
+            #     plot <- plot + ggplot2::theme_test()
+            # }
 
             # originaltheme <- self$options$originaltheme
             #
@@ -179,7 +193,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             usetitle <- self$options$usetitle
 
-            if (usetitle) {
+            if (marg && usetitle)
+                stop("Please do not use Marginal plots with Custom title")
+
+
+            if (!marg && usetitle) {
                 plot <- plot +
                     ggplot2::ggtitle(mytitle)
             }

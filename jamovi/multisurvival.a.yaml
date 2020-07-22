@@ -63,16 +63,15 @@ options:
       default: t1
 
 
-    - name: ac
-      title: Show Adjusted Survival Curve
-      type: Bool
-      default: false
+    # - name: ac
+    #   title: Show Adjusted Survival Curve
+    #   type: Bool
+    #   default: false
 
 
-    - name: adjexplanatory
-      title: Variable for Adjusted Survival Curve
-      type: Variable
-
+    # - name: adjexplanatory
+    #   title: Variable for Adjusted Survival Curve
+    #   type: Variable
 
 
 ...
