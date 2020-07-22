@@ -77,15 +77,25 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tidyr::pivot_wider(data = .,
                                    names_from = Gender,
                                    values_from = n) %>%
-                dplyr::arrange(dplyr::desc(Pop)) %>%
-                kableExtra::kable()
+                dplyr::arrange(dplyr::desc(Pop))
 
-            self$results$text$setContent(plotData2
-                # list(
-                #     head(mydata, n = 20),
-                #     head(plotData, n = 20)
-                #     )
-            )
+
+
+            plotData2 <- as.data.frame(plotData2) %>%
+                tibble::rownames_to_column(.data = .) %>%
+                dplyr::filter(!is.na(Pop)) %>%
+                dplyr::mutate(
+                    Pop = as.character(Pop)
+                )
+
+
+
+            pyramidTable <- self$results$pyramidTable
+
+            data_frame <- plotData2
+            for(i in seq_along(data_frame[,1,drop=T])) {
+                pyramidTable$addRow(rowKey = i, values = c(data_frame[i,]))
+            }
 
 
 

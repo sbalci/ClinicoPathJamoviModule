@@ -12,10 +12,9 @@ alluvial(
   marg = FALSE,
   fill = "first_variable",
   bin = "default",
-  flip = FALSE,
+  orient = "vert",
   usetitle = FALSE,
-  mytitle = "Alluvial Plot",
-  themex = "easyalluvial"
+  mytitle = "Alluvial Plot"
 )
 }
 \arguments{
@@ -35,13 +34,11 @@ represented by color. Default is 'first_variable'.}
 
 \item{bin}{labels for the bins from low to high}
 
-\item{flip}{.}
+\item{orient}{.}
 
 \item{usetitle}{.}
 
 \item{mytitle}{.}
-
-\item{themex}{.}
 }
 \value{
 A results object containing:

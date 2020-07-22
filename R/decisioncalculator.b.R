@@ -48,6 +48,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         # self$results$todo$setContent(todo)
 
+
+        # read numbers from input ----
+
         TP <- self$options$TP
 
         FP <- self$options$FP
@@ -55,6 +58,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         TN <- self$options$TN
 
         FN <- self$options$FN
+
+
+        # make table ----
 
         # table1 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE,
         # dimnames = list(c('Test Positive', 'Test Negative'), c('Gold
@@ -73,6 +79,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         pprob <- self$options$pprob
 
+
+        # caret result ----
+
         if (pp) {
             caretresult <- caret::confusionMatrix(table3, prevalence = pprob)
 
@@ -84,6 +93,31 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         self$results$text2$setContent(caretresult)
 
+
+
+        # Cross Table in jamovi style ----
+
+
+        # results1html <- as.data.frame(km_fit_median_df$table) %>%
+        #     janitor::clean_names(dat = ., case = "snake") %>%
+        #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
+        #
+        #
+        # table3
+        #
+        #
+        # cTable <- self$results$cTable
+        #
+        # data_frame <- table3
+        # for(i in seq_along(data_frame[,1,drop=T])) {
+        #     cTable$addRow(rowKey = i, values = c(data_frame[i,]))
+        # }
+
+
+
+
+
+        # Self Calculations ----
 
         # Self Calculation https://cran.r-project.org/web/packages/caret/caret.pdf
         # https://online.stat.psu.edu/stat509/node/150/
@@ -146,7 +180,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # Populate Table ----
+        # nTable Populate Table ----
 
         nTable <- self$results$nTable
         nTable$setRow(rowNo = 1,
@@ -161,6 +195,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             TestW = TestW
                            )
         )
+
+        # ratioTable Populate Table ----
+
 
         ratioTable <- self$results$ratioTable
         ratioTable$setRow(rowNo = 1,
@@ -179,7 +216,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             )
             )
 
-        # footnotes ----
+        # nTable footnotes ----
 
         if (self$options$fnote) {
 
@@ -201,6 +238,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
         }
+
+
+        # ratioTable footnotes ----
 
 
         if (self$options$fnote) {
@@ -235,17 +275,21 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # caretresult[['positive']] caretresult[['table']]
-        # caretresult[['overall']] caretresult[['overall']][['Accuracy']]
+        # caretresult[['positive']]
+        # caretresult[['table']]
+        # caretresult[['overall']]
+        # caretresult[['overall']][['Accuracy']]
         # caretresult[['overall']][['Kappa']]
         # caretresult[['overall']][['AccuracyLower']]
         # caretresult[['overall']][['AccuracyUpper']]
         # caretresult[['overall']][['AccuracyNull']]
         # caretresult[['overall']][['AccuracyPValue']]
-        # caretresult[['overall']][['McnemarPValue']] caretresult[['byClass']]
+        # caretresult[['overall']][['McnemarPValue']]
+        # caretresult[['byClass']]
         # caretresult[['byClass']][['Sensitivity']]
-        # caretresult[['byClass']][['Specificity']] caretresult[['byClass']][['Pos
-        # Pred Value']] caretresult[['byClass']][['Neg Pred Value']]
+        # caretresult[['byClass']][['Specificity']]
+        # caretresult[['byClass']][['Pos Pred Value']]
+        # caretresult[['byClass']][['Neg Pred Value']]
         # caretresult[['byClass']][['Precision']]
         # caretresult[['byClass']][['Recall']] caretresult[['byClass']][['F1']]
         # caretresult[['byClass']][['Prevalence']]
@@ -262,19 +306,168 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # use epiR ----
+        # epiR ----
 
         epirresult <- epiR::epi.tests(dat = table3)
-        self$results$text3$setContent(epirresult)
+        # self$results$text3$setContent(epirresult)
 
 
-        # epirresult[[1]]
-        # epirresult[[2]]
-        # epirresult[[2]][["conf.level"]]
-        # epirresult[[2]][["elements"]]
-        # epirresult[[2]][["rval"]]
-        # epirresult[[2]][["tab"]]
-        # epirresult[[4]]
+
+        epirresult2 <- summary(epirresult)
+        epirresult2 <- as.data.frame(epirresult2) %>%
+            tibble::rownames_to_column(.data = ., var = 'statsabv')
+
+
+        epirresult2$statsnames <-
+            c(
+                "Apparent prevalence",
+                "True prevalence",
+                "Test sensitivity",
+                "Test specificity",
+                "Diagnostic accuracy",
+                "Diagnostic odds ratio",
+                "Number needed to diagnose",
+                "Youden's index",
+                "Positive predictive value",
+                "Negative predictive value",
+                "Likelihood ratio of a positive test",
+                "Likelihood ratio of a negative test",
+                "Proportion of subjects with the outcome ruled out",
+                "Proportion of subjects with the outcome ruled in",
+                "Proportion of false positives",
+                "Proportion of false negative"
+            )
+
+        ratiorows <- c(
+            "aprev",
+            "tprev",
+            "se",
+            "sp",
+            "diag.acc",
+            "ppv",
+            "npv",
+            "pro",
+            "pri",
+            "pfp",
+            "pfn"
+        )
+
+
+        numberrows <- c(
+            "diag.or",
+            "nnd",
+            "youden",
+            "plr",
+            "nlr"
+        )
+
+        epirresult_number <- epirresult2[epirresult2$statsabv %in% numberrows, ]
+
+        epirresult_ratio <- epirresult2[epirresult2$statsabv %in% ratiorows, ]
+
+
+
+        # text4 <-
+        #     list(
+        #
+        #         "summary" = epirresult2
+        #
+        # # epirresult[[3]]$aprev,
+        # # epirresult[[3]]$tprev,
+        # # epirresult[[3]]$se,
+        # # epirresult[[3]]$sp,
+        # # epirresult[[3]]$diag.acc,
+        # # epirresult[[3]]$diag.or,
+        # # epirresult[[3]]$nnd,
+        # # epirresult[[3]]$youden,
+        # # epirresult[[3]]$ppv,
+        # # epirresult[[3]]$npv,
+        # # epirresult[[3]]$plr,
+        # # epirresult[[3]]$nlr,
+        # # epirresult[[3]]$pro,
+        # # epirresult[[3]]$pri,
+        # # epirresult[[3]]$pfp,
+        # # epirresult[[3]]$pfn
+        #     )
+
+
+
+
+
+
+
+        # self$results$text4$setContent(text4)
+
+
+
+        # epirTable_ratio -----
+
+        epirTable_ratio <- self$results$epirTable_ratio
+
+        data_frame <- epirresult_ratio
+        for(i in seq_along(data_frame[,1,drop=T])) {
+            epirTable_ratio$addRow(rowKey = i, values = c(data_frame[i,])) # This code produces a named vector/list, which is what the values argument expects
+        }
+
+
+
+        # epirTable_ratio footnotes ----
+
+        if (self$options$fnote) {
+
+            epirTable_ratio$addFootnote(
+                rowNo = 5,
+                col = "statsnames",
+                "Proportion of all tests that give a correct result."
+                )
+        }
+
+
+
+
+
+
+        # epirTable_number ----
+
+
+        epirTable_number <- self$results$epirTable_number
+
+        data_frame <- epirresult_number
+        for(i in seq_along(data_frame[,1,drop=T])) {
+            epirTable_number$addRow(rowKey = i, values = c(data_frame[i,]))
+        }
+
+
+
+        # epirTable_number footnotes ----
+
+        if (self$options$fnote) {
+
+
+            epirTable_number$addFootnote(
+                rowNo = 1,
+                col = "statsnames",
+                "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
+                )
+
+            epirTable_number$addFootnote(
+                rowNo = 2,
+                col = "statsnames",
+                "Number of patients that need to be tested to give one correct positive test."
+            )
+
+
+            epirTable_number$addFootnote(
+                rowNo = 3,
+                col = "statsnames",
+                "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
+
+            )
+
+
+        }
+
+
 
 
 

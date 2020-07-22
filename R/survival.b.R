@@ -18,6 +18,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) ) {
 
+                # TODO ----
+
                 todo <- glue::glue("
                 <br>Welcome to ClinicoPath
                 <br><br>
@@ -29,10 +31,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 Outcome Level: if patient is dead or event (recurrence) occured.
                 <br><br>
-                Survival should be numeric, continuous, and in months.
+                Survival time should be numeric, continuous, and in months.
                 <br><br>
                 This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                <br><hr>"
+                <br><hr>
+                <br>
+                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
                 )
 
                 html <- self$results$todo
@@ -41,7 +45,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else {
 
-                # Empty message when all variables selected
+                # Empty message when all variables selected ----
 
                 todo <- ""
                 html <- self$results$todo
@@ -129,7 +133,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # self$results$deneme4$setContent(mydata)
 
 
-                # results 1, Median Survival Table ----
+                # results 1 Median Survival Table ----
 
                 km_fit <- survival::survfit(survival::Surv(myoveralltime, myoutcome) ~ thefactor, data = mydata)
 
@@ -138,25 +142,43 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     janitor::clean_names(dat = ., case = "snake") %>%
                     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
 
+
                 results1html[,1] <- gsub(pattern = "thefactor=",
                                          replacement = "",
                                          x = results1html[,1])
 
-                # results 1 html, Median Survival Table Html Type ----
+                results1table <- results1html
 
-                results1html <- knitr::kable(results1html,
-                                             row.names = FALSE,
-                                             align = c('l', rep('r', 9)),
-                                             format = "html",
-                                             digits = 1
-                                             )
+                # results 1 html, Median Survival Table Html Type
+
+                # results1htmlresults <-
+                #     knitr::kable(results1html,
+                #     row.names = FALSE,
+                #     align = c('l', rep('r', 9)),
+                #     format = "html",
+                #     digits = 1
+                #     )
+
+
+                # Median Table ----
+
+
+                names(results1table)[1] <- "factor"
+
+
+                medianTable <- self$results$medianTable
+
+                data_frame <- results1table
+                for(i in seq_along(data_frame[,1,drop=T])) {
+                    medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                }
 
 
 
 
 
 
-                # results 2 median survival summary ----
+                # results 2 Median Survival Summary ----
 
                 km_fit_median_df <- summary(km_fit)
                 km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
@@ -178,12 +200,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 results2 <- km_fit_median_definition
 
-                # results 3 univariate cox regression ----
-
-
-                # myoveralltime,
-                # thefactor
-                # myoutcome
+                # results 3 Univariate Cox Regression ----
 
 
                 names(mydata) <- c(self$options$overalltime,
@@ -216,17 +233,50 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # results3 <- tUni
 
-                # results 4  univariate survival html ----
 
-                results4 <- knitr::kable(tUni[, 1:4],
-                                         row.names = FALSE,
-                                         align = c('l', 'l', 'r', 'r', 'r', 'r'),
-                                         format = "html")
 
-                # results 5 univariate survival explanation ----
+
+
+                # results 4  univariate survival html
+
+                # results4 <- knitr::kable(tUni[, 1:4],
+                #                          row.names = FALSE,
+                #                          align = c('l', 'l', 'r', 'r', 'r', 'r'),
+                #                          format = "html")
+
 
                 tUni_df <- tibble::as_tibble(tUni, .name_repair = "minimal") %>%
                     janitor::clean_names(dat = ., case = "snake")
+
+
+                # results4 <-
+                #     list(
+                #         tUni,
+                #         tUni_df
+                #     )
+
+                # Cox-Regression Table ----
+
+
+                uniTable <- self$results$uniTable
+
+                data_frame <- tUni_df
+
+                names(data_frame) <- c(
+                    "Explanatory",
+                    "Levels",
+                    "all",
+                    "HR_univariable",
+                    "HR_multivariable"
+                    )
+
+                for(i in seq_along(data_frame[,1,drop=T])) {
+                    uniTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                }
+
+
+                # results 5 univariate survival explanation ----
+
 
                 n_level <- dim(tUni_df)[1]
 
@@ -282,16 +332,25 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                       replacement = paste0(self$options$explanatory, " "),
                                       x = km_fit_df[,1])
 
-                km_fit_df_html <- knitr::kable(km_fit_df,
-                                               row.names = FALSE,
-                                               align = c('l', rep('r', 7)),
-                                               format = "html",
-                                               digits = 2)
+                # km_fit_df_html <- knitr::kable(km_fit_df,
+                #                                row.names = FALSE,
+                #                                align = c('l', rep('r', 7)),
+                #                                format = "html",
+                #                                digits = 2)
 
 
-                results6 <- km_fit_df_html
+                # results6 <- km_fit_df_html
 
 
+                # 1,3,5-yr survival Table ----
+
+
+                survTable <- self$results$survTable
+
+                data_frame <- km_fit_df
+                for(i in seq_along(data_frame[,1,drop=T])) {
+                    survTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                }
 
                 # results 7 1,3,5-yr survival summary ----
 
@@ -309,14 +368,21 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        # results 8 pairwise comparison ----
 
-                if(n_level < 3) {
 
-                    results8 <- "No pairwise comparison when explanatory variable has < 3 levels"
-                    results9 <- ""
 
-                } else {
+
+
+
+
+        # results 8,9 pairwise comparison ----
+
+
+
+                results8 <- "No pairwise comparison when explanatory variable has < 3 levels"
+                results9 <- ""
+
+                if(n_level > 2) {
 
                     formula_p <- paste0('survival::Surv(', formulaL, ',', formulaR, ') ~ ', formula2)
                     formula_p <- as.formula(formula_p)
@@ -325,9 +391,6 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             formula = formula_p,
                             data = mydata,
                             p.adjust.method = "BH")
-
-
-
 
 
                 mypairwise2 <- as.data.frame(results8[["p.value"]]) %>%
@@ -358,12 +421,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Results ----
                 ## self$results$text1$setContent(results1)
-                self$results$text1html$setContent(results1html)
+                # self$results$text1html$setContent(results1htmlresults)
                 self$results$text2$setContent(results2)
                 ## self$results$text3$setContent(results3)
-                self$results$text4$setContent(results4)
+                # self$results$text4$setContent(results4)
                 self$results$text5$setContent(results5)
-                self$results$text6$setContent(results6)
+                # self$results$text6$setContent(results6)
                 self$results$text7$setContent(results7)
                 self$results$text8$setContent(results8)
                 self$results$text9$setContent(results9)

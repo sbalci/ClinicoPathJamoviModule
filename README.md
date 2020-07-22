@@ -45,25 +45,38 @@ library.
 
 ## Installation via sideload [jamovi](https://www.jamovi.org)
 
-**Step 1: Download and install [jamovi](https://www.jamovi.org).**
+### Step 1:
 
-**Step 2: Download the relevant `jmo` file for your operating system
-from**
+**Download and install [jamovi](https://www.jamovi.org).**
 
-*a: For development version*
+### Step 2:
+
+**Download the relevant `jmo` file for your operating system from**
+
+#### a: For development version
 
   - [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
   - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
-*b: For smaller modules*
+#### b: For smaller modules
 
-  - ClinicoPathDescriptives
+##### ClinicoPathDescriptives
+
+ClinicoPathDescriptives functions are separately added to jamovi library
+under Exploration menu
+
+ClinicoPathDescriptives module can be downloaded inside jamovi (click
+Modules and jamovi library)
 
 <https://github.com/sbalci/ClinicoPathDescriptives/>
 
 <https://github.com/sbalci/ClinicoPathDescriptives/releases/>
 
-  - JJStatsPlot:
+<https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo>
+
+<https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0019.jmo>
+
+##### JJStatsPlot
 
 GGStatsPlot functions are separately added to jamovi library under
 jjstatsplot menu
@@ -73,23 +86,27 @@ jamovi library)
 
 <https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
 
+<https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
+
+<https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
+
 <https://github.com/sbalci/jjstatsplot>
 
 <https://github.com/sbalci/jjstatsplot/releases/>
 
-  - jsurvival:
+##### jsurvival
 
 <https://github.com/sbalci/jsurvival>
 
 <https://github.com/sbalci/jsurvival/releases/>
 
-  - meddecide
+##### meddecide
 
 <https://github.com/sbalci/meddecide/>
 
 <https://github.com/sbalci/meddecide/releases/>
 
-*c: For stable version*
+#### c: For stable version
 
   - windows:
     <https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo>
@@ -135,9 +152,11 @@ jamovi library)
 
 #### Alluvial Diagrams
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
-
 <img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
+
+#### Age Pyramid
+
+<img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
 
 -----
 
@@ -357,7 +376,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--07--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--07--22-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -432,7 +451,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--07--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--07--22-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

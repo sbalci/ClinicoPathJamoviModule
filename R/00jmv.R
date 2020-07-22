@@ -333,4 +333,11 @@
         `year`=2020, 
         `title`="rcrossref: Client for Various 'CrossRef' 'APIs'", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=rcrossref", 
-        `url`="https://CRAN.R-project.org/package=rcrossref"))
+        `url`="https://CRAN.R-project.org/package=rcrossref"), 
+    `epiR`=list(
+        `type`="software", 
+        `author`="Mark Stevenson with contributions from Telmo Nunes, Cord Heuer, Jonathon Marshall, Javier Sanchez, Ron Thornton, Jeno Reiczigel, Jim Robison-Cox, Paola Sebastiani, Peter Solymos, Kazuki Yoshida, Geoff Jones, Sarah Pirikahu, Simon Firestone, Ryan Kyle, Johann Popp, Mathew Jay and Charles Reynard.", 
+        `year`=2020, 
+        `title`="epiR: Tools for the Analysis of Epidemiological Data.", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=epiR", 
+        `url`="https://CRAN.R-project.org/package=epiR"))

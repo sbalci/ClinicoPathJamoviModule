@@ -94,11 +94,11 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text2 = function() private$.items[["text2"]],
-        text1html = function() private$.items[["text1html"]],
+        medianTable = function() private$.items[["medianTable"]],
         text5 = function() private$.items[["text5"]],
-        text4 = function() private$.items[["text4"]],
+        uniTable = function() private$.items[["uniTable"]],
         text7 = function() private$.items[["text7"]],
-        text6 = function() private$.items[["text6"]],
+        survTable = function() private$.items[["survTable"]],
         text9 = function() private$.items[["text9"]],
         text8 = function() private$.items[["text8"]],
         plot = function() private$.items[["plot"]],
@@ -122,6 +122,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -130,14 +131,50 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text1html",
-                title="`Median Survival Table  - ${explanatory}`",
+                name="medianTable",
+                title="`Median Survival Table: Levels for ${explanatory}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="factor", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="records", 
+                        `title`="Records", 
+                        `type`="number"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="rmean", 
+                        `title`="rmean", 
+                        `type`="number"),
+                    list(
+                        `name`="se_rmean", 
+                        `title`="se_rmean", 
+                        `type`="number"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number"),
+                    list(
+                        `name`="x0_95lcl", 
+                        `title`="Lower 95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="x0_95ucl", 
+                        `title`="Upper 95% CI", 
+                        `type`="number")),
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -146,14 +183,34 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text4",
+                name="uniTable",
                 title="`Cox Table- ${explanatory}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="Explanatory", 
+                        `title`="Explanatory", 
+                        `type`="text"),
+                    list(
+                        `name`="Levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="all", 
+                        `title`="all", 
+                        `type`="text"),
+                    list(
+                        `name`="HR_univariable", 
+                        `title`="HR (Univariable)", 
+                        `type`="text")),
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -162,14 +219,49 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text6",
-                title="`1, 3, 5-yr Survival  - ${explanatory}`",
+                name="survTable",
+                title="`1, 3, 5 year Survival - ${explanatory}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="strata", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="time", 
+                        `title`="time", 
+                        `type`="integer"),
+                    list(
+                        `name`="n.risk", 
+                        `title`="Number at Risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="n.event", 
+                        `title`="Number of Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="surv", 
+                        `title`="Survival", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc")),
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -178,14 +270,16 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text8",
-                title="`Pairwise Comparison - ${explanatory}`",
+                title="",
                 clearWith=list(
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -200,6 +294,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "sc",
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -214,6 +309,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "ce",
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -228,6 +324,7 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "ch",
                     "explanatory",
                     "outcome",
+                    "outcomeLevel",
                     "overalltime")))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -271,17 +368,23 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1html} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$uniTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text6} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text8} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$medianTable$asDF}
+#'
+#' \code{as.data.frame(results$medianTable)}
 #'
 #' @export
 survival <- function(

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0019</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0025</span>
       </span>
     </div>
 
@@ -156,7 +156,15 @@
     <p>Function for Medical Decision Calculator.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>decisioncalculator</span>(<span class='kw'>TP</span> <span class='kw'>=</span> <span class='fl'>90</span>, <span class='kw'>TN</span> <span class='kw'>=</span> <span class='fl'>80</span>, <span class='kw'>FP</span> <span class='kw'>=</span> <span class='fl'>30</span>, <span class='kw'>FN</span> <span class='kw'>=</span> <span class='fl'>20</span>, <span class='kw'>pp</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>pprob</span> <span class='kw'>=</span> <span class='fl'>0.3</span>)</pre>
+    <pre class="usage"><span class='fu'>decisioncalculator</span>(
+  <span class='kw'>TP</span> <span class='kw'>=</span> <span class='fl'>90</span>,
+  <span class='kw'>TN</span> <span class='kw'>=</span> <span class='fl'>80</span>,
+  <span class='kw'>FP</span> <span class='kw'>=</span> <span class='fl'>30</span>,
+  <span class='kw'>FN</span> <span class='kw'>=</span> <span class='fl'>20</span>,
+  <span class='kw'>pp</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>pprob</span> <span class='kw'>=</span> <span class='fl'>0.3</span>,
+  <span class='kw'>fnote</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -186,19 +194,26 @@
       <td><p>Prior probability (disease prevelance in the community).
 Requires a value between 0.001 and 0.999, default 0.300.</p></td>
     </tr>
+    <tr>
+      <th>fnote</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$manualtable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$nTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$ratioTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$epirTable_ratio</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$epirTable_number</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 </table>
 
 
 <p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
-<p><code>results$manualtable$asDF</code></p>
-<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$manualtable)</a></code></p>
+<p><code>results$nTable$asDF</code></p>
+<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$nTable)</a></code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {

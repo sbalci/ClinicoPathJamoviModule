@@ -18,9 +18,15 @@ agepyramid(data, age, gender, female)
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$pyramidTable$asDF}
+
+\code{as.data.frame(results$pyramidTable)}
 }
 \description{
 Age Pyramid

@@ -7,30 +7,29 @@ children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
-
     children:
       - type: TargetLayoutBox
         label: Golden Standard
-
         children:
           - type: VariablesListBox
             name: gold
             maxItemCount: 1
             isTarget: true
-
           - type: LevelSelector
             name: goldPositive
             enable: (gold)
-
       - type: TargetLayoutBox
         label: New Test
-
         children:
           - type: VariablesListBox
             name: newtest
             maxItemCount: 1
             isTarget: true
-
           - type: LevelSelector
             name: testPositive
             enable: (newtest)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fnote

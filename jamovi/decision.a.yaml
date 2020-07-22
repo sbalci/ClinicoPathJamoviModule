@@ -46,4 +46,14 @@ options:
       title: Positive Level
       type: Level
       variable: (newtest)
+
+
+
+    - name: fnote
+      title: Show Footnote
+      type: Bool
+      default: false
+
+
+
 ...

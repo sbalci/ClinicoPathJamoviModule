@@ -12,10 +12,9 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             marg = FALSE,
             fill = "first_variable",
             bin = "default",
-            flip = FALSE,
+            orient = "vert",
             usetitle = FALSE,
-            mytitle = "Alluvial Plot",
-            themex = "easyalluvial", ...) {
+            mytitle = "Alluvial Plot", ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -56,10 +55,13 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "min_max",
                     "cuts"),
                 default="default")
-            private$..flip <- jmvcore::OptionBool$new(
-                "flip",
-                flip,
-                default=FALSE)
+            private$..orient <- jmvcore::OptionList$new(
+                "orient",
+                orient,
+                options=list(
+                    "horr",
+                    "vert"),
+                default="vert")
             private$..usetitle <- jmvcore::OptionBool$new(
                 "usetitle",
                 usetitle,
@@ -68,23 +70,6 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "mytitle",
                 mytitle,
                 default="Alluvial Plot")
-            private$..themex <- jmvcore::OptionList$new(
-                "themex",
-                themex,
-                options=list(
-                    "jamovi",
-                    "easyalluvial",
-                    "grey",
-                    "gray",
-                    "bw",
-                    "linedraw",
-                    "light",
-                    "dark",
-                    "minimal",
-                    "classic",
-                    "void",
-                    "test"),
-                default="easyalluvial")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
@@ -92,10 +77,9 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..marg)
             self$.addOption(private$..fill)
             self$.addOption(private$..bin)
-            self$.addOption(private$..flip)
+            self$.addOption(private$..orient)
             self$.addOption(private$..usetitle)
             self$.addOption(private$..mytitle)
-            self$.addOption(private$..themex)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -104,10 +88,9 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         marg = function() private$..marg$value,
         fill = function() private$..fill$value,
         bin = function() private$..bin$value,
-        flip = function() private$..flip$value,
+        orient = function() private$..orient$value,
         usetitle = function() private$..usetitle$value,
-        mytitle = function() private$..mytitle$value,
-        themex = function() private$..themex$value),
+        mytitle = function() private$..mytitle$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
@@ -115,10 +98,9 @@ alluvialOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..marg = NA,
         ..fill = NA,
         ..bin = NA,
-        ..flip = NA,
+        ..orient = NA,
         ..usetitle = NA,
-        ..mytitle = NA,
-        ..themex = NA)
+        ..mytitle = NA)
 )
 
 alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -157,10 +139,9 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "verb",
                     "fill",
                     "bin",
-                    "flip",
+                    "orient",
                     "usetitle",
-                    "mytitle",
-                    "themex")))
+                    "mytitle")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -171,8 +152,7 @@ alluvialResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "condensationvar",
-                    "themex"),
+                    "condensationvar"),
                 visible="(condensationvar)"))}))
 
 alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -207,10 +187,9 @@ alluvialBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param fill A list for the argument fill for selecting the variable to be
 #'   represented by color. Default is 'first_variable'.
 #' @param bin labels for the bins from low to high
-#' @param flip .
+#' @param orient .
 #' @param usetitle .
 #' @param mytitle .
-#' @param themex .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -227,10 +206,9 @@ alluvial <- function(
     marg = FALSE,
     fill = "first_variable",
     bin = "default",
-    flip = FALSE,
+    orient = "vert",
     usetitle = FALSE,
-    mytitle = "Alluvial Plot",
-    themex = "easyalluvial") {
+    mytitle = "Alluvial Plot") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('alluvial requires jmvcore to be installed (restart may be required)')
@@ -251,10 +229,9 @@ alluvial <- function(
         marg = marg,
         fill = fill,
         bin = bin,
-        flip = flip,
+        orient = orient,
         usetitle = usetitle,
-        mytitle = mytitle,
-        themex = themex)
+        mytitle = mytitle)
 
     analysis <- alluvialClass$new(
         options = options,
