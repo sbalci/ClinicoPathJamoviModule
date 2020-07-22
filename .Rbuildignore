@@ -25,6 +25,7 @@
 
 ### Uncompiled documentation files
 ^README\.Rmd$
+^README\.html$
 ^.*Class.Rd$
 ^.*\.gif$
 ^.*\.png$
