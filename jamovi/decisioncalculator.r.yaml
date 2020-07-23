@@ -1,6 +1,6 @@
 ---
 name:  decisioncalculator
-title: Decision Calculator
+title: Medical Decision Calculator
 jrs:   '1.1'
 
 items:
@@ -13,14 +13,34 @@ items:
     #   title: Decision Calculator
     #   type:  Preformatted
 
-    - name:  text2
-      title: Decision Calculator
-      type:  Preformatted
-      clearWith:
-          - pp
-          - pprob
-          - fnote
-      refs: caret
+    # - name:  text2
+    #   title: Decision Calculator
+    #   type:  Preformatted
+    #   clearWith:
+    #       - pp
+    #       - pprob
+    #       - fnote
+    #   refs: caret
+
+
+    - name:  cTable
+      title: ''
+      # title: 'Decision Test Statistics'
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
 
 
     - name:  nTable
@@ -58,7 +78,6 @@ items:
           - pp
           - pprob
           - fnote
-      refs: caret
 
 
     - name:  ratioTable
@@ -115,7 +134,6 @@ items:
           - pp
           - pprob
           - fnote
-      refs: caret
 
 
 
@@ -141,8 +159,8 @@ items:
 
     - name: epirTable_ratio
       title: ''
-      # title: 'EpiR Table Ratios'
       type: Table
+      visible: (ci)
       rows: 0
       columns:
         - name: statsnames
@@ -164,11 +182,13 @@ items:
           - pp
           - pprob
           - fnote
+          - ci
       refs: epiR
+
 
     - name: epirTable_number
       title: ''
-      # title: 'EpiR Table Numbers'
+      visible: (ci)
       type: Table
       rows: 0
       columns:
@@ -188,7 +208,9 @@ items:
           - pp
           - pprob
           - fnote
+          - ci
       refs: epiR
+
 
     # - name:  table1
     #   title: 'Table 1'

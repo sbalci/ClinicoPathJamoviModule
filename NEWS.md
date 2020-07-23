@@ -1,3 +1,14 @@
+# ClinicoPath 0.0.2.0025
+
+- ClinicoPath as a combined module has been taken down from jamovi library.
+- Users are adviced to install submodules.
+
+- ClinicoPathDescriptives, jsurvival, and meddecide tables have been updated to look more jamovian :)
+
+
+
+
+
 # ClinicoPath 0.0.2.0024
 
 - ClinicoPathDescriptives functions are separately added to jamovi library under Exploration menu

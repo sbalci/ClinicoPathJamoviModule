@@ -10,7 +10,10 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             goldPositive = NULL,
             newtest = NULL,
             testPositive = NULL,
-            fnote = FALSE, ...) {
+            pp = FALSE,
+            pprob = 0.3,
+            fnote = FALSE,
+            ci = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -40,36 +43,61 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "testPositive",
                 testPositive,
                 variable="(newtest)")
+            private$..pp <- jmvcore::OptionBool$new(
+                "pp",
+                pp,
+                default=FALSE)
+            private$..pprob <- jmvcore::OptionNumber$new(
+                "pprob",
+                pprob,
+                default=0.3,
+                min=0.001,
+                max=0.999)
             private$..fnote <- jmvcore::OptionBool$new(
                 "fnote",
                 fnote,
+                default=FALSE)
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
                 default=FALSE)
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..newtest)
             self$.addOption(private$..testPositive)
+            self$.addOption(private$..pp)
+            self$.addOption(private$..pprob)
             self$.addOption(private$..fnote)
+            self$.addOption(private$..ci)
         }),
     active = list(
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
         newtest = function() private$..newtest$value,
         testPositive = function() private$..testPositive$value,
-        fnote = function() private$..fnote$value),
+        pp = function() private$..pp$value,
+        pprob = function() private$..pprob$value,
+        fnote = function() private$..fnote$value,
+        ci = function() private$..ci$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
         ..newtest = NA,
         ..testPositive = NA,
-        ..fnote = NA)
+        ..pp = NA,
+        ..pprob = NA,
+        ..fnote = NA,
+        ..ci = NA)
 )
 
 decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
+        cTable = function() private$.items[["cTable"]],
+        nTable = function() private$.items[["nTable"]],
+        ratioTable = function() private$.items[["ratioTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
         epirTable_number = function() private$.items[["epirTable_number"]]),
     private = list(),
@@ -83,15 +111,139 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="text1",
                 title="Original Data"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text2",
-                title="Decision Tests",
-                refs="caret"))
+                name="cTable",
+                title="Recoded Data for Decision Test Statistics",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="newtest", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="GP", 
+                        `title`="Gold Positive", 
+                        `type`="number"),
+                    list(
+                        `name`="GN", 
+                        `title`="Gold Negative", 
+                        `type`="number"),
+                    list(
+                        `name`="Total", 
+                        `title`="Total", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nTable",
+                title="",
+                swapRowsColumns=TRUE,
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="tablename", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="TotalPop", 
+                        `title`="Total", 
+                        `type`="number"),
+                    list(
+                        `name`="DiseaseP", 
+                        `title`="Diseased", 
+                        `type`="number"),
+                    list(
+                        `name`="DiseaseN", 
+                        `title`="Healthy", 
+                        `type`="number"),
+                    list(
+                        `name`="TestP", 
+                        `title`="Positive Tests", 
+                        `type`="number"),
+                    list(
+                        `name`="TestN", 
+                        `title`="Negative Tests", 
+                        `type`="number"),
+                    list(
+                        `name`="TestT", 
+                        `title`="True Test", 
+                        `type`="number"),
+                    list(
+                        `name`="TestW", 
+                        `title`="Wrong Test", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ratioTable",
+                title="",
+                swapRowsColumns=TRUE,
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="tablename", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="Sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="Spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="AccurT", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PrevalenceD", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PPV", 
+                        `title`="Positive Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="NPV", 
+                        `title`="Negative Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PostTestProbDisease", 
+                        `title`="Post-test Disease Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PostTestProbHealthy", 
+                        `title`="Post-test Health Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="LRP", 
+                        `title`="Positive Likelihood Ratio", 
+                        `type`="number"),
+                    list(
+                        `name`="LRN", 
+                        `title`="Negative Likelihood Ratio", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
                 title="",
+                visible="(ci)",
                 rows=0,
                 columns=list(
                     list(
@@ -122,6 +274,7 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="epirTable_number",
                 title="",
+                visible="(ci)",
                 rows=0,
                 columns=list(
                     list(
@@ -181,20 +334,26 @@ decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param goldPositive .
 #' @param newtest .
 #' @param testPositive .
+#' @param pp .
+#' @param pprob Prior probability (disease prevelance in the community).
+#'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote .
+#' @param ci .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$epirTable_ratio$asDF}
+#' \code{results$cTable$asDF}
 #'
-#' \code{as.data.frame(results$epirTable_ratio)}
+#' \code{as.data.frame(results$cTable)}
 #'
 #' @export
 decision <- function(
@@ -203,7 +362,10 @@ decision <- function(
     goldPositive,
     newtest,
     testPositive,
-    fnote = FALSE) {
+    pp = FALSE,
+    pprob = 0.3,
+    fnote = FALSE,
+    ci = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('decision requires jmvcore to be installed (restart may be required)')
@@ -224,7 +386,10 @@ decision <- function(
         goldPositive = goldPositive,
         newtest = newtest,
         testPositive = testPositive,
-        fnote = fnote)
+        pp = pp,
+        pprob = pprob,
+        fnote = fnote,
+        ci = ci)
 
     analysis <- decisionClass$new(
         options = options,

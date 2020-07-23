@@ -2,7 +2,7 @@
 % Please edit documentation in R/decisioncalculator.h.R
 \name{decisioncalculator}
 \alias{decisioncalculator}
-\title{Decision Calculator}
+\title{Medical Decision Calculator}
 \usage{
 decisioncalculator(
   TP = 90,
@@ -11,7 +11,8 @@ decisioncalculator(
   FN = 20,
   pp = FALSE,
   pprob = 0.3,
-  fnote = FALSE
+  fnote = FALSE,
+  ci = FALSE
 )
 }
 \arguments{
@@ -29,11 +30,13 @@ decisioncalculator(
 Requires a value between 0.001 and 0.999, default 0.300.}
 
 \item{fnote}{.}
+
+\item{ci}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
@@ -42,9 +45,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$nTable$asDF}
+\code{results$cTable$asDF}
 
-\code{as.data.frame(results$nTable)}
+\code{as.data.frame(results$cTable)}
 }
 \description{
 Function for Medical Decision Calculator.
