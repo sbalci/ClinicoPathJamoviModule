@@ -12,7 +12,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             FN = 20,
             pp = FALSE,
             pprob = 0.3,
-            fnote = FALSE, ...) {
+            fnote = FALSE,
+            ci = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -50,6 +51,10 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "fnote",
                 fnote,
                 default=FALSE)
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
+                default=FALSE)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -58,6 +63,7 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..pp)
             self$.addOption(private$..pprob)
             self$.addOption(private$..fnote)
+            self$.addOption(private$..ci)
         }),
     active = list(
         TP = function() private$..TP$value,
@@ -66,7 +72,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         FN = function() private$..FN$value,
         pp = function() private$..pp$value,
         pprob = function() private$..pprob$value,
-        fnote = function() private$..fnote$value),
+        fnote = function() private$..fnote$value,
+        ci = function() private$..ci$value),
     private = list(
         ..TP = NA,
         ..TN = NA,
@@ -74,13 +81,14 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..FN = NA,
         ..pp = NA,
         ..pprob = NA,
-        ..fnote = NA)
+        ..fnote = NA,
+        ..ci = NA)
 )
 
 decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text2 = function() private$.items[["text2"]],
+        cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
@@ -91,16 +99,29 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Calculator")
-            self$add(jmvcore::Preformatted$new(
+                title="Medical Decision Calculator")
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text2",
-                title="Decision Calculator",
-                clearWith=list(
-                    "pp",
-                    "pprob",
-                    "fnote"),
-                refs="caret"))
+                name="cTable",
+                title="",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="newtest", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="GP", 
+                        `title`="Gold Positive", 
+                        `type`="number"),
+                    list(
+                        `name`="GN", 
+                        `title`="Gold Negative", 
+                        `type`="number"),
+                    list(
+                        `name`="Total", 
+                        `title`="Total", 
+                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
@@ -143,8 +164,7 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob",
-                    "fnote"),
-                refs="caret"))
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
@@ -207,12 +227,12 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob",
-                    "fnote"),
-                refs="caret"))
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
                 title="",
+                visible="(ci)",
                 rows=0,
                 columns=list(
                     list(
@@ -237,12 +257,14 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob",
-                    "fnote"),
+                    "fnote",
+                    "ci"),
                 refs="epiR"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_number",
                 title="",
+                visible="(ci)",
                 rows=0,
                 columns=list(
                     list(
@@ -264,7 +286,8 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob",
-                    "fnote"),
+                    "fnote",
+                    "ci"),
                 refs="epiR"))}))
 
 decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -287,7 +310,7 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Decision Calculator
+#' Medical Decision Calculator
 #'
 #' Function for Medical Decision Calculator.
 #'
@@ -303,9 +326,10 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param pprob Prior probability (disease prevelance in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote .
+#' @param ci .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
@@ -314,9 +338,9 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$nTable$asDF}
+#' \code{results$cTable$asDF}
 #'
-#' \code{as.data.frame(results$nTable)}
+#' \code{as.data.frame(results$cTable)}
 #'
 #' @export
 decisioncalculator <- function(
@@ -326,7 +350,8 @@ decisioncalculator <- function(
     FN = 20,
     pp = FALSE,
     pprob = 0.3,
-    fnote = FALSE) {
+    fnote = FALSE,
+    ci = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('decisioncalculator requires jmvcore to be installed (restart may be required)')
@@ -339,7 +364,8 @@ decisioncalculator <- function(
         FN = FN,
         pp = pp,
         pprob = pprob,
-        fnote = fnote)
+        fnote = fnote,
+        ci = ci)
 
     analysis <- decisioncalculatorClass$new(
         options = options,

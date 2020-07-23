@@ -1,6 +1,6 @@
 ---
 name:  decisioncalculator
-title: Decision Calculator
+title: Medical Decision Calculator
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -41,6 +41,8 @@ options:
       type: Bool
       default: false
 
+
+
     - name: pprob
       title: Prior Probability (prevelance)
       type: Number
@@ -62,6 +64,10 @@ options:
       type: Bool
       default: false
 
+    - name: ci
+      title: 'Show 95% CI'
+      type: Bool
+      default: false
 
 
 

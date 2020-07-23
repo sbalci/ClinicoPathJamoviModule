@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Decision Calculator — decisioncalculator • ClinicoPath</title>
+<title>Medical Decision Calculator — decisioncalculator • ClinicoPath</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Decision Calculator — decisioncalculator" />
+<meta property="og:title" content="Medical Decision Calculator — decisioncalculator" />
 <meta property="og:description" content="Function for Medical Decision Calculator." />
 
 
@@ -147,7 +147,7 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Decision Calculator</h1>
+    <h1>Medical Decision Calculator</h1>
     <small class="dont-index">Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/R/decisioncalculator.h.R'><code>R/decisioncalculator.h.R</code></a></small>
     <div class="hidden name"><code>decisioncalculator.Rd</code></div>
     </div>
@@ -163,7 +163,8 @@
   <span class='kw'>FN</span> <span class='kw'>=</span> <span class='fl'>20</span>,
   <span class='kw'>pp</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>pprob</span> <span class='kw'>=</span> <span class='fl'>0.3</span>,
-  <span class='kw'>fnote</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>fnote</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>ci</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -198,12 +199,16 @@ Requires a value between 0.001 and 0.999, default 0.300.</p></td>
       <th>fnote</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>ci</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$cTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$nTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$ratioTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$epirTable_ratio</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
@@ -212,8 +217,8 @@ Requires a value between 0.001 and 0.999, default 0.300.</p></td>
 
 
 <p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
-<p><code>results$nTable$asDF</code></p>
-<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$nTable)</a></code></p>
+<p><code>results$cTable$asDF</code></p>
+<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$cTable)</a></code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {

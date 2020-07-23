@@ -14,16 +14,132 @@ items:
       type:  Preformatted
 
 
-    - name:  text2
-      title: Decision Tests
-      type:  Preformatted
-      refs: caret
+    # - name:  text2
+    #   title: Decision Tests
+    #   type:  Preformatted
+    #   refs: caret
+
+
+
+    - name:  cTable
+      title: 'Recoded Data for Decision Test Statistics'
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+
+    - name:  nTable
+      title: ''
+      # title: 'Decision Test Statistics'
+      type: Table
+      swapRowsColumns: true
+      rows:  1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: TotalPop
+          title: 'Total'
+          type: number
+        - name: DiseaseP
+          title: 'Diseased'
+          type: number
+        - name: DiseaseN
+          title: 'Healthy'
+          type: number
+        - name: TestP
+          title: 'Positive Tests'
+          type: number
+        - name: TestN
+          title: 'Negative Tests'
+          type: number
+        - name: TestT
+          title: 'True Test'
+          type: number
+        - name: TestW
+          title: 'Wrong Test'
+          type: number
+      clearWith:
+          - pp
+          - pprob
+          - fnote
+
+
+    - name:  ratioTable
+      title: ''
+      # title: 'Decision Test Statistics'
+      type: Table
+      swapRowsColumns: true
+      rows:  1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: Sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: AccurT
+          title: 'Accuracy'
+          type: number
+          format: pc
+        - name: PrevalenceD
+          title: 'Prevalence'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'Negative Predictive Value'
+          type: number
+          format: pc
+        - name: PostTestProbDisease
+          title: 'Post-test Disease Probability'
+          type: number
+          format: pc
+        - name: PostTestProbHealthy
+          title: 'Post-test Health Probability'
+          type: number
+          format: pc
+        - name: LRP
+          title: Positive Likelihood Ratio
+          type: number
+          # format: pc
+        - name: LRN
+          title: Negative Likelihood Ratio
+          type: number
+          # format: pc
+      clearWith:
+          - pp
+          - pprob
+          - fnote
+
+
 
 
     - name: epirTable_ratio
       title: ''
       # title: 'EpiR Table Ratios'
       type: Table
+      visible: (ci)
       rows: 0
       columns:
         - name: statsnames
@@ -47,10 +163,12 @@ items:
           - fnote
       refs: epiR
 
+
     - name: epirTable_number
       title: ''
       # title: 'EpiR Table Numbers'
       type: Table
+      visible: (ci)
       rows: 0
       columns:
         - name: statsnames

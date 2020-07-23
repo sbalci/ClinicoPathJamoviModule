@@ -116,15 +116,272 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
 
 
 
-        # Caret ----
+
+        # conf_table ----
 
         conf_table <- table(mydata2[["testVariable2"]], mydata2[["goldVariable2"]])
 
 
-        results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
+        # Caret ----
+        # results_caret <- caret::confusionMatrix(conf_table, positive = "Positive")
 
 
-        self$results$text2$setContent(results_caret)
+        # self$results$text2$setContent(
+        #     list(
+        #         conf_table,
+        #         results_caret
+        #         )
+        # )
+
+        TP <- conf_table[1,1]
+
+        FP <- conf_table[1,2]
+
+        FN <- conf_table[2,1]
+
+        TN <- conf_table[2,2]
+
+
+
+
+        # Cross Table in jamovi style ----
+
+        cTable <- self$results$cTable
+
+
+        cTable$addRow(rowKey = "Test Positive",
+                      values = list(
+                          newtest = "Test Positive",
+                          GP = TP,
+                          GN = FP,
+                          Total = TP + FP
+                      )
+        )
+
+
+        cTable$addRow(rowKey = "Test Negative",
+                      values = list(
+                          newtest = "Test Negative",
+                          GP = FN,
+                          GN = TN,
+                          Total = FN + TN
+                      )
+        )
+
+        cTable$addRow(rowKey = "Total",
+                      values = list(
+                          newtest = "Total",
+                          GP = TP + FN,
+                          GN = FP + TN,
+                          Total = TP + FP + FN + TN
+                      )
+        )
+
+
+
+
+
+        # Self Calculations ----
+
+        # Self Calculation https://cran.r-project.org/web/packages/caret/caret.pdf
+        # https://online.stat.psu.edu/stat509/node/150/
+
+        # https://en.wikipedia.org/wiki/Sensitivity_and_specificity
+
+        TotalPop <- TP + TN + FP + FN
+
+        DiseaseP <- TP + FN
+
+        DiseaseN <- TN + FP
+
+        TestP <- TP + FP
+
+        TestN <- TN + FN
+
+        TestT <- TP + TN
+
+        TestW <- FP + FN
+
+        Sens <- TP/DiseaseP
+
+        Spec <- TN/DiseaseN
+
+        AccurT <- TestT/TotalPop
+
+        PrevalenceD <- DiseaseP/TotalPop
+
+        PPV <- TP/TestP
+
+        NPV <- TN/TestN
+
+
+        pp <- self$options$pp
+        pprob <- self$options$pprob
+
+        if (pp) {
+            # Known prior probability from population
+            PriorProb <- pprob
+        } else {
+            # From ConfusionMatrix
+            PriorProb <- PrevalenceD
+        }
+
+
+        PostTestProbDisease <- (PriorProb * Sens)/((PriorProb * Sens) + ((1 -
+                                                                              PriorProb) * (1 - Spec)))
+
+
+
+        PostTestProbHealthy <- ((1 - PriorProb) * Spec)/(((1 - PriorProb) *
+                                                              Spec) + (PriorProb * (1 - Sens)))
+
+
+
+
+        LRP <- Sens / (1 - Spec)
+
+        LRN <- (1 - Sens) / Spec
+
+
+
+
+
+
+        # nTable Populate Table ----
+
+        nTable <- self$results$nTable
+        nTable$setRow(rowNo = 1,
+                      values = list(
+                          tablename = "n",
+                          TotalPop = TotalPop,
+                          DiseaseP = DiseaseP,
+                          DiseaseN = DiseaseN,
+                          TestP = TestP,
+                          TestN = TestN,
+                          TestT = TestT,
+                          TestW = TestW
+                      )
+        )
+
+        # ratioTable Populate Table ----
+
+
+        ratioTable <- self$results$ratioTable
+        ratioTable$setRow(rowNo = 1,
+                          values = list(
+                              tablename = "Ratios",
+                              Sens = Sens,
+                              Spec = Spec,
+                              AccurT = AccurT,
+                              PrevalenceD = PriorProb,
+                              PPV = PPV,
+                              NPV = NPV,
+                              PostTestProbDisease = PostTestProbDisease,
+                              PostTestProbHealthy = PostTestProbHealthy,
+                              LRP = LRP,
+                              LRN = LRN
+                          )
+        )
+
+        # nTable footnotes ----
+
+        if (self$options$fnote) {
+
+            # nTable$addFootnote(rowKey = "1", col = "TotalPop", "Total Population")
+
+            nTable$addFootnote(rowNo = 1, col = "TotalPop", "Total Number of Subjects")
+
+            nTable$addFootnote(rowNo = 1, col = "DiseaseP", "Total Number of Subjects with Disease")
+
+            nTable$addFootnote(rowNo = 1, col = "DiseaseN", "Total Number of Healthy Subjects")
+
+            nTable$addFootnote(rowNo = 1, col = "TestP", "Total Number of Positive Tests")
+
+            nTable$addFootnote(rowNo = 1, col = "TestN", "Total Number of Negative Tests")
+
+            nTable$addFootnote(rowNo = 1, col = "TestT", "Total Number of True Test Results")
+
+            nTable$addFootnote(rowNo = 1, col = "TestW", "Total Number of Wrong Test Results")
+
+
+        }
+
+
+        # ratioTable footnotes ----
+
+
+        if (self$options$fnote) {
+
+            ratioTable$addFootnote(rowNo = 1, col = "Sens", "Sensitivity (True Positives among Diseased)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "Spec", "Specificity (True Negatives among Healthy)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "AccurT", "Accuracy (True Test Result Ratio)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "PrevalenceD", "Disease Prevalence in this population")
+
+            ratioTable$addFootnote(rowNo = 1, col = "PPV", "Positive Predictive Value (Probability of having disease after a positive test using this experimental population)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "NPV", "Negative Predictive Value (Probability of being healthy after a negative test using this experimental population)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", "Post-test Probability of Having Disease  (Probability of having disease after a positive test using known Population Prevalence)")
+
+            ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)")
+
+            # ratioTable$addFootnote(rowNo = 1, col = "LRP", "")
+
+            # ratioTable$addFootnote(rowNo = 1, col = "LRN", "")
+
+
+        }
+
+
+
+
+        # Reorganize Table
+
+
+
+        # caretresult[['positive']]
+        # caretresult[['table']]
+        # caretresult[['overall']]
+        # caretresult[['overall']][['Accuracy']]
+        # caretresult[['overall']][['Kappa']]
+        # caretresult[['overall']][['AccuracyLower']]
+        # caretresult[['overall']][['AccuracyUpper']]
+        # caretresult[['overall']][['AccuracyNull']]
+        # caretresult[['overall']][['AccuracyPValue']]
+        # caretresult[['overall']][['McnemarPValue']]
+        # caretresult[['byClass']]
+        # caretresult[['byClass']][['Sensitivity']]
+        # caretresult[['byClass']][['Specificity']]
+        # caretresult[['byClass']][['Pos Pred Value']]
+        # caretresult[['byClass']][['Neg Pred Value']]
+        # caretresult[['byClass']][['Precision']]
+        # caretresult[['byClass']][['Recall']] caretresult[['byClass']][['F1']]
+        # caretresult[['byClass']][['Prevalence']]
+        # caretresult[['byClass']][['Detection Rate']]
+        # caretresult[['byClass']][['Detection Prevalence']]
+        # caretresult[['byClass']][['Balanced Accuracy']] caretresult[['mode']]
+        # caretresult[['dots']]
+
+
+
+
+        # Write Summary
+
+
+
+
+
+
+
+        # 95% CI ----
+
+        ci <- self$options$ci
+
+        if (ci) {
+
 
 
         # epiR ----
@@ -255,7 +512,11 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
 
         }
 
-           # drafts ----
+
+        }
+
+
+        # drafts ----
 
 
         # matrixdetails <- list(results_caret[["positive"]], results_caret[["table"]],

@@ -82,36 +82,51 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         # caret result ----
 
-        if (pp) {
-            caretresult <- caret::confusionMatrix(table3, prevalence = pprob)
+        # if (pp) {
+        #     caretresult <- caret::confusionMatrix(table3, prevalence = pprob)
+        #
+        # } else {
+        #
+        #     caretresult <- caret::confusionMatrix(table3)
+        #
+        # }
 
-        } else {
-
-            caretresult <- caret::confusionMatrix(table3)
-
-        }
-
-        self$results$text2$setContent(caretresult)
+        # self$results$text2$setContent(caretresult)
 
 
 
         # Cross Table in jamovi style ----
 
+        cTable <- self$results$cTable
 
-        # results1html <- as.data.frame(km_fit_median_df$table) %>%
-        #     janitor::clean_names(dat = ., case = "snake") %>%
-        #     tibble::rownames_to_column(.data = ., var = self$options$explanatory)
-        #
-        #
-        # table3
-        #
-        #
-        # cTable <- self$results$cTable
-        #
-        # data_frame <- table3
-        # for(i in seq_along(data_frame[,1,drop=T])) {
-        #     cTable$addRow(rowKey = i, values = c(data_frame[i,]))
-        # }
+
+        cTable$addRow(rowKey = "Test Positive",
+                      values = list(
+                          newtest = "Test Positive",
+                          GP = TP,
+                          GN = FP,
+                          Total = TP + FP
+                      )
+        )
+
+
+        cTable$addRow(rowKey = "Test Negative",
+                      values = list(
+                          newtest = "Test Negative",
+                          GP = FN,
+                          GN = TN,
+                          Total = FN + TN
+                      )
+        )
+
+        cTable$addRow(rowKey = "Total",
+                      values = list(
+                          newtest = "Total",
+                          GP = TP + FN,
+                          GN = FP + TN,
+                          Total = TP + FP + FN + TN
+                      )
+        )
 
 
 
@@ -206,7 +221,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             Sens = Sens,
             Spec = Spec,
             AccurT = AccurT,
-            PrevalenceD = PrevalenceD,
+            PrevalenceD = PriorProb,
             PPV = PPV,
             NPV = NPV,
             PostTestProbDisease = PostTestProbDisease,
@@ -303,6 +318,16 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         # Write Summary
 
+
+
+
+
+
+        # 95% CI ----
+
+        ci <- self$options$ci
+
+        if (ci) {
 
 
 
@@ -472,4 +497,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-    }))
+
+
+
+        }
+
+
+            }))

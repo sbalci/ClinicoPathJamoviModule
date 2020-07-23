@@ -4,7 +4,17 @@
 \alias{decision}
 \title{Medical Decision}
 \usage{
-decision(data, gold, goldPositive, newtest, testPositive, fnote = FALSE)
+decision(
+  data,
+  gold,
+  goldPositive,
+  newtest,
+  testPositive,
+  pp = FALSE,
+  pprob = 0.3,
+  fnote = FALSE,
+  ci = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -17,22 +27,31 @@ decision(data, gold, goldPositive, newtest, testPositive, fnote = FALSE)
 
 \item{testPositive}{.}
 
+\item{pp}{.}
+
+\item{pprob}{Prior probability (disease prevelance in the community).
+Requires a value between 0.001 and 0.999, default 0.300.}
+
 \item{fnote}{.}
+
+\item{ci}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$cTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$nTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$epirTable_ratio$asDF}
+\code{results$cTable$asDF}
 
-\code{as.data.frame(results$epirTable_ratio)}
+\code{as.data.frame(results$cTable)}
 }
 \description{
 Function for Medical Decision Analysis. Sensitivity, specificity, positive
