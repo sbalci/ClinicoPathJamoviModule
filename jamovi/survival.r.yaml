@@ -199,6 +199,7 @@ items:
           - outcome
           - outcomeLevel
           - overalltime
+      visible: (pw)
 
 
     - name:  text8
@@ -210,6 +211,8 @@ items:
           - outcome
           - outcomeLevel
           - overalltime
+          - pw
+      visible: (pw)
 
 
     - name: plot

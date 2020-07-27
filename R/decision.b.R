@@ -99,6 +99,9 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
         self$results$text1$setContent(results1)
 
 
+
+
+
         # Recode ----
 
         mydata2 <- mydata

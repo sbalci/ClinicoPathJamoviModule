@@ -45,13 +45,13 @@ options:
 
 
     - name: hr
-      title: Show Hazards Regression Plot
+      title: Hazards Regression Plot
       type: Bool
       default: false
 
 
     - name: sty
-      title: Select Plot Style
+      title: Plot Style
       type: List
       options:
         - title: finalfit

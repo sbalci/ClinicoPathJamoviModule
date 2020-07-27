@@ -32,19 +32,44 @@ children:
           - type: LevelSelector
             name: outcomeLevel
             enable: (outcome)
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Analysis
     children:
-      - type: CheckBox
-        name: sc
-      - type: CheckBox
-        name: ce
-      - type: CheckBox
-        name: ch
-  - type: LayoutBox
+      - type: Label
+        label: Survival table
+        children:
+          - type: TextBox
+            name: cutp
+            format: string
+            width: large
+      - type: Label
+        label: Pairwise comparisons
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: pw
+  - type: Label
+    label: Plots
     margin: large
+    cell:
+      row: 1
+      column: 1
     children:
-      - type: TextBox
-        name: cutp
-        format: string
-        width: large
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: CheckBox
+            name: sc
+          - type: CheckBox
+            name: ce
+          - type: CheckBox
+            name: ch
+
+
+
+
+
+
+
