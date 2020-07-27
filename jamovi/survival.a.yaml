@@ -61,8 +61,7 @@ options:
 
 
     - name: cutp
-      title: >
-          Cutpoints (months) for survival table
+      title: Cutpoints (in months)
       type: String
       default: '12, 36, 60'
 
@@ -101,20 +100,26 @@ options:
     #       R: select the time type in output
 
 
+    - name: pw
+      title: Pairwise comparisons
+      type: Bool
+      default: false
+
+
     - name: sc
-      title: Show Survival Plot
+      title: Survival Plot
       type: Bool
       default: false
 
 
     - name: ce
-      title: Cumulative Events Plot
+      title: Cumulative Events
       type: Bool
       default: false
 
 
     - name: ch
-      title: Cumulative Hazard Plot
+      title: Cumulative Hazard
       type: Bool
       default: false
 

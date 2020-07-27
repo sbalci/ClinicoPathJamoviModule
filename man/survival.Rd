@@ -11,6 +11,7 @@ survival(
   outcome,
   outcomeLevel,
   cutp = "12, 36, 60",
+  pw = FALSE,
   sc = FALSE,
   ce = FALSE,
   ch = FALSE
@@ -28,6 +29,8 @@ survival(
 \item{outcomeLevel}{.}
 
 \item{cutp}{.}
+
+\item{pw}{.}
 
 \item{sc}{.}
 

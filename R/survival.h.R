@@ -11,6 +11,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome = NULL,
             outcomeLevel = NULL,
             cutp = "12, 36, 60",
+            pw = FALSE,
             sc = FALSE,
             ce = FALSE,
             ch = FALSE, ...) {
@@ -47,6 +48,10 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "cutp",
                 cutp,
                 default="12, 36, 60")
+            private$..pw <- jmvcore::OptionBool$new(
+                "pw",
+                pw,
+                default=FALSE)
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -65,6 +70,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..cutp)
+            self$.addOption(private$..pw)
             self$.addOption(private$..sc)
             self$.addOption(private$..ce)
             self$.addOption(private$..ch)
@@ -75,6 +81,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         cutp = function() private$..cutp$value,
+        pw = function() private$..pw$value,
         sc = function() private$..sc$value,
         ce = function() private$..ce$value,
         ch = function() private$..ch$value),
@@ -84,6 +91,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..cutp = NA,
+        ..pw = NA,
         ..sc = NA,
         ..ce = NA,
         ..ch = NA)
@@ -271,7 +279,8 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime")))
+                    "overalltime"),
+                visible="(pw)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text8",
@@ -280,7 +289,9 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime")))
+                    "overalltime",
+                    "pw"),
+                visible="(pw)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -361,6 +372,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param outcome .
 #' @param outcomeLevel .
 #' @param cutp .
+#' @param pw .
 #' @param sc .
 #' @param ce .
 #' @param ch .
@@ -394,6 +406,7 @@ survival <- function(
     outcome,
     outcomeLevel,
     cutp = "12, 36, 60",
+    pw = FALSE,
     sc = FALSE,
     ce = FALSE,
     ch = FALSE) {
@@ -419,6 +432,7 @@ survival <- function(
         outcome = outcome,
         outcomeLevel = outcomeLevel,
         cutp = cutp,
+        pw = pw,
         sc = sc,
         ce = ce,
         ch = ch)

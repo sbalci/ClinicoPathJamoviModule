@@ -170,12 +170,24 @@ https://github.com/sbalci/meddecide/releases/
 
 ### Example Datasets
 
+**Using Example Datasets**
 
 <img src="man/figures/jamovi-ClinicoPath-example-datasets.gif" align="center" width = 75% />
 
+---
+
+
+https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.csv
+
+
+---
+
+
+https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.omv
 
 
 
+https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1vST3kwze9bNUSEr0eijs_81F6hXBrDZ-2Zt97ez-fbpXMELKGFHJNuQHSP2Oxars2C6F3n50KzT1-zD/pub?output=csv
 
 
 
@@ -558,4 +570,8 @@ https://paypal.me/serdarbalci
 ## Videos
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+
+
 
