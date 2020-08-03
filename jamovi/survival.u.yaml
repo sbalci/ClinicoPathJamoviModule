@@ -9,31 +9,124 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Explanatory Variable
+        label: Time Elapsed
         children:
           - type: VariablesListBox
-            name: explanatory
+            name: elapsedtime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Time (in months)
-        children:
-          - type: VariablesListBox
-            name: overalltime
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: 'Outcome'
+        label: Outcome
         children:
           - type: VariablesListBox
             name: outcome
             maxItemCount: 1
             isTarget: true
+            fitToGrid: true
           - type: LevelSelector
             name: outcomeLevel
-            enable: (outcome)
-  - type: Label
-    label: Analysis
+            enable: (outcome && !multievent)
+      - type: TargetLayoutBox
+        label: Explanatory Variable(s)
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 2
+            isTarget: true
+  - type: CollapseBox
+    label: Time Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Time Interval
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: tint
+                fitToGrid: true
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: dxdate
+                maxItemCount: 1
+                isTarget: true
+                fitToGrid: true
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: fudate
+                maxItemCount: 1
+                isTarget: true
+                fitToGrid: true
+      - type: Label
+        label: Time Type
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: timetypedata
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: timetypeoutput
+  - type: CollapseBox
+    label: Outcome Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Multiple Event Levels
+        fitToGrid: true
+        children:
+          - type: CheckBox
+            name: multievent
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: LevelSelector
+                name: dod
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: dooc
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awd
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awod
+                enable: (outcome && multievent)
+  - type: CollapseBox
+    label: Explanatory Variable Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Cut-off
+        children:
+          - type: Label
+            label: Cut-off
+            children:
+              - type: CheckBox
+                name: findcut
+  - type: CollapseBox
+    label: Analysis Type
+    collapsed: true
+    children:
+      - type: Label
+        label: Analysis
+        children:
+          - type: Label
+            label: Analysis Type
+            children:
+              - type: ComboBox
+                name: analysistype
+  - type: CollapseBox
+    label: Survival Tables
+    collapsed: true
     children:
       - type: Label
         label: Survival table
@@ -42,6 +135,10 @@ children:
             name: cutp
             format: string
             width: large
+  - type: CollapseBox
+    label: Pairwise Comparisons
+    collapsed: true
+    children:
       - type: Label
         label: Pairwise comparisons
         children:
@@ -50,26 +147,29 @@ children:
             children:
               - type: CheckBox
                 name: pw
-  - type: Label
+  - type: CollapseBox
     label: Plots
-    margin: large
-    cell:
-      row: 1
-      column: 1
+    collapsed: true
     children:
-      - type: LayoutBox
-        margin: small
+      - type: Label
+        label: Plots
+        fitToGrid: true
         children:
-          - type: CheckBox
-            name: sc
-          - type: CheckBox
-            name: ce
-          - type: CheckBox
-            name: ch
-
-
-
-
-
-
-
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: CheckBox
+                name: sc
+              - type: CheckBox
+                name: ce
+              - type: CheckBox
+                name: ch
+      - type: Label
+        label: Plot End Time
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: TextBox
+                name: endplot
+                format: number

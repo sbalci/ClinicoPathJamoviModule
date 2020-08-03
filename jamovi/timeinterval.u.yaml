@@ -1,0 +1,34 @@
+title: Time Interval
+name: timeinterval
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Elapsed (in months)
+        children:
+          - type: VariablesListBox
+            name: overalltime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Outcome'
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome)
+      - type: TargetLayoutBox
+        label: Explanatory Variable
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            isTarget: true
+

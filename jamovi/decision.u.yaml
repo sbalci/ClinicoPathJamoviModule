@@ -29,11 +29,22 @@ children:
             name: testPositive
             enable: (newtest)
   - type: Label
-    label: Options
+    label: Table
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: od
+          - type: CheckBox
+            name: fnote
+          - type: CheckBox
+            name: ci
+            enable: (!pp)
+
+  - type: Label
+    label: Prior Probability
+    children:
           - type: CheckBox
             name: pp
             enable: (!ci)
@@ -42,11 +53,5 @@ children:
             label: ''
             format: number
             enable: (!ci && pp)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: fnote
-      - type: CheckBox
-        name: ci
-        enable: (!pp)
+
+

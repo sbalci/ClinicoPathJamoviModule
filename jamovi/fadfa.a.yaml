@@ -1,0 +1,92 @@
+---
+name:  faDFA
+title: Detrended Fluctuation Analysis
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: Time series
+      type: Variable
+
+    - name: standardise
+      title: Standardise
+      type: List
+      options:
+        - name: none
+          title: No standardisation
+        - name: meanSD
+          title: Mean and SD
+        - name: medianMAD
+          title: Median and MAD
+      default: meanSD
+
+    - name: sumORDER
+      title: Adjust summation order
+      type: Bool
+      default: false
+
+    - name: removeTrend
+      title: "Remove trend in bins:"
+      type: List
+      options:
+        - name: poly
+          title: Polynomial
+        - name: adapt
+          title: Adaptive
+      default: poly
+
+    - name: poly_order
+      title: Polynomial order
+      type: Number
+      default: 1
+
+    - name: max_order
+      title: Maximum order
+      type: Number
+      default: 5
+
+    - name: minScale
+      title: "Minimum bin size: 2^"
+      type: List
+      options:
+         - name: autoMin
+           title: "Calculate based on time series length"
+         - name: userMin
+           title: "Enter value"
+      default: autoMin
+
+    - name: userMinScale
+      title: "Minimum bin size: 2^"
+      type: Number
+      default: 2
+
+    - name: maxScale
+      title: "Maximum bin size: 2^"
+      type: List
+      options:
+         - name: autoMax
+           title: "Calculate based on time series length"
+         - name: userMax
+           title: "Enter value"
+      default: autoMax
+
+    - name: userMaxScale
+      title: "Maximum bin size: 2^"
+      type: Number
+      default: 4
+
+    - name: scaleRES
+      title: "Bin sizes between min-max:"
+      type: Number
+      default: 30
+
+    - name: scaleExclude
+      title: "Estimates based on at least"
+      type: Number
+      default: 4
+...

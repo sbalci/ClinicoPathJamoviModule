@@ -20,6 +20,34 @@ items:
           - wght
           - exct
 
+
+    # - name: result_cohen
+    #   title: 'result_cohen'
+    #   type: Preformatted
+    #   clearWith:
+    #       - vars
+    #       - wght
+    #       - exct
+
+
+    # - name:  ka
+    #   title: Cohen's Kappa for 2 Raters
+    #   type: Table
+    #   rows:  1
+    #   columns:
+    #     - name: weights
+    #       type: text
+    #     - name: kappa
+    #       type: number
+    #     - name: upper_CI
+    #       type: number
+    #     - name: lower_CI
+    #       type: number
+    #     - name: p
+    #       type: number
+    #       format: zto,pvalue
+
+
     # - name:  text1
     #   title: Agreement
     #   type:  Preformatted

@@ -77,7 +77,6 @@ items:
       clearWith:
           - pp
           - pprob
-          - fnote
 
 
     - name:  ratioTable
@@ -133,7 +132,6 @@ items:
       clearWith:
           - pp
           - pprob
-          - fnote
 
 
 
@@ -171,18 +169,18 @@ items:
           type: number
           format: pc
         - name: lower
-          title: "Lower 95% CI"
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
           type: number
           format: pc
         - name: upper
-          title: "Upper 95% CI"
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
           type: number
           format: pc
       clearWith:
           - pp
           - pprob
-          - fnote
-          - ci
       refs: epiR
 
 
@@ -199,16 +197,16 @@ items:
           title: "Estimate"
           type: number
         - name: lower
-          title: "Lower 95% CI"
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
           type: number
         - name: upper
-          title: "Upper 95% CI"
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
           type: number
       clearWith:
           - pp
           - pprob
-          - fnote
-          - ci
       refs: epiR
 
 

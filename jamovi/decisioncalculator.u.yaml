@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: Label
-    label: Enter Number of Cases
+    label: Number of Cases
     children:
       - type: LayoutBox
         style: inline
@@ -34,12 +34,22 @@ children:
               - type: TextBox
                 name: TN
                 format: number
+
   - type: Label
-    label: Options
+    label: Table
     children:
       - type: LayoutBox
         margin: large
         children:
+
+          - type: CheckBox
+            name: fnote
+          - type: CheckBox
+            name: ci
+            enable: (!pp)
+  - type: Label
+    label: Prior Probability
+    children:
           - type: CheckBox
             name: pp
             enable: (!ci)
@@ -48,11 +58,4 @@ children:
             label: ''
             format: number
             enable: (!ci && pp)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: fnote
-      - type: CheckBox
-        name: ci
-        enable: (!pp)
+

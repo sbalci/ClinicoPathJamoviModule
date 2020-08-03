@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0026
-Date: 2020-07-27
+Version: 0.0.2.0029
+Date: 2020-08-02
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -17,8 +17,10 @@ Description: Analysis for Clinicopathological Research
     language summaries.
 License: GPL-3
 URL: https://github.com/sbalci/ClinicoPathJamoviModule/,
-    https://github.com/sbalci/ClinicoPath/,
     https://github.com/sbalci/ClinicoPathDescriptives/,
+    https://github.com/sbalci/jsurvival,
+    https://github.com/sbalci/meddecide,
+    https://github.com/sbalci/jjstatsplot,
     https://sbalci.github.io/ClinicoPathJamoviModule/
 BugReports: 
     https://github.com/sbalci/ClinicoPathJamoviModule/issues/
@@ -73,7 +75,44 @@ Suggests:
     vctrs,
     retractcheck,
     RefManageR,
-    rcrossref
+    rcrossref,
+    psych,
+    mlr3,
+    mlr3measures,
+    mlr3learners,
+    precrec,
+    ggpubr,
+    BBmisc,
+    kknn,
+    e1071,
+    ggfortify,
+    broom,
+    party,
+    tseries,
+    quadprog,
+    zoo,
+    quantmod,
+    xts,
+    TTR,
+    curl,
+    pracma,
+    randtests,
+    TSA,
+    sapa,
+    fractal,
+    ifultools,
+    splus2R,
+    scatterplot3d,
+    wmtsa,
+    bindrcpp,
+    bindr,
+    pkgconfig,
+    Matrix,
+    flexclust,
+    modeltools,
+    igraph,
+    invctr,
+    effsize
 Remotes:
     ndphillips/FFTrees,
     spgarbet/tangram,

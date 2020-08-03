@@ -1,0 +1,53 @@
+title: Statistical Tests of Data Assumptions
+name: tsTST
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time series
+        children:
+          - type: VariablesListBox
+            name: y1
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    label: "Randomness and Normality"
+    collapsed: true
+    children:
+        - type: CheckBox
+          name: jb
+        - type: CheckBox
+          name: bTRND
+        - type: CheckBox
+          name: bSOSC
+        - type: CheckBox
+          name: bVON
+
+  - type: CollapseBox
+    label: "Level stationarity"
+    collapsed: true
+    children:
+        - type: CheckBox
+          name: adf
+        - type: CheckBox
+          name: kpssLVL
+
+  - type: CollapseBox
+    label: "Trend stationarity"
+    collapsed: true
+    children:
+        - type: CheckBox
+          name: kpssTRND
+        - type: CheckBox
+          name: csd
+        - type: CheckBox
+          name: csu
+        - type: CheckBox
+          name: csdu
+

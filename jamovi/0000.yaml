@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0026
+version: 0.0.2.0029
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2020-07-27'
+date: '2020-08-02'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -97,12 +97,12 @@ analyses:
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
     menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
-  - title: Decision Calculator
+  - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
     menuGroup: meddecide
     menuSubgroup: Decision
-    menuTitle: Decision Calculator
+    menuTitle: Medical Decision Calculator
     description: Function for Medical Decision Calculator.
     menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
   - title: Decision Tree
@@ -273,6 +273,11 @@ analyses:
     menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptives
+  - title: Positive Predictive Value
+    name: ppv
+    ns: ClinicoPath
+    menuGroup: Demo
+    menuTitle: Positive Predictive Value
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

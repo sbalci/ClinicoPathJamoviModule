@@ -73,7 +73,7 @@ predictive value, negative predictive value." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0026</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0029</span>
       </span>
     </div>
 
@@ -166,6 +166,7 @@ predictive value, negative predictive value.</p>
   <span class='no'>testPositive</span>,
   <span class='kw'>pp</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>pprob</span> <span class='kw'>=</span> <span class='fl'>0.3</span>,
+  <span class='kw'>od</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>fnote</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ci</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
@@ -201,6 +202,11 @@ predictive value, negative predictive value.</p>
       <th>pprob</th>
       <td><p>Prior probability (disease prevelance in the community).
 Requires a value between 0.001 and 0.999, default 0.300.</p></td>
+    </tr>
+    <tr>
+      <th>od</th>
+      <td><p>Boolean selection whether to show frequency table. Default is
+'false'.</p></td>
     </tr>
     <tr>
       <th>fnote</th>

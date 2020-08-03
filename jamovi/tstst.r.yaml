@@ -1,0 +1,50 @@
+---
+name:  tsTST
+title: Test Ergodic Assumptions
+jrs:   '1.1'
+
+items:
+    - name:  jbOut
+      title: "Jacque-Bera (JB) test"
+      type:  Preformatted
+      visible: false
+    - name:  bTRNDout
+      title: "Bartel's Trend vs. Randomness test"
+      type:  Preformatted
+      visible: false
+    - name:  bSOSCout
+      title: "Bartel's Systematic Oscillations vs. Randomness test"
+      type:  Preformatted
+      visible: false
+    - name:  bVONout
+      title: "Bartel's rank test [of von NEUMANN's Ratio Test] for Randomness"
+      type:  Preformatted
+      visible: false
+    - name:  adfOut
+      title: "Augmented Dickey-Fuller (ADF) test"
+      type:  Preformatted
+      visible: false
+    - name:  kpssLVLout
+      title: "Kwiatkowski-Phillips-Schmidt-Shin (KPSS) level stationarity test"
+      type:  Preformatted
+      visible: false
+    - name:  kpssTRNDout
+      title: "Kwiatkowski-Phillips-Schmidt-Shin (KPSS) trend stationarity test"
+      type:  Preformatted
+      visible: false
+    - name:  csdOut
+      title: "Cox-Stuart test for downward trend (CSD)"
+      type:  Preformatted
+      visible: false
+    - name:  csuOut
+      title: "Cox-Stuart test for upward trend (CSU)"
+      type:  Preformatted
+      visible: false
+    - name:  csduOut
+      title: "Cox-Stuart test for upward, or downward trend (CSDU)"
+      type:  Preformatted
+      visible: false
+
+
+
+...

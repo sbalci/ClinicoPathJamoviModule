@@ -6,29 +6,62 @@
 \usage{
 survival(
   data,
+  elapsedtime,
+  tint = FALSE,
+  dxdate,
+  fudate,
   explanatory,
-  overalltime,
   outcome,
   outcomeLevel,
+  dod,
+  dooc,
+  awd,
+  awod,
+  analysistype = "overall",
   cutp = "12, 36, 60",
+  timetypedata = "months",
+  timetypeoutput = "months",
   pw = FALSE,
   sc = FALSE,
   ce = FALSE,
-  ch = FALSE
+  ch = FALSE,
+  endplot = 60,
+  findcut = FALSE,
+  multievent = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{explanatory}{.}
+\item{elapsedtime}{.}
 
-\item{overalltime}{.}
+\item{tint}{.}
+
+\item{dxdate}{.}
+
+\item{fudate}{.}
+
+\item{explanatory}{.}
 
 \item{outcome}{.}
 
 \item{outcomeLevel}{.}
 
+\item{dod}{.}
+
+\item{dooc}{.}
+
+\item{awd}{.}
+
+\item{awod}{.}
+
+\item{analysistype}{.}
+
 \item{cutp}{.}
+
+\item{timetypedata}{select the time type in data}
+
+\item{timetypeoutput}{select the time type in output}
 
 \item{pw}{.}
 
@@ -37,19 +70,25 @@ survival(
 \item{ce}{.}
 
 \item{ch}{.}
+
+\item{endplot}{.}
+
+\item{findcut}{.}
+
+\item{multievent}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$uniTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$text7} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$text9} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text8} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

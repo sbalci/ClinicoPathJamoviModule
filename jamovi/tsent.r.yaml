@@ -1,0 +1,44 @@
+---
+name:  tsENT
+title: Entropy & Roughness
+jrs:   '1.1'
+
+items:
+    - name:  tsdesc
+      title: Entropy & Roughness
+      type: Table
+      rows:  1
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: N
+         type: integer
+         title: "Valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: edim
+         type: number
+       - name: factor
+         type: number
+       - name: SD
+         type: number
+       - name: radius
+         type: number
+       - name: sampEnt
+         title: "Sample Entropy"
+         type: number
+       - title: "Approximate Entropy"
+         name: apprEnt
+         type: number
+       - title: "local VAR"
+         name: locVar
+         type: number
+       - title: "global VAR"
+         name: globVar
+         type: number
+       - title: "Relative Roughness"
+         name: RR
+         type: number
+...

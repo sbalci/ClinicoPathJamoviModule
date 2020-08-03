@@ -1,0 +1,94 @@
+title: Univariate State Space Grid
+name: ssgUNI
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: y1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time (optional)
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Trajectory ID (optional)
+        children:
+          - type: VariablesListBox
+            name: trajectories
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Waves within Trajectory ID (optional)
+        children:
+          - type: VariablesListBox
+            name: waves
+            maxItemCount: 1
+            isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Lag Variable 1 by:"
+            children:
+              - type: TextBox
+                name: ssgUNIlag
+                format: number
+  - type: CollapseBox
+    label: 'Variable 1: Specify categories'
+    collapsed: true
+    children:
+      - type: Label
+        label: "How many unique states can be observed for Variable 1? (optional)"
+        children:
+          - type: TextBox
+            name: v1_Nstates
+            label: N unique states
+            format: number
+      - type: Label
+        label: "Provide unobserved state labels seperated by comma's (optional)"
+        children:
+          - type: TextBox
+            name: v1_labels
+            label: "Unobserved state labels"
+            format: string
+            width: largest
+  - type: CollapseBox
+    label: State measures
+    collapsed: true
+    children:
+      - type: TextBox
+        name: MinReturns
+        format: number
+      - type: TextBox
+        name: MaxReturnTime
+        format: number
+      - type: TextBox
+        name: MaxReturnVisits
+        format: number
+      - type: TextBox
+        name: MinEventDuration
+        format: number
+      - type: TextBox
+        name: MinCellDuration
+        format: number
+
+  - type: CollapseBox
+    label: "Detect Attractor Cells (Winnowing Procedure)"
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: doWinnowing
+      - type: TextBox
+        name: screeCut
+        format: number

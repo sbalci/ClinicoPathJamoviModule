@@ -73,15 +73,21 @@ options:
             Requires a value between 0.001 and 0.999, default 0.300.
 
 
-
+    - name: od
+      title: Original Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show frequency table. Default is 'false'.
 
     - name: fnote
-      title: Show Footnote
+      title: Footnotes
       type: Bool
       default: false
 
     - name: ci
-      title: 'Show 95% CI'
+      title: '95% CI'
       type: Bool
       default: false
 
