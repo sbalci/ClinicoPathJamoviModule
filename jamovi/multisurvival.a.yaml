@@ -39,7 +39,7 @@ options:
       type: Variable
 
     - name: outcomeLevel
-      title: Select Event Level
+      title: Event Level
       type: Level
       variable: (outcome)
 

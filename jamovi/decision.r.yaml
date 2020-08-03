@@ -12,6 +12,13 @@ items:
     - name:  text1
       title: Original Data
       type:  Preformatted
+      visible: (od)
+
+
+    # - name:  text2
+    #   title: Original Data
+    #   type:  Preformatted
+
 
 
     # - name:  text2
@@ -21,7 +28,15 @@ items:
 
 
 
-
+    # - name:  origTable
+    #   title: 'Original Table'
+    #   type: Table
+    #   rows: (newtest)
+    #   columns:
+    #     - name: goldPositive
+    #       title: ''
+    #       type: text
+    #       content: ($key)
 
 
 
@@ -80,7 +95,6 @@ items:
       clearWith:
           - pp
           - pprob
-          - fnote
 
 
     - name:  ratioTable
@@ -136,7 +150,6 @@ items:
       clearWith:
           - pp
           - pprob
-          - fnote
 
 
 
@@ -156,17 +169,18 @@ items:
           type: number
           format: pc
         - name: lower
-          title: "Lower 95% CI"
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
           type: number
           format: pc
         - name: upper
-          title: "Upper 95% CI"
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
           type: number
           format: pc
       clearWith:
           - pp
           - pprob
-          - fnote
       refs: epiR
 
 
@@ -184,15 +198,16 @@ items:
           title: "Estimate"
           type: number
         - name: lower
-          title: "Lower 95% CI"
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
           type: number
         - name: upper
-          title: "Upper 95% CI"
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
           type: number
       clearWith:
           - pp
           - pprob
-          - fnote
       refs: epiR
 
 

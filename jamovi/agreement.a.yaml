@@ -33,7 +33,7 @@ options:
 
 
     - name: sft
-      title: Show Frequency Table
+      title: Frequency Table
       type: Bool
       default: false
       description:
@@ -42,7 +42,7 @@ options:
 
 
     - name: wght
-      title: Use Weighted Kappa (Effects only with Ordinal Variables)
+      title: Weighted Kappa (Ordinal Variables only)
       type: List
       options:
         - title: Unweighted
@@ -59,7 +59,7 @@ options:
             is not ordinal.
 
     - name: exct
-      title: Use Exact Kappa (Effects only >=3 Variables)
+      title: Exact Kappa (>=3 Variables)
       type: Bool
       default: false
       description:

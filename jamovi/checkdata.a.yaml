@@ -1,0 +1,15 @@
+---
+name:  checkdata
+title: Checking data
+menuGroup: PUBH5018
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Variable to check
+      type: Variable
+...

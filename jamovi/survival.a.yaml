@@ -37,67 +37,115 @@ options:
           R: >
             The data as a data frame.
 
-
-    - name: explanatory
-      title: Explanatory Variable
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-
-    - name: overalltime
-      title: 'Time (in months)'
+    - name: elapsedtime
+      title: 'Time Elapsed'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
+
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+
+    - name: dxdate
+      title: 'Diagnosis Date'
+      type: Variable
+
+    - name: fudate
+      title: 'Follow-up Date'
+      type: Variable
+
+    - name: explanatory
+      title: Explanatory Variable
+      type: Variables
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+
+
     - name: outcome
       title: 'Outcome'
       type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
 
     - name: outcomeLevel
-      title: Select Event Level
+      title: Event Level
       type: Level
       variable: (outcome)
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: dooc
+      title: Dead of Other
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: awd
+      title: Alive w Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: awod
+      title: Alive w/o Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+
+    - name: analysistype
+      title: 'Survival Type'
+      type: List
+      options:
+        - title: Overall
+          name: overall
+        - title: Cause Specific
+          name: cause
+        - title: Competing Risk
+          name: compete
+      default: overall
 
 
     - name: cutp
-      title: Cutpoints (in months)
+      title: Cutpoints
       type: String
       default: '12, 36, 60'
 
 
-    # - name: timetypedata
-    #   title: Time in Data
-    #   type: List
-    #   options:
-    #     - title: Days
-    #       name: Days
-    #     - title: Weeks
-    #       name: Weeks
-    #     - title: Months
-    #       name: Months
-    #     - title: Years
-    #       name: Years
-    #   default: Months
-    #   description:
-    #       R: select the time type in data
+    - name: timetypedata
+      title: Time Type in Data
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+          R: select the time type in data
 
 
-    # - name: timetypeoutput
-    #   title: Time in Output
-    #   type: List
-    #   options:
-    #     - title: Days
-    #       name: Days
-    #     - title: Weeks
-    #       name: Weeks
-    #     - title: Months
-    #       name: Months
-    #     - title: Years
-    #       name: Years
-    #   default: Months
-    #   description:
-    #       R: select the time type in output
+    - name: timetypeoutput
+      title: Time Type in Output
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+          R: select the time type in output
 
 
     - name: pw
@@ -122,6 +170,25 @@ options:
       title: Cumulative Hazard
       type: Bool
       default: false
+
+
+
+    - name: endplot
+      title: Plot End Time
+      type: Integer
+      default: 60
+
+    - name: findcut
+      title: Cut-off for Continious Explanatory
+      type: Bool
+      default: false
+
+
+    - name: multievent
+      title: Multiple Event Levels
+      type: Bool
+      default: false
+
 
 
 ...

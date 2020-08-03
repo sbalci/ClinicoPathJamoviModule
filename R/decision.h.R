@@ -12,6 +12,7 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             testPositive = NULL,
             pp = FALSE,
             pprob = 0.3,
+            od = FALSE,
             fnote = FALSE,
             ci = FALSE, ...) {
 
@@ -53,6 +54,10 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 default=0.3,
                 min=0.001,
                 max=0.999)
+            private$..od <- jmvcore::OptionBool$new(
+                "od",
+                od,
+                default=FALSE)
             private$..fnote <- jmvcore::OptionBool$new(
                 "fnote",
                 fnote,
@@ -68,6 +73,7 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..testPositive)
             self$.addOption(private$..pp)
             self$.addOption(private$..pprob)
+            self$.addOption(private$..od)
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
         }),
@@ -78,6 +84,7 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         testPositive = function() private$..testPositive$value,
         pp = function() private$..pp$value,
         pprob = function() private$..pprob$value,
+        od = function() private$..od$value,
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value),
     private = list(
@@ -87,6 +94,7 @@ decisionOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..testPositive = NA,
         ..pp = NA,
         ..pprob = NA,
+        ..od = NA,
         ..fnote = NA,
         ..ci = NA)
 )
@@ -110,7 +118,8 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Original Data"))
+                title="Original Data",
+                visible="(od)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -174,8 +183,7 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob",
-                    "fnote")))
+                    "pprob")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
@@ -237,8 +245,7 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob",
-                    "fnote")))
+                    "pprob")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
@@ -257,18 +264,19 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `format`="pc"),
                     list(
                         `name`="lower", 
-                        `title`="Lower 95% CI", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="upper", 
-                        `title`="Upper 95% CI", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
                     "pp",
-                    "pprob",
-                    "fnote"),
+                    "pprob"),
                 refs="epiR"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -287,16 +295,17 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="lower", 
-                        `title`="Lower 95% CI", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number"),
                     list(
                         `name`="upper", 
-                        `title`="Upper 95% CI", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob",
-                    "fnote"),
+                    "pprob"),
                 refs="epiR"))}))
 
 decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -337,6 +346,8 @@ decisionBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param pp .
 #' @param pprob Prior probability (disease prevelance in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
+#' @param od Boolean selection whether to show frequency table. Default is
+#'   'false'.
 #' @param fnote .
 #' @param ci .
 #' @return A results object containing:
@@ -364,6 +375,7 @@ decision <- function(
     testPositive,
     pp = FALSE,
     pprob = 0.3,
+    od = FALSE,
     fnote = FALSE,
     ci = FALSE) {
 
@@ -388,6 +400,7 @@ decision <- function(
         testPositive = testPositive,
         pp = pp,
         pprob = pprob,
+        od = od,
         fnote = fnote,
         ci = ci)
 

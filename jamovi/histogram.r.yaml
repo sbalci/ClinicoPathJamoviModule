@@ -1,0 +1,14 @@
+---
+name:  histogram
+title: Histogram
+jrs:   '1.1'
+
+items:
+    - name:  plot
+      title: Histogram Plot
+      type: Image
+      width: 400
+      height: 300
+      renderFun: .plot
+
+...

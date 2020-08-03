@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0026</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0029</span>
       </span>
     </div>
 
@@ -158,15 +158,28 @@
 
     <pre class="usage"><span class='fu'>survival</span>(
   <span class='no'>data</span>,
+  <span class='no'>elapsedtime</span>,
+  <span class='kw'>tint</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>dxdate</span>,
+  <span class='no'>fudate</span>,
   <span class='no'>explanatory</span>,
-  <span class='no'>overalltime</span>,
   <span class='no'>outcome</span>,
   <span class='no'>outcomeLevel</span>,
+  <span class='no'>dod</span>,
+  <span class='no'>dooc</span>,
+  <span class='no'>awd</span>,
+  <span class='no'>awod</span>,
+  <span class='kw'>analysistype</span> <span class='kw'>=</span> <span class='st'>"overall"</span>,
   <span class='kw'>cutp</span> <span class='kw'>=</span> <span class='st'>"12, 36, 60"</span>,
+  <span class='kw'>timetypedata</span> <span class='kw'>=</span> <span class='st'>"months"</span>,
+  <span class='kw'>timetypeoutput</span> <span class='kw'>=</span> <span class='st'>"months"</span>,
   <span class='kw'>pw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>sc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ce</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>ch</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>ch</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>endplot</span> <span class='kw'>=</span> <span class='fl'>60</span>,
+  <span class='kw'>findcut</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>multievent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -177,11 +190,23 @@
       <td><p>The data as a data frame.</p></td>
     </tr>
     <tr>
-      <th>explanatory</th>
+      <th>elapsedtime</th>
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>overalltime</th>
+      <th>tint</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dxdate</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>fudate</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>explanatory</th>
       <td><p>.</p></td>
     </tr>
     <tr>
@@ -193,8 +218,36 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>dod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dooc</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awd</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>analysistype</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>cutp</th>
       <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>timetypedata</th>
+      <td><p>select the time type in data</p></td>
+    </tr>
+    <tr>
+      <th>timetypeoutput</th>
+      <td><p>select the time type in output</p></td>
     </tr>
     <tr>
       <th>pw</th>
@@ -212,20 +265,32 @@
       <th>ch</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>endplot</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>findcut</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>multievent</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
-<tr><td><code>results$text5</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$uniTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
-<tr><td><code>results$text7</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
-<tr><td><code>results$text9</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$text8</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$pairwiseTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>

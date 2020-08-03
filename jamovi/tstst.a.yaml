@@ -1,0 +1,77 @@
+---
+name:  tsTST
+title: Statistical Tests of Data Assumptions
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: Time series
+      type: Variable
+
+    - name: jb
+      type: Bool
+      default: false
+      title: >
+             Jacque-Bera test
+             (H0: normally distributed)
+    - name: bTRND
+      type: Bool
+      default: false
+      title: >
+             Bartels' rank test of trend against randomness
+             (H0: randomness)
+    - name: bSOSC
+      type: Bool
+      default: false
+      title: >
+             Bartels' rank test of systematic oscillations against randomness
+             (H0: randomness)
+    - name: bVON
+      type: Bool
+      default: false
+      title: >
+             Bartels' rank test [von NEUMANN's Ratio Test for Randomness]
+             (H0: randomness)
+    - name: adf
+      type: Bool
+      default: false
+      title: >
+             Augmented Dickey-Fuller (ADF) test for stationarity
+             (H0: not stationary)
+    - name: kpssLVL
+      type: Bool
+      default: false
+      title: >
+             Kwiatkowski-Phillips-Schmidt-Shin (KPSS) level stationarity test
+             (H0: level stationary)
+    - name: kpssTRND
+      type: Bool
+      default: false
+      title: >
+             Kwiatkowski-Phillips-Schmidt-Shin (KPSS) trend stationarity test
+             (H0: trend stationary)
+    - name: csd
+      type: Bool
+      default: false
+      title: >
+             Cox-Stuart test for downward trend (CSD)
+             (H0: randomness)
+    - name: csu
+      type: Bool
+      default: false
+      title: >
+             Cox-Stuart test for upward trend (CSU)
+             (H0: randomness)
+    - name: csdu
+      type: Bool
+      default: false
+      title: >
+             Cox-Stuart sign test (upward or downward trend)
+             (H0: randomness)
+
+...

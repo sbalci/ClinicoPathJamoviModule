@@ -62,6 +62,36 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         ratings <- mydata %>% dplyr::select(myvars)
 
 
+        # psych::cohen.kappa ----
+
+        # from https://github.com/kwongwh/Kappa
+        # ratings2 <- mydata[c(self$options$vars)]
+        #
+        # result_cohen <- psych::cohen.kappa(x = ratings2)
+        #
+        # self$results$result_cohen$setContent(result_cohen)
+
+
+        # irr.kappa <- kappa2(vars, weight = self$options$weights)
+        # if(self$options$weights == "unweighted"){
+        #     n = 1
+        # } else {
+        #     n = 2
+        # }
+        #
+        # table <- self$results$ka
+        #
+        # table$setRow(rowNo=1, values=list(
+        #     weights = self$options$weights,
+        #     kappa=irr.kappa$value,
+        #     upper_CI=results$confid[1,3],
+        #     lower_CI=results$confid[1,1],
+        #     p = irr.kappa$p.value
+        # ))
+
+
+
+
         if (is.null(self$options$vars) || length(self$options$vars) < 2) {
             # No variables ----
 
@@ -88,6 +118,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 if (exct == TRUE) stop("Use exact argument only >=3 variables")
 
 
+                # irr::kappa2 ----
+
                 result2 <- irr::kappa2(ratings = ratings, weight = wght)
 
                 # self$results$text2$setContent(result2)
@@ -101,6 +133,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 # self$results$todo$setContent(todo)
 
+                # irr::kappam.fleiss ----
+
                 result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct,
                   detail = TRUE)
 
@@ -109,6 +143,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }
 
 
+            # irr::agree ----
 
             result <- table(ratings)
 
@@ -119,6 +154,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # self$results$text1$setContent(result1)
 
+            # Table ----
 
             table2 <- self$results$irrtable
             table2$setRow(rowNo = 1, values = list(method = result2[["method"]],

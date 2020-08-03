@@ -1,0 +1,101 @@
+---
+name:  ssgUNI
+title: Univariate State Space Grid
+jrs:   '1.1'
+
+items:
+
+    - name: warnings
+      type: Preformatted
+      title: "Notes"
+
+    - name:  tblTS
+      title: "Time series descriptives"
+      type: Table
+      rows:  2
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: vlevel
+         title: 'type'
+         type: text
+       - name: N
+         type: integer
+         title: "valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: uni_obs
+         title: "# of unique observed states "
+         type: number
+       - name: uni_exp
+         title: "# of unique expected states"
+         type: number
+       - name: discretised
+         title: "discretised?"
+         type: text
+
+    - name: tsplot
+      title: "Nominal time series"
+      type: Image
+      width: 700
+      height: 300
+      renderFun: .tsplot
+
+    - name: SSGplot
+      title: "State Space Grid"
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .SSGplot
+
+
+    - name:  tblSSG
+      title: "Grid measures"
+      type: Table
+      rows:  1
+      columns:
+       - name: Nstates
+         title: "Unique states"
+         type: number
+       - name: Ntraj
+         title: "Unique trajectories"
+         type: number
+       - name: Nreturns
+         title: "N returns"
+         type: number
+
+    - name:  tblSSGstates
+      title: "State measures"
+      type: Table
+      rows: 0
+      columns:
+       - name: stateName
+         title: "State"
+       - name: Nvisits
+         title: "# of Visits"
+         type: number
+       - name: MNduration
+         title: "Mean Visit duration"
+         type: number
+       - name: SDduration
+         title: "SD Visit duration"
+         type: number
+       - name: Nevents
+         title: "# of Events"
+         type: number
+       - name: MNevent
+         title: "Mean Event duration"
+         type: number
+       - name: SDevent
+         title: "SD Event duration"
+         type: number
+       - name: MNreturn
+         title: "Mean return time"
+         type: number
+       - name: SDreturn
+         title: "SD return time"
+         type: number
+
+...

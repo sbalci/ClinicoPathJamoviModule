@@ -1,3 +1,13 @@
+# ClinicoPath 0.0.2.0027
+
+- temporarily added many functions from various packages to update functions and arguments
+
+
+# ClinicoPath 0.0.2.0026
+
+- jsurvival has been added to jamovi library
+
+
 # ClinicoPath 0.0.2.0025
 
 - ClinicoPath as a combined module has been taken down from jamovi library.

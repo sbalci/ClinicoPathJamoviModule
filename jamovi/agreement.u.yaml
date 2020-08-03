@@ -15,15 +15,21 @@ children:
             name: vars
             isTarget: true
             maxItemCount: 4
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Table
     children:
-      - type: CheckBox
-        name: sft
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sft
+  - type: Label
+    label: Tests
     children:
-      - type: CheckBox
-        name: exct
-      - type: ComboBox
-        name: wght
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: exct
+          - type: ComboBox
+            name: wght

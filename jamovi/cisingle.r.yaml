@@ -1,0 +1,29 @@
+---
+name:  ciSingle
+title: Confidence interval for a mean
+jrs:   '1.1'
+
+items:
+    - name: conflevel
+      title: ""
+      type: Preformatted
+    
+    - name:  citable
+      title: Confidence interval for a mean
+      type:  Table
+      rows: (deps)
+      columns:
+        - name: var
+          title: ""
+          type: text
+        - name: mean
+          title: "Mean"
+          type: number
+        - name: lb
+          title: "Lower bound"
+          type: number
+        - name: ub
+          title: "Upper bound"
+          type: number
+
+...
