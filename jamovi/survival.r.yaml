@@ -16,14 +16,10 @@ items:
           - overalltime
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
-    #   clearWith:
-    #       - explanatory
-    #       - outcome
-    #       - outcomeLevel
-    #       - overalltime
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
+
 
 
 
@@ -123,6 +119,32 @@ items:
           - outcome
           - outcomeLevel
           - overalltime
+
+
+    # - name:  rescutTable
+    #   title: 'rescutTable'
+    #   type:  Preformatted
+
+    - name:  rescutTable
+      title: Cut Point
+      type:  Table
+      rows: 0
+      columns:
+        - name: cutpoint
+          title: 'Cut Point'
+          type: number
+        - name: statistic
+          title: 'Statistic'
+          type: number
+      clearWith:
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+      visible: (findcut)
+
+
+
 
 
     - name:  survTableSummary
@@ -266,9 +288,41 @@ items:
           - overalltime
 
 
+    - name: plot4
+      title: 'Cutpoint Plot'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot4
+      visible: (findcut)
+      requiresData: true
+      clearWith:
+          - findcut
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+
+
+    - name: plot5
+      title: 'Survival Plot with new Cut-off'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot5
+      visible: (findcut)
+      requiresData: true
+      clearWith:
+          - findcut
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+
 
 refs:
     - finalfit
     - survival
     - survminer
+
 ...

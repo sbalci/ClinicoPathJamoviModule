@@ -261,7 +261,7 @@ Using “preformatted” result element I get a markdown table output. Is there 
 so you’re best to make use of the table api … the table API has a lot more features than an md table.
 
 
-##### p-value
+##### p-value format
 
 ```yaml
      - name: p
@@ -364,6 +364,17 @@ https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20
 ```r
 devtools::install(upgrade = FALSE, quick = TRUE)
 ```
+
+
+## .init()
+
+```
+so the principle seems right. you initialise the table in the .init() phase (you add rows and columns), and then you populate the table in the .run() phase. however, i notice your .init() function calls .initcTable() which doesn’t actually do anything.
+most of the time, .init() isn’t necessary, because the .r.yaml file can take care of it, but sometimes the rows/columns the table should have is a more complex calculation than the .r.yaml allows (and example of this might be the ANOVA table in jmv … there’s not a simple relationship between the number of variables in the option, i.e. dose, supp, and the number of rows in the ANOVA table dose, supp, supp * dose, residuals. so we can’t achieve this with the .r.yaml, and so we set it up in the .init() phase.
+finally, there are times where you can’t even determine the number of rows/columns in the .init() phase. you can only decide how many rows/columns are appropriate after you’ve run the analysis. an example of this might be a cluster analysis, where there’s a row for each cluster, but you only know how many rows you need after the analysis has been run. this is the least desireable, because it does lead to the growing and shrinking of the table, but sometimes that’s unavoidable.
+so that’s your order of preference. preferably in the .r.yaml, if that can’t work, then do it in the .init(), and as a last resort, you can do it in the .run()
+```
+
 
 
 

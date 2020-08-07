@@ -60,9 +60,14 @@ options:
     - name: explanatory
       title: Explanatory Variable
       type: Variables
-      suggested: [ ordinal, nominal, continuous ]
-      permitted: [ factor, numeric ]
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
 
+    - name: contexpl
+      title: Continuous Explanatory Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
     - name: outcome
       title: 'Outcome'
@@ -115,18 +120,24 @@ options:
 
 
     - name: timetypedata
-      title: Time Type in Data
+      title: 'Time Type in Data (default: YYYY-MM-DD)'
       type: List
       options:
-        - title: days
-          name: days
-        - title: weeks
-          name: weeks
-        - title: months
-          name: months
-        - title: years
-          name: years
-      default: months
+        - title: ymdhms
+          name: ymdhms
+        - title: ymd
+          name: ymd
+        - title: ydm
+          name: ydm
+        - title: mdy
+          name: mdy
+        - title: myd
+          name: myd
+        - title: dmy
+          name: dmy
+        - title: dym
+          name: dym
+      default: ymd
       description:
           R: select the time type in data
 
@@ -189,6 +200,14 @@ options:
       type: Bool
       default: false
 
+    - name: ci95
+      title: '95% CI'
+      type: Bool
+      default: false
 
+    - name: risktable
+      title: risktable
+      type: Bool
+      default: false
 
 ...
