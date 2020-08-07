@@ -11,6 +11,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dxdate = NULL,
             fudate = NULL,
             explanatory = NULL,
+            contexpl = NULL,
             outcome = NULL,
             outcomeLevel = NULL,
             dod = NULL,
@@ -19,7 +20,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             awod = NULL,
             analysistype = "overall",
             cutp = "12, 36, 60",
-            timetypedata = "months",
+            timetypedata = "ymd",
             timetypeoutput = "months",
             pw = FALSE,
             sc = FALSE,
@@ -27,7 +28,9 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             ch = FALSE,
             endplot = 60,
             findcut = FALSE,
-            multievent = FALSE, ...) {
+            multievent = FALSE,
+            ci95 = FALSE,
+            risktable = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -57,10 +60,15 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 explanatory,
                 suggested=list(
                     "ordinal",
-                    "nominal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..contexpl <- jmvcore::OptionVariable$new(
+                "contexpl",
+                contexpl,
+                suggested=list(
                     "continuous"),
                 permitted=list(
-                    "factor",
                     "numeric"))
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
@@ -112,11 +120,14 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "timetypedata",
                 timetypedata,
                 options=list(
-                    "days",
-                    "weeks",
-                    "months",
-                    "years"),
-                default="months")
+                    "ymdhms",
+                    "ymd",
+                    "ydm",
+                    "mdy",
+                    "myd",
+                    "dmy",
+                    "dym"),
+                default="ymd")
             private$..timetypeoutput <- jmvcore::OptionList$new(
                 "timetypeoutput",
                 timetypeoutput,
@@ -154,12 +165,21 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "multievent",
                 multievent,
                 default=FALSE)
+            private$..ci95 <- jmvcore::OptionBool$new(
+                "ci95",
+                ci95,
+                default=FALSE)
+            private$..risktable <- jmvcore::OptionBool$new(
+                "risktable",
+                risktable,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
             self$.addOption(private$..fudate)
             self$.addOption(private$..explanatory)
+            self$.addOption(private$..contexpl)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..dod)
@@ -177,6 +197,8 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..endplot)
             self$.addOption(private$..findcut)
             self$.addOption(private$..multievent)
+            self$.addOption(private$..ci95)
+            self$.addOption(private$..risktable)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -184,6 +206,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         dxdate = function() private$..dxdate$value,
         fudate = function() private$..fudate$value,
         explanatory = function() private$..explanatory$value,
+        contexpl = function() private$..contexpl$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         dod = function() private$..dod$value,
@@ -200,13 +223,16 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ch = function() private$..ch$value,
         endplot = function() private$..endplot$value,
         findcut = function() private$..findcut$value,
-        multievent = function() private$..multievent$value),
+        multievent = function() private$..multievent$value,
+        ci95 = function() private$..ci95$value,
+        risktable = function() private$..risktable$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
         ..dxdate = NA,
         ..fudate = NA,
         ..explanatory = NA,
+        ..contexpl = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..dod = NA,
@@ -223,24 +249,30 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..ch = NA,
         ..endplot = NA,
         ..findcut = NA,
-        ..multievent = NA)
+        ..multievent = NA,
+        ..ci95 = NA,
+        ..risktable = NA)
 )
 
 survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        mydataview = function() private$.items[["mydataview"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
+        rescutTable = function() private$.items[["rescutTable"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
         survTable = function() private$.items[["survTable"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
-        plot3 = function() private$.items[["plot3"]]),
+        plot3 = function() private$.items[["plot3"]],
+        plot4 = function() private$.items[["plot4"]],
+        plot5 = function() private$.items[["plot5"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -261,6 +293,10 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "outcome",
                     "outcomeLevel",
                     "overalltime")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview",
+                title="mydataview"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -355,6 +391,26 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "outcome",
                     "outcomeLevel",
                     "overalltime")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rescutTable",
+                title="Cut Point",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="cutpoint", 
+                        `title`="Cut Point", 
+                        `type`="number"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number")),
+                clearWith=list(
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime"),
+                visible="(findcut)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableSummary",
@@ -488,6 +544,36 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot4",
+                title="Cutpoint Plot",
+                width=600,
+                height=450,
+                renderFun=".plot4",
+                visible="(findcut)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "findcut",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot5",
+                title="Survival Plot with new Cut-off",
+                width=600,
+                height=450,
+                renderFun=".plot5",
+                visible="(findcut)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "findcut",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
                     "overalltime")))}))
 
 survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -524,6 +610,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dxdate .
 #' @param fudate .
 #' @param explanatory .
+#' @param contexpl .
 #' @param outcome .
 #' @param outcomeLevel .
 #' @param dod .
@@ -541,13 +628,17 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param endplot .
 #' @param findcut .
 #' @param multievent .
+#' @param ci95 .
+#' @param risktable .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -555,6 +646,8 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot5} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -571,6 +664,7 @@ survival <- function(
     dxdate,
     fudate,
     explanatory,
+    contexpl,
     outcome,
     outcomeLevel,
     dod,
@@ -579,7 +673,7 @@ survival <- function(
     awod,
     analysistype = "overall",
     cutp = "12, 36, 60",
-    timetypedata = "months",
+    timetypedata = "ymd",
     timetypeoutput = "months",
     pw = FALSE,
     sc = FALSE,
@@ -587,7 +681,9 @@ survival <- function(
     ch = FALSE,
     endplot = 60,
     findcut = FALSE,
-    multievent = FALSE) {
+    multievent = FALSE,
+    ci95 = FALSE,
+    risktable = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('survival requires jmvcore to be installed (restart may be required)')
@@ -596,6 +692,7 @@ survival <- function(
     if ( ! missing(dxdate)) dxdate <- jmvcore::resolveQuo(jmvcore::enquo(dxdate))
     if ( ! missing(fudate)) fudate <- jmvcore::resolveQuo(jmvcore::enquo(fudate))
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
+    if ( ! missing(contexpl)) contexpl <- jmvcore::resolveQuo(jmvcore::enquo(contexpl))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -604,8 +701,10 @@ survival <- function(
             `if`( ! missing(dxdate), dxdate, NULL),
             `if`( ! missing(fudate), fudate, NULL),
             `if`( ! missing(explanatory), explanatory, NULL),
+            `if`( ! missing(contexpl), contexpl, NULL),
             `if`( ! missing(outcome), outcome, NULL))
 
+    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- survivalOptions$new(
         elapsedtime = elapsedtime,
@@ -613,6 +712,7 @@ survival <- function(
         dxdate = dxdate,
         fudate = fudate,
         explanatory = explanatory,
+        contexpl = contexpl,
         outcome = outcome,
         outcomeLevel = outcomeLevel,
         dod = dod,
@@ -629,7 +729,9 @@ survival <- function(
         ch = ch,
         endplot = endplot,
         findcut = findcut,
-        multievent = multievent)
+        multievent = multievent,
+        ci95 = ci95,
+        risktable = risktable)
 
     analysis <- survivalClass$new(
         options = options,

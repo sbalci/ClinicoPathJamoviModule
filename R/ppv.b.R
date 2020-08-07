@@ -87,7 +87,7 @@ ppvClass <- R6::R6Class(
                         ppv=ppv, fdr=fdr, df=df))
         },
 
-        #### Init tables ----
+        #### Init  <- s ----
         .initConfusionTable = function() {
 
             table <- self$results$confusion
