@@ -9,7 +9,44 @@
 #'
 
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisioncalculatorClass",
-    inherit = decisioncalculatorBase, private = list(.run = function() {
+    inherit = decisioncalculatorBase, private = list(
+
+
+
+        .init = function() {
+
+            cTable <- self$results$cTable
+
+            cTable$addRow(rowKey = "Test Positive",
+                          values = list(
+                              newtest = "Test Positive"
+                          )
+            )
+
+
+            cTable$addRow(rowKey = "Test Negative",
+                          values = list(
+                              newtest = "Test Negative"
+                          )
+            )
+
+
+
+
+            cTable$addRow(rowKey = "Total",
+                          values = list(
+                              newtest = "Total"
+                          )
+            )
+
+        },
+
+
+
+
+
+
+        .run = function() {
 
 
         # # Error Message ----
@@ -100,7 +137,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         cTable <- self$results$cTable
 
 
-        cTable$addRow(rowKey = "Test Positive",
+        cTable$setRow(rowKey = "Test Positive",
                       values = list(
                           newtest = "Test Positive",
                           GP = TP,
@@ -110,7 +147,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         )
 
 
-        cTable$addRow(rowKey = "Test Negative",
+        cTable$setRow(rowKey = "Test Negative",
                       values = list(
                           newtest = "Test Negative",
                           GP = FN,
@@ -119,7 +156,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                       )
         )
 
-        cTable$addRow(rowKey = "Total",
+        cTable$setRow(rowKey = "Total",
                       values = list(
                           newtest = "Total",
                           GP = TP + FN,
@@ -191,10 +228,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         LRN <- (1 - Sens) / Spec
 
 
-
-
-
-
         # nTable Populate Table ----
 
         nTable <- self$results$nTable
@@ -230,6 +263,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             LRN = LRN
             )
             )
+
+
+
+
 
         # nTable footnotes ----
 
@@ -503,4 +540,78 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         }
 
 
-            }))
+
+
+        # Send Data to Plot ----
+
+
+        plotData1 <- list(
+            "Prevalence" = PriorProb,
+            "Sens" = Sens,
+            "Spec" = Spec,
+            "Plr" = LRP,
+            "Nlr" = LRN
+        )
+
+        image1 <- self$results$plot1
+        image1$setState(plotData1)
+
+        # plotData2 <- plotData1
+        #
+        # image2 <- self$results$plot2
+        # image2$setState(plotData2)
+
+
+            }
+
+
+        ,
+
+        .plot1 = function(image1, ggtheme, ...) {
+
+
+            plotData1 <- image1$state
+
+        plot1 <- nomogrammer(Prevalence = plotData1$Prevalence,
+                            Sens = plotData1$Sens,
+                            Spec = plotData1$Spec,
+                            Plr = plotData1$Plr,
+                            Nlr = plotData1$Nlr,
+                            Detail = TRUE,
+                            NullLine = TRUE,
+                            LabelSize = (14/5),
+                            Verbose = TRUE
+                            )
+
+        print(plot1)
+        TRUE
+
+
+        }
+
+
+        # ,
+        # .plot2 = function(image2, ggtheme, ...) {
+        #
+        #
+        #     plotData2 <- image2$state
+        #
+        #     plot2 <- nomogrammer(Prevalence = plotData2$Prevalence,
+        #                          Plr = plotData2$Plr,
+        #                          Nlr = plotData2$Nlr,
+        #                          Detail = TRUE,
+        #                          NullLine = TRUE,
+        #                          LabelSize = (14/5),
+        #                          Verbose = TRUE
+        #     )
+        #
+        #     print(plot2)
+        #     TRUE
+        #
+        #
+        # }
+        #
+
+
+
+        ))

@@ -340,4 +340,33 @@
         `year`=2020, 
         `title`="epiR: Tools for the Analysis of Epidemiological Data.", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=epiR", 
-        `url`="https://CRAN.R-project.org/package=epiR"))
+        `url`="https://CRAN.R-project.org/package=epiR"), 
+    `KMunicate`=list(
+        `type`="software", 
+        `author`="Alessandro Gasparini", 
+        `year`=2020, 
+        `title`="KMunicate: KMunicate-Style Kaplan\u2013Meier Plots", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=KMunicate", 
+        `url`="https://CRAN.R-project.org/package=KMunicate"), 
+    `KMunicate2`=list(
+        `type`="article", 
+        `author`="Morris TP, Jarvis CI, Cragg W, et al", 
+        `title`="Proposals on Kaplan\u2013Meier plots in medical research and a survey of stakeholder views: KMunicate", 
+        `year`=2019, 
+        `publisher`="BMJ Open 2019;9:e030215.", 
+        `doi`="10.1136/bmjopen-2019-030215", 
+        `url`="https://bmjopen.bmj.com/content/9/9/e030215"), 
+    `Fagan`=list(
+        `type`="software", 
+        `author`="Adam Chekroud", 
+        `title`="nomogrammer: Fagan's nomograms with ggplot2", 
+        `publisher`="GitHub", 
+        `year`=2020, 
+        `url`="https://github.com/achekroud/nomogrammer"), 
+    `Fagan2`=list(
+        `type`="article", 
+        `author`=NULL, 
+        `title`="StATS: What is a Fagan nomogram?", 
+        `publisher`="website", 
+        `year`=2020, 
+        `url`="http://www.pmean.com/definitions/fagan.htm"))

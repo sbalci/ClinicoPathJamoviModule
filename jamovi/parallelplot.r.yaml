@@ -1,0 +1,11 @@
+---
+name:  parallelplot
+title: Parallel Plot
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Parallel Plot
+      type:  Preformatted
+
+...

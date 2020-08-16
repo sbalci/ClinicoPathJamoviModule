@@ -10,9 +10,12 @@ jas: '1.2'
 description:
     main: Function for Generating Summaries for Survival Analysis.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
             # example will be added
+            flow::flow_view(x = ClinicoPath::survival)
+
+
 
 
 options:
@@ -170,6 +173,11 @@ options:
       type: Bool
       default: false
 
+    - name: kmunicate
+      title: KMunicate-Style Plot
+      type: Bool
+      default: false
+
 
     - name: ce
       title: Cumulative Events
@@ -183,11 +191,18 @@ options:
       default: false
 
 
-
     - name: endplot
       title: Plot End Time
       type: Integer
       default: 60
+
+
+    - name: byplot
+      title: Time Interval
+      type: Integer
+      default: 12
+
+
 
     - name: findcut
       title: Cut-off for Continious Explanatory
@@ -209,5 +224,13 @@ options:
       title: risktable
       type: Bool
       default: false
+
+
+    - name: sas
+      title: Single Arm Survival
+      type: Bool
+      default: false
+
+
 
 ...

@@ -55,3 +55,8 @@ children:
             enable: (!ci && pp)
 
 
+  - type: Label
+    label: Plots
+    children:
+      - type: CheckBox
+        name: fagan

@@ -81,6 +81,13 @@ Modules and jamovi library)
 
 <https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo>
 
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathDescriptives.git
+      commit: 0bc3ea8c48b26059c4294c0e527f73fd7bdd4e05
+      platforms:
+        - win64
+        - macos
+
 ##### JJStatsPlot
 
 GGStatsPlot functions are separately added to jamovi library under
@@ -99,6 +106,10 @@ jamovi library)
 
 <https://github.com/sbalci/jjstatsplot/releases/>
 
+    - name: jjstatsplot
+      url: https://github.com/sbalci/jjstatsplot.git
+      commit: 9a45a583e73edf2d6cafb03ac347dedc5fd42f0b
+
 ##### jsurvival
 
 <https://github.com/sbalci/jsurvival>
@@ -111,11 +122,28 @@ jamovi library)
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jsurvival-0.0.2.0026.jmo -->
 
+    - name: jsurvival
+      url: https://github.com/sbalci/jsurvival.git
+      commit: 65abbbd860e792ffc794b404871f986b58179129
+      platforms:
+        - win64
+        - macos
+
 ##### meddecide
 
 <https://github.com/sbalci/meddecide/>
 
 <https://github.com/sbalci/meddecide/releases/>
+
+<https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo>
+
+<https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo>
+
+<https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo>
+
+    - name: meddecide
+      url: https://github.com/sbalci/meddecide.git
+      commit: 38aaf74a807241def57c23b99cc89a31a1ed5123
 
 <!-- #### c: For stable version    -->
 
@@ -219,6 +247,8 @@ jamovi library)
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
 
+<img src="man/figures/jamovi-KMunicate-survival.png" align="center" width = 75% />
+
 #### Multivariate Survival Analysis
 
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
@@ -258,6 +288,8 @@ jamovi library)
 #### Decision Calculator
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width = 75% />
 
 #### Decision Tree
 
@@ -397,7 +429,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--07-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--16-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -472,7 +504,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--07-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--16-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

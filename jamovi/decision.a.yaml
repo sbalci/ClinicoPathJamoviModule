@@ -92,4 +92,10 @@ options:
       default: false
 
 
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+
+
 ...

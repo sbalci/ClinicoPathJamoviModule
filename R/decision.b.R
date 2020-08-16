@@ -11,6 +11,33 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
 
 
 
+        .init = function() {
+
+            cTable <- self$results$cTable
+
+            cTable$addRow(rowKey = "Test Positive",
+                          values = list(
+                              newtest = "Test Positive"
+                          )
+                          )
+
+
+            cTable$addRow(rowKey = "Test Negative",
+                          values = list(
+                              newtest = "Test Negative"
+                          )
+                          )
+
+
+
+
+            cTable$addRow(rowKey = "Total",
+                          values = list(
+                              newtest = "Total"
+                              )
+                          )
+
+        },
 
 
 
@@ -186,8 +213,7 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
 
         cTable <- self$results$cTable
 
-
-        cTable$addRow(rowKey = "Test Positive",
+        cTable$setRow(rowKey = "Test Positive",
                       values = list(
                           newtest = "Test Positive",
                           GP = TP,
@@ -197,7 +223,7 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
         )
 
 
-        cTable$addRow(rowKey = "Test Negative",
+        cTable$setRow(rowKey = "Test Negative",
                       values = list(
                           newtest = "Test Negative",
                           GP = FN,
@@ -206,7 +232,7 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
                       )
         )
 
-        cTable$addRow(rowKey = "Total",
+        cTable$setRow(rowKey = "Total",
                       values = list(
                           newtest = "Total",
                           GP = TP + FN,
@@ -551,7 +577,49 @@ decisionClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisionClass",
         }
 
 
+
+        # Send Data to Plot ----
+
+
+        plotData1 <- list(
+            "Prevalence" = PriorProb,
+            "Sens" = Sens,
+            "Spec" = Spec,
+            "Plr" = LRP,
+            "Nlr" = LRN
+        )
+
+        image1 <- self$results$plot1
+        image1$setState(plotData1)
+
+
+
+
+
         }
+        }
+
+        ,
+
+        .plot1 = function(image1, ggtheme, ...) {
+
+
+            plotData1 <- image1$state
+
+            plot1 <- nomogrammer(Prevalence = plotData1$Prevalence,
+                                 Sens = plotData1$Sens,
+                                 Spec = plotData1$Spec,
+                                 Plr = plotData1$Plr,
+                                 Nlr = plotData1$Nlr,
+                                 Detail = TRUE,
+                                 NullLine = TRUE,
+                                 LabelSize = (14/5),
+                                 Verbose = TRUE
+            )
+
+            print(plot1)
+            TRUE
+
 
 
         # drafts ----

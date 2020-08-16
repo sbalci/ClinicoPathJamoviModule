@@ -1,3 +1,24 @@
+# ClinicoPath 0.0.2.0035
+
+- meddecide has been added to jamovi library
+
+https://github.com/sbalci/meddecide/
+
+https://github.com/sbalci/meddecide/releases/
+
+https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo
+
+https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo
+
+https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo
+
+# ClinicoPath 0.0.2.0034
+
+- added metrics to survival functions
+- updating survival options (continuous explanatory, cut-off, two categorical explanatory, multiple outcome options, elapsed time calculation from dates)
+- added KMunicate type survival curve
+- added Fagan's nomogram
+
 # ClinicoPath 0.0.2.0027
 
 - temporarily added many functions from various packages to update functions and arguments
@@ -6,6 +27,14 @@
 # ClinicoPath 0.0.2.0026
 
 - jsurvival has been added to jamovi library
+
+https://github.com/sbalci/jsurvival
+
+https://github.com/sbalci/jsurvival/releases/
+
+https://library.jamovi.org/macos/R3.6.3/jsurvival-0.0.2.0026.jmo
+
+https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo
 
 
 # ClinicoPath 0.0.2.0025

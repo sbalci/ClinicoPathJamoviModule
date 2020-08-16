@@ -147,7 +147,10 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ifelse(test = outcome1 == outcomeLevel,
                                yes = 1,
                                no = 0)
-                } else {
+
+
+
+                    } else {
 
                     stop('When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content.')
 
@@ -333,10 +336,10 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$mydataview$setContent(
                     list(
                     "outcome1" = outcome1,
-                    dod,
-                    dooc,
-                    awd,
-                    awod,
+                    # dod,
+                    # dooc,
+                    # awd,
+                    # awod,
                     head(mydata, n = 30)
                     )
                     )
@@ -376,16 +379,40 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                     formula2 <- as.vector(self$options$contexpl)
 
+                                    sas <- self$options$sas
+
+                                    if (sas) {
+                                        formula2 <- 1
+                                    }
+
                                     myformula <- paste("Surv(", "mytime", "," , "myoutcome", ")")
 
                                     finalfit::finalfit(.data = mydata,
                                                        dependent = myformula,
-                                                       explanatory = formula2
+                                                       explanatory = formula2,
 
-                                                       # metrics = TRUE
+                                                       metrics = TRUE
                                     ) -> tCox
 
-                                    tCox_df <- tibble::as_tibble(tCox, .name_repair = "minimal") %>%
+
+                                    tCoxtext2 <- glue::glue("
+                                <br>
+                                <b>Model Metrics:</b>
+                                  ",
+                                unlist(
+                                    tCox[[2]]
+                                ),
+                                "
+                                <br>
+                                ")
+
+
+                                    self$results$tCoxtext2$setContent(tCoxtext2)
+
+
+
+
+                                    tCox_df <- tibble::as_tibble(tCox[[1]], .name_repair = "minimal") %>%
                                         janitor::clean_names(dat = ., case = "snake")
 
 
@@ -411,7 +438,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     # Continious coxTable explanation ----
 
 
-                                    tCox_df <- tibble::as_tibble(tCox, .name_repair = "minimal") %>%
+                                    tCox_df <- tibble::as_tibble(tCox[[1]], .name_repair = "minimal") %>%
                                         janitor::clean_names(dat = ., case = "snake")
 
                                     names(tCox_df) <- names(data_frame) <- c(
@@ -573,11 +600,17 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 thefactor <- jmvcore::constructFormula(terms = self$options$explanatory)
 
+                sas <- self$options$sas
+
+                if (sas) {
+                    thefactor <- 1
+                 }
 
                 formula <- paste('survival::Surv(mytime, myoutcome) ~ ', thefactor)
                 formula <- as.formula(formula)
 
                 km_fit <- survival::survfit(formula, data = mydata)
+
 
                 km_fit_median_df <- summary(km_fit)
                 results1html <- as.data.frame(km_fit_median_df$table) %>%
@@ -629,16 +662,41 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 formula2 <- as.vector(self$options$explanatory)
 
+                sas <- self$options$sas
+
+                if (sas) {
+                    formula2 <- 1
+                    }
+
                 myformula <- paste("Surv(", "mytime", "," , "myoutcome", ")")
 
                 finalfit::finalfit(.data = mydata,
                 dependent = myformula,
-                explanatory = formula2
+                explanatory = formula2,
 
-                # metrics = TRUE
+                metrics = TRUE
                 ) -> tCox
 
-                tCox_df <- tibble::as_tibble(tCox, .name_repair = "minimal") %>%
+
+
+                tCoxtext2 <- glue::glue("
+                                <br>
+                                <b>Model Metrics:</b>
+                                  ",
+                                unlist(
+                                    tCox[[2]]
+                                ),
+                                "
+                                <br>
+                                ")
+
+
+                self$results$tCoxtext2$setContent(tCoxtext2)
+
+
+
+
+                tCox_df <- tibble::as_tibble(tCox[[1]], .name_repair = "minimal") %>%
                     janitor::clean_names(dat = ., case = "snake")
 
 
@@ -666,7 +724,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # coxTable explanation ----
 
 
-                tCox_df <- tibble::as_tibble(tCox, .name_repair = "minimal") %>%
+                tCox_df <- tibble::as_tibble(tCox[[1]], .name_repair = "minimal") %>%
                     janitor::clean_names(dat = ., case = "snake")
 
                 names(tCox_df) <- names(data_frame) <- c(
@@ -814,6 +872,14 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 title2 <- as.character(thefactor)
 
+
+                sas <- self$options$sas
+
+                if (sas) {
+                    thefactor <- 1
+                    title2 <- "Overall"
+                }
+
                 pairwiseTable$setTitle(paste0('Pairwise Comparisons ', title2))
 
 
@@ -875,6 +941,8 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         image3 <- self$results$plot3
                         image3$setState(plotData)
 
+                        image6 <- self$results$plot6
+                        image6$setState(plotData)
 
 
                     }
@@ -908,6 +976,14 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     title2 <- as.character(thefactor)
 
+    sas <- self$options$sas
+
+    if (sas) {
+        thefactor <- 1
+        title2 <- "Overall"
+    }
+
+
     plot <- plotData %>%
         finalfit::surv_plot(.data = .,
                             dependent = 'survival::Surv(mytime, myoutcome)',
@@ -915,7 +991,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
                             pval = TRUE,
                             legend = 'none',
-                            break.time.by = 12,
+                            break.time.by = self$options$byplot,
                             xlim = c(0,self$options$endplot),
                             title = paste0("Survival curves for ", title2),
                             subtitle = "Based on Kaplan-Meier estimates",
@@ -963,6 +1039,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     title2 <- as.character(thefactor)
 
+    sas <- self$options$sas
+
+    if (sas) {
+        thefactor <- 1
+        title2 <- "Overall"
+    }
 
     plot2 <- plotData %>%
         finalfit::surv_plot(.data = .,
@@ -971,7 +1053,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
                             # pval = TRUE,
                             legend = 'none',
-                            break.time.by = 12,
+                            break.time.by = self$options$byplot,
                             xlim = c(0,self$options$endplot),
                             title = paste0("Cumulative Events ", title2),
                             fun = "event",
@@ -1017,6 +1099,12 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     title2 <- as.character(thefactor)
 
+    sas <- self$options$sas
+
+    if (sas) {
+        thefactor <- 1
+        title2 <- "Overall"
+    }
 
 
     plot3 <- plotData %>%
@@ -1026,7 +1114,7 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
                             # pval = TRUE,
                             legend = 'none',
-                            break.time.by = 12,
+                            break.time.by = self$options$byplot,
                             xlim = c(0,self$options$endplot),
                             title = paste0("Cumulative Hazard ", title2),
                             fun = "cumhaz",
@@ -1103,6 +1191,15 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     contfactor <- jmvcore::constructFormula(terms = self$options$contexpl)
 
+
+    sas <- self$options$sas
+
+    if (sas) {
+        contfactor <- 1
+    }
+
+
+
     # contfactor <- as.formula(contfactor)
 
     myformula <- paste0("survival::Surv(mytime, myoutcome) ~ ", contfactor)
@@ -1123,6 +1220,67 @@ survivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     TRUE
 }
 
+
+
+,
+.plot6 = function(image6, ggtheme, theme, ...) {  # <-- the plot6 function ----
+
+
+    kmunicate <- self$options$kmunicate
+
+    if (!kmunicate)
+        return()
+
+    # if (nrow(self$data) == 0)
+    #     stop('Data contains no (complete) rows')
+
+    if ( !is.null(self$options$explanatory) && !is.null(self$options$contexpl)) {
+
+        stop("If you want to use continuous and categorical variables together as explanatory variables, please use Multivariate Survival Analysis function in jsurvival module.")
+
+    }
+
+    # if (is.null(self$options$contexpl) || is.null(self$options$outcome) || is.null(self$options$elapsedtime) )
+    #     return()
+
+    plotData <- image6$state
+
+    # KM <- image6$state
+
+
+    # thefactor <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+    # title2 <- as.character(thefactor)
+
+    thefactor <- jmvcore::constructFormula(terms = self$options$explanatory)
+
+
+    sas <- self$options$sas
+
+    if (sas) {
+        thefactor <- 1
+    }
+
+    formula <- paste('survival::Surv(mytime, myoutcome) ~ ', thefactor)
+
+    formula <- as.formula(formula)
+
+    km_fit <- survival::survfit(formula, data = plotData)
+
+    time_scale <- seq(0, self$options$endplot, by = self$options$byplot)
+
+
+    plot6 <-
+        KMunicate::KMunicate(fit = km_fit,
+                             time_scale = time_scale,
+                             .xlab = paste0('Time in ', self$options$timetypeoutput)
+                             )
+
+
+    print(plot6)
+    TRUE
+
+    }
 
 
 

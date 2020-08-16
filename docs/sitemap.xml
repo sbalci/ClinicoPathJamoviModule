@@ -328,7 +328,13 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/vartreeClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/childRmd/generatedCodeFlows.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/data-preperation.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/examples.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/module_development_jamovi.html</loc>
@@ -341,5 +347,8 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/pkgnet-report.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/workflows.html</loc>
   </url>
 </urlset>

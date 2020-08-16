@@ -120,7 +120,7 @@ agepyramidBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' Age Pyramid
 #'
 #' 
-#' @param data .
+#' @param data The data as a data frame.
 #' @param age .
 #' @param gender .
 #' @param female .

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0031
-Date: 2020-08-05
+Version: 0.0.2.0035
+Date: 2020-08-16
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -30,7 +30,8 @@ Imports:
     jmvcore,
     R6,
     magrittr,
-    ggplot2
+    ggplot2,
+    scales
 Suggests:
     dplyr,
     finalfit,
@@ -40,7 +41,6 @@ Suggests:
     janitor,
     knitr,
     purrr,
-    scales,
     survival,
     survminer,
     tableone,
@@ -119,7 +119,9 @@ Remotes:
     spgarbet/tangram,
     cran/rmngb,
     mayoverse/arsenal,
-    mixOmicsTeam/mixOmics
+    mixOmicsTeam/mixOmics,
+    moodymudskipper/flow,
+    ellessenne/KMunicate-package
 VignetteBuilder:
     knitr
 Encoding: UTF-8

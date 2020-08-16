@@ -163,11 +163,27 @@ multisurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                dependent = myformula,
                                explanatory = formula2,
 
-                               # metrics = TRUE
-                               # FIX ----
+                               metrics = TRUE
                                ) -> tMultivariate
 
-            results1 <- knitr::kable(tMultivariate,
+
+            text2 <- glue::glue("
+                                <br>
+                                <b>Model Metrics:</b>
+                                  ",
+                                unlist(
+                                    tMultivariate[[2]]
+                                    ),
+                                "
+                                <br>
+                                ")
+
+
+            self$results$text2$setContent(text2)
+
+
+
+            results1 <- knitr::kable(tMultivariate[[1]],
                                      row.names = FALSE,
                                      align = c('l', 'l', 'r', 'r', 'r', 'r'),
                                      format = "html")
