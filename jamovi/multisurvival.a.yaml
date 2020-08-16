@@ -74,4 +74,11 @@ options:
     #   type: Variable
 
 
+
+    - name: modelTerms
+      title: Model Terms
+      type: Terms
+      default: null
+
+
 ...

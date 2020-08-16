@@ -61,6 +61,9 @@ children:
                 name: sc
                 enable: (!contexpl)
               - type: CheckBox
+                name: kmunicate
+                enable: (!contexpl)
+              - type: CheckBox
                 name: ce
                 enable: (!contexpl)
               - type: CheckBox
@@ -74,6 +77,9 @@ children:
             children:
               - type: TextBox
                 name: endplot
+                format: number
+              - type: TextBox
+                name: byplot
                 format: number
               - type: CheckBox
                 name: ci95
@@ -200,3 +206,13 @@ children:
               - type: CheckBox
                 name: findcut
                 enable: (contexpl)
+  - type: CollapseBox
+    label: Single Arm Survival
+    collapsed: false
+    children:
+      - type: Label
+        label: Single Arm Survival
+        fitToGrid: true
+        children:
+          - type: CheckBox
+            name: sas

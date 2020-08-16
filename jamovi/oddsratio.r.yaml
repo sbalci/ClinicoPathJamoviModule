@@ -19,6 +19,12 @@ items:
           - explanatory
           - outcome
 
+    - name:  text2
+      title: ''
+      type:  Html
+
+
+
     - name: plot
       title: Odds Ratio Plot
       type: Image

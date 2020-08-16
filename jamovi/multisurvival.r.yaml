@@ -14,16 +14,6 @@ items:
           - outcomeLevel
           - overalltime
 
-
-    # - name:  text3
-    #   title: Deneme
-    #   type:  Preformatted
-
-    # - name:  text2
-    #   title: Deneme
-    #   type:  Preformatted
-
-
     - name:  text
       title: Multivariate Survival
       type:  Html
@@ -33,6 +23,14 @@ items:
           - outcomeLevel
           - overalltime
       refs: finalfit
+
+
+    - name:  text2
+      title: ''
+      type:  Html
+      refs: finalfit
+
+
 
     - name: plot
       title: Hazards Regression Plot
@@ -95,6 +93,7 @@ items:
     #   visible: (ac)
     #   refs: survminer
 
-
+    - name: model
+      type: Property
 
 ...

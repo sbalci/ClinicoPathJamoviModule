@@ -1,0 +1,11 @@
+---
+name:  nomogram
+title: Nomogram
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Nomogram
+      type:  Preformatted
+
+...

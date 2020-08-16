@@ -108,6 +108,14 @@ https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
 
 https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
 
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathDescriptives.git
+      commit: 0bc3ea8c48b26059c4294c0e527f73fd7bdd4e05
+      platforms:
+        - win64
+        - macos
+
+
 
 ##### JJStatsPlot  
 
@@ -128,6 +136,12 @@ https://github.com/sbalci/jjstatsplot
 https://github.com/sbalci/jjstatsplot/releases/
 
 
+    - name: jjstatsplot
+      url: https://github.com/sbalci/jjstatsplot.git
+      commit: 9a45a583e73edf2d6cafb03ac347dedc5fd42f0b
+
+
+
 ##### jsurvival
 
 https://github.com/sbalci/jsurvival
@@ -141,15 +155,29 @@ https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jsurvival-0.0.2.0026.jmo -->
 
+    - name: jsurvival
+      url: https://github.com/sbalci/jsurvival.git
+      commit: 65abbbd860e792ffc794b404871f986b58179129
+      platforms:
+        - win64
+        - macos
 
 
 ##### meddecide
 
 https://github.com/sbalci/meddecide/
 
-
 https://github.com/sbalci/meddecide/releases/
 
+https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo
+
+https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo
+
+https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo
+
+    - name: meddecide
+      url: https://github.com/sbalci/meddecide.git
+      commit: 38aaf74a807241def57c23b99cc89a31a1ed5123
 
 
 <!-- #### c: For stable version    -->
@@ -301,6 +329,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 <img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
 
 
+<img src="man/figures/jamovi-KMunicate-survival.png" align="center" width = 75% />
+
 
 
 #### Multivariate Survival Analysis
@@ -362,6 +392,10 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
+
+
+<img src="man/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width = 75% />
+
 
 
 #### Decision Tree

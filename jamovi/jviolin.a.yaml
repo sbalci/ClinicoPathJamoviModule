@@ -1,7 +1,7 @@
 ---
 name:  jviolin
 title: Violin Plot
-menuGroup: ClinicoPath2
+menuGroup: ClinicoPath
 menuSubgroup: R-Graph-Gallery
 menuSubtitle: R Graph Gallery Violin
 version: '1.0.0'

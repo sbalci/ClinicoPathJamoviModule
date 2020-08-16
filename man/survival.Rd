@@ -24,13 +24,16 @@ survival(
   timetypeoutput = "months",
   pw = FALSE,
   sc = FALSE,
+  kmunicate = FALSE,
   ce = FALSE,
   ch = FALSE,
   endplot = 60,
+  byplot = 12,
   findcut = FALSE,
   multievent = FALSE,
   ci95 = FALSE,
-  risktable = FALSE
+  risktable = FALSE,
+  sas = FALSE
 )
 }
 \arguments{
@@ -72,11 +75,15 @@ survival(
 
 \item{sc}{.}
 
+\item{kmunicate}{.}
+
 \item{ce}{.}
 
 \item{ch}{.}
 
 \item{endplot}{.}
+
+\item{byplot}{.}
 
 \item{findcut}{.}
 
@@ -85,6 +92,8 @@ survival(
 \item{ci95}{.}
 
 \item{risktable}{.}
+
+\item{sas}{.}
 }
 \value{
 A results object containing:
@@ -95,6 +104,7 @@ A results object containing:
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
@@ -105,6 +115,7 @@ A results object containing:
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot5} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -117,7 +128,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Generating Summaries for Survival Analysis.
 }
 \examples{
-\dontrun{
 # example will be added
-}
+flow::flow_view(x = ClinicoPath::survival)
+
 }

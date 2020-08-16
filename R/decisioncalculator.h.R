@@ -13,7 +13,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             pp = FALSE,
             pprob = 0.3,
             fnote = FALSE,
-            ci = FALSE, ...) {
+            ci = FALSE,
+            fagan = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -55,6 +56,10 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ci",
                 ci,
                 default=FALSE)
+            private$..fagan <- jmvcore::OptionBool$new(
+                "fagan",
+                fagan,
+                default=FALSE)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -64,6 +69,7 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..pprob)
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
+            self$.addOption(private$..fagan)
         }),
     active = list(
         TP = function() private$..TP$value,
@@ -73,7 +79,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         pp = function() private$..pp$value,
         pprob = function() private$..pprob$value,
         fnote = function() private$..fnote$value,
-        ci = function() private$..ci$value),
+        ci = function() private$..ci$value,
+        fagan = function() private$..fagan$value),
     private = list(
         ..TP = NA,
         ..TN = NA,
@@ -82,7 +89,8 @@ decisioncalculatorOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..pp = NA,
         ..pprob = NA,
         ..fnote = NA,
-        ..ci = NA)
+        ..ci = NA,
+        ..fagan = NA)
 )
 
 decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -92,7 +100,8 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
-        epirTable_number = function() private$.items[["epirTable_number"]]),
+        epirTable_number = function() private$.items[["epirTable_number"]],
+        plot1 = function() private$.items[["plot1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -286,7 +295,23 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob"),
-                refs="epiR"))}))
+                refs="epiR"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot1",
+                title="Fagan nomogram",
+                width=600,
+                height=450,
+                renderFun=".plot1",
+                requiresData=TRUE,
+                visible="(fagan)",
+                clearWith=list(
+                    "pp",
+                    "pprob",
+                    "fagan"),
+                refs=list(
+                    "Fagan",
+                    "Fagan2")))}))
 
 decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "decisioncalculatorBase",
@@ -325,6 +350,7 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote .
 #' @param ci .
+#' @param fagan .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
@@ -332,6 +358,7 @@ decisioncalculatorBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -349,7 +376,8 @@ decisioncalculator <- function(
     pp = FALSE,
     pprob = 0.3,
     fnote = FALSE,
-    ci = FALSE) {
+    ci = FALSE,
+    fagan = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('decisioncalculator requires jmvcore to be installed (restart may be required)')
@@ -363,7 +391,8 @@ decisioncalculator <- function(
         pp = pp,
         pprob = pprob,
         fnote = fnote,
-        ci = ci)
+        ci = ci,
+        fagan = fagan)
 
     analysis <- decisioncalculatorClass$new(
         options = options,

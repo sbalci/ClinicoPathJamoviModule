@@ -43,6 +43,7 @@ oddsratioResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
+        text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -67,6 +68,10 @@ oddsratioResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text2",
+                title=""))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -114,6 +119,7 @@ oddsratioBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

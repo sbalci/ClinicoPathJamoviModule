@@ -226,4 +226,24 @@ items:
     #   title: Medical Decision epiR
     #   type:  Preformatted
 
+    - name: plot1
+      title: 'Fagan nomogram'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      clearWith:
+          - pp
+          - pprob
+          - fagan
+      refs:
+          - Fagan
+          - Fagan2
+
+
+
+
+
 ...

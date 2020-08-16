@@ -122,10 +122,27 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 finalfit::finalfit(.data = mydata,
                                    dependent = formulaR,
-                                   explanatory = formula2
+                                   explanatory = formula2,
+                                   metrics = TRUE
                                    ) -> tOdds
 
-                results1 <-  knitr::kable(tOdds,
+
+                text2 <- glue::glue("
+                                <br>
+                                <b>Model Metrics:</b>
+                                  ",
+                                unlist(
+                                    tOdds[[2]]
+                                ),
+                                "
+                                <br>
+                                ")
+
+
+                self$results$text2$setContent(text2)
+
+
+                results1 <-  knitr::kable(tOdds[[1]],
                              row.names=FALSE,
                              align=c("l", "l", "r", "r", "r", "r"),
                              format = "html")

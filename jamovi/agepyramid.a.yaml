@@ -2,13 +2,16 @@
 name:  agepyramid
 title: Age Pyramid
 menuGroup: Exploration
-menuSubgroup: ClinicoPath Descriptives
+menuSubgroup: ClinicoPath Descriptive Plots
 version: '1.0.0'
 jas: '1.2'
 
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
 
     - name: age
       title: Age

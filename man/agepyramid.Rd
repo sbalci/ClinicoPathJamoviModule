@@ -7,7 +7,7 @@
 agepyramid(data, age, gender, female)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
 \item{age}{.}
 

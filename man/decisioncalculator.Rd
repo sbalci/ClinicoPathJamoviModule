@@ -12,7 +12,8 @@ decisioncalculator(
   pp = FALSE,
   pprob = 0.3,
   fnote = FALSE,
-  ci = FALSE
+  ci = FALSE,
+  fagan = FALSE
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{fnote}{.}
 
 \item{ci}{.}
+
+\item{fagan}{.}
 }
 \value{
 A results object containing:
@@ -41,6 +44,7 @@ A results object containing:
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
+\code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

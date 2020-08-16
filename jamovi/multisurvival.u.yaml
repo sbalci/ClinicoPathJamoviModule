@@ -47,3 +47,24 @@ children:
               - type: ComboBox
                 name: sty
                 enable: (hr)
+  - type: CollapseBox
+    label: Model
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Supplier
+        name: modelSupplier
+        label: Components
+        persistentItems: true
+        stretchFactor: 1
+        format: term
+        children:
+          - type: TargetLayoutBox
+            children:
+              - type: ListBox
+                name: modelTerms
+                valueFilter: unique
+                isTarget: true
+                itemDropBehaviour: emptyspace
+                template:
+                  type: TermLabel
