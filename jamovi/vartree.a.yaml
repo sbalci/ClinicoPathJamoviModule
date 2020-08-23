@@ -1,8 +1,8 @@
 ---
 name:  vartree
 title: Variable Tree
-menuGroup: ClinicoPath
-menuSubgroup: Descriptives
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
 version: '1.0.0'
 jas: '1.2'
 
@@ -12,7 +12,6 @@ description:
         dontrun: true
         usage: |
             # example will be added
-
 
 options:
     - name: data

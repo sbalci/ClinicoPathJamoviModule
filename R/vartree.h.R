@@ -30,16 +30,16 @@ vartreeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        plot = function() private$.items[["plot"]]),
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Variable Tree")
+                title="Variable Tree",
+                refs=list(
+                    "vtree"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -47,21 +47,7 @@ vartreeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Variable Tree Html"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Variable Tree Preformatted"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot",
-                title="Variable Tree Plot",
-                width=600,
-                height=450,
-                renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars")))}))
+                title="Variable Tree Html"))}))
 
 vartreeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeBase",
@@ -97,8 +83,6 @@ vartreeBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

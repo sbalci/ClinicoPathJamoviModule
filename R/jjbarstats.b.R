@@ -1,26 +1,32 @@
 #' @title Bar Charts
 #'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
 
+jjbarstatsClass <- if (requireNamespace('jmvcore'))
+    R6::R6Class(
+        "jjbarstatsClass",
+        inherit = jjbarstatsBase,
+        private = list(
+            # init ----
 
-jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "jjbarstatsClass",
-    inherit = jjbarstatsBase,
-    private = list(
+            .init = function() {
+                deplen <- length(self$options$dep)
 
-        .run = function() {
+                self$results$plot$setSize(400, deplen * 300)
 
+            }
+            ,
+
+            .run = function() {
                 # Initial Message ----
-            if ( is.null(self$options$dep) || is.null(self$options$group)) {
-
-                # TODO ----
+                if (is.null(self$options$dep) ||
+                    is.null(self$options$group)) {
+                    # TODO ----
 
                     todo <- glue::glue(
-                "<br>Welcome to ClinicoPath
+                        "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you generate Bar Charts.
                 <br><br>
@@ -35,10 +41,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
 
                 } else {
-
                     # TODO ----
                     todo <- glue::glue(
-                        "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>")
+                        "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>"
+                    )
 
                     self$results$todo$setContent(todo)
 
@@ -46,16 +52,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         stop('Data contains no (complete) rows')
 
                 }
-        }
+            }
 
 
 
-,
+            ,
             .plot = function(image, ggtheme, theme, ...) {
                 # the plot function ----
                 # Error messages ----
 
-                if ( is.null(self$options$dep) || is.null(self$options$group))
+                if (is.null(self$options$dep) ||
+                    is.null(self$options$group))
                     return()
 
                 if (nrow(self$data) == 0)
@@ -93,7 +100,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 excl <- self$options$excl
 
-                if (excl) {mydata <- jmvcore::naOmit(mydata)}
+                if (excl) {
+                    mydata <- jmvcore::naOmit(mydata)
+                }
 
 
 
@@ -120,66 +129,66 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
 
 
-                if ( length(self$options$dep) == 1 ) {
+                # dep == 1 ----
 
-                plot <-
-                    ggstatsplot::ggbarstats(
-                    data = mydata,
-                    main = !!dep1,
-                    condition = !!group,
+                if (length(self$options$dep) == 1) {
+                    plot <-
+                        ggstatsplot::ggbarstats(
+                            data = mydata,
+                            main = !!dep1,
+                            condition = !!group,
 
-                    # paired = paired,
+                            # paired = paired,
 
-                    paired = FALSE,
+                            paired = FALSE,
 
-                    counts = NULL,
-                    ratio = NULL,
-                    results.subtitle = TRUE,
-                    sample.size.label = TRUE,
-                    label = "percentage",
-                    perc.k = 0,
-                    label.args = list(alpha = 1, fill = "white"),
-                    bf.message = TRUE,
-                    sampling.plan = "indepMulti",
-                    fixed.margin = "rows",
-                    prior.concentration = 1,
-                    title = NULL,
-                    subtitle = NULL,
-                    caption = NULL,
-                    conf.level = 0.95,
-                    nboot = 100,
-                    legend.title = NULL,
-                    xlab = NULL,
-                    ylab = NULL,
-                    k = 2,
-                    proportion.test = TRUE,
-                    ggtheme = ggtheme,
+                            counts = NULL,
+                            ratio = NULL,
+                            results.subtitle = TRUE,
+                            sample.size.label = TRUE,
+                            label = "percentage",
+                            perc.k = 0,
+                            label.args = list(alpha = 1, fill = "white"),
+                            bf.message = TRUE,
+                            sampling.plan = "indepMulti",
+                            fixed.margin = "rows",
+                            prior.concentration = 1,
+                            title = NULL,
+                            subtitle = NULL,
+                            caption = NULL,
+                            conf.level = 0.95,
+                            nboot = 100,
+                            legend.title = NULL,
+                            xlab = NULL,
+                            ylab = NULL,
+                            k = 2,
+                            proportion.test = TRUE,
+                            ggtheme = ggtheme,
 
-                    # ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = originaltheme,
-                    package = "RColorBrewer",
-                    palette = "Dark2",
-                    ggplot.component = NULL,
-                    output = "plot",
-                    messages = TRUE,
-                    x = NULL,
-                    y = NULL
-                )
+                            # ggtheme = ggplot2::theme_bw(),
+                            ggstatsplot.layer = originaltheme,
+                            package = "RColorBrewer",
+                            palette = "Dark2",
+                            ggplot.component = NULL,
+                            output = "plot",
+                            messages = TRUE,
+                            x = NULL,
+                            y = NULL
+                        )
 
                 }
 
 
-                if ( length(self$options$dep) > 1 ) {
+                # dep > 1 ----
 
+                if (length(self$options$dep) > 1) {
                     dep2 <- as.list(self$options$dep)
 
                     plotlist <-
                         purrr::pmap(
-                            .l = list(
-                                main = dep2,
-                                # title = list(dep),
-                                messages = FALSE
-                            ),
+                            .l = list(main = dep2,
+                                      # title = list(dep),
+                                      messages = FALSE),
                             .f = ggstatsplot::ggbarstats,
                             data = mydata,
                             condition = !!group,
@@ -223,9 +232,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # y = NULL
                         )
 
-                    plot <- ggstatsplot::combine_plots(
-                        plotlist = plotlist,
-                        nrow = 2)
+                    plot <- ggstatsplot::combine_plots(plotlist = plotlist,
+                                                       nrow = length(self$options$dep))
 
 
 
@@ -238,151 +246,154 @@ jjbarstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
-#
-# ,             .plot2 = function(image, ggtheme, theme, ...) {
-#     # the plot function ----
-#     # Error messages ----
-#
-#     if ( is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
-#         return()
-#
-#     if (nrow(self$data) == 0)
-#         stop('Data contains no (complete) rows')
-#
-#
-#     # Prepare Data ----
-#
-#     mydata <- self$data
-#
-#
-#     # direction, paired ----
-#
-#     direction <- self$options$direction
-#
-#     if (direction == "repeated") {
-#
-#         paired <- TRUE
-#
-#     } else if (direction == "independent") {
-#
-#         paired <- FALSE
-#
-#     }
-#
-#     # Exclude NA ----
-#
-#     excl <- self$options$excl
-#
-#     if (excl) {mydata <- jmvcore::naOmit(mydata)}
-#
-#
-#
-#     dep <- self$options$dep
-#
-#     group <- self$options$group
-#
-#     originaltheme <- self$options$originaltheme
-#
-#     dep1 <- jmvcore::composeTerm(components = dep)
-#
-#     group <- jmvcore::composeTerm(components = group)
-#
-#
-#
-#     # grouped_ggbarstats ----
-#     # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
-#
-#
-#
-#         grvar <- self$options$grvar
-#
-#
-#     if ( length(self$options$dep) == 1 ) {
-#
-#
-#         plot2 <- ggstatsplot::grouped_ggbarstats(
-#             data = mydata,
-#             main = !!dep1,
-#             condition = !!group,
-#             grouping.var = !!grvar,
-#
-#             paired = paired,
-#             ggtheme = ggtheme,
-#
-#
-#             counts = NULL,
-#             title.prefix = NULL,
-#             output = "plot",
-#             x = NULL,
-#             y = NULL,
-#             plotgrid.args = list(),
-#             title.text = NULL,
-#             title.args = list(size = 16, fontface = "bold"),
-#             caption.text = NULL,
-#             caption.args = list(size = 10),
-#             sub.text = NULL,
-#             sub.args = list(size = 12),
-#             ggtheme = ggtheme,
-#             ggstatsplot.layer = originaltheme
-#         )
-#
-#     }
-#
-#
-#     if ( length(self$options$dep) > 1 ) {
-#
-#
-#
-#         dep2 <- as.list(self$options$dep)
-#
-#         plotlist <-
-#             purrr::pmap(
-#                 .l = list(
-#                     main = dep2,
-#                     # title = list(dep),
-#                     messages = FALSE
-#                 ),
-#                 .f = ggstatsplot::grouped_ggbarstats,
-#
-#                 condition = !!group,
-#                 grouping.var = !!grvar,
-#
-#                 paired = paired,
-#
-#
-#                 counts = NULL,
-#                 title.prefix = NULL,
-#                 output = "plot",
-#                 x = NULL,
-#                 y = NULL,
-#                 plotgrid.args = list(),
-#                 title.text = NULL,
-#                 title.args = list(size = 16, fontface = "bold"),
-#                 caption.text = NULL,
-#                 caption.args = list(size = 10),
-#                 sub.text = NULL,
-#                 sub.args = list(size = 12),
-#             ggtheme = ggtheme,
-#             ggstatsplot.layer = originaltheme
-#             )
-#
-#         plot2 <- ggstatsplot::combine_plots(
-#             plotlist = plotlist,
-#             ncol = 1)
-#
-#     }
-#
-#
-#     # Print Plot ----
-#
-#     print(plot2)
-#     TRUE
-#
-# }
-#
-#
+
+            ,
+
+            .plot2 = function(image, ggtheme, theme, ...) {
+                # the plot function ----
+
+                # Error messages ----
+
+                if (is.null(self$options$dep) ||
+                    is.null(self$options$group) || is.null(self$options$grvar))
+                    return()
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+
+                # Prepare Data ----
+
+                mydata <- self$data
+
+
+                # # direction, paired ----
+                #
+                # direction <- self$options$direction
+                #
+                # if (direction == "repeated") {
+                #
+                #     paired <- TRUE
+                #
+                # } else if (direction == "independent") {
+                #
+                #     paired <- FALSE
+                #
+                # }
+
+                # Exclude NA ----
+
+                excl <- self$options$excl
+
+                if (excl) {
+                    mydata <- jmvcore::naOmit(mydata)
+                }
 
 
 
+                dep <- self$options$dep
+
+                group <- self$options$group
+
+                # originaltheme <- self$options$originaltheme
+
+                dep1 <- jmvcore::composeTerm(components = dep)
+
+                group <- jmvcore::composeTerm(components = group)
+
+
+
+                # grouped_ggbarstats ----
+                # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
+
+
+
+                grvar <- self$options$grvar
+
+                # dep = 1 ----
+
+                if (length(self$options$dep) == 1) {
+                    plot2 <- ggstatsplot::grouped_ggbarstats(
+                        data = mydata,
+                        main = !!dep1,
+                        condition = !!group,
+                        grouping.var = !!grvar,
+
+                        paired = paired,
+                        ggtheme = ggtheme,
+
+
+                        counts = NULL,
+                        title.prefix = NULL,
+                        output = "plot",
+                        x = NULL,
+                        y = NULL,
+                        plotgrid.args = list(),
+                        title.text = NULL,
+                        title.args = list(size = 16, fontface = "bold"),
+                        caption.text = NULL,
+                        caption.args = list(size = 10),
+                        sub.text = NULL,
+                        sub.args = list(size = 12)
+                        # ,
+                        # ggtheme = ggtheme,
+                        # ggstatsplot.layer = originaltheme
+                    )
+
+                }
+
+
+                # dep > 1 ----
+
+                if (length(self$options$dep) > 1) {
+                    dep2 <- as.list(self$options$dep)
+
+                    plotlist <-
+                        purrr::pmap(
+                            .l = list(main = dep2,
+                                      # title = list(dep),
+                                      messages = FALSE),
+                            .f = ggstatsplot::grouped_ggbarstats,
+                            data = mydata,
+
+                            condition = !!group,
+                            grouping.var = !!grvar,
+
+                            paired = paired,
+
+
+                            counts = NULL,
+                            title.prefix = NULL,
+                            output = "plot",
+                            x = NULL,
+                            y = NULL,
+                            plotgrid.args = list(),
+                            title.text = NULL,
+                            title.args = list(size = 16, fontface = "bold"),
+                            caption.text = NULL,
+                            caption.args = list(size = 10),
+                            sub.text = NULL,
+                            sub.args = list(size = 12)
+                            # ,
+                            # ggtheme = ggtheme,
+                            # ggstatsplot.layer = originaltheme
+                        )
+
+                    plot2 <- ggstatsplot::combine_plots(plotlist = plotlist,
+                                                        ncol = 1)
+
+                    }
+
+                # Print Plot ----
+
+                print(plot2)
+                TRUE
+
+            }
+
+
+
+
+
+        )
     )
-)
