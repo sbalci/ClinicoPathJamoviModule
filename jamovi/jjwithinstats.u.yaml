@@ -9,11 +9,10 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Dependent Variables
         children:
           - type: VariablesListBox
             name: dep
-            maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
         label: Grouping Variable

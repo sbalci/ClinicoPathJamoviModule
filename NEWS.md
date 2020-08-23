@@ -1,3 +1,10 @@
+# ClinicoPath 0.0.2.0039
+
+
+# ClinicoPath 0.0.2.0038
+
+- fixes https://github.com/sbalci/ClinicoPathJamoviModule/issues/20
+
 # ClinicoPath 0.0.2.0037
 
 - added Survival Analysis for Continuous Explanatory

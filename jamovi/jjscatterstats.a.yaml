@@ -27,13 +27,13 @@ options:
 
 
     - name: dep
-      title: Dependent Variable
+      title: 'x-axis'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: group
-      title: Grouping Variable
+      title: 'y-axis'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
@@ -65,7 +65,7 @@ options:
       default: true
 
 
-  
+
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool

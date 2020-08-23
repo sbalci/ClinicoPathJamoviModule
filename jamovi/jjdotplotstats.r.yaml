@@ -24,7 +24,7 @@ items:
       title: '`${group} - {dep} by {grvar}`'
       type: Image
       width:  800
-      height: 600
+      height: 300
       renderFun: .plot2
       requiresData: true
       clearWith:
@@ -38,8 +38,8 @@ items:
     - name: plot
       title: '`${group} - {dep}`'
       type: Image
-      width:  800
-      height: 600
+      width:  400
+      height: 300
       renderFun: .plot
       requiresData: true
       clearWith:

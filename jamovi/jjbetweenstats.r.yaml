@@ -3,50 +3,38 @@ name:  jjbetweenstats
 title: Violin Plots to Compare Between Groups
 jrs:   '1.1'
 
+clearWith:
+    - dep
+    - group
+    - grvar
+    - originaltheme
+
+
+
 items:
 
     - name:  todo
       title: To Do
       type:  Html
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - originaltheme
-
-
-
-
 
     - name: plot2
-      title: '`${group} - {dep} by {grvar}`'
+      title: '`Violin Plot by ${grvar}`'
+      # title: '`${group} - {dep} by {grvar}`'
       type: Image
-      width:  800
-      height: 600
+      # width:  800
+      # height: 600
       renderFun: .plot2
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
       visible: (grvar)
 
     - name: plot
-      title: '`${group} - {dep}`'
+      title: 'Violin Plot'
+      # title: '`${group} - {dep}`'
       type: Image
-      width:  800
-      height: 600
+      # width:  800
+      # height: 600
       renderFun: .plot
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
-
 
 
 refs:
