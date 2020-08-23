@@ -23,8 +23,6 @@ decision2Class <- if (requireNamespace('jmvcore'))
 
                 if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
-
-
                 results <- private$.compute()
                 private$.populatecTable(results)
 
@@ -33,9 +31,7 @@ decision2Class <- if (requireNamespace('jmvcore'))
 
             .initcTable = function() {
                 cTable <- self$results$cTable
-
             },
-
 
             .compute = function() {
                 # Data definition ----
@@ -143,9 +139,6 @@ decision2Class <- if (requireNamespace('jmvcore'))
                 ))
 
             },
-
-
-
 
 
             .populatecTable = function(results) {

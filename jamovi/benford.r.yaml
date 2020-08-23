@@ -1,0 +1,31 @@
+---
+name:  benford
+title: Benford Analysis
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+    - name:  text
+      title: Benford Analysis
+      type:  Preformatted
+
+
+    - name:  text2
+      title: Suspects
+      type:  Preformatted
+
+
+    - name: plot
+      title: 'Benford Analysis'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+
+...

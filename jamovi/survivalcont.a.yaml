@@ -1,36 +1,13 @@
 ---
-name:  survival
-title: Survival Analysis
+name:  survivalcont
+title: Survival Analysis for Continuous Explanatory
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
+menuSubtitle: 'Find Cut-off for Continuous Variable & Do Univariate Analysis'
 version: '1.0.0'
 jas: '1.2'
 
-description:
-    main: Function for Generating Summaries for Survival Analysis.
-    R:
-        dontrun: false
-        usage: |
-            # example will be added
-            flow::flow_view(x = ClinicoPath::survival)
-
-
 options:
-
-    # - name: lang
-    #   title: Language
-    #   type: List
-    #   options:
-    #     - title: English
-    #       name: English
-    #     - title: Türkçe
-    #       name: Türkçe
-    #     - title: Deutsch
-    #       name: Deutsch
-    #   default: English
-    #   description:
-    #       R: select language
 
     - name: data
       type: Data
@@ -57,12 +34,6 @@ options:
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
-
-    - name: explanatory
-      title: Explanatory Variable
-      type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
 
     - name: contexpl
       title: Continuous Explanatory Variable
@@ -160,10 +131,10 @@ options:
           R: select the time type in output
 
 
-    - name: pw
-      title: Pairwise comparisons
-      type: Bool
-      default: false
+    # - name: pw
+    #   title: Pairwise comparisons
+    #   type: Bool
+    #   default: false
 
 
     - name: sc
@@ -224,11 +195,9 @@ options:
       default: false
 
 
-    - name: sas
-      title: Single Arm Survival
-      type: Bool
-      default: false
-
-
+    # - name: sas
+    #   title: Single Arm Survival
+    #   type: Bool
+    #   default: false
 
 ...

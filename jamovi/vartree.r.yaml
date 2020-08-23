@@ -13,18 +13,7 @@ items:
       title: Variable Tree Html
       type:  Html
 
-    - name:  text2
-      title: Variable Tree Preformatted
-      type:  Preformatted
-
-    - name: plot
-      title: Variable Tree Plot
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot
-      requiresData: true
-      clearWith:
-          - vars
+refs:
+    - vtree
 
 ...

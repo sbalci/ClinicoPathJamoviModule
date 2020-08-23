@@ -369,4 +369,18 @@
         `title`="StATS: What is a Fagan nomogram?", 
         `publisher`="website", 
         `year`=2020, 
-        `url`="http://www.pmean.com/definitions/fagan.htm"))
+        `url`="http://www.pmean.com/definitions/fagan.htm"), 
+    `benford.analysis`=list(
+        `type`="software", 
+        `author`="Carlos Cinelli", 
+        `year`=2020, 
+        `title`="benford.analysis: Benford Analysis for Data Validation and Forensic Analytics", 
+        `publisher`="[R package]. Retrieved from http://github.com/carloscinelli/benford.analysis", 
+        `url`="http://github.com/carloscinelli/benford.analysis"), 
+    `vtree`=list(
+        `type`="software", 
+        `author`="Nick Barrowman", 
+        `year`=2020, 
+        `title`="vtree: Display Information About Nested Subsets of a Data Frame", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=vtree", 
+        `url`="https://CRAN.R-project.org/package=vtree"))

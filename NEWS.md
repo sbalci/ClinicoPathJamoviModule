@@ -1,3 +1,27 @@
+# ClinicoPath 0.0.2.0037
+
+- added Survival Analysis for Continuous Explanatory
+
+- added vtree package functions to vartree function
+
+- fixes https://github.com/sbalci/ClinicoPathJamoviModule/issues/9
+
+
+# ClinicoPath 0.0.2.0036
+
+- added Benford Analysis
+
+- added interactive size to jjbarstats
+
+
+```
+.init = function() {
+            deplen <- length(self$options$dep)
+            self$results$plot$setSize(400, deplen*300)
+        }
+```
+
+
 # ClinicoPath 0.0.2.0035
 
 - meddecide has been added to jamovi library

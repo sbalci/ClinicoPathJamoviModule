@@ -179,39 +179,47 @@ jamovi library)
 
 <https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1vST3kwze9bNUSEr0eijs_81F6hXBrDZ-2Zt97ez-fbpXMELKGFHJNuQHSP2Oxars2C6F3n50KzT1-zD/pub?output=csv>
 
-### Descriptives
+### Exploration
 
-#### TableOne
+#### ClinicoPath Descriptives
+
+##### TableOne
 
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 
 <img src="man/figures/jamovi-ClinicoPath-tableone.gif" align="center" width = 75% />
 
-#### Summary of Continuous Variables
+##### Summary of Continuous Variables
 
 <img src="man/figures/jamovi-write-summary-continuous-variables.gif" align="center" width = 75% />
 
-#### Summary of Categorical Variables
+##### Summary of Categorical Variables
 
 <img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
 
-#### Variable Tree
+##### Benford Analysis
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+<img src="man/figures/jamovi-ClinicoPath-BenfordAnalysis.gif" align="center" width = 75% />
 
-#### Alluvial Diagrams
+#### ClinicoPath Descriptive Plots
+
+##### Variable Tree
+
+<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
+
+##### Alluvial Diagrams
 
 <img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
 
-#### Age Pyramid
+##### Age Pyramid
 
 <img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
 
 -----
 
-### Comparisons
+#### ClinicoPath Comparisons
 
-#### Cross Tables
+##### Cross Tables
 
 <img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
 
@@ -219,13 +227,11 @@ jamovi library)
 
 <img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
 
-##### Tables via arsenal, finalfit, gtsummary
+##### Pairwise Chi-Square Tests
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
-#### Pairwise Chi-Square Tests
-
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+### JJStatsPlot
 
 #### Graphs and Plots
 
@@ -239,7 +245,9 @@ jamovi library)
 
 ### Survival
 
-#### Survival Analysis
+#### jsurvival
+
+##### Univariate Survival Analysis
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
 
@@ -249,7 +257,7 @@ jamovi library)
 
 <img src="man/figures/jamovi-KMunicate-survival.png" align="center" width = 75% />
 
-#### Multivariate Survival Analysis
+##### Multivariate Survival Analysis
 
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
 
@@ -257,61 +265,65 @@ jamovi library)
 
 <img src="man/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width = 75% />
 
-#### Odds Ratio Table and Plot
+##### Univariate Survival Analysis for Continuous Explanatory Variable
+
+##### Odds Ratio Table and Plot
 
 <img src="man/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width = 75% />
 
-#### Competing Survival
+##### Competing Survival
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 -----
 
-### Agreement
+### meddecide
 
-#### Interrater Reliability
+#### Agreement
+
+##### Interrater Reliability
 
 <img src="man/figures/jamovi-clinicopath-kappa-irr.png" align="center" width = 75% />
 
-#### ICC coefficients
+##### ICC coefficients
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 -----
 
-### Decision
+#### Decision
 
-#### Medical Decision
+##### Medical Decision
 
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
-#### Decision Calculator
+##### Decision Calculator
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width = 75% />
 
-#### Decision Tree
+##### Decision Tree
 
-##### explore
+###### explore
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-clinicopath-explore-decision-tree.png" align="center" width = 75% />
 
-##### FFTrees
+###### FFTrees
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-clinicopath-FFTrees-decision-tree.png" align="center" width = 75% />
 
-##### rpart
+###### rpart
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 <img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
 
-#### ROC
+##### ROC
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -429,7 +441,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--16-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -504,7 +516,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--16-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

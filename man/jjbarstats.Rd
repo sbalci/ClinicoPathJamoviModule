@@ -4,7 +4,7 @@
 \alias{jjbarstats}
 \title{Bar Charts}
 \usage{
-jjbarstats(data, dep, group, excl = TRUE, originaltheme = FALSE)
+jjbarstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,6 +12,8 @@ jjbarstats(data, dep, group, excl = TRUE, originaltheme = FALSE)
 \item{dep}{.}
 
 \item{group}{.}
+
+\item{grvar}{.}
 
 \item{excl}{.}
 
@@ -21,6 +23,7 @@ jjbarstats(data, dep, group, excl = TRUE, originaltheme = FALSE)
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

@@ -1,12 +1,7 @@
 #' @title Variable Tree
 #'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#'
-
 
 vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeClass",
@@ -14,19 +9,17 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-            # Error Message ----
 
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
-            if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
+            if ( is.null(self$options$vars) ) {
                 # ToDo Message ----
                 todo <- "
-                <br>Welcome to ClinicoPath
+                <br>Welcome to ClinicoPath Descriptives Module
                           <br><br>
-                          This tool will help you form an Alluvial Plots.
+                          This tool will help you form a Variable Tree.
                           "
                 html <- self$results$todo
                 html$setContent(todo)
+                return()
 
             } else {
                 todo <- ""
@@ -35,6 +28,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
+            # Error Message ----
+
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            # Read Data ----
+
             mydata <- self$data
 
             mydata <- jmvcore::naOmit(mydata)
@@ -52,80 +51,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results <- vtree::vtree(mydata, myvars)
 
-            diagram <- results[["x"]][["diagram"]]
-
-            results <- DiagrammeR::grViz(diagram = diagram)
-
-
-
-            results <-
-                DiagrammeR::create_graph() %>%
-                DiagrammeR::add_node() %>%
-                DiagrammeR::add_node() %>%
-                DiagrammeR::add_edge(from = 1, to = 2)
-
-            results <- DiagrammeR::render_graph(results, layout = "nicely")
-
-
-            results <- knitr::asis_output(results)
-
+            results <- DiagrammeRsvg::export_svg(gv = results)
 
             self$results$text1$setContent(print(results))
 
-            self$results$text2$setContent(print(results))
-
-
-
-
-
-
-
-        },
-
-
-        .plot = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
-
-            mydata <- self$data
-
-            mydata <- jmvcore::naOmit(mydata)
-
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-
-            myvars <- jmvcore::decomposeFormula(formula = formula)
-
-            myvars <- unlist(myvars)
-
-            mydata <- mydata %>%
-                dplyr::select(myvars)
-
-            myvars <- paste0(myvars, collapse = " ")
-
-            results <- vtree::vtree(mydata, myvars)
-
-            # diagram <- results[["x"]][["diagram"]]
-
-            # results <- DiagrammeR::grViz(diagram = diagram)
-
-            plot <- results
-
-
-
-
-            # plot <-
-            #     DiagrammeR::create_graph() %>%
-            #     DiagrammeR::add_node() %>%
-            #     DiagrammeR::add_node() %>%
-            #     DiagrammeR::add_edge(from = 1, to = 2)
-
-            # plot <- DiagrammeR::render_graph(plot, layout = "nicely")
-
-            knitr::asis_output(plot)
-
-            # print(plot)
-            # TRUE
-
         }
-
 
         )
 )
