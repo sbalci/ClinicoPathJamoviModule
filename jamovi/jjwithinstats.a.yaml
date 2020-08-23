@@ -27,8 +27,8 @@ options:
 
 
     - name: dep
-      title: Dependent Variable
-      type: Variable
+      title: Dependent Variables
+      type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
 

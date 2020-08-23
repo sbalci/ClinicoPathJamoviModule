@@ -21,9 +21,9 @@ items:
 
 
     - name: plot2
-      title: '`${group} - {dep} by {grvar}`'
+      title: '`${group} vs {dep} by {grvar}`'
       type: Image
-      width:  800
+      width:  1600
       height: 600
       renderFun: .plot2
       requiresData: true
@@ -36,7 +36,7 @@ items:
       visible: (grvar)
 
     - name: plot
-      title: '`${group} - {dep}`'
+      title: '`${group} vs {dep}`'
       type: Image
       width:  800
       height: 600

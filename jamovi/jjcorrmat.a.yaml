@@ -27,7 +27,7 @@ options:
 
 
     - name: dep
-      title: Dependent Variable
+      title: Dependent Variables
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
@@ -58,7 +58,7 @@ options:
       type: Bool
       default: true
 
-  
+
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool

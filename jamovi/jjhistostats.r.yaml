@@ -3,48 +3,42 @@ name:  jjhistostats
 title: Histogram
 jrs:   '1.1'
 
+clearWith:
+    - dep
+    - group
+    - grvar
+    - direction
+    - originaltheme
+
 
 items:
 
     - name:  todo
       title: To Do
       type:  Html
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
 
+
+      # title: '` ${group} - {dep} by {grvar}`'
 
     - name: plot2
-      title: '`${dep} by {grvar}`'
+      title: '`Histogram Splitted by {grvar}`'
       type: Image
       width:  800
       height: 600
       renderFun: .plot2
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
       visible: (grvar)
 
+      # title: '` ${dep}`'
+
+
     - name: plot
-      title: '`${dep}`'
+      title: Histogram
       type: Image
-      width:  800
-      height: 600
+      # width:  800
+      # height: 600
       renderFun: .plot
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
 
 
 refs:

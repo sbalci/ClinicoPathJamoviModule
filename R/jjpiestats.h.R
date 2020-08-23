@@ -104,7 +104,7 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="plot4",
                 title="`${group} - {dep} by {grvar}`",
                 width=800,
-                height=600,
+                height=300,
                 renderFun=".plot4",
                 requiresData=TRUE,
                 clearWith=list(
@@ -119,7 +119,7 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="plot3",
                 title="`${dep} by {grvar}`",
                 width=800,
-                height=600,
+                height=300,
                 renderFun=".plot3",
                 requiresData=TRUE,
                 clearWith=list(
@@ -133,8 +133,8 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot2",
                 title="`${group} - {dep}`",
-                width=800,
-                height=600,
+                width=400,
+                height=300,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
@@ -148,8 +148,8 @@ jjpiestatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot1",
                 title="`${dep}`",
-                width=800,
-                height=600,
+                width=400,
+                height=300,
                 renderFun=".plot1",
                 requiresData=TRUE,
                 clearWith=list(

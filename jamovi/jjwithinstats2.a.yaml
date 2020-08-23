@@ -1,17 +1,18 @@
 ---
-name:  jjbetweenstats
-title: Violin Plots to Compare Between Groups
+name:  jjwithinstats2
+title: Violin Plots to Compare Within Groups
 menuGroup: JJStatsPlot
-menuSubgroup: 'Categorical vs Continuous'
-menuSubtitle: 'Independent Samples'
+menuSubgroup: Categorical vs Continuous
+menuSubtitle: Paired Measurements
 version: '1.0.0'
 jas: '1.2'
 
 
+
 description:
     # main: |
-    #     'Wrapper Function for ggstatsplot::ggbetweenstats and
-    #     ggstatsplot::grouped_ggbetweenstats to generate Violin Plots.'
+    #     'Wrapper Function for ggstatsplot::ggwithinstats and
+    #     ggstatsplot::grouped_ggwithinstats to generate Violin Plots.'
     R:
         dontrun: true
         usage: |
@@ -25,23 +26,23 @@ options:
             The data as a data frame.
 
 
-    - name: dep
-      title: Dependent Variables
-      type: Variables
+    - name: pairs
+      title: Paired Variables
+      type: Pairs
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-    - name: group
-      title: Grouping Variable
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+    # - name: group
+    #   title: Grouping Variable
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
 
-    - name: grvar
-      title: 'Split By (Optional)'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+    # - name: grvar
+    #   title: 'Split By (Optional)'
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
 
 
     # - name: direction
@@ -63,14 +64,10 @@ options:
       type: Bool
       default: true
 
-
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
-
-
-
 
 ...
 

@@ -101,7 +101,7 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name="plot2",
                 title="`${group} - {dep} by {grvar}`",
                 width=800,
-                height=600,
+                height=300,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 clearWith=list(
@@ -115,8 +115,8 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot",
                 title="`${group} - {dep}`",
-                width=800,
-                height=600,
+                width=400,
+                height=300,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
