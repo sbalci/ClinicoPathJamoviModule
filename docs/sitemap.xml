@@ -46,6 +46,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/alluvialClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/benford.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/checkdata.html</loc>
   </url>
   <url>
@@ -98,6 +101,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisioncalculatorClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/dendogram.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/experimenter.html</loc>
@@ -181,6 +187,12 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstats.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstats2.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstats2Class.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/jjwithinstatsClass.html</loc>
   </url>
   <url>
@@ -194,6 +206,12 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/linReg.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/linechart.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/lollipop.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/manyttestsIS.html</loc>
@@ -211,6 +229,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/multisurvivalClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/nomogram.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/oddsratio.html</loc>
   </url>
   <url>
@@ -224,6 +245,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/pairchi2Class.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/parallelplot.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/ppv.html</loc>
@@ -242,6 +266,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/retractedClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/ridgeline.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/roc.html</loc>
@@ -286,6 +313,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalcont.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>
   </url>
   <url>
@@ -328,9 +358,6 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/vartreeClass.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/childRmd/generatedCodeFlows.html</loc>
-  </url>
-  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/data-preperation.html</loc>
   </url>
   <url>
@@ -349,6 +376,6 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/pkgnet-report.html</loc>
   </url>
   <url>
-    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/workflows.html</loc>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//articles/wf_master.html</loc>
   </url>
 </urlset>

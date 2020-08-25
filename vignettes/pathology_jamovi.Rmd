@@ -23,14 +23,26 @@ library(ClinicoPath)
 In this page I am going to collect the most common statistical methods used in pathology research and how can one do them in jamovi.
 
 
-Statistical Literacy Among Academic Pathologists: A Survey Study to Gauge Knowledge of Frequently Used Statistical Tests Among Trainees and Faculty.
+- Recommendations for reporting histopathology studies: a proposal
 
-Arch Pathol Lab Med. 2017 Feb;141(2):279-287. doi: 10.5858/arpa.2016-0200-OA. Epub 2016 Dec 13.
+Virchows Arch (2015) 466:611–615 DOI 10.1007/s00428-015-1762-3
 
+
+
+- Statistical Literacy Among Academic Pathologists: A Survey Study to Gauge Knowledge of Frequently Used Statistical Tests Among Trainees and Faculty.
+
+Arch Pathol Lab Med. 2017 Feb;141(2):279-287. doi: 10.5858/arpa.2016-0200-OA
 
 https://www.ncbi.nlm.nih.gov/pubmed/27959584
 
 https://www.archivesofpathology.org/doi/pdf/10.5858/arpa.2016-0200-OA
+
+- Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
+
+Annals of Diagnostic Pathology, Volume 47, August 2020
+
+https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040
+
 
 
 

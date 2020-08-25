@@ -1,5 +1,9 @@
 # ClinicoPath 0.0.2.0039
 
+- added options to vartree
+
+fixes: https://github.com/sbalci/ClinicoPathJamoviModule/issues/28
+
 
 # ClinicoPath 0.0.2.0038
 

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0032</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0039</span>
       </span>
     </div>
 
@@ -101,9 +101,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/childRmd/generatedCodeFlows.html">UNKNOWN TITLE</a>
-    </li>
-    <li>
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
     </li>
     <li>
@@ -122,7 +119,7 @@
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
     </li>
     <li>
-      <a href="../articles/workflows.html">workflows</a>
+      <a href="../articles/wf_master.html">Function Workflows</a>
     </li>
   </ul>
 </li>
@@ -185,13 +182,16 @@
   <span class='kw'>timetypeoutput</span> <span class='kw'>=</span> <span class='st'>"months"</span>,
   <span class='kw'>pw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>sc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>kmunicate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ce</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ch</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>endplot</span> <span class='kw'>=</span> <span class='fl'>60</span>,
+  <span class='kw'>byplot</span> <span class='kw'>=</span> <span class='fl'>12</span>,
   <span class='kw'>findcut</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>multievent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ci95</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>risktable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>risktable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>sas</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -274,6 +274,10 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>kmunicate</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>ce</th>
       <td><p>.</p></td>
     </tr>
@@ -283,6 +287,10 @@
     </tr>
     <tr>
       <th>endplot</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>byplot</th>
       <td><p>.</p></td>
     </tr>
     <tr>
@@ -301,6 +309,10 @@
       <th>risktable</th>
       <td><p>.</p></td>
     </tr>
+    <tr>
+      <th>sas</th>
+      <td><p>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -312,6 +324,7 @@
 <tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
@@ -322,6 +335,7 @@
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 

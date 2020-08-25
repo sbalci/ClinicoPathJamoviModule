@@ -10,8 +10,19 @@ items:
       type:  Html
 
     - name:  text1
-      title: Variable Tree Html
+      title: Variable Tree
       type:  Html
+
+    - name:  text2
+      title: Pattern Table
+      type:  Preformatted
+      visible: (ptable)
+
+    # - name:  text3
+    #   title: Venn Table
+    #   type:  Preformatted
+    #   visible: (venntable)
+
 
 refs:
     - vtree

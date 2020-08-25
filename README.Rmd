@@ -119,26 +119,24 @@ https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
 
 ##### JJStatsPlot  
 
-GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu
+GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu  
 
-JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)
+JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)  
 
+https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
 
-https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
 
-https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
 
-https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.1.0001.jmo
+https://github.com/sbalci/jjstatsplot  
 
-
-https://github.com/sbalci/jjstatsplot
-
-https://github.com/sbalci/jjstatsplot/releases/
+https://github.com/sbalci/jjstatsplot/releases/  
 
 
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
-      commit: 9a45a583e73edf2d6cafb03ac347dedc5fd42f0b
+      commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
 
 
 
@@ -264,8 +262,10 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 ##### Variable Tree
 
 
-<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
+<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />  
 
+
+<img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />  
 
 
 ##### Alluvial Diagrams
@@ -480,6 +480,13 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 ```
 
 
+## Current Package Versions:
+
+**R:** 3.6.3
+
+**MRAN:** https://cran.microsoft.com/snapshot/2020-05-01
+
+
 ## Acknowledgement {#acknowledgement}
 
 Made possible via the codes, help, and guidence of
@@ -493,6 +500,7 @@ Made possible via the codes, help, and guidence of
 - [tableone](https://github.com/kaz-yos/tableone), 
 - [survival](https://github.com/therneau/survival), 
 - [survminer](https://github.com/kassambara/survminer),
+- [vtree](https://github.com/nbarrowman/vtree) developer [Nick Barrowman](https://github.com/nbarrowman),
 - [easyalluvial](https://github.com/erblast/easyalluvial), developer [Björn Oettinghaus](https://github.com/erblast), and
 - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 

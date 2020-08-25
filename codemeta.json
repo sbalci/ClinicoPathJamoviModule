@@ -374,18 +374,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "vtree",
-      "name": "vtree",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=vtree"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "DiagrammeRsvg",
       "name": "DiagrammeRsvg",
       "provider": {
@@ -1118,6 +1106,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "540.128KB",
+  "fileSize": "544.027KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

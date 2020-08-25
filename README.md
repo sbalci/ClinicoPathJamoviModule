@@ -96,11 +96,11 @@ jjstatsplot menu
 JJStastPlot module can be downloaded inside jamovi (click Modules and
 jamovi library)
 
-<https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
+<https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
 
-<https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
+<https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
 
-<https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.1.0001.jmo>
+<https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
 
 <https://github.com/sbalci/jjstatsplot>
 
@@ -108,7 +108,7 @@ jamovi library)
 
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
-      commit: 9a45a583e73edf2d6cafb03ac347dedc5fd42f0b
+      commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
 
 ##### jsurvival
 
@@ -206,6 +206,8 @@ jamovi library)
 ##### Variable Tree
 
 <img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />
 
 ##### Alluvial Diagrams
 
@@ -355,6 +357,12 @@ You can install the development version from
 devtools::install_github("sbalci/ClinicoPathJamoviModule")
 ```
 
+## Current Package Versions:
+
+**R:** 3.6.3
+
+**MRAN:** <https://cran.microsoft.com/snapshot/2020-05-01>
+
 ## Acknowledgement
 
 Made possible via the codes, help, and guidence of
@@ -372,6 +380,8 @@ Made possible via the codes, help, and guidence of
   - [tableone](https://github.com/kaz-yos/tableone),
   - [survival](https://github.com/therneau/survival),
   - [survminer](https://github.com/kassambara/survminer),
+  - [vtree](https://github.com/nbarrowman/vtree) developer [Nick
+    Barrowman](https://github.com/nbarrowman),
   - [easyalluvial](https://github.com/erblast/easyalluvial), developer
     [Björn Oettinghaus](https://github.com/erblast), and
   - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
@@ -441,7 +451,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--25-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -516,7 +526,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--23-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--25-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
