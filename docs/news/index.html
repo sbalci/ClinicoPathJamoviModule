@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0032</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0039</span>
       </span>
     </div>
 
@@ -100,9 +100,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/childRmd/generatedCodeFlows.html">UNKNOWN TITLE</a>
-    </li>
-    <li>
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
     </li>
     <li>
@@ -121,7 +118,7 @@
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
     </li>
     <li>
-      <a href="../articles/workflows.html">workflows</a>
+      <a href="../articles/wf_master.html">Function Workflows</a>
     </li>
   </ul>
 </li>
@@ -159,6 +156,65 @@
       <small>Source: <a href='https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="clinicopath-0020039" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0039">
+<a href="#clinicopath-0020039" class="anchor"></a>ClinicoPath 0.0.2.0039</h1>
+<ul>
+<li>added options to vartree</li>
+</ul>
+<p>fixes: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/28" class="uri">https://github.com/sbalci/ClinicoPathJamoviModule/issues/28</a></p>
+</div>
+    <div id="clinicopath-0020038" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0038">
+<a href="#clinicopath-0020038" class="anchor"></a>ClinicoPath 0.0.2.0038</h1>
+<ul>
+<li>fixes <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/20" class="uri">https://github.com/sbalci/ClinicoPathJamoviModule/issues/20</a>
+</li>
+</ul>
+</div>
+    <div id="clinicopath-0020037" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0037">
+<a href="#clinicopath-0020037" class="anchor"></a>ClinicoPath 0.0.2.0037</h1>
+<ul>
+<li><p>added Survival Analysis for Continuous Explanatory</p></li>
+<li><p>added vtree package functions to vartree function</p></li>
+<li><p>fixes <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/9" class="uri">https://github.com/sbalci/ClinicoPathJamoviModule/issues/9</a></p></li>
+</ul>
+</div>
+    <div id="clinicopath-0020036" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0036">
+<a href="#clinicopath-0020036" class="anchor"></a>ClinicoPath 0.0.2.0036</h1>
+<ul>
+<li><p>added Benford Analysis</p></li>
+<li><p>added interactive size to jjbarstats</p></li>
+</ul>
+<pre><code>.init = function() {
+            deplen &lt;- length(self$options$dep)
+            self$results$plot$setSize(400, deplen*300)
+        }</code></pre>
+</div>
+    <div id="clinicopath-0020035" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0035">
+<a href="#clinicopath-0020035" class="anchor"></a>ClinicoPath 0.0.2.0035</h1>
+<ul>
+<li>meddecide has been added to jamovi library</li>
+</ul>
+<p><a href="https://github.com/sbalci/meddecide/" class="uri">https://github.com/sbalci/meddecide/</a></p>
+<p><a href="https://github.com/sbalci/meddecide/releases/" class="uri">https://github.com/sbalci/meddecide/releases/</a></p>
+<p><a href="https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo" class="uri">https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo</a></p>
+<p><a href="https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo" class="uri">https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo</a></p>
+<p><a href="https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo" class="uri">https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo</a></p>
+</div>
+    <div id="clinicopath-0020034" class="section level1">
+<h1 class="page-header" data-toc-text="0.0.2.0034">
+<a href="#clinicopath-0020034" class="anchor"></a>ClinicoPath 0.0.2.0034</h1>
+<ul>
+<li>added metrics to survival functions</li>
+<li>updating survival options (continuous explanatory, cut-off, two categorical explanatory, multiple outcome options, elapsed time calculation from dates)</li>
+<li>added KMunicate type survival curve</li>
+<li>added Fagan’s nomogram</li>
+</ul>
+</div>
     <div id="clinicopath-0020027" class="section level1">
 <h1 class="page-header" data-toc-text="0.0.2.0027">
 <a href="#clinicopath-0020027" class="anchor"></a>ClinicoPath 0.0.2.0027</h1>
@@ -172,6 +228,10 @@
 <ul>
 <li>jsurvival has been added to jamovi library</li>
 </ul>
+<p><a href="https://github.com/sbalci/jsurvival" class="uri">https://github.com/sbalci/jsurvival</a></p>
+<p><a href="https://github.com/sbalci/jsurvival/releases/" class="uri">https://github.com/sbalci/jsurvival/releases/</a></p>
+<p><a href="https://library.jamovi.org/macos/R3.6.3/jsurvival-0.0.2.0026.jmo" class="uri">https://library.jamovi.org/macos/R3.6.3/jsurvival-0.0.2.0026.jmo</a></p>
+<p><a href="https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo" class="uri">https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo</a></p>
 </div>
     <div id="clinicopath-0020025" class="section level1">
 <h1 class="page-header" data-toc-text="0.0.2.0025">

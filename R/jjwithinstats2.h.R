@@ -50,7 +50,7 @@ jjwithinstats2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        mydataview = function() private$.items[["mydataview"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -71,14 +71,10 @@ jjwithinstats2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
-            self$add(jmvcore::Image$new(
+            self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="plot",
-                title="Violin Plots",
-                width=800,
-                height=600,
-                renderFun=".plot",
-                requiresData=TRUE))}))
+                name="mydataview",
+                title="mydataview"))}))
 
 jjwithinstats2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjwithinstats2Base",
@@ -115,7 +111,7 @@ jjwithinstats2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

@@ -190,7 +190,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         purrr::pmap(
                             .l = list(main = dep2,
                                       # title = list(dep),
-                                      messages = FALSE),
+                                      messages = TRUE),
                             .f = ggstatsplot::ggbarstats,
                             data = mydata,
                             condition = !!group,
@@ -354,7 +354,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         purrr::pmap(
                             .l = list(main = dep2,
                                       # title = list(dep),
-                                      messages = FALSE),
+                                      messages = TRUE),
                             .f = ggstatsplot::grouped_ggbarstats,
                             data = mydata,
 

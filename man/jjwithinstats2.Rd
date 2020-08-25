@@ -19,7 +19,7 @@ jjwithinstats2(data, pairs, excl = TRUE, originaltheme = FALSE)
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

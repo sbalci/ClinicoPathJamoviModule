@@ -2,7 +2,7 @@ Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
 Version: 0.0.2.0039
-Date: 2020-08-23
+Date: 2020-08-25
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -60,7 +60,6 @@ Suggests:
     RVAideMemoire,
     seriation,
     epiR,
-    vtree,
     DiagrammeRsvg,
     circlize,
     randomForest,
@@ -125,7 +124,8 @@ Remotes:
     mixOmicsTeam/mixOmics,
     moodymudskipper/flow,
     ellessenne/KMunicate-package,
-    carloscinelli/benford.analysis
+    carloscinelli/benford.analysis,
+    nbarrowman/vtree
 VignetteBuilder:
     knitr
 Encoding: UTF-8

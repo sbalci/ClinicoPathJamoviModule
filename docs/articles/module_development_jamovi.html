@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0032</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0039</span>
       </span>
     </div>
 
@@ -60,9 +60,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/childRmd/generatedCodeFlows.html">UNKNOWN TITLE</a>
-    </li>
-    <li>
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
     </li>
     <li>
@@ -81,7 +78,7 @@
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
     </li>
     <li>
-      <a href="../articles/workflows.html">workflows</a>
+      <a href="../articles/wf_master.html">Function Workflows</a>
     </li>
   </ul>
 </li>
@@ -288,10 +285,10 @@
 <div id="p-value-format" class="section level5">
 <h5 class="hasAnchor">
 <a href="#p-value-format" class="anchor"></a>p-value format</h5>
-<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1"></a><span class="at">     </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> p</span></span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="at">       </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"p"</span></span>
-<span id="cb14-3"><a href="#cb14-3"></a><span class="at">       </span><span class="fu">type</span><span class="kw">:</span><span class="at"> number</span></span>
-<span id="cb14-4"><a href="#cb14-4"></a><span class="at">       </span><span class="fu">format</span><span class="kw">:</span><span class="at"> zto,pvalue</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="at">     </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> p</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a><span class="at">       </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"p"</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a><span class="at">       </span><span class="fu">type</span><span class="kw">:</span><span class="at"> number</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true"></a><span class="at">       </span><span class="fu">format</span><span class="kw">:</span><span class="at"> zto,pvalue</span></span></code></pre></div>
 </div>
 </div>
 <div id="function-u-yaml" class="section level4">
@@ -3422,6 +3419,290 @@ plot %&gt;%
 
 
 </code></pre>
+<!-- I already got the First one(Raju's statistic) using $.  but for the second one, I can not get the results using $ -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- so you’re after the mF-mR values? -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- what i do in this situation, is take a look at the print function. so i’ll go: -->
+<!-- class(res) -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- that gives me: -->
+<!-- [1] "Raj" -->
+<!-- Seol  3 hours ago -->
+<!-- The result that I want to -->
+<!-- 이미지 2.png  -->
+<!-- 이미지 2.png -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- so this object is an S3 class … -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- in S3 classes, the print function is print.ClassName so in this case, it’s print.Raj -->
+<!-- Seol  3 hours ago -->
+<!-- Oh yub how can I get the results to use in the b.R ? -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- i’m getting there :slightly_smiling_face: -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- so now we take a look at the print.Raj() function. like this: -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- > print.Raj -->
+<!-- function (x, ...)  -->
+<!-- { -->
+<!--     res <- x -->
+<!--     if (is.character(res))  -->
+<!--         cat("Error: unappropriate model specification!", "\n") -->
+<!--     else { -->
+<!--         cat("\n") -->
+<!--         cat("Detection of Differential Item Functioning using Raju's method",  -->
+<!--             "\n") -->
+<!--         if (res$purification & is.null(res$anchor.names))  -->
+<!--             pur <- "with " -->
+<!--         else pur <- "without " -->
+<!--         cat("with ", res$model, " model and ", pur, "item purification",  -->
+<!--             "\n", "\n", sep = "") -->
+<!--         if (res$signed)  -->
+<!--             cat("Type of Raju's Z statistic: based on signed area",  -->
+<!--                 "\n", "\n") -->
+<!--         else cat("Type of Raju's Z statistic: based on unsigned area",  -->
+<!--             "\n", "\n") -->
+<!--         if (res$estPar) { -->
+<!--             if (res$model != "1PL" | res$engine == "ltm")  -->
+<!--                 cat("Engine 'ltm' for item parameter estimation",  -->
+<!--                   "\n", "\n") -->
+<!--             else cat("Engine 'lme4' for item parameter estimation",  -->
+<!--                 "\n", "\n") -->
+<!--         } -->
+<!--         if (res$model == "1PL" & res$engine == "ltm") { -->
+<!--             if (is.null(res$discr))  -->
+<!--                 cat("Common discrimination parameter: estimated from 'ltm'",  -->
+<!--                   "\n", "\n") -->
+<!--             else cat("Common discrimination parameter: fixed to ",  -->
+<!--                 res$discr, "\n", "\n", sep = "") -->
+<!--         } -->
+<!--         if (!is.null(res$c)) { -->
+<!--             if (length(res$c) == 1)  -->
+<!--                 cat("Common pseudo-guessing value:", res$c, "\n",  -->
+<!--                   "\n") -->
+<!--             else { -->
+<!--                 mat <- cbind(res$c) -->
+<!--                 if (!is.null(res$names))  -->
+<!--                   rownames(mat) <- res$names -->
+<!--                 else { -->
+<!--                   rn <- NULL -->
+<!--                   for (i in 1:nrow(mat)) rn[i] <- paste("Item",  -->
+<!--                     i, sep = "") -->
+<!--                   rownames(mat) <- rn -->
+<!--                 } -->
+<!--                 colnames(mat) <- "c" -->
+<!--                 cat("Common pseudo-guessing values:", "\n", "\n") -->
+<!--                 print(mat) -->
+<!--                 cat("\n") -->
+<!--             } -->
+<!--         } -->
+<!--         if (res$purification & is.null(res$anchor.names)) { -->
+<!--             if (res$nrPur <= 1)  -->
+<!--                 word <- " iteration" -->
+<!--             else word <- " iterations" -->
+<!--             if (!res$convergence) { -->
+<!--                 cat("WARNING: no item purification convergence after ",  -->
+<!--                   res$nrPur, word, "\n", sep = "") -->
+<!--                 loop <- NULL -->
+<!--                 for (i in 1:res$nrPur) loop[i] <- sum(res$difPur[1,  -->
+<!--                   ] == res$difPur[i + 1, ]) -->
+<!--                 if (max(loop) != length(res$RajuZ))  -->
+<!--                   cat("(Note: no loop detected in less than ",  -->
+<!--                     res$nrPur, word, ")", "\n", sep = "") -->
+<!--                 else cat("(Note: loop of length ", min((1:res$nrPur)[loop ==  -->
+<!--                   length(res$RajuZ)]), " in the item purification process)",  -->
+<!--                   "\n", sep = "") -->
+<!--                 cat("WARNING: following results based on the last iteration of the purification",  -->
+<!--                   "\n", "\n") -->
+<!--             } -->
+<!--             else cat("Convergence reached after ", res$nrPur,  -->
+<!--                 word, "\n", "\n", sep = "") -->
+<!--         } -->
+<!--         if (is.null(res$anchor.names)) { -->
+<!--             itk <- 1:length(res$RajuZ) -->
+<!--             cat("No set of anchor items was provided", "\n",  -->
+<!--                 "\n") -->
+<!--         } -->
+<!--         else { -->
+<!--             itk <- (1:length(res$RajuZ))[!is.na(res$RajuZ)] -->
+<!--             cat("Anchor items (provided by the user):", "\n") -->
+<!--             if (is.numeric(res$anchor.names))  -->
+<!--                 mm <- res$names[res$anchor.names] -->
+<!--             else mm <- res$anchor.names -->
+<!--             mm <- cbind(mm) -->
+<!--             rownames(mm) <- rep("", nrow(mm)) -->
+<!--             colnames(mm) <- "" -->
+<!--             print(mm, quote = FALSE) -->
+<!--             cat("\n", "\n") -->
+<!--         } -->
+<!--         if (is.null(res$p.adjust.method))  -->
+<!--             cat("No p-value adjustment for multiple comparisons",  -->
+<!--                 "\n", "\n") -->
+<!--         else { -->
+<!--             pAdjMeth <- switch(res$p.adjust.method, bonferroni = "Bonferroni",  -->
+<!--                 holm = "Holm", hochberg = "Hochberg", hommel = "Hommel",  -->
+<!--                 BH = "Benjamini-Hochberg", BY = "Benjamini-Yekutieli") -->
+<!--             cat("Multiple comparisons made with", pAdjMeth, "adjustement of p-values",  -->
+<!--                 "\n", "\n") -->
+<!--         } -->
+<!--         cat("Raju's statistic:", "\n", "\n") -->
+<!--         pval <- round(2 * (1 - pnorm(abs(res$RajuZ))), 4) -->
+<!--         if (is.null(res$p.adjust.method))  -->
+<!--             symb <- symnum(pval, c(0, 0.001, 0.01, 0.05, 0.1,  -->
+<!--                 1), symbols = c("***", "**", "*", ".", "")) -->
+<!--         else symb <- symnum(res$adjusted.p, c(0, 0.001, 0.01,  -->
+<!--             0.05, 0.1, 1), symbols = c("***", "**", "*", ".",  -->
+<!--             "")) -->
+<!--         m1 <- cbind(round(res$RajuZ[itk], 4), pval[itk]) -->
+<!--         if (!is.null(res$p.adjust.method))  -->
+<!--             m1 <- cbind(m1, round(res$adjusted.p[itk], 4)) -->
+<!--         m1 <- noquote(cbind(format(m1, justify = "right"), symb[itk])) -->
+<!--         if (!is.null(res$names))  -->
+<!--             rownames(m1) <- res$names[itk] -->
+<!--         else { -->
+<!--             rn <- NULL -->
+<!--             for (i in 1:nrow(m1)) rn[i] <- paste("Item", i, sep = "") -->
+<!--             rownames(m1) <- rn[itk] -->
+<!--         } -->
+<!--         con <- c("Stat.", "P-value") -->
+<!--         if (!is.null(res$p.adjust.method))  -->
+<!--             con <- c(con, "Adj. P", "") -->
+<!--         else con <- c(con, "") -->
+<!--         colnames(m1) <- con -->
+<!--         print(m1) -->
+<!--         cat("\n") -->
+<!--         cat("Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 ",  -->
+<!--             "\n") -->
+<!--         cat("\n", "Detection thresholds: ", -round(res$thr, 4),  -->
+<!--             " and ", round(res$thr, 4), " (significance level: ",  -->
+<!--             res$alpha, ")", "\n", "\n", sep = "") -->
+<!--         if (is.character(res$DIFitems))  -->
+<!--             cat("Items detected as DIF items:", res$DIFitems,  -->
+<!--                 "\n", "\n") -->
+<!--         else { -->
+<!--             cat("Items detected as DIF items:", "\n") -->
+<!--             if (!is.null(res$names))  -->
+<!--                 m2 <- res$names -->
+<!--             else { -->
+<!--                 rn <- NULL -->
+<!--                 for (i in 1:length(res$RajuZ)) rn[i] <- paste("Item",  -->
+<!--                   i, sep = "") -->
+<!--                 m2 <- rn -->
+<!--             } -->
+<!--             m2 <- cbind(m2[res$DIFitems]) -->
+<!--             rownames(m2) <- rep("", nrow(m2)) -->
+<!--             colnames(m2) <- "" -->
+<!--             print(m2, quote = FALSE) -->
+<!--             cat("\n") -->
+<!--         } -->
+<!--     } -->
+<!--     if (res$model == "1PL") { -->
+<!--         cat("Effect size (ETS Delta scale):", "\n", "\n") -->
+<!--         cat("Effect size code:", "\n") -->
+<!--         cat(" 'A': negligible effect", "\n") -->
+<!--         cat(" 'B': moderate effect", "\n") -->
+<!--         cat(" 'C': large effect", "\n", "\n") -->
+<!--         if (res$purification & is.null(res$anchor.names))  -->
+<!--             pars <- res$itemParFinal -->
+<!--         else pars <- res$itemParInit -->
+<!--         J <- nrow(pars)/2 -->
+<!--         mR <- pars[1:J, 1] -->
+<!--         mF <- itemRescale(pars[1:J, ], pars[(J + 1):(2 * J),  -->
+<!--             ])[, 1] -->
+<!--         rr1 <- round(mF - mR, 4) -->
+<!--         rr2 <- round(-2.35 * rr1, 4) -->
+<!--         symb1 <- symnum(abs(rr2), c(0, 1, 1.5, Inf), symbols = c("A",  -->
+<!--             "B", "C")) -->
+<!--         matR2 <- cbind(rr1, rr2)[itk, ] -->
+<!--         matR2 <- noquote(cbind(format(matR2, justify = "right"),  -->
+<!--             symb1[itk])) -->
+<!--         if (!is.null(res$names))  -->
+<!--             rownames(matR2) <- res$names[itk] -->
+<!--         else { -->
+<!--             rn <- NULL -->
+<!--             for (i in 1:nrow(matR2)) rn[i] <- paste("Item", i,  -->
+<!--                 sep = "") -->
+<!--             rownames(matR2) <- rn[itk] -->
+<!--         } -->
+<!--         colnames(matR2) <- c("mF-mR", "deltaRaju", "") -->
+<!--         print(matR2) -->
+<!--         cat("\n") -->
+<!--         cat("Effect size codes: 0 'A' 1.0 'B' 1.5 'C'", "\n") -->
+<!--         cat(" (for absolute values of 'deltaRaju')", "\n", "\n") -->
+<!--     } -->
+<!--     if (!x$save.output)  -->
+<!--         cat("Output was not captured!", "\n") -->
+<!--     else { -->
+<!--         if (x$output[2] == "default")  -->
+<!--             wd <- paste(getwd(), "/", sep = "") -->
+<!--         else wd <- x$output[2] -->
+<!--         fileName <- paste(wd, x$output[1], ".txt", sep = "") -->
+<!--         cat("Output was captured and saved into file", "\n",  -->
+<!--             " '", fileName, "'", "\n", "\n", sep = "") -->
+<!--     } -->
+<!-- } -->
+<!-- Seol  3 hours ago -->
+<!-- :disappointed_relieved: -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- the important part (the part you’re interested in) is under this if-statement: -->
+<!-- if (res$model == "1PL") { -->
+<!--         cat("Effect size (ETS Delta scale):", "\n", "\n") -->
+<!-- Seol  3 hours ago -->
+<!-- Thanks, Probably, I am gonna insert them into ,b,R? -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- yup -->
+<!-- Seol  3 hours ago -->
+<!-- Oh yub, I'will try that:thinking_face: -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- i think this is what you want: -->
+<!-- if (is.null(res$anchor.names)) { -->
+<!--     itk <- 1:length(res$RajuZ) -->
+<!-- } else { -->
+<!--     itk <- (1:length(res$RajuZ))[!is.na(res$RajuZ)] -->
+<!--     if (is.numeric(res$anchor.names))  -->
+<!--         mm <- res$names[res$anchor.names] -->
+<!--     else mm <- res$anchor.names -->
+<!--         mm <- cbind(mm) -->
+<!--     rownames(mm) <- rep("", nrow(mm)) -->
+<!--     colnames(mm) <- "" -->
+<!-- } -->
+<!-- if (res$purification & is.null(res$anchor.names)) { -->
+<!--     pars <- res$itemParFinal -->
+<!-- } else pars <- res$itemParInit -->
+<!-- J <- nrow(pars)/2 -->
+<!-- mR <- pars[1:J, 1] -->
+<!-- mF <- itemRescale(pars[1:J, ], pars[(J + 1):(2 * J),  -->
+<!--                                     ])[, 1] -->
+<!-- rr1 <- mF - mR -->
+<!-- rr2 <- -2.35 * rr1 -->
+<!-- symb1 <- symnum(abs(rr2), c(0, 1, 1.5, Inf), symbols = c("A",  -->
+<!--                                                          "B", "C")) -->
+<!-- matR2 <- cbind(rr1, rr2)[itk, ] -->
+<!-- but you can probably simplify it down a bit more too -->
+<!-- Seol  3 hours ago -->
+<!-- Is there any simple way to call Effect size result in the screen? For example, in the above screen, to get Raju's statistics, I am using res$RajuZ and to get p value, I'm just using res$p.value  -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- i don’t think so. it doesn’t look like it. sometimes R packages calculate all the results, and you can access them using $blah … but sometimes they don’t calculate the results until you print them. … -->
+<!-- Seol  3 hours ago -->
+<!-- I'm just wondering only those functions describe above might working well:thinking_face: -->
+<!-- Seol  3 hours ago -->
+<!-- Anyway, I'll try that :+1: -->
+<!-- jonathon:whale2:  3 hours ago -->
+<!-- you can probably reduce it down to this: -->
+<!-- itk <- 1:length(res$RajuZ) -->
+<!-- pars <- res$itemParInit -->
+<!-- J <- nrow(pars)/2 -->
+<!-- mR <- pars[1:J, 1] -->
+<!-- mF <- itemRescale(pars[1:J, ], pars[(J + 1):(2 * J),])[, 1] -->
+<!-- rr1 <- mF - mR -->
+<!-- rr2 <- -2.35 * rr1 -->
+<!-- matR2 <- cbind(rr1, rr2)[itk, ] -->
+<!-- depending on your needs -->
+<!-- Seol  2 hours ago -->
+<!-- Oh yub, It works:+1: and I'm gonna add it to the "snowIRT" module later:grinning: Thanks again~~ -->
+<!-- jonathon:whale2:  2 hours ago -->
+<!-- :+1: -->
 </div>
 </div>
   </div>
