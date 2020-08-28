@@ -4,121 +4,24 @@
 \alias{pairchi2}
 \title{Pairwise Chi-Square Test}
 \usage{
-pairchi2(
-  data,
-  rows,
-  cols,
-  counts = NULL,
-  layers = NULL,
-  chiSq = TRUE,
-  chiSqCorr = FALSE,
-  likeRat = FALSE,
-  fisher = FALSE,
-  contCoef = FALSE,
-  phiCra = FALSE,
-  logOdds = FALSE,
-  odds = FALSE,
-  relRisk = FALSE,
-  ci = TRUE,
-  ciWidth = 95,
-  gamma = FALSE,
-  taub = FALSE,
-  obs = TRUE,
-  exp = FALSE,
-  pcRow = FALSE,
-  pcCol = FALSE,
-  pcTot = FALSE,
-  pairw = FALSE,
-  formula
-)
+pairchi2(data, row, col)
 }
 \arguments{
-\item{data}{the data as a data frame}
+\item{data}{.}
 
-\item{rows}{the variable to use as the rows in the contingency table (not
-necessary when providing a formula, see the examples)}
+\item{row}{.}
 
-\item{cols}{the variable to use as the columns in the contingency table
-(not necessary when providing a formula, see the examples)}
-
-\item{counts}{the variable to use as the counts in the contingency table
-(not necessary when providing a formula, see the examples)}
-
-\item{layers}{the variables to use to split the contingency table (not
-necessary when providing a formula, see the examples)}
-
-\item{chiSq}{\code{TRUE} (default) or \code{FALSE}, provide X²}
-
-\item{chiSqCorr}{\code{TRUE} or \code{FALSE} (default), provide X² with
-continuity correction}
-
-\item{likeRat}{\code{TRUE} or \code{FALSE} (default), provide the
-likelihood ratio}
-
-\item{fisher}{\code{TRUE} or \code{FALSE} (default), provide Fisher's exact
-test}
-
-\item{contCoef}{\code{TRUE} or \code{FALSE} (default), provide the
-contingency coefficient}
-
-\item{phiCra}{\code{TRUE} or \code{FALSE} (default), provide Phi and
-Cramer's V}
-
-\item{logOdds}{\code{TRUE} or \code{FALSE} (default), provide the log odds
-ratio (only available for 2x2 tables)}
-
-\item{odds}{\code{TRUE} or \code{FALSE} (default), provide the odds ratio
-(only available for 2x2 tables)}
-
-\item{relRisk}{\code{TRUE} or \code{FALSE} (default), provide the relative
-risk (only available for 2x2 tables)}
-
-\item{ci}{\code{TRUE} or \code{FALSE} (default), provide confidence
-intervals for the comparative measures}
-
-\item{ciWidth}{a number between 50 and 99.9 (default: 95), width of the
-confidence intervals to provide}
-
-\item{gamma}{\code{TRUE} or \code{FALSE} (default), provide gamma}
-
-\item{taub}{\code{TRUE} or \code{FALSE} (default), provide Kendall's tau-b}
-
-\item{obs}{\code{TRUE} or \code{FALSE} (default), provide the observed
-counts}
-
-\item{exp}{\code{TRUE} or \code{FALSE} (default), provide the expected
-counts}
-
-\item{pcRow}{\code{TRUE} or \code{FALSE} (default), provide row percentages}
-
-\item{pcCol}{\code{TRUE} or \code{FALSE} (default), provide column
-percentages}
-
-\item{pcTot}{\code{TRUE} or \code{FALSE} (default), provide total
-percentages}
-
-\item{pairw}{.}
-
-\item{formula}{(optional) the formula to use, see the examples}
+\item{col}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
-\code{results$chiSq} \tab \tab \tab \tab \tab a table of X² test results \cr
-\code{results$odds} \tab \tab \tab \tab \tab a table of comparative measures \cr
-\code{results$nom} \tab \tab \tab \tab \tab a table of the 'nominal' test results \cr
-\code{results$gamma} \tab \tab \tab \tab \tab a table of the gamma test results \cr
-\code{results$taub} \tab \tab \tab \tab \tab a table of the Kendall's tau-b test results \cr
-\code{results$pw} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$tablepw} \tab \tab \tab \tab \tab a table \cr
+\code{results$conftable} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$chi2test} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwise1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwise2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwise3} \tab \tab \tab \tab \tab a preformatted \cr
 }
-
-Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-
-\code{results$freqs$asDF}
-
-\code{as.data.frame(results$freqs)}
 }
 \description{
 Pairwise Chi-Square Test

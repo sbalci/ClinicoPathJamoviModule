@@ -2,7 +2,7 @@ Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
 Version: 0.0.2.0039
-Date: 2020-08-25
+Date: 2020-08-28
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -115,7 +115,8 @@ Suggests:
     effsize,
     lubridate,
     imagerExtra,
-    imager
+    imager,
+    chisq.posthoc.test
 Remotes:
     ndphillips/FFTrees,
     spgarbet/tangram,

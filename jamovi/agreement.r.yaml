@@ -97,7 +97,9 @@ items:
           - wght
           - exct
 
-refs: irr
+refs:
+    - irr
+    - PathologyKappa
 
 
 ...
