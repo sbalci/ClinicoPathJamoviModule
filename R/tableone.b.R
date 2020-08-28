@@ -76,7 +76,6 @@ tableoneClass <- if (requireNamespace("jmvcore")) R6::R6Class("tableoneClass",
             } else if (sty == "t2") {
 
 
-
                 mytable <- gtsummary::tbl_summary(data = data)
                 mytable <- gtsummary::as_kable_extra(mytable)
 

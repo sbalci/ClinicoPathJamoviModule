@@ -6,29 +6,8 @@ pairchi2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            rows = NULL,
-            cols = NULL,
-            counts = NULL,
-            layers = NULL,
-            chiSq = TRUE,
-            chiSqCorr = FALSE,
-            likeRat = FALSE,
-            fisher = FALSE,
-            contCoef = FALSE,
-            phiCra = FALSE,
-            logOdds = FALSE,
-            odds = FALSE,
-            relRisk = FALSE,
-            ci = TRUE,
-            ciWidth = 95,
-            gamma = FALSE,
-            taub = FALSE,
-            obs = TRUE,
-            exp = FALSE,
-            pcRow = FALSE,
-            pcCol = FALSE,
-            pcTot = FALSE,
-            pairw = FALSE, ...) {
+            row = NULL,
+            col = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -36,200 +15,32 @@ pairchi2Options <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..rows <- jmvcore::OptionVariable$new(
-                "rows",
-                rows,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"))
-            private$..cols <- jmvcore::OptionVariable$new(
-                "cols",
-                cols,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"))
-            private$..counts <- jmvcore::OptionVariable$new(
-                "counts",
-                counts,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..layers <- jmvcore::OptionVariables$new(
-                "layers",
-                layers,
-                default=NULL,
-                permitted=list(
-                    "factor"))
-            private$..chiSq <- jmvcore::OptionBool$new(
-                "chiSq",
-                chiSq,
-                default=TRUE)
-            private$..chiSqCorr <- jmvcore::OptionBool$new(
-                "chiSqCorr",
-                chiSqCorr,
-                default=FALSE)
-            private$..likeRat <- jmvcore::OptionBool$new(
-                "likeRat",
-                likeRat,
-                default=FALSE)
-            private$..fisher <- jmvcore::OptionBool$new(
-                "fisher",
-                fisher,
-                default=FALSE)
-            private$..contCoef <- jmvcore::OptionBool$new(
-                "contCoef",
-                contCoef,
-                default=FALSE)
-            private$..phiCra <- jmvcore::OptionBool$new(
-                "phiCra",
-                phiCra,
-                default=FALSE)
-            private$..logOdds <- jmvcore::OptionBool$new(
-                "logOdds",
-                logOdds,
-                default=FALSE)
-            private$..odds <- jmvcore::OptionBool$new(
-                "odds",
-                odds,
-                default=FALSE)
-            private$..relRisk <- jmvcore::OptionBool$new(
-                "relRisk",
-                relRisk,
-                default=FALSE)
-            private$..ci <- jmvcore::OptionBool$new(
-                "ci",
-                ci,
-                default=TRUE)
-            private$..ciWidth <- jmvcore::OptionNumber$new(
-                "ciWidth",
-                ciWidth,
-                min=50,
-                max=99.9,
-                default=95)
-            private$..gamma <- jmvcore::OptionBool$new(
-                "gamma",
-                gamma,
-                default=FALSE)
-            private$..taub <- jmvcore::OptionBool$new(
-                "taub",
-                taub,
-                default=FALSE)
-            private$..obs <- jmvcore::OptionBool$new(
-                "obs",
-                obs,
-                default=TRUE)
-            private$..exp <- jmvcore::OptionBool$new(
-                "exp",
-                exp,
-                default=FALSE)
-            private$..pcRow <- jmvcore::OptionBool$new(
-                "pcRow",
-                pcRow,
-                default=FALSE)
-            private$..pcCol <- jmvcore::OptionBool$new(
-                "pcCol",
-                pcCol,
-                default=FALSE)
-            private$..pcTot <- jmvcore::OptionBool$new(
-                "pcTot",
-                pcTot,
-                default=FALSE)
-            private$..pairw <- jmvcore::OptionBool$new(
-                "pairw",
-                pairw,
-                default=FALSE)
+            private$..row <- jmvcore::OptionVariable$new(
+                "row",
+                row)
+            private$..col <- jmvcore::OptionVariable$new(
+                "col",
+                col)
 
-            self$.addOption(private$..rows)
-            self$.addOption(private$..cols)
-            self$.addOption(private$..counts)
-            self$.addOption(private$..layers)
-            self$.addOption(private$..chiSq)
-            self$.addOption(private$..chiSqCorr)
-            self$.addOption(private$..likeRat)
-            self$.addOption(private$..fisher)
-            self$.addOption(private$..contCoef)
-            self$.addOption(private$..phiCra)
-            self$.addOption(private$..logOdds)
-            self$.addOption(private$..odds)
-            self$.addOption(private$..relRisk)
-            self$.addOption(private$..ci)
-            self$.addOption(private$..ciWidth)
-            self$.addOption(private$..gamma)
-            self$.addOption(private$..taub)
-            self$.addOption(private$..obs)
-            self$.addOption(private$..exp)
-            self$.addOption(private$..pcRow)
-            self$.addOption(private$..pcCol)
-            self$.addOption(private$..pcTot)
-            self$.addOption(private$..pairw)
+            self$.addOption(private$..row)
+            self$.addOption(private$..col)
         }),
     active = list(
-        rows = function() private$..rows$value,
-        cols = function() private$..cols$value,
-        counts = function() private$..counts$value,
-        layers = function() private$..layers$value,
-        chiSq = function() private$..chiSq$value,
-        chiSqCorr = function() private$..chiSqCorr$value,
-        likeRat = function() private$..likeRat$value,
-        fisher = function() private$..fisher$value,
-        contCoef = function() private$..contCoef$value,
-        phiCra = function() private$..phiCra$value,
-        logOdds = function() private$..logOdds$value,
-        odds = function() private$..odds$value,
-        relRisk = function() private$..relRisk$value,
-        ci = function() private$..ci$value,
-        ciWidth = function() private$..ciWidth$value,
-        gamma = function() private$..gamma$value,
-        taub = function() private$..taub$value,
-        obs = function() private$..obs$value,
-        exp = function() private$..exp$value,
-        pcRow = function() private$..pcRow$value,
-        pcCol = function() private$..pcCol$value,
-        pcTot = function() private$..pcTot$value,
-        pairw = function() private$..pairw$value),
+        row = function() private$..row$value,
+        col = function() private$..col$value),
     private = list(
-        ..rows = NA,
-        ..cols = NA,
-        ..counts = NA,
-        ..layers = NA,
-        ..chiSq = NA,
-        ..chiSqCorr = NA,
-        ..likeRat = NA,
-        ..fisher = NA,
-        ..contCoef = NA,
-        ..phiCra = NA,
-        ..logOdds = NA,
-        ..odds = NA,
-        ..relRisk = NA,
-        ..ci = NA,
-        ..ciWidth = NA,
-        ..gamma = NA,
-        ..taub = NA,
-        ..obs = NA,
-        ..exp = NA,
-        ..pcRow = NA,
-        ..pcCol = NA,
-        ..pcTot = NA,
-        ..pairw = NA)
+        ..row = NA,
+        ..col = NA)
 )
 
 pairchi2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        freqs = function() private$.items[["freqs"]],
-        chiSq = function() private$.items[["chiSq"]],
-        odds = function() private$.items[["odds"]],
-        nom = function() private$.items[["nom"]],
-        gamma = function() private$.items[["gamma"]],
-        taub = function() private$.items[["taub"]],
-        pw = function() private$.items[["pw"]],
-        tablepw = function() private$.items[["tablepw"]]),
+        conftable = function() private$.items[["conftable"]],
+        chi2test = function() private$.items[["chi2test"]],
+        pairwise1 = function() private$.items[["pairwise1"]],
+        pairwise2 = function() private$.items[["pairwise2"]],
+        pairwise3 = function() private$.items[["pairwise3"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -239,307 +50,28 @@ pairchi2Results <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Pairwise Chi-Square Test",
                 refs=list(
                     "rmngb",
-                    "RVAideMemoire"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="freqs",
-                title="Contingency Tables",
-                columns=list(),
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="chiSq",
-                title="\u03C7\u00B2 Tests",
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers"),
-                columns=list(
-                    list(
-                        `name`="test[chiSq]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="\u03C7\u00B2", 
-                        `visible`="(chiSq)"),
-                    list(
-                        `name`="value[chiSq]", 
-                        `title`="Value", 
-                        `visible`="(chiSq)"),
-                    list(
-                        `name`="df[chiSq]", 
-                        `title`="df", 
-                        `type`="integer", 
-                        `visible`="(chiSq)"),
-                    list(
-                        `name`="p[chiSq]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(chiSq)"),
-                    list(
-                        `name`="test[chiSqCorr]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="\u03C7\u00B2 continuity correction", 
-                        `visible`="(chiSqCorr)"),
-                    list(
-                        `name`="value[chiSqCorr]", 
-                        `title`="Value", 
-                        `visible`="(chiSqCorr)"),
-                    list(
-                        `name`="df[chiSqCorr]", 
-                        `title`="df", 
-                        `type`="integer", 
-                        `visible`="(chiSqCorr)"),
-                    list(
-                        `name`="p[chiSqCorr]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(chiSqCorr)"),
-                    list(
-                        `name`="test[likeRat]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Likelihood ratio", 
-                        `visible`="(likeRat)", 
-                        `refs`="vcd"),
-                    list(
-                        `name`="value[likeRat]", 
-                        `title`="Value", 
-                        `visible`="(likeRat)"),
-                    list(
-                        `name`="df[likeRat]", 
-                        `title`="df", 
-                        `type`="integer", 
-                        `visible`="(likeRat)"),
-                    list(
-                        `name`="p[likeRat]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(likeRat)"),
-                    list(
-                        `name`="test[fisher]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Fisher's exact test", 
-                        `visible`="(fisher)"),
-                    list(
-                        `name`="value[fisher]", 
-                        `title`="Value", 
-                        `visible`="(fisher)"),
-                    list(
-                        `name`="p[fisher]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(fisher)"),
-                    list(
-                        `name`="test[N]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="N"),
-                    list(
-                        `name`="value[N]", 
-                        `title`="Value", 
-                        `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="odds",
-                title="Comparative Measures",
-                visible="(logOdds || odds || relRisk)",
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers",
-                    "ciWidth"),
-                columns=list(
-                    list(
-                        `name`="t[lo]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Log odds ratio", 
-                        `visible`="(logOdds)", 
-                        `refs`="vcd"),
-                    list(
-                        `name`="v[lo]", 
-                        `title`="Value", 
-                        `visible`="(logOdds)"),
-                    list(
-                        `name`="cil[lo]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(logOdds && ci)"),
-                    list(
-                        `name`="ciu[lo]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(logOdds && ci)"),
-                    list(
-                        `name`="t[o]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Odds ratio", 
-                        `visible`="(odds)"),
-                    list(
-                        `name`="v[o]", 
-                        `title`="Value", 
-                        `visible`="(odds)"),
-                    list(
-                        `name`="cil[o]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(odds && ci)"),
-                    list(
-                        `name`="ciu[o]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(odds && ci)"),
-                    list(
-                        `name`="t[rr]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Relative risk", 
-                        `visible`="(relRisk)"),
-                    list(
-                        `name`="v[rr]", 
-                        `title`="Value", 
-                        `visible`="(relRisk)"),
-                    list(
-                        `name`="cil[rr]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(relRisk && ci)"),
-                    list(
-                        `name`="ciu[rr]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence Intervals", 
-                        `visible`="(relRisk && ci)"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="nom",
-                title="Nominal",
-                visible="(contCoef || phiCra)",
-                columns=list(
-                    list(
-                        `name`="t[cont]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Contingency coefficient", 
-                        `visible`="(contCoef)"),
-                    list(
-                        `name`="v[cont]", 
-                        `title`="Value", 
-                        `visible`="(contCoef)"),
-                    list(
-                        `name`="t[phi]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Phi-coefficient", 
-                        `visible`="(phiCra)"),
-                    list(
-                        `name`="v[phi]", 
-                        `title`="Value", 
-                        `visible`="(phiCra)"),
-                    list(
-                        `name`="t[cra]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Cramer's V", 
-                        `visible`="(phiCra)"),
-                    list(
-                        `name`="v[cra]", 
-                        `title`="Value", 
-                        `visible`="(phiCra)"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="gamma",
-                title="Gamma",
-                visible="(gamma)",
-                refs="vcdExtra",
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers"),
-                columns=list(
-                    list(
-                        `name`="gamma", 
-                        `title`="Gamma"),
-                    list(
-                        `name`="se", 
-                        `title`="Standard Error"),
-                    list(
-                        `name`="cil", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence Intervals"),
-                    list(
-                        `name`="ciu", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence Intervals"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="taub",
-                title="Kendall's Tau-b",
-                visible="(taub)",
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers"),
-                columns=list(
-                    list(
-                        `name`="taub", 
-                        `title`="Kendall's Tau-B"),
-                    list(
-                        `name`="t", 
-                        `title`="t"),
-                    list(
-                        `name`="p", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
+                    "RVAideMemoire",
+                    "chisq.posthoc.test"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="pw",
-                title="Pairwise Chi-Square Comparison"))
-            self$add(jmvcore::Table$new(
+                name="conftable",
+                title="Confusion Table"))
+            self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="tablepw",
-                title="Pairwise Chi-Square Comparison",
-                visible="(pairw)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="v1", 
-                        `title`="Variable 1", 
-                        `type`="text"),
-                    list(
-                        `name`="v2", 
-                        `title`="Variable 2", 
-                        `type`="text"),
-                    list(
-                        `name`="pv", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "rows",
-                    "cols",
-                    "counts",
-                    "layers",
-                    "pairw")))}))
+                name="chi2test",
+                title="Chi-Square Test"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="pairwise1",
+                title="Pairwise Chi-Square Test 1"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="pairwise2",
+                title="Pairwise Chi-Square Test 2"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="pairwise3",
+                title="Pairwise Chi-Square Test 3"))}))
 
 pairchi2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
     "pairchi2Base",
@@ -557,176 +89,46 @@ pairchi2Base <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = TRUE,
+                completeWhenFilled = FALSE,
                 requiresMissings = FALSE)
         }))
 
 #' Pairwise Chi-Square Test
 #'
 #' 
-#' @param data the data as a data frame
-#' @param rows the variable to use as the rows in the contingency table (not
-#'   necessary when providing a formula, see the examples)
-#' @param cols the variable to use as the columns in the contingency table
-#'   (not necessary when providing a formula, see the examples)
-#' @param counts the variable to use as the counts in the contingency table
-#'   (not necessary when providing a formula, see the examples)
-#' @param layers the variables to use to split the contingency table (not
-#'   necessary when providing a formula, see the examples)
-#' @param chiSq \code{TRUE} (default) or \code{FALSE}, provide X²
-#' @param chiSqCorr \code{TRUE} or \code{FALSE} (default), provide X² with
-#'   continuity correction
-#' @param likeRat \code{TRUE} or \code{FALSE} (default), provide the
-#'   likelihood ratio
-#' @param fisher \code{TRUE} or \code{FALSE} (default), provide Fisher's exact
-#'   test
-#' @param contCoef \code{TRUE} or \code{FALSE} (default), provide the
-#'   contingency coefficient
-#' @param phiCra \code{TRUE} or \code{FALSE} (default), provide Phi and
-#'   Cramer's V
-#' @param logOdds \code{TRUE} or \code{FALSE} (default), provide the log odds
-#'   ratio (only available for 2x2 tables)
-#' @param odds \code{TRUE} or \code{FALSE} (default), provide the odds ratio
-#'   (only available for 2x2 tables)
-#' @param relRisk \code{TRUE} or \code{FALSE} (default), provide the relative
-#'   risk (only available for 2x2 tables)
-#' @param ci \code{TRUE} or \code{FALSE} (default), provide confidence
-#'   intervals for the comparative measures
-#' @param ciWidth a number between 50 and 99.9 (default: 95), width of the
-#'   confidence intervals to provide
-#' @param gamma \code{TRUE} or \code{FALSE} (default), provide gamma
-#' @param taub \code{TRUE} or \code{FALSE} (default), provide Kendall's tau-b
-#' @param obs \code{TRUE} or \code{FALSE} (default), provide the observed
-#'   counts
-#' @param exp \code{TRUE} or \code{FALSE} (default), provide the expected
-#'   counts
-#' @param pcRow \code{TRUE} or \code{FALSE} (default), provide row percentages
-#' @param pcCol \code{TRUE} or \code{FALSE} (default), provide column
-#'   percentages
-#' @param pcTot \code{TRUE} or \code{FALSE} (default), provide total
-#'   percentages
-#' @param pairw .
-#' @param formula (optional) the formula to use, see the examples
+#' @param data .
+#' @param row .
+#' @param col .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
-#'   \code{results$chiSq} \tab \tab \tab \tab \tab a table of X² test results \cr
-#'   \code{results$odds} \tab \tab \tab \tab \tab a table of comparative measures \cr
-#'   \code{results$nom} \tab \tab \tab \tab \tab a table of the 'nominal' test results \cr
-#'   \code{results$gamma} \tab \tab \tab \tab \tab a table of the gamma test results \cr
-#'   \code{results$taub} \tab \tab \tab \tab \tab a table of the Kendall's tau-b test results \cr
-#'   \code{results$pw} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$tablepw} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$conftable} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$chi2test} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$pairwise1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$pairwise2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$pairwise3} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$freqs$asDF}
-#'
-#' \code{as.data.frame(results$freqs)}
 #'
 #' @export
 pairchi2 <- function(
     data,
-    rows,
-    cols,
-    counts = NULL,
-    layers = NULL,
-    chiSq = TRUE,
-    chiSqCorr = FALSE,
-    likeRat = FALSE,
-    fisher = FALSE,
-    contCoef = FALSE,
-    phiCra = FALSE,
-    logOdds = FALSE,
-    odds = FALSE,
-    relRisk = FALSE,
-    ci = TRUE,
-    ciWidth = 95,
-    gamma = FALSE,
-    taub = FALSE,
-    obs = TRUE,
-    exp = FALSE,
-    pcRow = FALSE,
-    pcCol = FALSE,
-    pcTot = FALSE,
-    pairw = FALSE,
-    formula) {
+    row,
+    col) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('pairchi2 requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(formula)) {
-        if (missing(counts))
-            counts <- jmvcore::marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                from='lhs',
-                type='vars',
-                subset='1')
-        if (missing(rows))
-            rows <- jmvcore::marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                from='rhs',
-                type='vars',
-                subset='1')
-        if (missing(cols))
-            cols <- jmvcore::marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                from='rhs',
-                type='vars',
-                subset='2')
-        if (missing(layers))
-            layers <- jmvcore::marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                from='rhs',
-                type='vars',
-                subset='3:')
-    }
-
-    if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))
-    if ( ! missing(cols)) cols <- jmvcore::resolveQuo(jmvcore::enquo(cols))
-    if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
-    if ( ! missing(layers)) layers <- jmvcore::resolveQuo(jmvcore::enquo(layers))
+    if ( ! missing(row)) row <- jmvcore::resolveQuo(jmvcore::enquo(row))
+    if ( ! missing(col)) col <- jmvcore::resolveQuo(jmvcore::enquo(col))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(rows), rows, NULL),
-            `if`( ! missing(cols), cols, NULL),
-            `if`( ! missing(counts), counts, NULL),
-            `if`( ! missing(layers), layers, NULL))
+            `if`( ! missing(row), row, NULL),
+            `if`( ! missing(col), col, NULL))
 
-    for (v in rows) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in cols) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in layers) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- pairchi2Options$new(
-        rows = rows,
-        cols = cols,
-        counts = counts,
-        layers = layers,
-        chiSq = chiSq,
-        chiSqCorr = chiSqCorr,
-        likeRat = likeRat,
-        fisher = fisher,
-        contCoef = contCoef,
-        phiCra = phiCra,
-        logOdds = logOdds,
-        odds = odds,
-        relRisk = relRisk,
-        ci = ci,
-        ciWidth = ciWidth,
-        gamma = gamma,
-        taub = taub,
-        obs = obs,
-        exp = exp,
-        pcRow = pcRow,
-        pcCol = pcCol,
-        pcTot = pcTot,
-        pairw = pairw)
+        row = row,
+        col = col)
 
     analysis <- pairchi2Class$new(
         options = options,

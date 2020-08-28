@@ -1,6 +1,4 @@
 
-# This file is a generated template, your changes will not be overwritten
-
 benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "benfordClass",
     inherit = benfordBase,
@@ -11,36 +9,41 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             todo <- glue::glue("
                                <br>
-                               <a href = 'https://github.com/carloscinelli/benford.analysis'>Package documentation</a> states that:
-                               <br>
-                               After that you have the main statistics of the log mantissa of the data. If the data follows Benford's Law, the numbers should be close to:
-                               <br>
+                               See
+                               <a href = 'https://github.com/carloscinelli/benford.analysis'>Package documentation</a> for interpratation.
+                               ",
+                               # states that:
+                               # <br>
+                               # After that you have the main statistics of the log mantissa of the data. If the data follows Benfords Law, the numbers should be close to:
+                               # <br>
+                               #
+                               # <table>
+                               # <tr>
+                               # <th>Statistics</th>
+                               # <th>Value</th>
+                               # </tr>
+                               # <tr>
+                               # <td>Mean</td>
+                               # <td>0.5</td>
+                               # </tr>
+                               # <tr>
+                               # <td>Variance</td>
+                               # <td>1/12 (0.08333…)</td>
+                               # </tr>
+                               # <tr>
+                               # <td>Ex. Kurtosis</td>
+                               # <td>-1.2</td>
+                               # </tr>
+                               # <tr>
+                               # <td>Skewness</td>
+                               # <td>0</td>
+                               # </tr>
+                               # </table>
+                               # <br>
+                               # <hr>
+                               # <br>,
 
-                               <table>
-                               <tr>
-                               <th>Statistics</th>
-                               <th>Value</th>
-                               </tr>
-                               <tr>
-                               <td>Mean</td>
-                               <td>0.5</td>
-                               </tr>
-                               <tr>
-                               <td>Variance</td>
-                               <td>1/12 (0.08333…)</td>
-                               </tr>
-                               <tr>
-                               <td>Ex. Kurtosis</td>
-                               <td>-1.2</td>
-                               </tr>
-                               <tr>
-                               <td>Skewness</td>
-                               <td>0</td>
-                               </tr>
-                               </table>
-                               <br>
-                               <hr>
-                               <br>
+                               "<br>
                                Also see <a href = 'https://www.iamnagdev.com/?p=926'>this blog post</a>.
                                <br>
                                <hr>

@@ -1008,6 +1008,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=imager"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "chisq.posthoc.test",
+      "name": "chisq.posthoc.test",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=chisq.posthoc.test"
     }
   ],
   "softwareRequirements": [
@@ -1106,6 +1118,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "544.027KB",
+  "fileSize": "537.266KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }

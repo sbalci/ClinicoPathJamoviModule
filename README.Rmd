@@ -110,7 +110,7 @@ https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
-      commit: 0bc3ea8c48b26059c4294c0e527f73fd7bdd4e05
+      commit: 190b914807518bf0e9139bc282eabcf3883a9e72
       platforms:
         - win64
         - macos

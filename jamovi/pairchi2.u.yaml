@@ -1,190 +1,24 @@
-name: pairchi2
 title: Pairwise Chi-Square Test
-jus: '2.0'
-compilerMode: tame
+name: pairchi2
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
 children:
   - type: VariableSupplier
-    name: variablesupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
+        label: Row
         children:
           - type: VariablesListBox
-            name: rows
-            isTarget: true
+            name: row
             maxItemCount: 1
+            isTarget: true
       - type: TargetLayoutBox
+        label: Column
         children:
           - type: VariablesListBox
-            name: cols
-            isTarget: true
+            name: col
             maxItemCount: 1
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
-            name: counts
             isTarget: true
-            maxItemCount: 1
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
-            name: layers
-            isTarget: true
-  - type: LayoutBox
-    stretchFactor: 1
-    margin: large
-    children:
-      - type: CollapseBox
-        label: Statistics
-        stretchFactor: 1
-        collapsed: true
-        children:
-          - type: LayoutBox
-            margin: large
-            stretchFactor: 1
-            children:
-              - type: LayoutBox
-                cell:
-                  column: 0
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Tests
-                    fitToGrid: true
-                    cell:
-                      row: 0
-                      column: 0
-                    children:
-                      - type: CheckBox
-                        name: chiSq
-                      - type: CheckBox
-                        name: chiSqCorr
-                      - type: CheckBox
-                        name: likeRat
-                      - type: CheckBox
-                        name: fisher
-              - type: LayoutBox
-                cell:
-                  column: 1
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Comparative Measures (2x2 only)
-                    children:
-                      - type: CheckBox
-                        name: logOdds
-                      - type: CheckBox
-                        name: odds
-                      - type: CheckBox
-                        name: relRisk
-                      - type: CheckBox
-                        name: ci
-                        children:
-                          - type: TextBox
-                            name: ciWidth
-                            suffix: '%'
-                            format: number
-                            enable: (ci)
-          - type: LayoutBox
-            margin: large
-            stretchFactor: 1
-            children:
-              - type: LayoutBox
-                cell:
-                  column: 0
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    fitToGrid: true
-                    label: Nominal
-                    cell:
-                      column: 0
-                      row: 1
-                    children:
-                      - type: CheckBox
-                        name: contCoef
-                      - type: CheckBox
-                        name: phiCra
-              - type: LayoutBox
-                cell:
-                  column: 1
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Ordinal
-                    fitToGrid: true
-                    cell:
-                      column: 1
-                      row: 1
-                    children:
-                      - type: CheckBox
-                        name: gamma
-                      - type: CheckBox
-                        name: taub
-      - type: CollapseBox
-        label: Cells
-        stretchFactor: 1
-        collapsed: true
-        children:
-          - type: LayoutBox
-            margin: large
-            stretchFactor: 1
-            children:
-              - type: LayoutBox
-                cell:
-                  column: 0
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Counts
-                    fitToGrid: true
-                    children:
-                      - type: CheckBox
-                        name: obs
-                      - type: CheckBox
-                        name: exp
-              - type: LayoutBox
-                cell:
-                  column: 1
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Percentages
-                    fitToGrid: true
-                    cell:
-                      column: 1
-                      row: 0
-                    children:
-                      - type: CheckBox
-                        name: pcRow
-                      - type: CheckBox
-                        name: pcCol
-                      - type: CheckBox
-                        name: pcTot
-      - type: CollapseBox
-        label: Pairwise
-        stretchFactor: 1
-        collapsed: true
-        children:
-          - type: LayoutBox
-            cell:
-              column: 1
-              row: 0
-            stretchFactor: 1
-            children:
-              - type: Label
-                label: Pairwise
-                fitToGrid: true
-                cell:
-                  column: 1
-                  row: 0
-                children:
-                  - type: CheckBox
-                    name: pairw

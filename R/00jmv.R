@@ -277,6 +277,13 @@
         `title`="RVAideMemoire: Testing and Plotting Procedures for Biostatistics", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=RVAideMemoire", 
         `url`="https://CRAN.R-project.org/package=RVAideMemoire"), 
+    `chisq.posthoc.test`=list(
+        `type`="software", 
+        `author`="Daniel Ebbert", 
+        `year`=2019, 
+        `title`="chisq.posthoc.test: A Post Hoc Analysis for Pearson's Chi-Squared Test for Count Data", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=chisq.posthoc.test", 
+        `url`="https://CRAN.R-project.org/package=chisq.posthoc.test"), 
     `easyalluvial`=list(
         `type`="software", 
         `author`="Bjoern Koneswarakantha", 
@@ -383,4 +390,12 @@
         `year`=2020, 
         `title`="vtree: Display Information About Nested Subsets of a Data Frame", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=vtree", 
-        `url`="https://CRAN.R-project.org/package=vtree"))
+        `url`="https://CRAN.R-project.org/package=vtree"), 
+    `PathologyKappa`=list(
+        `type`="article", 
+        `title`="Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability", 
+        `year`=2020, 
+        `author`=NULL, 
+        `publisher`="Annals of Diagnostic Pathology", 
+        `volume`=47, 
+        `url`="https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040"))
