@@ -6,13 +6,31 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            explanatory = NULL,
-            overalltime = NULL,
+            elapsedtime = NULL,
+            tint = FALSE,
+            dxdate = NULL,
+            fudate = NULL,
             outcome = NULL,
             outcomeLevel = NULL,
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL,
+            explanatory = NULL,
+            contexpl = NULL,
+            multievent = FALSE,
+            analysistype = "overall",
+            timetypedata = "ymd",
+            timetypeoutput = "months",
             hr = FALSE,
             sty = "t1",
-            modelTerms = NULL, ...) {
+            km = FALSE,
+            ac = FALSE,
+            adjexplanatory = NULL,
+            endplot = 60,
+            byplot = 12,
+            ci95 = FALSE,
+            risktable = FALSE, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -20,23 +38,104 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..explanatory <- jmvcore::OptionVariables$new(
-                "explanatory",
-                explanatory)
-            private$..overalltime <- jmvcore::OptionVariable$new(
-                "overalltime",
-                overalltime,
+            private$..elapsedtime <- jmvcore::OptionVariable$new(
+                "elapsedtime",
+                elapsedtime,
                 suggested=list(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..tint <- jmvcore::OptionBool$new(
+                "tint",
+                tint,
+                default=FALSE)
+            private$..dxdate <- jmvcore::OptionVariable$new(
+                "dxdate",
+                dxdate)
+            private$..fudate <- jmvcore::OptionVariable$new(
+                "fudate",
+                fudate)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
-                outcome)
+                outcome,
+                suggested=list(
+                    "ordinal",
+                    "nominal",
+                    "continuous"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
                 variable="(outcome)")
+            private$..dod <- jmvcore::OptionLevel$new(
+                "dod",
+                dod,
+                variable="(outcome)",
+                allowNone=TRUE)
+            private$..dooc <- jmvcore::OptionLevel$new(
+                "dooc",
+                dooc,
+                variable="(outcome)",
+                allowNone=TRUE)
+            private$..awd <- jmvcore::OptionLevel$new(
+                "awd",
+                awd,
+                variable="(outcome)",
+                allowNone=TRUE)
+            private$..awod <- jmvcore::OptionLevel$new(
+                "awod",
+                awod,
+                variable="(outcome)",
+                allowNone=TRUE)
+            private$..explanatory <- jmvcore::OptionVariables$new(
+                "explanatory",
+                explanatory,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..contexpl <- jmvcore::OptionVariables$new(
+                "contexpl",
+                contexpl,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..multievent <- jmvcore::OptionBool$new(
+                "multievent",
+                multievent,
+                default=FALSE)
+            private$..analysistype <- jmvcore::OptionList$new(
+                "analysistype",
+                analysistype,
+                options=list(
+                    "overall",
+                    "cause"),
+                default="overall")
+            private$..timetypedata <- jmvcore::OptionList$new(
+                "timetypedata",
+                timetypedata,
+                options=list(
+                    "ymdhms",
+                    "ymd",
+                    "ydm",
+                    "mdy",
+                    "myd",
+                    "dmy",
+                    "dym"),
+                default="ymd")
+            private$..timetypeoutput <- jmvcore::OptionList$new(
+                "timetypeoutput",
+                timetypeoutput,
+                options=list(
+                    "days",
+                    "weeks",
+                    "months",
+                    "years"),
+                default="months")
             private$..hr <- jmvcore::OptionBool$new(
                 "hr",
                 hr,
@@ -48,35 +147,117 @@ multisurvivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "t1",
                     "t3"),
                 default="t1")
-            private$..modelTerms <- jmvcore::OptionTerms$new(
-                "modelTerms",
-                modelTerms,
-                default=NULL)
+            private$..km <- jmvcore::OptionBool$new(
+                "km",
+                km,
+                default=FALSE)
+            private$..ac <- jmvcore::OptionBool$new(
+                "ac",
+                ac,
+                default=FALSE)
+            private$..adjexplanatory <- jmvcore::OptionVariable$new(
+                "adjexplanatory",
+                adjexplanatory,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..endplot <- jmvcore::OptionInteger$new(
+                "endplot",
+                endplot,
+                default=60)
+            private$..byplot <- jmvcore::OptionInteger$new(
+                "byplot",
+                byplot,
+                default=12)
+            private$..ci95 <- jmvcore::OptionBool$new(
+                "ci95",
+                ci95,
+                default=FALSE)
+            private$..risktable <- jmvcore::OptionBool$new(
+                "risktable",
+                risktable,
+                default=FALSE)
 
-            self$.addOption(private$..explanatory)
-            self$.addOption(private$..overalltime)
+            self$.addOption(private$..elapsedtime)
+            self$.addOption(private$..tint)
+            self$.addOption(private$..dxdate)
+            self$.addOption(private$..fudate)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..dod)
+            self$.addOption(private$..dooc)
+            self$.addOption(private$..awd)
+            self$.addOption(private$..awod)
+            self$.addOption(private$..explanatory)
+            self$.addOption(private$..contexpl)
+            self$.addOption(private$..multievent)
+            self$.addOption(private$..analysistype)
+            self$.addOption(private$..timetypedata)
+            self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
-            self$.addOption(private$..modelTerms)
+            self$.addOption(private$..km)
+            self$.addOption(private$..ac)
+            self$.addOption(private$..adjexplanatory)
+            self$.addOption(private$..endplot)
+            self$.addOption(private$..byplot)
+            self$.addOption(private$..ci95)
+            self$.addOption(private$..risktable)
         }),
     active = list(
-        explanatory = function() private$..explanatory$value,
-        overalltime = function() private$..overalltime$value,
+        elapsedtime = function() private$..elapsedtime$value,
+        tint = function() private$..tint$value,
+        dxdate = function() private$..dxdate$value,
+        fudate = function() private$..fudate$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        dod = function() private$..dod$value,
+        dooc = function() private$..dooc$value,
+        awd = function() private$..awd$value,
+        awod = function() private$..awod$value,
+        explanatory = function() private$..explanatory$value,
+        contexpl = function() private$..contexpl$value,
+        multievent = function() private$..multievent$value,
+        analysistype = function() private$..analysistype$value,
+        timetypedata = function() private$..timetypedata$value,
+        timetypeoutput = function() private$..timetypeoutput$value,
         hr = function() private$..hr$value,
         sty = function() private$..sty$value,
-        modelTerms = function() private$..modelTerms$value),
+        km = function() private$..km$value,
+        ac = function() private$..ac$value,
+        adjexplanatory = function() private$..adjexplanatory$value,
+        endplot = function() private$..endplot$value,
+        byplot = function() private$..byplot$value,
+        ci95 = function() private$..ci95$value,
+        risktable = function() private$..risktable$value),
     private = list(
-        ..explanatory = NA,
-        ..overalltime = NA,
+        ..elapsedtime = NA,
+        ..tint = NA,
+        ..dxdate = NA,
+        ..fudate = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
+        ..dod = NA,
+        ..dooc = NA,
+        ..awd = NA,
+        ..awod = NA,
+        ..explanatory = NA,
+        ..contexpl = NA,
+        ..multievent = NA,
+        ..analysistype = NA,
+        ..timetypedata = NA,
+        ..timetypeoutput = NA,
         ..hr = NA,
         ..sty = NA,
-        ..modelTerms = NA)
+        ..km = NA,
+        ..ac = NA,
+        ..adjexplanatory = NA,
+        ..endplot = NA,
+        ..byplot = NA,
+        ..ci95 = NA,
+        ..risktable = NA)
 )
 
 multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -87,33 +268,34 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
-        model = function() private$..model),
-    private = list(
-        ..model = NA),
+        plotKM = function() private$.items[["plotKM"]],
+        plot7 = function() private$.items[["plot7"]]),
+    private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Multivariate Survival Analysis")
+                title="Multivariate Survival Analysis",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do",
-                clearWith=list(
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime")))
+                title="To Do"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 title="Multivariate Survival",
-                clearWith=list(
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime"),
                 refs="finalfit"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -128,13 +310,11 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=450,
                 renderFun=".plot",
                 requiresData=TRUE,
-                clearWith=list(
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime"),
                 visible="(hr && sty:t1)",
-                refs="finalfit"))
+                refs="finalfit",
+                clearWith=list(
+                    "hr",
+                    "sty")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -143,15 +323,44 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=600,
                 renderFun=".plot3",
                 requiresData=TRUE,
-                clearWith=list(
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime"),
                 visible="(hr && sty:t3)",
-                refs="survminer"))
-            private$..model <- NULL},
-        .setModel=function(x) private$..model <- x))
+                refs="survminer",
+                clearWith=list(
+                    "hr",
+                    "sty")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotKM",
+                title="Kaplan-Meier",
+                width=600,
+                height=450,
+                renderFun=".plotKM",
+                requiresData=TRUE,
+                visible="(km)",
+                refs="finalfit",
+                clearWith=list(
+                    "km",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot7",
+                title="`Adjusted Survival Curve - ${adjexplanatory}`",
+                width=800,
+                height=600,
+                renderFun=".plot7",
+                requiresData=TRUE,
+                visible="(ac)",
+                refs="survminer",
+                clearWith=list(
+                    "ac",
+                    "adjexplanatory",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable")))}))
 
 multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "multisurvivalBase",
@@ -182,13 +391,31 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param explanatory .
-#' @param overalltime .
+#' @param elapsedtime .
+#' @param tint .
+#' @param dxdate .
+#' @param fudate .
 #' @param outcome .
 #' @param outcomeLevel .
+#' @param dod .
+#' @param dooc .
+#' @param awd .
+#' @param awod .
+#' @param explanatory .
+#' @param contexpl .
+#' @param multievent .
+#' @param analysistype .
+#' @param timetypedata select the time type in data
+#' @param timetypeoutput select the time type in output
 #' @param hr .
 #' @param sty .
-#' @param modelTerms .
+#' @param km .
+#' @param ac .
+#' @param adjexplanatory .
+#' @param endplot .
+#' @param byplot .
+#' @param ci95 .
+#' @param risktable .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -196,43 +423,89 @@ multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$model} \tab \tab \tab \tab \tab a property \cr
+#'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 multisurvival <- function(
     data,
-    explanatory,
-    overalltime,
+    elapsedtime,
+    tint = FALSE,
+    dxdate,
+    fudate,
     outcome,
     outcomeLevel,
+    dod,
+    dooc,
+    awd,
+    awod,
+    explanatory,
+    contexpl,
+    multievent = FALSE,
+    analysistype = "overall",
+    timetypedata = "ymd",
+    timetypeoutput = "months",
     hr = FALSE,
     sty = "t1",
-    modelTerms = NULL) {
+    km = FALSE,
+    ac = FALSE,
+    adjexplanatory,
+    endplot = 60,
+    byplot = 12,
+    ci95 = FALSE,
+    risktable = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('multisurvival requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
-    if ( ! missing(overalltime)) overalltime <- jmvcore::resolveQuo(jmvcore::enquo(overalltime))
+    if ( ! missing(elapsedtime)) elapsedtime <- jmvcore::resolveQuo(jmvcore::enquo(elapsedtime))
+    if ( ! missing(dxdate)) dxdate <- jmvcore::resolveQuo(jmvcore::enquo(dxdate))
+    if ( ! missing(fudate)) fudate <- jmvcore::resolveQuo(jmvcore::enquo(fudate))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
+    if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
+    if ( ! missing(contexpl)) contexpl <- jmvcore::resolveQuo(jmvcore::enquo(contexpl))
+    if ( ! missing(adjexplanatory)) adjexplanatory <- jmvcore::resolveQuo(jmvcore::enquo(adjexplanatory))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(elapsedtime), elapsedtime, NULL),
+            `if`( ! missing(dxdate), dxdate, NULL),
+            `if`( ! missing(fudate), fudate, NULL),
+            `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(explanatory), explanatory, NULL),
-            `if`( ! missing(overalltime), overalltime, NULL),
-            `if`( ! missing(outcome), outcome, NULL))
+            `if`( ! missing(contexpl), contexpl, NULL),
+            `if`( ! missing(adjexplanatory), adjexplanatory, NULL))
 
-    if (inherits(modelTerms, 'formula')) modelTerms <- jmvcore::decomposeFormula(modelTerms)
+    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in adjexplanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- multisurvivalOptions$new(
-        explanatory = explanatory,
-        overalltime = overalltime,
+        elapsedtime = elapsedtime,
+        tint = tint,
+        dxdate = dxdate,
+        fudate = fudate,
         outcome = outcome,
         outcomeLevel = outcomeLevel,
+        dod = dod,
+        dooc = dooc,
+        awd = awd,
+        awod = awod,
+        explanatory = explanatory,
+        contexpl = contexpl,
+        multievent = multievent,
+        analysistype = analysistype,
+        timetypedata = timetypedata,
+        timetypeoutput = timetypeoutput,
         hr = hr,
         sty = sty,
-        modelTerms = modelTerms)
+        km = km,
+        ac = ac,
+        adjexplanatory = adjexplanatory,
+        endplot = endplot,
+        byplot = byplot,
+        ci95 = ci95,
+        risktable = risktable)
 
     analysis <- multisurvivalClass$new(
         options = options,

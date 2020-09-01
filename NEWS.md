@@ -1,3 +1,20 @@
+# ClinicoPath 0.0.2.0041
+
+- updated jsurvival
+- added more controls under collapse boxes
+- advanced outcome: users can select more than one outcome level depending on their analysis (event free or overall survival). Competing risk survival will also be added in the future.
+- advanced survival: users can use dates to calculate survival time. the date type should be defined. many variations for date types are given.
+- Cumulative events, cumulative survival and KMunicate style Kaplan-Meier curves are added.
+- A separate function for continuous explanatory variable is added. The optimal cut-off based on survival outcome is defined and after cut-off definition other univariate survival analysis are performed.
+- under multivariate analysis users can now generate Kaplan-Meier curves upto two explanatory variables.
+- an adjusted survival curve is also added, though it requires further management.
+
+
+# ClinicoPath 0.0.2.0040
+
+- separating univariate continuous survival from categorical
+
+
 # ClinicoPath 0.0.2.0039
 
 - added options to vartree

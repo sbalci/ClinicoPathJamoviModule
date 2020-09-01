@@ -109,6 +109,9 @@ jamovi library)
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
       commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
+      platforms:
+        - win64
+        - macos
 
 ##### jsurvival
 
@@ -124,7 +127,7 @@ jamovi library)
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 65abbbd860e792ffc794b404871f986b58179129
+      commit: 13378b62834109691c07f4a1392a6ec83d011140
       platforms:
         - win64
         - macos
@@ -359,9 +362,9 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 
 ## Current Package Versions:
 
-**R:** 3.6.3
+**R:** 4.0.2
 
-**MRAN:** <https://cran.microsoft.com/snapshot/2020-05-01>
+**MRAN:** <https://cran.microsoft.com/snapshot/2020-08-24>
 
 ## Acknowledgement
 
@@ -451,7 +454,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--28-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -526,7 +529,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--28-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

@@ -1,9 +1,9 @@
 ---
 name:  survivalcont
-title: Survival Analysis for Continuous Explanatory
+title: Survival Analysis for Continuous Variable
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Find Cut-off for Continuous Variable & Do Univariate Analysis'
+menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '1.0.0'
 jas: '1.2'
 
@@ -80,8 +80,8 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        - title: Competing Risk
-          name: compete
+        # - title: Competing Risk
+        #   name: compete
       default: overall
 
 

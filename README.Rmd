@@ -137,6 +137,9 @@ https://github.com/sbalci/jjstatsplot/releases/
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
       commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
+      platforms:
+        - win64
+        - macos
 
 
 
@@ -155,7 +158,7 @@ https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 65abbbd860e792ffc794b404871f986b58179129
+      commit: 13378b62834109691c07f4a1392a6ec83d011140
       platforms:
         - win64
         - macos
@@ -482,9 +485,9 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 
 ## Current Package Versions:
 
-**R:** 3.6.3
+**R:** 4.0.2
 
-**MRAN:** https://cran.microsoft.com/snapshot/2020-05-01
+**MRAN:** https://cran.microsoft.com/snapshot/2020-08-24
 
 
 ## Acknowledgement {#acknowledgement}
