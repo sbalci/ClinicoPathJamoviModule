@@ -34,7 +34,11 @@ Briefly:
 
 - Install jamovi from this link: https://www.jamovi.org/download.html Get the latest one 1.2.19
 
-- Install jmvtools package with: `install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))` 
+- Install jmvtools package with:
+
+```r
+install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+```
 
 - locate jamovi bin folder via this: `jmvtools::check("C://Program Files//jamovi//bin")` I recommend changing folder name from default `jamovi 1.2` to `jamovi`
 
@@ -464,16 +468,16 @@ add following to .gitignore file
 
 Try to use compatible packages with the jamovi's R version.
 
-Use: **R 3.6.3** https://cran.r-project.org/bin/macosx/R-3.6.3.pkg
+Use: **R 4.0.2**
+https://cran.r-project.org/bin/macosx/R-4.0.2.pkg
 
 
 Use packages from mran:
 
 ```r
-options(repos = c('https://repo.jamovi.org',
-                  "https://cran.microsoft.com/snapshot/2020-05-01/"
-                  )
-)
+options(
+repos = "https://cran.microsoft.com/snapshot/2020-08-24"
+                )
 ```
 
 ### Base R packages within jamovi

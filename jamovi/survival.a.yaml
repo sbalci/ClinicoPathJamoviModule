@@ -13,7 +13,6 @@ description:
         dontrun: false
         usage: |
             # example will be added
-            flow::flow_view(x = ClinicoPath::survival)
 
 
 options:
@@ -60,15 +59,10 @@ options:
 
     - name: explanatory
       title: Explanatory Variable
-      type: Variables
+      type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
-    - name: contexpl
-      title: Continuous Explanatory Variable
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
 
     - name: outcome
       title: 'Outcome'
@@ -109,8 +103,8 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        - title: Competing Risk
-          name: compete
+        # - title: Competing Risk
+        #   name: compete
       default: overall
 
 
@@ -201,13 +195,6 @@ options:
       default: 12
 
 
-
-    - name: findcut
-      title: Cut-off for Continious Explanatory
-      type: Bool
-      default: false
-
-
     - name: multievent
       title: Multiple Event Levels
       type: Bool
@@ -228,7 +215,6 @@ options:
       title: Single Arm Survival
       type: Bool
       default: false
-
 
 
 ...

@@ -6,31 +6,85 @@
 \usage{
 multisurvival(
   data,
-  explanatory,
-  overalltime,
+  elapsedtime,
+  tint = FALSE,
+  dxdate,
+  fudate,
   outcome,
   outcomeLevel,
+  dod,
+  dooc,
+  awd,
+  awod,
+  explanatory,
+  contexpl,
+  multievent = FALSE,
+  analysistype = "overall",
+  timetypedata = "ymd",
+  timetypeoutput = "months",
   hr = FALSE,
   sty = "t1",
-  modelTerms = NULL
+  km = FALSE,
+  ac = FALSE,
+  adjexplanatory,
+  endplot = 60,
+  byplot = 12,
+  ci95 = FALSE,
+  risktable = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{explanatory}{.}
+\item{elapsedtime}{.}
 
-\item{overalltime}{.}
+\item{tint}{.}
+
+\item{dxdate}{.}
+
+\item{fudate}{.}
 
 \item{outcome}{.}
 
 \item{outcomeLevel}{.}
 
+\item{dod}{.}
+
+\item{dooc}{.}
+
+\item{awd}{.}
+
+\item{awod}{.}
+
+\item{explanatory}{.}
+
+\item{contexpl}{.}
+
+\item{multievent}{.}
+
+\item{analysistype}{.}
+
+\item{timetypedata}{select the time type in data}
+
+\item{timetypeoutput}{select the time type in output}
+
 \item{hr}{.}
 
 \item{sty}{.}
 
-\item{modelTerms}{.}
+\item{km}{.}
+
+\item{ac}{.}
+
+\item{adjexplanatory}{.}
+
+\item{endplot}{.}
+
+\item{byplot}{.}
+
+\item{ci95}{.}
+
+\item{risktable}{.}
 }
 \value{
 A results object containing:
@@ -40,7 +94,8 @@ A results object containing:
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-\code{results$model} \tab \tab \tab \tab \tab a property \cr
+\code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{
