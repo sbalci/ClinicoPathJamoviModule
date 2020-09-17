@@ -3,39 +3,30 @@ name:  tree
 title: Decision Tree
 jrs:   '1.1'
 
+
+clearWith:
+    - vars
+    - facs
+    - target
+    - targetLevel
+    - sty
+
+
 items:
 
     - name:  todo
       title: To Do
       type:  Html
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
 
 
     - name:  text1
       title: Decision Tree
       type:  Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
 
 
     - name:  text2
       title: Decision Tree rpart
       type:  Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
       visible: (sty:rpart || sty:fftrees)
       refs:
           - rpart
@@ -49,12 +40,6 @@ items:
       height: 450
       renderFun: .plot1
       requiresData: true
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
       visible: (sty:explore)
       refs: explore
 
@@ -66,12 +51,6 @@ items:
       height: 450
       renderFun: .plot2
       requiresData: true
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
       visible: (sty:fftrees)
       refs: FFTrees
 
@@ -83,12 +62,6 @@ items:
       height: 450
       renderFun: .plot3
       requiresData: true
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - sty
       visible: (sty:rpart)
       refs:
           - rpart

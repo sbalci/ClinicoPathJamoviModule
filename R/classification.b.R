@@ -1,3 +1,8 @@
+# @import mlr3
+# @import mlr3measures
+# @import mlr3learners
+# @import mlr3viz
+
 # from https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
 classificationClass <- if (requireNamespace('jmvcore')) R6::R6Class(

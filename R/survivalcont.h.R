@@ -276,7 +276,8 @@ survivalcontResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs=list(
                     "finalfit",
                     "survival",
-                    "survminer"),
+                    "survminer",
+                    "dichotomizing"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",

@@ -40,8 +40,6 @@ options:
     - name: target
       title: Target Variable
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
       description: >
                   target variable
 

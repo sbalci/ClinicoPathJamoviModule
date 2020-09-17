@@ -3,6 +3,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
+# @import explore
 #'
 
 
@@ -26,15 +27,18 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- "
                 <br>Welcome to ClinicoPath
                           <br><br>
-                          This tool will help you form an Alluvial Plots.
+                          This tool will help you form Decision Trees.
                           "
                 html <- self$results$todo
                 html$setContent(todo)
+                return()
 
             } else {
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
+
+            }
 
 
             # Prepare Data ----
@@ -50,6 +54,8 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata[[targetName]] <- as.factor(mydata[[targetName]])
 
             mydata <- jmvcore::naOmit(mydata)
+
+            self$results$text1$setContent(head(mydata, n = 20))
 
 
             # Select Graph Style ----
@@ -121,9 +127,6 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 self$results$text2$setContent(mydata)
-
-
-            }
 
 
             }
@@ -286,9 +289,11 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myformula <- as.formula(myformula)
 
 
-            tree <- rpart::rpart(myformula,
+            tree <- rpart::rpart(formula = myformula,
                                  data = mydata,
-                                 cp = .02)
+
+                                 cp = .02
+                                 )
 
 
             plot3 <- rpart.plot::rpart.plot(tree,

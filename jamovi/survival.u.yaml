@@ -47,28 +47,28 @@ children:
               - type: CheckBox
                 name: tint
                 fitToGrid: true
-      - type: Label
-        label: Date Variables
-        fitToGrid: true
-        children:
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
+              - type: Label
+                label: Date Variables
+                fitToGrid: true
                 children:
-                  - type: VariablesListBox
-                    name: dxdate
-                    maxItemCount: 1
-                    isTarget: true
-                    fitToGrid: true
-              - type: TargetLayoutBox
-                children:
-                  - type: VariablesListBox
-                    name: fudate
-                    maxItemCount: 1
-                    isTarget: true
-                    fitToGrid: true
+                  - type: VariableSupplier
+                    persistentItems: false
+                    stretchFactor: 1
+                    children:
+                      - type: TargetLayoutBox
+                        children:
+                          - type: VariablesListBox
+                            name: dxdate
+                            maxItemCount: 1
+                            isTarget: true
+                            fitToGrid: true
+                      - type: TargetLayoutBox
+                        children:
+                          - type: VariablesListBox
+                            name: fudate
+                            maxItemCount: 1
+                            isTarget: true
+                            fitToGrid: true
       - type: Label
         label: Time Type
         fitToGrid: true
@@ -82,6 +82,23 @@ children:
                 enable: (tint)
               - type: ComboBox
                 name: timetypeoutput
+
+      - type: Label
+        label: Landmark Time
+        fitToGrid: true
+        children:
+        - type: LayoutBox
+          margin: large
+          children:
+            - type: CheckBox
+              name: uselandmark
+              children:
+                - type: TextBox
+                  name: landmark
+                  format: number
+                  enable: (uselandmark)
+
+
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -113,6 +130,7 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
+
   - type: CollapseBox
     label: Single Arm Survival
     collapsed: true
@@ -170,6 +188,8 @@ children:
                 name: ci95
               - type: CheckBox
                 name: risktable
+              - type: CheckBox
+                name: censored
   - type: CollapseBox
     label: Survival Tables
     collapsed: true

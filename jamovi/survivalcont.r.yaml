@@ -255,5 +255,6 @@ refs:
     - finalfit
     - survival
     - survminer
+    - dichotomizing
 
 ...

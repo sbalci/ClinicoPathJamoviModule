@@ -21,6 +21,8 @@ survival(
   cutp = "12, 36, 60",
   timetypedata = "ymd",
   timetypeoutput = "months",
+  uselandmark = FALSE,
+  landmark = 3,
   pw = FALSE,
   sc = FALSE,
   kmunicate = FALSE,
@@ -31,6 +33,7 @@ survival(
   multievent = FALSE,
   ci95 = FALSE,
   risktable = FALSE,
+  censored = FALSE,
   sas = FALSE
 )
 }
@@ -67,6 +70,10 @@ survival(
 
 \item{timetypeoutput}{select the time type in output}
 
+\item{uselandmark}{.}
+
+\item{landmark}{.}
+
 \item{pw}{.}
 
 \item{sc}{.}
@@ -86,6 +93,8 @@ survival(
 \item{ci95}{.}
 
 \item{risktable}{.}
+
+\item{censored}{.}
 
 \item{sas}{.}
 }

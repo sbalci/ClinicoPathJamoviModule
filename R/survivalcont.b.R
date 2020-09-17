@@ -334,7 +334,7 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
                 tCox_df %>%
                     dplyr::group_by(Explanatory) %>%
-                    dplyr::mutate(firstlevel = first(Levels)) %>%
+                    dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
                         coxdescription = glue::glue(
                             "When {Explanatory} increases 1 unit, the hazard increases {HR_multivariable} times."

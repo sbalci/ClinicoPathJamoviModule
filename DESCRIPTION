@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0041
-Date: 2020-08-31
+Version: 0.0.2.0043
+Date: 2020-09-17
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -50,7 +50,6 @@ Suggests:
     irr,
     caret,
     forcats,
-    explore,
     rpart,
     rpart.plot,
     plotROC,
@@ -80,6 +79,7 @@ Suggests:
     mlr3,
     mlr3measures,
     mlr3learners,
+    mlr3viz,
     precrec,
     ggpubr,
     BBmisc,
@@ -98,12 +98,8 @@ Suggests:
     pracma,
     randtests,
     TSA,
-    sapa,
-    fractal,
-    ifultools,
     splus2R,
     scatterplot3d,
-    wmtsa,
     bindrcpp,
     bindr,
     pkgconfig,
@@ -126,7 +122,12 @@ Remotes:
     moodymudskipper/flow,
     ellessenne/KMunicate-package,
     carloscinelli/benford.analysis,
-    nbarrowman/vtree
+    nbarrowman/vtree,
+    rolkra/explore,
+    cran/wmtsa,
+    cran/ifultools,
+    cran/sapa,
+    mariodosreis/fractal
 VignetteBuilder:
     knitr
 Encoding: UTF-8

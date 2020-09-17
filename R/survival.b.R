@@ -205,6 +205,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     awod <- self$options$awod
 
                     if (analysistype == 'overall') {
+                        # Overall ----
                         # (Alive) <=> (Dead of Disease & Dead of Other Causes)
 
 
@@ -218,6 +219,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
                     } else if (analysistype == 'cause') {
+                        # Cause Specific ----
                         # (Alive & Dead of Other Causes) <=> (Dead of Disease)
 
 
@@ -229,8 +231,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         mydata[["myoutcome"]][outcome1 == dooc] <- 0
 
                     } else if (analysistype == 'compete') {
+                        # Competing Risks ----
                         # Alive <=> Dead of Disease accounting for Dead of Other Causes
 
+                        # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#part_3:_competing_risks
 
 
                         mydata[["myoutcome"]] <- NA_integer_
@@ -282,6 +286,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                         "myoutcome" = outcome,
                                         "factor" = factor)
 
+                # Landmark ----
+                # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#landmark_method
+                if (self$options$uselandmark) {
+                    cleanData <- cleanData %>%
+                        dplyr::filter(mytime >= self$options$landmark) %>%
+                        dplyr::mutate(mytime = mytime - self$options$landmark)
+                }
+
+                # Time Dependent Covariate ----
+                # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#time-dependent_covariate
+
+
+
 
                 # Names cleanData ----
 
@@ -312,6 +329,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # naOmit ----
 
                 cleanData <- jmvcore::naOmit(cleanData)
+
+
+
+
+
 
                 # # View mydata ----
                 # self$results$mydataview$setContent(list(time,
@@ -574,7 +596,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 tCox_df %>%
                     dplyr::group_by(Explanatory) %>%
-                    dplyr::mutate(firstlevel = first(Levels)) %>%
+                    dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
                         coxdescription = glue::glue(
                             "When {Explanatory} is {Levels}, there is {HR_univariable} times risk than when {Explanatory} is {firstlevel}."
@@ -816,13 +838,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         explanatory = myfactor,
                         xlab = paste0('Time (', self$options$timetypeoutput, ')'),
                         pval = TRUE,
+                        pval.method	= TRUE,
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
                         title = paste0("Survival curves for ", title2),
                         subtitle = "Based on Kaplan-Meier estimates",
                         risk.table = self$options$risktable,
-                        conf.int = self$options$ci95
+                        conf.int = self$options$ci95,
+                        censor = self$options$censored
                     )
 
                 # plot <- plot + ggtheme
@@ -886,7 +910,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         title = paste0("Cumulative Events ", title2),
                         fun = "event",
                         risk.table = self$options$risktable,
-                        conf.int = self$options$ci95
+                        conf.int = self$options$ci95,
+                        censored = self$options$censored
                     )
 
 
@@ -949,7 +974,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         title = paste0("Cumulative Hazard ", title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
-                        conf.int = self$options$ci95
+                        conf.int = self$options$ci95,
+                        censored = self$options$censored
                     )
 
 

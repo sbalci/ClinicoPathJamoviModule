@@ -213,6 +213,7 @@ items:
           - sas
           - ci95
           - risktable
+          - censored
 
 
     - name: plot2
@@ -231,6 +232,8 @@ items:
           - sas
           - ci95
           - risktable
+          - censored
+
 
     - name: plot3
       # title: Cumulative Hazard
@@ -248,6 +251,8 @@ items:
           - sas
           - ci95
           - risktable
+          - censored
+
 
     - name: plot6
       title: '`KMunicate-Style Plot - ${explanatory}`'

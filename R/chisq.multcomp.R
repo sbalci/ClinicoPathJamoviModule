@@ -1,4 +1,14 @@
 # from: https://github.com/cran/RVAideMemoire/blob/master/R/chisq.multcomp.R
+#' Title
+#'
+#' @param x vector
+#' @param p.method fdr
+#'
+#' @importFrom stats chisq.test
+#' @importFrom stats fisher.test
+#' @importFrom stats p.adjust
+#' @importFrom stats p.adjust.methods
+#' @importFrom stats pairwise.table
 
 
 chisq.multcomp <-

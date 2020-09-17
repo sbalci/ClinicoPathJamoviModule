@@ -75,11 +75,9 @@ Modules and jamovi library)
 
 <https://github.com/sbalci/ClinicoPathDescriptives/releases/>
 
-<https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo>
+<https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo>
 
-<!-- https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo -->
-
-<https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo>
+<https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo>
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
@@ -87,6 +85,25 @@ Modules and jamovi library)
       platforms:
         - win64
         - macos
+
+##### ClinicoPathLinuxDescriptives
+
+ClinicoPathDescriptives functions for Linux
+
+<https://github.com/sbalci/ClinicoPathLinuxDescriptives/>
+
+<https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/>
+
+<https://library.jamovi.org/linux/R4.0.2/ClinicoPathDescriptives-0.0.2.0041.jmo>
+
+``` 
+- name: ClinicoPathDescriptives
+  url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
+  commit: cc63b37bd0a639194baf5a35db72783e05336027
+  platforms:
+    - linux
+    
+```
 
 ##### JJStatsPlot
 
@@ -96,11 +113,11 @@ jjstatsplot menu
 JJStastPlot module can be downloaded inside jamovi (click Modules and
 jamovi library)
 
-<https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
+<https://library.jamovi.org/win64/R4.0.2/jjstatsplot-0.0.2.0038.jmo>
 
-<https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
+<!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-<https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.2.0038.jmo>
+<https://library.jamovi.org/macos/R4.0.2/jjstatsplot-0.0.2.0038.jmo>
 
 <https://github.com/sbalci/jjstatsplot>
 
@@ -119,18 +136,19 @@ jamovi library)
 
 <https://github.com/sbalci/jsurvival/releases/>
 
-<https://library.jamovi.org/macos/R3.6.3/jsurvival-0.0.2.0026.jmo>
+<https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0041.jmo>
 
-<https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo>
+<https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0041.jmo>
 
-<!-- https://library.jamovi.org/linux/R3.6.3/jsurvival-0.0.2.0026.jmo -->
+<https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0041.jmo>
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 13378b62834109691c07f4a1392a6ec83d011140
+      commit: 687961589d432c0df900890660735dfb883111f3
       platforms:
         - win64
         - macos
+        - linux
 
 ##### meddecide
 
@@ -138,11 +156,11 @@ jamovi library)
 
 <https://github.com/sbalci/meddecide/releases/>
 
-<https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo>
+<https://library.jamovi.org/win64/R4.0.2/meddecide-0.0.1.0005.jmo>
 
-<https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo>
+<https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo>
 
-<https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo>
+<https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo>
 
     - name: meddecide
       url: https://github.com/sbalci/meddecide.git
@@ -454,7 +472,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -529,7 +547,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--08--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

@@ -1,3 +1,9 @@
+# ClinicoPath 0.0.2.0043
+
+- added jsurvival to linux
+- added some functions of descriptives to linux
+
+
 # ClinicoPath 0.0.2.0041
 
 - updated jsurvival

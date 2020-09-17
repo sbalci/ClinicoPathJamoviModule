@@ -102,11 +102,10 @@ https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
-https://library.jamovi.org/win64/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
+https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo
 
-<!-- https://library.jamovi.org/linux/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo -->
+https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo  
 
-https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
@@ -116,6 +115,26 @@ https://library.jamovi.org/macos/R3.6.3/ClinicoPathDescriptives-0.0.2.0025.jmo
         - macos
 
 
+##### ClinicoPathLinuxDescriptives
+
+ClinicoPathDescriptives functions for Linux  
+
+
+https://github.com/sbalci/ClinicoPathLinuxDescriptives/
+
+https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/
+
+
+https://library.jamovi.org/linux/R4.0.2/ClinicoPathDescriptives-0.0.2.0041.jmo
+
+
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
+      commit: cc63b37bd0a639194baf5a35db72783e05336027
+      platforms:
+        - linux
+        
+
 
 ##### JJStatsPlot  
 
@@ -123,11 +142,11 @@ GGStatsPlot functions are separately added to jamovi library under jjstatsplot m
 
 JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)  
 
-https://library.jamovi.org/win64/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
+https://library.jamovi.org/win64/R4.0.2/jjstatsplot-0.0.2.0038.jmo
 
-https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
+<!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-https://library.jamovi.org/macos/R3.6.3/jjstatsplot-0.0.2.0038.jmo  
+https://library.jamovi.org/macos/R4.0.2/jjstatsplot-0.0.2.0038.jmo
 
 https://github.com/sbalci/jjstatsplot  
 
@@ -149,32 +168,35 @@ https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
+https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0041.jmo  
 
-https://library.jamovi.org/macos/R3.6.3/jsurvival-0.0.2.0026.jmo
+https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0041.jmo
 
-https://library.jamovi.org/win64/R3.6.3/jsurvival-0.0.2.0026.jmo
+https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0041.jmo
 
-<!-- https://library.jamovi.org/linux/R3.6.3/jsurvival-0.0.2.0026.jmo -->
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 13378b62834109691c07f4a1392a6ec83d011140
+      commit: 687961589d432c0df900890660735dfb883111f3
       platforms:
         - win64
         - macos
+        - linux
 
 
-##### meddecide
+##### meddecide  
 
-https://github.com/sbalci/meddecide/
+https://github.com/sbalci/meddecide/  
 
-https://github.com/sbalci/meddecide/releases/
+https://github.com/sbalci/meddecide/releases/  
 
-https://library.jamovi.org/win64/R3.6.3/meddecide-0.0.1.0005.jmo
+https://library.jamovi.org/win64/R4.0.2/meddecide-0.0.1.0005.jmo
 
-https://library.jamovi.org/linux/R3.6.3/meddecide-0.0.1.0005.jmo
+https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo  
 
-https://library.jamovi.org/macos/R3.6.3/meddecide-0.0.1.0005.jmo
+https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo  
+
+
 
     - name: meddecide
       url: https://github.com/sbalci/meddecide.git

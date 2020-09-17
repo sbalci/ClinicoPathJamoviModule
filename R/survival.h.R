@@ -21,6 +21,8 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             cutp = "12, 36, 60",
             timetypedata = "ymd",
             timetypeoutput = "months",
+            uselandmark = FALSE,
+            landmark = 3,
             pw = FALSE,
             sc = FALSE,
             kmunicate = FALSE,
@@ -31,6 +33,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             multievent = FALSE,
             ci95 = FALSE,
             risktable = FALSE,
+            censored = FALSE,
             sas = FALSE, ...) {
 
             super$initialize(
@@ -130,6 +133,14 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "months",
                     "years"),
                 default="months")
+            private$..uselandmark <- jmvcore::OptionBool$new(
+                "uselandmark",
+                uselandmark,
+                default=FALSE)
+            private$..landmark <- jmvcore::OptionInteger$new(
+                "landmark",
+                landmark,
+                default=3)
             private$..pw <- jmvcore::OptionBool$new(
                 "pw",
                 pw,
@@ -170,6 +181,10 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "risktable",
                 risktable,
                 default=FALSE)
+            private$..censored <- jmvcore::OptionBool$new(
+                "censored",
+                censored,
+                default=FALSE)
             private$..sas <- jmvcore::OptionBool$new(
                 "sas",
                 sas,
@@ -190,6 +205,8 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
+            self$.addOption(private$..uselandmark)
+            self$.addOption(private$..landmark)
             self$.addOption(private$..pw)
             self$.addOption(private$..sc)
             self$.addOption(private$..kmunicate)
@@ -200,6 +217,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
+            self$.addOption(private$..censored)
             self$.addOption(private$..sas)
         }),
     active = list(
@@ -218,6 +236,8 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
+        uselandmark = function() private$..uselandmark$value,
+        landmark = function() private$..landmark$value,
         pw = function() private$..pw$value,
         sc = function() private$..sc$value,
         kmunicate = function() private$..kmunicate$value,
@@ -228,6 +248,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
+        censored = function() private$..censored$value,
         sas = function() private$..sas$value),
     private = list(
         ..elapsedtime = NA,
@@ -245,6 +266,8 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
+        ..uselandmark = NA,
+        ..landmark = NA,
         ..pw = NA,
         ..sc = NA,
         ..kmunicate = NA,
@@ -255,6 +278,7 @@ survivalOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..multievent = NA,
         ..ci95 = NA,
         ..risktable = NA,
+        ..censored = NA,
         ..sas = NA)
 )
 
@@ -474,7 +498,8 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "byplot",
                     "sas",
                     "ci95",
-                    "risktable")))
+                    "risktable",
+                    "censored")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -490,7 +515,8 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "byplot",
                     "sas",
                     "ci95",
-                    "risktable")))
+                    "risktable",
+                    "censored")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -506,7 +532,8 @@ survivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "byplot",
                     "sas",
                     "ci95",
-                    "risktable")))
+                    "risktable",
+                    "censored")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot6",
@@ -568,6 +595,8 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param cutp .
 #' @param timetypedata select the time type in data
 #' @param timetypeoutput select the time type in output
+#' @param uselandmark .
+#' @param landmark .
 #' @param pw .
 #' @param sc .
 #' @param kmunicate .
@@ -578,6 +607,7 @@ survivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param multievent .
 #' @param ci95 .
 #' @param risktable .
+#' @param censored .
 #' @param sas .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -621,6 +651,8 @@ survival <- function(
     cutp = "12, 36, 60",
     timetypedata = "ymd",
     timetypeoutput = "months",
+    uselandmark = FALSE,
+    landmark = 3,
     pw = FALSE,
     sc = FALSE,
     kmunicate = FALSE,
@@ -631,6 +663,7 @@ survival <- function(
     multievent = FALSE,
     ci95 = FALSE,
     risktable = FALSE,
+    censored = FALSE,
     sas = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -668,6 +701,8 @@ survival <- function(
         cutp = cutp,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
+        uselandmark = uselandmark,
+        landmark = landmark,
         pw = pw,
         sc = sc,
         kmunicate = kmunicate,
@@ -678,6 +713,7 @@ survival <- function(
         multievent = multievent,
         ci95 = ci95,
         risktable = risktable,
+        censored = censored,
         sas = sas)
 
     analysis <- survivalClass$new(

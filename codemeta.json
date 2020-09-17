@@ -18,11 +18,10 @@
   ],
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.2.41",
+  "version": "0.0.2.43",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "4.0.2",
     "url": "https://r-project.org"
   },
   "runtimePlatform": "R version 4.0.2 (2020-06-22)",
@@ -251,18 +250,6 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=forcats"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "explore",
-      "name": "explore",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=explore"
     },
     {
       "@type": "SoftwareApplication",
@@ -614,6 +601,18 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "mlr3viz",
+      "name": "mlr3viz",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mlr3viz"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "precrec",
       "name": "precrec",
       "provider": {
@@ -819,22 +818,14 @@
     {
       "@type": "SoftwareApplication",
       "identifier": "TSA",
-      "name": "TSA"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "sapa",
-      "name": "sapa"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "fractal",
-      "name": "fractal"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "ifultools",
-      "name": "ifultools"
+      "name": "TSA",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=TSA"
     },
     {
       "@type": "SoftwareApplication",
@@ -859,11 +850,6 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=scatterplot3d"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "wmtsa",
-      "name": "wmtsa"
     },
     {
       "@type": "SoftwareApplication",
@@ -1091,18 +1077,8 @@
     }
   ],
   "releaseNotes": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/NEWS.md",
-  "contIntegration": [
-    "https://travis-ci.com/sbalci/ClinicoPathJamoviModule",
-    "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule",
-    "https://codecov.io/gh/sbalci/ClinicoPathJamoviModule",
-    "https://circleci.com/gh/sbalci/ClinicoPathJamoviModule",
-    "https://coveralls.io/github/sbalci/clinicopathjamovimodule?branch=master"
-  ],
-  "developmentStatus": [
-    "https://www.repostatus.org/#wip",
-    "https://www.tidyverse.org/lifecycle/",
-    "http://www.repostatus.org/#active"
-  ],
+  "contIntegration": ["https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master", "https://travis-ci.com/sbalci/ClinicoPathJamoviModule", "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule", "https://codecov.io/gh/sbalci/ClinicoPathJamoviModule", "https://circleci.com/gh/sbalci/ClinicoPathJamoviModule", "https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master", "https://travis-ci.com/sbalci/ClinicoPathJamoviModule", "https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule", "https://codecov.io/gh/sbalci/ClinicoPathJamoviModule", "https://circleci.com/gh/sbalci/ClinicoPathJamoviModule"],
+  "developmentStatus": ["https://www.repostatus.org/#active", "https://www.tidyverse.org/lifecycle/", "https://www.repostatus.org/#active", "https://www.tidyverse.org/lifecycle/"],
   "keywords": [
     "jamovi",
     "module",
@@ -1118,6 +1094,6 @@
     "survival-analysis",
     "natural-language-summaries"
   ],
-  "fileSize": "544.838KB",
+  "fileSize": "0KB",
   "readme": "https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/README.md"
 }
