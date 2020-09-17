@@ -35,12 +35,7 @@ treeOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "factor"))
             private$..target <- jmvcore::OptionVariable$new(
                 "target",
-                target,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                target)
             private$..targetLevel <- jmvcore::OptionLevel$new(
                 "targetLevel",
                 targetLevel,
@@ -89,37 +84,25 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree")
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "sty")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text1",
                 title="Decision Tree",
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
-                    "sty")))
+                    "sty"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text1",
+                title="Decision Tree"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
                 title="Decision Tree rpart",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "sty"),
                 visible="(sty:rpart || sty:fftrees)",
                 refs=list(
                     "rpart",
@@ -132,12 +115,6 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=450,
                 renderFun=".plot1",
                 requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "sty"),
                 visible="(sty:explore)",
                 refs="explore"))
             self$add(jmvcore::Image$new(
@@ -148,12 +125,6 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "sty"),
                 visible="(sty:fftrees)",
                 refs="FFTrees"))
             self$add(jmvcore::Image$new(
@@ -164,12 +135,6 @@ treeResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=450,
                 renderFun=".plot3",
                 requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "sty"),
                 visible="(sty:rpart)",
                 refs=list(
                     "rpart",
@@ -242,7 +207,6 @@ tree <- function(
             `if`( ! missing(target), target, NULL))
 
     for (v in facs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in target) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- treeOptions$new(
         vars = vars,

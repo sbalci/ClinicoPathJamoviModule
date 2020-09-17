@@ -108,7 +108,9 @@ decisioncalculatorResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Medical Decision Calculator")
+                title="Medical Decision Calculator",
+                refs=list(
+                    "DiagnosticTests"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",

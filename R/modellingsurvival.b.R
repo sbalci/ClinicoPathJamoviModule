@@ -1,3 +1,14 @@
+modellingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "modellingSurvivalClass",
+    inherit = modellingSurvivalBase,
+    private = list(
+
+
+    )
+)
+
+
+
 # # from https://github.com/AlbertoAlvarezIglesias2019/SimpleSurvival
 #
 #

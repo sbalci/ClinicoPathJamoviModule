@@ -247,6 +247,8 @@ items:
     #       - Fagan
     #       - Fagan2
 
+refs:
+    - DiagnosticTests
 
 
 ...

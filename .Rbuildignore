@@ -49,6 +49,7 @@ tododata
 ^build/
 ^.*\.jmo$
 ^.*\.omv$
+^.*\.jasp$
 
 ### Other R codes
 ^tests$
@@ -72,3 +73,14 @@ R/utils-pipe.R
 ^\.github$
 ^clang-.*
 ^gfortran.*
+
+
+### Incomplete Functions
+chisq.multcomp\\.
+modellingSurvival\\.
+
+
+
+
+
+

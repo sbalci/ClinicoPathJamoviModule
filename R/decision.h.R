@@ -123,7 +123,9 @@ decisionResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Medical Decision")
+                title="Medical Decision",
+                refs=list(
+                    "DiagnosticTests"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
