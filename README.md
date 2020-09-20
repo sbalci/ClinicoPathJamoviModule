@@ -79,6 +79,10 @@ Modules and jamovi library)
 
 <https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo>
 
+``` r
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
       commit: 190b914807518bf0e9139bc282eabcf3883a9e72
@@ -95,6 +99,10 @@ ClinicoPathDescriptives functions for Linux
 <https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/>
 
 <https://library.jamovi.org/linux/R4.0.2/ClinicoPathDescriptives-0.0.2.0041.jmo>
+
+``` r
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
 
 ``` 
 - name: ClinicoPathDescriptives
@@ -123,6 +131,10 @@ jamovi library)
 
 <https://github.com/sbalci/jjstatsplot/releases/>
 
+``` r
+remotes::install_github("sbalci/jjstatsplot")
+```
+
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
       commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
@@ -141,6 +153,10 @@ jamovi library)
 <https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0041.jmo>
 
 <https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0041.jmo>
+
+``` r
+remotes::install_github("sbalci/jsurvival")
+```
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
@@ -162,9 +178,23 @@ jamovi library)
 
 <https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo>
 
+``` r
+remotes::install_github("sbalci/meddecide")
+```
+
     - name: meddecide
       url: https://github.com/sbalci/meddecide.git
       commit: 38aaf74a807241def57c23b99cc89a31a1ed5123
+
+##### jbbplot
+
+<https://github.com/sbalci/jbbplot/>
+
+<https://github.com/sbalci/jbbplot/releases/>
+
+``` r
+remotes::install_github("sbalci/jbbplot")
+```
 
 <!-- #### c: For stable version    -->
 
@@ -472,7 +502,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--20-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -547,7 +577,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--17-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--09--20-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

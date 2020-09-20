@@ -16,21 +16,6 @@ description:
 
 options:
 
-    # - name: lang
-    #   title: Language
-    #   type: List
-    #   options:
-    #     - title: English
-    #       name: English
-    #     - title: Türkçe
-    #       name: Türkçe
-    #     - title: Deutsch
-    #       name: Deutsch
-    #   default: English
-    #   description:
-    #       R: select language
-
-
     - name: data
       type: Data
       description:
@@ -48,3 +33,19 @@ options:
             a string naming the variables from `data` that contains the
             continuous values used for the report
 ...
+
+
+
+    # - name: lang
+    #   title: Language
+    #   type: List
+    #   options:
+    #     - title: English
+    #       name: English
+    #     - title: Türkçe
+    #       name: Türkçe
+    #     - title: Deutsch
+    #       name: Deutsch
+    #   default: English
+    #   description:
+    #       R: select language

@@ -122,10 +122,11 @@ associated. If the p-value is low, it suggests the variables are not
 independent, and that there is a relationship between the two variables.
 }
 \examples{
-data('HairEyeColor')
-dat <- as.data.frame(HairEyeColor)
+\dontrun{
+# data('HairEyeColor')
+# dat <- as.data.frame(HairEyeColor)
 
-contTables(formula = Freq ~ Hair:Eye, dat)
+# contTables(formula = Freq ~ Hair:Eye, dat)
 
 #
 #  CONTINGENCY TABLES
@@ -154,6 +155,6 @@ contTables(formula = Freq ~ Hair:Eye, dat)
 # Alternatively, omit the left of the formula (`Freq`) if each row
 # represents a single observation:
 
-contTables(formula = ~ Hair:Eye, dat)
-
+# contTables(formula = ~ Hair:Eye, dat)
+}
 }

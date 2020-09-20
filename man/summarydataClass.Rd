@@ -3,6 +3,9 @@
 \name{summarydataClass}
 \alias{summarydataClass}
 \title{Summary of Continuous Variables}
+\value{
+Text
+}
 \description{
 Summary of Continuous Variables
 

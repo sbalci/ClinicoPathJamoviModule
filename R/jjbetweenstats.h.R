@@ -40,7 +40,8 @@ jjbetweenstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -155,7 +156,7 @@ jjbetweenstats <- function(
     data,
     dep,
     group,
-    grvar,
+    grvar = NULL,
     excl = TRUE,
     originaltheme = FALSE) {
 

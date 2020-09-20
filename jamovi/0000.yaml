@@ -278,6 +278,11 @@ analyses:
     ns: ClinicoPath
     menuGroup: Demo
     menuTitle: Positive Predictive Value
+  - title: Line Chart
+    name: line
+    ns: jamoviTemplate
+    menuGroup: jbbplot
+    menuTitle: Line Chart
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

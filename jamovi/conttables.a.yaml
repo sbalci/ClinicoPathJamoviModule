@@ -17,12 +17,12 @@ description:
         or associated. If the p-value is low, it suggests the variables are not
         independent, and that there is a relationship between the two variables.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data('HairEyeColor')
-            dat <- as.data.frame(HairEyeColor)
+            # data('HairEyeColor')
+            # dat <- as.data.frame(HairEyeColor)
 
-            contTables(formula = Freq ~ Hair:Eye, dat)
+            # contTables(formula = Freq ~ Hair:Eye, dat)
 
             #
             #  CONTINGENCY TABLES
@@ -51,7 +51,7 @@ description:
             # Alternatively, omit the left of the formula (`Freq`) if each row
             # represents a single observation:
 
-            contTables(formula = ~ Hair:Eye, dat)
+            # contTables(formula = ~ Hair:Eye, dat)
 
 completeWhenFilled: true
 
