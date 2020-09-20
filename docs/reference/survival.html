@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0039</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0043</span>
       </span>
     </div>
 
@@ -169,7 +169,6 @@
   <span class='no'>dxdate</span>,
   <span class='no'>fudate</span>,
   <span class='no'>explanatory</span>,
-  <span class='no'>contexpl</span>,
   <span class='no'>outcome</span>,
   <span class='no'>outcomeLevel</span>,
   <span class='no'>dod</span>,
@@ -180,6 +179,8 @@
   <span class='kw'>cutp</span> <span class='kw'>=</span> <span class='st'>"12, 36, 60"</span>,
   <span class='kw'>timetypedata</span> <span class='kw'>=</span> <span class='st'>"ymd"</span>,
   <span class='kw'>timetypeoutput</span> <span class='kw'>=</span> <span class='st'>"months"</span>,
+  <span class='kw'>uselandmark</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>landmark</span> <span class='kw'>=</span> <span class='fl'>3</span>,
   <span class='kw'>pw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>sc</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>kmunicate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
@@ -187,10 +188,10 @@
   <span class='kw'>ch</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>endplot</span> <span class='kw'>=</span> <span class='fl'>60</span>,
   <span class='kw'>byplot</span> <span class='kw'>=</span> <span class='fl'>12</span>,
-  <span class='kw'>findcut</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>multievent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ci95</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>risktable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>censored</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>sas</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
@@ -219,10 +220,6 @@
     </tr>
     <tr>
       <th>explanatory</th>
-      <td><p>.</p></td>
-    </tr>
-    <tr>
-      <th>contexpl</th>
       <td><p>.</p></td>
     </tr>
     <tr>
@@ -266,6 +263,14 @@
       <td><p>select the time type in output</p></td>
     </tr>
     <tr>
+      <th>uselandmark</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>landmark</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>pw</th>
       <td><p>.</p></td>
     </tr>
@@ -294,10 +299,6 @@
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>findcut</th>
-      <td><p>.</p></td>
-    </tr>
-    <tr>
       <th>multievent</th>
       <td><p>.</p></td>
     </tr>
@@ -310,6 +311,10 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>censored</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>sas</th>
       <td><p>.</p></td>
     </tr>
@@ -319,13 +324,11 @@
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$mydataview</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
-<tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
 <tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
@@ -333,8 +336,6 @@
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
-<tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
-<tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
@@ -344,8 +345,9 @@
 <p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$medianTable)</a></code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># example will be added</span>
-<span class='kw pkg'>flow</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/flow/man/flow_view.html'>flow_view</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='kw pkg'>ClinicoPath</span><span class='kw ns'>::</span><span class='no'>survival</span>)</div></pre>
+    <pre class="examples"><div class='input'># example will be added
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -523,10 +523,11 @@ contTablesBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data('HairEyeColor')
-#' dat <- as.data.frame(HairEyeColor)
+#' \dontrun{
+#' # data('HairEyeColor')
+#' # dat <- as.data.frame(HairEyeColor)
 #'
-#' contTables(formula = Freq ~ Hair:Eye, dat)
+#' # contTables(formula = Freq ~ Hair:Eye, dat)
 #'
 #' #
 #' #  CONTINGENCY TABLES
@@ -555,8 +556,8 @@ contTablesBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' # Alternatively, omit the left of the formula (`Freq`) if each row
 #' # represents a single observation:
 #'
-#' contTables(formula = ~ Hair:Eye, dat)
-#'
+#' # contTables(formula = ~ Hair:Eye, dat)
+#'}
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table (not
 #'   necessary when providing a formula, see the examples)

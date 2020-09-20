@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0039</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0043</span>
       </span>
     </div>
 
@@ -164,13 +164,31 @@
 
     <pre class="usage"><span class='fu'>multisurvival</span>(
   <span class='no'>data</span>,
-  <span class='no'>explanatory</span>,
-  <span class='no'>overalltime</span>,
+  <span class='no'>elapsedtime</span>,
+  <span class='kw'>tint</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>dxdate</span>,
+  <span class='no'>fudate</span>,
   <span class='no'>outcome</span>,
   <span class='no'>outcomeLevel</span>,
+  <span class='no'>dod</span>,
+  <span class='no'>dooc</span>,
+  <span class='no'>awd</span>,
+  <span class='no'>awod</span>,
+  <span class='no'>explanatory</span>,
+  <span class='no'>contexpl</span>,
+  <span class='kw'>multievent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>analysistype</span> <span class='kw'>=</span> <span class='st'>"overall"</span>,
+  <span class='kw'>timetypedata</span> <span class='kw'>=</span> <span class='st'>"ymd"</span>,
+  <span class='kw'>timetypeoutput</span> <span class='kw'>=</span> <span class='st'>"months"</span>,
   <span class='kw'>hr</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>sty</span> <span class='kw'>=</span> <span class='st'>"t1"</span>,
-  <span class='kw'>modelTerms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+  <span class='kw'>km</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>ac</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>adjexplanatory</span>,
+  <span class='kw'>endplot</span> <span class='kw'>=</span> <span class='fl'>60</span>,
+  <span class='kw'>byplot</span> <span class='kw'>=</span> <span class='fl'>12</span>,
+  <span class='kw'>ci95</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>risktable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -181,11 +199,19 @@
       <td><p>The data as a data frame.</p></td>
     </tr>
     <tr>
-      <th>explanatory</th>
+      <th>elapsedtime</th>
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>overalltime</th>
+      <th>tint</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dxdate</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>fudate</th>
       <td><p>.</p></td>
     </tr>
     <tr>
@@ -197,6 +223,46 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>dod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>dooc</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awd</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>awod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>explanatory</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>contexpl</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>multievent</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>analysistype</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>timetypedata</th>
+      <td><p>select the time type in data</p></td>
+    </tr>
+    <tr>
+      <th>timetypeoutput</th>
+      <td><p>select the time type in output</p></td>
+    </tr>
+    <tr>
       <th>hr</th>
       <td><p>.</p></td>
     </tr>
@@ -205,7 +271,31 @@
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>modelTerms</th>
+      <th>km</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>ac</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>adjexplanatory</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>endplot</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>byplot</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>ci95</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>risktable</th>
       <td><p>.</p></td>
     </tr>
     </table>
@@ -218,7 +308,8 @@
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
-<tr><td><code>results$model</code></td><td></td><td></td><td></td><td></td><td>a property</td></tr>
+<tr><td><code>results$plotKM</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 

@@ -112,7 +112,13 @@ Suggests:
     lubridate,
     imagerExtra,
     imager,
-    chisq.posthoc.test
+    chisq.posthoc.test,
+    vcd,
+    gapminder,
+    ggalt,
+    R.utils,
+    png,
+    grid
 Remotes:
     ndphillips/FFTrees,
     spgarbet/tangram,
@@ -127,7 +133,8 @@ Remotes:
     cran/wmtsa,
     cran/ifultools,
     cran/sapa,
-    mariodosreis/fractal
+    mariodosreis/fractal,
+    bbc/bbplot
 VignetteBuilder:
     knitr
 Encoding: UTF-8

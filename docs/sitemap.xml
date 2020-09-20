@@ -52,6 +52,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/checkdata.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/chisq.multcomp.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/ciSingle.html</loc>
   </url>
   <url>
@@ -208,6 +211,9 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/linReg.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/line.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/linechart.html</loc>
   </url>
   <url>
@@ -314,6 +320,9 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalcont.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalcontClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>
