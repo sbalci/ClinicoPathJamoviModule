@@ -291,17 +291,50 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 title="Multivariate Survival",
-                refs="finalfit"))
+                refs="finalfit",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
                 title="",
-                refs="finalfit"))
+                refs="finalfit",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -314,7 +347,17 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs="finalfit",
                 clearWith=list(
                     "hr",
-                    "sty")))
+                    "sty",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -327,7 +370,17 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 refs="survminer",
                 clearWith=list(
                     "hr",
-                    "sty")))
+                    "sty",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotKM",
@@ -343,7 +396,17 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "endplot",
                     "byplot",
                     "ci95",
-                    "risktable")))
+                    "risktable",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot7",
@@ -360,7 +423,17 @@ multisurvivalResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "endplot",
                     "byplot",
                     "ci95",
-                    "risktable")))}))
+                    "risktable",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "adjexplanatory")))}))
 
 multisurvivalBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "multisurvivalBase",

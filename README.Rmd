@@ -200,7 +200,7 @@ remotes::install_github("sbalci/jsurvival")
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 687961589d432c0df900890660735dfb883111f3
+      commit: 9c57e504ddc0ceb42681f92b63ec0c0adf294436
       platforms:
         - win64
         - macos

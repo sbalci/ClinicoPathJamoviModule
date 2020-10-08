@@ -24,9 +24,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                     (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
 
-                    is.null(self$options$explanatory) ||
+                    is.null(self$options$explanatory)
 
-                    (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
+                    # ||
+
+                    # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
 
 
                     )
@@ -264,12 +266,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 # Define Explanatory ----
 
+                myexplanatory <- NULL
+
+                if(!is.null(self$options$explanatory)) {
+
                 myexplanatory <- as.vector(self$options$explanatory)
 
-                if (!is.null(self$options$contexpl)) {
-
-                    mycontexpl <- as.vector(self$options$contexpl)
                 }
+
+
+                mycontexpl <- NULL
+
+                if(!is.null(self$options$contexpl)) {
+
+                mycontexpl <- as.vector(self$options$contexpl)
+
+                }
+
 
                 myfactors <- c(myexplanatory, mycontexpl)
 
@@ -306,9 +319,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                     (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
 
-                    is.null(self$options$explanatory) ||
+                    is.null(self$options$explanatory)
 
-                    (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
+                    # ||
+                    #
+                    # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
 
                     ) {
                     private$.todo()
@@ -363,9 +378,31 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 # prepare formula ----
 
-                formula2 <-c(as.vector(self$options$explanatory),
-                             as.vector(self$options$contexpl)
-                )
+
+                myexplanatory <- NULL
+
+                if(!is.null(self$options$explanatory)) {
+
+                    myexplanatory <- as.vector(self$options$explanatory)
+
+                }
+
+
+                mycontexpl <- NULL
+
+                if(!is.null(self$options$contexpl)) {
+
+                    mycontexpl <- as.vector(self$options$contexpl)
+
+                }
+
+
+                formula2 <- c(myexplanatory, mycontexpl)
+
+
+                # formula2 <-c(as.vector(self$options$explanatory),
+                #              as.vector(self$options$contexpl)
+                # )
 
                 # formulaL <-
                 #     jmvcore::constructFormula(terms = self$options$elapsedtime)

@@ -4,7 +4,7 @@
 \alias{line}
 \title{Line Chart}
 \usage{
-line(data, dep, group, alt = "notequal", varEq = TRUE)
+line(data, dep, group, col, fill)
 }
 \arguments{
 \item{data}{.}
@@ -13,9 +13,9 @@ line(data, dep, group, alt = "notequal", varEq = TRUE)
 
 \item{group}{.}
 
-\item{alt}{.}
+\item{col}{.}
 
-\item{varEq}{.}
+\item{fill}{.}
 }
 \value{
 A results object containing:

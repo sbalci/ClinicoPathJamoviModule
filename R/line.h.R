@@ -8,8 +8,8 @@ lineOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            col = NULL,
+            fill = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -23,34 +23,28 @@ lineOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+            private$..col <- jmvcore::OptionVariable$new(
+                "col",
+                col)
+            private$..fill <- jmvcore::OptionVariable$new(
+                "fill",
+                fill)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..col)
+            self$.addOption(private$..fill)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        col = function() private$..col$value,
+        fill = function() private$..fill$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..col = NA,
+        ..fill = NA)
 )
 
 lineResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -98,8 +92,8 @@ lineBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param dep .
 #' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param col .
+#' @param fill .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -110,26 +104,30 @@ line <- function(
     data,
     dep,
     group,
-    alt = "notequal",
-    varEq = TRUE) {
+    col,
+    fill) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('line requires jmvcore to be installed (restart may be required)')
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(col)) col <- jmvcore::resolveQuo(jmvcore::enquo(col))
+    if ( ! missing(fill)) fill <- jmvcore::resolveQuo(jmvcore::enquo(fill))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(group), group, NULL),
+            `if`( ! missing(col), col, NULL),
+            `if`( ! missing(fill), fill, NULL))
 
 
     options <- lineOptions$new(
         dep = dep,
         group = group,
-        alt = alt,
-        varEq = varEq)
+        col = col,
+        fill = fill)
 
     analysis <- lineClass$new(
         options = options,
