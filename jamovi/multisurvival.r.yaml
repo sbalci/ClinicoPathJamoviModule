@@ -23,6 +23,19 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+
 
     # - name:  mydataview
     #   title: mydataview
@@ -33,13 +46,33 @@ items:
       title: Multivariate Survival
       type:  Html
       refs: finalfit
-
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
 
     - name:  text2
       title: ''
       type:  Html
       refs: finalfit
-
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
 
 
     - name: plot
@@ -54,6 +87,16 @@ items:
       clearWith:
           - hr
           - sty
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
 
     # - name: plot2
     #   title: Hazards Regression Plot
@@ -85,6 +128,17 @@ items:
       clearWith:
           - hr
           - sty
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
 
     - name: plotKM
       title: Kaplan-Meier
@@ -101,7 +155,16 @@ items:
           - byplot
           - ci95
           - risktable
-
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
 
     - name: plot7
       title: '`Adjusted Survival Curve - ${adjexplanatory}`'
@@ -119,6 +182,17 @@ items:
           - byplot
           - ci95
           - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
 
     # - name: model
     #   type: Property

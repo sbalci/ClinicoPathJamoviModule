@@ -1,3 +1,8 @@
+# ClinicoPath 0.0.2.0044
+
+- fixed multivariate survival to work without continuous explanatory 
+
+
 # ClinicoPath 0.0.2.0043
 
 - added jsurvival to linux

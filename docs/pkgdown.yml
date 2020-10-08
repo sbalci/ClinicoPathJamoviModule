@@ -1,8 +1,18 @@
 pandoc: 2.9.2.1
 pkgdown: 1.5.1
 pkgdown_sha: ~
-articles: []
-last_built: 2020-09-20T07:49Z
+articles:
+  _wf_child: _wf_child.html
+  _workflows: _workflows.html
+  _generatedCodeFlows: childRmd/_generatedCodeFlows.html
+  data-preperation: data-preperation.html
+  examples: examples.html
+  module_development_jamovi: module_development_jamovi.html
+  motivation: motivation.html
+  pathology_jamovi: pathology_jamovi.html
+  pkgnet-report: pkgnet-report.html
+  wf_master: wf_master.html
+last_built: 2020-10-08T16:18Z
 urls:
   reference: https://sbalci.github.io/ClinicoPathJamoviModule//reference
   article: https://sbalci.github.io/ClinicoPathJamoviModule//articles
