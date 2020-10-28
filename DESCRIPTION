@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0044
-Date: 2020-10-08
+Version: 0.0.2.0045
+Date: 2020-10-27
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -118,7 +118,10 @@ Suggests:
     ggalt,
     R.utils,
     png,
-    grid
+    grid,
+    retractcheck,
+    RefManageR,
+    rcrossref
 Remotes:
     ndphillips/FFTrees,
     spgarbet/tangram,

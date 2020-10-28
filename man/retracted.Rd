@@ -15,6 +15,9 @@ retracted(data, doi)
 A results object containing:
 \tabular{llllll}{
 \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$resids} \tab \tab \tab \tab \tab an output \cr
+\code{results$resids2} \tab \tab \tab \tab \tab an output \cr
 }
 }
 \description{

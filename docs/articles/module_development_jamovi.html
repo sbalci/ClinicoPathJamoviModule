@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0044</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0045</span>
       </span>
     </div>
 
@@ -109,7 +109,8 @@
 
       
 
-      </header><script src="module_development_jamovi_files/header-attrs-2.3/header-attrs.js"></script><script src="module_development_jamovi_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="module_development_jamovi_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="module_development_jamovi_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
+<script src="module_development_jamovi_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Module Development for Jamovi</h1>
@@ -139,7 +140,8 @@
 <li><p>Install jamovi from this link: <a href="https://www.jamovi.org/download.html" class="uri">https://www.jamovi.org/download.html</a> Get the latest one 1.2.19</p></li>
 <li><p>Install jmvtools package with:</p></li>
 </ul>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></pre></div>
 <ul>
 <li><p>locate jamovi bin folder via this: <code><a href="https://rdrr.io/pkg/jmvtools/man/check.html">jmvtools::check("C://Program Files//jamovi//bin")</a></code> I recommend changing folder name from default <code>jamovi 1.2</code> to <code>jamovi</code></p></li>
 <li><p>Fork and Clone this repo: <a href="https://github.com/sbalci/ClinicoPath" class="uri">https://github.com/sbalci/ClinicoPath</a></p></li>
@@ -173,9 +175,12 @@
 <h3 class="hasAnchor">
 <a href="#jmvtools-should-be-installed-from-the-jamovi-repo" class="anchor"></a>jmvtools should be installed from the jamovi repo</h3>
 <p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'jmvtools'</span>, <span class="kw">repos</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span>()</pre></body></html></div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb2"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit">
+<span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit">
+<span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span><span class="op">(</span><span class="op">)</span></pre></div>
 <p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 </div>
@@ -183,12 +188,14 @@
 <h2 class="hasAnchor">
 <a href="#creating-a-module" class="anchor"></a>Creating a Module</h2>
 <p><a href="https://dev.jamovi.org/tuts0102-creating-a-module.html" class="uri">https://dev.jamovi.org/tuts0102-creating-a-module.html</a></p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="kw">path</span> <span class="kw">=</span> <span class="st">"~/ClinicoPathDescriptives"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb5"><pre class="downlit">
+<span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/ClinicoPathDescriptives"</span><span class="op">)</span></pre></div>
 </div>
 <div id="add-analysis" class="section level2">
 <h2 class="hasAnchor">
 <a href="#add-analysis" class="anchor"></a>add analysis</h2>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="kw pkg">jmvtools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span>(<span class="st">'function'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb6"><pre class="downlit">
+<span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span><span class="op">(</span><span class="st">'function'</span><span class="op">)</span></pre></div>
 </div>
 </div>
 <div id="structure" class="section level1">
@@ -232,22 +239,28 @@
 <h5 class="hasAnchor">
 <a href="#write-formula" class="anchor"></a>Write Formula</h5>
 <p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="kw">formula</span> <span class="kw">=</span> <span class="no">len</span> ~ <span class="no">supp</span> * <span class="no">dose</span>, <span class="no">ToothGrowth</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="no">len</span>, <span class="fu">vars</span>(<span class="no">supp</span>, <span class="no">dose</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">...</span>, <span class="kw">emMeans</span> <span class="kw">=</span> ~ <span class="no">supp</span> + <span class="no">dose</span>:<span class="no">supp</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb7"><pre class="downlit">
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">len</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">*</span> <span class="va">dose</span>, <span class="va">ToothGrowth</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit">
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="va">len</span>, <span class="fu">vars</span><span class="op">(</span><span class="va">supp</span>, <span class="va">dose</span><span class="op">)</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit">
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">...</span>, emMeans <span class="op">=</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">+</span> <span class="va">dose</span><span class="op">:</span><span class="va">supp</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit">
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span><span class="op">)</span></pre></div>
 <blockquote>
 <p>In this case, jmv will look for variables in ToothGrowth called ‘dep’ or ‘factors’. This is tidy evaluation. To instruct jmv to use the contents of it’s arguments, rather than the symbol name, prefix them with the !! signifier. For example:</p>
 </blockquote>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">dep</span> <span class="kw">&lt;-</span> <span class="st">'len'</span>
-<span class="no">factors</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'supp'</span>, <span class="st">'dose'</span>)
+<div class="sourceCode" id="cb11"><pre class="downlit">
+<span class="va">dep</span> <span class="op">&lt;-</span> <span class="st">'len'</span>
+<span class="va">factors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span>
 
-<span class="kw pkg">jmv</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span>(<span class="no">ToothGrowth</span>, !!<span class="no">dep</span>, !!<span class="no">factors</span>)</pre></body></html></div>
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="op">!</span><span class="op">!</span><span class="va">dep</span>, <span class="op">!</span><span class="op">!</span><span class="va">factors</span><span class="op">)</span></pre></div>
 </div>
 <div id="warning-error-messages" class="section level5">
 <h5 class="hasAnchor">
 <a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h5>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="kw">if</span> (<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">self</span>$<span class="no">data</span>) <span class="kw">==</span> <span class="fl">0</span>) <span class="fu"><a href="https://rdrr.io/r/base/stop.html">stop</a></span>(<span class="st">"Data contains no (complete) rows"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb12"><pre class="downlit">
+<span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">"Data contains no (complete) rows"</span><span class="op">)</span></pre></div>
 </div>
 <div id="prepare-data-for-analysis" class="section level5">
 <h5 class="hasAnchor">
@@ -363,7 +376,8 @@
 <h3 class="hasAnchor">
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h3>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span>(<span class="kw">upgrade</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">quick</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb17"><pre class="downlit">
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span><span class="op">(</span>upgrade <span class="op">=</span> <span class="cn">FALSE</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></pre></div>
 </div>
 </div>
 <div id="init" class="section level2">
@@ -383,42 +397,42 @@ so that’s your order of preference. preferably in the .r.yaml, if that can’t
 <p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <pre><code>select repo:jamovi/jmv filename:.b.R language:R</code></pre>
-<div class="sourceCode" id="cb20"><html><body><pre class="r">generate advanced search for all jamovi library
-jamovi_library_names &lt;- readLines("https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml")
-
-jamovi_library_names &lt;- stringr::str_extract(
-  string = jamovi_library_names,
-  pattern = "github.com/(.*).git")
-
-jamovi_library_names &lt;- jamovi_library_names[!is.na(jamovi_library_names)]
-
-jamovi_library_names &lt;- gsub(pattern = "github.com/|.git",
-                             replacement = "",
-                             x = jamovi_library_names)
-
-jamovi_library_names &lt;- c("jamovi/jmv", jamovi_library_names)
-
-jamovi_library_names &lt;- gsub(pattern = "/",
-                              replacement = "%2F",
-                              x = jamovi_library_names)
-
-query &lt;- "type: Level"
-
-repos &lt;- paste0("repo%3A",jamovi_library_names,"+")
-
-repos &lt;- paste0(repos, collapse = "")
-
-repos &lt;- gsub(pattern = "\\+$",
-              replacement = "",
-              x = repos)
-
-github_search &lt;- paste0("https://github.com/search?q=",
-                        query,
-                        "+",
-                        repos,
-                        "&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l=")
-
-cat(github_search)</pre></body></html></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>generate advanced search <span class="cf">for</span> all jamovi library</span>
+<span id="cb20-2"><a href="#cb20-2"></a>jamovi_library_names &lt;-<span class="st"> </span><span class="kw">readLines</span>(<span class="st">"https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3"></a></span>
+<span id="cb20-4"><a href="#cb20-4"></a>jamovi_library_names &lt;-<span class="st"> </span>stringr<span class="op">::</span><span class="kw">str_extract</span>(</span>
+<span id="cb20-5"><a href="#cb20-5"></a>  <span class="dt">string =</span> jamovi_library_names,</span>
+<span id="cb20-6"><a href="#cb20-6"></a>  <span class="dt">pattern =</span> <span class="st">"github.com/(.*).git"</span>)</span>
+<span id="cb20-7"><a href="#cb20-7"></a></span>
+<span id="cb20-8"><a href="#cb20-8"></a>jamovi_library_names &lt;-<span class="st"> </span>jamovi_library_names[<span class="op">!</span><span class="kw">is.na</span>(jamovi_library_names)]</span>
+<span id="cb20-9"><a href="#cb20-9"></a></span>
+<span id="cb20-10"><a href="#cb20-10"></a>jamovi_library_names &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">"github.com/|.git"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11"></a>                             <span class="dt">replacement =</span> <span class="st">""</span>,</span>
+<span id="cb20-12"><a href="#cb20-12"></a>                             <span class="dt">x =</span> jamovi_library_names)</span>
+<span id="cb20-13"><a href="#cb20-13"></a></span>
+<span id="cb20-14"><a href="#cb20-14"></a>jamovi_library_names &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">"jamovi/jmv"</span>, jamovi_library_names)</span>
+<span id="cb20-15"><a href="#cb20-15"></a></span>
+<span id="cb20-16"><a href="#cb20-16"></a>jamovi_library_names &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">"/"</span>,</span>
+<span id="cb20-17"><a href="#cb20-17"></a>                              <span class="dt">replacement =</span> <span class="st">"%2F"</span>,</span>
+<span id="cb20-18"><a href="#cb20-18"></a>                              <span class="dt">x =</span> jamovi_library_names)</span>
+<span id="cb20-19"><a href="#cb20-19"></a></span>
+<span id="cb20-20"><a href="#cb20-20"></a>query &lt;-<span class="st"> "type: Level"</span></span>
+<span id="cb20-21"><a href="#cb20-21"></a></span>
+<span id="cb20-22"><a href="#cb20-22"></a>repos &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">"repo%3A"</span>,jamovi_library_names,<span class="st">"+"</span>)</span>
+<span id="cb20-23"><a href="#cb20-23"></a></span>
+<span id="cb20-24"><a href="#cb20-24"></a>repos &lt;-<span class="st"> </span><span class="kw">paste0</span>(repos, <span class="dt">collapse =</span> <span class="st">""</span>)</span>
+<span id="cb20-25"><a href="#cb20-25"></a></span>
+<span id="cb20-26"><a href="#cb20-26"></a>repos &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">"</span><span class="ch">\\</span><span class="st">+$"</span>,</span>
+<span id="cb20-27"><a href="#cb20-27"></a>              <span class="dt">replacement =</span> <span class="st">""</span>,</span>
+<span id="cb20-28"><a href="#cb20-28"></a>              <span class="dt">x =</span> repos)</span>
+<span id="cb20-29"><a href="#cb20-29"></a></span>
+<span id="cb20-30"><a href="#cb20-30"></a>github_search &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">"https://github.com/search?q="</span>,</span>
+<span id="cb20-31"><a href="#cb20-31"></a>                        query,</span>
+<span id="cb20-32"><a href="#cb20-32"></a>                        <span class="st">"+"</span>,</span>
+<span id="cb20-33"><a href="#cb20-33"></a>                        repos,</span>
+<span id="cb20-34"><a href="#cb20-34"></a>                        <span class="st">"&amp;type=Code&amp;ref=advsearch&amp;l=&amp;l="</span>)</span>
+<span id="cb20-35"><a href="#cb20-35"></a></span>
+<span id="cb20-36"><a href="#cb20-36"></a><span class="kw">cat</span>(github_search)</span></code></pre></div>
 </div>
 <div id="library-development-status" class="section level3">
 <h3 class="hasAnchor">
@@ -450,9 +464,10 @@ cat(github_search)</pre></body></html></div>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
 <p>Use: <strong>R 4.0.2</strong> <a href="https://cran.r-project.org/bin/macosx/R-4.0.2.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-4.0.2.pkg</a></p>
 <p>Use packages from mran:</p>
-<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(
-<span class="kw">repos</span> <span class="kw">=</span> <span class="st">"https://cran.microsoft.com/snapshot/2020-08-24"</span>
-                )</pre></body></html></div>
+<div class="sourceCode" id="cb22"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span><span class="op">(</span>
+repos <span class="op">=</span> <span class="st">"https://cran.microsoft.com/snapshot/2020-08-24"</span>
+                <span class="op">)</span></pre></div>
 </div>
 <div id="base-r-packages-within-jamovi" class="section level3">
 <h3 class="hasAnchor">
@@ -502,10 +517,11 @@ datasets:
 <div id="error-messages" class="section level2">
 <h2 class="hasAnchor">
 <a href="#error-messages" class="anchor"></a>Error messages</h2>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="kw">outcome</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">NA</span>,<span class="fl">1</span>))
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span>(<span class="no">data</span>)
-<span class="kw">if</span> ( ! <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span>(<span class="no">data</span>$<span class="no">outcome</span>) <span class="kw">||</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span>(<span class="no">data</span>$<span class="no">outcome</span> <span class="kw">!=</span> <span class="fl">0</span> <span class="kw">&amp;</span> <span class="no">data</span>$<span class="no">outcome</span> <span class="kw">!=</span> <span class="fl">1</span>))
-  <span class="fu"><a href="https://rdrr.io/r/base/stop.html">stop</a></span>(<span class="st">'Outcome variable must only contains 1s and 0s'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb25"><pre class="downlit">
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>outcome<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="cn">NA</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span><span class="op">)</span> <span class="op">||</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+  <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">'Outcome variable must only contains 1s and 0s'</span><span class="op">)</span></pre></div>
 <p>it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up.</p>
 <p>part of our philosophy is that people shouldn’t have to set their data up if they can’t be bothered … because with large data sets it can take a lot of time. so i’d encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() … more on our data philosophy here: <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
 <p><a href="https://youtu.be/oWZrrWc6e74" class="uri">https://youtu.be/oWZrrWc6e74</a></p>
@@ -557,565 +573,567 @@ Oh, I see. Thank you :slightly_smiling_face:</code></pre>
 <div id="develop" class="section level1">
 <h1 class="hasAnchor">
 <a href="#develop" class="anchor"></a>Develop</h1>
-<div class="sourceCode" id="cb28"><html><body><pre class="r">library, eval=FALSE, include=FALSE
-# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
-
-# jmvtools::check("C://Program Files//jamovi//bin")
-
-# jmvtools::install(home = "C://Program Files//jamovi//bin")
-#
-# devtools::build(path = "C:\\ClinicoPathOutput")
-
-# .libPaths(new = "C:\\ClinicoPathLibrary")
-
-# devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))
-
-Sys.setenv(TZ="Europe/Istanbul")
-
-library("jmvtools")</pre></body></html></div>
-<div class="sourceCode" id="cb29"><html><body><pre class="r">
-check, eval=FALSE, include=FALSE
-
-jmvtools::check()
-
-# rhub::check_on_macos()
-
-# rhub::check_for_cran()
-
-# codemetar::write_codemeta()
-
-
-devtools::check()</pre></body></html></div>
-<div class="sourceCode" id="cb30"><html><body><pre class="r">pkgdown build, eval=FALSE, include=FALSE
-rmarkdown::render('/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd',  encoding = 'UTF-8', knit_root_dir = '~/histopathRprojects/ClinicoPath', quiet = TRUE)
-
-devtools::document()
-
-pkgdown::build_site()</pre></body></html></div>
-<div class="sourceCode" id="cb31"><html><body><pre class="r">git force push, eval=FALSE, include=FALSE
-# gitUpdateCommitPush
-CommitMessage &lt;- paste("updated on ", Sys.time(), sep = "")
-wd &lt;- getwd()
-gitCommand &lt;- paste("cd ", wd, " \n git add . \n git commit --message '", CommitMessage, "' \n git push origin master \n", sep = "")
-# gitCommand &lt;- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "")
-system(command = gitCommand, intern = TRUE)</pre></body></html></div>
-<div class="sourceCode" id="cb32"><html><body><pre class="r">add analysis, eval=FALSE, include=FALSE
-
-# jmvtools::install()
-#
-# jmvtools::create('SuperAwesome')
-#
-# jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
-#
-# jmvtools::addAnalysis(name='survival', title='survival')
-#
-# jmvtools::addAnalysis(name='correlation', title='correlation')
-#
-# jmvtools::addAnalysis(name='tableone', title='TableOne')
-#
-# jmvtools::addAnalysis(name='crosstable', title='CrossTable')
-#
-#
-# jmvtools::addAnalysis(name='writesummary', title='WriteSummary')
-
-# jmvtools::addAnalysis(name='finalfit', title='FinalFit')
-
-# jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival')
-
-# jmvtools::addAnalysis(name='report', title='Report General Features')
-
-# jmvtools::addAnalysis(name='frequencies', title='Frequencies')
-
-# jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')
-
-# jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')
-
-# jmvtools::addAnalysis(name='scat2', title='scat2')
-
-# jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')
-
-# jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')
-
-# jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')
-
-# jmvtools::addAnalysis(name='tree', title='Decision Tree')</pre></body></html></div>
-<div class="sourceCode" id="cb33"><html><body><pre class="r">devtools install, eval=FALSE, include=FALSE
-devtools::install()</pre></body></html></div>
-<div class="sourceCode" id="cb34"><html><body><pre class="r">jmvtools install, eval=FALSE, include=FALSE
-# jmvtools::check()
-jmvtools::install()</pre></body></html></div>
-<div class="sourceCode" id="cb35"><html><body><pre class="r">construct, eval=FALSE, include=FALSE
-formula &lt;- jmvcore::constructFormula(terms = c("A", "B", "C"), dep = "D")
-
-jmvcore::constructFormula(terms = list("A", "B", c("C", "D")), dep = "E")
-
-
-jmvcore::constructFormula(terms = list("A", "B", "C"))
-
-vars &lt;- jmvcore::decomposeFormula(formula = formula)
-
-unlist(vars)
-
-cformula &lt;- jmvcore::composeTerm(components = formula)
-
-jmvcore::composeTerm("A")
-
-jmvcore::composeTerm(components = c("A", "B", "C"))
-
-jmvcore::decomposeTerm(term = c("A", "B", "C"))
-
-jmvcore::decomposeTerm(term = formula)
-
-jmvcore::decomposeTerm(term = cformula)
-
-
-
-composeTerm &lt;- jmvcore::composeTerm(components = c("A", "B", "C"))
-
-jmvcore::decomposeTerm(term = composeTerm)
-</pre></body></html></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>library, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="co"># install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a></span>
+<span id="cb28-4"><a href="#cb28-4"></a><span class="co"># jmvtools::check("C://Program Files//jamovi//bin")</span></span>
+<span id="cb28-5"><a href="#cb28-5"></a></span>
+<span id="cb28-6"><a href="#cb28-6"></a><span class="co"># jmvtools::install(home = "C://Program Files//jamovi//bin")</span></span>
+<span id="cb28-7"><a href="#cb28-7"></a><span class="co">#</span></span>
+<span id="cb28-8"><a href="#cb28-8"></a><span class="co"># devtools::build(path = "C:\\ClinicoPathOutput")</span></span>
+<span id="cb28-9"><a href="#cb28-9"></a></span>
+<span id="cb28-10"><a href="#cb28-10"></a><span class="co"># .libPaths(new = "C:\\ClinicoPathLibrary")</span></span>
+<span id="cb28-11"><a href="#cb28-11"></a></span>
+<span id="cb28-12"><a href="#cb28-12"></a><span class="co"># devtools::build(path = "C:\\ClinicoPathOutput", binary = TRUE, args = c('--preclean'))</span></span>
+<span id="cb28-13"><a href="#cb28-13"></a></span>
+<span id="cb28-14"><a href="#cb28-14"></a><span class="kw">Sys.setenv</span>(<span class="dt">TZ=</span><span class="st">"Europe/Istanbul"</span>)</span>
+<span id="cb28-15"><a href="#cb28-15"></a></span>
+<span id="cb28-16"><a href="#cb28-16"></a><span class="kw">library</span>(<span class="st">"jmvtools"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a></span>
+<span id="cb29-2"><a href="#cb29-2"></a>check, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a></span>
+<span id="cb29-4"><a href="#cb29-4"></a>jmvtools<span class="op">::</span><span class="kw">check</span>()</span>
+<span id="cb29-5"><a href="#cb29-5"></a></span>
+<span id="cb29-6"><a href="#cb29-6"></a><span class="co"># rhub::check_on_macos()</span></span>
+<span id="cb29-7"><a href="#cb29-7"></a></span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="co"># rhub::check_for_cran()</span></span>
+<span id="cb29-9"><a href="#cb29-9"></a></span>
+<span id="cb29-10"><a href="#cb29-10"></a><span class="co"># codemetar::write_codemeta()</span></span>
+<span id="cb29-11"><a href="#cb29-11"></a></span>
+<span id="cb29-12"><a href="#cb29-12"></a></span>
+<span id="cb29-13"><a href="#cb29-13"></a>devtools<span class="op">::</span><span class="kw">check</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>pkgdown build, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>rmarkdown<span class="op">::</span><span class="kw">render</span>(<span class="st">'/Users/serdarbalciold/histopathRprojects/ClinicoPath/README.Rmd'</span>,  <span class="dt">encoding =</span> <span class="st">'UTF-8'</span>, <span class="dt">knit_root_dir =</span> <span class="st">'~/histopathRprojects/ClinicoPath'</span>, <span class="dt">quiet =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb30-3"><a href="#cb30-3"></a></span>
+<span id="cb30-4"><a href="#cb30-4"></a>devtools<span class="op">::</span><span class="kw">document</span>()</span>
+<span id="cb30-5"><a href="#cb30-5"></a></span>
+<span id="cb30-6"><a href="#cb30-6"></a>pkgdown<span class="op">::</span><span class="kw">build_site</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>git force push, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="co"># gitUpdateCommitPush</span></span>
+<span id="cb31-3"><a href="#cb31-3"></a>CommitMessage &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">"updated on "</span>, <span class="kw">Sys.time</span>(), <span class="dt">sep =</span> <span class="st">""</span>)</span>
+<span id="cb31-4"><a href="#cb31-4"></a>wd &lt;-<span class="st"> </span><span class="kw">getwd</span>()</span>
+<span id="cb31-5"><a href="#cb31-5"></a>gitCommand &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">"cd "</span>, wd, <span class="st">" </span><span class="ch">\n</span><span class="st"> git add . </span><span class="ch">\n</span><span class="st"> git commit --message '"</span>, CommitMessage, <span class="st">"' </span><span class="ch">\n</span><span class="st"> git push origin master </span><span class="ch">\n</span><span class="st">"</span>, <span class="dt">sep =</span> <span class="st">""</span>)</span>
+<span id="cb31-6"><a href="#cb31-6"></a><span class="co"># gitCommand &lt;- paste("cd ", wd, " \n git add . \n git commit --no-verify --message '", CommitMessage, "' \n git push origin master \n", sep = "")</span></span>
+<span id="cb31-7"><a href="#cb31-7"></a><span class="kw">system</span>(<span class="dt">command =</span> gitCommand, <span class="dt">intern =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>add analysis, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="co"># jmvtools::install()</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a><span class="co">#</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a><span class="co"># jmvtools::create('SuperAwesome')</span></span>
+<span id="cb32-6"><a href="#cb32-6"></a><span class="co">#</span></span>
+<span id="cb32-7"><a href="#cb32-7"></a><span class="co"># jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')</span></span>
+<span id="cb32-8"><a href="#cb32-8"></a><span class="co">#</span></span>
+<span id="cb32-9"><a href="#cb32-9"></a><span class="co"># jmvtools::addAnalysis(name='survival', title='survival')</span></span>
+<span id="cb32-10"><a href="#cb32-10"></a><span class="co">#</span></span>
+<span id="cb32-11"><a href="#cb32-11"></a><span class="co"># jmvtools::addAnalysis(name='correlation', title='correlation')</span></span>
+<span id="cb32-12"><a href="#cb32-12"></a><span class="co">#</span></span>
+<span id="cb32-13"><a href="#cb32-13"></a><span class="co"># jmvtools::addAnalysis(name='tableone', title='TableOne')</span></span>
+<span id="cb32-14"><a href="#cb32-14"></a><span class="co">#</span></span>
+<span id="cb32-15"><a href="#cb32-15"></a><span class="co"># jmvtools::addAnalysis(name='crosstable', title='CrossTable')</span></span>
+<span id="cb32-16"><a href="#cb32-16"></a><span class="co">#</span></span>
+<span id="cb32-17"><a href="#cb32-17"></a><span class="co">#</span></span>
+<span id="cb32-18"><a href="#cb32-18"></a><span class="co"># jmvtools::addAnalysis(name='writesummary', title='WriteSummary')</span></span>
+<span id="cb32-19"><a href="#cb32-19"></a></span>
+<span id="cb32-20"><a href="#cb32-20"></a><span class="co"># jmvtools::addAnalysis(name='finalfit', title='FinalFit')</span></span>
+<span id="cb32-21"><a href="#cb32-21"></a></span>
+<span id="cb32-22"><a href="#cb32-22"></a><span class="co"># jmvtools::addAnalysis(name='multisurvival', title='FinalFit Multivariate Survival')</span></span>
+<span id="cb32-23"><a href="#cb32-23"></a></span>
+<span id="cb32-24"><a href="#cb32-24"></a><span class="co"># jmvtools::addAnalysis(name='report', title='Report General Features')</span></span>
+<span id="cb32-25"><a href="#cb32-25"></a></span>
+<span id="cb32-26"><a href="#cb32-26"></a><span class="co"># jmvtools::addAnalysis(name='frequencies', title='Frequencies')</span></span>
+<span id="cb32-27"><a href="#cb32-27"></a></span>
+<span id="cb32-28"><a href="#cb32-28"></a><span class="co"># jmvtools::addAnalysis(name='statsplot', title='GGStatsPlot')</span></span>
+<span id="cb32-29"><a href="#cb32-29"></a></span>
+<span id="cb32-30"><a href="#cb32-30"></a><span class="co"># jmvtools::addAnalysis(name='statsplot2', title='GGStatsPlot2')</span></span>
+<span id="cb32-31"><a href="#cb32-31"></a></span>
+<span id="cb32-32"><a href="#cb32-32"></a><span class="co"># jmvtools::addAnalysis(name='scat2', title='scat2')</span></span>
+<span id="cb32-33"><a href="#cb32-33"></a></span>
+<span id="cb32-34"><a href="#cb32-34"></a><span class="co"># jmvtools::addAnalysis(name='decisioncalculator', title='Decision Calculator')</span></span>
+<span id="cb32-35"><a href="#cb32-35"></a></span>
+<span id="cb32-36"><a href="#cb32-36"></a><span class="co"># jmvtools::addAnalysis(name='agreement', title='Interrater Intrarater Reliability')</span></span>
+<span id="cb32-37"><a href="#cb32-37"></a></span>
+<span id="cb32-38"><a href="#cb32-38"></a><span class="co"># jmvtools::addAnalysis(name='cluster', title='Cluster Analysis')</span></span>
+<span id="cb32-39"><a href="#cb32-39"></a></span>
+<span id="cb32-40"><a href="#cb32-40"></a><span class="co"># jmvtools::addAnalysis(name='tree', title='Decision Tree')</span></span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>devtools install, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a>devtools<span class="op">::</span><span class="kw">install</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>jmvtools install, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="co"># jmvtools::check()</span></span>
+<span id="cb34-3"><a href="#cb34-3"></a>jmvtools<span class="op">::</span><span class="kw">install</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>construct, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a>formula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>), <span class="dt">dep =</span> <span class="st">"D"</span>)</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">list</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="kw">c</span>(<span class="st">"C"</span>, <span class="st">"D"</span>)), <span class="dt">dep =</span> <span class="st">"E"</span>)</span>
+<span id="cb35-5"><a href="#cb35-5"></a></span>
+<span id="cb35-6"><a href="#cb35-6"></a></span>
+<span id="cb35-7"><a href="#cb35-7"></a>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">list</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb35-8"><a href="#cb35-8"></a></span>
+<span id="cb35-9"><a href="#cb35-9"></a>vars &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">decomposeFormula</span>(<span class="dt">formula =</span> formula)</span>
+<span id="cb35-10"><a href="#cb35-10"></a></span>
+<span id="cb35-11"><a href="#cb35-11"></a><span class="kw">unlist</span>(vars)</span>
+<span id="cb35-12"><a href="#cb35-12"></a></span>
+<span id="cb35-13"><a href="#cb35-13"></a>cformula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(<span class="dt">components =</span> formula)</span>
+<span id="cb35-14"><a href="#cb35-14"></a></span>
+<span id="cb35-15"><a href="#cb35-15"></a>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(<span class="st">"A"</span>)</span>
+<span id="cb35-16"><a href="#cb35-16"></a></span>
+<span id="cb35-17"><a href="#cb35-17"></a>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(<span class="dt">components =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb35-18"><a href="#cb35-18"></a></span>
+<span id="cb35-19"><a href="#cb35-19"></a>jmvcore<span class="op">::</span><span class="kw">decomposeTerm</span>(<span class="dt">term =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb35-20"><a href="#cb35-20"></a></span>
+<span id="cb35-21"><a href="#cb35-21"></a>jmvcore<span class="op">::</span><span class="kw">decomposeTerm</span>(<span class="dt">term =</span> formula)</span>
+<span id="cb35-22"><a href="#cb35-22"></a></span>
+<span id="cb35-23"><a href="#cb35-23"></a>jmvcore<span class="op">::</span><span class="kw">decomposeTerm</span>(<span class="dt">term =</span> cformula)</span>
+<span id="cb35-24"><a href="#cb35-24"></a></span>
+<span id="cb35-25"><a href="#cb35-25"></a></span>
+<span id="cb35-26"><a href="#cb35-26"></a></span>
+<span id="cb35-27"><a href="#cb35-27"></a>composeTerm &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(<span class="dt">components =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb35-28"><a href="#cb35-28"></a></span>
+<span id="cb35-29"><a href="#cb35-29"></a>jmvcore<span class="op">::</span><span class="kw">decomposeTerm</span>(<span class="dt">term =</span> composeTerm)</span>
+<span id="cb35-30"><a href="#cb35-30"></a></span></code></pre></div>
 <hr>
 </div>
 <div id="example" class="section level1">
 <h1 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h1>
-<div class="sourceCode" id="cb36"><html><body><pre class="r">read data, eval=FALSE, include=FALSE
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))</pre></body></html></div>
-<div class="sourceCode" id="cb37"><html><body><pre class="r">writesummary, eval=FALSE, include=FALSE
-devtools::install(upgrade = FALSE, quick = TRUE)
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-# library("ClinicoPath")
-
-deneme$Age &lt;- as.numeric(as.character(deneme$Age))
-
-ClinicoPath::writesummary(data = deneme, vars = Age)
-
-ggstatsplot::normality_message(deneme$Age, "Age")
-
-
-ClinicoPath::writesummary(
-    data = deneme,
-    vars = Age)
-</pre></body></html></div>
-<div class="sourceCode" id="cb38"><html><body><pre class="r">finalfit, eval=FALSE, include=FALSE
-devtools::install(upgrade = FALSE, quick = TRUE)
-library(dplyr)
-library(survival)
-library(finalfit)
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-ClinicoPath::finalfit(data = deneme,
-                      explanatory = Sex,
-                      outcome = Outcome,
-                      overalltime = OverallTime)</pre></body></html></div>
-<div class="sourceCode" id="cb39"><html><body><pre class="r">decision, eval=FALSE, include=FALSE
-devtools::install(upgrade = FALSE, quick = TRUE)
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-ClinicoPath::decision(
-    data = deneme,
-    gold = Outcome,
-    goldPositive = "1",
-    newtest = Smoker,
-    testPositive = "TRUE")
-
-ClinicoPath::decision(
-    data = deneme,
-    gold = LVI,
-    goldPositive = "Present",
-    newtest = PNI,
-    testPositive = "Present")</pre></body></html></div>
-<div class="sourceCode" id="cb40"><html><body><pre class="r">eval=FALSE, include=FALSE
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-ggstatsplot::ggbetweenstats(data = deneme,
-                            x = LVI,
-                            y = Age)</pre></body></html></div>
-<div class="sourceCode" id="cb41"><html><body><pre class="r">statsplot, eval=FALSE, include=FALSE
-devtools::install(upgrade = FALSE, quick = TRUE)
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-ClinicoPath::statsplot(
-    data = deneme,
-    dep = Age,
-    group = Smoker)</pre></body></html></div>
-<div class="sourceCode" id="cb42"><html><body><pre class="r">decision 2, eval=FALSE, include=FALSE
-mytable &lt;- table(deneme$Outcome, deneme$Smoker)
-
-caret::confusionMatrix(mytable)
-confusionMatrix(pred, truth)
-confusionMatrix(xtab, prevalence = 0.25)
-
-levels(deneme$Outcome)
-
-mytable[1,2]
-
-d &lt;- "0"
-
-mytable[d, "FALSE"]
-
-mytable[[0]]</pre></body></html></div>
-<div class="sourceCode" id="cb43"><html><body><pre class="r">construct formula, eval=FALSE, include=FALSE
-formula &lt;- jmvcore::constructFormula(terms = c("A", "B", "C"))
-
-jmvcore::constructFormula(terms = list("A", "B", "C"))
-
-vars &lt;- jmvcore::decomposeFormula(formula = formula)
-
-vars &lt;- jmvcore::decomposeTerms(vars)
-
-
-vars &lt;- unlist(vars)
-
-formula &lt;- as.formula(formula)
-
-
-my_group &lt;- "lvi"
-my_dep &lt;- "age"
-
-formula &lt;- paste0('x = ', group, 'y = ', dep)
-myformula &lt;- as.formula(formula)
-
-myformula &lt;- glueformula::gf(my_group, my_dep)
-
-myformula &lt;- glue::glue( 'x = ' , my_group, ', y = ' , my_dep)
-
-myformula &lt;- jmvcore::composeTerm(myformula)
-</pre></body></html></div>
-<div class="sourceCode" id="cb44"><html><body><pre class="r">eval=FALSE, include=FALSE
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-library(survival)
-km_fit &lt;- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
-
-library(dplyr)
-km_fit_median_df &lt;- summary(km_fit)
-km_fit_median_df &lt;- as.data.frame(km_fit_median_df$table) %&gt;%
-                janitor::clean_names(dat = ., case = "snake") %&gt;%
-                tibble::rownames_to_column(.data = ., var = "LVI")</pre></body></html></div>
-<div class="sourceCode" id="cb45"><html><body><pre class="r">construct formula 2, eval=FALSE, include=FALSE
-library(dplyr)
-library(survival)
-
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-myoveralltime &lt;- deneme$OverallTime
-myoutcome &lt;- deneme$Outcome
-myexplanatory &lt;- deneme$LVI
-
-class(myoveralltime)
-class(myoutcome)
-typeof(myexplanatory)
-
-is.ordered(myexplanatory)
-
-formula2 &lt;- jmvcore::constructFormula(terms = "myexplanatory")
-# formula2 &lt;- jmvcore::decomposeFormula(formula = formula2)
-# formula2 &lt;- paste("", formula2)
-# formula2 &lt;- as.formula(formula2)
-formula2 &lt;- jmvcore::composeTerm(formula2)
-
-
-formulaL &lt;- jmvcore::constructFormula(terms = "myoveralltime")
-# formulaL &lt;- jmvcore::decomposeFormula(formula = formulaL)
-
-formulaR &lt;- jmvcore::constructFormula(terms = "myoutcome")
-# formulaR &lt;- jmvcore::decomposeFormula(formula = formulaR)
-
-formula &lt;- paste("Surv(", formulaL, ",", formulaR, ")")
-# formula &lt;- jmvcore::composeTerm(formula)
-# formula &lt;- as.formula(formula)
-# jmvcore::constructFormula(terms = c(formula, formula2))
-
-deneme %&gt;%
-  finalfit::finalfit(formula, formula2) -&gt; tUni
-
-tUni</pre></body></html></div>
-<div class="sourceCode" id="cb46"><html><body><pre class="r">eval=FALSE, include=FALSE
-library(dplyr)
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-results &lt;- deneme %&gt;%
-                ggstatsplot::ggbetweenstats(LVI, Age)
-results
-
-mydep &lt;- deneme$Age
-mygroup &lt;- deneme$LVI
-
-
-mygroup &lt;- jmvcore::constructFormula(terms = "mygroup")
-mygroup &lt;- jmvcore::composeTerm(mygroup)
-
-mydep &lt;- jmvcore::constructFormula(terms = "mydep")
-mydep &lt;- jmvcore::composeTerm(mydep)
-
-
-# not working
-# eval(mygroup)
-# rlang::eval_tidy(mygroup)
-# !!mygroup
-# mygroup
-# sym(mygroup)
-# quote(mygroup)
-# enexpr(mygroup)
-
-mygroup &lt;- jmvcore::constructFormula(terms = "mygroup")
-mydep &lt;- jmvcore::constructFormula(terms = "mydep")
-
-formula1 &lt;- paste(mydep)
-formula1 &lt;- jmvcore::composeTerm(formula1)
-
-
-mygroup &lt;- paste(mygroup)
-mygroup &lt;- jmvcore::composeTerm(mygroup)
-
-mydep &lt;- deneme$Age
-mygroup &lt;- deneme$LVI
-
-mydep &lt;- jmvcore::resolveQuo(jmvcore::enquo(mydep))
-mygroup &lt;- jmvcore::resolveQuo(jmvcore::enquo(mygroup))
-
-mydata2 &lt;- data.frame(mygroup=mygroup, mydep=mydep)
-
-results &lt;- mydata2 %&gt;%
-                ggstatsplot::ggbetweenstats(
-x = mygroup, y = mydep  )
-
-results
-
-
-
-myformula &lt;- glue::glue('x = ', mygroup, ', y = ' , mydep)
-
-myformula &lt;- jmvcore::composeTerm(myformula)
-
-myformula &lt;- as.formula(myformula)
-
-
-mydep2 &lt;- quote(mydep)
-mygroup2 &lt;- quote(mygroup)
-
-
-results &lt;- deneme %&gt;%
-                ggstatsplot::ggbetweenstats(!!mygroup2, !!mydep2)
-results</pre></body></html></div>
-<div class="sourceCode" id="cb47"><html><body><pre class="r">construct formula 3, eval=FALSE, include=FALSE
-formula &lt;- jmvcore::constructFormula(terms = c("myoveralltime", "myoutcome"))
-
-vars &lt;- jmvcore::decomposeFormula(formula = formula)
-
-
-explanatory &lt;- jmvcore::constructFormula(terms = c("explanatory"))
-
-explanatory &lt;- jmvcore::decomposeFormula(formula = explanatory)
-
-explanatory &lt;- unlist(explanatory)
-
-myformula &lt;- paste("Surv(", vars[1], ", ", vars[2], ")")
-
-
-
-deneme %&gt;%
-finalfit::finalfit(myformula, explanatory) -&gt; tUni</pre></body></html></div>
-<div class="sourceCode" id="cb48"><html><body><pre class="r">table tangram, eval=FALSE, include=FALSE
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-
-
-table3 &lt;-
-  tangram::html5(
-    tangram::tangram(
-      "Death ~ LVI + PNI + Age", deneme),
-    fragment=TRUE,
-    inline="nejm.css",
-    caption = "HTML5 Table NEJM Style",
-    id="tbl3")
-
-table3
-
-mydep &lt;- deneme$Age
-mygroup &lt;- deneme$Death
-
-
-formulaR &lt;- jmvcore::constructFormula(terms =  c("LVI", "PNI", "Age"))
-
-formulaL &lt;- jmvcore::constructFormula(terms = "Death")
-
-formula &lt;- paste(formulaL, '~', formulaR)
-
-formula &lt;- as.formula(formula)
-
-
-table &lt;- tangram::html5(
-    tangram::tangram(formula, deneme
-                     ))
-
-table
-</pre></body></html></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>read data, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>writesummary, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a>devtools<span class="op">::</span><span class="kw">install</span>(<span class="dt">upgrade =</span> <span class="ot">FALSE</span>, <span class="dt">quick =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb37-3"><a href="#cb37-3"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb37-4"><a href="#cb37-4"></a></span>
+<span id="cb37-5"><a href="#cb37-5"></a><span class="co"># library("ClinicoPath")</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a></span>
+<span id="cb37-7"><a href="#cb37-7"></a>deneme<span class="op">$</span>Age &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">as.character</span>(deneme<span class="op">$</span>Age))</span>
+<span id="cb37-8"><a href="#cb37-8"></a></span>
+<span id="cb37-9"><a href="#cb37-9"></a>ClinicoPath<span class="op">::</span><span class="kw">writesummary</span>(<span class="dt">data =</span> deneme, <span class="dt">vars =</span> Age)</span>
+<span id="cb37-10"><a href="#cb37-10"></a></span>
+<span id="cb37-11"><a href="#cb37-11"></a>ggstatsplot<span class="op">::</span><span class="kw">normality_message</span>(deneme<span class="op">$</span>Age, <span class="st">"Age"</span>)</span>
+<span id="cb37-12"><a href="#cb37-12"></a></span>
+<span id="cb37-13"><a href="#cb37-13"></a></span>
+<span id="cb37-14"><a href="#cb37-14"></a>ClinicoPath<span class="op">::</span><span class="kw">writesummary</span>(</span>
+<span id="cb37-15"><a href="#cb37-15"></a>    <span class="dt">data =</span> deneme,</span>
+<span id="cb37-16"><a href="#cb37-16"></a>    <span class="dt">vars =</span> Age)</span>
+<span id="cb37-17"><a href="#cb37-17"></a></span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>finalfit, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a>devtools<span class="op">::</span><span class="kw">install</span>(<span class="dt">upgrade =</span> <span class="ot">FALSE</span>, <span class="dt">quick =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb38-4"><a href="#cb38-4"></a><span class="kw">library</span>(survival)</span>
+<span id="cb38-5"><a href="#cb38-5"></a><span class="kw">library</span>(finalfit)</span>
+<span id="cb38-6"><a href="#cb38-6"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb38-7"><a href="#cb38-7"></a>ClinicoPath<span class="op">::</span><span class="kw">finalfit</span>(<span class="dt">data =</span> deneme,</span>
+<span id="cb38-8"><a href="#cb38-8"></a>                      <span class="dt">explanatory =</span> Sex,</span>
+<span id="cb38-9"><a href="#cb38-9"></a>                      <span class="dt">outcome =</span> Outcome,</span>
+<span id="cb38-10"><a href="#cb38-10"></a>                      <span class="dt">overalltime =</span> OverallTime)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>decision, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a>devtools<span class="op">::</span><span class="kw">install</span>(<span class="dt">upgrade =</span> <span class="ot">FALSE</span>, <span class="dt">quick =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb39-3"><a href="#cb39-3"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb39-4"><a href="#cb39-4"></a></span>
+<span id="cb39-5"><a href="#cb39-5"></a>ClinicoPath<span class="op">::</span><span class="kw">decision</span>(</span>
+<span id="cb39-6"><a href="#cb39-6"></a>    <span class="dt">data =</span> deneme,</span>
+<span id="cb39-7"><a href="#cb39-7"></a>    <span class="dt">gold =</span> Outcome,</span>
+<span id="cb39-8"><a href="#cb39-8"></a>    <span class="dt">goldPositive =</span> <span class="st">"1"</span>,</span>
+<span id="cb39-9"><a href="#cb39-9"></a>    <span class="dt">newtest =</span> Smoker,</span>
+<span id="cb39-10"><a href="#cb39-10"></a>    <span class="dt">testPositive =</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb39-11"><a href="#cb39-11"></a></span>
+<span id="cb39-12"><a href="#cb39-12"></a>ClinicoPath<span class="op">::</span><span class="kw">decision</span>(</span>
+<span id="cb39-13"><a href="#cb39-13"></a>    <span class="dt">data =</span> deneme,</span>
+<span id="cb39-14"><a href="#cb39-14"></a>    <span class="dt">gold =</span> LVI,</span>
+<span id="cb39-15"><a href="#cb39-15"></a>    <span class="dt">goldPositive =</span> <span class="st">"Present"</span>,</span>
+<span id="cb39-16"><a href="#cb39-16"></a>    <span class="dt">newtest =</span> PNI,</span>
+<span id="cb39-17"><a href="#cb39-17"></a>    <span class="dt">testPositive =</span> <span class="st">"Present"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb40-2"><a href="#cb40-2"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb40-3"><a href="#cb40-3"></a>ggstatsplot<span class="op">::</span><span class="kw">ggbetweenstats</span>(<span class="dt">data =</span> deneme,</span>
+<span id="cb40-4"><a href="#cb40-4"></a>                            <span class="dt">x =</span> LVI,</span>
+<span id="cb40-5"><a href="#cb40-5"></a>                            <span class="dt">y =</span> Age)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>statsplot, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb41-2"><a href="#cb41-2"></a>devtools<span class="op">::</span><span class="kw">install</span>(<span class="dt">upgrade =</span> <span class="ot">FALSE</span>, <span class="dt">quick =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb41-3"><a href="#cb41-3"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb41-4"><a href="#cb41-4"></a>ClinicoPath<span class="op">::</span><span class="kw">statsplot</span>(</span>
+<span id="cb41-5"><a href="#cb41-5"></a>    <span class="dt">data =</span> deneme,</span>
+<span id="cb41-6"><a href="#cb41-6"></a>    <span class="dt">dep =</span> Age,</span>
+<span id="cb41-7"><a href="#cb41-7"></a>    <span class="dt">group =</span> Smoker)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>decision <span class="dv">2</span>, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb42-2"><a href="#cb42-2"></a>mytable &lt;-<span class="st"> </span><span class="kw">table</span>(deneme<span class="op">$</span>Outcome, deneme<span class="op">$</span>Smoker)</span>
+<span id="cb42-3"><a href="#cb42-3"></a></span>
+<span id="cb42-4"><a href="#cb42-4"></a>caret<span class="op">::</span><span class="kw">confusionMatrix</span>(mytable)</span>
+<span id="cb42-5"><a href="#cb42-5"></a><span class="kw">confusionMatrix</span>(pred, truth)</span>
+<span id="cb42-6"><a href="#cb42-6"></a><span class="kw">confusionMatrix</span>(xtab, <span class="dt">prevalence =</span> <span class="fl">0.25</span>)</span>
+<span id="cb42-7"><a href="#cb42-7"></a></span>
+<span id="cb42-8"><a href="#cb42-8"></a><span class="kw">levels</span>(deneme<span class="op">$</span>Outcome)</span>
+<span id="cb42-9"><a href="#cb42-9"></a></span>
+<span id="cb42-10"><a href="#cb42-10"></a>mytable[<span class="dv">1</span>,<span class="dv">2</span>]</span>
+<span id="cb42-11"><a href="#cb42-11"></a></span>
+<span id="cb42-12"><a href="#cb42-12"></a>d &lt;-<span class="st"> "0"</span></span>
+<span id="cb42-13"><a href="#cb42-13"></a></span>
+<span id="cb42-14"><a href="#cb42-14"></a>mytable[d, <span class="st">"FALSE"</span>]</span>
+<span id="cb42-15"><a href="#cb42-15"></a></span>
+<span id="cb42-16"><a href="#cb42-16"></a>mytable[[<span class="dv">0</span>]]</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>construct formula, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb43-2"><a href="#cb43-2"></a>formula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb43-3"><a href="#cb43-3"></a></span>
+<span id="cb43-4"><a href="#cb43-4"></a>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">list</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb43-5"><a href="#cb43-5"></a></span>
+<span id="cb43-6"><a href="#cb43-6"></a>vars &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">decomposeFormula</span>(<span class="dt">formula =</span> formula)</span>
+<span id="cb43-7"><a href="#cb43-7"></a></span>
+<span id="cb43-8"><a href="#cb43-8"></a>vars &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">decomposeTerms</span>(vars)</span>
+<span id="cb43-9"><a href="#cb43-9"></a></span>
+<span id="cb43-10"><a href="#cb43-10"></a></span>
+<span id="cb43-11"><a href="#cb43-11"></a>vars &lt;-<span class="st"> </span><span class="kw">unlist</span>(vars)</span>
+<span id="cb43-12"><a href="#cb43-12"></a></span>
+<span id="cb43-13"><a href="#cb43-13"></a>formula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(formula)</span>
+<span id="cb43-14"><a href="#cb43-14"></a></span>
+<span id="cb43-15"><a href="#cb43-15"></a></span>
+<span id="cb43-16"><a href="#cb43-16"></a>my_group &lt;-<span class="st"> "lvi"</span></span>
+<span id="cb43-17"><a href="#cb43-17"></a>my_dep &lt;-<span class="st"> "age"</span></span>
+<span id="cb43-18"><a href="#cb43-18"></a></span>
+<span id="cb43-19"><a href="#cb43-19"></a>formula &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">'x = '</span>, group, <span class="st">'y = '</span>, dep)</span>
+<span id="cb43-20"><a href="#cb43-20"></a>myformula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(formula)</span>
+<span id="cb43-21"><a href="#cb43-21"></a></span>
+<span id="cb43-22"><a href="#cb43-22"></a>myformula &lt;-<span class="st"> </span>glueformula<span class="op">::</span><span class="kw">gf</span>(my_group, my_dep)</span>
+<span id="cb43-23"><a href="#cb43-23"></a></span>
+<span id="cb43-24"><a href="#cb43-24"></a>myformula &lt;-<span class="st"> </span>glue<span class="op">::</span><span class="kw">glue</span>( <span class="st">'x = '</span> , my_group, <span class="st">', y = '</span> , my_dep)</span>
+<span id="cb43-25"><a href="#cb43-25"></a></span>
+<span id="cb43-26"><a href="#cb43-26"></a>myformula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(myformula)</span>
+<span id="cb43-27"><a href="#cb43-27"></a></span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb44-2"><a href="#cb44-2"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb44-3"><a href="#cb44-3"></a></span>
+<span id="cb44-4"><a href="#cb44-4"></a><span class="kw">library</span>(survival)</span>
+<span id="cb44-5"><a href="#cb44-5"></a>km_fit &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(OverallTime, Outcome) <span class="op">~</span><span class="st"> </span>LVI, <span class="dt">data =</span> deneme)</span>
+<span id="cb44-6"><a href="#cb44-6"></a></span>
+<span id="cb44-7"><a href="#cb44-7"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb44-8"><a href="#cb44-8"></a>km_fit_median_df &lt;-<span class="st"> </span><span class="kw">summary</span>(km_fit)</span>
+<span id="cb44-9"><a href="#cb44-9"></a>km_fit_median_df &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(km_fit_median_df<span class="op">$</span>table) <span class="op">%&gt;%</span></span>
+<span id="cb44-10"><a href="#cb44-10"></a><span class="st">                </span>janitor<span class="op">::</span><span class="kw">clean_names</span>(<span class="dt">dat =</span> ., <span class="dt">case =</span> <span class="st">"snake"</span>) <span class="op">%&gt;%</span></span>
+<span id="cb44-11"><a href="#cb44-11"></a><span class="st">                </span>tibble<span class="op">::</span><span class="kw">rownames_to_column</span>(<span class="dt">.data =</span> ., <span class="dt">var =</span> <span class="st">"LVI"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a>construct formula <span class="dv">2</span>, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb45-2"><a href="#cb45-2"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb45-3"><a href="#cb45-3"></a><span class="kw">library</span>(survival)</span>
+<span id="cb45-4"><a href="#cb45-4"></a></span>
+<span id="cb45-5"><a href="#cb45-5"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb45-6"><a href="#cb45-6"></a></span>
+<span id="cb45-7"><a href="#cb45-7"></a>myoveralltime &lt;-<span class="st"> </span>deneme<span class="op">$</span>OverallTime</span>
+<span id="cb45-8"><a href="#cb45-8"></a>myoutcome &lt;-<span class="st"> </span>deneme<span class="op">$</span>Outcome</span>
+<span id="cb45-9"><a href="#cb45-9"></a>myexplanatory &lt;-<span class="st"> </span>deneme<span class="op">$</span>LVI</span>
+<span id="cb45-10"><a href="#cb45-10"></a></span>
+<span id="cb45-11"><a href="#cb45-11"></a><span class="kw">class</span>(myoveralltime)</span>
+<span id="cb45-12"><a href="#cb45-12"></a><span class="kw">class</span>(myoutcome)</span>
+<span id="cb45-13"><a href="#cb45-13"></a><span class="kw">typeof</span>(myexplanatory)</span>
+<span id="cb45-14"><a href="#cb45-14"></a></span>
+<span id="cb45-15"><a href="#cb45-15"></a><span class="kw">is.ordered</span>(myexplanatory)</span>
+<span id="cb45-16"><a href="#cb45-16"></a></span>
+<span id="cb45-17"><a href="#cb45-17"></a>formula2 &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"myexplanatory"</span>)</span>
+<span id="cb45-18"><a href="#cb45-18"></a><span class="co"># formula2 &lt;- jmvcore::decomposeFormula(formula = formula2)</span></span>
+<span id="cb45-19"><a href="#cb45-19"></a><span class="co"># formula2 &lt;- paste("", formula2)</span></span>
+<span id="cb45-20"><a href="#cb45-20"></a><span class="co"># formula2 &lt;- as.formula(formula2)</span></span>
+<span id="cb45-21"><a href="#cb45-21"></a>formula2 &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(formula2)</span>
+<span id="cb45-22"><a href="#cb45-22"></a></span>
+<span id="cb45-23"><a href="#cb45-23"></a></span>
+<span id="cb45-24"><a href="#cb45-24"></a>formulaL &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"myoveralltime"</span>)</span>
+<span id="cb45-25"><a href="#cb45-25"></a><span class="co"># formulaL &lt;- jmvcore::decomposeFormula(formula = formulaL)</span></span>
+<span id="cb45-26"><a href="#cb45-26"></a></span>
+<span id="cb45-27"><a href="#cb45-27"></a>formulaR &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"myoutcome"</span>)</span>
+<span id="cb45-28"><a href="#cb45-28"></a><span class="co"># formulaR &lt;- jmvcore::decomposeFormula(formula = formulaR)</span></span>
+<span id="cb45-29"><a href="#cb45-29"></a></span>
+<span id="cb45-30"><a href="#cb45-30"></a>formula &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">"Surv("</span>, formulaL, <span class="st">","</span>, formulaR, <span class="st">")"</span>)</span>
+<span id="cb45-31"><a href="#cb45-31"></a><span class="co"># formula &lt;- jmvcore::composeTerm(formula)</span></span>
+<span id="cb45-32"><a href="#cb45-32"></a><span class="co"># formula &lt;- as.formula(formula)</span></span>
+<span id="cb45-33"><a href="#cb45-33"></a><span class="co"># jmvcore::constructFormula(terms = c(formula, formula2))</span></span>
+<span id="cb45-34"><a href="#cb45-34"></a></span>
+<span id="cb45-35"><a href="#cb45-35"></a>deneme <span class="op">%&gt;%</span></span>
+<span id="cb45-36"><a href="#cb45-36"></a><span class="st">  </span>finalfit<span class="op">::</span><span class="kw">finalfit</span>(formula, formula2) -&gt;<span class="st"> </span>tUni</span>
+<span id="cb45-37"><a href="#cb45-37"></a></span>
+<span id="cb45-38"><a href="#cb45-38"></a>tUni</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb46-2"><a href="#cb46-2"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb46-3"><a href="#cb46-3"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb46-4"><a href="#cb46-4"></a></span>
+<span id="cb46-5"><a href="#cb46-5"></a>results &lt;-<span class="st"> </span>deneme <span class="op">%&gt;%</span></span>
+<span id="cb46-6"><a href="#cb46-6"></a><span class="st">                </span>ggstatsplot<span class="op">::</span><span class="kw">ggbetweenstats</span>(LVI, Age)</span>
+<span id="cb46-7"><a href="#cb46-7"></a>results</span>
+<span id="cb46-8"><a href="#cb46-8"></a></span>
+<span id="cb46-9"><a href="#cb46-9"></a>mydep &lt;-<span class="st"> </span>deneme<span class="op">$</span>Age</span>
+<span id="cb46-10"><a href="#cb46-10"></a>mygroup &lt;-<span class="st"> </span>deneme<span class="op">$</span>LVI</span>
+<span id="cb46-11"><a href="#cb46-11"></a></span>
+<span id="cb46-12"><a href="#cb46-12"></a></span>
+<span id="cb46-13"><a href="#cb46-13"></a>mygroup &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"mygroup"</span>)</span>
+<span id="cb46-14"><a href="#cb46-14"></a>mygroup &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(mygroup)</span>
+<span id="cb46-15"><a href="#cb46-15"></a></span>
+<span id="cb46-16"><a href="#cb46-16"></a>mydep &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"mydep"</span>)</span>
+<span id="cb46-17"><a href="#cb46-17"></a>mydep &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(mydep)</span>
+<span id="cb46-18"><a href="#cb46-18"></a></span>
+<span id="cb46-19"><a href="#cb46-19"></a></span>
+<span id="cb46-20"><a href="#cb46-20"></a><span class="co"># not working</span></span>
+<span id="cb46-21"><a href="#cb46-21"></a><span class="co"># eval(mygroup)</span></span>
+<span id="cb46-22"><a href="#cb46-22"></a><span class="co"># rlang::eval_tidy(mygroup)</span></span>
+<span id="cb46-23"><a href="#cb46-23"></a><span class="co"># !!mygroup</span></span>
+<span id="cb46-24"><a href="#cb46-24"></a><span class="co"># mygroup</span></span>
+<span id="cb46-25"><a href="#cb46-25"></a><span class="co"># sym(mygroup)</span></span>
+<span id="cb46-26"><a href="#cb46-26"></a><span class="co"># quote(mygroup)</span></span>
+<span id="cb46-27"><a href="#cb46-27"></a><span class="co"># enexpr(mygroup)</span></span>
+<span id="cb46-28"><a href="#cb46-28"></a></span>
+<span id="cb46-29"><a href="#cb46-29"></a>mygroup &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"mygroup"</span>)</span>
+<span id="cb46-30"><a href="#cb46-30"></a>mydep &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"mydep"</span>)</span>
+<span id="cb46-31"><a href="#cb46-31"></a></span>
+<span id="cb46-32"><a href="#cb46-32"></a>formula1 &lt;-<span class="st"> </span><span class="kw">paste</span>(mydep)</span>
+<span id="cb46-33"><a href="#cb46-33"></a>formula1 &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(formula1)</span>
+<span id="cb46-34"><a href="#cb46-34"></a></span>
+<span id="cb46-35"><a href="#cb46-35"></a></span>
+<span id="cb46-36"><a href="#cb46-36"></a>mygroup &lt;-<span class="st"> </span><span class="kw">paste</span>(mygroup)</span>
+<span id="cb46-37"><a href="#cb46-37"></a>mygroup &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(mygroup)</span>
+<span id="cb46-38"><a href="#cb46-38"></a></span>
+<span id="cb46-39"><a href="#cb46-39"></a>mydep &lt;-<span class="st"> </span>deneme<span class="op">$</span>Age</span>
+<span id="cb46-40"><a href="#cb46-40"></a>mygroup &lt;-<span class="st"> </span>deneme<span class="op">$</span>LVI</span>
+<span id="cb46-41"><a href="#cb46-41"></a></span>
+<span id="cb46-42"><a href="#cb46-42"></a>mydep &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">resolveQuo</span>(jmvcore<span class="op">::</span><span class="kw">enquo</span>(mydep))</span>
+<span id="cb46-43"><a href="#cb46-43"></a>mygroup &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">resolveQuo</span>(jmvcore<span class="op">::</span><span class="kw">enquo</span>(mygroup))</span>
+<span id="cb46-44"><a href="#cb46-44"></a></span>
+<span id="cb46-45"><a href="#cb46-45"></a>mydata2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">mygroup=</span>mygroup, <span class="dt">mydep=</span>mydep)</span>
+<span id="cb46-46"><a href="#cb46-46"></a></span>
+<span id="cb46-47"><a href="#cb46-47"></a>results &lt;-<span class="st"> </span>mydata2 <span class="op">%&gt;%</span></span>
+<span id="cb46-48"><a href="#cb46-48"></a><span class="st">                </span>ggstatsplot<span class="op">::</span><span class="kw">ggbetweenstats</span>(</span>
+<span id="cb46-49"><a href="#cb46-49"></a><span class="dt">x =</span> mygroup, <span class="dt">y =</span> mydep  )</span>
+<span id="cb46-50"><a href="#cb46-50"></a></span>
+<span id="cb46-51"><a href="#cb46-51"></a>results</span>
+<span id="cb46-52"><a href="#cb46-52"></a></span>
+<span id="cb46-53"><a href="#cb46-53"></a></span>
+<span id="cb46-54"><a href="#cb46-54"></a></span>
+<span id="cb46-55"><a href="#cb46-55"></a>myformula &lt;-<span class="st"> </span>glue<span class="op">::</span><span class="kw">glue</span>(<span class="st">'x = '</span>, mygroup, <span class="st">', y = '</span> , mydep)</span>
+<span id="cb46-56"><a href="#cb46-56"></a></span>
+<span id="cb46-57"><a href="#cb46-57"></a>myformula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">composeTerm</span>(myformula)</span>
+<span id="cb46-58"><a href="#cb46-58"></a></span>
+<span id="cb46-59"><a href="#cb46-59"></a>myformula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(myformula)</span>
+<span id="cb46-60"><a href="#cb46-60"></a></span>
+<span id="cb46-61"><a href="#cb46-61"></a></span>
+<span id="cb46-62"><a href="#cb46-62"></a>mydep2 &lt;-<span class="st"> </span><span class="kw">quote</span>(mydep)</span>
+<span id="cb46-63"><a href="#cb46-63"></a>mygroup2 &lt;-<span class="st"> </span><span class="kw">quote</span>(mygroup)</span>
+<span id="cb46-64"><a href="#cb46-64"></a></span>
+<span id="cb46-65"><a href="#cb46-65"></a></span>
+<span id="cb46-66"><a href="#cb46-66"></a>results &lt;-<span class="st"> </span>deneme <span class="op">%&gt;%</span></span>
+<span id="cb46-67"><a href="#cb46-67"></a><span class="st">                </span>ggstatsplot<span class="op">::</span><span class="kw">ggbetweenstats</span>(<span class="op">!!</span>mygroup2, <span class="op">!!</span>mydep2)</span>
+<span id="cb46-68"><a href="#cb46-68"></a>results</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>construct formula <span class="dv">3</span>, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb47-2"><a href="#cb47-2"></a>formula &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">c</span>(<span class="st">"myoveralltime"</span>, <span class="st">"myoutcome"</span>))</span>
+<span id="cb47-3"><a href="#cb47-3"></a></span>
+<span id="cb47-4"><a href="#cb47-4"></a>vars &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">decomposeFormula</span>(<span class="dt">formula =</span> formula)</span>
+<span id="cb47-5"><a href="#cb47-5"></a></span>
+<span id="cb47-6"><a href="#cb47-6"></a></span>
+<span id="cb47-7"><a href="#cb47-7"></a>explanatory &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="kw">c</span>(<span class="st">"explanatory"</span>))</span>
+<span id="cb47-8"><a href="#cb47-8"></a></span>
+<span id="cb47-9"><a href="#cb47-9"></a>explanatory &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">decomposeFormula</span>(<span class="dt">formula =</span> explanatory)</span>
+<span id="cb47-10"><a href="#cb47-10"></a></span>
+<span id="cb47-11"><a href="#cb47-11"></a>explanatory &lt;-<span class="st"> </span><span class="kw">unlist</span>(explanatory)</span>
+<span id="cb47-12"><a href="#cb47-12"></a></span>
+<span id="cb47-13"><a href="#cb47-13"></a>myformula &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">"Surv("</span>, vars[<span class="dv">1</span>], <span class="st">", "</span>, vars[<span class="dv">2</span>], <span class="st">")"</span>)</span>
+<span id="cb47-14"><a href="#cb47-14"></a></span>
+<span id="cb47-15"><a href="#cb47-15"></a></span>
+<span id="cb47-16"><a href="#cb47-16"></a></span>
+<span id="cb47-17"><a href="#cb47-17"></a>deneme <span class="op">%&gt;%</span></span>
+<span id="cb47-18"><a href="#cb47-18"></a>finalfit<span class="op">::</span><span class="kw">finalfit</span>(myformula, explanatory) -&gt;<span class="st"> </span>tUni</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>table tangram, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb48-2"><a href="#cb48-2"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb48-3"><a href="#cb48-3"></a></span>
+<span id="cb48-4"><a href="#cb48-4"></a></span>
+<span id="cb48-5"><a href="#cb48-5"></a>table3 &lt;-</span>
+<span id="cb48-6"><a href="#cb48-6"></a><span class="st">  </span>tangram<span class="op">::</span><span class="kw">html5</span>(</span>
+<span id="cb48-7"><a href="#cb48-7"></a>    tangram<span class="op">::</span><span class="kw">tangram</span>(</span>
+<span id="cb48-8"><a href="#cb48-8"></a>      <span class="st">"Death ~ LVI + PNI + Age"</span>, deneme),</span>
+<span id="cb48-9"><a href="#cb48-9"></a>    <span class="dt">fragment=</span><span class="ot">TRUE</span>,</span>
+<span id="cb48-10"><a href="#cb48-10"></a>    <span class="dt">inline=</span><span class="st">"nejm.css"</span>,</span>
+<span id="cb48-11"><a href="#cb48-11"></a>    <span class="dt">caption =</span> <span class="st">"HTML5 Table NEJM Style"</span>,</span>
+<span id="cb48-12"><a href="#cb48-12"></a>    <span class="dt">id=</span><span class="st">"tbl3"</span>)</span>
+<span id="cb48-13"><a href="#cb48-13"></a></span>
+<span id="cb48-14"><a href="#cb48-14"></a>table3</span>
+<span id="cb48-15"><a href="#cb48-15"></a></span>
+<span id="cb48-16"><a href="#cb48-16"></a>mydep &lt;-<span class="st"> </span>deneme<span class="op">$</span>Age</span>
+<span id="cb48-17"><a href="#cb48-17"></a>mygroup &lt;-<span class="st"> </span>deneme<span class="op">$</span>Death</span>
+<span id="cb48-18"><a href="#cb48-18"></a></span>
+<span id="cb48-19"><a href="#cb48-19"></a></span>
+<span id="cb48-20"><a href="#cb48-20"></a>formulaR &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span>  <span class="kw">c</span>(<span class="st">"LVI"</span>, <span class="st">"PNI"</span>, <span class="st">"Age"</span>))</span>
+<span id="cb48-21"><a href="#cb48-21"></a></span>
+<span id="cb48-22"><a href="#cb48-22"></a>formulaL &lt;-<span class="st"> </span>jmvcore<span class="op">::</span><span class="kw">constructFormula</span>(<span class="dt">terms =</span> <span class="st">"Death"</span>)</span>
+<span id="cb48-23"><a href="#cb48-23"></a></span>
+<span id="cb48-24"><a href="#cb48-24"></a>formula &lt;-<span class="st"> </span><span class="kw">paste</span>(formulaL, <span class="st">'~'</span>, formulaR)</span>
+<span id="cb48-25"><a href="#cb48-25"></a></span>
+<span id="cb48-26"><a href="#cb48-26"></a>formula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(formula)</span>
+<span id="cb48-27"><a href="#cb48-27"></a></span>
+<span id="cb48-28"><a href="#cb48-28"></a></span>
+<span id="cb48-29"><a href="#cb48-29"></a>table &lt;-<span class="st"> </span>tangram<span class="op">::</span><span class="kw">html5</span>(</span>
+<span id="cb48-30"><a href="#cb48-30"></a>    tangram<span class="op">::</span><span class="kw">tangram</span>(formula, deneme</span>
+<span id="cb48-31"><a href="#cb48-31"></a>                     ))</span>
+<span id="cb48-32"><a href="#cb48-32"></a></span>
+<span id="cb48-33"><a href="#cb48-33"></a>table</span>
+<span id="cb48-34"><a href="#cb48-34"></a></span></code></pre></div>
 <hr>
 <div id="arsenal" class="section level2">
 <h2 class="hasAnchor">
 <a href="#arsenal" class="anchor"></a>arsenal</h2>
-<div class="sourceCode" id="cb49"><html><body><pre class="r">arsenal, results='asis', eval=FALSE, include=FALSE
-
-tab1 &lt;- arsenal::tableby(~ Age + Sex, data = deneme)
-
-results &lt;- summary(tab1)
-
-
-# results$object
-# results$control
-# results$totals
-# results$hasStrata
-# results$text
-# results$pfootnote
-# results$term.name
-#
-# tab1$Call
-#
-# tab1$control
-
-tab1$tables # this is where results lie
-</pre></body></html></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>arsenal, results=<span class="st">'asis'</span>, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb49-2"><a href="#cb49-2"></a></span>
+<span id="cb49-3"><a href="#cb49-3"></a>tab1 &lt;-<span class="st"> </span>arsenal<span class="op">::</span><span class="kw">tableby</span>(<span class="op">~</span><span class="st"> </span>Age <span class="op">+</span><span class="st"> </span>Sex, <span class="dt">data =</span> deneme)</span>
+<span id="cb49-4"><a href="#cb49-4"></a></span>
+<span id="cb49-5"><a href="#cb49-5"></a>results &lt;-<span class="st"> </span><span class="kw">summary</span>(tab1)</span>
+<span id="cb49-6"><a href="#cb49-6"></a></span>
+<span id="cb49-7"><a href="#cb49-7"></a></span>
+<span id="cb49-8"><a href="#cb49-8"></a><span class="co"># results$object</span></span>
+<span id="cb49-9"><a href="#cb49-9"></a><span class="co"># results$control</span></span>
+<span id="cb49-10"><a href="#cb49-10"></a><span class="co"># results$totals</span></span>
+<span id="cb49-11"><a href="#cb49-11"></a><span class="co"># results$hasStrata</span></span>
+<span id="cb49-12"><a href="#cb49-12"></a><span class="co"># results$text</span></span>
+<span id="cb49-13"><a href="#cb49-13"></a><span class="co"># results$pfootnote</span></span>
+<span id="cb49-14"><a href="#cb49-14"></a><span class="co"># results$term.name</span></span>
+<span id="cb49-15"><a href="#cb49-15"></a><span class="co">#</span></span>
+<span id="cb49-16"><a href="#cb49-16"></a><span class="co"># tab1$Call</span></span>
+<span id="cb49-17"><a href="#cb49-17"></a><span class="co">#</span></span>
+<span id="cb49-18"><a href="#cb49-18"></a><span class="co"># tab1$control</span></span>
+<span id="cb49-19"><a href="#cb49-19"></a></span>
+<span id="cb49-20"><a href="#cb49-20"></a>tab1<span class="op">$</span>tables <span class="co"># this is where results lie</span></span>
+<span id="cb49-21"><a href="#cb49-21"></a></span></code></pre></div>
 </div>
 <div id="define-survival-time" class="section level2">
 <h2 class="hasAnchor">
 <a href="#define-survival-time" class="anchor"></a>define survival time</h2>
-<div class="sourceCode" id="cb50"><html><body><pre class="r">define survival time, eval=FALSE, include=FALSE
-mydata$int &lt;- lubridate::interval(
-  lubridate::ymd(mydata$SurgeryDate),
-  lubridate::ymd(mydata$LastFollowUpDate)
-  )
-mydata$OverallTime &lt;- lubridate::time_length(mydata$int, "month")
-mydata$OverallTime &lt;- round(mydata$OverallTime, digits = 1)</pre></body></html></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>define survival time, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a>mydata<span class="op">$</span>int &lt;-<span class="st"> </span>lubridate<span class="op">::</span><span class="kw">interval</span>(</span>
+<span id="cb50-3"><a href="#cb50-3"></a>  lubridate<span class="op">::</span><span class="kw">ymd</span>(mydata<span class="op">$</span>SurgeryDate),</span>
+<span id="cb50-4"><a href="#cb50-4"></a>  lubridate<span class="op">::</span><span class="kw">ymd</span>(mydata<span class="op">$</span>LastFollowUpDate)</span>
+<span id="cb50-5"><a href="#cb50-5"></a>  )</span>
+<span id="cb50-6"><a href="#cb50-6"></a>mydata<span class="op">$</span>OverallTime &lt;-<span class="st"> </span>lubridate<span class="op">::</span><span class="kw">time_length</span>(mydata<span class="op">$</span>int, <span class="st">"month"</span>)</span>
+<span id="cb50-7"><a href="#cb50-7"></a>mydata<span class="op">$</span>OverallTime &lt;-<span class="st"> </span><span class="kw">round</span>(mydata<span class="op">$</span>OverallTime, <span class="dt">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
 </div>
 <div id="multivariate-analysis-survival" class="section level2">
 <h2 class="hasAnchor">
 <a href="#multivariate-analysis-survival" class="anchor"></a>Multivariate Analysis Survival</h2>
-<div class="sourceCode" id="cb51"><html><body><pre class="r">Multivariate Analysis, eval=FALSE, include=FALSE
-library(finalfit)
-library(survival)
-explanatoryMultivariate &lt;- explanatoryKM
-dependentMultivariate &lt;- dependentKM
-
-mydata %&gt;%
-  finalfit(dependentMultivariate, explanatoryMultivariate) -&gt; tMultivariate
-
-knitr::kable(tMultivariate, row.names=FALSE, align=c("l", "l", "r", "r", "r", "r"))</pre></body></html></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>Multivariate Analysis, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb51-2"><a href="#cb51-2"></a><span class="kw">library</span>(finalfit)</span>
+<span id="cb51-3"><a href="#cb51-3"></a><span class="kw">library</span>(survival)</span>
+<span id="cb51-4"><a href="#cb51-4"></a>explanatoryMultivariate &lt;-<span class="st"> </span>explanatoryKM</span>
+<span id="cb51-5"><a href="#cb51-5"></a>dependentMultivariate &lt;-<span class="st"> </span>dependentKM</span>
+<span id="cb51-6"><a href="#cb51-6"></a></span>
+<span id="cb51-7"><a href="#cb51-7"></a>mydata <span class="op">%&gt;%</span></span>
+<span id="cb51-8"><a href="#cb51-8"></a><span class="st">  </span><span class="kw">finalfit</span>(dependentMultivariate, explanatoryMultivariate) -&gt;<span class="st"> </span>tMultivariate</span>
+<span id="cb51-9"><a href="#cb51-9"></a></span>
+<span id="cb51-10"><a href="#cb51-10"></a>knitr<span class="op">::</span><span class="kw">kable</span>(tMultivariate, <span class="dt">row.names=</span><span class="ot">FALSE</span>, <span class="dt">align=</span><span class="kw">c</span>(<span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>))</span></code></pre></div>
 <hr>
-<div class="sourceCode" id="cb52"><html><body><pre class="r">eval=FALSE, include=FALSE
-# Find arguments in yaml
-
-list_of_yaml &lt;- c(
-    list.files(path = "~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv",
-               pattern = "\\.yaml$",
-               full.names = TRUE,
-               all.files = TRUE,
-               include.dirs = TRUE,
-               recursive = TRUE
-    )
-)
-
-
-text_of_yaml_yml &lt;- purrr::map(
-    .x = list_of_yaml,
-    .f = readLines
-)
-
-text_of_yaml_yml &lt;- as.vector(unlist(text_of_yaml_yml))
-
-arglist &lt;-
-    stringr::str_extract(
-        string = text_of_yaml_yml,
-        pattern =
-            "([[:alnum:]]*):"
-    )
-
-arglist &lt;- arglist[!is.na(arglist)]
-arglist &lt;- unique(arglist)
-arglist &lt;- gsub(pattern = ":", # remove some characters
-                    replacement = "",
-                    x = arglist)
-arglist &lt;- trimws(arglist) # remove whitespace
-
-cat(arglist, sep = "\n")</pre></body></html></div>
-<div class="sourceCode" id="cb53"><html><body><pre class="r">#
-#                 # tUni_df_descr &lt;- paste0("When ",
-#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
-#                 #                         " is ",
-#                 #                         tUni_df$x[2],
-#                 #                         ", there is ",
-#                 #                         tUni_df$hr_univariable[2],
-#                 #                         " times risk than ",
-#                 #                         "when ",
-#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],
-#                 #                         " is ",
-#                 #                         tUni_df$x[1],
-#                 #                         "."
-#                 # )
-#
-#                 # results5 &lt;- tUni_df_descr</pre></body></html></div>
-<div class="sourceCode" id="cb54"><html><body><pre class="r">eval=FALSE, include=FALSE
-boot::melanoma
-rio::export(x = boot::melanoma, file = "data/melanoma.csv")
-
-survival::colon
-rio::export(x = survival::colon, file = "data/colon.csv")
-
-# BreastCancerData &lt;- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
-#
-# BreastCancerNames &lt;- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
-#
-# BreastCancerData &lt;- read.csv(file = BreastCancerData, header = FALSE,
-#                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )
-
-library(mlbench)
-
-data("BreastCancer")
-BreastCancer
-
-rio::export(x = BreastCancer, file = "data/BreastCancer.csv")</pre></body></html></div>
-<div class="sourceCode" id="cb55"><html><body><pre class="r">pairwise, eval=FALSE, include=FALSE
-deneme &lt;- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
-# names(deneme)
-
-mypairwise &lt;-  survminer::pairwise_survdiff(
-                            formula = survival::Surv(OverallTime, Outcome) ~ TStage,
-                            data = deneme,
-                            p.adjust.method = "BH"
-                            )
-
-
-mypairwise2 &lt;- as.data.frame(mypairwise[["p.value"]]) %&gt;%
-  tibble::rownames_to_column()
-
-mypairwise2 %&gt;%
-  tidyr::pivot_longer(cols = -rowname) %&gt;%
-  dplyr::filter(complete.cases(.)) %&gt;%
-  dplyr::mutate(description =
-                            glue::glue(
-                                "The comparison between rowname and name has a p-value of round(value, 2)."
-                            )
-                    ) %&gt;%
-                    dplyr::select(description) %&gt;%
-                    dplyr::pull() -&gt; mypairwisedescription
-
-mypairwisedescription &lt;- unlist(mypairwisedescription)
-
-mypairwisedescription &lt;- c(
-"In the pairwise comparison of",
-mypairwisedescription)</pre></body></html></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="co"># Find arguments in yaml</span></span>
+<span id="cb52-3"><a href="#cb52-3"></a></span>
+<span id="cb52-4"><a href="#cb52-4"></a>list_of_yaml &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
+<span id="cb52-5"><a href="#cb52-5"></a>    <span class="kw">list.files</span>(<span class="dt">path =</span> <span class="st">"~/histopathRprojects/ClinicoPath-Jamovi--prep/jmv"</span>,</span>
+<span id="cb52-6"><a href="#cb52-6"></a>               <span class="dt">pattern =</span> <span class="st">"</span><span class="ch">\\</span><span class="st">.yaml$"</span>,</span>
+<span id="cb52-7"><a href="#cb52-7"></a>               <span class="dt">full.names =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb52-8"><a href="#cb52-8"></a>               <span class="dt">all.files =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb52-9"><a href="#cb52-9"></a>               <span class="dt">include.dirs =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb52-10"><a href="#cb52-10"></a>               <span class="dt">recursive =</span> <span class="ot">TRUE</span></span>
+<span id="cb52-11"><a href="#cb52-11"></a>    )</span>
+<span id="cb52-12"><a href="#cb52-12"></a>)</span>
+<span id="cb52-13"><a href="#cb52-13"></a></span>
+<span id="cb52-14"><a href="#cb52-14"></a></span>
+<span id="cb52-15"><a href="#cb52-15"></a>text_of_yaml_yml &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(</span>
+<span id="cb52-16"><a href="#cb52-16"></a>    <span class="dt">.x =</span> list_of_yaml,</span>
+<span id="cb52-17"><a href="#cb52-17"></a>    <span class="dt">.f =</span> readLines</span>
+<span id="cb52-18"><a href="#cb52-18"></a>)</span>
+<span id="cb52-19"><a href="#cb52-19"></a></span>
+<span id="cb52-20"><a href="#cb52-20"></a>text_of_yaml_yml &lt;-<span class="st"> </span><span class="kw">as.vector</span>(<span class="kw">unlist</span>(text_of_yaml_yml))</span>
+<span id="cb52-21"><a href="#cb52-21"></a></span>
+<span id="cb52-22"><a href="#cb52-22"></a>arglist &lt;-</span>
+<span id="cb52-23"><a href="#cb52-23"></a><span class="st">    </span>stringr<span class="op">::</span><span class="kw">str_extract</span>(</span>
+<span id="cb52-24"><a href="#cb52-24"></a>        <span class="dt">string =</span> text_of_yaml_yml,</span>
+<span id="cb52-25"><a href="#cb52-25"></a>        <span class="dt">pattern =</span></span>
+<span id="cb52-26"><a href="#cb52-26"></a>            <span class="st">"([[:alnum:]]*):"</span></span>
+<span id="cb52-27"><a href="#cb52-27"></a>    )</span>
+<span id="cb52-28"><a href="#cb52-28"></a></span>
+<span id="cb52-29"><a href="#cb52-29"></a>arglist &lt;-<span class="st"> </span>arglist[<span class="op">!</span><span class="kw">is.na</span>(arglist)]</span>
+<span id="cb52-30"><a href="#cb52-30"></a>arglist &lt;-<span class="st"> </span><span class="kw">unique</span>(arglist)</span>
+<span id="cb52-31"><a href="#cb52-31"></a>arglist &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">":"</span>, <span class="co"># remove some characters</span></span>
+<span id="cb52-32"><a href="#cb52-32"></a>                    <span class="dt">replacement =</span> <span class="st">""</span>,</span>
+<span id="cb52-33"><a href="#cb52-33"></a>                    <span class="dt">x =</span> arglist)</span>
+<span id="cb52-34"><a href="#cb52-34"></a>arglist &lt;-<span class="st"> </span><span class="kw">trimws</span>(arglist) <span class="co"># remove whitespace</span></span>
+<span id="cb52-35"><a href="#cb52-35"></a></span>
+<span id="cb52-36"><a href="#cb52-36"></a><span class="kw">cat</span>(arglist, <span class="dt">sep =</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="downlit">
+<span class="co">#</span>
+<span class="co">#                 # tUni_df_descr &lt;- paste0("When ",</span>
+<span class="co">#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],</span>
+<span class="co">#                 #                         " is ",</span>
+<span class="co">#                 #                         tUni_df$x[2],</span>
+<span class="co">#                 #                         ", there is ",</span>
+<span class="co">#                 #                         tUni_df$hr_univariable[2],</span>
+<span class="co">#                 #                         " times risk than ",</span>
+<span class="co">#                 #                         "when ",</span>
+<span class="co">#                 #                         tUni_df$dependent_surv_overall_time_outcome[1],</span>
+<span class="co">#                 #                         " is ",</span>
+<span class="co">#                 #                         tUni_df$x[1],</span>
+<span class="co">#                 #                         "."</span>
+<span class="co">#                 # )</span>
+<span class="co">#</span>
+<span class="co">#                 # results5 &lt;- tUni_df_descr</span></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb54-2"><a href="#cb54-2"></a>boot<span class="op">::</span>melanoma</span>
+<span id="cb54-3"><a href="#cb54-3"></a>rio<span class="op">::</span><span class="kw">export</span>(<span class="dt">x =</span> boot<span class="op">::</span>melanoma, <span class="dt">file =</span> <span class="st">"data/melanoma.csv"</span>)</span>
+<span id="cb54-4"><a href="#cb54-4"></a></span>
+<span id="cb54-5"><a href="#cb54-5"></a>survival<span class="op">::</span>colon</span>
+<span id="cb54-6"><a href="#cb54-6"></a>rio<span class="op">::</span><span class="kw">export</span>(<span class="dt">x =</span> survival<span class="op">::</span>colon, <span class="dt">file =</span> <span class="st">"data/colon.csv"</span>)</span>
+<span id="cb54-7"><a href="#cb54-7"></a></span>
+<span id="cb54-8"><a href="#cb54-8"></a><span class="co"># BreastCancerData &lt;- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"</span></span>
+<span id="cb54-9"><a href="#cb54-9"></a><span class="co">#</span></span>
+<span id="cb54-10"><a href="#cb54-10"></a><span class="co"># BreastCancerNames &lt;- "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"</span></span>
+<span id="cb54-11"><a href="#cb54-11"></a><span class="co">#</span></span>
+<span id="cb54-12"><a href="#cb54-12"></a><span class="co"># BreastCancerData &lt;- read.csv(file = BreastCancerData, header = FALSE,</span></span>
+<span id="cb54-13"><a href="#cb54-13"></a><span class="co">#                 col.names = c("id","CT", "UCSize", "UCShape", "MA", "SECS", "BN", "BC", "NN","M", "diagnosis") )</span></span>
+<span id="cb54-14"><a href="#cb54-14"></a></span>
+<span id="cb54-15"><a href="#cb54-15"></a><span class="kw">library</span>(mlbench)</span>
+<span id="cb54-16"><a href="#cb54-16"></a></span>
+<span id="cb54-17"><a href="#cb54-17"></a><span class="kw">data</span>(<span class="st">"BreastCancer"</span>)</span>
+<span id="cb54-18"><a href="#cb54-18"></a>BreastCancer</span>
+<span id="cb54-19"><a href="#cb54-19"></a></span>
+<span id="cb54-20"><a href="#cb54-20"></a>rio<span class="op">::</span><span class="kw">export</span>(<span class="dt">x =</span> BreastCancer, <span class="dt">file =</span> <span class="st">"data/BreastCancer.csv"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>pairwise, eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span></span>
+<span id="cb55-2"><a href="#cb55-2"></a>deneme &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_xlsx</span>(<span class="dt">path =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"tododata"</span>, <span class="st">"histopathology-template2019-11-25.xlsx"</span>))</span>
+<span id="cb55-3"><a href="#cb55-3"></a><span class="co"># names(deneme)</span></span>
+<span id="cb55-4"><a href="#cb55-4"></a></span>
+<span id="cb55-5"><a href="#cb55-5"></a>mypairwise &lt;-<span class="st">  </span>survminer<span class="op">::</span><span class="kw">pairwise_survdiff</span>(</span>
+<span id="cb55-6"><a href="#cb55-6"></a>                            <span class="dt">formula =</span> survival<span class="op">::</span><span class="kw">Surv</span>(OverallTime, Outcome) <span class="op">~</span><span class="st"> </span>TStage,</span>
+<span id="cb55-7"><a href="#cb55-7"></a>                            <span class="dt">data =</span> deneme,</span>
+<span id="cb55-8"><a href="#cb55-8"></a>                            <span class="dt">p.adjust.method =</span> <span class="st">"BH"</span></span>
+<span id="cb55-9"><a href="#cb55-9"></a>                            )</span>
+<span id="cb55-10"><a href="#cb55-10"></a></span>
+<span id="cb55-11"><a href="#cb55-11"></a></span>
+<span id="cb55-12"><a href="#cb55-12"></a>mypairwise2 &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(mypairwise[[<span class="st">"p.value"</span>]]) <span class="op">%&gt;%</span></span>
+<span id="cb55-13"><a href="#cb55-13"></a><span class="st">  </span>tibble<span class="op">::</span><span class="kw">rownames_to_column</span>()</span>
+<span id="cb55-14"><a href="#cb55-14"></a></span>
+<span id="cb55-15"><a href="#cb55-15"></a>mypairwise2 <span class="op">%&gt;%</span></span>
+<span id="cb55-16"><a href="#cb55-16"></a><span class="st">  </span>tidyr<span class="op">::</span><span class="kw">pivot_longer</span>(<span class="dt">cols =</span> <span class="op">-</span>rowname) <span class="op">%&gt;%</span></span>
+<span id="cb55-17"><a href="#cb55-17"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) <span class="op">%&gt;%</span></span>
+<span id="cb55-18"><a href="#cb55-18"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">mutate</span>(<span class="dt">description =</span></span>
+<span id="cb55-19"><a href="#cb55-19"></a>                            glue<span class="op">::</span><span class="kw">glue</span>(</span>
+<span id="cb55-20"><a href="#cb55-20"></a>                                <span class="st">"The comparison between rowname and name has a p-value of round(value, 2)."</span></span>
+<span id="cb55-21"><a href="#cb55-21"></a>                            )</span>
+<span id="cb55-22"><a href="#cb55-22"></a>                    ) <span class="op">%&gt;%</span></span>
+<span id="cb55-23"><a href="#cb55-23"></a><span class="st">                    </span>dplyr<span class="op">::</span><span class="kw">select</span>(description) <span class="op">%&gt;%</span></span>
+<span id="cb55-24"><a href="#cb55-24"></a><span class="st">                    </span>dplyr<span class="op">::</span><span class="kw">pull</span>() -&gt;<span class="st"> </span>mypairwisedescription</span>
+<span id="cb55-25"><a href="#cb55-25"></a></span>
+<span id="cb55-26"><a href="#cb55-26"></a>mypairwisedescription &lt;-<span class="st"> </span><span class="kw">unlist</span>(mypairwisedescription)</span>
+<span id="cb55-27"><a href="#cb55-27"></a></span>
+<span id="cb55-28"><a href="#cb55-28"></a>mypairwisedescription &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
+<span id="cb55-29"><a href="#cb55-29"></a><span class="st">"In the pairwise comparison of"</span>,</span>
+<span id="cb55-30"><a href="#cb55-30"></a>mypairwisedescription)</span></code></pre></div>
 </div>
 <div id="diagrams" class="section level2">
 <h2 class="hasAnchor">
 <a href="#diagrams" class="anchor"></a>Diagrams</h2>
-<div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="no">echo</span><span class="kw">=</span><span class="fl">FALSE</span>
-<span class="kw pkg">DiagrammeR</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/DiagrammeR/man/grViz.html">grViz</a></span>(
-  <span class="kw">diagram</span> <span class="kw">=</span> <span class="kw pkg">here</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"vignettes/graph.gv"</span>),
-  <span class="kw">height</span> <span class="kw">=</span> <span class="fl">200</span>
-)</pre></body></html></div>
-<div class="sourceCode" id="cb57"><html><body><pre class="r">eval=FALSE, include=FALSE, echo=FALSE
-DiagrammeR::mermaid(
-  diagram = here::here("vignettes/graph.mmd"),
-  height = 200
-)</pre></body></html></div>
+<div class="sourceCode" id="cb56"><pre class="downlit">
+<span class="va">echo</span><span class="op">=</span><span class="cn">FALSE</span>
+<span class="fu">DiagrammeR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DiagrammeR/man/grViz.html">grViz</a></span><span class="op">(</span>
+  diagram <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span><span class="op">(</span><span class="st">"vignettes/graph.gv"</span><span class="op">)</span>,
+  height <span class="op">=</span> <span class="fl">200</span>
+<span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>eval=<span class="ot">FALSE</span>, include=<span class="ot">FALSE</span>, echo=<span class="ot">FALSE</span></span>
+<span id="cb57-2"><a href="#cb57-2"></a>DiagrammeR<span class="op">::</span><span class="kw">mermaid</span>(</span>
+<span id="cb57-3"><a href="#cb57-3"></a>  <span class="dt">diagram =</span> here<span class="op">::</span><span class="kw">here</span>(<span class="st">"vignettes/graph.mmd"</span>),</span>
+<span id="cb57-4"><a href="#cb57-4"></a>  <span class="dt">height =</span> <span class="dv">200</span></span>
+<span id="cb57-5"><a href="#cb57-5"></a>)</span></code></pre></div>
 <pre><code>
 
 Remotes:
@@ -3724,7 +3742,7 @@ plot %&gt;%
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

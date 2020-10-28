@@ -185,11 +185,11 @@ https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
-https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0041.jmo  
+https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0044.jmo  
 
-https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0041.jmo
+https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0044.jmo
 
-https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0041.jmo
+https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0044.jmo
 
 
 ```r
