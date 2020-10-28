@@ -6,7 +6,9 @@ retractedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            doi = NULL, ...) {
+            doi = NULL,
+            resids = NULL,
+            resids2 = NULL, ...) {
 
             super$initialize(
                 package='ClinicoPath',
@@ -17,19 +19,34 @@ retractedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..doi <- jmvcore::OptionVariable$new(
                 "doi",
                 doi)
+            private$..resids <- jmvcore::OptionOutput$new(
+                "resids",
+                resids)
+            private$..resids2 <- jmvcore::OptionOutput$new(
+                "resids2",
+                resids2)
 
             self$.addOption(private$..doi)
+            self$.addOption(private$..resids)
+            self$.addOption(private$..resids2)
         }),
     active = list(
-        doi = function() private$..doi$value),
+        doi = function() private$..doi$value,
+        resids = function() private$..resids$value,
+        resids2 = function() private$..resids2$value),
     private = list(
-        ..doi = NA)
+        ..doi = NA,
+        ..resids = NA,
+        ..resids2 = NA)
 )
 
 retractedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text4 = function() private$.items[["text4"]]),
+        text4 = function() private$.items[["text4"]],
+        text5 = function() private$.items[["text5"]],
+        resids = function() private$.items[["resids"]],
+        resids2 = function() private$.items[["resids2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -40,7 +57,19 @@ retractedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="id convert"))}))
+                title="id convert"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text5",
+                title="text5"))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="resids",
+                title="Residuals"))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="resids2",
+                title="Residuals2"))}))
 
 retractedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "retractedBase",
@@ -70,6 +99,9 @@ retractedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$resids} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$resids2} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' @export

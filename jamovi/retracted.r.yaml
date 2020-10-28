@@ -23,5 +23,9 @@ items:
       type:  Html
 
 
+    - name:  text5
+      title: 'text5'
+      type:  Preformatted
+
 
 ...

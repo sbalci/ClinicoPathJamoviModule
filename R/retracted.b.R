@@ -48,19 +48,19 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # }
             # retracted_list <- do.call("rbind",retracted_list)
 
-            retracted_list <-
-                retractcheck::retractcheck(
-                    dois = doi_list,
-                    database = "or",
-                    # database = "rw",
-                    return = "all"
-                    # return = "unique"
-                )
-
-            table_retracted_list <- kableExtra::kable(
-                retracted_list,
-                format = "html"
-                )
+            # retracted_list <-
+            #     retractcheck::retractcheck(
+            #         dois = doi_list,
+            #         database = "or",
+            #         # database = "rw",
+            #         return = "all"
+            #         # return = "unique"
+            #     )
+            #
+            # table_retracted_list <- kableExtra::kable(
+            #     retracted_list,
+            #     format = "html"
+            #     )
 
 
 
@@ -68,14 +68,14 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            info_list <-
-            RefManageR::GetBibEntryWithDOI(doi = doi_list)
-
-
-            table_info_list <- kableExtra::kable(
-                info_list,
-                format = "html"
-            )
+            # info_list <-
+            # RefManageR::GetBibEntryWithDOI(doi = doi_list)
+            #
+            #
+            # table_info_list <- kableExtra::kable(
+            #     info_list,
+            #     format = "html"
+            # )
 
 
 
@@ -94,6 +94,33 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             self$results$text4$setContent(table_table_ids)
+
+            pmids1 <- ids[["records"]][["pmid"]]
+
+
+            pmids1 <- as.vector(pmids1)
+
+            self$results$text5$setContent(pmids1)
+
+
+
+            if (! is.null(self$options$resids)) {
+
+                pmids2 <- ids[["records"]][["pmid"]]
+
+                pmids2 <- as.vector(pmids2)
+                pmids2 <- as.factor(pmids2)
+            }
+
+            if ( ! is.null(self$options$resids)) {
+                self$results$resids$setValues(pmids2)
+
+            }
+
+            self$results$resids2$setValues(pmids2)
+
+
+
 
 
 
