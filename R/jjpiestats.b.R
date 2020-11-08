@@ -127,8 +127,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot1 <-
                 ggstatsplot::ggpiestats(
                     data = mydata,
-                    main = !!dep,
-                    condition = NULL,
+                    x = !!dep,
+                    y = NULL,
                     counts = NULL,
                     ratio = NULL,
                     paired = FALSE,
@@ -156,9 +156,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     palette = "Dark2",
                     ggplot.component = NULL,
                     output = "plot",
-                    messages = TRUE,
-                    x = NULL,
-                    y = NULL
+                    messages = TRUE
                     )
 
 
@@ -242,8 +240,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot2 <-
                 ggstatsplot::ggpiestats(
                     data = mydata,
-                    main = !!dep,
-                    condition = !!group,
+                    x = !!dep,
+                    y = !!group,
                     counts = NULL,
                     ratio = NULL,
                     paired = FALSE,
@@ -271,9 +269,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     palette = "Dark2",
                     ggplot.component = NULL,
                     output = "plot",
-                    messages = TRUE,
-                    x = NULL,
-                    y = NULL
+                    messages = TRUE
                 )
 
 
@@ -352,14 +348,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot3 <- ggstatsplot::grouped_ggpiestats(
                     data = mydata,
-                    main = !!dep,
-                    condition = NULL,
+                    x = !!dep,
+                    y = NULL,
                     counts = NULL,
                     grouping.var = !!grvar,
                     title.prefix = NULL,
                     output = "plot",
-                    x = NULL,
-                    y = NULL,
                     plotgrid.args = list(),
                     title.text = NULL,
                     title.args = list(size = 16, fontface = "bold"),
@@ -448,14 +442,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot4 <- ggstatsplot::grouped_ggpiestats(
                     data = mydata,
-                    main = !!dep,
-                    condition = !!group,
+                    x = !!dep,
+                    y = !!group,
                     counts = NULL,
                     grouping.var = !!grvar,
                     title.prefix = NULL,
                     output = "plot",
-                    x = NULL,
-                    y = NULL,
                     plotgrid.args = list(),
                     title.text = NULL,
                     title.args = list(size = 16, fontface = "bold"),
