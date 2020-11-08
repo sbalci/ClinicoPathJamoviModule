@@ -69,5 +69,15 @@ options:
       type: Bool
       default: false
 
+    - name: pointpath
+      title: Show Point Path
+      type: Bool
+      default: true
+
+    - name: meanpath
+      title: Show Mean Path
+      type: Bool
+      default: true
+
 ...
 

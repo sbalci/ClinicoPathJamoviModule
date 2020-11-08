@@ -130,6 +130,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- jmvcore::composeTerm(components = group)
 
+            pointpath <- self$options$pointpath
+
+            meanpath <- self$options$meanpath
+
+
+
             # ggwithinstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html
 
@@ -143,7 +149,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!group,
                     y = !!dep,
                     type = "parametric",
-                    pairwise.comparisons = FALSE,
+                    pairwise.comparisons = TRUE,
                     pairwise.display = "significant",
                     p.adjust.method = "holm",
                     effsize.type = "unbiased",
@@ -158,17 +164,17 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title = NULL,
                     subtitle = NULL,
                     sample.size.label = TRUE,
-                    k = 2,
+                    k = 2L,
                     conf.level = 0.95,
-                    nboot = 100,
+                    nboot = 100L,
                     tr = 0.1,
                     mean.plotting = TRUE,
                     mean.ci = FALSE,
                     mean.point.args = list(size = 5, color = "darkred"),
                     mean.label.args = list(size = 3),
-                    point.path = TRUE,
+                    point.path = pointpath,
                     point.path.args = list(alpha = 0.5, linetype = "dashed"),
-                    mean.path = TRUE,
+                    mean.path = meanpath,
                     mean.path.args = list(color = "red", size = 1, alpha = 0.5),
                     notch = FALSE,
                     notchwidth = 0.5,
@@ -178,6 +184,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     outlier.label.args = list(),
                     outlier.point.args = list(),
                     violin.args = list(width = 0.5, alpha = 0.2),
+                    ggsignif.args = list(textsize = 3, tip_length = 0.01),
                     ggtheme = ggtheme,
                     # ggtheme = ggplot2::theme_bw(),
                     ggstatsplot.layer = originaltheme,
@@ -187,6 +194,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     output = "plot",
                     messages = TRUE
                 )
+
 
             }
 
@@ -228,9 +236,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             mean.ci = FALSE,
                             mean.point.args = list(size = 5, color = "darkred"),
                             mean.label.args = list(size = 3),
-                            point.path = TRUE,
+                            point.path = pointpath,
                             point.path.args = list(alpha = 0.5, linetype = "dashed"),
-                            mean.path = TRUE,
+                            mean.path = meanpath,
                             mean.path.args = list(color = "red", size = 1, alpha = 0.5),
                             notch = FALSE,
                             notchwidth = 0.5,
@@ -284,6 +292,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
+            pointpath <- self$options$pointpath
+
+            meanpath <- self$options$meanpath
+
 
             vars <- self$options$dep
 
@@ -306,6 +318,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # }
 
             # Exclude NA ----
+
 
             excl <- self$options$excl
 
@@ -355,6 +368,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
+                    ,
+                    point.path = pointpath,
+                    mean.path = meanpath
+
 
                 )
 
@@ -387,6 +404,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sub.args = list(size = 12)
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
+                        ,
+                        point.path = pointpath,
+                        mean.path = meanpath
 
                     )
 

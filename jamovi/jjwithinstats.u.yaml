@@ -35,3 +35,7 @@ children:
         name: excl
       - type: CheckBox
         name: originaltheme
+      - type: CheckBox
+        name: pointpath
+      - type: CheckBox
+        name: meanpath

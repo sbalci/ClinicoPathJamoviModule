@@ -137,8 +137,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     plot <-
                         ggstatsplot::ggbarstats(
                             data = mydata,
-                            main = !!dep1,
-                            condition = !!group,
+                            x = !!dep1,
+                            y = !!group,
 
                             # paired = paired,
 
@@ -173,9 +173,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             palette = "Dark2",
                             ggplot.component = NULL,
                             output = "plot",
-                            messages = TRUE,
-                            x = NULL,
-                            y = NULL
+                            messages = TRUE
+                            # x = NULL,
+                            # y = NULL
                         )
 
                 }
@@ -188,12 +188,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                     plotlist <-
                         purrr::pmap(
-                            .l = list(main = dep2,
+                            .l = list(x = dep2,
                                       # title = list(dep),
                                       messages = TRUE),
                             .f = ggstatsplot::ggbarstats,
                             data = mydata,
-                            condition = !!group,
+                            y = !!group,
 
                             # paired = paired,
                             paired = FALSE,
@@ -317,8 +317,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (length(self$options$dep) == 1) {
                     plot2 <- ggstatsplot::grouped_ggbarstats(
                         data = mydata,
-                        main = !!dep1,
-                        condition = !!group,
+                        x = !!dep1,
+                        y = !!group,
                         grouping.var = !!grvar,
 
                         paired = paired,
@@ -328,8 +328,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         counts = NULL,
                         title.prefix = NULL,
                         output = "plot",
-                        x = NULL,
-                        y = NULL,
+                        # x = NULL,
+                        # y = NULL,
                         plotgrid.args = list(),
                         title.text = NULL,
                         title.args = list(size = 16, fontface = "bold"),
@@ -352,13 +352,13 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                     plotlist <-
                         purrr::pmap(
-                            .l = list(main = dep2,
+                            .l = list(x = dep2,
                                       # title = list(dep),
                                       messages = TRUE),
                             .f = ggstatsplot::grouped_ggbarstats,
                             data = mydata,
 
-                            condition = !!group,
+                            y = !!group,
                             grouping.var = !!grvar,
 
                             paired = paired,
@@ -367,8 +367,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             counts = NULL,
                             title.prefix = NULL,
                             output = "plot",
-                            x = NULL,
-                            y = NULL,
+                            # x = NULL,
+                            # y = NULL,
                             plotgrid.args = list(),
                             title.text = NULL,
                             title.args = list(size = 16, fontface = "bold"),

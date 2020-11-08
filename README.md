@@ -3,7 +3,7 @@
 
 # ClinicoPath
 
------
+------------------------------------------------------------------------
 
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
@@ -17,7 +17,7 @@ tables, survival curves, and natural language summaries.
 
 <!-- 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩 -->
 
------
+------------------------------------------------------------------------
 
 [![Download
 ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
@@ -29,11 +29,11 @@ DOI 10.17605/OSF.IO/9SZUD
 
 <https://osf.io/9szud/>
 
------
+------------------------------------------------------------------------
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
-You can install this module after installing jamovi version \>= 1.2.19
+You can install this module after installing jamovi version &gt;= 1.2.19
 from here: <https://www.jamovi.org/download.html>
 
 Then you can install the submodules directly inside the jamovi, using
@@ -58,8 +58,8 @@ jjstatsplot
 
 #### a: For development version
 
-  - [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
-  - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
+-   [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
+-   [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
 
 #### b: For smaller modules
 
@@ -104,14 +104,12 @@ ClinicoPathDescriptives functions for Linux
 remotes::install_github("sbalci/ClinicoPathDescriptives")
 ```
 
-``` 
-- name: ClinicoPathDescriptives
-  url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
-  commit: cc63b37bd0a639194baf5a35db72783e05336027
-  platforms:
-    - linux
-    
-```
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
+      commit: cc63b37bd0a639194baf5a35db72783e05336027
+      platforms:
+        - linux
+        
 
 ##### JJStatsPlot
 
@@ -197,22 +195,19 @@ remotes::install_github("sbalci/jbbplot")
 ```
 
 <!-- #### c: For stable version    -->
-
 <!-- - windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo -->
-
 <!-- - macOS: https://library.jamovi.org/macos/R3.6.3/ClinicoPath-0.0.2.jmo -->
-
 <!-- - linux: https://library.jamovi.org/linux/R3.6.3/ClinicoPath-0.0.2.jmo -->
 
 **Step 3: And install using side-load as shown below:**
 
 <img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
 
------
+------------------------------------------------------------------------
 
 ## Screenshots of Module
 
------
+------------------------------------------------------------------------
 
 ### Example Datasets
 
@@ -220,11 +215,11 @@ remotes::install_github("sbalci/jbbplot")
 
 <img src="man/figures/jamovi-ClinicoPath-example-datasets.gif" align="center" width = 75% />
 
------
+------------------------------------------------------------------------
 
 <https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.csv>
 
------
+------------------------------------------------------------------------
 
 <https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.omv>
 
@@ -268,7 +263,7 @@ remotes::install_github("sbalci/jbbplot")
 
 <img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
 
------
+------------------------------------------------------------------------
 
 #### ClinicoPath Comparisons
 
@@ -294,7 +289,7 @@ remotes::install_github("sbalci/jbbplot")
 
 <img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
 
------
+------------------------------------------------------------------------
 
 ### Survival
 
@@ -328,7 +323,7 @@ remotes::install_github("sbalci/jbbplot")
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
------
+------------------------------------------------------------------------
 
 ### meddecide
 
@@ -342,7 +337,7 @@ remotes::install_github("sbalci/jbbplot")
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
------
+------------------------------------------------------------------------
 
 #### Decision
 
@@ -380,7 +375,7 @@ remotes::install_github("sbalci/jbbplot")
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
------
+------------------------------------------------------------------------
 
 ### Correlation
 
@@ -388,16 +383,13 @@ remotes::install_github("sbalci/jbbplot")
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
------
+------------------------------------------------------------------------
 
 ## Installation in R
 
 <!-- You can install the released version of ClinicoPath from [CRAN](https://CRAN.R-project.org) with: -->
-
 <!-- ``` r -->
-
 <!-- install.packages("ClinicoPath") -->
-
 <!-- ``` -->
 
 You can install the development version from
@@ -418,40 +410,40 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 
 Made possible via the codes, help, and guidence of
 
-  - [jamovi](https://www.jamovi.org/) developer [Jonathon
+-   [jamovi](https://www.jamovi.org/) developer [Jonathon
     Love](https://github.com/jonathon-love),
-  - [finalfit](https://finalfit.org/) developer [Ewen
+-   [finalfit](https://finalfit.org/) developer [Ewen
     Harrison](https://github.com/ewenharrison),
-  - [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
+-   [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
     developer [Indrajeet Patil](https://github.com/IndrajeetPatil),
-  - [tangram](https://github.com/spgarbet/tangram) developer [Shawn
+-   [tangram](https://github.com/spgarbet/tangram) developer [Shawn
     Garbett](https://github.com/spgarbet),
-  - [easystats](https://easystats.github.io/blog/) developers ,
-  - [report](https://easystats.github.io/report/) ,
-  - [tableone](https://github.com/kaz-yos/tableone),
-  - [survival](https://github.com/therneau/survival),
-  - [survminer](https://github.com/kassambara/survminer),
-  - [vtree](https://github.com/nbarrowman/vtree) developer [Nick
+-   [easystats](https://easystats.github.io/blog/) developers ,
+-   [report](https://easystats.github.io/report/) ,
+-   [tableone](https://github.com/kaz-yos/tableone),
+-   [survival](https://github.com/therneau/survival),
+-   [survminer](https://github.com/kassambara/survminer),
+-   [vtree](https://github.com/nbarrowman/vtree) developer [Nick
     Barrowman](https://github.com/nbarrowman),
-  - [easyalluvial](https://github.com/erblast/easyalluvial), developer
+-   [easyalluvial](https://github.com/erblast/easyalluvial), developer
     [Björn Oettinghaus](https://github.com/erblast), and
-  - [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
+-   [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
 
 See <https://github.com/ClinicoPath> for forked packages.
 
------
+------------------------------------------------------------------------
 
 <a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow
 @serdarbalci</a>
-
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:15px;font-size:28px !important;">Buy
-me a coffee</span></a>
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span
+style="margin-left:15px;font-size:28px !important;">Buy me a
+coffee</span></a>
 
 <https://paypal.me/serdarbalci>
 
------
+------------------------------------------------------------------------
 
 <img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>  
 ![Twitter
@@ -459,7 +451,7 @@ Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
 ![GitHub
 followers](https://img.shields.io/github/followers/sbalci?style=social)
 [![Say
-Thanks\!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
+Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
 
 ## Development Status
 
@@ -502,7 +494,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--10--28-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--11--08-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -577,7 +569,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--10--28-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--11--08-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -617,5 +609,4 @@ watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?
 ## Videos
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-
 </iframe>

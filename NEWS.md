@@ -1,3 +1,15 @@
+# ClinicoPath 0.0.2.0046
+
+-  use `x` and `y` instead of `main` and `condition` arguments for `ggpiestats` and `ggbarstats`  
+partially fixed: https://github.com/sbalci/jjstatsplot/issues/1
+
+-  add point.path argument in grouped_ggwithinstats
+partially fixed: https://github.com/sbalci/jjstatsplot/issues/2
+
+- waiting for update in jamovi mran version. current ggstatsplot dependencies are not up to date in jamovi's library
+
+
+
 # ClinicoPath 0.0.2.0044
 
 - fixed multivariate survival to work without continuous explanatory 
