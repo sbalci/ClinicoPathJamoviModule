@@ -115,6 +115,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 }
 
 
+                # type of statistics ----
+
+
+                typestatistics <-
+                    jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+
                 # arguments ----
 
                 # mydep <- mydata[[self$options$dep]]
@@ -151,7 +159,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             # title = NULL,
                             # subtitle = NULL,
                             # caption = NULL,
-                            # type = "parametric",
+
+                            type = typestatistics,
+
+
                             # test.value = 0,
                             # bf.prior = 0.707,
                             # bf.message = TRUE,
@@ -203,7 +214,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             # title = NULL,
                             # subtitle = NULL,
                             # caption = NULL,
-                            # type = "parametric",
+
+                            type = typestatistics,
+
                             # test.value = 0,
                             # bf.prior = 0.707,
                             # bf.message = TRUE,
@@ -301,6 +314,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 }
 
 
+                # type of statistics ----
+
+
+                typestatistics <-
+                    jmvcore::constructFormula(terms = self$options$typestatistics)
+
 
                 dep <- self$options$dep
 
@@ -337,8 +356,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         caption.args = list(size = 10),
                         sub.text = NULL,
                         sub.args = list(size = 12)
-                        ,
-                        ggtheme = ggtheme
+                        , ggtheme = ggtheme
+                        , type = typestatistics
+
 
                     )
 
@@ -370,8 +390,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             caption.args = list(size = 10),
                             sub.text = NULL,
                             sub.args = list(size = 12)
-                            ,
-                            ggtheme = ggtheme
+                            , ggtheme = ggtheme
+                            , type = typestatistics
 
 
                         )

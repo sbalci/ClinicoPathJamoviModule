@@ -1,3 +1,9 @@
+# ClinicoPath 0.0.2.0048
+
+- started adding arguments of ggstatsplot
+fixed: https://github.com/sbalci/jjstatsplot/issues/3
+
+
 # ClinicoPath 0.0.2.0046
 
 -  use `x` and `y` instead of `main` and `condition` arguments for `ggpiestats` and `ggbarstats`  

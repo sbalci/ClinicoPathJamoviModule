@@ -18,7 +18,7 @@
   ],
   "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.2.46",
+  "version": "0.0.2.48",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -1055,32 +1055,15 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "retractcheck",
-      "name": "retractcheck",
+      "identifier": "ggstatsplot",
+      "name": "ggstatsplot",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
         "name": "Comprehensive R Archive Network (CRAN)",
         "url": "https://cran.r-project.org"
       },
-      "sameAs": "https://CRAN.R-project.org/package=retractcheck"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "RefManageR",
-      "name": "RefManageR"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "rcrossref",
-      "name": "rcrossref",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=rcrossref"
+      "sameAs": "https://CRAN.R-project.org/package=ggstatsplot"
     }
   ],
   "softwareRequirements": [

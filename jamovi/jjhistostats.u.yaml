@@ -26,3 +26,8 @@ children:
     children:
       - type: CheckBox
         name: excl
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: typestatistics

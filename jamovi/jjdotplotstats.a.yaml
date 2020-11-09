@@ -65,7 +65,25 @@ options:
       type: Bool
       default: true
 
-  
+
+    - name: typestatistics
+      title: 'Type of Statistic'
+      type: List
+      options:
+        - title: Parametric
+          name: parametric
+        - title: Nonparametric
+          name: nonparametric
+        - title: Robust
+          name: robust
+        - title: Bayes
+          name: bayes
+      default: parametric
+
+
+
+
+
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool

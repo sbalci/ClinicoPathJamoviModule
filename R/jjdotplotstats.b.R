@@ -101,6 +101,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+
             # define main arguments ----
 
             dep <- self$options$dep
@@ -130,7 +138,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title = NULL,
                     subtitle = NULL,
                     caption = NULL,
-                    type = "parametric",
+
+                    type = typestatistics,
+
                     test.value = 0,
                     bf.prior = 0.707,
                     bf.message = TRUE,
@@ -211,6 +221,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+
             # define main arguments ----
 
 
@@ -253,6 +271,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
+                    , type = typestatistics
+
 
                 )
 

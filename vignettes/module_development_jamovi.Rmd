@@ -2,7 +2,7 @@
 title: "Module Development for Jamovi"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntryModule Development for Jamovi
+  %\VignetteIndexEntry{Module Development for Jamovi}
   %\VignetteEngineknitr::rmarkdown
   %\VignetteEncodingUTF-8
 ---

@@ -3,17 +3,19 @@ name:  jjcorrmat
 title: Correlation Matrix
 jrs:   '1.1'
 
+clearWith:
+    - dep
+    - grvar
+    - excl
+    - originaltheme
+    - typestatistics
+
 
 items:
 
     - name:  todo
       title: To Do
       type:  Html
-      clearWith:
-          - dep
-          - grvar
-          - direction
-          - originaltheme
 
 
     - name: plot2
@@ -23,11 +25,6 @@ items:
       height: 600
       renderFun: .plot2
       requiresData: true
-      clearWith:
-          - dep
-          - grvar
-          - direction
-          - originaltheme
       visible: (grvar)
 
     - name: plot
@@ -37,11 +34,7 @@ items:
       height: 600
       renderFun: .plot
       requiresData: true
-      clearWith:
-          - dep
-          - grvar
-          - direction
-          - originaltheme
+
 
 
 refs:

@@ -13,35 +13,6 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
 
-            # # Error Message ----
-            #
-            # if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-            #
-            # if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
-            #     # ToDo Message ----
-            #     todo <- "
-            #         <br>Welcome to ClinicoPath
-            #                   <br><br>
-            #                   This tool will help you form an Alluvial Plots.
-            #                   "
-            #     html <- self$results$todo
-            #     html$setContent(todo)
-            #
-            # } else {
-            #     todo <- ""
-            #     html <- self$results$todo
-            #     html$setContent(todo)
-            #
-            #
-            #
-            # }
-
-
-
-
-
-
-
 
             if (length(self$options$vars) == 0) {
                 # ToDo Message ----
@@ -89,47 +60,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-
-            # myreport <- mydata %>%
-            #     select(myvars) %>%
-            #     report::report(.,
-            #                    median = FALSE,
-            #                    centrality = TRUE,
-            #                    dispersion = TRUE,
-            #                    range = TRUE,
-            #                    distribution = FALSE,
-            #                    levels_percentage = FALSE,
-            #                    n_entries = 3,
-            #                    missing_percentage = FALSE
-            # #                    median = med,
-            # #                    centrality = cent,
-            # #                    dispersion = disp,
-            # #                    range = ran,
-            # #                    distribution = distr,
-            # #                    levels_percentage = lev,
-            # #                    n_characters = n_ch,
-            # #                    missing_percentage = mis
-            #                    )
-            #
-            # results1 <- myreport
-
-
-
-            # results1 <- mydata %>%
-            #     explore::describe(.) %>%
-            #     dplyr::filter(na > 0)
-
-
-            # for (fac in facs)
-            #     data[[fac]] <- as.factor(data[[fac]])
-
-
-
             # catsummary function
             catsummary <- function(myvar) {
-
-
-
 
                 leng <- length(mydata[[myvar]])
 
@@ -183,6 +115,58 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             results1 <- unlist(results)
 
             self$results$text$setContent(results1)
+
+
+
+#
+#             myreport <- mydata %>%
+#                 jmvcore::select(df = ., columnNames = myvars) %>%
+#                 report::report(.,
+#                                median = FALSE,
+#                                centrality = TRUE,
+#                                dispersion = TRUE,
+#                                range = TRUE,
+#                                distribution = FALSE,
+#                                levels_percentage = FALSE,
+#                                n_entries = 3,
+#                                missing_percentage = FALSE
+#             #                    median = med,
+#             #                    centrality = cent,
+#             #                    dispersion = disp,
+#             #                    range = ran,
+#             #                    distribution = distr,
+#             #                    levels_percentage = lev,
+#             #                    n_characters = n_ch,
+#             #                    missing_percentage = mis
+#                                )
+#
+#             results2 <- myreport
+#
+#
+#             self$results$text2$setContent(results2)
+
+
+
+
+            # results1 <- mydata %>%
+            #     explore::describe(.) %>%
+            #     dplyr::filter(na > 0)
+
+
+            # for (fac in facs)
+            #     data[[fac]] <- as.factor(data[[fac]])
+
+
+
+
+
+
+
+
+
+
+
+
 
             }
 

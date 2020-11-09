@@ -15,6 +15,12 @@ items:
       title: ''
       type:  Preformatted
 
-refs: report
+
+    # - name:  text2
+    #   title: 'text2'
+    #   type:  Preformatted
+
+
+# refs: report
 
 ...

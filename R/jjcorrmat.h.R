@@ -9,6 +9,7 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             grvar = NULL,
             excl = TRUE,
+            typestatistics = "parametric",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -36,6 +37,15 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..typestatistics <- jmvcore::OptionList$new(
+                "typestatistics",
+                typestatistics,
+                options=list(
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parametric")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -44,17 +54,20 @@ jjcorrmatOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
             self$.addOption(private$..excl)
+            self$.addOption(private$..typestatistics)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
         excl = function() private$..excl$value,
+        typestatistics = function() private$..typestatistics$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
         ..excl = NA,
+        ..typestatistics = NA,
         ..originaltheme = NA)
 )
 
@@ -73,16 +86,17 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Correlation Matrix",
                 refs=list(
                     "ggplot2",
-                    "ggstatsplot"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do",
+                    "ggstatsplot"),
                 clearWith=list(
                     "dep",
                     "grvar",
-                    "direction",
-                    "originaltheme")))
+                    "excl",
+                    "originaltheme",
+                    "typestatistics"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -91,11 +105,6 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=600,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "grvar",
-                    "direction",
-                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -104,12 +113,7 @@ jjcorrmatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "grvar",
-                    "direction",
-                    "originaltheme")))}))
+                requiresData=TRUE))}))
 
 jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjcorrmatBase",
@@ -143,6 +147,7 @@ jjcorrmatBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param grvar .
 #' @param excl .
+#' @param typestatistics .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -157,6 +162,7 @@ jjcorrmat <- function(
     dep,
     grvar,
     excl = TRUE,
+    typestatistics = "parametric",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -176,6 +182,7 @@ jjcorrmat <- function(
         dep = dep,
         grvar = grvar,
         excl = excl,
+        typestatistics = typestatistics,
         originaltheme = originaltheme)
 
     analysis <- jjcorrmatClass$new(

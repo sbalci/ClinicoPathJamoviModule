@@ -10,6 +10,7 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             group = NULL,
             grvar = NULL,
             excl = TRUE,
+            typestatistics = "parametric",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -45,6 +46,15 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..typestatistics <- jmvcore::OptionList$new(
+                "typestatistics",
+                typestatistics,
+                options=list(
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parametric")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -54,6 +64,7 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..excl)
+            self$.addOption(private$..typestatistics)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
@@ -61,12 +72,14 @@ jjdotplotstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         excl = function() private$..excl$value,
+        typestatistics = function() private$..typestatistics$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
         ..excl = NA,
+        ..typestatistics = NA,
         ..originaltheme = NA)
 )
 
@@ -85,17 +98,18 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title="Dot Chart",
                 refs=list(
                     "ggplot2",
-                    "ggstatsplot"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do",
+                    "ggstatsplot"),
                 clearWith=list(
                     "dep",
                     "group",
                     "grvar",
-                    "direction",
-                    "originaltheme")))
+                    "excl",
+                    "originaltheme",
+                    "typestatistics"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -104,12 +118,6 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 height=300,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction",
-                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -118,13 +126,7 @@ jjdotplotstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 width=400,
                 height=300,
                 renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction",
-                    "originaltheme")))}))
+                requiresData=TRUE))}))
 
 jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjdotplotstatsBase",
@@ -159,6 +161,7 @@ jjdotplotstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param group .
 #' @param grvar .
 #' @param excl .
+#' @param typestatistics .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -174,6 +177,7 @@ jjdotplotstats <- function(
     group,
     grvar,
     excl = TRUE,
+    typestatistics = "parametric",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -197,6 +201,7 @@ jjdotplotstats <- function(
         group = group,
         grvar = grvar,
         excl = excl,
+        typestatistics = typestatistics,
         originaltheme = originaltheme)
 
     analysis <- jjdotplotstatsClass$new(

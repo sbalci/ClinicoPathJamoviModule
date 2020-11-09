@@ -78,7 +78,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
 
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
 
@@ -107,7 +111,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 output = "plot",
                 matrix.type = "full",
                 matrix.method = "square",
-                type = "parametric",
+
+                type = typestatistics,
+
                 beta = 0.1,
                 k = 2L,
                 sig.level = 0.05,
@@ -164,6 +170,15 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+
+
             # define main arguments ----
 
             myvars <- jmvcore::constructFormula(terms = self$options$dep)
@@ -199,7 +214,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.text = NULL,
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
-                    , ggstatsplot.layer = originaltheme,
+                    , ggstatsplot.layer = originaltheme
+                    , type = typestatistics
+
 
 
                 )

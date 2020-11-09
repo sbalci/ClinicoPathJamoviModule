@@ -105,6 +105,12 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
 
             # mydep <- mydata[[self$options$dep]]
             # mygroup <- mydata[[self$options$group]]
@@ -132,7 +138,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!dep,
                     y = !!group,
-                    type = "parametric",
+
+                    type = typestatistics,
+
+
                     conf.level = 0.95,
                     bf.prior = 0.707,
                     bf.message = TRUE,
@@ -227,6 +236,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
             dep <- self$options$dep
 
@@ -268,6 +282,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.text = NULL,
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
+                    , type = typestatistics
+
 
                 )
             }

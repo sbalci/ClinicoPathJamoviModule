@@ -10,6 +10,11 @@ jjbetweenstats(
   group,
   grvar = NULL,
   excl = TRUE,
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  pairwisedisplay = "significant",
+  padjustmethod = "holm",
+  plottype = "boxviolin",
   originaltheme = FALSE
 )
 }
@@ -23,6 +28,16 @@ jjbetweenstats(
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{typestatistics}{.}
+
+\item{pairwisecomparisons}{.}
+
+\item{pairwisedisplay}{.}
+
+\item{padjustmethod}{.}
+
+\item{plottype}{.}
 
 \item{originaltheme}{.}
 }

@@ -4,7 +4,15 @@
 \alias{jjdotplotstats}
 \title{Dot Chart}
 \usage{
-jjdotplotstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
+jjdotplotstats(
+  data,
+  dep,
+  group,
+  grvar,
+  excl = TRUE,
+  typestatistics = "parametric",
+  originaltheme = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +24,8 @@ jjdotplotstats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{typestatistics}{.}
 
 \item{originaltheme}{.}
 }
