@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 ---
 
+
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
 A [jamovi](https://www.jamovi.org) Module that contains main analysis used in **ClinicoPathological** research. ClinicoPath help researchers to generate natural language summaries of their dataset, generate cross tables with statistical tests, and survival analysis with survival tables, survival curves, and natural language summaries.

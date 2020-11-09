@@ -8,6 +8,8 @@ clearWith:
     - group
     - grvar
     - originaltheme
+    - typestatistics
+    - excl
 
 
 

@@ -1,4 +1,4 @@
-pandoc: 2.7.3
+pandoc: 2.11.0.4
 pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
@@ -9,7 +9,7 @@ articles:
   pathology_jamovi: pathology_jamovi.html
   pkgnet-report: pkgnet-report.html
   wf_master: wf_master.html
-last_built: 2020-11-08T16:59Z
+last_built: 2020-11-09T18:58Z
 urls:
   reference: https://sbalci.github.io/ClinicoPathJamoviModule//reference
   article: https://sbalci.github.io/ClinicoPathJamoviModule//articles

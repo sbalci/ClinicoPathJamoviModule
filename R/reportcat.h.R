@@ -42,8 +42,7 @@ reportcatResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Summary of Categorical Variables",
-                refs="report")
+                title="Summary of Categorical Variables")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

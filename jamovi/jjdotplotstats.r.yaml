@@ -4,17 +4,21 @@ title: Dot Chart
 jrs:   '1.1'
 
 
+clearWith:
+    - dep
+    - group
+    - grvar
+    - excl
+    - originaltheme
+    - typestatistics
+
+
+
 items:
 
     - name:  todo
       title: To Do
       type:  Html
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
 
 
 
@@ -27,12 +31,6 @@ items:
       height: 300
       renderFun: .plot2
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
       visible: (grvar)
 
     - name: plot
@@ -42,12 +40,6 @@ items:
       height: 300
       renderFun: .plot
       requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
 
 
 refs:

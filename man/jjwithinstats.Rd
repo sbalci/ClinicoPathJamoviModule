@@ -9,7 +9,7 @@ jjwithinstats(
   dep,
   group,
   grvar,
-  excl = TRUE,
+  typestatistics = "parametric",
   originaltheme = FALSE,
   pointpath = TRUE,
   meanpath = TRUE
@@ -24,7 +24,7 @@ jjwithinstats(
 
 \item{grvar}{.}
 
-\item{excl}{.}
+\item{typestatistics}{.}
 
 \item{originaltheme}{.}
 

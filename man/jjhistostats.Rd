@@ -4,7 +4,7 @@
 \alias{jjhistostats}
 \title{Histogram}
 \usage{
-jjhistostats(data, dep, grvar, excl = TRUE)
+jjhistostats(data, dep, grvar, excl = TRUE, typestatistics = "parametric")
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +14,8 @@ jjhistostats(data, dep, grvar, excl = TRUE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{typestatistics}{.}
 }
 \value{
 A results object containing:

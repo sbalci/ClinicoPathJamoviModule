@@ -109,10 +109,18 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
+            # excl <- self$options$excl
+            #
+            # if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
+
+
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
             # mydep <- mydata[[self$options$dep]]
@@ -148,8 +156,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!group,
                     y = !!dep,
-                    type = "parametric",
-                    pairwise.comparisons = TRUE,
+
+                    type = typestatistics,
+
+                    pairwise.comparisons = FALSE,
                     pairwise.display = "significant",
                     p.adjust.method = "holm",
                     effsize.type = "unbiased",
@@ -210,9 +220,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                   # title = list(dep),
                                   messages = FALSE),
                         .f = ggstatsplot::ggwithinstats,
+
                         data = mydata,
                             x = !!group,
-                            type = "parametric",
+                            type = typestatistics,
                             pairwise.comparisons = FALSE,
                             pairwise.display = "significant",
                             p.adjust.method = "holm",
@@ -320,10 +331,16 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Exclude NA ----
 
 
-            excl <- self$options$excl
+            # excl <- self$options$excl
+            #
+            # if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
 
@@ -368,9 +385,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
-                    ,
-                    point.path = pointpath,
-                    mean.path = meanpath
+                    , point.path = pointpath
+                    , mean.path = meanpath
+                    , type = typestatistics
 
 
                 )
@@ -404,9 +421,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sub.args = list(size = 12)
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
-                        ,
-                        point.path = pointpath,
-                        mean.path = meanpath
+                        , point.path = pointpath
+                        , mean.path = meanpath
+                        , type = typestatistics
+
 
                     )
 

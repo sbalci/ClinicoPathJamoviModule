@@ -7,8 +7,9 @@ clearWith:
     - dep
     - group
     - grvar
-    - direction
+    - excl
     - originaltheme
+    - typestatistics
 
 
 items:

@@ -9,7 +9,7 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            typestatistics = "parametric",
             originaltheme = FALSE,
             pointpath = TRUE,
             meanpath = TRUE, ...) {
@@ -43,10 +43,15 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
-                default=TRUE)
+            private$..typestatistics <- jmvcore::OptionList$new(
+                "typestatistics",
+                typestatistics,
+                options=list(
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parametric")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -63,7 +68,7 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..excl)
+            self$.addOption(private$..typestatistics)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..pointpath)
             self$.addOption(private$..meanpath)
@@ -72,7 +77,7 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value,
+        typestatistics = function() private$..typestatistics$value,
         originaltheme = function() private$..originaltheme$value,
         pointpath = function() private$..pointpath$value,
         meanpath = function() private$..meanpath$value),
@@ -80,7 +85,7 @@ jjwithinstatsOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..excl = NA,
+        ..typestatistics = NA,
         ..originaltheme = NA,
         ..pointpath = NA,
         ..meanpath = NA)
@@ -106,8 +111,9 @@ jjwithinstatsResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction",
-                    "originaltheme"))
+                    "typestatistics",
+                    "originaltheme",
+                    "excl"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -158,7 +164,7 @@ jjwithinstatsBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param excl .
+#' @param typestatistics .
 #' @param originaltheme .
 #' @param pointpath .
 #' @param meanpath .
@@ -175,7 +181,7 @@ jjwithinstats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE,
+    typestatistics = "parametric",
     originaltheme = FALSE,
     pointpath = TRUE,
     meanpath = TRUE) {
@@ -200,7 +206,7 @@ jjwithinstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        excl = excl,
+        typestatistics = typestatistics,
         originaltheme = originaltheme,
         pointpath = pointpath,
         meanpath = meanpath)

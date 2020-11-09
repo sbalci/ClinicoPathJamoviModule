@@ -18,9 +18,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             deplen <- length(self$options$dep)
 
-            self$results$plot$setSize(400, deplen * 300)
+            self$results$plot$setSize(600, deplen * 450)
 
-            self$results$plot2$setSize(800, deplen * 300)
+            self$results$plot2$setSize(1200, deplen * 450)
 
         }
         ,
@@ -100,14 +100,28 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # pairw <- self$options$pairw
 
 
-            # distribution ----
+            # type of statistics ----
 
 
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
-            # pairw <- self$options$pairw
 
+            plottype <-
+                jmvcore::constructFormula(terms = self$options$plottype)
+
+            originaltheme <- self$options$originaltheme
+
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+
+            # ADD HERE ----
 
 
 
@@ -136,7 +150,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            originaltheme <- self$options$originaltheme
+
+
 
 
             dep <- jmvcore::composeTerm(components = dep)
@@ -153,12 +168,59 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data = mydata,
                 x = !!group,
                 y = !!dep
-                # ,
-                # type = distribution
+                , type = typestatistics
                 , ggtheme = ggtheme
                 , ggstatsplot.layer = originaltheme
+                , plot.type = plottype
+                , pairwise.comparisons = pairwisecomparisons
+                , pairwise.display = pairwisedisplay
+                , p.adjust.method = padjustmethod
 
+                ,
+                effsize.type = "unbiased",
+                bf.prior = 0.707,
+                bf.message = TRUE,
+                results.subtitle = TRUE,
+                xlab = NULL,
+                ylab = NULL,
+                caption = NULL,
+                title = NULL,
+                subtitle = NULL,
+                sample.size.label = TRUE,
+                k = 2L,
+                var.equal = FALSE,
+                conf.level = 0.95,
+                nboot = 100L,
+                tr = 0.1,
+                mean.plotting = TRUE,
+                mean.ci = FALSE,
+                mean.point.args = list(size = 5, color = "darkred"),
+                mean.label.args = list(size = 3),
+                notch = FALSE,
+                notchwidth = 0.5,
+                outlier.tagging = FALSE,
+                outlier.label = NULL,
+                outlier.coef = 1.5,
+                outlier.shape = 19,
+                outlier.color = "black",
+                outlier.label.args = list(size = 3),
+                outlier.point.args = list(),
+                point.args = list(position = ggplot2::position_jitterdodge(dodge.width = 0.6), alpha
+                                  = 0.4, size = 3, stroke = 0),
+                violin.args = list(width = 0.5, alpha = 0.2),
+                ggsignif.args = list(textsize = 3, tip_length = 0.01),
+
+                package = "RColorBrewer",
+                palette = "Dark2",
+                ggplot.component = NULL,
+                output = "plot"
             )
+
+
+
+
+
+
 
             }
 
@@ -177,10 +239,18 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .f = ggstatsplot::ggbetweenstats,
                         data = mydata,
                         x = !!group,
-                        # ,
-                        # type = distribution
+                        , type = typestatistics
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
+                        , plot.type = plottype
+                        , pairwise.comparisons = pairwisecomparisons
+                        , pairwise.display = pairwisedisplay
+                        , p.adjust.method = padjustmethod
+
+
+
+
+
 
                     )
 
@@ -233,20 +303,32 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #
             # }
 
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
             # pairw <- self$options$pairw
 
 
-            # distribution ----
+            # type of statistics ----
 
 
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
-            # pairw <- self$options$pairw
 
+
+            plottype <-
+                jmvcore::constructFormula(terms = self$options$plottype)
+
+
+            originaltheme <- self$options$originaltheme
+
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+            # ADD HERE ----
 
 
 
@@ -275,7 +357,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            originaltheme <- self$options$originaltheme
 
 
             dep <- jmvcore::composeTerm(components = dep)
@@ -300,8 +381,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!group,
                     y = !! dep,
                     grouping.var = !!grvar
+                    , type = typestatistics
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
+                    , plot.type = plottype
+                    , pairwise.comparisons = pairwisecomparisons
+                    , pairwise.display = pairwisedisplay
+                    , p.adjust.method = padjustmethod
+
+
+
 
                 )
 
@@ -322,8 +411,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         data = mydata,
                         x = !!group,
                         grouping.var = !!grvar
+                        , type = typestatistics
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
+                        , plot.type = plottype
+                        , pairwise.comparisons = pairwisecomparisons
+                        , pairwise.display = pairwisedisplay
+                        , p.adjust.method = padjustmethod
+
+
+
+
+
+
+
+
+
 
                     )
 
