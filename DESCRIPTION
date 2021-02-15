@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0048
-Date: 2020-11-09
+Version: 0.0.2.0061
+Date: 2021-02-15
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -96,7 +96,6 @@ Suggests:
     curl,
     pracma,
     randtests,
-    TSA,
     splus2R,
     scatterplot3d,
     bindrcpp,
@@ -120,9 +119,9 @@ Suggests:
     grid,
     ggstatsplot
 Remotes:
-    easystats/parameters,
     easystats/insight,
     easystats/bayestestR,
+    easystats/parameters,
     easystats/effectsize,
     easystats/report,
     ndphillips/FFTrees,
@@ -139,7 +138,8 @@ Remotes:
     cran/ifultools,
     cran/sapa,
     mariodosreis/fractal,
-    bbc/bbplot
+    bbc/bbplot,
+    yanlinlin82/ggvenn
 VignetteBuilder:
     knitr
 Encoding: UTF-8
