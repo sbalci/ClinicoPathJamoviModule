@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0048</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0065</span>
       </span>
     </div>
 
@@ -39,13 +39,13 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="../dev/index.html">
-    <span class="fa fa-cogs"></span>
+    <span class="fas fa-cogs"></span>
      
   </a>
 </li>
@@ -77,9 +77,6 @@
     <li>
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
     </li>
-    <li>
-      <a href="../articles/wf_master.html">Function Workflows</a>
-    </li>
   </ul>
 </li>
 <li>
@@ -89,13 +86,13 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="http://twitter.com/serdarbalci">
-    <span class="fab fa fab fa-twitter fa-lg"></span>
+    <span class="fab fa-twitter fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="https://github.com/sbalci/ClinicoPathJamoviModule/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -109,8 +106,7 @@
 
       
 
-      </header><script src="motivation_files/header-attrs-2.5.3/header-attrs.js"></script><link href="motivation_files/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet">
-<script src="motivation_files/anchor-sections-1.0.1/anchor-sections.js"></script><div class="row">
+      </header><script src="motivation_files/header-attrs-2.6.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Motivation</h1>
@@ -124,12 +120,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sbalci/ClinicoPathJamoviModule/">ClinicoPath</a></span><span class="op">)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Attaching package: 'ClinicoPath'</span>
-<span class="co">#&gt; The following objects are masked from 'package:stats':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     kmeans, line</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sbalci/ClinicoPathJamoviModule/">ClinicoPath</a></span><span class="op">)</span></code></pre></div>
 <p>I have started collecting R codes for my research. Then I started converting the results into natural language sentences. My colleagues are used to spss like point to click software. jamovi is a very good, R based open source project, but it still requires statistical literacy. Here I tried to make a stepwise, easy research analysis workflow.</p>
 <p>Linked repositories: histopathR, histopathology-template, ClinicoPathJamoviModule, histopathRshiny, clinicopathological, histopathRaddins</p>
 <p><a href="https://github.com/users/sbalci/projects/1" class="uri">https://github.com/users/sbalci/projects/1</a></p>
@@ -145,7 +136,7 @@
 <hr>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"sbalci/histopathR"</span><span class="op">)</span>
-<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
+<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rmarkdown.rstudio.com/docs//reference/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
                  template <span class="op">=</span> <span class="st">"clinicopathological"</span>,
                  package <span class="op">=</span> <span class="st">"histopathR"</span>,
                  create_dir <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -246,7 +237,7 @@
 </ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"sbalci/histopathR"</span><span class="op">)</span>
-<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
+<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rmarkdown.rstudio.com/docs//reference/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
                  template <span class="op">=</span> <span class="st">"clinicopathological"</span>,
                  package <span class="op">=</span> <span class="st">"histopathR"</span>,
                  create_dir <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -404,7 +395,7 @@ A work by <a href="https://github.com/sbalci/">Serdar Balci</a>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"sbalci/histopathR"</span><span class="op">)</span>
-<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
+<span class="fu">rmarkdown</span><span class="fu">::</span><span class="fu"><a href="https://rmarkdown.rstudio.com/docs//reference/draft.html">draft</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"myfile"</span>,
                  template <span class="op">=</span> <span class="st">"clinicopathological"</span>,
                  package <span class="op">=</span> <span class="st">"histopathR"</span>,
                  create_dir <span class="op">=</span> <span class="cn">TRUE</span>,

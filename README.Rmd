@@ -102,20 +102,18 @@ https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
-https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo
+https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0062.jmo
 
-https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo  
+https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0062.jmo  
 
 
 ```r
 remotes::install_github("sbalci/ClinicoPathDescriptives")
 ```
 
-
-
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
-      commit: 190b914807518bf0e9139bc282eabcf3883a9e72
+      commit: 0b898d7c0371fc9dd4d14971949073cc27d99e54
       platforms:
         - win64
         - macos
@@ -123,7 +121,7 @@ remotes::install_github("sbalci/ClinicoPathDescriptives")
 
 ##### ClinicoPathLinuxDescriptives
 
-ClinicoPathDescriptives functions for Linux  
+ClinicoPath Descriptives functions for Linux  
 
 
 https://github.com/sbalci/ClinicoPathLinuxDescriptives/
@@ -131,16 +129,16 @@ https://github.com/sbalci/ClinicoPathLinuxDescriptives/
 https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/
 
 
-https://library.jamovi.org/linux/R4.0.2/ClinicoPathDescriptives-0.0.2.0041.jmo
+https://library.jamovi.org/linux/R4.0.2/ClinicoPathLinuxDescriptives-0.0.2.0065.jmo
 
 ```r
-remotes::install_github("sbalci/ClinicoPathDescriptives")
+remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
 ```
 
 
-    - name: ClinicoPathDescriptives
+    - name: ClinicoPathLinuxDescriptives
       url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
-      commit: cc63b37bd0a639194baf5a35db72783e05336027
+      commit: 8be6cae0d5b89bdf54c4b6804826785c089d29c0
       platforms:
         - linux
         
