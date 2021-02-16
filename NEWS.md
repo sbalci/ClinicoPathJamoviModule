@@ -1,3 +1,10 @@
+# ClinicoPath 0.0.2.0064
+
+- added ggvenn function
+fixed https://github.com/yanlinlin82/ggvenn/issues/16
+
+- deleted some functions, will add as updated
+
 # ClinicoPath 0.0.2.0048
 
 - started adding arguments of ggstatsplot
