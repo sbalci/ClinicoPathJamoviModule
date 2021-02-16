@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0061
+version: 0.0.2.0064
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -19,6 +19,122 @@ analyses:
     menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
+  - title: Alluvial Diagrams
+    name: alluvial
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Alluvial Diagrams
+  - title: Benford Analysis
+    name: benford
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Benford Analysis
+  - title: Cross Tables
+    name: crosstable
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Comparisons
+    menuTitle: Cross Tables
+    description: Function for making Cross Tables.
+  - title: Summary of Categorical Variables
+    name: reportcat
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Summary of Categorical Variables
+    description: Function for Generating Summaries for Categorical Variables.
+  - title: Summary of Continuous Variables
+    name: summarydata
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Summary of Continuous Variables
+    description: Function for Generating Summaries for Continuous Variables.
+  - title: Table One
+    name: tableone
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Table One
+    description: Function for making Table One.
+  - title: Variable Tree
+    name: vartree
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Variable Tree
+    description: Function for Generating Tree Summaries of Variables.
+  - title: Venn Diagram
+    name: venn
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Venn Diagram
+datasets:
+  - name: histopathology including analysis
+    path: histopathologyDescriptives.omv
+    description: Example analysis for descriptive functions.
+    tags:
+      - Table One
+      - Data Summary
+      - Cross Tables
+      - Alluvial Diagrams
+  - name: histopathology including analysis
+    path: histopathologySurvival.omv
+    description: Example survival analysis for histopathology data
+    tags:
+      - Survival
+      - Natural Language
+  - name: histopathology including analysis
+    path: histopathologyMedicalDecision.omv
+    description: Example analysis for Medical Decision Tests.
+    tags:
+      - Kappa
+      - Sensitivity
+  - name: histopathology including analysis
+    path: histopathologyGraphsPlots.omv
+    description: Examples for Graphs and Plots
+    tags:
+      - GGStatsPlot
+      - Histogram
+      - Violin Plots
+      - Bar Charts
+      - Pie Charts
+      - Dot Charts
+      - Scatter Plots
+      - Correlation Matrix
+  - name: histopathology data only
+    path: histopathology.omv
+    description: Fake histopathology research data for ClinicoPath module
+    tags:
+      - Table One
+      - Data Summary
+      - Survival
+  - name: melanoma
+    path: melanoma.omv
+    description: 'melanoma dataset obtained from {boot}.'
+    tags:
+      - Data Summary
+      - Survival
+      - Competing risks regression
+  - name: colon
+    path: colon.omv
+    description: 'colon cancer dataset, obtained from {survival}.'
+    tags:
+      - Data Summary
+      - Survival
+  - name: BreastCancer
+    path: BreastCancer.omv
+    description: 'Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.'
+    tags:
+      - Classification
+  - name: rocdata
+    path: rocdata.omv
+    description: Example data for ROC analysis.
+    tags:
+      - ROC
 usesNative: true
 minApp: 1.2.22
 

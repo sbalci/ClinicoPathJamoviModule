@@ -1,0 +1,53 @@
+title: Venn Diagram
+name: venn
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variable 1
+        children:
+          - type: VariablesListBox
+            name: var1
+            isTarget: true
+            maxItemCount: 1
+          - type: LevelSelector
+            name: var1true
+            enable: (var1)
+      - type: TargetLayoutBox
+        label: Variable 2
+        children:
+          - type: VariablesListBox
+            name: var2
+            isTarget: true
+            maxItemCount: 1
+            enable: (var1)
+          - type: LevelSelector
+            name: var2true
+            enable: (var2)
+      - type: TargetLayoutBox
+        label: Variable 3
+        children:
+          - type: VariablesListBox
+            name: var3
+            isTarget: true
+            maxItemCount: 1
+            enable: (var2)
+          - type: LevelSelector
+            name: var3true
+            enable: (var3)
+      - type: TargetLayoutBox
+        label: Variable 4
+        children:
+          - type: VariablesListBox
+            name: var4
+            isTarget: true
+            maxItemCount: 1
+            enable: (var3)
+          - type: LevelSelector
+            name: var4true
+            enable: (var4)
