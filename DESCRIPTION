@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0065
-Date: 2021-02-16
+Version: 0.0.2.0066
+Date: 2021-02-19
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -44,12 +44,20 @@ Imports:
     kableExtra,
     finalfit,
     vtree,
-    DiagrammeRsvg
+    DiagrammeRsvg,
+    survival,
+    survminer,
+    finalfit,
+    janitor,
+    lubridate,
+    checkmate,
+    pammtools
 Remotes:
     spgarbet/tangram,
     mayoverse/arsenal,
     carloscinelli/benford.analysis,
-    yanlinlin82/ggvenn
+    yanlinlin82/ggvenn,
+    ellessenne/KMunicate-package
 VignetteBuilder:
     knitr
 Encoding: UTF-8

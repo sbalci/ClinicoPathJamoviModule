@@ -136,9 +136,9 @@ remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
 ```
 
 
-    - name: ClinicoPathLinuxDescriptives
+    - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
-      commit: 8be6cae0d5b89bdf54c4b6804826785c089d29c0
+      commit: ac0ec6b5127a058977aad3dc3982ee93c6d68c16
       platforms:
         - linux
         
