@@ -24,6 +24,7 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             uselandmark = FALSE,
             landmark = 3,
             pw = FALSE,
+            padjustmethod = "holm",
             sc = FALSE,
             kmunicate = FALSE,
             ce = FALSE,
@@ -110,6 +111,8 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "overall",
                     "cause"),
                 default="overall")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -147,6 +150,19 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "pw",
                 pw,
                 default=FALSE)
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY",
+                    "fdr",
+                    "none"),
+                default="holm")
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -205,12 +221,14 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
+            self$.addOption(private$..outcomeredifened)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..uselandmark)
             self$.addOption(private$..landmark)
             self$.addOption(private$..pw)
+            self$.addOption(private$..padjustmethod)
             self$.addOption(private$..sc)
             self$.addOption(private$..kmunicate)
             self$.addOption(private$..ce)
@@ -237,12 +255,14 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
+        outcomeredifened = function() private$..outcomeredifened$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
         uselandmark = function() private$..uselandmark$value,
         landmark = function() private$..landmark$value,
         pw = function() private$..pw$value,
+        padjustmethod = function() private$..padjustmethod$value,
         sc = function() private$..sc$value,
         kmunicate = function() private$..kmunicate$value,
         ce = function() private$..ce$value,
@@ -268,12 +288,14 @@ survivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
+        ..outcomeredifened = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
         ..uselandmark = NA,
         ..landmark = NA,
         ..pw = NA,
+        ..padjustmethod = NA,
         ..sc = NA,
         ..kmunicate = NA,
         ..ce = NA,
@@ -304,7 +326,8 @@ survivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
-        calculatedtime = function() private$.items[["calculatedtime"]]),
+        calculatedtime = function() private$.items[["calculatedtime"]],
+        outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -560,13 +583,23 @@ survivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
-                title="Calculated Time",
-                varTitle="`Calculated Time - from ${ dxdate } to ${ fudate }`",
+                title="Add Calculated Time to Data",
+                varTitle="`Calculated Time - from ${ dxdate } to { fudate }`",
                 varDescription="Calculated Time from given Dates",
                 clearWith=list(
                     "tint",
                     "dxdate",
-                    "fudate")))}))
+                    "fudate")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="outcomeredifened",
+                title="Add Redefined Outcome to Data",
+                varTitle="`Redefined Outcome - from ${ outcome } for analysis { analysistype }`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
+                    "multievent")))}))
 
 survivalBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "survivalBase",
@@ -614,6 +647,7 @@ survivalBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #' @param uselandmark .
 #' @param landmark .
 #' @param pw .
+#' @param padjustmethod .
 #' @param sc .
 #' @param kmunicate .
 #' @param ce .
@@ -642,6 +676,7 @@ survivalBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -671,6 +706,7 @@ survival <- function(
     uselandmark = FALSE,
     landmark = 3,
     pw = FALSE,
+    padjustmethod = "holm",
     sc = FALSE,
     kmunicate = FALSE,
     ce = FALSE,
@@ -721,6 +757,7 @@ survival <- function(
         uselandmark = uselandmark,
         landmark = landmark,
         pw = pw,
+        padjustmethod = padjustmethod,
         sc = sc,
         kmunicate = kmunicate,
         ce = ce,

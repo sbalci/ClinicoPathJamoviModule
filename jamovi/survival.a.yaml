@@ -59,7 +59,7 @@ options:
 
 
     - name: calculatedtime
-      title: Calculated Time
+      title: Add Calculated Time to Data
       type: Output
 
 
@@ -112,6 +112,13 @@ options:
         # - title: Competing Risk
         #   name: compete
       default: overall
+
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+
+
 
 
     - name: cutp
@@ -174,6 +181,31 @@ options:
       title: Pairwise comparisons
       type: Bool
       default: false
+
+
+
+    - name: padjustmethod
+      title: 'Adjustment Method'
+      type: List
+      options:
+        - title: holm
+          name: holm
+        - title: hochberg
+          name: hochberg
+        - title: hommel
+          name: hommel
+        - title: bonferroni
+          name: bonferroni
+        - title: BH
+          name: BH
+        - title: BY
+          name: BY
+        - title: fdr
+          name: fdr
+        - title: none
+          name: none
+      default: holm
+
 
 
     - name: sc

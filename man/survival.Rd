@@ -24,6 +24,7 @@ survival(
   uselandmark = FALSE,
   landmark = 3,
   pw = FALSE,
+  padjustmethod = "holm",
   sc = FALSE,
   kmunicate = FALSE,
   ce = FALSE,
@@ -76,6 +77,8 @@ survival(
 
 \item{pw}{.}
 
+\item{padjustmethod}{.}
+
 \item{sc}{.}
 
 \item{kmunicate}{.}
@@ -116,6 +119,7 @@ A results object containing:
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
