@@ -96,6 +96,8 @@ A results object containing:
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }
 }
 \description{

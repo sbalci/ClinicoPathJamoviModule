@@ -511,7 +511,9 @@ survivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue")),
                 visible="(pw && !sas)",
                 clearWith=list(
-                    "pw")))
+                    "pw"),
+                refs=list(
+                    "padjust")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

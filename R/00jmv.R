@@ -434,6 +434,12 @@
         `type`="software", 
         `author`="Linlin Yan", 
         `year`=2020, 
-        `title`=" Venn Diagram by ggplot2, with really easy-to-use API", 
+        `title`="Venn Diagram by ggplot2, with really easy-to-use API", 
         `publisher`="[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn", 
-        `url`="https://github.com/yanlinlin82/ggvenn"))
+        `url`="https://github.com/yanlinlin82/ggvenn"), 
+    `padjust`=list(
+        `type`="website", 
+        `year`=2020, 
+        `title`="p.adjust {stats} Adjust P-values for Multiple Comparisons", 
+        `publisher`="[R package]. Retrieved from https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html", 
+        `url`="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html"))

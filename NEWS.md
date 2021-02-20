@@ -1,3 +1,10 @@
+# ClinicoPath 0.0.2.0069
+
+optional padjustement to pairwise survival fixes: https://github.com/sbalci/ClinicoPathJamoviModule/issues/38
+
+saving calculated variables to Data
+
+
 # ClinicoPath 0.0.2.0064
 
 - added ggvenn function
