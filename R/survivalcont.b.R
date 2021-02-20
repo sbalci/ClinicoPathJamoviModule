@@ -241,6 +241,38 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
                 mydata[["myfactor"]] <- mydata[[contexpl]]
 
+
+                # Add Redefined Outcome to Data ----
+
+                if (self$options$multievent) {
+
+                if (self$options$outcomeredifened &&
+                    self$results$outcomeredifened$isNotFilled()) {
+                    self$results$outcomeredifened$setValues(mydata[["myoutcome"]])
+                }
+                }
+
+                # Add Calculated Time to Data ----
+
+                if (self$options$tint) {
+
+                if (self$options$calculatedtime &&
+                    self$results$calculatedtime$isNotFilled()) {
+                    self$results$calculatedtime$setValues(mydata[["mytime"]])
+                }
+                }
+
+
+
+
+
+
+
+
+
+
+
+
                 # Define Data For Analysis ----
 
                 # naOmit ----

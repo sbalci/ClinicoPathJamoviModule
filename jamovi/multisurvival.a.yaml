@@ -213,6 +213,14 @@ options:
       type: Bool
       default: false
 
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+
 
 
 

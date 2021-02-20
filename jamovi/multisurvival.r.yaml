@@ -194,6 +194,31 @@ items:
           - adjexplanatory
 
 
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time in Multivariate Survival Function - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome in Multivariate Survival Function - from ${ outcome } for analysis { analysistype }`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      clearWith:
+          - outcome
+          - analysistype
+          - multievent
+
+
+
+
     # - name: model
     #   type: Property
 

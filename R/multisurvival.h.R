@@ -179,6 +179,10 @@ multisurvivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "risktable",
                 risktable,
                 default=FALSE)
+            private$..calculatedtime <- jmvcore::OptionOutput$new(
+                "calculatedtime")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -205,6 +209,8 @@ multisurvivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..byplot)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
+            self$.addOption(private$..calculatedtime)
+            self$.addOption(private$..outcomeredifened)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -231,7 +237,9 @@ multisurvivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         endplot = function() private$..endplot$value,
         byplot = function() private$..byplot$value,
         ci95 = function() private$..ci95$value,
-        risktable = function() private$..risktable$value),
+        risktable = function() private$..risktable$value,
+        calculatedtime = function() private$..calculatedtime$value,
+        outcomeredifened = function() private$..outcomeredifened$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -257,7 +265,9 @@ multisurvivalOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         ..endplot = NA,
         ..byplot = NA,
         ..ci95 = NA,
-        ..risktable = NA)
+        ..risktable = NA,
+        ..calculatedtime = NA,
+        ..outcomeredifened = NA)
 )
 
 multisurvivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -269,7 +279,9 @@ multisurvivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
         plotKM = function() private$.items[["plotKM"]],
-        plot7 = function() private$.items[["plot7"]]),
+        plot7 = function() private$.items[["plot7"]],
+        calculatedtime = function() private$.items[["calculatedtime"]],
+        outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -433,7 +445,27 @@ multisurvivalResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
-                    "adjexplanatory")))}))
+                    "adjexplanatory")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedtime",
+                title="Add Calculated Time to Data",
+                varTitle="`Calculated Time in Multivariate Survival Function - from ${ dxdate } to { fudate }`",
+                varDescription="Calculated Time from given Dates",
+                clearWith=list(
+                    "tint",
+                    "dxdate",
+                    "fudate")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="outcomeredifened",
+                title="Add Redefined Outcome to Data",
+                varTitle="`Redefined Outcome in Multivariate Survival Function - from ${ outcome } for analysis { analysistype }`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
+                    "multievent")))}))
 
 multisurvivalBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "multisurvivalBase",
@@ -498,6 +530,8 @@ multisurvivalBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' @export

@@ -190,3 +190,24 @@ children:
               - type: CheckBox
                 name: risktable
                 enable: (km || ac)
+
+  - type: CollapseBox
+    label: Save Converted Variables to Data
+    collapsed: true
+    children:
+      - type: Label
+        label: Add Calculated Time to Your Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: calculatedtime
+            enable: (tint)
+            fitToGrid: true
+      - type: Label
+        label: Add Redefined Outcome to Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: outcomeredifened
+            enable: (multievent)
+            fitToGrid: true

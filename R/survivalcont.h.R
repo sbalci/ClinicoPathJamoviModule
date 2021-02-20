@@ -168,6 +168,10 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "risktable",
                 risktable,
                 default=FALSE)
+            private$..calculatedtime <- jmvcore::OptionOutput$new(
+                "calculatedtime")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -194,6 +198,8 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
+            self$.addOption(private$..calculatedtime)
+            self$.addOption(private$..outcomeredifened)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -220,7 +226,9 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         findcut = function() private$..findcut$value,
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
-        risktable = function() private$..risktable$value),
+        risktable = function() private$..risktable$value,
+        calculatedtime = function() private$..calculatedtime$value,
+        outcomeredifened = function() private$..outcomeredifened$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -246,7 +254,9 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         ..findcut = NA,
         ..multievent = NA,
         ..ci95 = NA,
-        ..risktable = NA)
+        ..risktable = NA,
+        ..calculatedtime = NA,
+        ..outcomeredifened = NA)
 )
 
 survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -265,7 +275,9 @@ survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         survTable = function() private$.items[["survTable"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
-        plot6 = function() private$.items[["plot6"]]),
+        plot6 = function() private$.items[["plot6"]],
+        calculatedtime = function() private$.items[["calculatedtime"]],
+        outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -502,7 +514,27 @@ survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     "byplot"),
                 refs=list(
                     "KMunicate",
-                    "KMunicate2")))}))
+                    "KMunicate2")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedtime",
+                title="Add Calculated Time to Data",
+                varTitle="`Calculated Time in Continious Survival Function - from ${ dxdate } to { fudate }`",
+                varDescription="Calculated Time from given Dates",
+                clearWith=list(
+                    "tint",
+                    "dxdate",
+                    "fudate")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="outcomeredifened",
+                title="Add Redefined Outcome to Data",
+                varTitle="`Redefined Outcome in Continious Survival Function - from ${ outcome } for analysis { analysistype }`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
+                    "multievent")))}))
 
 survivalcontBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "survivalcontBase",
@@ -569,6 +601,8 @@ survivalcontBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
