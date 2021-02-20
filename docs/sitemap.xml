@@ -31,6 +31,18 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/histopathology.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/multisurvival.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/multisurvivalClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/oddsratio.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/oddsratioClass.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/reportcat.html</loc>
   </url>
   <url>
@@ -44,6 +56,18 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/summarydataClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survival.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalcont.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/survivalcontClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableone.html</loc>

@@ -195,6 +195,8 @@ items:
       visible: (pw && !sas)
       clearWith:
           - pw
+      refs:
+          - padjust
 
 
     - name: plot
@@ -273,9 +275,9 @@ items:
 
 
     - name: calculatedtime
-      title: Calculated Time
+      title: Add Calculated Time to Data
       type: Output
-      varTitle: '`Calculated Time - from ${ dxdate } to ${ fudate }`'
+      varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
       varDescription: Calculated Time from given Dates
       clearWith:
           - tint
@@ -283,7 +285,15 @@ items:
           - fudate
 
 
-
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      clearWith:
+          - outcome
+          - analysistype
+          - multievent
 
 
 refs:

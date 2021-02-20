@@ -69,11 +69,6 @@ children:
                             maxItemCount: 1
                             isTarget: true
                             fitToGrid: true
-              - type: LayoutBox
-                margin: large
-                children:
-                  - type: Output
-                    name: calculatedtime
       - type: Label
         label: Time Type
         fitToGrid: true
@@ -154,6 +149,9 @@ children:
             children:
               - type: CheckBox
                 name: pw
+              - type: ComboBox
+                name: padjustmethod
+                enable: (pw)
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -202,3 +200,23 @@ children:
             name: cutp
             format: string
             width: large
+  - type: CollapseBox
+    label: Save Converted Variables to Data
+    collapsed: true
+    children:
+      - type: Label
+        label: Add Calculated Time to Your Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: calculatedtime
+            enable: (tint)
+            fitToGrid: true
+      - type: Label
+        label: Add Redefined Outcome to Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: outcomeredifened
+            enable: (multievent)
+            fitToGrid: true

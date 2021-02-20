@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0048</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0069</span>
       </span>
     </div>
 
@@ -80,13 +80,13 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="../dev/index.html">
-    <span class="fa fa-cogs"></span>
+    <span class="fas fa-cogs"></span>
      
   </a>
 </li>
@@ -118,9 +118,6 @@
     <li>
       <a href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a>
     </li>
-    <li>
-      <a href="../articles/wf_master.html">Function Workflows</a>
-    </li>
   </ul>
 </li>
 <li>
@@ -130,13 +127,13 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="http://twitter.com/serdarbalci">
-    <span class="fab fa fab fa-twitter fa-lg"></span>
+    <span class="fab fa-twitter fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="https://github.com/sbalci/ClinicoPathJamoviModule/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -182,6 +179,7 @@
   uselandmark <span class='op'>=</span> <span class='cn'>FALSE</span>,
   landmark <span class='op'>=</span> <span class='fl'>3</span>,
   pw <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  padjustmethod <span class='op'>=</span> <span class='st'>"holm"</span>,
   sc <span class='op'>=</span> <span class='cn'>FALSE</span>,
   kmunicate <span class='op'>=</span> <span class='cn'>FALSE</span>,
   ce <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -275,6 +273,10 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>padjustmethod</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>sc</th>
       <td><p>.</p></td>
     </tr>
@@ -337,6 +339,8 @@
 <tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 <tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr>
+<tr><td><code>results$outcomeredifened</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr>
 </table>
 
 
