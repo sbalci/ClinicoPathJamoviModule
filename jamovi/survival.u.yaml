@@ -36,6 +36,7 @@ children:
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
+    stretchFactor: 1
     children:
       - type: Label
         label: Time Interval
@@ -62,6 +63,7 @@ children:
                             maxItemCount: 1
                             isTarget: true
                             fitToGrid: true
+                            stretchFactor: 1
                       - type: TargetLayoutBox
                         children:
                           - type: VariablesListBox
@@ -69,6 +71,7 @@ children:
                             maxItemCount: 1
                             isTarget: true
                             fitToGrid: true
+                            stretchFactor: 1
       - type: Label
         label: Time Type
         fitToGrid: true

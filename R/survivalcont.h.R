@@ -172,6 +172,8 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "calculatedtime")
             private$..outcomeredifened <- jmvcore::OptionOutput$new(
                 "outcomeredifened")
+            private$..calculatedcutoff <- jmvcore::OptionOutput$new(
+                "calculatedcutoff")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -200,6 +202,7 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..risktable)
             self$.addOption(private$..calculatedtime)
             self$.addOption(private$..outcomeredifened)
+            self$.addOption(private$..calculatedcutoff)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -228,7 +231,8 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
         calculatedtime = function() private$..calculatedtime$value,
-        outcomeredifened = function() private$..outcomeredifened$value),
+        outcomeredifened = function() private$..outcomeredifened$value,
+        calculatedcutoff = function() private$..calculatedcutoff$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -256,13 +260,15 @@ survivalcontOptions <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         ..ci95 = NA,
         ..risktable = NA,
         ..calculatedtime = NA,
-        ..outcomeredifened = NA)
+        ..outcomeredifened = NA,
+        ..calculatedcutoff = NA)
 )
 
 survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        mydataview = function() private$.items[["mydataview"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
@@ -277,7 +283,8 @@ survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredifened = function() private$.items[["outcomeredifened"]]),
+        outcomeredifened = function() private$.items[["outcomeredifened"]],
+        calculatedcutoff = function() private$.items[["calculatedcutoff"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -304,6 +311,10 @@ survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview",
+                title="mydataview"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxSummary",
@@ -534,7 +545,19 @@ survivalcontResults <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 clearWith=list(
                     "outcome",
                     "analysistype",
-                    "multievent")))}))
+                    "multievent")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedcutoff",
+                title="Add Calculated Cut-off Group to Data",
+                varTitle="`Calculated Cut-off Group - from ${ contexpl }`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
+                    "multievent",
+                    "contexpl",
+                    "findcut")))}))
 
 survivalcontBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "survivalcontBase",
@@ -588,6 +611,7 @@ survivalcontBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
@@ -603,6 +627,7 @@ survivalcontBase <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

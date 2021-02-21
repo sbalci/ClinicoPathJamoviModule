@@ -1,3 +1,9 @@
+# ClinicoPath 0.0.2.0072
+
+
+calculated cut-off groups in continuous survival can be added to data
+
+
 # ClinicoPath 0.0.2.0069
 
 optional padjustement to pairwise survival fixes: https://github.com/sbalci/ClinicoPathJamoviModule/issues/38

@@ -52,6 +52,7 @@ children:
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
+    stretchFactor: 1
     children:
       - type: Label
         label: Time Interval
@@ -66,6 +67,7 @@ children:
       - type: Label
         label: Date Variables
         fitToGrid: true
+        stretchFactor: 1
         children:
           - type: VariableSupplier
             persistentItems: false
@@ -78,6 +80,7 @@ children:
                     maxItemCount: 1
                     isTarget: true
                     fitToGrid: true
+                    stretchFactor: 1
               - type: TargetLayoutBox
                 children:
                   - type: VariablesListBox
@@ -85,6 +88,7 @@ children:
                     maxItemCount: 1
                     isTarget: true
                     fitToGrid: true
+                    stretchFactor: 1
       - type: Label
         label: Time Type
         fitToGrid: true
@@ -207,4 +211,11 @@ children:
             name: outcomeredifened
             enable: (multievent)
             fitToGrid: true
-
+      - type: Label
+        label: Add Redefined Outcome to Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: calculatedcutoff
+            enable: (findcut)
+            fitToGrid: true

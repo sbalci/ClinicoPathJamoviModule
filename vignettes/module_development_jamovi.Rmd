@@ -381,8 +381,11 @@ so that’s your order of preference. preferably in the .r.yaml, if that can’t
 
 
 ## Output variables in jamovi 1.6.16
-                # hi, we’ve added “output variables” to version 1.6.16 of jamovi. this allows analyses to save data from the analyses, back to the spreadsheet (for example, residuals). there’s nothing in the 1.6.16 which indicates to users that this functionality is there, and it will only appear when an analysis implements these features. the idea is that we won’t actually release any modules with these features publicly, until an upcoming jamovi 1.8, or 2.0, or whatever. we’ve added these to the 1.6.16 so you can begin developing for the upcoming release.
-                # you begin by specifying an output option in your .a.yaml file, i.e.
+
+```
+hi, we’ve added “output variables” to version 1.6.16 of jamovi. this allows analyses to save data from the analyses, back to the spreadsheet (for example, residuals). there’s nothing in the 1.6.16 which indicates to users that this functionality is there, and it will only appear when an analysis implements these features. the idea is that we won’t actually release any modules with these features publicly, until an upcoming jamovi 1.8, or 2.0, or whatever. we’ve added these to the 1.6.16 so you can begin developing for the upcoming release.
+you begin by specifying an output option in your .a.yaml file, i.e.
+
                 # - name: resids
                 # title: Residuals
                 # type: Output
@@ -402,7 +405,8 @@ so that’s your order of preference. preferably in the .r.yaml, if that can’t
                 #     if (self$options$resids && self$results$resids$isNotFilled()) {
                 #         self$results$resids$setValues(aVector)
                 #     }
-                # sometimes your dataset will have gaps in it, either from filters, or from you calling na.omit() on it, and so if you simply send the residuals from your linear model to $setValues() they won’t be placed in the correct rows. there are two ways to solve this. call self$results$resids$setRowNums(...) . conveniently, you can simply take the rownames() from your data set (after calling na.omit()) on it, and pass this in here. i.e.
+                # sometimes your dataset will have gaps in it, either from filters, or from you calling na.omit() on it, and so if you simply send the residuals from your linear model to $setValues() they won’t be placed in the correct rows. there are two ways to solve this.
+                call self$results$resids$setRowNums(...) . conveniently, you can simply take the rownames() from your data set (after calling na.omit()) on it, and pass this in here. i.e.
                 # cleanData <- na.omit(self$data)
                 # ...
                 # rowNums <- rownames(cleanData)
@@ -430,9 +434,9 @@ so that’s your order of preference. preferably in the .r.yaml, if that can’t
                 # items: (vars)
                 # this will create an output column for each variable assigned to vars. these can be set:
                 #     self$results$resids$setValues(key=key, values)
-                # all the cases i’ve illustrated so far are for when you know the number of columns you want to create in advance … none handle the situation where that number is determined by the analysis, at runtime, from the data. i’ll be adding that functionality shortly.
-                # that’s most of it anyway. there’s still a few things we need to do, fixes, improvements. but we’ll add those in the next little while. let me know if you have any questions.
 
+
+```
 
 
 ## Other Tips

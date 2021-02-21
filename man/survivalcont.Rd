@@ -90,6 +90,7 @@ survivalcont(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
@@ -105,6 +106,7 @@ A results object containing:
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+\code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -41,6 +41,7 @@ children:
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
+    stretchFactor: 1
     children:
       - type: Label
         label: Time Interval
@@ -55,6 +56,7 @@ children:
       - type: Label
         label: Date Variables
         fitToGrid: true
+        stretchFactor: 1
         children:
           - type: VariableSupplier
             persistentItems: false
@@ -67,6 +69,7 @@ children:
                     maxItemCount: 1
                     isTarget: true
                     fitToGrid: true
+                    stretchFactor: 1
               - type: TargetLayoutBox
                 children:
                   - type: VariablesListBox
@@ -74,6 +77,7 @@ children:
                     maxItemCount: 1
                     isTarget: true
                     fitToGrid: true
+                    stretchFactor: 1
       - type: Label
         label: Time Type
         fitToGrid: true
@@ -122,6 +126,7 @@ children:
   - type: CollapseBox
     label: Plots
     collapsed: false
+    stretchFactor: 1
     children:
       - type: Label
         label: Hazard Regression Plots
@@ -148,9 +153,11 @@ children:
       - type: Label
         label: Adjusted Survival Curve
         fitToGrid: true
+        stretchFactor: 1
         children:
           - type: LayoutBox
             margin: large
+            stretchFactor: 1
             children:
               - type: CheckBox
                 name: ac
@@ -166,6 +173,7 @@ children:
                         name: adjexplanatory
                         maxItemCount: 1
                         isTarget: true
+                        stretchFactor: 1
       - type: Label
         label: Plot Options
         fitToGrid: true
