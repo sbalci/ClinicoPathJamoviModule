@@ -603,6 +603,7 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
                 cutoffdata <- private$.cutoff2(res.cut)
 
+                if (self$options$findcut && self$results$calculatedcutoff$isNotFilled()) {
 
                 # Set rownames ----
 
@@ -613,8 +614,6 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
                 # Add calculatedcutoff to Data ----
 
                 cutoffgr <- cutoffdata[[self$options$contexpl]]
-
-                if (self$options$findcut) {
 
                     if (self$options$calculatedcutoff &&
                         self$results$calculatedcutoff$isNotFilled()) {
