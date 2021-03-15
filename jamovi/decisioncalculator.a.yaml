@@ -1,0 +1,79 @@
+---
+name:  decisioncalculator
+title: Medical Decision Calculator
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Medical Decision Calculator.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
+options:
+    - name: TP
+      title: 'True Positive ='
+      type: Number
+      default: 90
+
+    - name: TN
+      title: 'True Negative ='
+      type: Number
+      default: 80
+
+    - name: FP
+      title: 'False Positive ='
+      type: Number
+      default: 30
+
+    - name: FN
+      title: 'False Negative ='
+      type: Number
+      default: 20
+
+    - name: pp
+      title: Prior Probability (prevelance)
+      type: Bool
+      default: false
+
+
+
+    - name: pprob
+      title: Prior Probability (prevelance)
+      type: Number
+      default: 0.300
+      min: 0.001
+      max: 0.999
+      description:
+          ui: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+          R: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+
+
+
+    - name: fnote
+      title: Show Footnote
+      type: Bool
+      default: false
+
+    - name: ci
+      title: 'Show 95% CI'
+      type: Bool
+      default: false
+
+
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+
+
+...

@@ -13,6 +13,12 @@
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agepyramidClass.html</loc>
   </url>
   <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreement.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/agreementClass.html</loc>
+  </url>
+  <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/alluvial.html</loc>
   </url>
   <url>
@@ -26,6 +32,18 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/crosstableClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decision.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisionClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisioncalculator.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/decisioncalculatorClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/histopathology.html</loc>
@@ -47,6 +65,12 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/reportcatClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/retracted.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/retractedClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/rocdata.html</loc>
@@ -74,6 +98,12 @@
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tableoneClass.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/tree.html</loc>
+  </url>
+  <url>
+    <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/treeClass.html</loc>
   </url>
   <url>
     <loc>https://sbalci.github.io/ClinicoPathJamoviModule//reference/vartree.html</loc>
