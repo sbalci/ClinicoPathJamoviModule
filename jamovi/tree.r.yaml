@@ -1,0 +1,70 @@
+---
+name:  tree
+title: Decision Tree
+jrs:   '1.1'
+
+
+clearWith:
+    - vars
+    - facs
+    - target
+    - targetLevel
+    - sty
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+
+    - name:  text1
+      title: Decision Tree
+      type:  Preformatted
+
+
+    - name:  text2
+      title: Decision Tree rpart
+      type:  Preformatted
+      visible: (sty:rpart || sty:fftrees)
+      refs:
+          - rpart
+          - rpart.plot
+
+
+    - name: plot1
+      title: Decision Tree Explore
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (sty:explore)
+      refs: explore
+
+
+    - name: plot2
+      title: Decision Tree FFTrees
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      visible: (sty:fftrees)
+      refs: FFTrees
+
+
+    - name: plot3
+      title: Decision Tree rpart
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot3
+      requiresData: true
+      visible: (sty:rpart)
+      refs:
+          - rpart
+          - rpart.plot
+
+...

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0072
+version: 0.0.2.0075
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2021-02-22'
+date: '2021-03-01'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -103,6 +103,44 @@ analyses:
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
     description: Function for Odds Ratio Table and Plot.
+  - title: Interrater Reliability
+    name: agreement
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Agreement
+    menuTitle: Interrater Reliability
+    description: Function for Interrater Reliability.
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Decision
+    menuTitle: Medical Decision
+    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    description: >
+      Function for Medical Decision Analysis. Sensitivity, specificity, positive
+      predictive value, negative predictive value.
+  - title: Medical Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Decision
+    menuTitle: Medical Decision Calculator
+    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    description: Function for Medical Decision Calculator.
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Decision
+    menuTitle: Decision Tree
+    description: Function for making Decision Trees.
+  - title: Find Retracted Papers from DOI
+    name: retracted
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Bibliometrics
+    menuTitle: Find Retracted Papers from DOI
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

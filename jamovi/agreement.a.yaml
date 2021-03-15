@@ -1,0 +1,70 @@
+---
+name:  agreement
+title: Interrater Reliability
+menuGroup: meddecide
+menuSubgroup: Agreement
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Interrater Reliability.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Raters
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            A string naming the variable from `data` that contains the
+            diagnosis given by the observer, variable can be categorical, ordinal or numeric.
+
+
+    - name: sft
+      title: Frequency Table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show frequency table. Default is 'false'.
+
+
+    - name: wght
+      title: Weighted Kappa (Ordinal Variables only)
+      type: List
+      options:
+        - title: Unweighted
+          name: unweighted
+        - title: Squared
+          name: squared
+        - title: Equal/Linear
+          name: equal
+      default: unweighted
+      description:
+          R: >
+            A list for the argument weight (wght), for weighted kappa analysis. Default is 'unweighted'.
+            'squared' or 'equal' should be selected only with ordinal variables. The function gives error if the variable type
+            is not ordinal.
+
+    - name: exct
+      title: Exact Kappa (>=3 Variables)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to use exact kappa. Effects only more than 3 observers.
+
+
+...

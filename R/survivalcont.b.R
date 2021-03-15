@@ -624,26 +624,22 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
 
 
-                # View mydata ----
-
-                mydata2 <- mydata
-                res.cut2 <- res.cut
-                cutoffdata2 <- cutoffdata
-
-
-                selfdata2 <- self$data
-                mydata2$row_names <- row.names(mydata2)
-                res.cut2$row_names <- row.names(res.cut2)
-                cutoffdata2$row_names <- row.names(cutoffdata2)
-
-                self$results$mydataview$setContent(
-                    list(
-                        "self$data" = selfdata2,
-                        "mydata" = mydata2,
-                        "res.cut" = res.cut2,
-                        "cutoffdata" = cutoffdata2
-                    )
-                    )
+                # # View mydata ----
+                # mydata2 <- mydata
+                # res.cut2 <- res.cut
+                # cutoffdata2 <- cutoffdata
+                # selfdata2 <- self$data
+                # mydata2$row_names <- row.names(mydata2)
+                # res.cut2$row_names <- row.names(res.cut2)
+                # cutoffdata2$row_names <- row.names(cutoffdata2)
+                # self$results$mydataview$setContent(
+                #     list(
+                #         "self$data" = selfdata2,
+                #         "mydata" = mydata2,
+                #         "res.cut" = res.cut2,
+                #         "cutoffdata" = cutoffdata2
+                #     )
+                #     )
 
 
 

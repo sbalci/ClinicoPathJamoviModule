@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0069</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0075</span>
       </span>
     </div>
 
@@ -106,7 +106,7 @@
 
       
 
-      </header><script src="module_development_jamovi_files/header-attrs-2.6.6/header-attrs.js"></script><div class="row">
+      </header><script src="module_development_jamovi_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Module Development for Jamovi</h1>
@@ -387,57 +387,59 @@ so that’s your order of preference. preferably in the .r.yaml, if that can’t
 <div id="output-variables-in-jamovi-1-6-16" class="section level2">
 <h2 class="hasAnchor">
 <a href="#output-variables-in-jamovi-1-6-16" class="anchor"></a>Output variables in jamovi 1.6.16</h2>
-<pre><code>            # hi, we’ve added “output variables” to version 1.6.16 of jamovi. this allows analyses to save data from the analyses, back to the spreadsheet (for example, residuals). there’s nothing in the 1.6.16 which indicates to users that this functionality is there, and it will only appear when an analysis implements these features. the idea is that we won’t actually release any modules with these features publicly, until an upcoming jamovi 1.8, or 2.0, or whatever. we’ve added these to the 1.6.16 so you can begin developing for the upcoming release.
-            # you begin by specifying an output option in your .a.yaml file, i.e.
-            # - name: resids
-            # title: Residuals
-            # type: Output
-            # and then add an entry into your .r.yaml file, with a matching name:
-            #     - name: resids
-            # title: Residuals
-            # type: Output
-            # varTitle: '`Residuals - ${ dep }`'
-            # varDescription: Residuals from ANCOVA
-            # clearWith:
-            #     - dep
-            # - factors
-            # - covs
-            # - modelTerms
-            # in this case you’ll see that i’m specifying a formatted string, where the name of the column produced is generated from the dep variable, or dependent variable.
-            # you can populate the output column with:
-            #     if (self$options$resids &amp;&amp; self$results$resids$isNotFilled()) {
-            #         self$results$resids$setValues(aVector)
-            #     }
-            # sometimes your dataset will have gaps in it, either from filters, or from you calling na.omit() on it, and so if you simply send the residuals from your linear model to $setValues() they won’t be placed in the correct rows. there are two ways to solve this. call self$results$resids$setRowNums(...) . conveniently, you can simply take the rownames() from your data set (after calling na.omit()) on it, and pass this in here. i.e.
-            # cleanData &lt;- na.omit(self$data)
-            # ...
-            # rowNums &lt;- rownames(cleanData)
-            # self$results$resids$setRowNums(rowNums)
-            # alternatively, you can turn your residuals into a data frame, attach the row numbers to that:
-            #     residuals &lt;- ...
-            # residuals &lt;- data.frame(residuals=residuals, row.names=rownames(cleanData))
-            # self$results$setValues(residuals)
-            # if you want to provide multiple output columns, for example, perhaps in the previous example we want a “predicted values” column as well, we’d add additional entries to the .a.yaml and the .r.yaml. each entry in the .a.yaml will result in one checkbox.
-            # if you want to provide multiple columns with a single checkbox/option, then you can use the items property.
-            # - name: predInt
-            # title: Prediction intervals
-            # varTitle: Pred interval
-            # type: Output
-            # items: 2
-            # then you can go:
-            #     self$results$predInt$setValues(index=i, values)
-            # or you could wrap both columns of values in a data frame, and go:
-            #     self$results$predInt$setValues(valuesinadataframe)
-            # you can use data bindings with items too. i.e.
-            # - name: resids
-            # title: Residuals
-            # type: Output
-            # varTitle: 'Residuals - $key'
-            # items: (vars)
-            # this will create an output column for each variable assigned to vars. these can be set:
-            #     self$results$resids$setValues(key=key, values)
-            # all the cases i’ve illustrated so far are for when you know the number of columns you want to create in advance … none handle the situation where that number is determined by the analysis, at runtime, from the data. i’ll be adding that functionality shortly.
-            # that’s most of it anyway. there’s still a few things we need to do, fixes, improvements. but we’ll add those in the next little while. let me know if you have any questions.</code></pre>
+<pre><code>hi, we’ve added “output variables” to version 1.6.16 of jamovi. this allows analyses to save data from the analyses, back to the spreadsheet (for example, residuals). there’s nothing in the 1.6.16 which indicates to users that this functionality is there, and it will only appear when an analysis implements these features. the idea is that we won’t actually release any modules with these features publicly, until an upcoming jamovi 1.8, or 2.0, or whatever. we’ve added these to the 1.6.16 so you can begin developing for the upcoming release.
+you begin by specifying an output option in your .a.yaml file, i.e.
+
+                # - name: resids
+                # title: Residuals
+                # type: Output
+                # and then add an entry into your .r.yaml file, with a matching name:
+                #     - name: resids
+                # title: Residuals
+                # type: Output
+                # varTitle: '`Residuals - ${ dep }`'
+                # varDescription: Residuals from ANCOVA
+                # clearWith:
+                #     - dep
+                # - factors
+                # - covs
+                # - modelTerms
+                # in this case you’ll see that i’m specifying a formatted string, where the name of the column produced is generated from the dep variable, or dependent variable.
+                # you can populate the output column with:
+                #     if (self$options$resids &amp;&amp; self$results$resids$isNotFilled()) {
+                #         self$results$resids$setValues(aVector)
+                #     }
+                # sometimes your dataset will have gaps in it, either from filters, or from you calling na.omit() on it, and so if you simply send the residuals from your linear model to $setValues() they won’t be placed in the correct rows. there are two ways to solve this.
+                call self$results$resids$setRowNums(...) . conveniently, you can simply take the rownames() from your data set (after calling na.omit()) on it, and pass this in here. i.e.
+                # cleanData &lt;- na.omit(self$data)
+                # ...
+                # rowNums &lt;- rownames(cleanData)
+                # self$results$resids$setRowNums(rowNums)
+                # alternatively, you can turn your residuals into a data frame, attach the row numbers to that:
+                #     residuals &lt;- ...
+                # residuals &lt;- data.frame(residuals=residuals, row.names=rownames(cleanData))
+                # self$results$setValues(residuals)
+                # if you want to provide multiple output columns, for example, perhaps in the previous example we want a “predicted values” column as well, we’d add additional entries to the .a.yaml and the .r.yaml. each entry in the .a.yaml will result in one checkbox.
+                # if you want to provide multiple columns with a single checkbox/option, then you can use the items property.
+                # - name: predInt
+                # title: Prediction intervals
+                # varTitle: Pred interval
+                # type: Output
+                # items: 2
+                # then you can go:
+                #     self$results$predInt$setValues(index=i, values)
+                # or you could wrap both columns of values in a data frame, and go:
+                #     self$results$predInt$setValues(valuesinadataframe)
+                # you can use data bindings with items too. i.e.
+                # - name: resids
+                # title: Residuals
+                # type: Output
+                # varTitle: 'Residuals - $key'
+                # items: (vars)
+                # this will create an output column for each variable assigned to vars. these can be set:
+                #     self$results$resids$setValues(key=key, values)
+
+</code></pre>
 </div>
 <div id="other-tips" class="section level2">
 <h2 class="hasAnchor">
