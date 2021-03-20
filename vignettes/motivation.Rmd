@@ -19,4 +19,4 @@ library(ClinicoPath)
 ```
 
 
-See Turkish version for my motivation here: [Neden jamovi modüllerine ihtiyacım oldu?] (https://www.serdarbalci.com/posts/2021-03-15-neden-jamovi-modullerine-ihtiyacim-oldu/)
+See Turkish version for my motivation here: [Neden jamovi modüllerine ihtiyacım oldu?](https://www.serdarbalci.com/posts/2021-03-15-neden-jamovi-modullerine-ihtiyacim-oldu/)

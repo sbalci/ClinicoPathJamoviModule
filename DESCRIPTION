@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0075
-Date: 2021-03-01
+Version: 0.0.2.0076
+Date: 2021-03-18
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -59,7 +59,8 @@ Imports:
     epiR,
     explore,
     rpart,
-    rcrossref
+    rcrossref,
+    ggstatsplot
 Remotes:
     spgarbet/tangram,
     mayoverse/arsenal,
