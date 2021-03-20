@@ -13,9 +13,6 @@ description:
         usage: |
             # example will be added
 
-clearWith:
-    - '*'
-
 options:
     - name: data
       type: Data
