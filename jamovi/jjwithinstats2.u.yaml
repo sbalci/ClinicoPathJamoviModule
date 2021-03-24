@@ -15,7 +15,7 @@ children:
             name: pairs
             fullRowSelect: true
             isTarget: true
-            # maxItemCount: 1
+            maxItemCount: 1
             columns:
               - name: i1
                 stretchFactor: 1

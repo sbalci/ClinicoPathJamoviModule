@@ -45,6 +45,112 @@ jjwithinstats2Class <- if (requireNamespace('jmvcore'))
                         stop('Data contains no (complete) rows')
 
 
+
+
+
+
+
+
+
+                    # Error messages ----
+
+                    if (is.null(self$options$pairs))
+                        return()
+
+                    if (nrow(self$data) == 0)
+                        stop('Data contains no (complete) rows')
+
+
+                    # Prepare Data ----
+
+
+                    data <- self$data
+
+                    pairs <- self$options$pairs
+
+                    mydata <- data
+
+                    for (i in seq_along(pairs)) {
+                        pair <- pairs[[i]]
+
+                        name1 <- pair$i1
+                        name2 <- pair$i2
+
+                        if (is.null(name1) || is.null(name2))
+                            return()
+
+                        data[[name1]] <- jmvcore::toNumeric(data[[name1]])
+                        data[[name2]] <- jmvcore::toNumeric(data[[name2]])
+
+
+                        mydata <-
+                            data %>%
+                            tibble::rowid_to_column(.data = .) %>%
+                            dplyr::select(rowid,
+                                          name1,
+                                          name2) %>%
+                            tidyr::pivot_longer(cols = -rowid,
+                                                names_to = "Measurement",
+                                                values_to = "Values"
+                            )
+
+                        mydata[["Measurement"]] <- ordered(
+                            x = mydata[["Measurement"]],
+                            levels = c(name1, name2)
+                        )
+
+
+                    }
+
+
+                    # Exclude NA ----
+
+                    excl <- self$options$excl
+
+                    if (excl) {
+                        mydata <- jmvcore::naOmit(mydata)
+                    }
+
+
+                    mypairs <- list2DF(x = pairs)
+
+
+
+                    self$results$text1$setContent(
+                        list(
+                            mydata = head(mydata, n = 10),
+                            data = head(data, n = 10),
+                            pairs = pairs,
+                            name1 = name1,
+                            name2 = name2,
+                            levels = levels(mydata[["Measurement"]]),
+                            table = table(mydata[["Measurement"]]),
+                            length = length(pairs),
+                            mypairs = mypairs
+                            )
+                    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 }
 
 
@@ -58,7 +164,7 @@ jjwithinstats2Class <- if (requireNamespace('jmvcore'))
                 # the plot function ----
                 # Error messages ----
 
-                if (is.null(self$options$get('pairs')))
+                if (is.null(self$options$pairs))
                     return()
 
                 if (nrow(self$data) == 0)
@@ -70,7 +176,7 @@ jjwithinstats2Class <- if (requireNamespace('jmvcore'))
 
                 data <- self$data
 
-                pairs <- self$options$get('pairs')
+                pairs <- self$options$pairs
 
                 mydata <- data
 
@@ -97,6 +203,13 @@ jjwithinstats2Class <- if (requireNamespace('jmvcore'))
                                             names_to = "Measurement",
                                             values_to = "Values"
                                             )
+
+                    mydata[["Measurement"]] <- ordered(
+                        x = mydata[["Measurement"]],
+                        levels = c(name1, name2)
+                    )
+
+
 
                 }
 

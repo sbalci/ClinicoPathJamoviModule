@@ -1,6 +1,6 @@
 ---
-name:  jjwithinstats2
-title: Violin Plots to Compare Within Groups for Wide Data Format
+name:  jjwithinstats3
+title: Violin Plots to Compare Repeated Measurements for Continuous Variables
 jrs:   '1.1'
 
 clearWith:

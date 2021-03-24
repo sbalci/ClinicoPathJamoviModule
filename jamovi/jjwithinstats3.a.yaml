@@ -1,9 +1,9 @@
 ---
-name:  jjwithinstats2
-title: Violin Plots to Compare Within Groups for Wide Data Format
+name:  jjwithinstats3
+title: Violin Plots to Compare Repeated Measurements for Continuous Variables
 menuGroup: JJStatsPlot
-menuSubgroup: Categorical vs Continuous
-menuSubtitle: Paired Measurements
+menuSubgroup: Repeated Measurements
+menuSubtitle: Repeated Measurements for Continuous Variables
 version: '1.0.0'
 jas: '1.2'
 
@@ -26,9 +26,9 @@ options:
             The data as a data frame.
 
 
-    - name: pairs
-      title: Paired Variables
-      type: Pair
+    - name: dep
+      title: Repeated Measurements
+      type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
 
