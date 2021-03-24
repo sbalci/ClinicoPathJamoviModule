@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0076
-Date: 2021-03-18
+Version: 0.0.2.0077
+Date: 2021-03-20
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
