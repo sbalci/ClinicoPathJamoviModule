@@ -8,8 +8,8 @@ articles:
   motivation: motivation.html
   pathology_jamovi: pathology_jamovi.html
   pkgnet-report: pkgnet-report.html
-last_built: 2021-03-24T23:11Z
+last_built: 2021-03-24T23:28Z
 urls:
-  reference: https://sbalci.github.io/ClinicoPathJamoviModule//reference
-  article: https://sbalci.github.io/ClinicoPathJamoviModule//articles
+  reference: https://sbalci.github.io/ClinicoPathJamoviModule/reference
+  article: https://sbalci.github.io/ClinicoPathJamoviModule/articles
 
