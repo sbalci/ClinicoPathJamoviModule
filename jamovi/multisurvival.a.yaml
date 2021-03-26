@@ -1,14 +1,14 @@
 ---
 name:  multisurvival
-title: Multivariate Survival Analysis
+title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Multivariate Cox-regression, Adjusted Survival'
+menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for Multivariate Survival Analysis using Cox-regression.
+    main: Function for Multivariable Survival Analysis using Cox-regression.
     R:
         dontrun: true
         usage: |

@@ -1,6 +1,6 @@
 ---
 name:  multisurvival
-title: Multivariate Survival Analysis
+title: Multivariable Survival Analysis
 jrs:   '1.1'
 
 
@@ -43,7 +43,7 @@ items:
 
 
     - name:  text
-      title: Multivariate Survival
+      title: Multivariable Survival
       type:  Html
       refs: finalfit
       clearWith:
@@ -198,7 +198,7 @@ items:
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
-      varTitle: '`Calculated Time in Multivariate Survival Function - from ${ dxdate } to { fudate }`'
+      varTitle: '`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`'
       varDescription: Calculated Time from given Dates
       clearWith:
           - tint
@@ -209,7 +209,7 @@ items:
     - name: outcomeredifened
       title: Add Redefined Outcome to Data
       type: Output
-      varTitle: '`Redefined Outcome in Multivariate Survival Function - from ${ outcome } for analysis { analysistype }`'
+      varTitle: '`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`'
       varDescription: Redefined Outcome from Outcome based on Analysis Type
       clearWith:
           - outcome
@@ -217,7 +217,8 @@ items:
           - multievent
 
 
-
+refs:
+    - multivariable
 
     # - name: model
     #   type: Property

@@ -1,4 +1,4 @@
-#' @title Multivariate Survival Analysis
+#' @title Multivariable Survival Analysis
 #'
 #'
 #' @importFrom R6 R6Class
@@ -39,7 +39,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                         "
                     <br>Welcome to ClinicoPath
                     <br><br>
-                        This tool will help you perform a multivariate survival analysis.
+                        This tool will help you perform a multivariable survival analysis.
                     <br><br>
                         Explanatory variables can be categorical (ordinal or nominal) or continuous.
                     <br><br>
@@ -464,7 +464,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 # self$results$text3$setContent(resultsdeneme2)
 
-                # finalfit multivariate table ----
+                # finalfit Multivariable table ----
 
                 finalfit::finalfit(
                     .data = mydata,
@@ -472,14 +472,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     explanatory = formula2,
 
                     metrics = TRUE
-                ) -> tMultivariate
+                ) -> tMultivariable
 
 
                 text2 <- glue::glue("
                                 <br>
                                 <b>Model Metrics:</b>
                                   ",
-                                unlist(tMultivariate[[2]]),
+                                unlist(tMultivariable[[2]]),
                                 "
                                 <br>
                                 ")
@@ -490,7 +490,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
                 results1 <- knitr::kable(
-                    tMultivariate[[1]],
+                    tMultivariable[[1]],
                     row.names = FALSE,
                     align = c('l', 'l', 'r', 'r', 'r', 'r'),
                     format = "html"
@@ -752,7 +752,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
                 if (!(self$options$adjexplanatory %in% c(self$options$explanatory, self$options$contexpl)))
-                    stop("Please use the explanatory variable used to build the multivariate survival model.")
+                    stop("Please use the explanatory variable used to build the multivariable survival model.")
 
 
 
