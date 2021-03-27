@@ -27,9 +27,9 @@
 ^README\.Rmd$
 ^README\.html$
 ^.*Class.Rd$
-^.*\.gif$
-^.*\.png$
-^.*\.mp4$
+# ^.*\.gif$
+# ^.*\.png$
+# ^.*\.mp4$
 
 
 ### License
