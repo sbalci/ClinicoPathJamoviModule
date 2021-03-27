@@ -16,12 +16,7 @@ Description: Analysis for Clinicopathological Research
     survival analysis with survival tables, survival plots, and natural
     language summaries.
 License: GPL-3
-URL: https://github.com/sbalci/ClinicoPathJamoviModule/,
-    https://github.com/sbalci/ClinicoPathDescriptives/,
-    https://github.com/sbalci/jsurvival,
-    https://github.com/sbalci/meddecide,
-    https://github.com/sbalci/jjstatsplot,
-    https://sbalci.github.io/ClinicoPathJamoviModule/
+URL: https://www.serdarbalci.com/ClinicoPathJamoviModule, https://github.com/sbalci/ClinicoPathJamoviModule/, https://github.com/sbalci/ClinicoPathDescriptives/, https://github.com/sbalci/jsurvival, https://github.com/sbalci/meddecide, https://github.com/sbalci/jjstatsplot, https://sbalci.github.io/ClinicoPathJamoviModule/
 BugReports: 
     https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:

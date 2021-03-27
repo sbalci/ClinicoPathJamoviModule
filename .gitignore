@@ -39,3 +39,4 @@ build
 *.jmo
 .DS_Store
 ClinicoPath.code-workspace
+docs
