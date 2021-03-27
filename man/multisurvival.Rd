@@ -2,7 +2,7 @@
 % Please edit documentation in R/multisurvival.h.R
 \name{multisurvival}
 \alias{multisurvival}
-\title{Multivariate Survival Analysis}
+\title{Multivariable Survival Analysis}
 \usage{
 multisurvival(
   data,
@@ -101,7 +101,7 @@ A results object containing:
 }
 }
 \description{
-Function for Multivariate Survival Analysis using Cox-regression.
+Function for Multivariable Survival Analysis using Cox-regression.
 }
 \examples{
 \dontrun{

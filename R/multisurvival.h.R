@@ -289,7 +289,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Multivariate Survival Analysis",
+                title="Multivariable Survival Analysis",
+                refs=list(
+                    "multivariable"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -319,7 +321,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
-                title="Multivariate Survival",
+                title="Multivariable Survival",
                 refs="finalfit",
                 clearWith=list(
                     "outcome",
@@ -451,7 +453,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="calculatedtime",
                 title="Add Calculated Time to Data",
-                varTitle="`Calculated Time in Multivariate Survival Function - from ${ dxdate } to { fudate }`",
+                varTitle="`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`",
                 varDescription="Calculated Time from given Dates",
                 clearWith=list(
                     "tint",
@@ -461,7 +463,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="outcomeredifened",
                 title="Add Redefined Outcome to Data",
-                varTitle="`Redefined Outcome in Multivariate Survival Function - from ${ outcome } for analysis { analysistype }`",
+                varTitle="`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`",
                 varDescription="Redefined Outcome from Outcome based on Analysis Type",
                 clearWith=list(
                     "outcome",
@@ -488,9 +490,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Multivariate Survival Analysis
+#' Multivariable Survival Analysis
 #'
-#' Function for Multivariate Survival Analysis using Cox-regression.
+#' Function for Multivariable Survival Analysis using Cox-regression.
 #'
 #' @examples
 #' \dontrun{

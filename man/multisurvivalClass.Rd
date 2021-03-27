@@ -2,11 +2,11 @@
 % Please edit documentation in R/multisurvival.b.R
 \name{multisurvivalClass}
 \alias{multisurvivalClass}
-\title{Multivariate Survival Analysis}
+\title{Multivariable Survival Analysis}
 \description{
-Multivariate Survival Analysis
+Multivariable Survival Analysis
 
-Multivariate Survival Analysis
+Multivariable Survival Analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:multisurvivalBase]{ClinicoPath::multisurvivalBase}} -> \code{multisurvivalClass}

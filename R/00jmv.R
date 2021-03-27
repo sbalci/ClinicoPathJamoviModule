@@ -442,4 +442,14 @@
         `year`=2020, 
         `title`="p.adjust {stats} Adjust P-values for Multiple Comparisons", 
         `publisher`="[R package]. Retrieved from https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html", 
-        `url`="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html"))
+        `url`="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html"), 
+    `multivariable`=list(
+        `type`="article", 
+        `title`="Multivariate or Multivariable Regression?", 
+        `year`=2013, 
+        `author`="Hidalgo B, Goodman M.", 
+        `publisher`="Am J Public Health.", 
+        `volume`=103, 
+        `pages`="39-40", 
+        `doi`="10.2105/AJPH.2012.300897", 
+        `url`="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3518362/"))
