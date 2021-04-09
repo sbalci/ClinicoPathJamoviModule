@@ -525,15 +525,15 @@ add following to .gitignore file
 
 Try to use compatible packages with the jamovi's R version.
 
-Use: **R 4.0.2**
-https://cran.r-project.org/bin/macosx/R-4.0.2.pkg
+Use: **R 4.0.5**
+https://cran.r-project.org/bin/macosx/R-4.0.5.pkg
 
 
 Use packages from mran:
 
 ```r
 options(
-repos = "https://cran.microsoft.com/snapshot/2020-08-24"
+repos = "https://cran.microsoft.com/snapshot/2021-04-01"
                 )
 ```
 

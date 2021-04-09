@@ -1,6 +1,6 @@
 pandoc: 2.11.4
-pkgdown: 1.6.1.9001
-pkgdown_sha: 23eb05ceceda1c44573b254dd8b96e92cd91f825
+pkgdown: 1.6.1
+pkgdown_sha: ~
 articles:
   data-preperation: data-preperation.html
   examples: examples.html
@@ -8,8 +8,8 @@ articles:
   motivation: motivation.html
   pathology_jamovi: pathology_jamovi.html
   pkgnet-report: pkgnet-report.html
-last_built: 2021-03-24T23:28Z
+last_built: 2021-04-09T18:14Z
 urls:
-  reference: https://sbalci.github.io/ClinicoPathJamoviModule/reference
-  article: https://sbalci.github.io/ClinicoPathJamoviModule/articles
+  reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
+  article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles
 

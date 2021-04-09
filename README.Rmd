@@ -54,10 +54,11 @@ You can install this module after installing jamovi version >= 1.2.19 from here:
 Then you can install the submodules directly inside the jamovi, using library.  
 
 Submodules are:
-- ClinicoPathDescriptives
-- jsurvival
-- meddecide
-- jjstatsplot
+
+- ClinicoPathDescriptives  
+- jsurvival  
+- meddecide  
+- jjstatsplot  
 
 
 
@@ -102,9 +103,9 @@ https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
-https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0062.jmo
+https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.0062.jmo
 
-https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0062.jmo  
+https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.0062.jmo  
 
 
 ```r
@@ -129,7 +130,7 @@ https://github.com/sbalci/ClinicoPathLinuxDescriptives/
 https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/
 
 
-https://library.jamovi.org/linux/R4.0.2/ClinicoPathLinuxDescriptives-0.0.2.0065.jmo
+https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0065.jmo
 
 ```r
 remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
@@ -150,11 +151,11 @@ GGStatsPlot functions are separately added to jamovi library under jjstatsplot m
 
 JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)  
 
-https://library.jamovi.org/win64/R4.0.2/jjstatsplot-0.0.2.0075.jmo
+https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.0075.jmo
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-https://library.jamovi.org/macos/R4.0.2/jjstatsplot-0.0.2.0075.jmo
+https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.0075.jmo
 
 https://github.com/sbalci/jjstatsplot  
 
@@ -183,11 +184,11 @@ https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
-https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0044.jmo  
+https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.0044.jmo  
 
-https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0044.jmo
+https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.0044.jmo
 
-https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0044.jmo
+https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.0044.jmo
 
 
 ```r
@@ -211,11 +212,11 @@ https://github.com/sbalci/meddecide/
 
 https://github.com/sbalci/meddecide/releases/  
 
-https://library.jamovi.org/win64/R4.0.2/meddecide-0.0.1.0005.jmo
+https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.1.0005.jmo
 
-https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo  
+https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo  
 
-https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo  
+https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.1.0005.jmo  
 
 
 ```r
@@ -545,7 +546,7 @@ devtools::install_github("sbalci/ClinicoPathJamoviModule")
 
 ## Current Package Versions:
 
-**R:** 4.0.2
+**R:** 4.0.5
 
 **MRAN:** https://cran.microsoft.com/snapshot/2020-08-24
 
@@ -628,6 +629,7 @@ https://paypal.me/serdarbalci
 ![GitHub stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+[![Codecov test coverage](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg)](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule?branch=master)
 <!-- badges: end -->
 
 

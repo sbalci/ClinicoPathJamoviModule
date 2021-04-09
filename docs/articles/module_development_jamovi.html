@@ -19,8 +19,6 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
-
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -33,12 +31,18 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0077</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0080</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
+<li>
+  <a href="../index.html">
+    <span class="fas fa-home fa-lg"></span>
+     
+  </a>
+</li>
 <li>
   <a href="../dev/index.html">
     <span class="fas fa-cogs"></span>
@@ -81,13 +85,13 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="http://twitter.com/serdarbalci" class="external-link">
+  <a href="http://twitter.com/serdarbalci">
     <span class="fab fa-twitter fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="https://github.com/sbalci/ClinicoPathJamoviModule/" class="external-link">
+  <a href="https://github.com/sbalci/ClinicoPathJamoviModule/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -108,7 +112,7 @@
       <h1 data-toc-skip>Module Development for Jamovi</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/vignettes/module_development_jamovi.Rmd" class="external-link"><code>vignettes/module_development_jamovi.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/vignettes/module_development_jamovi.Rmd"><code>vignettes/module_development_jamovi.Rmd</code></a></small>
       <div class="hidden name"><code>module_development_jamovi.Rmd</code></div>
 
     </div>
@@ -118,38 +122,38 @@
 <div id="a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="section level1">
 <h1 class="hasAnchor">
 <a href="#a-beginners-guide-to-jamovi-modules-or-jamovi-modules-for-dummies" class="anchor"></a>‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’</h1>
-<p>Official documentation is here: <a href="https://dev.jamovi.org/" class="external-link uri">https://dev.jamovi.org/</a></p>
+<p>Official documentation is here: <a href="https://dev.jamovi.org/" class="uri">https://dev.jamovi.org/</a></p>
 <div id="tldr" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tldr" class="anchor"></a>TL;DR</h2>
 <ul>
-<li>Details are here: <a href="https://dev.jamovi.org/" class="external-link uri">https://dev.jamovi.org/</a>
+<li>Details are here: <a href="https://dev.jamovi.org/" class="uri">https://dev.jamovi.org/</a>
 </li>
 </ul>
 <p>Briefly:</p>
 <ul>
 <li><p>Use <code>R 3.6.3</code></p></li>
-<li><p>Install jamovi from this link: <a href="https://www.jamovi.org/download.html" class="external-link uri">https://www.jamovi.org/download.html</a> Get the latest one 1.2.19</p></li>
+<li><p>Install jamovi from this link: <a href="https://www.jamovi.org/download.html" class="uri">https://www.jamovi.org/download.html</a> Get the latest one 1.2.19</p></li>
 <li><p>Install jmvtools package with:</p></li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <ul>
-<li><p>locate jamovi bin folder via this: <code><a href="https://rdrr.io/pkg/jmvtools/man/check.html" class="external-link">jmvtools::check("C://Program Files//jamovi//bin")</a></code> I recommend changing folder name from default <code>jamovi 1.2</code> to <code>jamovi</code></p></li>
-<li><p>Fork and Clone this repo: <a href="https://github.com/sbalci/ClinicoPath" class="external-link uri">https://github.com/sbalci/ClinicoPath</a></p></li>
-<li><p>inside this repo folder in R <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html" class="external-link">jmvtools::install()</a></code></p></li>
+<li><p>locate jamovi bin folder via this: <code><a href="https://rdrr.io/pkg/jmvtools/man/check.html">jmvtools::check("C://Program Files//jamovi//bin")</a></code> I recommend changing folder name from default <code>jamovi 1.2</code> to <code>jamovi</code></p></li>
+<li><p>Fork and Clone this repo: <a href="https://github.com/sbalci/ClinicoPath" class="uri">https://github.com/sbalci/ClinicoPath</a></p></li>
+<li><p>inside this repo folder in R <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code></p></li>
 <li><p>it will produce a file named ClinicoPath.jmo and install this module to jamovi</p></li>
 <li><p>The repo is like an R package except <code>jamovi</code> folder.</p></li>
 <li><p>You need to edit <code>R/crosstable.b.R</code></p></li>
-<li><p>Just edit the <code>tangram::</code> code <a href="https://dev.jamovi.org/tuts0104-implementing-an-analysis.html" class="external-link uri">https://dev.jamovi.org/tuts0104-implementing-an-analysis.html</a> <a href="https://dev.jamovi.org/tuts0105-debugging-an-analysis.html" class="external-link uri">https://dev.jamovi.org/tuts0105-debugging-an-analysis.html</a></p></li>
+<li><p>Just edit the <code>tangram::</code> code <a href="https://dev.jamovi.org/tuts0104-implementing-an-analysis.html" class="uri">https://dev.jamovi.org/tuts0104-implementing-an-analysis.html</a> <a href="https://dev.jamovi.org/tuts0105-debugging-an-analysis.html" class="uri">https://dev.jamovi.org/tuts0105-debugging-an-analysis.html</a></p></li>
 <li><p>In DESCRIPTION file change <code>spgarbet/tangram@0.3.2</code> to the version you want to test.</p></li>
-<li><p>run <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html" class="external-link">jmvtools::install()</a></code> again.</p></li>
+<li><p>run <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> again.</p></li>
 </ul>
 <p>Let me know how it goes :)</p>
 </div>
 <div id="user2017-jamovi-a-spreadsheet-for-r" class="section level2">
 <h2 class="hasAnchor">
-<a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R" class="external-link">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
+<a href="#user2017-jamovi-a-spreadsheet-for-r" class="anchor"></a><a href="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R">useR!2017: <em>jamovi</em>: a spreadsheet for R</a>
 </h2>
 <iframe src="https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/jamovi-a-spreadsheet-for-R/player" width="50%" allowfullscreen frameborder="0" title="*jamovi*: a spreadsheet for R - Microsoft Channel 9 Video">
 </iframe>
@@ -160,34 +164,34 @@
 <div id="use-an-unsigned-version-of-jamovi-for-development-in-mac" class="section level3">
 <h3 class="hasAnchor">
 <a href="#use-an-unsigned-version-of-jamovi-for-development-in-mac" class="anchor"></a>use an unsigned version of jamovi for development in mac</h3>
-<p><a href="https://dev.jamovi.org/#28-02-2020" class="external-link uri">https://dev.jamovi.org/#28-02-2020</a></p>
-<p><a href="https://www.jamovi.org/downloads/jamovi-unsigned.zip" class="external-link uri">https://www.jamovi.org/downloads/jamovi-unsigned.zip</a></p>
+<p><a href="https://dev.jamovi.org/#28-02-2020" class="uri">https://dev.jamovi.org/#28-02-2020</a></p>
+<p><a href="https://www.jamovi.org/downloads/jamovi-unsigned.zip" class="uri">https://www.jamovi.org/downloads/jamovi-unsigned.zip</a></p>
 </div>
 <div id="jmvtools-should-be-installed-from-the-jamovi-repo" class="section level3">
 <h3 class="hasAnchor">
 <a href="#jmvtools-should-be-installed-from-the-jamovi-repo" class="anchor"></a>jmvtools should be installed from the jamovi repo</h3>
-<p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="external-link uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
+<p><a href="https://dev.jamovi.org/tuts0101-getting-started.html" class="uri">https://dev.jamovi.org/tuts0101-getting-started.html</a></p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">'jmvtools'</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'https://repo.jamovi.org'</span>, <span class="st">'https://cran.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/check.html">check</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html" class="external-link">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html" class="external-link">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
+<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/install.html">install</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p>You can use <code><a href="https://devtools.r-lib.org//reference/install.html">devtools::install()</a></code> to use your codes as a usual R package, submit to github or CRAN. <code><a href="https://devtools.r-lib.org//reference/check.html">devtools::check()</a></code> does not like some jamovi folders so be sure to add them under <code>.Rbuildignore</code></p>
 </div>
 </div>
 <div id="creating-a-module" class="section level2">
 <h2 class="hasAnchor">
 <a href="#creating-a-module" class="anchor"></a>Creating a Module</h2>
-<p><a href="https://dev.jamovi.org/tuts0102-creating-a-module.html" class="external-link uri">https://dev.jamovi.org/tuts0102-creating-a-module.html</a></p>
+<p><a href="https://dev.jamovi.org/tuts0102-creating-a-module.html" class="uri">https://dev.jamovi.org/tuts0102-creating-a-module.html</a></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html" class="external-link">create</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/ClinicoPathDescriptives"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/ClinicoPathDescriptives"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="add-analysis" class="section level2">
 <h2 class="hasAnchor">
 <a href="#add-analysis" class="anchor"></a>add analysis</h2>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html" class="external-link">create</a></span><span class="op">(</span><span class="st">'function'</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmvtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvtools/man/create.html">create</a></span><span class="op">(</span><span class="st">'function'</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="structure" class="section level1">
@@ -203,10 +207,10 @@
 <div id="description-file" class="section level3">
 <h3 class="hasAnchor">
 <a href="#description-file" class="anchor"></a><code>DESCRIPTION</code> file</h3>
-<p><code>Imports</code>, <code>Depends</code>, <code>Suggests</code>, and <code>Remotes</code> have practically no difference in building jamovi modules. The <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html" class="external-link">jmvtools::install()</a></code> copies libraries under <em>build</em> folder.</p>
+<p><code>Imports</code>, <code>Depends</code>, <code>Suggests</code>, and <code>Remotes</code> have practically no difference in building jamovi modules. The <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> copies libraries under <em>build</em> folder.</p>
 <p>Under <code>Imports</code> <code>jmvcore</code> and <code>R6</code> are defaults.</p>
-<p>With Remotes one can install github packages as well. But with each <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html" class="external-link">jmvtools::install()</a></code> command it tries to check the updates, and if you are online throws an error. An <code>upgrade = FALSE, quick = TRUE</code> argument like in devtools::install() is not available, yet. One workaround is temporarily deleting Remotes from DESCRIPTION. The package folders continue to remain under build folder.</p>
-<p>One can also directly copy package folders from system R package folder (find via <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code>) as well.</p>
+<p>With Remotes one can install github packages as well. But with each <code><a href="https://rdrr.io/pkg/jmvtools/man/install.html">jmvtools::install()</a></code> command it tries to check the updates, and if you are online throws an error. An <code>upgrade = FALSE, quick = TRUE</code> argument like in devtools::install() is not available, yet. One workaround is temporarily deleting Remotes from DESCRIPTION. The package folders continue to remain under build folder.</p>
+<p>One can also directly copy package folders from system R package folder (find via <code><a href="https://rdrr.io/r/base/libPaths.html">.libPaths()</a></code>) as well.</p>
 </div>
 <div id="namespace-file" class="section level3">
 <h3 class="hasAnchor">
@@ -230,29 +234,29 @@
 <div id="write-formula" class="section level5">
 <h5 class="hasAnchor">
 <a href="#write-formula" class="anchor"></a>Write Formula</h5>
-<p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="external-link uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
+<p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">len</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">*</span> <span class="va">dose</span>, <span class="va">ToothGrowth</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">len</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">*</span> <span class="va">dose</span>, <span class="va">ToothGrowth</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="va">len</span>, <span class="fu">vars</span><span class="op">(</span><span class="va">supp</span>, <span class="va">dose</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="va">len</span>, <span class="fu">vars</span><span class="op">(</span><span class="va">supp</span>, <span class="va">dose</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">...</span>, emMeans <span class="op">=</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">+</span> <span class="va">dose</span><span class="op">:</span><span class="va">supp</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">...</span>, emMeans <span class="op">=</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">+</span> <span class="va">dose</span><span class="op">:</span><span class="va">supp</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <blockquote>
 <p>In this case, jmv will look for variables in ToothGrowth called ‘dep’ or ‘factors’. This is tidy evaluation. To instruct jmv to use the contents of it’s arguments, rather than the symbol name, prefix them with the !! signifier. For example:</p>
 </blockquote>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dep</span> <span class="op">&lt;-</span> <span class="st">'len'</span>
-<span class="va">factors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span>
+<span class="va">factors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span>
 
-<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="op">!</span><span class="op">!</span><span class="va">dep</span>, <span class="op">!</span><span class="op">!</span><span class="va">factors</span><span class="op">)</span></code></pre></div>
+<span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="op">!</span><span class="op">!</span><span class="va">dep</span>, <span class="op">!</span><span class="op">!</span><span class="va">factors</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="warning-error-messages" class="section level5">
 <h5 class="hasAnchor">
 <a href="#warning-error-messages" class="anchor"></a>Warning, Error Messages</h5>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Data contains no (complete) rows"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">"Data contains no (complete) rows"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="prepare-data-for-analysis" class="section level5">
 <h5 class="hasAnchor">
@@ -265,8 +269,8 @@
 <h5 class="hasAnchor">
 <a href="#remove-na-containing-cases-works-on-selected-variables" class="anchor"></a>Remove NA containing cases (works on selected variables)</h5>
 <pre><code>        data &lt;- jmvcore::naOmit(data)</code></pre>
-<p>jmvcore::toNumeric() <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="external-link uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
-<p>can I just send whole data to plot function? you usually don’t want to, but sometimes it’s appropriate. normally you just provide a summary of the data to the plot function … just enough data for it to do it’s job. but if you need the whole data set for the plot function, then you can specify requiresData: true on the image object. that means the plot function can access self$data. i do it in the correlation matrix for example. there’s no summary i could send … the plot function needs all the data: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143" class="external-link uri">https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143</a> jamovi/corrmatrix.r.yaml:143 requiresData: true</p>
+<p>jmvcore::toNumeric() <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
+<p>can I just send whole data to plot function? you usually don’t want to, but sometimes it’s appropriate. normally you just provide a summary of the data to the plot function … just enough data for it to do it’s job. but if you need the whole data set for the plot function, then you can specify requiresData: true on the image object. that means the plot function can access self$data. i do it in the correlation matrix for example. there’s no summary i could send … the plot function needs all the data: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/corrmatrix.r.yaml#L143</a> jamovi/corrmatrix.r.yaml:143 requiresData: true</p>
 </div>
 <div id="prepare-data-to-send-to-plot-function" class="section level5">
 <h5 class="hasAnchor">
@@ -287,7 +291,7 @@
 <div id="preformatted" class="section level5">
 <h5 class="hasAnchor">
 <a href="#preformatted" class="anchor"></a>preformatted</h5>
-<p>Using “preformatted” result element I get a markdown table output. Is there a way to somehow render/convert this output to html version. Or should I go with <a href="https://dev.jamovi.org/api_table.html" class="external-link uri">https://dev.jamovi.org/api_table.html</a> table api?</p>
+<p>Using “preformatted” result element I get a markdown table output. Is there a way to somehow render/convert this output to html version. Or should I go with <a href="https://dev.jamovi.org/api_table.html" class="uri">https://dev.jamovi.org/api_table.html</a> table api?</p>
 <p>so you’re best to make use of the table api … the table API has a lot more features than an md table.</p>
 </div>
 <div id="p-value-format" class="section level5">
@@ -319,9 +323,9 @@
 <div id="refs-yaml" class="section level4">
 <h4 class="hasAnchor">
 <a href="#refs-yaml" class="anchor"></a>00refs.yaml</h4>
-<p>prepare a 00refs.yaml like this: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="external-link uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
+<p>prepare a 00refs.yaml like this: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/00refs.yaml</a></p>
 <p>attach references to objects in the .r.yaml file like this:</p>
-<p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="external-link uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
+<p><a href="https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ancova.r.yaml#L174</a></p>
 </div>
 </div>
 </div>
@@ -332,7 +336,7 @@
 <p>Below is my current .r.yaml - name: irrtable title: Interrater Reliability type: Table rows: 1 columns: - name: method title: ‘Method’ type: text - name: subjects title: ‘Subjects’ type: integer - name: raters title: ‘Raters’ type: integer - name: peragree title: ‘Agreement %’ type: number - name: kappa title: ‘Kappa’ type: number - name: z title: ‘z’ type: number - name: p title: ‘p-value’ type: number format: zto,pvalue</p>
 <ul>
 <li>try setting swapRowsColumns to true.</li>
-<li>alternatively, you can name your columns like this method[a], method[b], this will cause the row to be ‘folded’ where the value in method[b] appears below the value in method[a] . an example of this is the t-test: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20" class="external-link uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20</a>
+<li>alternatively, you can name your columns like this method[a], method[b], this will cause the row to be ‘folded’ where the value in method[b] appears below the value in method[a] . an example of this is the t-test: <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L20</a>
 </li>
 </ul>
 </div>
@@ -369,7 +373,7 @@
 <a href="#devtoolsinstall" class="anchor"></a><code>devtools::install</code>
 </h3>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html" class="external-link">install</a></span><span class="op">(</span>upgrade <span class="op">=</span> <span class="cn">FALSE</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/install.html">install</a></span><span class="op">(</span>upgrade <span class="op">=</span> <span class="cn">FALSE</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="init" class="section level2">
@@ -443,8 +447,8 @@ you begin by specifying an output option in your .a.yaml file, i.e.
 <div id="code-search-in-github" class="section level3">
 <h3 class="hasAnchor">
 <a href="#code-search-in-github" class="anchor"></a>Code Search in GitHub</h3>
-<p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="external-link uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
-<p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="external-link uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
+<p><a href="https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search/advanced?q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
+<p><a href="https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code" class="uri">https://github.com/search?l=&amp;q=select+repo%3Ajamovi%2Fjmv+filename%3A.b.R+language%3AR&amp;type=Code</a></p>
 <pre><code>select repo:jamovi/jmv filename:.b.R language:R</code></pre>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>generate advanced search <span class="cf">for</span> all jamovi library</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>jamovi_library_names <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="st">"https://raw.githubusercontent.com/jonathon-love/jamovi-library/master/modules.yaml"</span>)</span>
@@ -486,7 +490,7 @@ you begin by specifying an output option in your .a.yaml file, i.e.
 <div id="library-development-status" class="section level3">
 <h3 class="hasAnchor">
 <a href="#library-development-status" class="anchor"></a>Library Development Status</h3>
-<p><a href="https://ci.appveyor.com/project/jonathon-love/jamovi-library/history" class="external-link uri">https://ci.appveyor.com/project/jonathon-love/jamovi-library/history</a></p>
+<p><a href="https://ci.appveyor.com/project/jonathon-love/jamovi-library/history" class="uri">https://ci.appveyor.com/project/jonathon-love/jamovi-library/history</a></p>
 </div>
 <div id="yaml-1" class="section level3">
 <h3 class="hasAnchor">
@@ -511,11 +515,11 @@ you begin by specifying an output option in your .a.yaml file, i.e.
 <h3 class="hasAnchor">
 <a href="#r-version" class="anchor"></a>R version</h3>
 <p>Try to use compatible packages with the jamovi’s R version.</p>
-<p>Use: <strong>R 4.0.2</strong> <a href="https://cran.r-project.org/bin/macosx/R-4.0.2.pkg" class="external-link uri">https://cran.r-project.org/bin/macosx/R-4.0.2.pkg</a></p>
+<p>Use: <strong>R 4.0.5</strong> <a href="https://cran.r-project.org/bin/macosx/R-4.0.5.pkg" class="uri">https://cran.r-project.org/bin/macosx/R-4.0.5.pkg</a></p>
 <p>Use packages from mran:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>
-repos <span class="op">=</span> <span class="st">"https://cran.microsoft.com/snapshot/2020-08-24"</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span><span class="op">(</span>
+repos <span class="op">=</span> <span class="st">"https://cran.microsoft.com/snapshot/2021-04-01"</span>
                 <span class="op">)</span></code></pre></div>
 </div>
 <div id="base-r-packages-within-jamovi" class="section level3">
@@ -534,15 +538,15 @@ That cause problems if you are using different package versions. So it is best t
 <div id="electron" class="section level3">
 <h3 class="hasAnchor">
 <a href="#electron" class="anchor"></a>Electron</h3>
-<p>jamovi is electron based. See R, shiny, and electron based application development here: <a href="https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron" class="external-link">Deploying a Shiny app as a desktop application with Electron</a></p>
+<p>jamovi is electron based. See R, shiny, and electron based application development here: <a href="https://github.com/sbalci/clinicopathological#deploying-a-shiny-app-as-a-desktop-application-with-electron">Deploying a Shiny app as a desktop application with Electron</a></p>
 </div>
 <div id="project-structure" class="section level3">
 <h3 class="hasAnchor">
 <a href="#project-structure" class="anchor"></a>Project Structure</h3>
-<p><a href="https://dev.jamovi.org/info_project-structure.html" class="external-link uri">https://dev.jamovi.org/info_project-structure.html</a></p>
-<p><a href="https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251" class="external-link uri">https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251</a></p>
+<p><a href="https://dev.jamovi.org/info_project-structure.html" class="uri">https://dev.jamovi.org/info_project-structure.html</a></p>
+<p><a href="https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251" class="uri">https://forum.jamovi.org/viewtopic.php?f=12&amp;t=1253&amp;p=4251&amp;hilit=npm#p4251</a></p>
 <blockquote>
-<p>the easiest way to build jamovi on macOS is to use our dev bundle. <a href="https://www.jamovi.org/downloads/jamovi-dev.zip" class="external-link uri">https://www.jamovi.org/downloads/jamovi-dev.zip</a> if you navigate to the <code>jamovi.app/Contents/Resources</code> folder, you’ll find a package.json which contains a bunch of different build commands. you can issue commands like: npm run build:client npm run build:server npm run build:analyses:jmv depending on which component you’re wanting to build.</p>
+<p>the easiest way to build jamovi on macOS is to use our dev bundle. <a href="https://www.jamovi.org/downloads/jamovi-dev.zip" class="uri">https://www.jamovi.org/downloads/jamovi-dev.zip</a> if you navigate to the <code>jamovi.app/Contents/Resources</code> folder, you’ll find a package.json which contains a bunch of different build commands. you can issue commands like: npm run build:client npm run build:server npm run build:analyses:jmv depending on which component you’re wanting to build.</p>
 </blockquote>
 </div>
 </div>
@@ -567,19 +571,19 @@ datasets:
 <h2 class="hasAnchor">
 <a href="#error-messages" class="anchor"></a>Error messages</h2>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>outcome<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="cn">NA</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>
-<span class="kw">if</span> <span class="op">(</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span><span class="op">)</span> <span class="op">||</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">'Outcome variable must only contains 1s and 0s'</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>outcome<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="cn">NA</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span><span class="op">)</span> <span class="op">||</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">data</span><span class="op">$</span><span class="va">outcome</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+  <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">'Outcome variable must only contains 1s and 0s'</span><span class="op">)</span></code></pre></div>
 <p>it’s good to test lots of different data sets that a user may have … include missing values, really large values, etc. etc. and make sure your analyses always handle them, and provide useful error messages for why an analysis doesn’t work. you don’t want to leave the user uncertain why something isn’t working … otherwise they just give up.</p>
-<p>part of our philosophy is that people shouldn’t have to set their data up if they can’t be bothered … because with large data sets it can take a lot of time. so i’d encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() … more on our data philosophy here: <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="external-link uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
-<p><a href="https://youtu.be/oWZrrWc6e74" class="external-link uri">https://youtu.be/oWZrrWc6e74</a></p>
+<p>part of our philosophy is that people shouldn’t have to set their data up if they can’t be bothered … because with large data sets it can take a lot of time. so i’d encourage you to treat whatever the user provides you with as continuous, by converting it with toNumeric() … more on our data philosophy here: <a href="https://dev.jamovi.org/tuts0202-handling-data.html" class="uri">https://dev.jamovi.org/tuts0202-handling-data.html</a></p>
+<p><a href="https://youtu.be/oWZrrWc6e74" class="uri">https://youtu.be/oWZrrWc6e74</a></p>
 <p>in the options, you’ve got Survival Curve, and in the results, it’s Survival Plot … i’d encourage you to make these consistent. also, if the Survival Curve is unchecked, i’d hide the Surival plot, rather than leaving all that vacant space there.</p>
-<p>visible: (optionName) <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416" class="external-link uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416</a> jamovi/ttestis.r.yaml:408-416 - name: qq type: Image description: Q-Q plot width: 350 height: 300</p>
+<p>visible: (optionName) <a href="https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416" class="uri">https://github.com/jamovi/jmv/blob/master/jamovi/ttestis.r.yaml#L408-L416</a> jamovi/ttestis.r.yaml:408-416 - name: qq type: Image description: Q-Q plot width: 350 height: 300</p>
 <p>is there a variable type for dates in jamovi? Can I force a user to add only a date to a VariablesListBox? I tried to get info from a self<span class="math inline">\(options\)</span>var via lubridate::is.Date and is.na.POSIXlt but it did not work hi, we don’t have a date data type at this time … only integer, numeric, and character … you could have people enter dates as character, and parse them yourself, but i appreciate that’s a bit of a hack</p>
 <p>Thank you. Dates are always a problem in my routine practice. I work with many international colleagues and always date column is a mess, and people calculate survival time very differently. I want to have raw dates so that I can calculate survival time. I will try somehow going around.</p>
 <p>learn YAML syntax</p>
-<p>it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. you can take a look at jmv for examples: <a href="https://github.com/jamovi/jmv/tree/master/jamovi" class="external-link uri">https://github.com/jamovi/jmv/tree/master/jamovi</a></p>
+<p>it’s a pretty straightforward syntax … you’ve basically got ‘objects’ where each of the elements have names, and you’ve got arrays, where each of the objects have an index. and that’s more-or-less all there is to it. you can take a look at jmv for examples: <a href="https://github.com/jamovi/jmv/tree/master/jamovi" class="uri">https://github.com/jamovi/jmv/tree/master/jamovi</a></p>
 <p>I don’t think we’ve got a list of allowed parameters anywhere. Probably your best bet is to browse through the .yaml files in jmv. I think you’ll find there’s not that many parameter names.</p>
 <p>as a work-around, once it’s installed the package from the Remotes, you can remove it from the DESCRIPTION and it won’t keep installing it over and over</p>
 <p>Hi, there are scarce sources for pairwise chi-square tests. I have found rmngb::pairwise.chisq.test() and rmngb::pairwise.fisher.test() but that package has been removed from CRAN. Would you consider implementing this feature? I also thought to add these functions in a module, but I want to ask your policy about removed packages as well. 4 replies</p>
@@ -593,7 +597,7 @@ datasets:
 <p>jonathon:whale2: 5 hours ago yup, this will do it too: as.numeric(strsplit(utimes, ‘,’)[[1]]) (it’s better if you can avoid using purrr, because it’s not really necessary, and you’re better off reducing the amount of dependencies you use)</p>
 <p>Serdar Balci 5 hours ago thank you. :+1:</p>
 <hr>
-<p>so wrt width/height, you can set that in the .r.yaml like so: <a href="https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49" class="external-link uri">https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49</a> it’s possible to do it programmatically, with … image$setSize()</p>
+<p>so wrt width/height, you can set that in the .r.yaml like so: <a href="https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49" class="uri">https://github.com/kylehamilton/MAJOR/blob/master/jamovi/bayesmetacorr.r.yaml#L46-L49</a> it’s possible to do it programmatically, with … image$setSize()</p>
 <hr>
 <pre><code>Serdar Balci  4:48 PM
  I think I am getting familiar with the codes :)
@@ -1174,8 +1178,8 @@ Oh, I see. Thank you :slightly_smiling_face:</code></pre>
 <a href="#diagrams" class="anchor"></a>Diagrams</h2>
 <div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">echo</span><span class="op">=</span><span class="cn">FALSE</span>
-<span class="fu">DiagrammeR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DiagrammeR/man/grViz.html" class="external-link">grViz</a></span><span class="op">(</span>
-  diagram <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"vignettes/graph.gv"</span><span class="op">)</span>,
+<span class="fu">DiagrammeR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DiagrammeR/man/grViz.html">grViz</a></span><span class="op">(</span>
+  diagram <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"vignettes/graph.gv"</span><span class="op">)</span>,
   height <span class="op">=</span> <span class="fl">200</span>
 <span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>eval<span class="ot">=</span><span class="cn">FALSE</span>, include<span class="ot">=</span><span class="cn">FALSE</span>, echo<span class="ot">=</span><span class="cn">FALSE</span></span>
@@ -3787,13 +3791,11 @@ plot %&gt;%
 
 
       <footer><div class="copyright">
-  <p></p>
-<p>Developed by <a href="https://www.serdarbalci.com/" class="external-link external-link">Serdar Balci</a>.</p>
+  <p>Developed by <a href="https://www.serdarbalci.com/">Serdar Balci</a>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link external-link">pkgdown</a> 1.6.1.9001.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
@@ -3801,8 +3803,6 @@ plot %&gt;%
 
   
 
-
-  
 
   </body>
 </html>
