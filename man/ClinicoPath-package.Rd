@@ -21,6 +21,7 @@ For more documentation, see the
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://www.serdarbalci.com/ClinicoPathJamoviModule}
   \item \url{https://github.com/sbalci/ClinicoPathJamoviModule/}
   \item \url{https://github.com/sbalci/ClinicoPathDescriptives/}
   \item \url{https://github.com/sbalci/jsurvival}
