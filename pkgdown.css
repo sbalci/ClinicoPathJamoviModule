@@ -244,14 +244,14 @@ nav[data-toggle='toc'] .nav .nav > .active:focus > a {
 
 .ref-index th {font-weight: normal;}
 
-.ref-index td {vertical-align: top;}
+.ref-index td {vertical-align: top; min-width: 100px}
 .ref-index .icon {width: 40px;}
 .ref-index .alias {width: 40%;}
 .ref-index-icons .alias {width: calc(40% - 40px);}
 .ref-index .title {width: 60%;}
 
 .ref-arguments th {text-align: right; padding-right: 10px;}
-.ref-arguments th, .ref-arguments td {vertical-align: top;}
+.ref-arguments th, .ref-arguments td {vertical-align: top; min-width: 100px}
 .ref-arguments .name {width: 20%;}
 .ref-arguments .desc {width: 80%;}
 
@@ -264,50 +264,7 @@ table {
 
 /* Syntax highlighting ---------------------------------------------------- */
 
-pre {
-  word-wrap: normal;
-  word-break: normal;
-  border: 1px solid #eee;
-}
-
-pre, code {
-  background-color: #f8f8f8;
-  color: #333;
-}
-
-pre code {
-  overflow: auto;
-  word-wrap: normal;
-  white-space: pre;
-}
-
-pre .img {
-  margin: 5px 0;
-}
-
-pre .img img {
-  background-color: #fff;
-  display: block;
-  height: auto;
-}
-
-code a, pre a {
-  color: #375f84;
-}
-
-a.sourceLine:hover {
-  text-decoration: none;
-}
-
-.fl      {color: #1514b5;}
-.fu      {color: #000000;} /* function */
-.ch,.st  {color: #036a07;} /* string */
-.kw      {color: #264D66;} /* keyword */
-.co      {color: #888888;} /* comment */
-
-.message { color: black;   font-weight: bolder;}
-.error   { color: orange;  font-weight: bolder;}
-.warning { color: #6A0366; font-weight: bolder;}
+  /* Moved to new files.*/
 
 /* Clipboard --------------------------*/
 

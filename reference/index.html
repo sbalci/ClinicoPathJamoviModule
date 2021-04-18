@@ -6,6 +6,22 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Inform modern browsers that this page supports both dark and light color schemes,
+  and the page author prefers light. -->
+<meta name="color-scheme" content="dark light">
+<script>
+  // If `prefers-color-scheme` is not supported, fall back to light mode.
+  // i.e. In this case, inject the `light` CSS before the others, with
+  // no media filter so that it will be downloaded with highest priority.
+  if (window.matchMedia("(prefers-color-scheme: dark)").media === "not all") {
+    document.documentElement.style.display = "none";
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      "<link id=\"css\" rel=\"stylesheet\" href=\"https://bootswatch.com/3/flatly/bootstrap.css\" onload=\"document.documentElement.style.display = ''\">"
+    );
+  }
+</script>
+
 <title>Function reference • ClinicoPath</title>
 
 
@@ -13,9 +29,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- Flatly Theme - Light  -->
+<link id="css-light" rel="stylesheet" href="https://bootswatch.com/3/flatly/bootstrap.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+
+<!-- Darkly Theme - Dark -->
+<link id="css-dark" rel="stylesheet" href="https://bootswatch.com/3/darkly/bootstrap.css" media="(prefers-color-scheme: dark)">
+
+<!-- preferably CSS -->
+<link rel="stylesheet" href="../preferably.css">
+<link id="css-code-light" rel="stylesheet" href="../code-color-scheme-light.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+<link id="css-code-dark" rel="stylesheet" href="../code-color-scheme-dark.css" media="(prefers-color-scheme: dark)">
+
 
 <!-- bootstrap-toc -->
 <link rel="stylesheet" href="../bootstrap-toc.css">
@@ -48,6 +74,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script>
 
+
+
+
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -71,7 +100,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0026</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0084</span>
       </span>
     </div>
 
@@ -79,13 +108,13 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="../dev/index.html">
-    <span class="fa fa-cogs"></span>
+    <span class="fas fa-cogs"></span>
      
   </a>
 </li>
@@ -101,6 +130,9 @@
   <ul class="dropdown-menu" role="menu">
     <li>
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
+    </li>
+    <li>
+      <a href="../articles/examples.html">Examples</a>
     </li>
     <li>
       <a href="../articles/module_development_jamovi.html">Module Development for Jamovi</a>
@@ -121,18 +153,23 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+        
         <li>
   <a href="http://twitter.com/serdarbalci">
-    <span class="fab fa fab fa-twitter fa-lg"></span>
+    <span class="fab fa-twitter fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="https://github.com/sbalci/ClinicoPathJamoviModule/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
+        
+        
+
+
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -170,12 +207,6 @@
       
       
       <tr>
-        
-        <td>
-          <p><code><a href="BreastCancer.html">BreastCancer</a></code> </p>
-        </td>
-        <td><p>BreastCancer</p></td>
-      </tr><tr>
         
         <td>
           <p><code><a href="ClinicoPath-package.html">ClinicoPath-package</a></code> </p>
@@ -220,33 +251,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="colon.html">colon</a></code> </p>
+          <p><code><a href="benford.html">benford()</a></code> </p>
         </td>
-        <td><p>colon</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="competingsurvival.html">competingsurvival()</a></code> </p>
-        </td>
-        <td><p>Overall, Cause Specific, and Competing Survival</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="competingsurvivalClass.html">competingsurvivalClass</a></code> </p>
-        </td>
-        <td><p>Competing Survival Analysis</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="correlation.html">correlation()</a></code> </p>
-        </td>
-        <td><p>Correlation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="correlationClass.html">correlationClass</a></code> </p>
-        </td>
-        <td><p>Correlation Analysis</p></td>
+        <td><p>Benford Analysis</p></td>
       </tr><tr>
         
         <td>
@@ -286,131 +293,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="gtsummary.html">gtsummary()</a></code> </p>
-        </td>
-        <td><p>Tables via gtsummary</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="gtsummaryClass.html">gtsummaryClass</a></code> </p>
-        </td>
-        <td><p>Tables via gtsummary</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="histopathology.html">histopathology</a></code> </p>
         </td>
         <td><p>histopathology</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="icccoeff.html">icccoeff()</a></code> </p>
-        </td>
-        <td><p>ICC coefficients</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="icccoeffClass.html">icccoeffClass</a></code> </p>
-        </td>
-        <td><p>Interclass Correlation Coefficient
-
-Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa'>http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa</a></p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbarstats.html">jjbarstats()</a></code> </p>
-        </td>
-        <td><p>Bar Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbarstats2.html">jjbarstats2()</a></code> </p>
-        </td>
-        <td><p>Bar Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbarstats2Class.html">jjbarstats2Class</a></code> </p>
-        </td>
-        <td><p>Bar Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbarstatsClass.html">jjbarstatsClass</a></code> </p>
-        </td>
-        <td><p>Bar Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbetweenstats.html">jjbetweenstats()</a></code> </p>
-        </td>
-        <td><p>Violin Plots to Compare Between Groups</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjbetweenstatsClass.html">jjbetweenstatsClass</a></code> </p>
-        </td>
-        <td><p>Violin Plots to Compare Between Groups</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjcorrmat.html">jjcorrmat()</a></code> </p>
-        </td>
-        <td><p>Correlation Matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjcorrmatClass.html">jjcorrmatClass</a></code> </p>
-        </td>
-        <td><p>Correlation Matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjdotplotstats.html">jjdotplotstats()</a></code> </p>
-        </td>
-        <td><p>Dot Chart</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjdotplotstatsClass.html">jjdotplotstatsClass</a></code> </p>
-        </td>
-        <td><p>Dot Chart</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjhistostats.html">jjhistostats()</a></code> </p>
-        </td>
-        <td><p>Histogram</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjhistostatsClass.html">jjhistostatsClass</a></code> </p>
-        </td>
-        <td><p>Histogram</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjpiestats.html">jjpiestats()</a></code> </p>
-        </td>
-        <td><p>Pie Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjpiestatsClass.html">jjpiestatsClass</a></code> </p>
-        </td>
-        <td><p>Pie Charts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjscatterstats.html">jjscatterstats()</a></code> </p>
-        </td>
-        <td><p>Scatter Plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jjscatterstatsClass.html">jjscatterstatsClass</a></code> </p>
-        </td>
-        <td><p>Scatter Plot</p></td>
       </tr><tr>
         
         <td>
@@ -420,39 +305,45 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
       </tr><tr>
         
         <td>
+          <p><code><a href="jjwithinstats2.html">jjwithinstats2()</a></code> </p>
+        </td>
+        <td><p>Violin Plots to Compare Within Groups for Wide Data Format</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="jjwithinstats2Class.html">jjwithinstats2Class</a></code> </p>
+        </td>
+        <td><p>Violin Plots to Compare Within Group  for Wide Data Format</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="jjwithinstats3.html">jjwithinstats3()</a></code> </p>
+        </td>
+        <td><p>Violin Plots to Compare Repeated Measurements for Continuous Variables</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="jjwithinstats3Class.html">jjwithinstats3Class</a></code> </p>
+        </td>
+        <td><p>Violin Plots to Compare Within Group  for Wide Data Format 3</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="jjwithinstatsClass.html">jjwithinstatsClass</a></code> </p>
         </td>
         <td><p>Violin Plots to Compare Within Group</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="jviolin.html">jviolin()</a></code> </p>
-        </td>
-        <td><p>Violin Plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jviolinClass.html">jviolinClass</a></code> </p>
-        </td>
-        <td><p>Violin Plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="melanoma.html">melanoma</a></code> </p>
-        </td>
-        <td><p>Melanoma</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="multisurvival.html">multisurvival()</a></code> </p>
         </td>
-        <td><p>Multivariate Survival Analysis</p></td>
+        <td><p>Multivariable Survival Analysis</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="multisurvivalClass.html">multisurvivalClass</a></code> </p>
         </td>
-        <td><p>Multivariate Survival Analysis</p></td>
+        <td><p>Multivariable Survival Analysis</p></td>
       </tr><tr>
         
         <td>
@@ -465,18 +356,6 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
           <p><code><a href="oddsratioClass.html">oddsratioClass</a></code> </p>
         </td>
         <td><p>Odds Ratio Table and Plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pairchi2.html">pairchi2()</a></code> </p>
-        </td>
-        <td><p>Pairwise Chi-Square Test</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pairchi2Class.html">pairchi2Class</a></code> </p>
-        </td>
-        <td><p>Pairwise Chi-Square Test</p></td>
       </tr><tr>
         
         <td>
@@ -504,33 +383,9 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
       </tr><tr>
         
         <td>
-          <p><code><a href="roc.html">roc()</a></code> </p>
-        </td>
-        <td><p>ROC</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="rocClass.html">rocClass</a></code> </p>
-        </td>
-        <td><p>ROC Analysis</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="rocdata.html">rocdata</a></code> </p>
         </td>
         <td><p>rocdata</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="statsplot2.html">statsplot2()</a></code> </p>
-        </td>
-        <td><p>Graphs and Plots</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="statsplot2Class.html">statsplot2Class</a></code> </p>
-        </td>
-        <td><p>Plots and Graphs Based on Variable Types</p></td>
       </tr><tr>
         
         <td>
@@ -555,6 +410,18 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
           <p><code><a href="survivalClass.html">survivalClass</a></code> </p>
         </td>
         <td><p>Survival Analysis</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="survivalcont.html">survivalcont()</a></code> </p>
+        </td>
+        <td><p>Survival Analysis for Continuous Variable</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="survivalcontClass.html">survivalcontClass</a></code> </p>
+        </td>
+        <td><p>Survival Analysis for Continuous Explanatory Variable</p></td>
       </tr><tr>
         
         <td>
@@ -591,6 +458,18 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
           <p><code><a href="vartreeClass.html">vartreeClass</a></code> </p>
         </td>
         <td><p>Variable Tree</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="venn.html">venn()</a></code> </p>
+        </td>
+        <td><p>Venn Diagram</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vennClass.html">vennClass</a></code> </p>
+        </td>
+        <td><p>Venn Diagram</p></td>
       </tr>
     </tbody>
     </table>
@@ -610,7 +489,7 @@ Also see <a href='http://www.cookbook-r.com/Statistical_analysis/Inter-rater_rel
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Made with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1, using <a href="https://preferably.amirmasoudabdol.name/?source=footer">preferably</a> template.</p>
 </div>
 
       </footer>
