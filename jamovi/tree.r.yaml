@@ -4,67 +4,132 @@ title: Decision Tree
 jrs:   '1.1'
 
 
-clearWith:
-    - vars
-    - facs
-    - target
-    - targetLevel
-    - sty
-
-
 items:
 
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
 
 
     - name:  text1
-      title: Decision Tree
+      title: Data View 1
       type:  Preformatted
-
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
 
     - name:  text2
-      title: Decision Tree rpart
+      title: Data View 2
       type:  Preformatted
-      visible: (sty:rpart || sty:fftrees)
-      refs:
-          - rpart
-          - rpart.plot
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
+    - name:  text2a
+      title: Data View 2a
+      type:  Preformatted
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
 
 
-    - name: plot1
-      title: Decision Tree Explore
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot1
-      requiresData: true
-      visible: (sty:explore)
-      refs: explore
+
+    - name:  text2b
+      title: Data View 2b
+      type:  Preformatted
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
 
 
-    - name: plot2
-      title: Decision Tree FFTrees
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot2
-      requiresData: true
-      visible: (sty:fftrees)
-      refs: FFTrees
+
+    - name:  text3
+      title: Decision Tree 1
+      type:  Preformatted
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
+    - name:  text4
+      title: Decision Tree 2
+      type:  Html
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
 
 
-    - name: plot3
-      title: Decision Tree rpart
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot3
-      requiresData: true
-      visible: (sty:rpart)
-      refs:
-          - rpart
-          - rpart.plot
+
+    # - name: plot1
+    #   title: Decision Tree Explore
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot1
+    #   requiresData: true
+    #   visible: (sty:explore)
+    #   refs: explore
+
+
+    # - name: plot2
+    #   title: Decision Tree FFTrees
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   visible: (showPlot)
+    #   # visible: (sty:fftrees)
+    #   refs: FFTrees
+    #   clearWith:
+    #       - vars
+    #       - facs
+    #       - target
+    #       - targetLevel
+    #       - train
+    #       - trainLevel
+
+    # - name: plot3
+    #   title: Decision Tree rpart
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plot3
+    #   requiresData: true
+    #   visible: (sty:rpart)
+    #   refs:
+    #       - rpart
+    #       - rpart.plot
 
 ...

@@ -547,7 +547,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="calculatedcutoff",
                 title="Add Calculated Cut-off Group to Data",
                 varTitle="`Calculated Cut-off Group - from ${ contexpl }`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                varDescription="Calculated Cut-off Group",
                 clearWith=list(
                     "outcome",
                     "analysistype",

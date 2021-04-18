@@ -40,6 +40,8 @@ options:
     - name: target
       title: Target Variable
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description: >
                   target variable
 
@@ -48,17 +50,37 @@ options:
       type: Level
       variable: (target)
 
-    - name: sty
-      title: Tree Style
-      type: List
-      options:
-        - title: Explore
-          name: explore
-        - title: FFTrees
-          name: fftrees
-        - title: rpart
-          name: rpart
-      default: explore
+    - name: train
+      title: Test Train
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  Variable containing Test/Train information
+
+    - name: trainLevel
+      title: Select Train Level
+      type: Level
+      variable: (train)
+
+
+    - name: showPlot
+      title: Show Plot
+      type: Bool
+      default: false
+
+
+    # - name: sty
+    #   title: Tree Style
+    #   type: List
+    #   options:
+    #     - title: Explore
+    #       name: explore
+    #     - title: FFTrees
+    #       name: fftrees
+    #     - title: rpart
+    #       name: rpart
+    #   default: explore
 
 
 

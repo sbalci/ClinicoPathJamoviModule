@@ -103,9 +103,9 @@ https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
-https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.0062.jmo
+https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.0084.jmo
 
-https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.0062.jmo  
+https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.0084.jmo  
 
 
 ```r
@@ -114,7 +114,7 @@ remotes::install_github("sbalci/ClinicoPathDescriptives")
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
-      commit: 0b898d7c0371fc9dd4d14971949073cc27d99e54
+      commit: b10110547d6ca1637982094031a9e592c092a9c0
       platforms:
         - win64
         - macos
@@ -130,7 +130,7 @@ https://github.com/sbalci/ClinicoPathLinuxDescriptives/
 https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/
 
 
-https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0065.jmo
+https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0084.jmo
 
 ```r
 remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
@@ -139,7 +139,7 @@ remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
-      commit: ac0ec6b5127a058977aad3dc3982ee93c6d68c16
+      commit: 0bac188199fda2e8397f09a1416e162c18f6c85d
       platforms:
         - linux
         
@@ -184,11 +184,11 @@ https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
-https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.0044.jmo  
+https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.0084.jmo  
 
-https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.0044.jmo
+https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.0084.jmo
 
-https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.0044.jmo
+https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.0084.jmo
 
 
 ```r
@@ -199,7 +199,7 @@ remotes::install_github("sbalci/jsurvival")
 
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 9c57e504ddc0ceb42681f92b63ec0c0adf294436
+      commit: 83b75ef784a623a8d92999ed269ba0b859ba64ab
       platforms:
         - win64
         - macos

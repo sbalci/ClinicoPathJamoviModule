@@ -19,3 +19,5 @@ navbar:
       href: dev/index.html
 home:
   strip_header: true
+template:
+  package: preferably
