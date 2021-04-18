@@ -141,12 +141,12 @@ treeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 trainData <- mydata %>%
-                    dplyr::filter(trainName2 == TRUE) %>%
+                    dplyr::filter(trainName2 == "Train") %>%
                     dplyr::select(-trainName2)
 
 
                 testData <- mydata %>%
-                    dplyr::filter(trainName2 == FALSE) %>%
+                    dplyr::filter(trainName2 == "Test") %>%
                     dplyr::select(-trainName2)
 
 
