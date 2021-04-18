@@ -4239,12 +4239,14 @@ plot %>%
 
 
 
+imports <- c(
+  attachment::att_from_rscripts("./R", recursive = TRUE)
+)
 
-<!-- Seol  2 hours ago -->
-<!-- Oh yub, It works:+1: and I'm gonna add it to the "snowIRT" module later:grinning: Thanks again~~ -->
-
-
-
-
-<!-- jonathon:whale2:  2 hours ago -->
-<!-- :+1: -->
+attachment::att_to_desc_from_is(path.d = "DESCRIPTION",
+                                imports = imports,
+                                normalize = TRUE,
+                                add_remotes = TRUE)
+                                
+                                
+                                

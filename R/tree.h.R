@@ -10,7 +10,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             facs = NULL,
             target = NULL,
             targetLevel = NULL,
-            sty = "explore", ...) {
+            train = NULL,
+            trainLevel = NULL,
+            showPlot = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,38 +37,57 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "factor"))
             private$..target <- jmvcore::OptionVariable$new(
                 "target",
-                target)
+                target,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..targetLevel <- jmvcore::OptionLevel$new(
                 "targetLevel",
                 targetLevel,
                 variable="(target)")
-            private$..sty <- jmvcore::OptionList$new(
-                "sty",
-                sty,
-                options=list(
-                    "explore",
-                    "fftrees",
-                    "rpart"),
-                default="explore")
+            private$..train <- jmvcore::OptionVariable$new(
+                "train",
+                train,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..trainLevel <- jmvcore::OptionLevel$new(
+                "trainLevel",
+                trainLevel,
+                variable="(train)")
+            private$..showPlot <- jmvcore::OptionBool$new(
+                "showPlot",
+                showPlot,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
             self$.addOption(private$..target)
             self$.addOption(private$..targetLevel)
-            self$.addOption(private$..sty)
+            self$.addOption(private$..train)
+            self$.addOption(private$..trainLevel)
+            self$.addOption(private$..showPlot)
         }),
     active = list(
         vars = function() private$..vars$value,
         facs = function() private$..facs$value,
         target = function() private$..target$value,
         targetLevel = function() private$..targetLevel$value,
-        sty = function() private$..sty$value),
+        train = function() private$..train$value,
+        trainLevel = function() private$..trainLevel$value,
+        showPlot = function() private$..showPlot$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
         ..target = NA,
         ..targetLevel = NA,
-        ..sty = NA)
+        ..train = NA,
+        ..trainLevel = NA,
+        ..showPlot = NA)
 )
 
 treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -76,70 +97,94 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
-        plot1 = function() private$.items[["plot1"]],
-        plot2 = function() private$.items[["plot2"]],
-        plot3 = function() private$.items[["plot3"]]),
+        text2a = function() private$.items[["text2a"]],
+        text2b = function() private$.items[["text2b"]],
+        text3 = function() private$.items[["text3"]],
+        text4 = function() private$.items[["text4"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree",
+                title="Decision Tree")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
-                    "sty"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do"))
+                    "train",
+                    "trainLevel")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Decision Tree"))
+                title="Data View 1",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Decision Tree rpart",
-                visible="(sty:rpart || sty:fftrees)",
-                refs=list(
-                    "rpart",
-                    "rpart.plot")))
-            self$add(jmvcore::Image$new(
+                title="Data View 2",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="plot1",
-                title="Decision Tree Explore",
-                width=600,
-                height=450,
-                renderFun=".plot1",
-                requiresData=TRUE,
-                visible="(sty:explore)",
-                refs="explore"))
-            self$add(jmvcore::Image$new(
+                name="text2a",
+                title="Data View 2a",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="plot2",
-                title="Decision Tree FFTrees",
-                width=600,
-                height=450,
-                renderFun=".plot2",
-                requiresData=TRUE,
-                visible="(sty:fftrees)",
-                refs="FFTrees"))
-            self$add(jmvcore::Image$new(
+                name="text2b",
+                title="Data View 2b",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="plot3",
-                title="Decision Tree rpart",
-                width=600,
-                height=450,
-                renderFun=".plot3",
-                requiresData=TRUE,
-                visible="(sty:rpart)",
-                refs=list(
-                    "rpart",
-                    "rpart.plot")))}))
+                name="text3",
+                title="Decision Tree 1",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text4",
+                title="Decision Tree 2",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))}))
 
 treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treeBase",
@@ -174,15 +219,18 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param facs categorical explanatory variables
 #' @param target target variable
 #' @param targetLevel .
-#' @param sty .
+#' @param train Variable containing Test/Train information
+#' @param trainLevel .
+#' @param showPlot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$text2a} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -192,7 +240,9 @@ tree <- function(
     facs,
     target,
     targetLevel,
-    sty = "explore") {
+    train,
+    trainLevel,
+    showPlot = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tree requires jmvcore to be installed (restart may be required)")
@@ -200,21 +250,27 @@ tree <- function(
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(facs)) facs <- jmvcore::resolveQuo(jmvcore::enquo(facs))
     if ( ! missing(target)) target <- jmvcore::resolveQuo(jmvcore::enquo(target))
+    if ( ! missing(train)) train <- jmvcore::resolveQuo(jmvcore::enquo(train))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(facs), facs, NULL),
-            `if`( ! missing(target), target, NULL))
+            `if`( ! missing(target), target, NULL),
+            `if`( ! missing(train), train, NULL))
 
     for (v in facs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in target) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in train) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- treeOptions$new(
         vars = vars,
         facs = facs,
         target = target,
         targetLevel = targetLevel,
-        sty = sty)
+        train = train,
+        trainLevel = trainLevel,
+        showPlot = showPlot)
 
     analysis <- treeClass$new(
         options = options,

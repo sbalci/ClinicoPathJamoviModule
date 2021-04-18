@@ -5,22 +5,20 @@ title: '`Survival Analysis - ${explanatory}`'
 jrs:   '1.1'
 
 
-clearWith:
-    - explanatory
-    - outcome
-    - outcomeLevel
-    - overalltime
-    - fudate
-    - dxdate
-    - tint
-    - multievent
-
-
 items:
 
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
     # - name:  mydataview
@@ -33,6 +31,15 @@ items:
       title: '`Median Survival Summary and Table - ${explanatory}`'
       type:  Preformatted
       visible: (!sas)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
 
@@ -76,7 +83,15 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
           visible: (!sas)
-
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
     - name:  coxSummary
@@ -84,6 +99,16 @@ items:
       title: '`Cox Regression Summary and Table - ${explanatory}`'
       type:  Preformatted
       visible: (!sas)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name:  coxTable
@@ -108,6 +133,16 @@ items:
         # - name: 'HR_multivariable'
         #   title: "HR (Multivariable)"
         #   type: text
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name:  tCoxtext2
@@ -119,9 +154,12 @@ items:
           - outcome
           - outcomeLevel
           - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
           - contexpl
       visible: (!sas)
-
 
 
     - name:  survTableSummary
@@ -129,6 +167,16 @@ items:
       title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
       type:  Preformatted
       visible: (!sas)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
 
@@ -165,6 +213,16 @@ items:
           type: number
           format: pc
       visible: (!sas)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
 
@@ -174,7 +232,16 @@ items:
       type:  Preformatted
       clearWith:
           - pw
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
       visible: (pw && !sas)
+
 
 
     - name:  pairwiseTable
@@ -195,8 +262,17 @@ items:
       visible: (pw && !sas)
       clearWith:
           - pw
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
       refs:
           - padjust
+
 
 
     - name: plot
@@ -216,6 +292,15 @@ items:
           - ci95
           - risktable
           - censored
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name: plot2
@@ -235,6 +320,15 @@ items:
           - ci95
           - risktable
           - censored
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name: plot3
@@ -254,6 +348,15 @@ items:
           - ci95
           - risktable
           - censored
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name: plot6
@@ -269,6 +372,14 @@ items:
           - endplot
           - byplot
           - sas
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
       refs:
           - KMunicate
           - KMunicate2
@@ -283,6 +394,15 @@ items:
           - tint
           - dxdate
           - fudate
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
     - name: outcomeredifened
@@ -294,7 +414,13 @@ items:
           - outcome
           - analysistype
           - multievent
-
+          - explanatory
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 refs:
     - finalfit

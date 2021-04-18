@@ -4,7 +4,16 @@
 \alias{tree}
 \title{Decision Tree}
 \usage{
-tree(data, vars, facs, target, targetLevel, sty = "explore")
+tree(
+  data,
+  vars,
+  facs,
+  target,
+  targetLevel,
+  train,
+  trainLevel,
+  showPlot = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -17,7 +26,11 @@ tree(data, vars, facs, target, targetLevel, sty = "explore")
 
 \item{targetLevel}{.}
 
-\item{sty}{.}
+\item{train}{Variable containing Test/Train information}
+
+\item{trainLevel}{.}
+
+\item{showPlot}{.}
 }
 \value{
 A results object containing:
@@ -25,9 +38,10 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$plot1} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$text2a} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text4} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
