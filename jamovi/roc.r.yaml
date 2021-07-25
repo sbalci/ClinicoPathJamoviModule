@@ -1,0 +1,99 @@
+---
+name:  roc
+title: ROC
+jrs:   '1.1'
+
+items:
+
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - measurement
+          - status
+          - excl
+          - sty
+          - quant
+          - label
+          - inter
+
+    - name:  text
+      title: ROC text
+      type:  Preformatted
+      clearWith:
+          - measurement
+          - status
+          - excl
+          - sty
+          - quant
+          - label
+          - inter
+
+
+    - name:  textplot
+      title: ROC textplot
+      type:  Preformatted
+      clearWith:
+          - measurement
+          - status
+          - excl
+          - sty
+          - quant
+          - label
+          - inter
+
+
+
+
+    - title: ROC
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - measurement
+          - status
+          - excl
+          - sty
+          - quant
+          - label
+          - inter
+
+
+
+    - title: ROC Interactive
+      name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - measurement
+          - status
+          - excl
+      visible: (inter)
+
+
+
+
+    # - title: ROC Interactive
+    #   name: plot3
+    #   type: Html
+    #   clearWith:
+    #       - measurement
+    #       - status
+
+
+
+refs:
+    - plotROC
+
+
+
+
+
+...

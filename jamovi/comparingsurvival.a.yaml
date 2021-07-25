@@ -1,0 +1,53 @@
+---
+name:  comparingSurvival
+title: Comparing Survival Outcomes
+menuGroup: SimpleSurvival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: times
+      title: Time
+      type: Variable
+      suggested: [ continuous ]
+    
+    - name: status
+      title: Event indicator
+      type: Variable
+      suggested: [ continuous ]
+
+    - name: groups
+      title: Grouping Variable
+      type: Variable
+      suggested: [ nominal ]
+
+    - name: ciyn
+      title: Add confidence intervals?
+      type: Bool
+      default: false
+
+    - name: loglogyn
+      title: Add the plot of cumulative hazards in the log scale?
+      type: Bool
+      default: false
+
+    - name: timeunits
+      title: Time units
+      type: List
+      options:
+        - name: None
+          title: None
+        - name: Days
+          title: Days
+        - name: Weeks
+          title: Weeks
+        - name: Months
+          title: Months
+        - name: Years
+          title: Years
+      default: None
+ 
+...

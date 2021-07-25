@@ -45,7 +45,9 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Benford Analysis",
-                refs="benford.analysis")
+                refs=list(
+                    "benford.analysis",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

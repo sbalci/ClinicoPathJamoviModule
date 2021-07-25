@@ -1,0 +1,281 @@
+---
+name:  contTables
+title: Contingency Tables
+jrs: '1.0'
+
+items:
+    - name: freqs
+      title: Contingency Tables
+      type: Table
+      description: a table of proportions
+      columns: [ ]
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+
+    - name: chiSq
+      title: χ² Tests
+      type: Table
+      description: a table of χ² test results
+
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+
+      columns:
+        - name: test[chiSq]
+          title: ''
+          type: text
+          content: χ²
+          visible: (chiSq)
+
+        - name: value[chiSq]
+          title: Value
+          visible: (chiSq)
+
+        - name: df[chiSq]
+          title: df
+          type: integer
+          visible: (chiSq)
+
+        - name: p[chiSq]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (chiSq)
+
+        - name: test[chiSqCorr]
+          title: ''
+          type: text
+          content: χ² continuity correction
+          visible: (chiSqCorr)
+
+        - name: value[chiSqCorr]
+          title: Value
+          visible: (chiSqCorr)
+
+        - name: df[chiSqCorr]
+          title: df
+          type: integer
+          visible: (chiSqCorr)
+
+        - name: p[chiSqCorr]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (chiSqCorr)
+
+        - name: test[likeRat]
+          title: ''
+          type: text
+          content: Likelihood ratio
+          visible: (likeRat)
+          refs: vcd
+
+        - name: value[likeRat]
+          title: Value
+          visible: (likeRat)
+
+        - name: df[likeRat]
+          title: df
+          type: integer
+          visible: (likeRat)
+
+        - name: p[likeRat]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (likeRat)
+
+        - name: test[fisher]
+          title: ''
+          type: text
+          content: Fisher's exact test
+          visible: (fisher)
+
+        - name: value[fisher]
+          title: Value
+          visible: (fisher)
+
+        - name: p[fisher]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (fisher)
+
+        - name: test[N]
+          title: ''
+          type: text
+          content: 'N'
+
+        - name: value[N]
+          title: Value
+          type: 'integer'
+
+    - name: odds
+      title: Comparative Measures
+      type: Table
+      description: a table of comparative measures
+      visible: (logOdds || odds || relRisk)
+
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+        - ciWidth
+
+      columns:
+        - name: t[lo]
+          title: ''
+          type: text
+          content: Log odds ratio
+          visible: (logOdds)
+          refs: vcd
+
+        - name: v[lo]
+          title: Value
+          visible: (logOdds)
+
+        - name: cil[lo]
+          title: Lower
+          superTitle: Confidence Intervals
+          visible: (logOdds && ci)
+
+        - name: ciu[lo]
+          title: Upper
+          superTitle: Confidence Intervals
+          visible: (logOdds && ci)
+
+        - name: t[o]
+          title: ''
+          type: text
+          content: Odds ratio
+          visible: (odds)
+
+        - name: v[o]
+          title: Value
+          visible: (odds)
+
+        - name: cil[o]
+          title: Lower
+          superTitle: Confidence Intervals
+          visible: (odds && ci)
+
+        - name: ciu[o]
+          title: Upper
+          superTitle: Confidence Intervals
+          visible: (odds && ci)
+
+        - name: t[rr]
+          title: ''
+          type: text
+          content: Relative risk
+          visible: (relRisk)
+
+        - name: v[rr]
+          title: Value
+          visible: (relRisk)
+
+        - name: cil[rr]
+          title: Lower
+          superTitle: Confidence Intervals
+          visible: (relRisk && ci)
+
+        - name: ciu[rr]
+          title: Upper
+          superTitle: Confidence Intervals
+          visible: (relRisk && ci)
+
+    - name: nom
+      title: Nominal
+      type: Table
+      description: a table of the 'nominal' test results
+      visible: (contCoef || phiCra)
+
+      columns:
+        - name: t[cont]
+          title: ''
+          type: text
+          content: Contingency coefficient
+          visible: (contCoef)
+
+        - name: v[cont]
+          title: Value
+          visible: (contCoef)
+
+        - name: t[phi]
+          title: ''
+          type: text
+          content: Phi-coefficient
+          visible: (phiCra)
+
+        - name: v[phi]
+          title: Value
+          visible: (phiCra)
+
+        - name: t[cra]
+          title: ''
+          type: text
+          content: Cramer's V
+          visible: (phiCra)
+
+        - name: v[cra]
+          title: Value
+          visible: (phiCra)
+
+    - name: gamma
+      title: Gamma
+      type: Table
+      description: a table of the gamma test results
+      visible: (gamma)
+      refs: vcdExtra
+
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+
+      columns:
+        - name: gamma
+          title: Gamma
+
+        - name: se
+          title: Standard Error
+
+        - name: cil
+          title: Lower
+          superTitle: Confidence Intervals
+
+        - name: ciu
+          title: Upper
+          superTitle: Confidence Intervals
+
+    - name: taub
+      title: Kendall's Tau-b
+      type: Table
+      description: a table of the Kendall's tau-b test results
+      visible: (taub)
+
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - layers
+
+      columns:
+        - name: taub
+          title: Kendall's Tau-B
+
+        - name: t
+          title: t
+
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue

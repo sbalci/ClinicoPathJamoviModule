@@ -39,6 +39,8 @@ items:
           - age
           - gender
           - female
-
+          
+refs:
+    - ClinicoPathJamoviModule
 
 ...

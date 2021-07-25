@@ -1,0 +1,95 @@
+---
+name:  comparingSurvival
+title: Comparing Survival Outcomes
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Comparing Survival Outcomes
+      type:  Preformatted
+
+    - name:  compsurvTable1
+      title: Events Summary
+      type: Table
+      clearWith:
+        - times
+        - status
+        - groups
+      columns:
+        - name: group
+          title: ''
+          type: text
+          content: ($key)
+          visible: (groups)
+        - name: n
+          title: 'Number of Subjects'
+          type: integer
+        - name: obs
+          title: 'Observed Events (V)'
+          type: integer
+        - name: exp
+          title: 'Expected Events (E)'
+          type: number
+        - name: ovse
+          title: '(O-E)^2/E'
+          type: number
+        - name: ovsev
+          title: '(O-E)^2/V'
+          type: number
+
+    - name:  compsurvTable2
+      title: Log-Rank Test Summary
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: 'Method'
+          type: text
+        - name: chisqr
+          title: 'Chi-Squared'
+          type: number
+        - name: df
+          title: 'DF'
+          type: integer
+        - name: p
+          title: 'P-Value'
+          type: number
+          format: zto,pvalue
+
+    - name:  compsurvTable3
+      title: Median Estimates
+      type: Table
+      clearWith:
+        - times
+        - status
+      columns:
+        - name: group
+          title: ''
+          type: text
+          content: ($key)
+          visible: (groups)
+        - name: median
+          title: 'Median'
+          type: number
+        - name: cilb
+          title: 'Lower'
+          type: number
+        - name: ciub
+          title: 'Upper'
+          type: number
+
+
+    - name: plot
+      title: Kaplan-Meier estimator of the survivor function
+      type: Image
+      width:  600
+      height: 500
+      renderFun: .plot
+
+    - name: plot2
+      title: Cumulative hazard function (log scale)
+      type: Image
+      width:  600
+      height: 500
+      renderFun: .plot2
+...

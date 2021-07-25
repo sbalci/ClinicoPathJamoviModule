@@ -162,6 +162,15 @@ refs:
         url: https://CRAN.R-project.org/package=ggstatsplot
         doi: '10.5281/zenodo.2074621'
 
+    ggstatsplot_article:
+        type: 'article'
+        author: Patil, I.
+        year: 2021
+        title: "Visualizations with statistical details: The 'ggstatsplot' approach."
+        publisher: 'PsyArxiv'
+        doi: 'doi:10.31234/osf.io/p7mku'
+
+
     report:
         type: 'software'
         author: Makowski, Dominique, Lüdecke, Daniel
@@ -544,49 +553,13 @@ refs:
         doi: 10.2105/AJPH.2012.300897
         url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3518362/
 
-
-
-    ClinicoPathDescriptives:
+    ClinicoPathJamoviModule:
         type: 'software'
-        author: Linlin Yan
-        year: 2020
-        title: "Venn Diagram by ggplot2, with really easy-to-use API"
-        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
-        url: https://github.com/yanlinlin82/ggvenn
-
-
-    ClinicoPathLinuxDescriptives:
-        type: 'software'
-        author: Linlin Yan
-        year: 2020
-        title: "Venn Diagram by ggplot2, with really easy-to-use API"
-        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
-        url: https://github.com/yanlinlin82/ggvenn
-
-    jsurvival:
-        type: 'software'
-        author: Linlin Yan
-        year: 2020
-        title: "Venn Diagram by ggplot2, with really easy-to-use API"
-        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
-        url: https://github.com/yanlinlin82/ggvenn
-
-
-    jjstatsplot:
-        type: 'software'
-        author: Linlin Yan
-        year: 2020
-        title: "Venn Diagram by ggplot2, with really easy-to-use API"
-        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
-        url: https://github.com/yanlinlin82/ggvenn
-
-
-    meddecide:
-        type: 'software'
-        author: Linlin Yan
-        year: 2020
-        title: "Venn Diagram by ggplot2, with really easy-to-use API"
-        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
-        url: https://github.com/yanlinlin82/ggvenn
+        author: Serdar Balci
+        year: 2021
+        title: "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188"
+        publisher: '[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule'
+        doi: 10.17605/OSF.IO/9SZUD
+        url: https://www.serdarbalci.com/ClinicoPathJamoviModule/
 
 ...
