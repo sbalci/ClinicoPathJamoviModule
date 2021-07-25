@@ -6,6 +6,22 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Inform modern browsers that this page supports both dark and light color schemes,
+  and the page author prefers light. -->
+<meta name="color-scheme" content="dark light">
+<script>
+  // If `prefers-color-scheme` is not supported, fall back to light mode.
+  // i.e. In this case, inject the `light` CSS before the others, with
+  // no media filter so that it will be downloaded with highest priority.
+  if (window.matchMedia("(prefers-color-scheme: dark)").media === "not all") {
+    document.documentElement.style.display = "none";
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      "<link id=\"css\" rel=\"stylesheet\" href=\"https://bootswatch.com/3/flatly/bootstrap.css\" onload=\"document.documentElement.style.display = ''\">"
+    );
+  }
+</script>
+
 <title>Pairwise Chi-Square Test — pairchi2 • ClinicoPath</title>
 
 
@@ -13,9 +29,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- Flatly Theme - Light  -->
+<link id="css-light" rel="stylesheet" href="https://bootswatch.com/3/flatly/bootstrap.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+
+<!-- Darkly Theme - Dark -->
+<link id="css-dark" rel="stylesheet" href="https://bootswatch.com/3/darkly/bootstrap.css" media="(prefers-color-scheme: dark)">
+
+<!-- preferably CSS -->
+<link rel="stylesheet" href="../preferably.css">
+<link id="css-code-light" rel="stylesheet" href="../code-color-scheme-light.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+<link id="css-code-dark" rel="stylesheet" href="../code-color-scheme-dark.css" media="(prefers-color-scheme: dark)">
+
 
 <!-- bootstrap-toc -->
 <link rel="stylesheet" href="../bootstrap-toc.css">
@@ -49,6 +75,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script>
 
+
+
+
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -72,7 +101,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0026</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0089</span>
       </span>
     </div>
 
@@ -80,7 +109,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -104,6 +133,9 @@
       <a href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a>
     </li>
     <li>
+      <a href="../articles/examples.html">Examples</a>
+    </li>
+    <li>
       <a href="../articles/module_development_jamovi.html">Module Development for Jamovi</a>
     </li>
     <li>
@@ -122,18 +154,23 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+        
         <li>
   <a href="http://twitter.com/serdarbalci">
-    <span class="fab fa fab fa-twitter fa-lg"></span>
+    <span class="fab fa-twitter fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="https://github.com/sbalci/ClinicoPathJamoviModule/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
+        
+        
+
+
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -156,174 +193,36 @@
     <p>Pairwise Chi-Square Test</p>
     </div>
 
-    <pre class="usage"><span class='fu'>pairchi2</span>(
-  <span class='no'>data</span>,
-  <span class='no'>rows</span>,
-  <span class='no'>cols</span>,
-  <span class='kw'>counts</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>layers</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>chiSq</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>chiSqCorr</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>likeRat</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>fisher</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>contCoef</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>phiCra</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>logOdds</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>odds</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>relRisk</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>ci</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>ciWidth</span> <span class='kw'>=</span> <span class='fl'>95</span>,
-  <span class='kw'>gamma</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>taub</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>obs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>exp</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>pcRow</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>pcCol</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>pcTot</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>pairw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>formula</span>
-)</pre>
+    <pre class="usage"><span class='fu'>pairchi2</span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>row</span>, <span class='va'>col</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>data</th>
-      <td><p>the data as a data frame</p></td>
-    </tr>
-    <tr>
-      <th>rows</th>
-      <td><p>the variable to use as the rows in the contingency table (not
-necessary when providing a formula, see the examples)</p></td>
-    </tr>
-    <tr>
-      <th>cols</th>
-      <td><p>the variable to use as the columns in the contingency table
-(not necessary when providing a formula, see the examples)</p></td>
-    </tr>
-    <tr>
-      <th>counts</th>
-      <td><p>the variable to use as the counts in the contingency table
-(not necessary when providing a formula, see the examples)</p></td>
-    </tr>
-    <tr>
-      <th>layers</th>
-      <td><p>the variables to use to split the contingency table (not
-necessary when providing a formula, see the examples)</p></td>
-    </tr>
-    <tr>
-      <th>chiSq</th>
-      <td><p><code>TRUE</code> (default) or <code>FALSE</code>, provide X²</p></td>
-    </tr>
-    <tr>
-      <th>chiSqCorr</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide X² with
-continuity correction</p></td>
-    </tr>
-    <tr>
-      <th>likeRat</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the
-likelihood ratio</p></td>
-    </tr>
-    <tr>
-      <th>fisher</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide Fisher's exact
-test</p></td>
-    </tr>
-    <tr>
-      <th>contCoef</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the
-contingency coefficient</p></td>
-    </tr>
-    <tr>
-      <th>phiCra</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide Phi and
-Cramer's V</p></td>
-    </tr>
-    <tr>
-      <th>logOdds</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the log odds
-ratio (only available for 2x2 tables)</p></td>
-    </tr>
-    <tr>
-      <th>odds</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the odds ratio
-(only available for 2x2 tables)</p></td>
-    </tr>
-    <tr>
-      <th>relRisk</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the relative
-risk (only available for 2x2 tables)</p></td>
-    </tr>
-    <tr>
-      <th>ci</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide confidence
-intervals for the comparative measures</p></td>
-    </tr>
-    <tr>
-      <th>ciWidth</th>
-      <td><p>a number between 50 and 99.9 (default: 95), width of the
-confidence intervals to provide</p></td>
-    </tr>
-    <tr>
-      <th>gamma</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide gamma</p></td>
-    </tr>
-    <tr>
-      <th>taub</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide Kendall's tau-b</p></td>
-    </tr>
-    <tr>
-      <th>obs</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the observed
-counts</p></td>
-    </tr>
-    <tr>
-      <th>exp</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide the expected
-counts</p></td>
-    </tr>
-    <tr>
-      <th>pcRow</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide row percentages</p></td>
-    </tr>
-    <tr>
-      <th>pcCol</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide column
-percentages</p></td>
-    </tr>
-    <tr>
-      <th>pcTot</th>
-      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide total
-percentages</p></td>
-    </tr>
-    <tr>
-      <th>pairw</th>
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>formula</th>
-      <td><p>(optional) the formula to use, see the examples</p></td>
+      <th>row</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>col</th>
+      <td><p>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A results object containing:</p><table class='table'>
-<tr><td><code>results$freqs</code></td><td></td><td></td><td></td><td></td><td>a table of proportions</td></tr>
-<tr><td><code>results$chiSq</code></td><td></td><td></td><td></td><td></td><td>a table of X² test results</td></tr>
-<tr><td><code>results$odds</code></td><td></td><td></td><td></td><td></td><td>a table of comparative measures</td></tr>
-<tr><td><code>results$nom</code></td><td></td><td></td><td></td><td></td><td>a table of the 'nominal' test results</td></tr>
-<tr><td><code>results$gamma</code></td><td></td><td></td><td></td><td></td><td>a table of the gamma test results</td></tr>
-<tr><td><code>results$taub</code></td><td></td><td></td><td></td><td></td><td>a table of the Kendall's tau-b test results</td></tr>
-<tr><td><code>results$pw</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$tablepw</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$conftable</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$chi2test</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$pairwise1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$pairwise2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$pairwise3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 </table>
 
 
-<p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
-<p><code>results$freqs$asDF</code></p>
-<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$freqs)</a></code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -340,7 +239,7 @@ percentages</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Made with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1, using <a href="https://preferably.amirmasoudabdol.name/?source=footer">preferably</a> template.</p>
 </div>
 
       </footer>

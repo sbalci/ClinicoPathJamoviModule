@@ -48,7 +48,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0084</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0089</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@
 </li>
 <li>
   <a href="../dev/index.html">
-    <span class="fas fa-cogs"></span>
+    <span class="fa fa-cogs"></span>
      
   </a>
 </li>
@@ -148,8 +148,60 @@
 <span class="co">#&gt; ℹ Loading ClinicoPath</span>
 <span class="co">#&gt; Writing NAMESPACE</span>
 <span class="co">#&gt; Writing NAMESPACE</span>
-<span class="co">#&gt; ── Running 44 example files ───────────────────────────────────── ClinicoPath ──</span>
+<span class="co">#&gt; ── Running 94 example files ───────────────────────────────────── ClinicoPath ──</span>
 <span class="co">#&gt; ℹ Loading ClinicoPath</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; &gt; dat &lt;- data.frame(`1st survey` = c("Approve", "Approve", </span>
+<span class="co">#&gt; +     "Disapprove", "Disapprove"), `2nd survey` = c("Approve", </span>
+<span class="co">#&gt; +     "Disapprove", "Approve", "Disapprove"), Counts = c(794, 150, </span>
+<span class="co">#&gt; +     86, 570), check.names = FALSE)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; &gt; contTablesPaired(formula = Counts ~ `1st survey`:`2nd survey`, </span>
+<span class="co">#&gt; +     data = dat)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Contingency Tables                               </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt;    1st survey    Approve    Disapprove    Total   </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt;    Approve           794           150      944   </span>
+<span class="co">#&gt;    Disapprove         86           570      656   </span>
+<span class="co">#&gt;    Total             880           720     1600   </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  McNemar Test                          </span>
+<span class="co">#&gt;  ───────────────────────────────────── </span>
+<span class="co">#&gt;          Value       df    p           </span>
+<span class="co">#&gt;  ───────────────────────────────────── </span>
+<span class="co">#&gt;    χ²    17.35593     1    0.0000310   </span>
+<span class="co">#&gt;    N     1600.000                      </span>
+<span class="co">#&gt;  ───────────────────────────────────── </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; &gt; contTablesPaired(formula = ~`1st survey`:`2nd survey`, </span>
+<span class="co">#&gt; +     data = dat)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Contingency Tables                               </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt;    1st survey    Approve    Disapprove    Total   </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt;    Approve             1             1        2   </span>
+<span class="co">#&gt;    Disapprove          1             1        2   </span>
+<span class="co">#&gt;    Total               2             2        4   </span>
+<span class="co">#&gt;  ──────────────────────────────────────────────── </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  McNemar Test                          </span>
+<span class="co">#&gt;  ───────────────────────────────────── </span>
+<span class="co">#&gt;          Value       df    p           </span>
+<span class="co">#&gt;  ───────────────────────────────────── </span>
+<span class="co">#&gt;    χ²    0.000000     1    1.0000000   </span>
+<span class="co">#&gt;    N            4                      </span>
+<span class="co">#&gt;  ─────────────────────────────────────</span>
 <span class="co">#&gt; ℹ Loading ClinicoPath</span></code></pre></div>
   </div>
 
