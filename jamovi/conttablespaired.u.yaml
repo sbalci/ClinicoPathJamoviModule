@@ -1,0 +1,53 @@
+name: contTablesPaired
+title: Paired Samples Contingency Tables
+jus: '2.0'
+stage: 2
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: rows
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: cols
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: counts
+            isTarget: true
+            maxItemCount: 1
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: chiSq
+      - type: CheckBox
+        name: chiSqCorr
+      - type: CheckBox
+        name: exact
+  - type: LayoutBox
+    cell:
+        row: 1
+        column: 1
+    stretchFactor: 1
+    margin: large
+    children:
+      - type: Label
+        label: Percentages
+        children:
+          - type: CheckBox
+            name: pcRow
+          - type: CheckBox
+            name: pcCol
+

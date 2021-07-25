@@ -101,7 +101,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ClinicoPath</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0084</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.0089</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
 </li>
 <li>
   <a href="../dev/index.html">
-    <span class="fas fa-cogs"></span>
+    <span class="fa fa-cogs"></span>
      
   </a>
 </li>
@@ -193,7 +193,16 @@
     <p>Function for making Decision Trees.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tree</span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>vars</span>, <span class='va'>facs</span>, <span class='va'>target</span>, <span class='va'>targetLevel</span>, sty <span class='op'>=</span> <span class='st'>"explore"</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>tree</span><span class='op'>(</span>
+  <span class='va'>data</span>,
+  <span class='va'>vars</span>,
+  <span class='va'>facs</span>,
+  <span class='va'>target</span>,
+  <span class='va'>targetLevel</span>,
+  <span class='va'>train</span>,
+  <span class='va'>trainLevel</span>,
+  showPlot <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -219,7 +228,15 @@
       <td><p>.</p></td>
     </tr>
     <tr>
-      <th>sty</th>
+      <th>train</th>
+      <td><p>Variable containing Test/Train information</p></td>
+    </tr>
+    <tr>
+      <th>trainLevel</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>showPlot</th>
       <td><p>.</p></td>
     </tr>
     </table>
@@ -230,9 +247,10 @@
 <tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 <tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
 <tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
-<tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
-<tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
-<tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$text2a</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text2b</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$text4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr>
 </table>
 
 

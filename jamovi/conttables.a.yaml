@@ -1,0 +1,282 @@
+---
+name: contTables
+title: Contingency Tables
+
+menuGroup: Frequencies
+menuSubgroup: Contingency Tables
+menuTitle: Independent Samples
+menuSubtitle: χ² test of association
+
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        The χ² test of association (not to be confused with the χ² goodness of
+        fit) is used to test whether two categorical variables are independent
+        or associated. If the p-value is low, it suggests the variables are not
+        independent, and that there is a relationship between the two variables.
+    R:
+        dontrun: true
+        usage: |
+            # data('HairEyeColor')
+            # dat <- as.data.frame(HairEyeColor)
+
+            # contTables(formula = Freq ~ Hair:Eye, dat)
+
+            #
+            #  CONTINGENCY TABLES
+            #
+            #  Contingency Tables
+            #  ─────────────────────────────────────────────────────
+            #    Hair     Brown    Blue    Hazel    Green    Total
+            #  ─────────────────────────────────────────────────────
+            #    Black       68      20       15        5      108
+            #    Brown      119      84       54       29      286
+            #    Red         26      17       14       14       71
+            #    Blond        7      94       10       16      127
+            #    Total      220     215       93       64      592
+            #  ─────────────────────────────────────────────────────
+            #
+            #
+            #  χ² Tests
+            #  ───────────────────────────────
+            #          Value    df    p
+            #  ───────────────────────────────
+            #    χ²      138     9    < .001
+            #    N       592
+            #  ───────────────────────────────
+            #
+
+            # Alternatively, omit the left of the formula (`Freq`) if each row
+            # represents a single observation:
+
+            # contTables(formula = ~ Hair:Eye, dat)
+
+completeWhenFilled: true
+
+formula:
+    counts:
+        from: lhs
+        type: vars
+        subset: 1
+    rows:
+        from: rhs
+        type: vars
+        subset: 1
+    cols:
+        from: rhs
+        type: vars
+        subset: 2
+    layers:
+        from: rhs
+        type: vars
+        subset: '3:'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: rows
+      title: Rows
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the rows in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: cols
+      title: Columns
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the columns in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: counts
+      title: Counts (optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default:
+      description:
+          R: >
+              the variable to use as the counts in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: layers
+      title: Layers
+      type: Variables
+      default: NULL
+      permitted:
+        - factor
+      description:
+          R: >
+              the variables to use to split the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: chiSq
+      title: χ²
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, provide χ²
+
+    - name: chiSqCorr
+      title: χ² continuity correction
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide χ² with continuity correction
+
+    - name: likeRat
+      title: Likelihood ratio
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the likelihood ratio
+
+    - name: fisher
+      title: Fisher's exact test
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide Fisher's exact test
+
+    - name: contCoef
+      title: Contingency coefficient
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the contingency coefficient
+
+    - name: phiCra
+      title: Phi and Cramer's V
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide Phi and Cramer's V
+
+    - name: logOdds
+      title: Log odds ratio
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the log odds ratio (only available
+            for 2x2 tables)
+
+    - name: odds
+      title: Odds ratio
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the odds ratio (only available
+            for 2x2 tables)
+
+    - name: relRisk
+      title: Relative risk
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the relative risk (only available
+            for 2x2 tables)
+
+    - name: ci
+      title: Confidence intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide confidence intervals for the
+            comparative measures
+
+    - name: ciWidth
+      title: Interval
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            a number between 50 and 99.9 (default: 95), width of the confidence
+            intervals to provide
+
+    - name: gamma
+      title: Gamma
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide gamma
+
+    - name: taub
+      title: Kendall's tau-b
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide Kendall's tau-b
+
+    - name: obs
+      title: Observed counts
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the observed counts
+
+    - name: exp
+      title: Expected counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the expected counts
+
+    - name: pcRow
+      title: Row
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide row percentages
+
+    - name: pcCol
+      title: Column
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide column percentages
+
+    - name: pcTot
+      title: Total
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide total percentages
+...

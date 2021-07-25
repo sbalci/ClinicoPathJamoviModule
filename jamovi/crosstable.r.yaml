@@ -62,4 +62,8 @@ items:
       visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
 
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

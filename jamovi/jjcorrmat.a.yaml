@@ -1,0 +1,89 @@
+---
+name:  jjcorrmat
+title: Correlation Matrix
+menuGroup: JJStatsPlot
+menuSubgroup: Continuous vs Continuous
+# menuSubtitle: Correlation Matrix
+version: '1.0.0'
+jas: '1.2'
+
+
+
+description:
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggcorrmat and
+    #     ggstatsplot::grouped_ggcorrmat to generate Correlation Matrix.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: dep
+      title: Dependent Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: grvar
+      title: 'Split By (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+
+
+    - name: typestatistics
+      title: 'Type of Statistic'
+      type: List
+      options:
+        - title: Parametric
+          name: parametric
+        - title: Nonparametric
+          name: nonparametric
+        - title: Robust
+          name: robust
+        - title: Bayes
+          name: bayes
+      default: parametric
+
+
+    - name: originaltheme
+      title: Add GGStatsPlot Layer
+      type: Bool
+      default: false
+
+
+
+
+
+...
+
+

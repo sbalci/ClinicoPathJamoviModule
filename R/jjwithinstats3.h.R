@@ -62,7 +62,8 @@ jjwithinstats3Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Violin Plots to Compare Repeated Measurements for Continuous Variables",
                 refs=list(
                     "ggplot2",
-                    "ggstatsplot"),
+                    "ggstatsplot",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "pairs",
                     "excl",

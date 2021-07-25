@@ -1,0 +1,24 @@
+title: Pairwise Chi-Square Test
+name: pairchi2
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Row
+        children:
+          - type: VariablesListBox
+            name: row
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Column
+        children:
+          - type: VariablesListBox
+            name: col
+            maxItemCount: 1
+            isTarget: true

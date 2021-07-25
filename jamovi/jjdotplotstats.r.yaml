@@ -1,0 +1,50 @@
+---
+name:  jjdotplotstats
+title: Dot Chart
+jrs:   '1.1'
+
+
+clearWith:
+    - dep
+    - group
+    - grvar
+    - excl
+    - originaltheme
+    - typestatistics
+
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+
+
+
+
+    - name: plot2
+      title: '`${group} - {dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 300
+      renderFun: .plot2
+      requiresData: true
+      visible: (grvar)
+
+    - name: plot
+      title: '`${group} - {dep}`'
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot
+      requiresData: true
+
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - ClinicoPathJamoviModule
+
+...

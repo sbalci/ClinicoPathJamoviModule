@@ -1,0 +1,57 @@
+---
+name:  jjhistostats
+title: Histogram
+jrs:   '1.1'
+
+# clearWith:
+#     - dep
+#     - group
+#     - grvar
+#     - excl
+#     - originaltheme
+#     - typestatistics
+#     - changebinwidth
+#     - binwidth
+#     - barmeasure
+#     - centralityparameter
+
+clearWith:
+    - '*'
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+
+      # title: '` ${group} - {dep} by {grvar}`'
+
+    - name: plot2
+      title: '`Histogram Splitted by {grvar}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      visible: (grvar)
+
+      # title: '` ${dep}`'
+
+
+    - name: plot
+      title: Histogram
+      type: Image
+      # width:  800
+      # height: 600
+      renderFun: .plot
+      requiresData: true
+
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - ClinicoPathJamoviModule
+    
+...

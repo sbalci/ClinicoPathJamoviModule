@@ -84,5 +84,5 @@ ClinicoPath.code-workspace
 others
 pdfs
 
-
+^module-updates.R$
 

@@ -1,0 +1,29 @@
+title: Confidence interval for a mean
+name: ciSingle
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variables
+        children:
+          - type: VariablesListBox
+            name: deps
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Split by
+        children:
+          - type: VariablesListBox
+            name: splitBy
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ciWidth
+        format: number

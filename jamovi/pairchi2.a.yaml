@@ -1,0 +1,20 @@
+---
+name:  pairchi2
+title: Pairwise Chi-Square Test
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: row
+      title: Row
+      type: Variable
+
+    - name: col
+      title: Column
+      type: Variable
+
+...

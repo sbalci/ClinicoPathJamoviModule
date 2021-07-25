@@ -62,7 +62,8 @@ jjwithinstats2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Violin Plots to Compare Within Groups for Wide Data Format",
                 refs=list(
                     "ggplot2",
-                    "ggstatsplot"),
+                    "ggstatsplot",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "pairs",
                     "excl",

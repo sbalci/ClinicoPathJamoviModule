@@ -1,0 +1,113 @@
+---
+name:  classification
+title: Decision tree
+jrs:   '1.1'
+
+items:
+
+  - name: modelSettings
+    title: Model parameters
+    type: Html
+
+  - name: confusion
+    title: Confusion matric
+    type: Group
+    items:
+      - name:  matrix
+        title: 'Confusion matrix'
+        visible: (reporting:confusionMatrix)
+        type: Table
+        rows:  0
+        columns:
+          - name: class
+            title: 'response'
+            type: number
+
+  - name: classificationMetrics
+    title: Classification metrics
+    type: Group
+    items:
+      - name:  general
+        visible: (reporting:classifMetrices)
+        title: 'General'
+        type: Table
+        rows:  0
+        columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+      - name: class
+        title: 'Per class'
+        type: Table
+        visible: (reporting:classifMetrices)
+        rows:  0
+        columns:
+          - name: class
+            title: 'class name'
+            type: text
+          - name: classif.precision
+            title: 'precision'
+            type: number
+            visible: (reporting:classifMetrices)
+          - name: classif.recall
+            title: 'recall'
+            type: number
+            visible: (reporting:classifMetrices)
+          - name: classif.fbeta
+            title: 'F-score'
+            type: number
+            visible: (reporting:classifMetrices)
+          - name: classif.auc
+            title: 'AUC'
+            type: number
+            visible: (reporting:AUC)
+
+  - name: rocCurvePlot
+    title: ROC curve
+    visible: (reporting:AUC)
+    type: Image
+    width:  400
+    height: 300
+    renderFun: .plotRocCurve
+
+  - name: decisionTreeModel
+    title: Decision tree model
+    visible: (plotDecisionTree)
+    type: Image
+    width:  400
+    height: 300
+    renderFun: .printDecisionTree
+
+  - name: predictedFreqPlot
+    title: Predicted frequencies
+    visible: (predictedFreq)
+    type: Image
+    width:  350
+    height: 450
+    renderFun: .plotFrequencies
+
+  - name: printRandForest
+    type: Group
+    title: Random forest model
+    items:
+      - name: randomForestModel
+        title: ''
+        visible: (printRandForest)
+        type: Table
+        rows: 8
+        columns:
+          - name: type
+            title: 'Type'
+            type: Text
+          - name: classif
+            title: 'Classification'
+            type: Number
+
+
+  - name:  text
+    title: ''
+    type:  Preformatted
+...

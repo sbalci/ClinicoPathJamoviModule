@@ -1,0 +1,95 @@
+---
+name:  jjpiestats
+title: Pie Charts
+jrs:   '1.1'
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+
+
+
+
+    - name: plot4
+      title: '`${group} - {dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 300
+      renderFun: .plot4
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+      visible: (grvar)
+      # visible: (dep && group && grvar)
+
+
+
+    - name: plot3
+      title: '`${dep} by {grvar}`'
+      type: Image
+      width:  800
+      height: 300
+      renderFun: .plot3
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+      visible: (grvar)
+
+
+    - name: plot2
+      title: '`${group} - {dep}`'
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+      visible: (group)
+      # visible: (dep && group)
+
+
+
+    - name: plot1
+      title: '`${dep}`'
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot1
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+      visible: (dep)
+
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - ClinicoPathJamoviModule
+    
+...

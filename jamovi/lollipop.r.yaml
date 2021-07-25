@@ -1,0 +1,23 @@
+---
+name:  lollipop
+title: Lollipop Chart
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Lollipop Chart
+      type:  Preformatted
+
+
+    - name: plot
+      title: 'Lollipop Chart'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+
+
+
+...

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0084
-Date: 2021-04-14
+Version: 0.0.2.0089
+Date: 2021-07-25
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -40,8 +40,6 @@ Imports:
     explore,
     finalfit,
     forcats,
-    ggplot2,
-    ggstatsplot,
     glue,
     gt,
     gtsummary,
@@ -64,13 +62,28 @@ Imports:
     tangram,
     tibble,
     tidyr,
-    vtree
+    vtree,
+    caret
 VignetteBuilder:
     knitr
 Remotes:
+    tidyverse/ggplot2,
     carloscinelli/benford.analysis,
     ndphillips/FFTrees,
-    yanlinlin82/ggvenn
+    yanlinlin82/ggvenn,
+    easystats/datawizard,
+    easystats/insight,
+    easystats/bayestestR,
+    easystats/parameters,
+    easystats/performance,
+    easystats/effectsize,
+    easystats/report,
+    easystats/correlation,
+    thomasp85/patchwork,
+    cran/WRS2,
+    IndrajeetPatil/statsExpressions,
+    IndrajeetPatil/pairwiseComparisons,
+    IndrajeetPatil/ggstatsplot
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

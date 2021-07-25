@@ -1,0 +1,45 @@
+---
+name:  jjscatterstats
+title: Scatter Plot
+jrs:   '1.1'
+
+
+clearWith:
+    - dep
+    - group
+    - grvar
+    - excl
+    - originaltheme
+    - typestatistics
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+
+    - name: plot2
+      title: '`${group} vs {dep} by {grvar}`'
+      type: Image
+      width:  1600
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      visible: (grvar)
+
+    - name: plot
+      title: '`${group} vs {dep}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - ClinicoPathJamoviModule
+    
+...

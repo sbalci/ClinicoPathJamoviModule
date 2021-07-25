@@ -1,0 +1,61 @@
+---
+name:  jjbarstats2
+title: jjbarstats2
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: jjbarstats2
+      type:  Preformatted
+
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+
+
+
+    - name: plot
+      title: Bar Chart
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+
+
+
+    - name: plot2
+      title: Bar Chart
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - dep
+          - group
+          - grvar
+          - direction
+          - originaltheme
+
+
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - ClinicoPathJamoviModule
+
+...

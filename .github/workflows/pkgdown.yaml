@@ -40,9 +40,6 @@ jobs:
           install.packages('rmarkdown')
           install.packages('devtools')
           remotes::install_github("amirmasoudabdol/preferably", type = "source")
-          remotes::install_github("carloscinelli/benford.analysis", type = "source")
-          remotes::install_github("ndphillips/FFTrees", type = "source")
-          remotes::install_github("yanlinlin82/ggvenn", type = "source")
 
         shell: Rscript {0}
 

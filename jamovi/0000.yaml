@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0084
+version: 0.0.2.0089
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2021-04-14'
+date: '2021-07-25'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -162,6 +162,212 @@ analyses:
     menuSubgroup: Repeated Measurements
     menuTitle: Violin Plots to Compare Repeated Measurements for Continuous Variables
     menuSubtitle: Repeated Measurements for Continuous Variables
+  - title: Histogram
+    name: jjhistostats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous
+    menuTitle: Histogram
+    description: |
+      'Wrapper Function for ggstatsplot::gghistostats and
+      ggstatsplot::grouped_gghistostats to generate Histogram.'
+  - title: Checking data
+    name: checkdata
+    ns: ClinicoPath
+    menuGroup: PUBH5018
+    menuTitle: Checking data
+  - title: Confidence interval for a mean
+    name: ciSingle
+    ns: ClinicoPath
+    menuGroup: PUBH5018
+    menuTitle: Confidence interval for a mean
+  - title: Decision tree
+    name: classification
+    ns: ClinicoPath
+    menuGroup: Classification
+    menuTitle: Decision tree
+  - title: Comparing Survival Outcomes
+    name: comparingSurvival
+    ns: ClinicoPath
+    menuGroup: SimpleSurvival
+    menuTitle: Comparing Survival Outcomes
+  - title: 'Overall, Cause Specific, and Competing Survival'
+    name: competingsurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: 'Overall, Cause Specific, and Competing Survival'
+    menuSubtitle: Survival for Different Outcomes
+    description: 'Overall, Cause Specific, and Competing Survival.'
+  - title: Contingency Tables
+    name: contTables
+    ns: ClinicoPath
+    menuGroup: Frequencies
+    menuSubgroup: Contingency Tables
+    menuTitle: Independent Samples
+    menuSubtitle: χ² test of association
+    description: >
+      The χ² test of association (not to be confused with the χ² goodness of
+      fit) is used to test whether two categorical variables are independent or
+      associated. If the p-value is low, it suggests the variables are not
+      independent, and that there is a relationship between the two variables.
+  - title: Paired Samples Contingency Tables
+    name: contTablesPaired
+    ns: ClinicoPath
+    menuGroup: Frequencies
+    menuSubgroup: Contingency Tables
+    menuTitle: Paired Samples
+    menuSubtitle: McNemar test
+    description: McNemar test
+  - title: Correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Correlation
+    menuTitle: Correlation
+    description: Function for Correlation.
+  - title: Decision 2 for using init
+    name: decision2
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Decision
+    menuTitle: Decision 2 for using init
+    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    description: >
+      Function for Medical Decision Analysis. Sensitivity, specificity, positive
+      predictive value, negative predictive value.
+  - title: Dendogram
+    name: dendogram
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Dendogram
+  - title: Tables via gtsummary
+    name: gtsummary
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Comparisons
+    menuTitle: Tables via gtsummary
+  - title: ICC coefficients
+    name: icccoeff
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Agreement
+    menuTitle: ICC coefficients
+    description: Function for Interclass Correlation Coefficient Calculation.
+  - title: Bar Charts
+    name: jjbarstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Categorical
+    menuTitle: Bar Charts
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+  - title: Bar Charts
+    name: jjbarstats2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Categorical vs Categorical
+    menuTitle: Bar Charts
+    description: |
+      'Wrapper Function for ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+  - title: Violin Plots to Compare Between Groups
+    name: jjbetweenstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Violin Plots to Compare Between Groups
+    menuSubtitle: Independent Samples
+  - title: Correlation Matrix
+    name: jjcorrmat
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous vs Continuous
+    menuTitle: Correlation Matrix
+  - title: Dot Chart
+    name: jjdotplotstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Dot Chart
+  - title: Pie Charts
+    name: jjpiestats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Categorical
+    menuTitle: Pie Charts
+  - title: Scatter Plot
+    name: jjscatterstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Continuous vs Continuous
+    menuTitle: Scatter Plot
+  - title: Violin Plot
+    name: jviolin
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: R-Graph-Gallery
+    menuTitle: Violin Plot
+    menuSubtitle: R Graph Gallery Violin
+  - title: Line Chart
+    name: linechart
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Exploration
+    menuTitle: Line Chart
+    menuSubtitle: ClinicoPath Descriptive Plots
+  - title: Lollipop Chart
+    name: lollipop
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Lollipop Chart
+  - title: Nomogram
+    name: nomogram
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Nomogram
+  - title: One Survival Outcome
+    name: oneSurvival
+    ns: ClinicoPath
+    menuGroup: SimpleSurvival
+    menuTitle: One Survival Outcome
+  - title: Pairwise Chi-Square Test
+    name: pairchi2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Pairwise Chi-Square Test
+  - title: Parallel Plot
+    name: parallelplot
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: Parallel Plot
+  - title: Positive Predictive Value
+    name: ppv
+    ns: ClinicoPath
+    menuGroup: Demo
+    menuTitle: Positive Predictive Value
+  - title: ROC
+    name: roc
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Decision
+    menuTitle: ROC
+    description: Function for ROC Analysis.
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Variable Type Based Graphs and Plots
+    menuTitle: Graphs and Plots
+    description: Function for Generating Plots and Graphs Based on Variable Types.
+  - title: Time Interval
+    name: timeinterval
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Time Interval
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
@@ -226,6 +432,6 @@ datasets:
     tags:
       - ROC
 usesNative: true
-minApp: 1.8.1
+minApp: 1.8.0
 
 ...

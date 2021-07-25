@@ -166,7 +166,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text3",
-                title="Decision Tree 1",
+                title="Decision Tree 3",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -177,7 +177,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="Decision Tree 2",
+                title="Decision Tree 4",
                 clearWith=list(
                     "vars",
                     "facs",

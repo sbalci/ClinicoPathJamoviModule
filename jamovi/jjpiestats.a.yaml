@@ -1,0 +1,77 @@
+---
+name:  jjpiestats
+title: Pie Charts
+menuGroup: JJStatsPlot
+menuSubgroup: 'Categorical vs Categorical'
+# menuSubtitle: 'Pie Charts'
+version: '1.0.0'
+jas: '1.2'
+
+
+
+description:
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggpiestats and
+    #     ggstatsplot::grouped_ggpiestats to generate Pie Charts.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: group
+      title: 'Grouping Variable: (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: grvar
+      title: 'Split By (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+  
+    - name: originaltheme
+      title: Add GGStatsPlot Layer
+      type: Bool
+      default: false
+
+
+
+
+...
+

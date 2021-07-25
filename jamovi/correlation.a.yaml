@@ -1,0 +1,31 @@
+---
+name:  correlation
+title: Correlation
+menuGroup: ClinicoPath
+menuSubgroup: Correlation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Correlation.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: vars
+      title: Select Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+...
