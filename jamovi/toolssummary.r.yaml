@@ -1,0 +1,17 @@
+---
+name:  toolssummary
+title: Tools for data summary
+jrs:   '1.1'
+
+items:
+    - name:  tablestyle4
+      title: toolssummary
+      type:  Preformatted
+
+
+    - name:  tablestyle4html
+      title: toolssummary
+      type:  Html
+
+
+...
