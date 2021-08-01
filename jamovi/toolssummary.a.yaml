@@ -1,0 +1,17 @@
+---
+name:  toolssummary
+title: Tools for data summary
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables
+      type: Variables
+
+
+...

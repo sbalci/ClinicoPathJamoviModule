@@ -466,5 +466,5 @@
         `year`=2021, 
         `title`="ClinicoPath jamovi Module doi:10.5281/zenodo.3997188", 
         `publisher`="[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule", 
-        `DOI`="10.17605/OSF.IO/9SZUD", 
+        `doi`="10.17605/OSF.IO/9SZUD", 
         `url`="https://www.serdarbalci.com/ClinicoPathJamoviModule/"))
