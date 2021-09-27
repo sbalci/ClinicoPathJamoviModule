@@ -1,0 +1,296 @@
+---
+title: "workflows"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r global options, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+
+```{r flow_tableone}
+
+flow::flow_view(x = ClinicoPath::tableone)
+
+```
+
+
+
+---
+
+
+**Workflow for ClinicoPath::tableone** 
+
+
+
+<img src='figures/flow_tableone.png' align='center' width = 75% />
+
+
+
+---
+
+
+**Workflow for ClinicoPath::summarydata** 
+
+
+<img src='figures/flow_summarydata.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::reportcat** 
+
+
+<img src='figures/flow_reportcat.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::alluvial** 
+
+
+<img src='figures/flow_alluvial.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::agepyramid** 
+
+
+<img src='figures/flow_agepyramid.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::crosstable** 
+
+
+
+<img src='figures/flow_crosstable.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::survival** 
+
+
+
+<img src='figures/flow_survival.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::multisurvival** 
+
+
+
+<img src='figures/flow_multisurvival.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::oddsratio** 
+
+
+
+<img src='figures/flow_oddsratio.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::agreement** 
+
+
+
+<img src='figures/flow_agreement.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::decision** 
+
+
+
+<img src='figures/flow_decision.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::decisioncalculator** 
+
+
+<img src='figures/flow_decisioncalculator.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::statsplot2** 
+
+
+
+<img src='figures/flow_statsplot2.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjbarstats** 
+
+
+
+<img src='figures/flow_jjbarstats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjbetweenstats** 
+
+
+<img src='figures/flow_jjbetweenstats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjcorrmat** 
+
+
+
+<img src='figures/flow_jjcorrmat.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjdotplotstats** 
+
+
+
+<img src='figures/flow_jjdotplotstats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjhistostats** 
+
+
+
+<img src='figures/flow_jjhistostats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjpiestats** 
+
+
+
+<img src='figures/flow_jjpiestats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjscatterstats** 
+
+
+<img src='figures/flow_jjscatterstats.png' align='center' width = 75% />
+
+
+---
+
+
+**Workflow for ClinicoPath::jjwithinstats** 
+
+
+<img src='figures/flow_jjwithinstats.png' align='center' width = 75% />
+
+
+---
+
+
+
+
+
+
+
+
+<!-- ```{r get all functions in ClinicoPath} -->
+<!-- # functionsClinicoPath <- getNamespaceExports(ns = "ClinicoPath") -->
+
+<!-- functionsClinicoPath <- c( -->
+<!--     "tableone", -->
+<!--     "summarydata", -->
+<!--     "reportcat", -->
+<!--     "alluvial", -->
+<!--     "agepyramid", -->
+
+<!--     "crosstable", -->
+
+<!--     # Survival -->
+<!--     "survival", -->
+<!--     "multisurvival", -->
+<!--     "oddsratio", -->
+
+<!--     # Agreement -->
+<!--     "agreement", -->
+
+<!--     # Decision -->
+<!--     "decision", -->
+<!--     "decisioncalculator", -->
+
+<!--     # JJ Functions -->
+<!--     "statsplot2", -->
+<!--     "jjbarstats", -->
+<!--     "jjbetweenstats", -->
+<!--     "jjcorrmat", -->
+<!--     "jjdotplotstats", -->
+<!--     "jjhistostats", -->
+<!--     "jjpiestats", -->
+<!--     "jjscatterstats", -->
+<!--     "jjwithinstats" -->
+<!-- ) -->
+
+<!-- # ls(getNamespace(name = 'ClinicoPath')) -->
+
+<!-- ``` -->
+
+
+
+
+
+<!-- ```{r generate Code, include=FALSE} -->
+<!-- source(here::here("R", "gc_flows.R")) -->
+<!-- ``` -->
+
+
+
+<!-- ```{r generatedCode, child=here::here('childRmd', "generatedCodeFlows.Rmd")} -->
+<!-- ``` -->
+

@@ -844,9 +844,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(
                         description =
                             glue::glue(
-                                "The difference",
+                                "The difference ",
                                 title2,
-                                "between {rowname} and {name}",
+                                " between {rowname} and {name}",
                                 " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}."
                             )
                     ) %>%

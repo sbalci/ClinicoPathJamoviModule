@@ -1,0 +1,67 @@
+---
+name:  tree
+title: Decision Tree
+menuGroup: ClinicoPath
+menuSubgroup: Decision
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for making Decision Trees.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: vars
+      title: Continuous Explanatory Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >
+                  continuous explanatory variables
+
+    - name: facs
+      title: Categorical Explanatory Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  categorical explanatory variables
+
+    - name: target
+      title: Target Variable
+      type: Variable
+      description: >
+                  target variable
+
+    - name: targetLevel
+      title: Target Level
+      type: Level
+      variable: (target)
+
+    - name: sty
+      title: Tree Style
+      type: List
+      options:
+        - title: Explore
+          name: explore
+        - title: FFTrees
+          name: fftrees
+        - title: rpart
+          name: rpart
+      default: explore
+
+
+
+
+
+...

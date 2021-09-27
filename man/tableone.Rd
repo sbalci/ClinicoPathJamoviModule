@@ -4,7 +4,7 @@
 \alias{tableone}
 \title{Table One}
 \usage{
-tableone(data, vars, sty = "t1", excl = TRUE)
+tableone(data, vars, sty = "t1", excl = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}

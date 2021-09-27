@@ -1,0 +1,535 @@
+---
+refs:
+    emmeans:
+        type: 'software'
+        author: Lenth, R.
+        year: 2018
+        title: 'emmeans: Estimated Marginal Means, aka Least-Squares Means'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=emmeans'
+        url: https://CRAN.R-project.org/package=emmeans
+
+    afex:
+        type: 'software'
+        author: Singmann, H.
+        year: 2018
+        title: 'afex: Analysis of Factorial Experiments'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=afex'
+        url: https://CRAN.R-project.org/package=afex
+
+    R:
+        type: 'software'
+        author: R Core Team
+        year: 2018
+        title: 'A Language and Envionment for Statistical Computing'
+        publisher: '[Computer software]. Retrieved from https://CRAN.R-project.org/'
+        url: https://CRAN.R-project.org/
+
+    BF:
+        type: 'software'
+        author: Morey, R. D., & Rouder, J. N.
+        year: 2018
+        title: 'BayesFactor: Computation of Bayes Factors for Common Designs'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=BayesFactor'
+        url: https://CRAN.R-project.org/package=BayesFactor
+
+    btt:
+        type: 'article'
+        author: Rouder, J. N., Speckman, P. L., Sun, D., Morey, R. D., & Iverson, G.
+        year: 2009
+        title: Bayesian t tests for accepting and rejecting the null hypothesis
+        publisher: Psychonomic Bulletin & Review
+        volume: 16
+        pages: 225-237
+
+    car:
+        type: 'software'
+        author: Fox, J., & Weisberg, S.
+        year: 2018
+        title: 'car: Companion to Applied Regression'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=car'
+        url: https://CRAN.R-project.org/package=car
+
+    ggplot2:
+        type: 'software'
+        author: Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio
+        year: 2018
+        title: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggplot2'
+        url: https://CRAN.R-project.org/package=ggplot2
+
+    ggridges:
+        type: 'software'
+        author: Wilke, C., & RStudio
+        year: 2018
+        title: 'ggridges: Ridgeline Plots in ggplot2'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggridges'
+        url: https://CRAN.R-project.org/package=ggridges
+
+    mvnormtest:
+        type: 'software'
+        author: Jarek, S.
+        year: 2012
+        title: 'mvnormtest: Normality test for multivariate variables'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mvnormtest'
+        url: https://CRAN.R-project.org/package=mvnormtest
+
+    PMCMR:
+        type: 'software'
+        author: Pohlert, T.
+        year: 2018
+        title: 'PMCMR: Calculate Pairwise Multiple Comparisons of Mean Rank Sums'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=PMCMR'
+        url: https://CRAN.R-project.org/package=PMCMR
+
+    ROCR:
+        type: 'software'
+        author: Sing, T., Sander, O., Beerenwinkel, N., & Lengauer, T.
+        year: 2015
+        title: 'ROCR: Visualizing the Performance of Scoring Classifiers'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ROCR'
+        url: https://CRAN.R-project.org/package=ROCR
+
+    nnet:
+        type: 'software'
+        author: Ripley, B., Venables W.
+        year: 2016
+        title: 'nnet: Feed-Forward Neural Networks and Multinomial Log-Linear Models'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=nnet'
+        url: https://CRAN.R-project.org/package=nnet
+
+    MASS:
+        type: 'software'
+        author: Ripley, B., Venables W., Bates, D. M., Hornik, K., Gebhardt, A., & Firth, D.
+        year: 2018
+        title: "MASS: Support Functions and Datasets for Venables and Ripley's MASS"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=MASS'
+        url: https://CRAN.R-project.org/package=MASS
+
+    vcd:
+        type: 'software'
+        author: Meyer, D., Zeileis, A., Hornik, K., Gerber, F., & Friendly, M.
+        year: 2017
+        title: "vcd: Visualizing Categorical Data"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=vcd'
+        url: https://CRAN.R-project.org/package=vcd
+
+    vcdExtra:
+        type: 'software'
+        author: Friendly M., Turner, H., Zeileis, A., Murdoch, D., & Firth, D.
+        year: 2017
+        title: "vcdExtra: 'vcd' Extensions and Additions"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=vcdExtra'
+        url: https://CRAN.R-project.org/package=vcdExtra
+
+    exact2x2:
+        type: 'software'
+        author: Fay, M. P., Hunsberger, S. A., Nason, M., & Gabriel, E.
+        year: 2018
+        title: "exact2x2: Exact Tests and Confidence Intervals for 2x2 Tables"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=exact2x2'
+        url: https://CRAN.R-project.org/package=exact2x2
+
+    psych:
+        type: 'software'
+        author: Revelle, W.
+        year: 2019
+        title: "psych: Procedures for Psychological, Psychometric, and Personality Research"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=psych'
+        url: https://CRAN.R-project.org/package=psych
+
+    lavaan:
+        type: 'software'
+        author: Rosseel, Y., et al.
+        year: 2018
+        title: "lavaan: Latent Variable Analysis"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=lavaan'
+        url: https://CRAN.R-project.org/package=lavaan
+
+    semPlot:
+        type: 'software'
+        author: Epskamp, S.
+        year: 2017
+        title: "semPlot: Path Diagrams and Visual Analysis of Various SEM Packages' Output"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=semPlot'
+        url: https://CRAN.R-project.org/package=semPlot
+
+    ggstatsplot:
+        type: 'software'
+        author: Patil, I.
+        year: 2018
+        title: "ggstatsplot: 'ggplot2' Based Plots with Statistical Details"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggstatsplot'
+        url: https://CRAN.R-project.org/package=ggstatsplot
+        doi: '10.5281/zenodo.2074621'
+
+    report:
+        type: 'software'
+        author: Makowski, Dominique, Lüdecke, Daniel
+        year: 2019
+        title: "The report package for R: Ensuring the use of best practices for results reporting"
+        publisher: '[R package]. Retrieved from https://github.com/easystats/report'
+        url: https://github.com/easystats/report
+
+    arsenal:
+        type: 'software'
+        author: Heinzen, E Sinnwell, J Atkinson, E Gunderson, T Dougherty, G
+        year: 2018
+        title: "arsenal: An Arsenal of 'R' Functions for Large-Scale Statistical Summaries"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=arsenal'
+        url: https://CRAN.R-project.org/package=arsenal
+
+    tangram:
+        type: 'software'
+        author: Garbett, S.
+        year: 2018
+        title: "tangram: The Grammar of Tables"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tangram'
+        url: https://CRAN.R-project.org/package=tangram
+
+    irr:
+        type: 'software'
+        author: Matthias Gamer, Jim Lemon, Ian Fellows, Puspendra Singh
+        year: 2019
+        title: "Various Coefficients of Interrater Reliability and Agreement."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=irr'
+        url: https://CRAN.R-project.org/package=irr
+
+    tableone:
+        type: 'software'
+        author: Kazuki, Y.
+        year: 2019
+        title: "tableone: Create 'Table 1' to Describe Baseline Characteristics"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tableone'
+        url: https://CRAN.R-project.org/package=tableone
+
+    janitor:
+        type: 'software'
+        author: Firke, S.
+        year: 2019
+        title: "janitor: Simple Tools for Examining and Cleaning Dirty Data."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=janitor'
+        url: https://CRAN.R-project.org/package=janitor
+
+
+    finalfit:
+        type: 'software'
+        author: Ewen Harrison and Tom Drake and Riinu Ots
+        year: 2019
+        title: "finalfit: Quickly Create Elegant Regression Results Tables and Plots when Modelling"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=finalfit'
+        url: https://CRAN.R-project.org/package=finalfit
+
+
+    caret:
+        type: 'software'
+        author: Max Kuhn
+        year: 2020
+        title: "caret: Classification and Regression Training"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=caret'
+        url: https://CRAN.R-project.org/package=caret
+
+    psycho:
+        type: 'software'
+        author: Makowski, D.
+        year: 2018
+        title: "The Psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science. Journal of Open Source Software, 3(22), 470."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=psycho.R'
+        url: https://CRAN.R-project.org/package=psycho.R
+
+    survival:
+        type: 'software'
+        author: Terry M Therneau, Thomas Lumley
+        year: 2019
+        title: "survival: Survival Analysis"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survival'
+        url: https://CRAN.R-project.org/package=survival
+
+    survminer:
+        type: 'software'
+        author: Alboukadel Kassambara and Marcin Kosinski and Przemyslaw Biecek
+        year: 2019
+        title: "survminer: Drawing Survival Curves using 'ggplot2'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survminer'
+        url: https://CRAN.R-project.org/package=survminer
+
+
+    ggalluvial:
+        type: 'software'
+        author: Jason Cory Brunson
+        year: 2019
+        title: "ggalluvial: Alluvial Plots in 'ggplot2'."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggalluvial'
+        url: https://CRAN.R-project.org/package=ggalluvial
+
+    explore:
+        type: 'software'
+        author: Roland Krasser
+        year: 2020
+        title: "explore: Simplifies Exploratory Data Analysis."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=explore'
+        url: https://CRAN.R-project.org/package=explore
+
+    FFTrees:
+        type: 'software'
+        author: Nathaniel Phillips, Hansjoerg Neth, Jan Woike and Wolfgang Gaissmaer
+        year: 2019
+        title: "FFTrees: Generate, Visualise, and Evaluate Fast-and-Frugal Decision Trees"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=FFTrees'
+        url: https://CRAN.R-project.org/package=FFTrees
+
+
+    rpart:
+        type: 'software'
+        author: Terry Therneau and Beth Atkinson
+        year: 2019
+        title: "rpart: Recursive Partitioning and Regression Trees."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart'
+        url: https://CRAN.R-project.org/package=rpart
+
+    rpart.plot:
+        type: 'software'
+        author: Stephen Milborrow
+        year: 2019
+        title: "rpart.plot: Plot 'rpart' Models: An Enhanced Version of 'plot.rpart'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart.plot'
+        url: https://CRAN.R-project.org/package=rpart.plot
+
+    gtsummary:
+        type: 'software'
+        author: Daniel D. Sjoberg, Margie Hannum, Karissa Whiting and Emily C. Zabor
+        year: 2020
+        title: "gtsummary: Presentation-Ready Data Summary and Analytic Result Tables"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gtsummary'
+        url: https://CRAN.R-project.org/package=gtsummary
+
+    rmngb:
+        type: 'software'
+        author: Antoine Filipovic Pierucci
+        year: 2014
+        title: "rmngb: Miscellaneous Collection of Functions for Medical Data Analysis"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rmngb'
+        url: https://CRAN.R-project.org/package=rmngb
+
+    RVAideMemoire:
+        type: 'software'
+        author: Maxime Hervé
+        year: 2020
+        title: "RVAideMemoire: Testing and Plotting Procedures for Biostatistics"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RVAideMemoire'
+        url: https://CRAN.R-project.org/package=RVAideMemoire
+
+
+    chisq.posthoc.test:
+        type: 'software'
+        author: Daniel Ebbert
+        year: 2019
+        title: "chisq.posthoc.test: A Post Hoc Analysis for Pearson's Chi-Squared Test for Count Data"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=chisq.posthoc.test'
+        url: https://CRAN.R-project.org/package=chisq.posthoc.test
+
+
+
+    easyalluvial:
+        type: 'software'
+        author: Bjoern Koneswarakantha
+        year: 2019
+        title: "easyalluvial: Generate Alluvial Plots with a Single Line of Code."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=easyalluvial'
+        url: https://CRAN.R-project.org/package=easyalluvial
+
+
+    parcats:
+        type: 'software'
+        author: Bjoern Koneswarakantha
+        year: 2019
+        title: "parcats: Interactive Parallel Categories Diagrams for 'easyalluvial'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=parcats'
+        url: https://CRAN.R-project.org/package=parcats
+
+
+    plotROC:
+        type: 'software'
+        author: Michael C. Sachs
+        year: 2017
+        title: "plotROC: A Tool for Plotting ROC Curves.Journal of Statistical Software, Code Snippets, 79(2), 1-19. doi:10.18637/jss.v079.c02"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plotROC'
+        url: https://CRAN.R-project.org/package=plotROC
+
+
+    RGraphGallery:
+        type: 'website'
+        author: Holtz Yan
+        year: 2020
+        title: "The R Graph Gallery"
+        publisher: 'A website that displays hundreds of R charts https://www.r-graph-gallery.com'
+        url: https://github.com/holtzy/R-graph-gallery
+
+
+    hrbrthemes:
+        type: 'software'
+        author: Bob Rudis
+        year: 2020
+        title: "hrbrthemes: Additional Themes, Theme Components and Utilities for 'ggplot2'."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=hrbrthemes'
+        url: https://CRAN.R-project.org/package=hrbrthemes
+
+
+    retractcheck:
+        type: 'software'
+        author: Chris Hartgerink and Frederik Aust
+        year: 2019
+        title: "retractcheck: Retraction Scanner"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=retractcheck'
+        url: https://CRAN.R-project.org/package=retractcheck
+
+
+    RefManageR:
+        type: 'software'
+        author: McLean MW
+        year: 2017
+        title: 'RefManageR: Import and Manage BibTeX and BibLaTeX References in R. The Journal of Open Source Software.'
+        doi: 10.21105/joss.00338
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RefManageR'
+        url: https://CRAN.R-project.org/package=RefManageR
+
+
+    rcrossref:
+        type: 'software'
+        author: Scott Chamberlain and Hao Zhu and Najko Jahn and Carl Boettiger and Karthik Ram
+        year: 2020
+        title: "rcrossref: Client for Various 'CrossRef' 'APIs'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rcrossref'
+        url: https://CRAN.R-project.org/package=rcrossref
+
+
+    epiR:
+        type: 'software'
+        author: >-
+            Mark Stevenson with contributions from Telmo Nunes,
+            Cord Heuer, Jonathon Marshall, Javier Sanchez, Ron
+            Thornton, Jeno Reiczigel, Jim Robison-Cox, Paola
+            Sebastiani, Peter Solymos, Kazuki Yoshida, Geoff Jones,
+            Sarah Pirikahu, Simon Firestone, Ryan Kyle, Johann
+            Popp, Mathew Jay and Charles Reynard.
+        year: 2020
+        title: "epiR: Tools for the Analysis of Epidemiological Data."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=epiR'
+        url: https://CRAN.R-project.org/package=epiR
+
+
+    KMunicate:
+        type: 'software'
+        author: Alessandro Gasparini
+        year: 2020
+        title: "KMunicate: KMunicate-Style Kaplan–Meier Plots"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=KMunicate'
+        url: https://CRAN.R-project.org/package=KMunicate
+
+
+    KMunicate2:
+        type: 'article'
+        author: Morris TP, Jarvis CI, Cragg W, et al
+        title: "Proposals on Kaplan–Meier plots in medical research and a survey of stakeholder views: KMunicate"
+        year: 2019
+        publisher: 'BMJ Open 2019;9:e030215.'
+        doi: 10.1136/bmjopen-2019-030215
+        url: https://bmjopen.bmj.com/content/9/9/e030215
+
+
+    Fagan:
+        type: 'software'
+        author: Adam Chekroud
+        title: "nomogrammer: Fagan's nomograms with ggplot2"
+        publisher: 'GitHub'
+        year: 2020
+        url: https://github.com/achekroud/nomogrammer
+
+
+    Fagan2:
+        type: 'article'
+        author:
+        title: 'StATS: What is a Fagan nomogram?'
+        publisher: 'website'
+        year: 2020
+        url: http://www.pmean.com/definitions/fagan.htm
+
+
+    benford.analysis:
+        type: 'software'
+        author: Carlos Cinelli
+        year: 2020
+        title: "benford.analysis: Benford Analysis for Data Validation and Forensic Analytics"
+        publisher: '[R package]. Retrieved from http://github.com/carloscinelli/benford.analysis'
+        url: http://github.com/carloscinelli/benford.analysis
+
+
+    vtree:
+        type: 'software'
+        author: Nick Barrowman
+        year: 2020
+        title: "vtree: Display Information About Nested Subsets of a Data Frame"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=vtree'
+        url: https://CRAN.R-project.org/package=vtree
+
+
+    PathologyKappa:
+        type: 'article'
+        title: Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
+        year: 2020
+        author:
+        publisher: Annals of Diagnostic Pathology
+        volume: 47
+        url: https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040
+
+
+    DiagnosticTests:
+        type: 'article'
+        title: The Interpretation of SARS-CoV-2 Diagnostic Tests
+        year: 2020
+        author: Stites EC, Wilen CB.
+        publisher:  Med (N Y).
+        doi: 10.1016/j.medj.2020.08.001
+        url: https://www.cell.com/med/fulltext/S2666-6340(20)30016-7
+
+    dichotomizing:
+        type: 'article'
+        title: 'Dichotomizing continuous predictors in multiple regression: a bad idea.'
+        year: 2006
+        author: Royston, P., Altman, D.G. and Sauerbrei, W.
+        publisher:  Statist. Med.
+        volume: 25
+        pages: 127-141
+        doi: 10.1002/sim.2331
+        url: https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.2331
+
+    bbccookbook:
+        type: 'article'
+        title: 'BBC Visual and Data Journalism cookbook for R graphics'
+        year: 2019
+        author: BBC data team
+        url: https://bbc.github.io/rcookbook/
+
+    bbplot:
+        type: 'software'
+        author: Nassos Stylianou and Will william.dahlgreen@bbc.co.uk Dahlgreen and Robert robert.cuffe@bbc.co.uk Cuffe and Tom Calver and Ransome Mpini
+        year: 2020
+        title: "bbplot: MAKING GGPLOT GRAPHICS IN BBC NEWS STYLE"
+        publisher: '[R package]. Retrieved from https://github.com/bbc/bbplot'
+        url: https://github.com/bbc/bbplot
+
+    venn:
+        type: 'software'
+        author: Linlin Yan
+        year: 2020
+        title: "Venn Diagram by ggplot2, with really easy-to-use API"
+        publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
+        url: https://github.com/yanlinlin82/ggvenn
+
+    padjust:
+        type: 'website'
+        year: 2020
+        title: "p.adjust {stats} Adjust P-values for Multiple Comparisons"
+        publisher: '[R package]. Retrieved from https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html'
+        url: https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html
+
+...
