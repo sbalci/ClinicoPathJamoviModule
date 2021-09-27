@@ -1,0 +1,101 @@
+---
+name:  decision
+title: Medical Decision
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Function for Medical Decision Analysis. Sensitivity, specificity, positive predictive value,
+        negative predictive value.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+
+    - name: gold
+      title: Golden Standard
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+
+    - name: goldPositive
+      title: Positive Level
+      type: Level
+      variable: (gold)
+
+    - name: newtest
+      title: New Test
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: testPositive
+      title: Positive Level
+      type: Level
+      variable: (newtest)
+
+
+
+
+
+
+
+    - name: pp
+      title: Prior Probability (prevelance)
+      type: Bool
+      default: false
+
+    - name: pprob
+      title: Prior Probability (prevelance)
+      type: Number
+      default: 0.300
+      min: 0.001
+      max: 0.999
+      description:
+          ui: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+          R: >
+            Prior probability (disease prevelance in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+
+
+    - name: od
+      title: Original Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show frequency table. Default is 'false'.
+
+    - name: fnote
+      title: Footnotes
+      type: Bool
+      default: false
+
+    - name: ci
+      title: '95% CI'
+      type: Bool
+      default: false
+
+
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+
+
+...

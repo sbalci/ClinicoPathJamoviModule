@@ -1,0 +1,44 @@
+---
+name:  agepyramid
+title: Age Pyramid
+jrs:   '1.1'
+
+items:
+
+
+    - name:  pyramidTable
+      title: 'Population Data'
+      type: Table
+      rows: 0
+      columns:
+      # columns: &idcols
+        - name: Pop
+          title: "Population"
+          type: text
+        - name: Female
+          title: "Female"
+          type: number
+        - name: Male
+          title: "Male"
+          type: number
+      clearWith:
+          - age
+          - gender
+          - female
+
+
+
+    - name: plot
+      title: 'Age Pyramid'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - age
+          - gender
+          - female
+
+
+...

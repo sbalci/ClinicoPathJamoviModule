@@ -1,0 +1,35 @@
+---
+name:  oddsratio
+title: Odds Ratio Table and Plot
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Odds Ratio for Binary Outcomes'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Odds Ratio Table and Plot.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+
+    - name: outcome
+      title: Mortality or Recurrence
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+...

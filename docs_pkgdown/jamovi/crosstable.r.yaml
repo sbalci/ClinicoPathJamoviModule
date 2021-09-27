@@ -1,0 +1,65 @@
+---
+name:  crosstable
+title: '`Cross Table - ${group}`'
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+          - group
+          - cont
+          - pcat
+
+    # - name:  tablearsenal_output
+    #   title: tablearsenal_output
+    #   type:  Html
+    #   clearWith:
+    #       - vars
+    #       - group
+
+    - name:  tablestyle1
+      title: '`Cross Table - ${group}`'
+      type:  Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:arsenal)
+      refs: arsenal
+
+
+    - name:  tablestyle2
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - cont
+          - pcat
+      visible: (sty:finalfit)
+      refs: finalfit
+
+
+    - name: tablestyle3
+      title: '`Cross Table - ${group}`'
+      type:  Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:gtsummary)
+      refs: gtsummary
+
+
+    - name: tablestyle4
+      title: '`Cross Table - ${group}`'
+      type:  Html
+      clearWith:
+          - vars
+          - group
+      visible: (sty:nejm || sty:lancet || sty:hmisc)
+      refs: tangram
+
+...

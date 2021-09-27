@@ -1,0 +1,37 @@
+---
+name:  venn
+title: Venn Diagram
+jrs:   '1.1'
+
+clearWith:
+    - var1
+    - var2
+    - var3
+    - var4
+    - var1true
+    - var2true
+    - var3true
+    - var4true
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+    # - name: output1
+    #   title: To Do
+    #   type:  Preformatted
+
+    - title: Venn Diagram
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - venn
+
+...

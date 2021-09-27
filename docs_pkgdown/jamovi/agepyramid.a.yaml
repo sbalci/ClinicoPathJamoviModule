@@ -1,0 +1,33 @@
+---
+name:  agepyramid
+title: Age Pyramid
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: age
+      title: Age
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: gender
+      title: Gender
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: female
+      title: Select Female
+      type: Level
+      variable: (gender)
+
+...
