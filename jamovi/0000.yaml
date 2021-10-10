@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.0093
+version: 0.0.2.0097
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2021-08-01'
+date: '2021-10-03'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -254,6 +254,13 @@ analyses:
     menuSubgroup: Agreement
     menuTitle: ICC coefficients
     description: Function for Interclass Correlation Coefficient Calculation.
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Variable Type Based Graphs and Plots
+    menuTitle: Graphs and Plots
+    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath

@@ -426,5 +426,6 @@ refs:
     - finalfit
     - survival
     - survminer
+    - ClinicoPathJamoviModule
 
 ...

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0093
-Date: 2021-08-01
+Version: 0.0.2.0097
+Date: 2021-10-03
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -87,7 +87,11 @@ Imports:
     WRS2,
     metaBMA,
     PMCMRplus,
-    broom.mixed
+    broom.mixed,
+    performance,
+    broomExtra,
+    skimr,
+    groupedstats
 VignetteBuilder:
     knitr
 Remotes:
@@ -115,3 +119,6 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

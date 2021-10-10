@@ -32,5 +32,6 @@ refs:
     - rmngb
     - RVAideMemoire
     - chisq.posthoc.test
+    - ClinicoPathJamoviModule
 
 ...

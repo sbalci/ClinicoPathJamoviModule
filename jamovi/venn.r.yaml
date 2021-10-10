@@ -33,5 +33,6 @@ items:
 
 refs:
     - venn
+    - ClinicoPathJamoviModule
 
 ...

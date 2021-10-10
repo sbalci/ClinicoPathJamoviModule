@@ -293,5 +293,6 @@ refs:
     - survival
     - survminer
     - dichotomizing
+    - ClinicoPathJamoviModule
 
 ...

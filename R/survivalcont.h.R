@@ -296,7 +296,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "finalfit",
                     "survival",
                     "survminer",
-                    "dichotomizing"),
+                    "dichotomizing",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",

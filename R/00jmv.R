@@ -391,6 +391,13 @@
         `title`="benford.analysis: Benford Analysis for Data Validation and Forensic Analytics", 
         `publisher`="[R package]. Retrieved from http://github.com/carloscinelli/benford.analysis", 
         `url`="http://github.com/carloscinelli/benford.analysis"), 
+    `benford.nedir`=list(
+        `type`="website", 
+        `author`="\u00DCmit I\u015Flak", 
+        `year`=2021, 
+        `title`="Benford (ilk basamak) kanunu nedir?", 
+        `publisher`="sarkac.org", 
+        `url`="https://sarkac.org/2021/09/benford-ilk-basamak-kanunu-nedir/"), 
     `vtree`=list(
         `type`="software", 
         `author`="Nick Barrowman", 
