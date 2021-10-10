@@ -67,4 +67,8 @@ items:
           - rpart
           - rpart.plot
 
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

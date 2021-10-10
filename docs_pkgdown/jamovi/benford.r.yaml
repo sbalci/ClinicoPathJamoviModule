@@ -27,6 +27,9 @@ items:
       renderFun: .plot
       requiresData: true
 
-refs: benford.analysis
+refs:
+    - benford.analysis
+    - benford.nedir
+    - ClinicoPathJamoviModule
 
 ...
