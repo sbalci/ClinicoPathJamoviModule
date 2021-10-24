@@ -1,5 +1,3 @@
-Sys.setenv(gfortran="/opt/R/arm64/bin/gfortran/bin/gfortran")
-
 options(
     repos = "https://cran.microsoft.com/snapshot/2021-04-01"
 )
@@ -9,4 +7,30 @@ cat( "ClinicoPath jamovi module",
     "Serdar Balci MD Pathologist",
     "https://www.serdarbalci.com/ClinicoPathJamoviModule/",
     sep = "\n"
+)
+
+if (!requireNamespace("rlang", quietly = TRUE)) {
+    install.packages("rlang")
+}
+
+if (!requireNamespace("magrittr", quietly = TRUE)) {
+    install.packages("magrittr")
+}
+
+`%||%` <- rlang:::`%||%`
+
+`%|%` <- function(x, y) {
+    if (is.na(x)) y else x
+}
+
+`%notin%` <- Negate("%in%")
+`%!in%` <- Negate("%in%")
+
+
+library("magrittr")
+cat("Serdar Balci, MD, Pathologist",
+    "\n",
+    "https://www.serdarbalci.com/",
+    "\n",
+    "\n"
 )

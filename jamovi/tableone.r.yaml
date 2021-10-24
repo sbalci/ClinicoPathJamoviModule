@@ -47,4 +47,8 @@ items:
       visible: (sty:t4)
       refs: janitor
 
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

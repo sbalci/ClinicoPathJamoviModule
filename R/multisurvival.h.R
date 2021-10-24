@@ -291,7 +291,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Multivariable Survival Analysis",
                 refs=list(
-                    "multivariable"),
+                    "multivariable",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",

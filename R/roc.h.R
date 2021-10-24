@@ -90,7 +90,8 @@ rocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="ROC",
                 refs=list(
-                    "plotROC"))
+                    "plotROC",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

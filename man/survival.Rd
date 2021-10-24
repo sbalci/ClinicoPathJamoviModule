@@ -27,6 +27,7 @@ survival(
   padjustmethod = "holm",
   sc = FALSE,
   kmunicate = FALSE,
+  iwillsurvive = FALSE,
   ce = FALSE,
   ch = FALSE,
   endplot = 60,
@@ -83,6 +84,8 @@ survival(
 
 \item{kmunicate}{.}
 
+\item{iwillsurvive}{.}
+
 \item{ce}{.}
 
 \item{ch}{.}
@@ -105,6 +108,7 @@ survival(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -118,6 +122,9 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$iws1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$iws2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }

@@ -71,5 +71,6 @@ refs:
     - ggstatsplot
     - ggalluvial
     - easyalluvial
+    - ClinicoPathJamoviModule
 
 ...

@@ -91,6 +91,7 @@ items:
 
 refs:
     - plotROC
+    - ClinicoPathJamoviModule
 
 
 
