@@ -21,9 +21,9 @@ items:
           - multievent
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
 
 
     - name:  medianSummary
@@ -383,6 +383,52 @@ items:
       refs:
           - KMunicate
           - KMunicate2
+
+
+
+    - name:  iws1
+      title: '`iwillsurvive - ${explanatory}`'
+      type:  Preformatted
+      visible: (iwillsurvive)
+
+
+    - name:  iws2
+      title: '`iwillsurvive - ${explanatory}`'
+      type:  Html
+      visible: (iwillsurvive)
+
+
+    - name: plot7
+      title: '`iwillsurvive-Style Plot - ${explanatory}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot7
+      visible: (iwillsurvive)
+      requiresData: true
+      clearWith:
+          - kmunicate
+          - endplot
+          - byplot
+          - sas
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+      refs:
+          - iwillsurvive
+          - iwillsurvive
+
+
+
+
+
+
+
 
 
     - name: calculatedtime

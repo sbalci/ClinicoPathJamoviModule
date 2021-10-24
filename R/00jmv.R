@@ -474,4 +474,11 @@
         `title`="ClinicoPath jamovi Module doi:10.5281/zenodo.3997188", 
         `publisher`="[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule", 
         `doi`="10.17605/OSF.IO/9SZUD", 
-        `url`="https://www.serdarbalci.com/ClinicoPathJamoviModule/"))
+        `url`="https://www.serdarbalci.com/ClinicoPathJamoviModule/"), 
+    `iwillsurvive`=list(
+        `type`="software", 
+        `author`="Nathaniel Phillips", 
+        `year`=2021, 
+        `title`="iwillsurvive", 
+        `publisher`="[R package]. Retrieved from https://github.com/ndphillips/iwillsurvive", 
+        `url`="https://github.com/ndphillips/iwillsurvive"))

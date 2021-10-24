@@ -1,8 +1,6 @@
-# source("renv/activate.R")
-
-if (!requireNamespace("jmvtools", quietly = TRUE)) {
-    renv::install('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.r-project.org'))
-}
+# if (!requireNamespace("jmvtools", quietly = TRUE)) {
+#     renv::install('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+# }
 
 
 options(
