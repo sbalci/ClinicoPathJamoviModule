@@ -1,0 +1,20 @@
+---
+name:  reportcat
+title: Summary of Categorical Variables
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+
+    - name:  text
+      title: ''
+      type:  Preformatted
+
+refs: report
+
+...

@@ -1,0 +1,19 @@
+---
+name: summarydata
+title: Summary of Continuous Variables
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+    - name:  text
+      title: ''
+      type:  Preformatted
+
+
+# refs:
+
+...

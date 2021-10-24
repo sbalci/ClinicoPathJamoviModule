@@ -1,0 +1,225 @@
+---
+name:  multisurvival
+title: Multivariate Survival Analysis
+jrs:   '1.1'
+
+
+
+clearWith:
+    - outcome
+    - outcomeLevel
+    - overalltime
+    - explanatory
+    - contexpl
+    - fudate
+    - dxdate
+    - tint
+    - multievent
+    - adjexplanatory
+
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+
+
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
+
+
+    - name:  text
+      title: Multivariate Survival
+      type:  Html
+      refs: finalfit
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+    - name:  text2
+      title: ''
+      type:  Html
+      refs: finalfit
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+
+    - name: plot
+      title: Hazards Regression Plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      visible: (hr && sty:t1)
+      refs: finalfit
+      clearWith:
+          - hr
+          - sty
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+    # - name: plot2
+    #   title: Hazards Regression Plot
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot2
+    #   requiresData: true
+    #   clearWith:
+    #       - explanatory
+    #       - outcome
+    #       - overalltime
+    #   visible: (sty:t2)
+    #   refs: ggstatsplot
+      # clearWith:
+      #     - hr
+      #     - sty
+
+
+    - name: plot3
+      title: Hazards Regression Plot
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot3
+      requiresData: true
+      visible: (hr && sty:t3)
+      refs: survminer
+      clearWith:
+          - hr
+          - sty
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+
+    - name: plotKM
+      title: Kaplan-Meier
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plotKM
+      requiresData: true
+      visible: (km)
+      refs: finalfit
+      clearWith:
+          - km
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+    - name: plot7
+      title: '`Adjusted Survival Curve - ${adjexplanatory}`'
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot7
+      requiresData: true
+      visible: (ac)
+      refs: survminer
+      clearWith:
+          - ac
+          - adjexplanatory
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - adjexplanatory
+
+
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time in Multivariate Survival Function - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome in Multivariate Survival Function - from ${ outcome } for analysis { analysistype }`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      clearWith:
+          - outcome
+          - analysistype
+          - multievent
+
+
+
+
+    # - name: model
+    #   type: Property
+
+...
