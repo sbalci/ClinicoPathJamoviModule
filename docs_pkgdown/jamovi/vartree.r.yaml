@@ -1,0 +1,30 @@
+---
+name:  vartree
+title: Variable Tree
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+
+    - name:  text1
+      title: Variable Tree
+      type:  Html
+
+    - name:  text2
+      title: Pattern Table
+      type:  Preformatted
+      visible: (ptable)
+
+    # - name:  text3
+    #   title: Venn Table
+    #   type:  Preformatted
+    #   visible: (venntable)
+
+
+refs:
+    - vtree
+
+...

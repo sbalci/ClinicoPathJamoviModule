@@ -1,0 +1,76 @@
+Type: Package
+Package: ClinicoPath
+Title: Analysis for Clinicopathological Research
+Version: 0.0.2.0077
+Date: 2021-03-20
+Authors@R: 
+    person(given = "Serdar",
+           family = "Balci",
+           role = c("aut", "cre"),
+           email = "drserdarbalci@gmail.com",
+           comment = c(ORCID = "0000-0002-7852-3851"))
+Maintainer: Serdar Balci <drserdarbalci@gmail.com>
+Description: Analysis for Clinicopathological Research
+    ClinicoPath help researchers to generate natural language summaries of
+    their dataset, generate cross tables with statistical tests, and
+    survival analysis with survival tables, survival plots, and natural
+    language summaries.
+License: GPL-3
+URL: https://github.com/sbalci/ClinicoPathJamoviModule/,
+    https://github.com/sbalci/ClinicoPathDescriptives/,
+    https://github.com/sbalci/jsurvival,
+    https://github.com/sbalci/meddecide,
+    https://github.com/sbalci/jjstatsplot,
+    https://sbalci.github.io/ClinicoPathJamoviModule/
+BugReports: 
+    https://github.com/sbalci/ClinicoPathJamoviModule/issues/
+Depends:
+    R (>= 4.0.0)
+Imports: 
+    dplyr,
+    magrittr,
+    ggplot2,
+    easyalluvial,
+    glue,
+    janitor,
+    jmvcore,
+    purrr,
+    R6,
+    scales,
+    tableone,
+    tibble,
+    tidyr,
+    gtsummary,
+    kableExtra,
+    finalfit,
+    vtree,
+    DiagrammeRsvg,
+    survival,
+    survminer,
+    finalfit,
+    janitor,
+    lubridate,
+    checkmate,
+    pammtools,
+    irr,
+    utils,
+    forcats,
+    e1071,
+    epiR,
+    explore,
+    rpart,
+    rcrossref,
+    ggstatsplot
+Remotes:
+    spgarbet/tangram,
+    mayoverse/arsenal,
+    carloscinelli/benford.analysis,
+    yanlinlin82/ggvenn,
+    ellessenne/KMunicate-package,
+    ndphillips/FFTrees
+VignetteBuilder:
+    knitr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1

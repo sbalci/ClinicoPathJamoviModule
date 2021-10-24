@@ -63,7 +63,33 @@ Imports:
     tibble,
     tidyr,
     vtree,
-    caret
+    caret,
+        ggalluvial,
+    ggplot2,
+    easyalluvial,
+    jmvcore,
+    R6,
+    correlation,
+    cowplot,
+    ggcorrplot,
+    ggExtra,
+    ggrepel,
+    ggsignif,
+    insight,
+    paletteer,
+    parameters,
+    dunn.test,
+    zeallot,
+    ez,
+    metafor,
+    metaplus,
+    rcompanion,
+    WRS2,
+    metaBMA,
+    PMCMRplus,
+    broom.mixed,
+    performance,
+    groupedstats
 VignetteBuilder:
     knitr
 Remotes:
@@ -83,8 +109,14 @@ Remotes:
     cran/WRS2,
     IndrajeetPatil/statsExpressions,
     IndrajeetPatil/pairwiseComparisons,
-    IndrajeetPatil/ggstatsplot
+    IndrajeetPatil/ggstatsplot,
+    IndrajeetPatil/ipmisc@9528292b59ff773bc03d009b4d7a143434862b60,
+    IndrajeetPatil/tidyBF@02ec0b87d7ea0960868728e6f1cf84315e5c60a8,
+    IndrajeetPatil/broomExtra@4f3b5201ee48ec1528d67ecbf83b259ad7a7ea34,
+    IndrajeetPatil/pairwiseComparisons@54f5cbbd51afd7d6d897cfe66e4fad8425613bbf,
+    IndrajeetPatil/statsExpressions@bd154d98eeffb6111aebf4cb528428f331008ce8,
+    IndrajeetPatil/ggstatsplot@77bb08fbcd6c1e26a7e60ce2de825413937cb62e
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

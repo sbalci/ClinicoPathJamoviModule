@@ -1,0 +1,17 @@
+### Workflow for {{i}}
+
+#### Workflow for `r '{{value.to.match}}'`.
+
+```{r echo=TRUE}
+value.to.match <- '{{value.to.match}}'
+
+# value.to.match <- 'tableone'
+
+myfun <- paste0('ClinicoPath::', value.to.match)
+
+
+flow::flow_view(x = eval(parse(text = myfun))
+                )
+
+```
+

@@ -1,0 +1,612 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# ClinicoPath
+
+------------------------------------------------------------------------
+
+## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
+
+A [jamovi](https://www.jamovi.org) Module that contains main analysis
+used in **ClinicoPathological** research. ClinicoPath help researchers
+to generate natural language summaries of their dataset, generate cross
+tables with statistical tests, and survival analysis with survival
+tables, survival curves, and natural language summaries.
+
+🔬👀📑🗃📊🏨🗄📇📖⚗📝🎶📈📉📃🖍 🔬🔬🏋🚴🚙👨💻 📸📺🎛🔭🔬💊🔐🍫🌸
+
+<!-- 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩 -->
+
+------------------------------------------------------------------------
+
+[![Download
+ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
+<a href="https://www.buymeacoffee.com/bS0teIs" target="_blank">
+
+<https://zenodo.org/account/settings/github/repository/sbalci/ClinicoPathJamoviModule>
+
+DOI 10.17605/OSF.IO/9SZUD
+
+<https://osf.io/9szud/>
+
+------------------------------------------------------------------------
+
+## Installation in [jamovi](https://www.jamovi.org)
+
+You can install this module after installing jamovi version &gt;= 1.2.19
+from here: <https://www.jamovi.org/download.html>
+
+Then you can install the submodules directly inside the jamovi, using
+library.
+
+Submodules are: - ClinicoPathDescriptives - jsurvival - meddecide -
+jjstatsplot
+
+<img src="man/figures/jamovi-library.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-0.0.2-released.gif" align="center" width = 75% />
+
+## Installation via sideload [jamovi](https://www.jamovi.org)
+
+### Step 1:
+
+**Download and install [jamovi](https://www.jamovi.org).**
+
+### Step 2:
+
+**Download the relevant `jmo` file for your operating system from**
+
+#### a: For development version
+
+-   [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
+-   [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
+
+#### b: For smaller modules
+
+##### ClinicoPathDescriptives
+
+ClinicoPathDescriptives functions are separately added to jamovi library
+under Exploration menu
+
+ClinicoPathDescriptives module can be downloaded inside jamovi (click
+Modules and jamovi library)
+
+<https://github.com/sbalci/ClinicoPathDescriptives/>
+
+<https://github.com/sbalci/ClinicoPathDescriptives/releases/>
+
+<https://library.jamovi.org/win64/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo>
+
+<https://library.jamovi.org/macos/R4.0.2/ClinicoPathDescriptives-0.0.2.0039.jmo>
+
+``` r
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathDescriptives.git
+      commit: 190b914807518bf0e9139bc282eabcf3883a9e72
+      platforms:
+        - win64
+        - macos
+
+##### ClinicoPathLinuxDescriptives
+
+ClinicoPathDescriptives functions for Linux
+
+<https://github.com/sbalci/ClinicoPathLinuxDescriptives/>
+
+<https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/>
+
+<https://library.jamovi.org/linux/R4.0.2/ClinicoPathDescriptives-0.0.2.0041.jmo>
+
+``` r
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
+    - name: ClinicoPathDescriptives
+      url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
+      commit: cc63b37bd0a639194baf5a35db72783e05336027
+      platforms:
+        - linux
+        
+
+##### JJStatsPlot
+
+GGStatsPlot functions are separately added to jamovi library under
+jjstatsplot menu
+
+JJStastPlot module can be downloaded inside jamovi (click Modules and
+jamovi library)
+
+<https://library.jamovi.org/win64/R4.0.2/jjstatsplot-0.0.2.0038.jmo>
+
+<!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
+
+<https://library.jamovi.org/macos/R4.0.2/jjstatsplot-0.0.2.0038.jmo>
+
+<https://github.com/sbalci/jjstatsplot>
+
+<https://github.com/sbalci/jjstatsplot/releases/>
+
+``` r
+remotes::install_github("sbalci/jjstatsplot")
+```
+
+    - name: jjstatsplot
+      url: https://github.com/sbalci/jjstatsplot.git
+      commit: c49c23de8b9ff8a1569da4ee1b6f4fcc8cf61d1f
+      platforms:
+        - win64
+        - macos
+
+##### jsurvival
+
+<https://github.com/sbalci/jsurvival>
+
+<https://github.com/sbalci/jsurvival/releases/>
+
+<https://library.jamovi.org/macos/R4.0.2/jsurvival-0.0.2.0044.jmo>
+
+<https://library.jamovi.org/win64/R4.0.2/jsurvival-0.0.2.0044.jmo>
+
+<https://library.jamovi.org/linux/R4.0.2/jsurvival-0.0.2.0044.jmo>
+
+``` r
+remotes::install_github("sbalci/jsurvival")
+```
+
+    - name: jsurvival
+      url: https://github.com/sbalci/jsurvival.git
+      commit: 9c57e504ddc0ceb42681f92b63ec0c0adf294436
+      platforms:
+        - win64
+        - macos
+        - linux
+
+##### meddecide
+
+<https://github.com/sbalci/meddecide/>
+
+<https://github.com/sbalci/meddecide/releases/>
+
+<https://library.jamovi.org/win64/R4.0.2/meddecide-0.0.1.0005.jmo>
+
+<https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo>
+
+<https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo>
+
+``` r
+remotes::install_github("sbalci/meddecide")
+```
+
+    - name: meddecide
+      url: https://github.com/sbalci/meddecide.git
+      commit: 38aaf74a807241def57c23b99cc89a31a1ed5123
+
+##### jbbplot
+
+<https://github.com/sbalci/jbbplot/>
+
+<https://github.com/sbalci/jbbplot/releases/>
+
+``` r
+remotes::install_github("sbalci/jbbplot")
+```
+
+<!-- #### c: For stable version    -->
+<!-- - windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo -->
+<!-- - macOS: https://library.jamovi.org/macos/R3.6.3/ClinicoPath-0.0.2.jmo -->
+<!-- - linux: https://library.jamovi.org/linux/R3.6.3/ClinicoPath-0.0.2.jmo -->
+
+**Step 3: And install using side-load as shown below:**
+
+<img src="man/figures/jamovi-sideload.gif" align="center" width = 75% />
+
+------------------------------------------------------------------------
+
+## Screenshots of Module
+
+------------------------------------------------------------------------
+
+### Example Datasets
+
+**Using Example Datasets**
+
+<img src="man/figures/jamovi-ClinicoPath-example-datasets.gif" align="center" width = 75% />
+
+------------------------------------------------------------------------
+
+<https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.csv>
+
+------------------------------------------------------------------------
+
+<https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.omv>
+
+<https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1vST3kwze9bNUSEr0eijs_81F6hXBrDZ-2Zt97ez-fbpXMELKGFHJNuQHSP2Oxars2C6F3n50KzT1-zD/pub?output=csv>
+
+### Exploration
+
+#### ClinicoPath Descriptives
+
+##### TableOne
+
+<img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-tableone.gif" align="center" width = 75% />
+
+##### Summary of Continuous Variables
+
+<img src="man/figures/jamovi-write-summary-continuous-variables.gif" align="center" width = 75% />
+
+##### Summary of Categorical Variables
+
+<img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
+
+##### Benford Analysis
+
+<img src="man/figures/jamovi-ClinicoPath-BenfordAnalysis.gif" align="center" width = 75% />
+
+#### ClinicoPath Descriptive Plots
+
+##### Variable Tree
+
+<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />
+
+##### Alluvial Diagrams
+
+<img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
+
+##### Age Pyramid
+
+<img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
+
+------------------------------------------------------------------------
+
+#### ClinicoPath Comparisons
+
+##### Cross Tables
+
+<img src="man/figures/jamovi-and-R-tangram.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-tangram-crosstable.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-CrossTable-FinalFit.png" align="center" width = 75% />
+
+##### Pairwise Chi-Square Tests
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+### JJStatsPlot
+
+#### Graphs and Plots
+
+<img src="man/figures/jamovi-ClinicoPath-ggstatsplot-alluvial-plots.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-R-ggstatsplot.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-ggstatsplot.gif" align="center" width = 75% />
+
+------------------------------------------------------------------------
+
+### Survival
+
+#### jsurvival
+
+##### Univariate Survival Analysis
+
+<img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-survival-analysis-finalfit-2.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-KMunicate-survival.png" align="center" width = 75% />
+
+##### Multivariate Survival Analysis
+
+<img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
+
+<img src="man/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width = 75% />
+
+##### Univariate Survival Analysis for Continuous Explanatory Variable
+
+##### Odds Ratio Table and Plot
+
+<img src="man/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width = 75% />
+
+##### Competing Survival
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+### meddecide
+
+#### Agreement
+
+##### Interrater Reliability
+
+<img src="man/figures/jamovi-clinicopath-kappa-irr.png" align="center" width = 75% />
+
+##### ICC coefficients
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+#### Decision
+
+##### Medical Decision
+
+<img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
+
+##### Decision Calculator
+
+<img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
+
+<img src="man/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width = 75% />
+
+##### Decision Tree
+
+###### explore
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+<img src="man/figures/jamovi-clinicopath-explore-decision-tree.png" align="center" width = 75% />
+
+###### FFTrees
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+<img src="man/figures/jamovi-clinicopath-FFTrees-decision-tree.png" align="center" width = 75% />
+
+###### rpart
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+<img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
+
+##### ROC
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+### Correlation
+
+#### Correlation
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+## Installation in R
+
+<!-- You can install the released version of ClinicoPath from [CRAN](https://CRAN.R-project.org) with: -->
+<!-- ``` r -->
+<!-- install.packages("ClinicoPath") -->
+<!-- ``` -->
+
+You can install the development version from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("sbalci/ClinicoPathJamoviModule")
+```
+
+## Current Package Versions:
+
+**R:** 4.0.2
+
+**MRAN:** <https://cran.microsoft.com/snapshot/2020-08-24>
+
+## Acknowledgement
+
+Made possible via the codes, help, and guidence of
+
+-   [jamovi](https://www.jamovi.org/) developer [Jonathon
+    Love](https://github.com/jonathon-love),
+-   [finalfit](https://finalfit.org/) developer [Ewen
+    Harrison](https://github.com/ewenharrison),
+-   [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
+    developer [Indrajeet Patil](https://github.com/IndrajeetPatil),
+-   [tangram](https://github.com/spgarbet/tangram) developer [Shawn
+    Garbett](https://github.com/spgarbet),
+-   [easystats](https://easystats.github.io/blog/) developers ,
+-   [report](https://easystats.github.io/report/) ,
+-   [tableone](https://github.com/kaz-yos/tableone),
+-   [survival](https://github.com/therneau/survival),
+-   [survminer](https://github.com/kassambara/survminer),
+-   [vtree](https://github.com/nbarrowman/vtree) developer [Nick
+    Barrowman](https://github.com/nbarrowman),
+-   [easyalluvial](https://github.com/erblast/easyalluvial), developer
+    [Björn Oettinghaus](https://github.com/erblast), and
+-   [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
+
+See <https://github.com/ClinicoPath> for forked packages.
+
+------------------------------------------------------------------------
+
+<a class="twitter-follow-button" data-show-count="false" href="https://twitter.com/serdarbalci">Follow
+@serdarbalci</a>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bS0teIs"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span
+style="margin-left:15px;font-size:28px !important;">Buy me a
+coffee</span></a>
+
+<https://paypal.me/serdarbalci>
+
+------------------------------------------------------------------------
+
+<img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>  
+![Twitter
+Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)
+![GitHub
+followers](https://img.shields.io/github/followers/sbalci?style=social)
+[![Say
+Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
+
+## Development Status
+
+<!-- badges: start -->
+
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+[![Gitpod
+Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
+[![Download
+ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovimodule.svg)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)  
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/)
+[![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/joethorley/stability-badges#unstable)
+[![GitHub
+issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![R CMD Check via
+{tic}](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R%20CMD%20Check%20via%20%7Btic%7D/badge.svg)
+![Render
+README](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/Render%20README/badge.svg)
+![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg)
+[![Codacy
+Badge](https://app.codacy.com/project/badge/Grade/cdf2bede535c439d826b6dffdff40764)](https://www.codacy.com/manual/drserdarbalci/ClinicoPathJamoviModule?utm_source=github.com&utm_medium=referral&utm_content=sbalci/ClinicoPathJamoviModule&utm_campaign=Badge_Grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule/badge)](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule)  
+[![Coverage
+Status](https://coveralls.io/repos/github/sbalci/ClinicoPathJamoviModule/badge.svg?branch=master)](https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master)
+[![Build
+Status](https://travis-ci.com/sbalci/ClinicoPathJamoviModule.svg?branch=master)](https://travis-ci.com/sbalci/ClinicoPathJamoviModule)
+[![Build
+status](https://ci.appveyor.com/api/projects/status/ftdd497g9qamm4ov?svg=true)](https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule)
+[![codecov](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg)](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule)
+[![CircleCI](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule.svg?style=svg)](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule)
+[![GuardRails
+badge](https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=9402aef8ace3415bad8f423a384b631c7319e5faffc96e2e299b603ace62d68e&provider=github)](https://dashboard.guardrails.io/gh/sbalci/33943)
+[![Maintainability](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/maintainability)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/maintainability)
+[![Test
+Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage)
+![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
+[![GitHub last
+commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--11--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+![GitHub Release
+Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
+![GitHub commit
+activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+[![GitHub code size in
+bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
+[![minimal R
+version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
+[![Libraries.io dependency status for GitHub
+repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.svg)](https://libraries.io/github/sbalci/clinicopathjamovimodule)
+[![Requirements
+Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
+[![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)
+![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule?style=social)
+[![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/stargazers)
+[![Github
+Stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&label=Github)](https://github.com/sbalci/clinicopathjamovimodule)
+![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)
+[![contributions
+welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![GitHub
+watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+<!-- badges: end -->
+
+**Code**  
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+[![Gitpod
+Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
+[![Download
+ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovimodule.svg)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
+
+**Status**  
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)  
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/)
+[![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/joethorley/stability-badges#unstable)
+[![GitHub
+issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![GitHub
+issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule)
+
+**Check, CI**  
+![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg)
+
+[![Codacy
+Badge](https://app.codacy.com/project/badge/Grade/cdf2bede535c439d826b6dffdff40764)](https://www.codacy.com/manual/drserdarbalci/ClinicoPathJamoviModule?utm_source=github.com&utm_medium=referral&utm_content=sbalci/ClinicoPathJamoviModule&utm_campaign=Badge_Grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule/badge)](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule)
+[![Coverage
+Status](https://coveralls.io/repos/github/sbalci/ClinicoPathJamoviModule/badge.svg?branch=master)](https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master)
+[![Build
+Status](https://travis-ci.com/sbalci/ClinicoPathJamoviModule.svg?branch=master)](https://travis-ci.com/sbalci/ClinicoPathJamoviModule)
+[![Build
+status](https://ci.appveyor.com/api/projects/status/ftdd497g9qamm4ov?svg=true)](https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule)
+[![codecov](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg)](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule)
+[![CircleCI](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule.svg?style=svg)](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule)
+[![GuardRails
+badge](https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=9402aef8ace3415bad8f423a384b631c7319e5faffc96e2e299b603ace62d68e&provider=github)](https://dashboard.guardrails.io/gh/sbalci/33943)
+[![Maintainability](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/maintainability)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/maintainability)
+[![Test
+Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage)
+<!-- [![DepShield Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/depshield.svg)](https://depshield.github.io) -->
+
+**Recency, Updates**  
+![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
+<!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
+[![GitHub last
+commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--11--09-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+![GitHub Release
+Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
+![GitHub commit
+activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
+
+**Webpage, Links, Size, Download**  
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+[![GitHub code size in
+bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
+
+**Dependencies**  
+[![minimal R
+version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
+[![Libraries.io dependency status for GitHub
+repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.svg)](https://libraries.io/github/sbalci/clinicopathjamovimodule)
+[![Requirements
+Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
+<!-- [![DepShield Badge](https://depshield.sonatype.org/badges/sbalci/clinicopathjamovimodule/depshield.svg)](https://depshield.github.io) -->
+
+**Interaction, Shares**  
+[![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)
+![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule?style=social)
+[![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/stargazers)
+[![Github
+Stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&label=Github)](https://github.com/sbalci/clinicopathjamovimodule)
+![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20📦.%20@serdarbalci&url=https%3A%2F%2Fsbalci.github.io%2ClinicoPathJamoviModule%2)
+[![contributions
+welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![GitHub
+watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+
+## Videos
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>

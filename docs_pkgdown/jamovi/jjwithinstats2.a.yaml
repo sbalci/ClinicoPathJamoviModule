@@ -1,0 +1,47 @@
+---
+name:  jjwithinstats2
+title: Violin Plots to Compare Within Groups for Wide Data Format
+menuGroup: JJStatsPlot
+menuSubgroup: Categorical vs Continuous
+menuSubtitle: Paired Measurements
+version: '1.0.0'
+jas: '1.2'
+
+
+
+description:
+    # main: |
+    #     'Wrapper Function for ggstatsplot::ggwithinstats and
+    #     ggstatsplot::grouped_ggwithinstats to generate Violin Plots.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+
+    - name: pairs
+      title: Paired Variables
+      type: Pair
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+    - name: originaltheme
+      title: Add GGStatsPlot Layer
+      type: Bool
+      default: false
+
+...
+

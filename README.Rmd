@@ -151,11 +151,11 @@ GGStatsPlot functions are separately added to jamovi library under jjstatsplot m
 
 JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)  
 
-https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.0075.jmo
+<!-- https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.0075.jmo -->
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.0075.jmo
+<!-- https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.0075.jmo -->
 
 https://github.com/sbalci/jjstatsplot  
 
@@ -171,7 +171,7 @@ remotes::install_github("sbalci/jjstatsplot")
 
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
-      commit: a9588a5f23ccc466c2034a8f209dbbc9c6db28bf
+      commit: f11320070235f34c4205b3002d21294266f59cf9
       platforms:
         - win64
         - macos
