@@ -86,4 +86,30 @@ pdfs
 
 ^module-updates.R$
 
+^module-updates-jjstatsplot.R$
+
 ^^docs$$
+
+docs_docsify
+docs_docute
+docs_pkgdown
+
+
+_pkgdown.yml
+build
+ClinicoPath.Rproj
+codecov.yml
+codemeta.json
+docs
+docs_docsify
+docs_docute
+docs_pkgdown
+
+module-updates-jjstatsplot.R
+module-updates.R
+NEWS.md
+others
+pdfs
+tododata
+vignettes
+
