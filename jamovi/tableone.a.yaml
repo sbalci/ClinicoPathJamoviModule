@@ -54,7 +54,7 @@ options:
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
-      default: true
+      default: false
 
 
     # - name: alllevels

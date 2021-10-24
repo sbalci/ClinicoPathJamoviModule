@@ -52,7 +52,8 @@ pairchi2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "rmngb",
                     "RVAideMemoire",
-                    "chisq.posthoc.test"))
+                    "chisq.posthoc.test",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="conftable",

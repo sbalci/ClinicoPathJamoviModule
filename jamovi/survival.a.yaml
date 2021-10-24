@@ -218,6 +218,12 @@ options:
       type: Bool
       default: false
 
+    - name: iwillsurvive
+      title: iwillsurvive-Style Plot
+      type: Bool
+      default: false
+
+
 
     - name: ce
       title: Cumulative Events

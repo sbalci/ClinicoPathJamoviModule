@@ -113,7 +113,8 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Venn Diagram",
                 refs=list(
-                    "venn"),
+                    "venn",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "var1",
                     "var2",

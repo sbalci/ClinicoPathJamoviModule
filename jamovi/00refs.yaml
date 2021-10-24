@@ -472,6 +472,15 @@ refs:
         url: http://github.com/carloscinelli/benford.analysis
 
 
+    benford.nedir:
+        type: 'website'
+        author: "Ümit Işlak"
+        year: 2021
+        title: "Benford (ilk basamak) kanunu nedir?"
+        publisher: 'sarkac.org'
+        url: https://sarkac.org/2021/09/benford-ilk-basamak-kanunu-nedir/
+
+
     vtree:
         type: 'software'
         author: Nick Barrowman
@@ -561,5 +570,16 @@ refs:
         publisher: '[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule'
         doi: 10.17605/OSF.IO/9SZUD
         url: https://www.serdarbalci.com/ClinicoPathJamoviModule/
+
+
+    iwillsurvive:
+        type: 'software'
+        author: Nathaniel Phillips
+        year: 2021
+        title: "iwillsurvive"
+        publisher: '[R package]. Retrieved from https://github.com/ndphillips/iwillsurvive'
+        url: https://github.com/ndphillips/iwillsurvive
+
+
 
 ...

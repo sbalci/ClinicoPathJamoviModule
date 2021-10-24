@@ -8,7 +8,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sty = "t1",
-            excl = TRUE, ...) {
+            excl = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -31,7 +31,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sty)
@@ -62,7 +62,9 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Table One")
+                title="Table One",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -157,7 +159,7 @@ tableone <- function(
     data,
     vars,
     sty = "t1",
-    excl = TRUE) {
+    excl = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone requires jmvcore to be installed (restart may be required)")

@@ -106,7 +106,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggstatsplot",
                     "ggalluvial",
-                    "easyalluvial"))
+                    "easyalluvial",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
