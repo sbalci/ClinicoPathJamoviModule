@@ -86,9 +86,8 @@ pdfs
 
 ^module-updates.R$
 
-^module-updates-jjstatsplot.R$
-
 ^^docs$$
+^module-updates-jjstatsplot.R$
 
 docs_docsify
 docs_docute
@@ -112,4 +111,3 @@ others
 pdfs
 tododata
 vignettes
-

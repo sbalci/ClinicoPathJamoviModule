@@ -1,11 +1,13 @@
-# if (!requireNamespace("jmvtools", quietly = TRUE)) {
-#     renv::install('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.r-project.org'))
-# }
-
-
 options(
     repos = "https://cran.microsoft.com/snapshot/2021-04-01"
-        )
+)
+# source("renv/activate.R")
+
+cat( "ClinicoPath jamovi module",
+    "Serdar Balci MD Pathologist",
+    "https://www.serdarbalci.com/ClinicoPathJamoviModule/",
+    sep = "\n"
+)
 
 if (!requireNamespace("rlang", quietly = TRUE)) {
     install.packages("rlang")
@@ -32,4 +34,3 @@ cat("Serdar Balci, MD, Pathologist",
     "\n",
     "\n"
 )
-
