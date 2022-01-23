@@ -27,9 +27,13 @@ items:
       renderFun: .plot
       requiresData: true
 
+<<<<<<< HEAD
+refs: benford.analysis
+=======
 refs:
     - benford.analysis
     - benford.nedir
     - ClinicoPathJamoviModule
+>>>>>>> 13fff15670065c01c41370210160b9b08fa662eb
 
 ...
