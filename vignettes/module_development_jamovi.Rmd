@@ -4249,4 +4249,15 @@ attachment::att_to_desc_from_is(path.d = "DESCRIPTION",
                                 add_remotes = TRUE)
                                 
                                 
-                                
+```
+so you’ve got a few options … but it’s worth pointing out that most of the time, the name of the jamovi function/analysis doesn’t really matter. unless you’re wanting people to be able to use the same functions from R, then no-one will ever use them/see them. (the only thing that matters is that the name of the analysis doesn’t change, so jamovi can match the analysis with analyses in old .omv files)
+so assuming you want people to be able to use these same functions from R, and you want to rename, say, the flexplota function, you can use rename in the .a.yaml file. we use it for the anova:
+https://github.com/jamovi/jmv/blob/master/jamovi/anova.a.yaml#L2-L3
+this only renames the function used to call the analysis from R, and preserves the underlying ‘analysis name’ that jamovi depends on. in the case of our ANOVA, we decided the lowercase name conflicted with too many anova() functions in R. the only change this makes to your .h.R file is here:
+https://github.com/jamovi/jmv/blob/master/R/anova.h.R#L527
+another approach, if you don’t want to provide the analysis R functions at all, you can see export: false in the .a.yaml file.
+https://github.com/jamovi/jmv/blob/master/jamovi/empty.a.yaml#L7
+in the case of anova, this would completely remove the ANOVA() function from the .h.R file (jamovi doesn’t actually use that top level function itself, rather it constructs the anovaClass, anovaOptions, etc. objects directly) … some times people do this where they want to implement their own top level function, rather than relying on the automatically generated one. or sometimes they just don’t want people to use that function from R, and want them to use a different approach in R. (one usually wants to override the syntax generated for ‘syntax mode’ if taking this approach … i can walk you through that if that’s where you want to head). (edited) 
+```
+
+
