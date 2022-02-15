@@ -42,6 +42,14 @@ install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-
 
 - locate jamovi bin folder via this: `jmvtools::check("C://Program Files//jamovi//bin")` I recommend changing folder name from default `jamovi 1.2` to `jamovi`
 
+- `C:\Program Files\jamovi 2.3.0.0\bin\jamovi.exe`
+
+```r
+jmvtools::check(home = 'C:\\Program Files\\jamovi 2.3.0.0\\bin')
+
+options(jamovi_home = 'C:\\Program Files\\jamovi 2.3.0.0\\bin')
+```
+
 - Fork and Clone this repo: https://github.com/sbalci/ClinicoPath
 
 - inside this repo folder in R `jmvtools::install()`
