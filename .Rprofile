@@ -1,13 +1,13 @@
 options(
-    repos = "https://cran.microsoft.com/snapshot/2021-04-01"
+    repos = "https://cran.microsoft.com/snapshot/2022-01-01"
 )
 # source("renv/activate.R")
 
-cat( "ClinicoPath jamovi module",
-    "Serdar Balci MD Pathologist",
-    "https://www.serdarbalci.com/ClinicoPathJamoviModule/",
-    sep = "\n"
-)
+
+# if (!requireNamespace("jmvtools", quietly = TRUE)) {
+#     renv::install('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+# }
+
 
 if (!requireNamespace("rlang", quietly = TRUE)) {
     install.packages("rlang")
@@ -28,9 +28,9 @@ if (!requireNamespace("magrittr", quietly = TRUE)) {
 
 
 library("magrittr")
-cat("Serdar Balci, MD, Pathologist",
-    "\n",
-    "https://www.serdarbalci.com/",
-    "\n",
-    "\n"
+
+cat( "ClinicoPath jamovi module",
+     "Serdar Balci MD Pathologist",
+     "https://www.serdarbalci.com/ClinicoPathJamoviModule/",
+     sep = "\n"
 )
