@@ -4272,4 +4272,5 @@ in the case of anova, this would completely remove the ANOVA() function from the
 flatpak run --command=R --devel org.jamovi.jamovi
 if(!require(jmvtools)) install.packages('jmvtools', repos='https://repo.jamovi.org')
 jmvtools::install(home='/app/bin/')
+flatpak install flathub org.freedesktop.Sdk.Extension.gfortran-62
 ```
