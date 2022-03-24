@@ -4268,4 +4268,8 @@ https://github.com/jamovi/jmv/blob/master/jamovi/empty.a.yaml#L7
 in the case of anova, this would completely remove the ANOVA() function from the .h.R file (jamovi doesn’t actually use that top level function itself, rather it constructs the anovaClass, anovaOptions, etc. objects directly) … some times people do this where they want to implement their own top level function, rather than relying on the automatically generated one. or sometimes they just don’t want people to use that function from R, and want them to use a different approach in R. (one usually wants to override the syntax generated for ‘syntax mode’ if taking this approach … i can walk you through that if that’s where you want to head). (edited) 
 ```
 
-
+```
+flatpak run --command=R --devel org.jamovi.jamovi
+if(!require(jmvtools)) install.packages('jmvtools', repos='https://repo.jamovi.org')
+jmvtools::install(home='/app/bin/')
+```
