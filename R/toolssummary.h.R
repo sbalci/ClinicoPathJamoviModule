@@ -38,7 +38,9 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="Tools for data summary")
+                title="Tools for data summary",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle4",

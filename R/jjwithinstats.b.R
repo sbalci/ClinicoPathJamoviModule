@@ -16,9 +16,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             deplen <- length(self$options$dep)
 
-            self$results$plot$setSize(400, deplen * 300)
+            self$results$plot$setSize(600, deplen * 450)
 
-            self$results$plot2$setSize(800, deplen * 300)
+            self$results$plot2$setSize(1200, deplen * 450)
 
         }
         ,
@@ -36,6 +36,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 This tool will help you generate Violin Plots for repeated measurements.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggwithinstats.html' target='_blank'>grouped_ggwithinstats</a>.
+This function does not allow missing values and works on long data format. Please see above links for further information.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -60,13 +61,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
 
-
         ,
         .plot = function(image, ggtheme, theme, ...) {
+
             # the plot function ----
             # Error messages ----
 
-            if ( is.null(self$options$dep) || is.null(self$options$group))
+            if (is.null(self$options$dep) ||
+                is.null(self$options$group))
                 return()
 
             if (nrow(self$data) == 0)
@@ -90,12 +92,38 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #
             # }
 
-
             # distribution <-
             #     jmvcore::constructFormula(terms = self$options$distribution)
 
             # pairw <- self$options$pairw
 
+
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+            plottype <-
+                jmvcore::constructFormula(terms = self$options$plottype)
+
+            originaltheme <- self$options$originaltheme
+
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+
+            # ADD HERE ----
+
+
+
+            # read data ----
 
             mydata <- self$data
 
@@ -109,30 +137,20 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            # excl <- self$options$excl
-            #
-            # if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            excl <- self$options$excl
+
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
+            # read arguments ----
 
             dep <- self$options$dep
 
             group <- self$options$group
 
 
-            originaltheme <- self$options$originaltheme
+
+
 
             dep <- jmvcore::composeTerm(components = dep)
 
@@ -152,57 +170,85 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$dep) == 1) {
             plot <-
+
+                # ggstatsplot::ggwithinstats(
+                #         data = mydata,
+                #         x = !!group,
+                #         y = !!dep
+                #
+                #     # data = iris,
+                #     # x = Species,
+                #     # y = Sepal.Length
+                # )
+
+
+
+
+
+
                 ggstatsplot::ggwithinstats(
                     data = mydata,
                     x = !!group,
-                    y = !!dep,
+                    y = !!dep
 
-                    type = typestatistics,
+                    , type = typestatistics
+                    , ggtheme = ggtheme
+                    , ggstatsplot.layer = originaltheme
+                    , plot.type = plottype
+                    , pairwise.comparisons = pairwisecomparisons
+                    , pairwise.display = pairwisedisplay
+                    , p.adjust.method = padjustmethod
 
-                    pairwise.comparisons = FALSE,
-                    pairwise.display = "significant",
-                    p.adjust.method = "holm",
-                    effsize.type = "unbiased",
-                    partial = TRUE,
-                    bf.prior = 0.707,
-                    bf.message = TRUE,
-                    sphericity.correction = TRUE,
-                    results.subtitle = TRUE,
-                    xlab = NULL,
-                    ylab = NULL,
-                    caption = NULL,
-                    title = NULL,
-                    subtitle = NULL,
-                    sample.size.label = TRUE,
-                    k = 2L,
-                    conf.level = 0.95,
-                    nboot = 100L,
-                    tr = 0.1,
-                    mean.plotting = TRUE,
-                    mean.ci = FALSE,
-                    mean.point.args = list(size = 5, color = "darkred"),
-                    mean.label.args = list(size = 3),
-                    point.path = pointpath,
-                    point.path.args = list(alpha = 0.5, linetype = "dashed"),
-                    mean.path = meanpath,
-                    mean.path.args = list(color = "red", size = 1, alpha = 0.5),
-                    notch = FALSE,
-                    notchwidth = 0.5,
-                    outlier.tagging = FALSE,
-                    outlier.label = NULL,
-                    outlier.coef = 1.5,
-                    outlier.label.args = list(),
-                    outlier.point.args = list(),
-                    violin.args = list(width = 0.5, alpha = 0.2),
-                    ggsignif.args = list(textsize = 3, tip_length = 0.01),
-                    ggtheme = ggtheme,
-                    # ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = originaltheme,
-                    package = "RColorBrewer",
-                    palette = "Dark2",
-                    ggplot.component = NULL,
-                    output = "plot",
-                    messages = TRUE
+                    # x = !!group,
+                    # y = !!dep
+                    # ,
+                    #
+                    # type = typestatistics,
+                    #
+                    # pairwise.comparisons = FALSE,
+                    # pairwise.display = "significant",
+                    # p.adjust.method = "holm",
+                    # effsize.type = "unbiased",
+                    # partial = TRUE,
+                    # bf.prior = 0.707,
+                    # bf.message = TRUE,
+                    # sphericity.correction = TRUE,
+                    # results.subtitle = TRUE,
+                    # xlab = NULL,
+                    # ylab = NULL,
+                    # caption = NULL,
+                    # title = NULL,
+                    # subtitle = NULL,
+                    # sample.size.label = TRUE,
+                    # k = 2L,
+                    # conf.level = 0.95,
+                    # nboot = 100L,
+                    # tr = 0.1,
+                    # mean.plotting = TRUE,
+                    # mean.ci = FALSE,
+                    # mean.point.args = list(size = 5, color = "darkred"),
+                    # mean.label.args = list(size = 3),
+                    # point.path = pointpath,
+                    # point.path.args = list(alpha = 0.5, linetype = "dashed"),
+                    # mean.path = meanpath,
+                    # mean.path.args = list(color = "red", size = 1, alpha = 0.5),
+                    # notch = FALSE,
+                    # notchwidth = 0.5,
+                    # outlier.tagging = FALSE,
+                    # outlier.label = NULL,
+                    # outlier.coef = 1.5,
+                    # outlier.label.args = list(),
+                    # outlier.point.args = list(),
+                    # violin.args = list(width = 0.5, alpha = 0.2),
+                    # ggsignif.args = list(textsize = 3, tip_length = 0.01),
+                    # ggtheme = ggtheme,
+                    # # ggtheme = ggplot2::theme_bw(),
+                    # ggstatsplot.layer = originaltheme,
+                    # package = "RColorBrewer",
+                    # palette = "Dark2",
+                    # ggplot.component = NULL,
+                    # output = "plot",
+                    # messages = TRUE
                 )
 
 
@@ -331,9 +377,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Exclude NA ----
 
 
-            # excl <- self$options$excl
-            #
-            # if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            excl <- self$options$excl
+
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
 
             # type of statistics ----

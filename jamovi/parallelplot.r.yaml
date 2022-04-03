@@ -8,4 +8,9 @@ items:
       title: Parallel Plot
       type:  Preformatted
 
+
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

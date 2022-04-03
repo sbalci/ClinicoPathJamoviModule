@@ -31,4 +31,9 @@ items:
         - name: maxvalues
           title: "Values"
           type: number
+
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

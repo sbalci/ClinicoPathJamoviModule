@@ -565,7 +565,7 @@ refs:
     ClinicoPathJamoviModule:
         type: 'software'
         author: Serdar Balci
-        year: 2021
+        year: 2022
         title: "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188"
         publisher: '[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule'
         doi: 10.17605/OSF.IO/9SZUD
@@ -580,6 +580,13 @@ refs:
         publisher: '[R package]. Retrieved from https://github.com/ndphillips/iwillsurvive'
         url: https://github.com/ndphillips/iwillsurvive
 
+    sensspecwiki:
+        type: 'webpage'
+        author: "Wikipedia contributors"
+        title: "Sensitivity and specificity --- Wikipedia, The Free Encyclopedia"
+        year: "2022"
+        url: https://en.wikipedia.org/w/index.php?title=Sensitivity_and_specificity&oldid=1077556477
+        note: "[Online; accessed 3-April-2022]"
 
 
 ...

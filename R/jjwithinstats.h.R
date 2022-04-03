@@ -9,10 +9,15 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            typestatistics = "parametric",
-            originaltheme = FALSE,
+            excl = TRUE,
             pointpath = TRUE,
-            meanpath = TRUE, ...) {
+            meanpath = TRUE,
+            typestatistics = "parametric",
+            pairwisecomparisons = TRUE,
+            pairwisedisplay = "significant",
+            padjustmethod = "holm",
+            plottype = "boxviolin",
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -43,6 +48,18 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
+                default=TRUE)
+            private$..pointpath <- jmvcore::OptionBool$new(
+                "pointpath",
+                pointpath,
+                default=TRUE)
+            private$..meanpath <- jmvcore::OptionBool$new(
+                "meanpath",
+                meanpath,
+                default=TRUE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -52,43 +69,83 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..pairwisecomparisons <- jmvcore::OptionBool$new(
+                "pairwisecomparisons",
+                pairwisecomparisons,
+                default=TRUE)
+            private$..pairwisedisplay <- jmvcore::OptionList$new(
+                "pairwisedisplay",
+                pairwisedisplay,
+                options=list(
+                    "significant",
+                    "non-significant",
+                    "everything"),
+                default="significant")
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY",
+                    "fdr",
+                    "none"),
+                default="holm")
+            private$..plottype <- jmvcore::OptionList$new(
+                "plottype",
+                plottype,
+                options=list(
+                    "box",
+                    "violin",
+                    "boxviolin"),
+                default="boxviolin")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
-            private$..pointpath <- jmvcore::OptionBool$new(
-                "pointpath",
-                pointpath,
-                default=TRUE)
-            private$..meanpath <- jmvcore::OptionBool$new(
-                "meanpath",
-                meanpath,
-                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..typestatistics)
-            self$.addOption(private$..originaltheme)
+            self$.addOption(private$..excl)
             self$.addOption(private$..pointpath)
             self$.addOption(private$..meanpath)
+            self$.addOption(private$..typestatistics)
+            self$.addOption(private$..pairwisecomparisons)
+            self$.addOption(private$..pairwisedisplay)
+            self$.addOption(private$..padjustmethod)
+            self$.addOption(private$..plottype)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        typestatistics = function() private$..typestatistics$value,
-        originaltheme = function() private$..originaltheme$value,
+        excl = function() private$..excl$value,
         pointpath = function() private$..pointpath$value,
-        meanpath = function() private$..meanpath$value),
+        meanpath = function() private$..meanpath$value,
+        typestatistics = function() private$..typestatistics$value,
+        pairwisecomparisons = function() private$..pairwisecomparisons$value,
+        pairwisedisplay = function() private$..pairwisedisplay$value,
+        padjustmethod = function() private$..padjustmethod$value,
+        plottype = function() private$..plottype$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..typestatistics = NA,
-        ..originaltheme = NA,
+        ..excl = NA,
         ..pointpath = NA,
-        ..meanpath = NA)
+        ..meanpath = NA,
+        ..typestatistics = NA,
+        ..pairwisecomparisons = NA,
+        ..pairwisedisplay = NA,
+        ..padjustmethod = NA,
+        ..plottype = NA,
+        ..originaltheme = NA)
 )
 
 jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -154,7 +211,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Violin Plots to Compare Within Groups
+#' Box-Violin Plots to Compare Within Groups
 #'
 #' 
 #'
@@ -166,10 +223,15 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param typestatistics .
-#' @param originaltheme .
+#' @param excl .
 #' @param pointpath .
 #' @param meanpath .
+#' @param typestatistics .
+#' @param pairwisecomparisons .
+#' @param pairwisedisplay .
+#' @param padjustmethod .
+#' @param plottype .
+#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -183,10 +245,15 @@ jjwithinstats <- function(
     dep,
     group,
     grvar,
-    typestatistics = "parametric",
-    originaltheme = FALSE,
+    excl = TRUE,
     pointpath = TRUE,
-    meanpath = TRUE) {
+    meanpath = TRUE,
+    typestatistics = "parametric",
+    pairwisecomparisons = TRUE,
+    pairwisedisplay = "significant",
+    padjustmethod = "holm",
+    plottype = "boxviolin",
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
@@ -208,10 +275,15 @@ jjwithinstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        typestatistics = typestatistics,
-        originaltheme = originaltheme,
+        excl = excl,
         pointpath = pointpath,
-        meanpath = meanpath)
+        meanpath = meanpath,
+        typestatistics = typestatistics,
+        pairwisecomparisons = pairwisecomparisons,
+        pairwisedisplay = pairwisedisplay,
+        padjustmethod = padjustmethod,
+        plottype = plottype,
+        originaltheme = originaltheme)
 
     analysis <- jjwithinstatsClass$new(
         options = options,
