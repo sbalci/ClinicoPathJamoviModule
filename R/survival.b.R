@@ -366,20 +366,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
                 # # View mydata ----
-                self$results$mydataview$setContent(
-                    list(
-                        time,
-                        outcome,
-                        factor,
-                        name1time,
-                        name2outcome,
-                        name3explanatory,
-                        head(
-                            cleanData,
-                            n = 30
-                            )
-                        )
-                    )
+                # self$results$mydataview$setContent(list(time,
+                #                                         outcome,
+                #                                         factor,
+                #                                         name1time,
+                #                                         name2outcome,
+                #                                         name3explanatory,
+                #                                         head(cleanData, n = 30)))
 
 
                 # Prepare Data For Plots ----
@@ -411,7 +404,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "name2outcome" = name2outcome,
                         "name3explanatory" = name3explanatory,
                         "cleanData" = cleanData
-
                     )
                 )
 
@@ -471,6 +463,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
+
                 # Run Analysis ----
                 if (!self$options$sas) {
                     # Median Survival ----
@@ -487,99 +480,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
 
-                # iwillsurvive ----
-                if (self$options$iwillsurvive) {
-                    private$.iws(results)
-                }
-
-
 
             }
-
-            # iwillsurvive iws function ----
-            ,
-            .iws = function(results) {
-
-                mytime <- results$name1time
-
-                mytime <- jmvcore::constructFormula(
-                    terms = mytime)
-
-                myoutcome <- results$name2outcome
-
-                myoutcome <-
-                    jmvcore::constructFormula(terms = myoutcome)
-
-                myfactor <- results$name3explanatory
-
-                myfactor <-
-                    jmvcore::constructFormula(terms = myfactor)
-
-                plotData7 <- results$cleanData
-
-                plotData7[[mytime]] <-
-                    jmvcore::toNumeric(plotData7[[mytime]])
-
-                plotData7[["event_status"]] <- plotData7[[myoutcome]]
-
-                plotData7[["event_status"]] <- ifelse(
-                    plotData7[["event_status"]] == 1,
-                    TRUE,
-                    FALSE
-                )
-
-
-
-                cohort_iws <-
-                    iwillsurvive::iwillsurvive(
-                        plotData7,
-                        followup_time = "OverallTime",
-                        terms = "Smoker",
-                        event_title = "Outcome",
-                        index_title = "LOT1 Start"
-                        # myformula
-                        #
-                        # cohort,
-                        # followup_time = "followup_days",
-                        # terms = "condition",
-                        # event_title = "Death",
-                        # index_title = "LOT1 Start"
-                    )
-
-
-
-                self$results$iws1$setContent(cohort_iws)
-
-
-
-                # followup_plot <- iwillsurvive::plot_followup(cohort_iws)
-
-
-                # self$results$iws2$setContent(followup_plot)
-
-
-
-
-                # Prepare Data For iwillsurvive Plots ----
-
-                # cleanData7
-                #
-                # plotData7 <- list(
-                #     "name1time" = name1time,
-                #     "name2outcome" = name2outcome,
-                #     "name3explanatory" = name3explanatory,
-                #     "cleanData7" = cleanData7
-                # )
-
-                # image7 <- self$results$plot7
-                # image7$setState(plotData7)
-
-                # image7$setState(plotData7)
-
-
-            }
-
-
 
             # Median Survival Function ----
             ,
@@ -942,9 +844,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(
                         description =
                             glue::glue(
-                                "The difference ",
+                                "The difference",
                                 title2,
-                                " between {rowname} and {name}",
+                                "between {rowname} and {name}",
                                 " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}."
                             )
                     ) %>%
@@ -1232,99 +1134,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
             }
 
-
-
-
-            # # iwillsurvive Style ----
-            # ,
-            # .plot7 = function(image7, ggtheme, theme, ...) {
-            #     iwillsurvive <- self$options$iwillsurvive
-            #
-            #     if (!iwillsurvive)
-            #         return()
-            #
-            #
-            #
-            #     # plot7 <- plot(cohort_iws)
-            #
-            #     # plot7 <- print(cohort_iws)
-            #
-            #
-            #     # plot7 <- plot(cohort_iws,
-            #     #      add_confidence = FALSE,
-            #     #      add_median_delta = FALSE,
-            #     #      censor_pch = 3,
-            #     #      censor_size = 5,
-            #     #      legend_position_x = c(600, 400),
-            #     #      legend_nudge_y =  c(.25, .3),
-            #     #      median_flag_nudge_y = .15,
-            #     #      anchor_arrow = TRUE,
-            #     #      palette = "Dark2",
-            #     #      title = "My Title",
-            #     #      subtitle = "My Subttitle",
-            #     #      risk_table_title = "My Risk Table Title")
-            #
-            #
-            #
-            #
-            #
-            #
-            #     # mytime <- results$name1time
-            #     # mytime <- jmvcore::constructFormula(terms = mytime)
-            #     #
-            #     # myoutcome <- results$name2outcome
-            #     # myoutcome <-
-            #     #     jmvcore::constructFormula(terms = myoutcome)
-            #     #
-            #     #
-            #     # myfactor <- results$name3explanatory
-            #     # myfactor <-
-            #     #     jmvcore::constructFormula(terms = myfactor)
-            #     #
-            #     # plotData <- results$cleanData
-            #     #
-            #     # plotData[[mytime]] <-
-            #     #     jmvcore::toNumeric(plotData[[mytime]])
-            #     #
-            #     #
-            #     # title2 <- as.character(myfactor)
-            #     #
-            #     # sas <- self$options$sas
-            #     #
-            #     # if (sas) {
-            #     #     title2 <- "Overall"
-            #     # }
-            #     #
-            #     #
-            #     # myformula <-
-            #     #     paste('survival::Surv(',
-            #     #           mytime,
-            #     #           ',',
-            #     #           myoutcome,
-            #     #           ') ~ ',
-            #     #           myfactor)
-            #     #
-            #     # myformula <- as.formula(myformula)
-            #     #
-            #     # km_fit <-
-            #     #     survival::survfit(myformula, data = plotData)
-            #     #
-            #     # time_scale <-
-            #     #     seq(0, self$options$endplot, by = self$options$byplot)
-            #     #
-            #     #
-            #     # plot7 <-
-            #     #     KMunicate::KMunicate(
-            #     #         fit = km_fit,
-            #     #         time_scale = time_scale,
-            #     #         .xlab = paste0('Time in ', self$options$timetypeoutput)
-            #     #     )
-            #
-            #
-            #     print(plot7)
-            #     TRUE
-            #
-            # }
 
         )
     )

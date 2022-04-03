@@ -8,4 +8,8 @@ items:
       title: Nomogram
       type:  Preformatted
 
+refs:
+    - ClinicoPathJamoviModule
+
+
 ...

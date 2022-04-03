@@ -28,4 +28,9 @@ items:
       type:  Preformatted
 
 
+refs:
+    - ClinicoPathJamoviModule
+
+
+
 ...

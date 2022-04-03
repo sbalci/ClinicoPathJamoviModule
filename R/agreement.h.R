@@ -74,8 +74,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Interrater Reliability",
                 refs=list(
                     "irr",
-                    "PathologyKappa",
-                    "ClinicoPathJamoviModule"))
+                    "PathologyKappa"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -107,7 +106,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="peragree", 
                         `title`="Agreement %", 
-                        `type`="number"),
+                        `type`="integer"),
                     list(
                         `name`="kappa", 
                         `title`="Kappa", 

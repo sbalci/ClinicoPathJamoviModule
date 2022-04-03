@@ -17,6 +17,8 @@ items:
       renderFun: .plot
       requiresData: true
 
+refs:
+    - ClinicoPathJamoviModule
 
 
 

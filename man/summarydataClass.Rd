@@ -49,6 +49,7 @@ Summary of Continuous Variables
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="serialize">}\href{../../jmvcore/html/Analysis.html#method-serialize}{\code{jmvcore::Analysis$serialize()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError">}\href{../../jmvcore/html/Analysis.html#method-setError}{\code{jmvcore::Analysis$setError()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus">}\href{../../jmvcore/html/Analysis.html#method-setStatus}{\code{jmvcore::Analysis$setStatus()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate">}\href{../../jmvcore/html/Analysis.html#method-translate}{\code{jmvcore::Analysis$translate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="ClinicoPath" data-topic="summarydataBase" data-id="initialize">}\href{../../ClinicoPath/html/summarydataBase.html#method-initialize}{\code{ClinicoPath::summarydataBase$initialize()}}\out{</span>}
 }
 \out{</details>}
