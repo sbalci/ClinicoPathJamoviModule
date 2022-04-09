@@ -215,11 +215,11 @@ https://github.com/sbalci/meddecide/
 
 https://github.com/sbalci/meddecide/releases/  
 
-https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.03.jmo
+https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo
 
 <!-- https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo   -->
 
-https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.03.jmo
+https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo
 
 
 ```r
@@ -229,7 +229,7 @@ remotes::install_github("sbalci/meddecide")
 
     - name: meddecide
       url: https://github.com/sbalci/meddecide.git
-      commit: 7ab904086eee8259e1af536955eb91ffd6b0a549
+      commit: 2bda14af05d8dafe33d9d137705f9fb8ac527279
       platforms:
         - win64
         - macos
