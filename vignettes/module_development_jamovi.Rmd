@@ -30,13 +30,15 @@ Official documentation is here: https://dev.jamovi.org/
 
 Briefly:
 
-- Use `R 3.6.3`
+- Use `R >= 4.0.5`
 
-- Install jamovi from this link: https://www.jamovi.org/download.html Get the latest one 1.2.19
+- Install jamovi from this link: https://www.jamovi.org/download.html Get the latest one 2.3.2
 
 - Install jmvtools package with:
 
 ```r
+install.packages('node', repos='https://repo.jamovi.org')
+
 install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 ```
 
