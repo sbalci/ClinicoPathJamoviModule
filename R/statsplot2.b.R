@@ -5,7 +5,9 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import magrittr
 #'
+
 
 
 statsplot2Class <- if (requireNamespace('jmvcore'))

@@ -52,6 +52,7 @@ Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliabi
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="serialize">}\href{../../jmvcore/html/Analysis.html#method-serialize}{\code{jmvcore::Analysis$serialize()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError">}\href{../../jmvcore/html/Analysis.html#method-setError}{\code{jmvcore::Analysis$setError()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus">}\href{../../jmvcore/html/Analysis.html#method-setStatus}{\code{jmvcore::Analysis$setStatus()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate">}\href{../../jmvcore/html/Analysis.html#method-translate}{\code{jmvcore::Analysis$translate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="ClinicoPath" data-topic="icccoeffBase" data-id="initialize">}\href{../../ClinicoPath/html/icccoeffBase.html#method-initialize}{\code{ClinicoPath::icccoeffBase$initialize()}}\out{</span>}
 }
 \out{</details>}
