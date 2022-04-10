@@ -27,7 +27,6 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             padjustmethod = "holm",
             sc = FALSE,
             kmunicate = FALSE,
-            iwillsurvive = FALSE,
             ce = FALSE,
             ch = FALSE,
             endplot = 60,
@@ -172,10 +171,6 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "kmunicate",
                 kmunicate,
                 default=FALSE)
-            private$..iwillsurvive <- jmvcore::OptionBool$new(
-                "iwillsurvive",
-                iwillsurvive,
-                default=FALSE)
             private$..ce <- jmvcore::OptionBool$new(
                 "ce",
                 ce,
@@ -236,7 +231,6 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..sc)
             self$.addOption(private$..kmunicate)
-            self$.addOption(private$..iwillsurvive)
             self$.addOption(private$..ce)
             self$.addOption(private$..ch)
             self$.addOption(private$..endplot)
@@ -271,7 +265,6 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         padjustmethod = function() private$..padjustmethod$value,
         sc = function() private$..sc$value,
         kmunicate = function() private$..kmunicate$value,
-        iwillsurvive = function() private$..iwillsurvive$value,
         ce = function() private$..ce$value,
         ch = function() private$..ch$value,
         endplot = function() private$..endplot$value,
@@ -305,7 +298,6 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..padjustmethod = NA,
         ..sc = NA,
         ..kmunicate = NA,
-        ..iwillsurvive = NA,
         ..ce = NA,
         ..ch = NA,
         ..endplot = NA,
@@ -322,7 +314,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        mydataview = function() private$.items[["mydataview"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
         coxSummary = function() private$.items[["coxSummary"]],
@@ -336,9 +327,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
-        iws1 = function() private$.items[["iws1"]],
-        iws2 = function() private$.items[["iws2"]],
-        plot7 = function() private$.items[["plot7"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
@@ -351,8 +339,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "finalfit",
                     "survival",
-                    "survminer",
-                    "ClinicoPathJamoviModule"))
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -366,10 +353,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview",
-                title="mydataview"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -706,41 +689,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="iws1",
-                title="`iwillsurvive - ${explanatory}`",
-                visible="(iwillsurvive)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="iws2",
-                title="`iwillsurvive - ${explanatory}`",
-                visible="(iwillsurvive)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot7",
-                title="`iwillsurvive-Style Plot - ${explanatory}`",
-                width=600,
-                height=450,
-                renderFun=".plot7",
-                visible="(iwillsurvive)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "kmunicate",
-                    "endplot",
-                    "byplot",
-                    "sas",
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent"),
-                refs=list(
-                    "iwillsurvive",
-                    "iwillsurvive")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -826,7 +774,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param padjustmethod .
 #' @param sc .
 #' @param kmunicate .
-#' @param iwillsurvive .
 #' @param ce .
 #' @param ch .
 #' @param endplot .
@@ -839,7 +786,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -853,9 +799,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$iws1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$iws2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
@@ -890,7 +833,6 @@ survival <- function(
     padjustmethod = "holm",
     sc = FALSE,
     kmunicate = FALSE,
-    iwillsurvive = FALSE,
     ce = FALSE,
     ch = FALSE,
     endplot = 60,
@@ -942,7 +884,6 @@ survival <- function(
         padjustmethod = padjustmethod,
         sc = sc,
         kmunicate = kmunicate,
-        iwillsurvive = iwillsurvive,
         ce = ce,
         ch = ch,
         endplot = endplot,

@@ -2,17 +2,22 @@
 % Please edit documentation in R/jjwithinstats.h.R
 \name{jjwithinstats}
 \alias{jjwithinstats}
-\title{Violin Plots to Compare Within Groups}
+\title{Box-Violin Plots to Compare Within Groups}
 \usage{
 jjwithinstats(
   data,
   dep,
   group,
   grvar,
-  typestatistics = "parametric",
-  originaltheme = FALSE,
+  excl = TRUE,
   pointpath = TRUE,
-  meanpath = TRUE
+  meanpath = TRUE,
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  pairwisedisplay = "significant",
+  padjustmethod = "holm",
+  plottype = "boxviolin",
+  originaltheme = FALSE
 )
 }
 \arguments{
@@ -24,13 +29,23 @@ jjwithinstats(
 
 \item{grvar}{.}
 
-\item{typestatistics}{.}
-
-\item{originaltheme}{.}
+\item{excl}{.}
 
 \item{pointpath}{.}
 
 \item{meanpath}{.}
+
+\item{typestatistics}{.}
+
+\item{pairwisecomparisons}{.}
+
+\item{pairwisedisplay}{.}
+
+\item{padjustmethod}{.}
+
+\item{plottype}{.}
+
+\item{originaltheme}{.}
 }
 \value{
 A results object containing:
@@ -41,7 +56,7 @@ A results object containing:
 }
 }
 \description{
-Violin Plots to Compare Within Groups
+Box-Violin Plots to Compare Within Groups
 }
 \examples{
 \dontrun{

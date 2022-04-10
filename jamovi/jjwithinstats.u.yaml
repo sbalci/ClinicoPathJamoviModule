@@ -1,8 +1,8 @@
-title: Violin Plots to Compare Within Groups
+title: Box-Violin Plots to Compare Within Groups
 name: jjwithinstats
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -28,17 +28,63 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
+  - type: CollapseBox
+    label: Data
+    collapsed: false
+    children:
+      - type: Label
+        label: Data
+        fitToGrid: true
+        children: []
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl
+  - type: CollapseBox
+    label: Analysis
+    collapsed: false
+    children:
+      - type: Label
+        label: Analysis
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: typestatistics
+              - type: CheckBox
+                name: pairwisecomparisons
+                children:
+                  - type: ComboBox
+                    name: pairwisedisplay
+                    enable: (pairwisecomparisons)
+                  - type: ComboBox
+                    name: padjustmethod
+                    enable: (pairwisecomparisons)
+  - type: CollapseBox
+    label: Plot
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: pointpath
+          - type: CheckBox
+            name: meanpath
+      - type: Label
+        label: Plot
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: originaltheme
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: typestatistics
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: originaltheme
-      - type: CheckBox
-        name: pointpath
-      - type: CheckBox
-        name: meanpath
+        name: plottype

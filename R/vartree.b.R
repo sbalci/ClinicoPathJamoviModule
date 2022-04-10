@@ -39,11 +39,24 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Read Arguments ----
 
             horizontal <- self$options$horizontal
+
             sline <- self$options$sline
+
             mytitle <- self$options$mytitle
+
             myvars <-  self$options$vars
-            percvar <- self$options$percvar
-            summaryvar <- self$options$summaryvar
+
+            if ( !is.null(self$options$percvar) ) {
+                percvar <- self$options$percvar
+            } else {
+                percvar <- NULL
+            }
+
+            if ( !is.null(self$options$summaryvar) ) {
+                summaryvar <- self$options$summaryvar
+            } else {
+                summaryvar <- NULL
+            }
 
             # Default Arguments ----
 
@@ -136,8 +149,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
             # Prepare Data ----
+            mydata <- jmvcore::select(
+                df = mydata,
+                columnNames = c(myvars,
+                                percvar,
+                                summaryvar)
+                )
 
-            mydata <- jmvcore::select(df = mydata, columnNames = c(myvars, percvar, summaryvar))
 
             # Prepare Formula ----
 

@@ -174,8 +174,6 @@ children:
               - type: CheckBox
                 name: kmunicate
               - type: CheckBox
-                name: iwillsurvive
-              - type: CheckBox
                 name: ce
               - type: CheckBox
                 name: ch

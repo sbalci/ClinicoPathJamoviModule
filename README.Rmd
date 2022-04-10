@@ -103,9 +103,9 @@ https://github.com/sbalci/ClinicoPathDescriptives/
 
 https://github.com/sbalci/ClinicoPathDescriptives/releases/
 
-https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.0084.jmo
+https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo
 
-https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.0084.jmo  
+https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo
 
 
 ```r
@@ -114,7 +114,7 @@ remotes::install_github("sbalci/ClinicoPathDescriptives")
 
     - name: ClinicoPathDescriptives
       url: https://github.com/sbalci/ClinicoPathDescriptives.git
-      commit: b10110547d6ca1637982094031a9e592c092a9c0
+      commit: c425bb0021a097b76666006c19b3b87fa137264e
       platforms:
         - win64
         - macos
@@ -152,11 +152,11 @@ GGStatsPlot functions are separately added to jamovi library under jjstatsplot m
 JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)  
 
 
-https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.0095.jmo
+https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.0095.jmo
+https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo
 
 
 https://github.com/sbalci/jjstatsplot  
@@ -173,7 +173,7 @@ remotes::install_github("sbalci/jjstatsplot")
 
     - name: jjstatsplot
       url: https://github.com/sbalci/jjstatsplot.git
-      commit: f11320070235f34c4205b3002d21294266f59cf9
+      commit: b26c2c37f02b25ff3c3d32391a5cc7f413373a9d
       platforms:
         - win64
         - macos
@@ -186,11 +186,11 @@ https://github.com/sbalci/jsurvival
 
 https://github.com/sbalci/jsurvival/releases/
 
-https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.0084.jmo  
+https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo
 
-https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.0084.jmo
+https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo
 
-https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.0084.jmo
+<!-- https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.02.jmo -->
 
 
 ```r
@@ -198,14 +198,15 @@ remotes::install_github("sbalci/jsurvival")
 ```
 
 
-
     - name: jsurvival
       url: https://github.com/sbalci/jsurvival.git
-      commit: 83b75ef784a623a8d92999ed269ba0b859ba64ab
+      commit: 080034635c3f0173e5a22ddd2614d0af90504763
       platforms:
         - win64
         - macos
-        - linux
+
+
+<!-- - linux -->
 
 
 ##### meddecide  
@@ -214,11 +215,11 @@ https://github.com/sbalci/meddecide/
 
 https://github.com/sbalci/meddecide/releases/  
 
-https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.1.0005.jmo
+https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo
 
-https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo  
+<!-- https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo   -->
 
-https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.1.0005.jmo  
+https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo
 
 
 ```r
@@ -228,7 +229,11 @@ remotes::install_github("sbalci/meddecide")
 
     - name: meddecide
       url: https://github.com/sbalci/meddecide.git
-      commit: 38aaf74a807241def57c23b99cc89a31a1ed5123
+      commit: 2bda14af05d8dafe33d9d137705f9fb8ac527279
+      platforms:
+        - win64
+        - macos
+
 
 
 ##### jbbplot  
@@ -621,7 +626,7 @@ https://paypal.me/serdarbalci
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
 [![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
-[![minimal R version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
+[![minimal R version](https://img.shields.io/badge/R%3E%3D-4.1.0-6666ff.svg)](https://cran.r-project.org/)
 [![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.svg)](https://libraries.io/github/sbalci/clinicopathjamovimodule)
 [![Requirements Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
 [![GitHub forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)

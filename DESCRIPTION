@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.0097
-Date: 2021-10-03
+Version: 0.0.2.04
+Date: 2022-04-03
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -24,7 +24,7 @@ URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://sbalci.github.io/ClinicoPathJamoviModule/
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:
-    R (>= 4.0.0)
+    R (>= 4.1.0)
 Imports: 
     magrittr,
     checkmate,
@@ -101,7 +101,7 @@ Remotes:
     ndphillips/FFTrees,
     yanlinlin82/ggvenn,
     easystats/datawizard,
-    easystats/insight@85b36acc5167978e4f0b59fdc055495ceffa28a5,
+    easystats/insight,
     easystats/bayestestR,
     easystats/parameters,
     easystats/performance,

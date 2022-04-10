@@ -68,6 +68,8 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
 
+refs:
+    - ClinicoPathJamoviModule
 
 
 ...

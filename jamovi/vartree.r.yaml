@@ -26,6 +26,5 @@ items:
 
 refs:
     - vtree
-    - ClinicoPathJamoviModule
 
 ...
