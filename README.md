@@ -170,11 +170,11 @@ remotes::install_github("sbalci/jsurvival")
 
 <https://github.com/sbalci/meddecide/releases/>
 
-<https://library.jamovi.org/win64/R4.0.2/meddecide-0.0.1.0005.jmo>
+<https://library.jamovi.org/win64/R4.1.2/meddecide-0.0.2.07.jmo>
+    
+<!-- <https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo> -->
 
-<https://library.jamovi.org/linux/R4.0.2/meddecide-0.0.1.0005.jmo>
-
-<https://library.jamovi.org/macos/R4.0.2/meddecide-0.0.1.0005.jmo>
+<https://library.jamovi.org/macos/R4.1.2/meddecide-0.0.2.07.jmo>
 
 ``` r
 remotes::install_github("sbalci/meddecide")
