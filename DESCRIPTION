@@ -91,7 +91,6 @@ Imports:
     performance,
     broomExtra,
     skimr,
-    groupedstats,
     rstan
 VignetteBuilder:
     knitr
