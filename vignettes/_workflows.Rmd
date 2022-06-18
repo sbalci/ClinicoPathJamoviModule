@@ -7,232 +7,232 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r global options, include=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
+<!-- ```{r global options, include=FALSE} -->
+<!-- knitr::opts_chunk$set( -->
+<!--   collapse = TRUE, -->
+<!--   comment = "#>" -->
+<!-- ) -->
+<!-- ``` -->
 
 
-```{r setup}
-library(ClinicoPath)
-```
+<!-- ```{r setup} -->
+<!-- library(ClinicoPath) -->
+<!-- ``` -->
 
 
 
-```{r flow_tableone}
+<!-- ```{r flow_tableone} -->
 
-flow::flow_view(x = ClinicoPath::tableone)
+<!-- flow::flow_view(x = ClinicoPath::tableone) -->
 
-```
+<!-- ``` -->
 
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::tableone** 
+<!-- **Workflow for ClinicoPath::tableone**  -->
 
 
 
-<img src='figures/flow_tableone.png' align='center' width = 75% />
+<!-- <img src='figures/flow_tableone.png' align='center' width = 75% /> -->
 
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::summarydata** 
+<!-- **Workflow for ClinicoPath::summarydata**  -->
 
 
-<img src='figures/flow_summarydata.png' align='center' width = 75% />
+<!-- <img src='figures/flow_summarydata.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::reportcat** 
+<!-- **Workflow for ClinicoPath::reportcat**  -->
 
 
-<img src='figures/flow_reportcat.png' align='center' width = 75% />
+<!-- <img src='figures/flow_reportcat.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::alluvial** 
+<!-- **Workflow for ClinicoPath::alluvial**  -->
 
 
-<img src='figures/flow_alluvial.png' align='center' width = 75% />
+<!-- <img src='figures/flow_alluvial.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::agepyramid** 
+<!-- **Workflow for ClinicoPath::agepyramid**  -->
 
 
-<img src='figures/flow_agepyramid.png' align='center' width = 75% />
+<!-- <img src='figures/flow_agepyramid.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::crosstable** 
+<!-- **Workflow for ClinicoPath::crosstable**  -->
 
 
 
-<img src='figures/flow_crosstable.png' align='center' width = 75% />
+<!-- <img src='figures/flow_crosstable.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::survival** 
+<!-- **Workflow for ClinicoPath::survival**  -->
 
 
 
-<img src='figures/flow_survival.png' align='center' width = 75% />
+<!-- <img src='figures/flow_survival.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::multisurvival** 
+<!-- **Workflow for ClinicoPath::multisurvival**  -->
 
 
 
-<img src='figures/flow_multisurvival.png' align='center' width = 75% />
+<!-- <img src='figures/flow_multisurvival.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::oddsratio** 
+<!-- **Workflow for ClinicoPath::oddsratio**  -->
 
 
 
-<img src='figures/flow_oddsratio.png' align='center' width = 75% />
+<!-- <img src='figures/flow_oddsratio.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::agreement** 
+<!-- **Workflow for ClinicoPath::agreement**  -->
 
 
 
-<img src='figures/flow_agreement.png' align='center' width = 75% />
+<!-- <img src='figures/flow_agreement.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::decision** 
+<!-- **Workflow for ClinicoPath::decision**  -->
 
 
 
-<img src='figures/flow_decision.png' align='center' width = 75% />
+<!-- <img src='figures/flow_decision.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::decisioncalculator** 
+<!-- **Workflow for ClinicoPath::decisioncalculator**  -->
 
 
-<img src='figures/flow_decisioncalculator.png' align='center' width = 75% />
+<!-- <img src='figures/flow_decisioncalculator.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::statsplot2** 
+<!-- **Workflow for ClinicoPath::statsplot2**  -->
 
 
 
-<img src='figures/flow_statsplot2.png' align='center' width = 75% />
+<!-- <img src='figures/flow_statsplot2.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjbarstats** 
+<!-- **Workflow for ClinicoPath::jjbarstats**  -->
 
 
 
-<img src='figures/flow_jjbarstats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjbarstats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjbetweenstats** 
+<!-- **Workflow for ClinicoPath::jjbetweenstats**  -->
 
 
-<img src='figures/flow_jjbetweenstats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjbetweenstats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjcorrmat** 
+<!-- **Workflow for ClinicoPath::jjcorrmat**  -->
 
 
 
-<img src='figures/flow_jjcorrmat.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjcorrmat.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjdotplotstats** 
+<!-- **Workflow for ClinicoPath::jjdotplotstats**  -->
 
 
 
-<img src='figures/flow_jjdotplotstats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjdotplotstats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjhistostats** 
+<!-- **Workflow for ClinicoPath::jjhistostats**  -->
 
 
 
-<img src='figures/flow_jjhistostats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjhistostats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjpiestats** 
+<!-- **Workflow for ClinicoPath::jjpiestats**  -->
 
 
 
-<img src='figures/flow_jjpiestats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjpiestats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjscatterstats** 
+<!-- **Workflow for ClinicoPath::jjscatterstats**  -->
 
 
-<img src='figures/flow_jjscatterstats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjscatterstats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
-**Workflow for ClinicoPath::jjwithinstats** 
+<!-- **Workflow for ClinicoPath::jjwithinstats**  -->
 
 
-<img src='figures/flow_jjwithinstats.png' align='center' width = 75% />
+<!-- <img src='figures/flow_jjwithinstats.png' align='center' width = 75% /> -->
 
 
----
+<!-- --- -->
 
 
 

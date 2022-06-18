@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(ClinicoPath)
+# library(ClinicoPath)
 ```
 
 
 
 
 ```{r run all examples}
-devtools::run_examples()
+# devtools::run_examples()
 ```
 
 

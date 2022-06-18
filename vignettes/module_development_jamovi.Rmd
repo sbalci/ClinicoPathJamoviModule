@@ -4276,3 +4276,56 @@ if(!require(jmvtools)) install.packages('jmvtools', repos='https://repo.jamovi.o
 jmvtools::install(home='/app/bin/')
 flatpak install flathub org.freedesktop.Sdk.Extension.gfortran-62
 ```
+
+
+
+
+
+
+<!-- Serdar Balci -->
+<!--   2 months ago -->
+<!-- At least I am now getting a different error :slightly_smiling_face: -->
+
+<!-- > jmvtools::prepare() -->
+
+<!-- jamovi compiler -->
+
+<!-- jamovi 2.3.2 found at /usr/bin/flatpak -->
+<!-- error: runtime/org.freedesktop.Sdk/x86_64/21.08 not installed -->
+
+<!-- Error: Command failed: "flatpak" run --devel org.jamovi.jamovi "-R" --version -->
+<!-- error: runtime/org.freedesktop.Sdk/x86_64/21.08 not installed -->
+
+<!--   at checkExecSyncError (node:child_process:828:11) -->
+<!--   at Object.execSync (node:child_process:902:15) -->
+<!--   at /home/parallels/R/x86_64-pc-linux-gnu-library/4.1/jmvtools/node_modules/jamovi-compiler/index.js:214:40 -->
+<!--   at Object.<anonymous> (/home/parallels/R/x86_64-pc-linux-gnu-library/4.1/jmvtools/node_modules/jamovi-compiler/index.js:580:3) -->
+<!--   at Module._compile (node:internal/modules/cjs/loader:1103:14) -->
+<!--   at Object.Module._extensions..js (node:internal/modules/cjs/loader:1157:10) -->
+<!--   at Module.load (node:internal/modules/cjs/loader:981:32) -->
+<!--   at Function.Module._load (node:internal/modules/cjs/loader:822:12) -->
+<!--   at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12) -->
+<!--   at node:internal/main/run_main_module:17:47 -->
+
+<!-- Command failed: "flatpak" run --devel org.jamovi.jamovi "-R" --version -->
+<!-- error: runtime/org.freedesktop.Sdk/x86_64/21.08 not installed -->
+<!-- (edited) -->
+
+
+<!-- jonathon -->
+<!-- :whale2:  2 months ago -->
+<!-- flatpak install flathub org.freedesktop.Sdk//21.08 -->
+
+
+<!-- Serdar Balci -->
+<!--   2 months ago -->
+<!-- Thank you, seems to work now. -->
+<!-- You have a warning message: -->
+
+<!-- (node:4706) [DEP0128] DeprecationWarning: Invalid 'main' field in '/home/parallels/R/x86_64-pc-linux-gnu-library/4.1/jmvtools/node_modules/jamovi-compiler/node_modules/po2json/package.json' of './lib/po2json'. Please either fix that or report it to the module author -->
+<!-- (Use `node --trace-deprecation ...` to show where the warning was created) -->
+
+
+<!-- jonathon -->
+<!-- :whale2:  2 months ago -->
+<!-- oh yeah, i’ve got enough on my plate, to worry about warnings :stuck_out_tongue: -->

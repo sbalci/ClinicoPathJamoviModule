@@ -96,7 +96,7 @@ docs_pkgdown
 
 _pkgdown.yml
 build
-ClinicoPath.Rproj
+*.Rproj
 codecov.yml
 codemeta.json
 docs
