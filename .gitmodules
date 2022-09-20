@@ -1,0 +1,18 @@
+[submodule "jsurvival"]
+	path = jsurvival
+	url = https://github.com/sbalci/jsurvival
+[submodule "ClinicoPathDescriptives"]
+	path = ClinicoPathDescriptives
+	url = https://github.com/sbalci/ClinicoPathDescriptives/
+[submodule "ClinicoPathLinuxDescriptives"]
+	path = ClinicoPathLinuxDescriptives
+	url = https://github.com/sbalci/ClinicoPathLinuxDescriptives/
+[submodule "jjstatsplot"]
+	path = jjstatsplot
+	url = https://github.com/sbalci/jjstatsplot
+[submodule "meddecide"]
+	path = meddecide
+	url = https://github.com/sbalci/meddecide/
+[submodule "jbbplot"]
+	path = jbbplot
+	url = https://github.com/sbalci/jbbplot/
