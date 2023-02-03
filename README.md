@@ -23,7 +23,9 @@ tables, survival curves, and natural language summaries.
 ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
 <a href="https://www.buymeacoffee.com/bS0teIs" target="_blank">
 
-<https://zenodo.org/account/settings/github/repository/sbalci/ClinicoPathJamoviModule>
+
+
+[![DOI](https://zenodo.org/badge/224154555.svg)](https://zenodo.org/badge/latestdoi/224154555)
 
 DOI 10.17605/OSF.IO/9SZUD
 
