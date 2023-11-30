@@ -1,8 +1,4 @@
 #' @title Pie Charts
-#'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'

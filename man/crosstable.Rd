@@ -9,7 +9,7 @@ crosstable(
   vars,
   group,
   sty = "nejm",
-  excl = TRUE,
+  excl = FALSE,
   cont = "mean",
   pcat = "chisq"
 )
@@ -33,6 +33,7 @@ crosstable(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr

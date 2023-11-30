@@ -1,6 +1,4 @@
 #' @title Decision Tree
-#'
-#'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
 #'

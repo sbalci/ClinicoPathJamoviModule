@@ -21,3 +21,4 @@ children:
             name: outcome
             maxItemCount: 1
             isTarget: true
+            fitToGrid: true

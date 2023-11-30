@@ -1,0 +1,231 @@
+---
+name:  singlearm
+title: Single Arm Survival
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Survival for whole group, no explanatory factor'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Generating Summaries for Survival Analysis.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+
+options:
+
+    # - name: lang
+    #   title: Language
+    #   type: List
+    #   options:
+    #     - title: English
+    #       name: English
+    #     - title: Türkçe
+    #       name: Türkçe
+    #     - title: Deutsch
+    #       name: Deutsch
+    #   default: English
+    #   description:
+    #       R: select language
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: 'Time Elapsed'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+
+    - name: dxdate
+      title: 'Diagnosis Date'
+      type: Variable
+
+    - name: fudate
+      title: 'Follow-up Date'
+      type: Variable
+
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: dooc
+      title: Dead of Other
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: awd
+      title: Alive w Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+    - name: awod
+      title: Alive w/o Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+
+    - name: analysistype
+      title: 'Survival Type'
+      type: List
+      options:
+        - title: Overall
+          name: overall
+        - title: Cause Specific
+          name: cause
+        # - title: Competing Risk
+        #   name: compete
+      default: overall
+
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+
+
+
+
+    - name: cutp
+      title: Cutpoints
+      type: String
+      default: '12, 36, 60'
+
+
+    - name: timetypedata
+      title: 'Time Type in Data (default: YYYY-MM-DD)'
+      type: List
+      options:
+        - title: ymdhms
+          name: ymdhms
+        - title: ymd
+          name: ymd
+        - title: ydm
+          name: ydm
+        - title: mdy
+          name: mdy
+        - title: myd
+          name: myd
+        - title: dmy
+          name: dmy
+        - title: dym
+          name: dym
+      default: ymd
+      description:
+          R: select the time type in data
+
+
+    - name: timetypeoutput
+      title: Time Type in Output
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+          R: select the time type in output
+
+
+    - name: uselandmark
+      title: Use Landmark Time
+      type: Bool
+      default: false
+
+    - name: landmark
+      title: Landmark Time
+      type: Integer
+      default: 3
+
+
+    - name: sc
+      title: Survival Plot
+      type: Bool
+      default: false
+
+    - name: kmunicate
+      title: KMunicate-Style Plot
+      type: Bool
+      default: false
+
+
+    - name: ce
+      title: Cumulative Events
+      type: Bool
+      default: false
+
+
+    - name: ch
+      title: Cumulative Hazard
+      type: Bool
+      default: false
+
+
+    - name: endplot
+      title: Plot End Time
+      type: Integer
+      default: 60
+
+
+    - name: byplot
+      title: Time Interval
+      type: Integer
+      default: 12
+
+
+    - name: multievent
+      title: Multiple Event Levels
+      type: Bool
+      default: false
+
+    - name: ci95
+      title: '95% CI'
+      type: Bool
+      default: false
+
+    - name: risktable
+      title: risktable
+      type: Bool
+      default: false
+
+    - name: censored
+      title: censored
+      type: Bool
+      default: false
+
+
+...
+

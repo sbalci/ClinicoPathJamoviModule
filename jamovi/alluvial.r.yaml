@@ -58,7 +58,8 @@ items:
 
 refs:
     - easyalluvial
-    # - parcats
     - ClinicoPathJamoviModule
+    # - parcats
+
 
 ...

@@ -35,6 +35,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ci95 = FALSE,
             risktable = FALSE,
             censored = FALSE,
+            pplot = TRUE,
             sas = FALSE, ...) {
 
             super$initialize(
@@ -203,6 +204,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "censored",
                 censored,
                 default=FALSE)
+            private$..pplot <- jmvcore::OptionBool$new(
+                "pplot",
+                pplot,
+                default=TRUE)
             private$..sas <- jmvcore::OptionBool$new(
                 "sas",
                 sas,
@@ -239,6 +244,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
+            self$.addOption(private$..pplot)
             self$.addOption(private$..sas)
         }),
     active = list(
@@ -273,6 +279,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
         censored = function() private$..censored$value,
+        pplot = function() private$..pplot$value,
         sas = function() private$..sas$value),
     private = list(
         ..elapsedtime = NA,
@@ -306,6 +313,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ci95 = NA,
         ..risktable = NA,
         ..censored = NA,
+        ..pplot = NA,
         ..sas = NA)
 )
 
@@ -313,6 +321,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalResults",
     inherit = jmvcore::Group,
     active = list(
+        subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
@@ -335,11 +344,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="`Survival Analysis - ${explanatory}`",
+                title="Survival Analysis",
                 refs=list(
                     "finalfit",
                     "survival",
-                    "survminer"))
+                    "survminer",
+                    "survivaltutorial",
+                    "survivalrviews",
+                    "appliedsurvivalanalysisR",
+                    "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="subtitle",
+                title="`Survival Analysis - ${explanatory}`"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -380,7 +397,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="records", 
                         `title`="Records", 
-                        `type`="number"),
+                        `type`="integer"),
                     list(
                         `name`="events", 
                         `title`="Events", 
@@ -613,7 +630,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "pplot")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -742,7 +760,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'none')
         }))
 
 #' Survival Analysis
@@ -782,9 +801,11 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ci95 .
 #' @param risktable .
 #' @param censored .
+#' @param pplot .
 #' @param sas .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
@@ -841,6 +862,7 @@ survival <- function(
     ci95 = FALSE,
     risktable = FALSE,
     censored = FALSE,
+    pplot = TRUE,
     sas = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -892,6 +914,7 @@ survival <- function(
         ci95 = ci95,
         risktable = risktable,
         censored = censored,
+        pplot = pplot,
         sas = sas)
 
     analysis <- survivalClass$new(

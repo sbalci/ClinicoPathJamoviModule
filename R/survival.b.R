@@ -40,8 +40,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                          is.null(self$options$dxdate) || is.null(self$options$fudate)
                      )) ||
 
-                    is.null(self$options$explanatory)) {
-                    todo <- glue::glue(
+                    ((is.null(self$options$explanatory)) || (is.null(self$explanatory$sas)))) {
+
+                  todo <- glue::glue(
                         "
                 <br>Welcome to ClinicoPath
                 <br><br>
@@ -319,9 +320,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Landmark ----
                 # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#landmark_method
                 if (self$options$uselandmark) {
+
+                  landmark <- jmvcore::toNumeric(self$options$landmark)
+
                     cleanData <- cleanData %>%
-                        dplyr::filter(mytime >= self$options$landmark) %>%
-                        dplyr::mutate(mytime = mytime - self$options$landmark)
+                        dplyr::filter(mytime >= landmark) %>%
+                        dplyr::mutate(mytime = mytime - landmark)
                 }
 
                 # Time Dependent Covariate ----
@@ -435,6 +439,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.todo()
 
                     return()
+                } else {
+                  self$results$todo$setVisible(FALSE)
                 }
 
                 # Empty data ----
@@ -511,6 +517,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 km_fit_median_df <- summary(km_fit)
 
+
+                # medianSummary2 <-
+                #   as.data.frame(km_fit_median_df$table)
+                # self$results$medianSummary2$setContent(medianSummary2)
+
+
+
                 results1html <-
                     as.data.frame(km_fit_median_df$table) %>%
 
@@ -544,11 +557,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 "."
                             )
                     ) %>%
-                    dplyr::mutate(description = gsub(
-                        pattern = "=",
-                        replacement = " is ",
-                        x = description
-                    )) %>%
+                  dplyr::mutate(
+                    description = dplyr::case_when(
+                      is.na(median) ~ paste0(
+                        glue::glue("{description} \n Note that when {factor}, the survival curve does not drop below 1/2 during \n the observation period, thus the median survival is undefined.")),
+                      TRUE ~ paste0(description)
+                    )
+                  ) %>%
+                  dplyr::mutate(description = gsub(
+                    pattern = "=",
+                    replacement = " is ",
+                    x = description
+                  )) %>%
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> km_fit_median_definition
 
@@ -597,6 +617,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
 
+
                 tCoxtext2 <- glue::glue("
                                 <br>
                                 <b>Model Metrics:</b>
@@ -605,6 +626,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                         "
                                 <br>
                                 ")
+
+                if (self$options$uselandmark) {
+
+                  landmark <- jmvcore::toNumeric(self$options$landmark)
+
+                  tCoxtext2 <- glue::glue(tCoxtext2,
+                                          "Landmark time used as: ",
+                                          landmark, " ",
+                                          self$options$timetypeoutput, "."
+                  )
+                }
 
 
                 self$results$tCoxtext2$setContent(tCoxtext2)
@@ -916,8 +948,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         dependent = myformula,
                         explanatory = myfactor,
                         xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-                        pval = TRUE,
-                        pval.method	= TRUE,
+                        pval = self$options$pplot,
+                        pval.method	= self$options$pplot,
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
@@ -984,7 +1016,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         dependent = myformula,
                         explanatory = myfactor,
                         xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-                        # pval = TRUE,
+                        pval = self$options$pplot,
+                        pval.method	= self$options$pplot,
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
@@ -1050,7 +1083,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         dependent = myformula,
                         explanatory = myfactor,
                         xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-                        # pval = TRUE,
+                        pval = self$options$pplot,
+                        pval.method	= self$options$pplot,
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),

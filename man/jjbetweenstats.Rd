@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjbetweenstats.h.R
 \name{jjbetweenstats}
 \alias{jjbetweenstats}
-\title{Violin Plots to Compare Between Groups}
+\title{Box-Violin Plots to Compare Between Groups}
 \usage{
 jjbetweenstats(
   data,
@@ -50,7 +50,7 @@ A results object containing:
 }
 }
 \description{
-Violin Plots to Compare Between Groups
+Box-Violin Plots to Compare Between Groups
 }
 \examples{
 \dontrun{

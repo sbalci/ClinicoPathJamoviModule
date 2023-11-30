@@ -83,7 +83,7 @@ options:
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
-      default: true
+      default: false
 
     - name: vp
       title: Valid Percentages
@@ -171,6 +171,10 @@ options:
           name: leafonly
       default: leafonly
 
+    - name: maxwidth
+      title: Image Width
+      type: Integer
+      default: 100
 
     # - name: width
     #   title: Image Width

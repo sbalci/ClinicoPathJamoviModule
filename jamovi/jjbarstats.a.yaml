@@ -69,6 +69,62 @@ options:
       type: Bool
       default: true
 
+
+    - name: typestatistics
+      title: 'Type of Statistic'
+      type: List
+      options:
+        - title: Parametric
+          name: parametric
+        - title: Nonparametric
+          name: nonparametric
+        - title: Robust
+          name: robust
+        - title: Bayes
+          name: bayes
+      default: parametric
+
+    - name: pairwisecomparisons
+      title: Pairwise Comparisons
+      type: Bool
+      default: true
+
+    - name: pairwisedisplay
+      title: 'Pairwise Display'
+      type: List
+      options:
+        - title: significant
+          name: significant
+        - title: non-significant
+          name: non-significant
+        - title: everything
+          name: everything
+      default: significant
+
+
+    - name: padjustmethod
+      title: 'Adjustment Method'
+      type: List
+      options:
+        - title: holm
+          name: holm
+        - title: hochberg
+          name: hochberg
+        - title: hommel
+          name: hommel
+        - title: bonferroni
+          name: bonferroni
+        - title: BH
+          name: BH
+        - title: BY
+          name: BY
+        - title: fdr
+          name: fdr
+        - title: none
+          name: none
+      default: holm
+
+
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
@@ -212,3 +268,266 @@ options:
 
 
 ...
+
+
+# ggbarstats(
+#   data,
+#   x,
+#   y,
+#   counts = NULL,
+#   ratio = NULL,
+#   paired = FALSE,
+#   results.subtitle = TRUE,
+#   sample.size.label = TRUE,
+#   label = "percentage",
+#   label.args = list(alpha = 1, fill = "white"),
+#   conf.level = 0.95,
+#   k = 2L,
+#   proportion.test = TRUE,
+#   perc.k = 0,
+#   bf.message = TRUE,
+#   sampling.plan = "indepMulti",
+#   fixed.margin = "rows",
+#   prior.concentration = 1,
+#   title = NULL,
+#   subtitle = NULL,
+#   caption = NULL,
+#   legend.title = NULL,
+#   xlab = NULL,
+#   ylab = NULL,
+#   ggtheme = ggplot2::theme_bw(),
+#   ggstatsplot.layer = TRUE,
+#   package = "RColorBrewer",
+#   palette = "Dark2",
+#   ggplot.component = NULL,
+#   output = "plot",
+#   ...
+# )
+# Arguments
+# data
+# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
+#
+# x
+# The variable to use as the rows in the contingency table.
+#
+# y
+# The variable to use as the columns in the contingency table. Default is NULL. If NULL, one-sample proportion test (a goodness of fit test) will be run for the x variable. Otherwise an appropriate association test will be run. This argument can not be NULL for ggbarstats function.
+#
+# counts
+# A string naming a variable in data containing counts, or NULL if each row represents a single observation.
+#
+# ratio
+# A vector of proportions: the expected proportions for the proportion test (should sum to 1). Default is NULL, which means the null is equal theoretical proportions across the levels of the nominal variable. This means if there are two levels this will be ratio = c(0.5,0.5) or if there are four levels this will be ratio = c(0.25,0.25,0.25,0.25), etc.
+#
+# paired
+# Logical indicating whether data came from a within-subjects or repeated measures design study (Default: FALSE). If TRUE, McNemar's test subtitle will be returned. If FALSE, Pearson's chi-square test will be returned.
+#
+# results.subtitle
+# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+#
+# sample.size.label
+# Logical that decides whether sample size information should be displayed for each level of the grouping variable y (Default: TRUE).
+#
+# label
+# Character decides what information needs to be displayed on the label in each pie slice. Possible options are "percentage" (default), "counts", "both".
+#
+# label.args
+# Additional aesthetic arguments that will be passed to geom_label.
+#
+# conf.level
+# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+#
+# k
+# Number of digits after decimal point (should be an integer) (Default: k = 2L).
+#
+# proportion.test
+# Decides whether proportion test for x variable is to be carried out for each level of y (Default: TRUE).
+#
+# perc.k
+# Numeric that decides number of decimal places for percentage labels (Default: 0).
+#
+# bf.message
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+#
+# sampling.plan
+# Character describing the sampling plan. Possible options are "indepMulti" (independent multinomial; default), "poisson", "jointMulti" (joint multinomial), "hypergeom" (hypergeometric). For more, see ?BayesFactor::contingencyTableBF().
+#
+# fixed.margin
+# For the independent multinomial sampling plan, which margin is fixed ("rows" or "cols"). Defaults to "rows".
+#
+# prior.concentration
+# Specifies the prior concentration parameter, set to 1 by default. It indexes the expected deviation from the null hypothesis under the alternative, and corresponds to Gunel and Dickey's (1974) "a" parameter.
+#
+# title
+# The text for the plot title.
+#
+# subtitle
+# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
+#
+# caption
+# The text for the plot caption.
+#
+# legend.title
+# Title text for the legend.
+#
+# xlab
+# Custom text for the x axis label (Default: NULL, which will cause the x axis label to be the x variable).
+#
+# ylab
+# Custom text for the y axis label (Default: NULL).
+#
+# ggtheme
+# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
+#
+# ggstatsplot.layer
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+#
+# package
+# Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
+#
+# palette
+# Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
+#
+# ggplot.component
+# A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
+#
+# output
+# Character that describes what is to be returned: can be "plot" (default) or "subtitle" or "caption". Setting this to "subtitle" will return the expression containing statistical results. If you have set results.subtitle = FALSE, then this will return a NULL. Setting this to "caption" will return the expression containing details about Bayes Factor analysis, but valid only when type = "parametric" and bf.message = TRUE, otherwise this will return a NULL. For functions ggpiestats and ggbarstats, setting output = "proptest" will return a dataframe containing results from proportion tests.
+#
+#
+# grouped_ggbarstats(
+#   data,
+#   x,
+#   y,
+#   counts = NULL,
+#   grouping.var,
+#   title.prefix = NULL,
+#   output = "plot",
+#   ...,
+#   plotgrid.args = list(),
+#   title.text = NULL,
+#   title.args = list(size = 16, fontface = "bold"),
+#   caption.text = NULL,
+#   caption.args = list(size = 10),
+#   sub.text = NULL,
+#   sub.args = list(size = 12)
+# )
+# Arguments
+# data
+# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
+#
+# x
+# The variable to use as the rows in the contingency table.
+#
+# y
+# The variable to use as the columns in the contingency table. Default is NULL. If NULL, one-sample proportion test (a goodness of fit test) will be run for the x variable. Otherwise an appropriate association test will be run. This argument can not be NULL for ggbarstats function.
+#
+# counts
+# A string naming a variable in data containing counts, or NULL if each row represents a single observation.
+#
+# grouping.var
+# A single grouping variable (can be entered either as a bare name x or as a string "x").
+#
+# title.prefix
+# Character string specifying the prefix text for the fixed plot title (name of each factor level) (Default: NULL). If NULL, the variable name entered for grouping.var will be used.
+#
+# output
+# Character that describes what is to be returned: can be "plot" (default) or "subtitle" or "caption". Setting this to "subtitle" will return the expression containing statistical results. If you have set results.subtitle = FALSE, then this will return a NULL. Setting this to "caption" will return the expression containing details about Bayes Factor analysis, but valid only when type = "parametric" and bf.message = TRUE, otherwise this will return a NULL. For functions ggpiestats and ggbarstats, setting output = "proptest" will return a dataframe containing results from proportion tests.
+#
+# ...
+# Arguments passed on to ggbarstats
+#
+# xlab
+# Custom text for the x axis label (Default: NULL, which will cause the x axis label to be the x variable).
+#
+# ylab
+# Custom text for the y axis label (Default: NULL).
+#
+# sample.size.label
+# Logical that decides whether sample size information should be displayed for each level of the grouping variable y (Default: TRUE).
+#
+# ratio
+# A vector of proportions: the expected proportions for the proportion test (should sum to 1). Default is NULL, which means the null is equal theoretical proportions across the levels of the nominal variable. This means if there are two levels this will be ratio = c(0.5,0.5) or if there are four levels this will be ratio = c(0.25,0.25,0.25,0.25), etc.
+#
+# paired
+# Logical indicating whether data came from a within-subjects or repeated measures design study (Default: FALSE). If TRUE, McNemar's test subtitle will be returned. If FALSE, Pearson's chi-square test will be returned.
+#
+# results.subtitle
+# Decides whether the results of statistical tests are to be displayed as a subtitle (Default: TRUE). If set to FALSE, only the plot will be returned.
+#
+# label
+# Character decides what information needs to be displayed on the label in each pie slice. Possible options are "percentage" (default), "counts", "both".
+#
+# label.args
+# Additional aesthetic arguments that will be passed to geom_label.
+#
+# conf.level
+# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+#
+# k
+# Number of digits after decimal point (should be an integer) (Default: k = 2L).
+#
+# proportion.test
+# Decides whether proportion test for x variable is to be carried out for each level of y (Default: TRUE).
+#
+# perc.k
+# Numeric that decides number of decimal places for percentage labels (Default: 0).
+#
+# bf.message
+# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
+#
+# sampling.plan
+# Character describing the sampling plan. Possible options are "indepMulti" (independent multinomial; default), "poisson", "jointMulti" (joint multinomial), "hypergeom" (hypergeometric). For more, see ?BayesFactor::contingencyTableBF().
+#
+# fixed.margin
+# For the independent multinomial sampling plan, which margin is fixed ("rows" or "cols"). Defaults to "rows".
+#
+# prior.concentration
+# Specifies the prior concentration parameter, set to 1 by default. It indexes the expected deviation from the null hypothesis under the alternative, and corresponds to Gunel and Dickey's (1974) "a" parameter.
+#
+# subtitle
+# The text for the plot subtitle. Will work only if results.subtitle = FALSE.
+#
+# caption
+# The text for the plot caption.
+#
+# legend.title
+# Title text for the legend.
+#
+# ggtheme
+# A function, ggplot2 theme name. Default value is ggplot2::theme_bw(). Any of the ggplot2 themes, or themes from extension packages are allowed (e.g., ggthemes::theme_fivethirtyeight(), hrbrthemes::theme_ipsum_ps(), etc.).
+#
+# ggstatsplot.layer
+# Logical that decides whether theme_ggstatsplot theme elements are to be displayed along with the selected ggtheme (Default: TRUE). theme_ggstatsplot is an opinionated theme layer that override some aspects of the selected ggtheme.
+#
+# package
+# Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
+#
+# palette
+# Name of the package from which the given palette is to be extracted. The available palettes and packages can be checked by running View(paletteer::palettes_d_names).
+#
+# ggplot.component
+# A ggplot component to be added to the plot prepared by ggstatsplot. This argument is primarily helpful for grouped_ variant of the current function. Default is NULL. The argument should be entered as a function.
+#
+# plotgrid.args
+# A list of additional arguments to cowplot::plot_grid.
+#
+# title.text
+# String or plotmath expression to be drawn as title for the combined plot.
+#
+# title.args
+# A list of additional arguments provided to title, caption and sub, resp.
+#
+# caption.text
+# String or plotmath expression to be drawn as the caption for the combined plot.
+#
+# caption.args
+# A list of additional arguments provided to title, caption and sub, resp.
+#
+# sub.text
+# The label with which the combined plot should be annotated. Can be a plotmath expression.
+#
+# sub.args
+# A list of additional arguments provided to title, caption and sub, resp.
+#
+#

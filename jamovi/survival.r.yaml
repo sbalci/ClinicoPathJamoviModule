@@ -1,11 +1,16 @@
 ---
 name:  survival
-# title: Survival Analysis
-title: '`Survival Analysis - ${explanatory}`'
+title: Survival Analysis
+# title: '`Survival Analysis - ${explanatory}`'
 jrs:   '1.1'
 
 
 items:
+    - name: subtitle
+      title: '`Survival Analysis - ${explanatory}`'
+      type:  Preformatted
+
+
 
     - name:  todo
       title: To Do
@@ -24,6 +29,12 @@ items:
     # - name:  mydataview
     #   title: mydataview
     #   type:  Preformatted
+
+
+    # - name:  medianSummary2
+    #   title: medianSummary2
+    #   type:  Preformatted
+
 
 
     - name:  medianSummary
@@ -55,7 +66,7 @@ items:
           type: text
         - name: records
           title: "Records"
-          type: number
+          type: integer
         # - name: n_max
         #   title: "n_max"
         #   type: number
@@ -300,6 +311,7 @@ items:
           - dxdate
           - tint
           - multievent
+          - pplot
 
 
 
@@ -426,5 +438,9 @@ refs:
     - finalfit
     - survival
     - survminer
+    - survivaltutorial
+    - survivalrviews
+    - appliedsurvivalanalysisR
+    - ClinicoPathJamoviModule
 
 ...

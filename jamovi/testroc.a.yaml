@@ -1,0 +1,178 @@
+---
+name:  TestROC
+title: Test ROC
+menuGroup: PPDA
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dependentVars
+      title: Dependent Variable
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: classVar
+      title: Class Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+
+    - name: subGroup
+      title: Group Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+
+    - name: method
+      title: Method
+      type: List
+      options:
+        - name: oc_manual
+          title: "Custom cut score"
+        - name: maximize_metric
+          title: Maximize metric
+        - name: minimize_metric
+          title: Minimize metric
+        - name: maximize_loess_metric
+          title: Maximize metric (LOESS)
+        - name: minimize_loess_metric
+          title: Minimize metric (LOESS)
+        - name: maximize_spline_metric
+          title: Maximize metric (spline)
+        - name: minimize_spline_metric
+          title: Minimize metric (spline)
+        - name: maximize_boot_metric
+          title: Maximize metric (boot)
+        - name: minimize_boot_metric
+          title: Minimize metric (boot)
+        - name: oc_youden_kernel
+          title: "Maximize Youden-Index (Kernel smoothed)"
+        - name: oc_youden_normal
+          title: "Maximize Youden-Index (Parametric normal)"
+      default: maximize_metric
+
+
+    - name: allObserved
+      title: All observed scores
+      type: Bool
+
+    - name: specifyCutScore
+      title: Specify cut score
+      type: String
+      default: ""
+
+    - name: metric
+      title: Metric
+      type: List
+      options:
+        - name: sum_sens_spec
+          title: 'Sum: Sens/Spec'
+        - name: accuracy
+          title: Accuracy
+        - name: youden
+          title: Youden-Index
+        - name: sum_ppv_npv
+          title: 'Sum: PPV/NPV'
+        - name: prod_sens_spec
+          title: 'Prod: Sens/Spec'
+        - name: prod_ppv_npv
+          title: 'Prod: PPV/NPV'
+        - name: cohens_kappa
+          title: "Cohen's Kappa"
+        - name: abs_d_sens_spec
+          title: 'Abs. d: Sens/Spec'
+        - name: roc01
+          title: 'ROC'
+        - name: abs_d_ppv_npv
+          title: 'Abs. d: PPV/NPV'
+        - name: p_chisquared
+          title: 'Chi-squared'
+        - name: odds_ratio
+          title: Odds Ratio
+        - name: risk_ratio
+          title: Risk Ratio
+        - name: misclassification_cost
+          title: Misclassification Cost
+        - name: total_utility
+          title: Total Utility
+        - name: F1_score
+          title: F1 score
+
+    - name: boot_runs
+      title: Bootstrap runs
+      type: Number
+
+#    - name: use_midpoint
+#      title: Use midpoint
+#      type: Bool
+
+    - name: break_ties
+      title: Ties
+      type: List
+      options:
+        - name: c
+          title: All optimal cutpoints
+        - name: mean
+          title: Mean optimal cutpoint
+        - name: median
+          title: Median optimal cutpoint
+
+    - name: tol_metric
+      title: Tolerance metric
+      type: Number
+      default: 0.05
+
+    - name: direction
+      title: Direction
+      type: List
+      options:
+        - name: ">="
+          title: ">="
+        - name: "<="
+          title: "<="
+
+    - name: plotROC
+      title: ROC Curves
+      type: Bool
+      default: True
+
+    - name: combinePlots
+      title: Combine plots
+      type: Bool
+      default: True
+
+    - name: displaySE
+      title: Standard error bars
+      type: Bool
+      default: False
+
+    - name: smoothing
+      title: LOESS smoothing
+      type: Bool
+      default: False
+
+    - name: sensSpecTable
+      title: Sensitivity-specificity tables
+      type: Bool
+      default: False
+
+    - name: delongTest
+      title: DeLong's test
+      type: Bool
+      default: False
+
+    - name: positiveClass
+      title: Positive class
+      type: String
+      default: ""
+...

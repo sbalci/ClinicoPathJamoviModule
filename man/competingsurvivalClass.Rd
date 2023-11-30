@@ -9,51 +9,51 @@ Competing Survival Analysis
 Competing Survival Analysis
 }
 \section{Super classes}{
-\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{\link[ClinicoPath:competingsurvivalBase]{ClinicoPath::competingsurvivalBase}} -> \code{competingsurvivalClass}
+\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::competingsurvivalBase} -> \code{competingsurvivalClass}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-clone}{\code{competingsurvivalClass$clone()}}
+\item \href{#method-competingsurvivalClass-clone}{\code{competingsurvivalClass$clone()}}
 }
 }
-\if{html}{
-\out{<details ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImage">}\href{../../jmvcore/html/Analysis.html#method-.createImage}{\code{jmvcore::Analysis$.createImage()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImages">}\href{../../jmvcore/html/Analysis.html#method-.createImages}{\code{jmvcore::Analysis$.createImages()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createPlotObject">}\href{../../jmvcore/html/Analysis.html#method-.createPlotObject}{\code{jmvcore::Analysis$.createPlotObject()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".load">}\href{../../jmvcore/html/Analysis.html#method-.load}{\code{jmvcore::Analysis$.load()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".render">}\href{../../jmvcore/html/Analysis.html#method-.render}{\code{jmvcore::Analysis$.render()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".save">}\href{../../jmvcore/html/Analysis.html#method-.save}{\code{jmvcore::Analysis$.save()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".savePart">}\href{../../jmvcore/html/Analysis.html#method-.savePart}{\code{jmvcore::Analysis$.savePart()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setCheckpoint">}\href{../../jmvcore/html/Analysis.html#method-.setCheckpoint}{\code{jmvcore::Analysis$.setCheckpoint()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setParent">}\href{../../jmvcore/html/Analysis.html#method-.setParent}{\code{jmvcore::Analysis$.setParent()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setReadDatasetHeaderSource">}\href{../../jmvcore/html/Analysis.html#method-.setReadDatasetHeaderSource}{\code{jmvcore::Analysis$.setReadDatasetHeaderSource()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setReadDatasetSource">}\href{../../jmvcore/html/Analysis.html#method-.setReadDatasetSource}{\code{jmvcore::Analysis$.setReadDatasetSource()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setResourcesPathSource">}\href{../../jmvcore/html/Analysis.html#method-.setResourcesPathSource}{\code{jmvcore::Analysis$.setResourcesPathSource()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource">}\href{../../jmvcore/html/Analysis.html#method-.setStatePathSource}{\code{jmvcore::Analysis$.setStatePathSource()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon">}\href{../../jmvcore/html/Analysis.html#method-addAddon}{\code{jmvcore::Analysis$addAddon()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf">}\href{../../jmvcore/html/Analysis.html#method-asProtoBuf}{\code{jmvcore::Analysis$asProtoBuf()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource">}\href{../../jmvcore/html/Analysis.html#method-asSource}{\code{jmvcore::Analysis$asSource()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check">}\href{../../jmvcore/html/Analysis.html#method-check}{\code{jmvcore::Analysis$check()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init">}\href{../../jmvcore/html/Analysis.html#method-init}{\code{jmvcore::Analysis$init()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler">}\href{../../jmvcore/html/Analysis.html#method-optionsChangedHandler}{\code{jmvcore::Analysis$optionsChangedHandler()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit">}\href{../../jmvcore/html/Analysis.html#method-postInit}{\code{jmvcore::Analysis$postInit()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print">}\href{../../jmvcore/html/Analysis.html#method-print}{\code{jmvcore::Analysis$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="readDataset">}\href{../../jmvcore/html/Analysis.html#method-readDataset}{\code{jmvcore::Analysis$readDataset()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="run">}\href{../../jmvcore/html/Analysis.html#method-run}{\code{jmvcore::Analysis$run()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="serialize">}\href{../../jmvcore/html/Analysis.html#method-serialize}{\code{jmvcore::Analysis$serialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError">}\href{../../jmvcore/html/Analysis.html#method-setError}{\code{jmvcore::Analysis$setError()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus">}\href{../../jmvcore/html/Analysis.html#method-setStatus}{\code{jmvcore::Analysis$setStatus()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate">}\href{../../jmvcore/html/Analysis.html#method-translate}{\code{jmvcore::Analysis$translate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="ClinicoPath" data-topic="competingsurvivalBase" data-id="initialize">}\href{../../ClinicoPath/html/competingsurvivalBase.html#method-initialize}{\code{ClinicoPath::competingsurvivalBase$initialize()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImage"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createImage'><code>jmvcore::Analysis$.createImage()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImages"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createImages'><code>jmvcore::Analysis$.createImages()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createPlotObject"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createPlotObject'><code>jmvcore::Analysis$.createPlotObject()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".load"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.load'><code>jmvcore::Analysis$.load()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".render"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.render'><code>jmvcore::Analysis$.render()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".save"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.save'><code>jmvcore::Analysis$.save()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".savePart"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.savePart'><code>jmvcore::Analysis$.savePart()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setCheckpoint"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setCheckpoint'><code>jmvcore::Analysis$.setCheckpoint()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setParent"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setParent'><code>jmvcore::Analysis$.setParent()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setReadDatasetHeaderSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setReadDatasetHeaderSource'><code>jmvcore::Analysis$.setReadDatasetHeaderSource()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setReadDatasetSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setReadDatasetSource'><code>jmvcore::Analysis$.setReadDatasetSource()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setResourcesPathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setResourcesPathSource'><code>jmvcore::Analysis$.setResourcesPathSource()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="readDataset"><a href='../../jmvcore/html/Analysis.html#method-Analysis-readDataset'><code>jmvcore::Analysis$readDataset()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="run"><a href='../../jmvcore/html/Analysis.html#method-Analysis-run'><code>jmvcore::Analysis$run()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="serialize"><a href='../../jmvcore/html/Analysis.html#method-Analysis-serialize'><code>jmvcore::Analysis$serialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setError'><code>jmvcore::Analysis$setError()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setStatus'><code>jmvcore::Analysis$setStatus()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate"><a href='../../jmvcore/html/Analysis.html#method-Analysis-translate'><code>jmvcore::Analysis$translate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="ClinicoPath" data-topic="competingsurvivalBase" data-id="initialize"><a href='../../ClinicoPath/html/competingsurvivalBase.html#method-competingsurvivalBase-initialize'><code>ClinicoPath::competingsurvivalBase$initialize()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-competingsurvivalClass-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-competingsurvivalClass-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

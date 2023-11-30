@@ -15,6 +15,12 @@ items:
       visible: (od)
 
 
+    - name:  text2
+      title: Original Data
+      type:  Html
+      visible: (od)
+
+
     # - name:  text2
     #   title: Original Data
     #   type:  Preformatted
@@ -210,7 +216,9 @@ items:
           - pprob
       refs: epiR
 
-
+    # - name:  plotcontent
+    #   title: plotcontent
+    #   type:  Preformatted
 
     # - name:  text3
     #   title: Matrix Details
@@ -245,6 +253,7 @@ items:
 
 refs:
     - DiagnosticTests
+    - ClinicoPathJamoviModule
 
 
 ...

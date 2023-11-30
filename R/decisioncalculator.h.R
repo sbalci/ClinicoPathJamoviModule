@@ -111,7 +111,9 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Medical Decision Calculator",
                 refs=list(
-                    "DiagnosticTests"))
+                    "DiagnosticTests",
+                    "sensspecwiki",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -269,7 +271,9 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 clearWith=list(
                     "pp",
                     "pprob"),
-                refs="epiR"))
+                refs=list(
+                    "epiR",
+                    "sensspecwiki")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_number",
@@ -298,7 +302,9 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 clearWith=list(
                     "pp",
                     "pprob"),
-                refs="epiR"))
+                refs=list(
+                    "epiR",
+                    "sensspecwiki")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -314,7 +320,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "fagan"),
                 refs=list(
                     "Fagan",
-                    "Fagan2")))}))
+                    "Fagan2",
+                    "sensspecwiki")))}))
 
 decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncalculatorBase",
@@ -333,7 +340,8 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'na')
         }))
 
 #' Medical Decision Calculator
@@ -349,7 +357,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param FP .
 #' @param FN .
 #' @param pp .
-#' @param pprob Prior probability (disease prevelance in the community).
+#' @param pprob Prior probability (disease prevalence in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote .
 #' @param ci .

@@ -321,7 +321,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         y = !!group,
                         grouping.var = !!grvar,
 
-                        paired = paired,
+                        # paired = paired,
+                        paired = FALSE,
                         ggtheme = ggtheme,
 
 
@@ -361,7 +362,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             y = !!group,
                             grouping.var = !!grvar,
 
-                            paired = paired,
+                            # paired = paired,
+
+                            paired = FALSE,
 
 
                             counts = NULL,

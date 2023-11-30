@@ -1,6 +1,4 @@
 #' @title Violin Plots to Compare Within Group  for Wide Data Format 3
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'

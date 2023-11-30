@@ -1,6 +1,4 @@
 #' @title Violin Plots to Compare Within Group
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'

@@ -53,6 +53,7 @@ options:
       title: Event Level
       type: Level
       variable: (outcome)
+
     - name: dod
       title: Dead of Disease
       type: Level
@@ -150,6 +151,15 @@ options:
           R: select the time type in output
 
 
+    - name: uselandmark
+      title: Use Landmark Time
+      type: Bool
+      default: false
+
+    - name: landmark
+      title: Landmark Time
+      type: Integer
+      default: 3
 
 
 
@@ -179,17 +189,17 @@ options:
       default: false
 
 
-    - name: ac
-      title: Adjusted Survival Curve
-      type: Bool
-      default: false
+    # - name: ac
+    #   title: Adjusted Survival Curve
+    #   type: Bool
+    #   default: false
 
 
-    - name: adjexplanatory
-      title: Variable for Adjusted Survival Curve
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+    # - name: adjexplanatory
+    #   title: Variable for Adjusted Survival Curve
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
 
 
     - name: endplot
@@ -212,6 +222,16 @@ options:
       title: risktable
       type: Bool
       default: false
+
+    - name: censored
+      title: censored
+      type: Bool
+      default: false
+
+    - name: pplot
+      title: p-value
+      type: Bool
+      default: true
 
     - name: calculatedtime
       title: Add Calculated Time to Data

@@ -1,8 +1,4 @@
 #' @title Violin Plots to Compare Between Groups
-#'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
@@ -24,7 +20,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         }
         ,
-
 
         .run = function() {
 

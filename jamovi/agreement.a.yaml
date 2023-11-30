@@ -33,7 +33,7 @@ options:
 
 
     - name: sft
-      title: Frequency Table
+      title: Frequency Tables
       type: Bool
       default: false
       description:

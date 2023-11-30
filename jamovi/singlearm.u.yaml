@@ -1,0 +1,196 @@
+title: Single Arm Survival
+name: singlearm
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Elapsed
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Outcome
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            fitToGrid: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome && !multievent)
+  - type: CollapseBox
+    label: Advanced Elapsed Time Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Time Interval
+        fitToGrid: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            stretchFactor: 1
+            children:
+              - type: CheckBox
+                name: tint
+                fitToGrid: true
+              - type: Label
+                label: Date Variables
+                fitToGrid: true
+                stretchFactor: 1
+                children:
+                  - type: VariableSupplier
+                    persistentItems: false
+                    stretchFactor: 1
+                    children:
+                      - type: TargetLayoutBox
+                        children:
+                          - type: VariablesListBox
+                            name: dxdate
+                            maxItemCount: 1
+                            isTarget: true
+                            fitToGrid: true
+                            stretchFactor: 1
+                      - type: TargetLayoutBox
+                        children:
+                          - type: VariablesListBox
+                            name: fudate
+                            maxItemCount: 1
+                            isTarget: true
+                            fitToGrid: true
+                            stretchFactor: 1
+      - type: Label
+        label: Time Type
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            fitToGrid: true
+            children:
+              - type: ComboBox
+                name: timetypedata
+                enable: (tint)
+              - type: ComboBox
+                name: timetypeoutput
+      - type: Label
+        label: Landmark Time
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: uselandmark
+                children:
+                  - type: TextBox
+                    name: landmark
+                    format: number
+                    enable: (uselandmark)
+  - type: CollapseBox
+    label: Analysis with Multiple Outcomes
+    collapsed: true
+    children:
+      - type: Label
+        label: Multiple Event Levels
+        fitToGrid: true
+        children:
+          - type: CheckBox
+            name: multievent
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: LevelSelector
+                name: dod
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: dooc
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awd
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awod
+                enable: (outcome && multievent)
+      - type: Label
+        label: Analysis Type
+        children:
+          - type: ComboBox
+            name: analysistype
+            enable: (outcome && multievent)
+  - type: CollapseBox
+    label: Plots
+    collapsed: true
+    children:
+      - type: Label
+        label: Plots
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: CheckBox
+                name: sc
+              - type: CheckBox
+                name: kmunicate
+              - type: CheckBox
+                name: ce
+              - type: CheckBox
+                name: ch
+      - type: Label
+        label: Plot Arguments
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: TextBox
+                name: endplot
+                format: number
+              - type: TextBox
+                name: byplot
+                format: number
+              - type: CheckBox
+                name: ci95
+              - type: CheckBox
+                name: risktable
+              - type: CheckBox
+                name: censored
+  - type: CollapseBox
+    label: Survival Tables
+    collapsed: true
+    children:
+      - type: Label
+        label: Survival table
+        children:
+          - type: TextBox
+            name: cutp
+            format: string
+            width: large
+  - type: CollapseBox
+    label: Save Converted Variables to Data
+    collapsed: true
+    children:
+      - type: Label
+        label: Add Calculated Time to Your Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: calculatedtime
+            enable: (tint)
+            fitToGrid: true
+      - type: Label
+        label: Add Redefined Outcome to Data
+        fitToGrid: true
+        children:
+          - type: Output
+            name: outcomeredifened
+            enable: (multievent)
+            fitToGrid: true

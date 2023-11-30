@@ -1,0 +1,114 @@
+title: Power Approach for the Number of Subjects Required
+name: kappaSizePower
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        margin: large
+        cell:
+          row: 1
+          column: 1
+        children:
+          - type: Label
+            label: Number of Outcome Level
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: ComboBox
+                    name: outcome
+                    label: Outcome Level
+      - type: LayoutBox
+        margin: large
+        cell:
+          row: 1
+          column: 2
+        children:
+          - type: Label
+            label: Number of Raters
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: ComboBox
+                    name: raters
+                    label: Raters
+
+
+
+
+  - type: Label
+    label: Kappa Levels
+    children:
+        - type: LayoutBox
+          margin: large
+          cell:
+            row: 1
+            column: 1
+          children:
+            - type: TextBox
+              name: kappa0
+              label: 'Null Hypothesis'
+              format: number
+        - type: LayoutBox
+          margin: large
+          cell:
+            row: 1
+            column: 2
+          children:
+            - type: TextBox
+              name: kappa1
+              label: 'Alternative Hypothesis'
+              format: number
+
+  - type: Label
+    label: "Proportions of Each Outcome Level"
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 2
+        fitToGrid: true
+        children:
+          - type: TextBox
+            name: props
+            label: ''
+            format: string
+            stretchFactor: 2
+            fitToGrid: true
+
+
+
+  - type: Label
+    label: "Alpha and Power"
+    children:
+        - type: LayoutBox
+          margin: large
+          cell:
+            row: 1
+            column: 1
+          children:
+            - type: LayoutBox
+              margin: large
+              children:
+                - type: TextBox
+                  name: alpha
+                  label: 'Alpha'
+                  format: number
+        - type: LayoutBox
+          margin: large
+          cell:
+            row: 1
+            column: 2
+          children:
+            - type: LayoutBox
+              margin: large
+              children:
+                - type: TextBox
+                  name: power
+                  label: 'Power'
+                  format: number

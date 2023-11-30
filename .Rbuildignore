@@ -96,7 +96,6 @@ docs_pkgdown
 
 _pkgdown.yml
 build
-*.Rproj
 codecov.yml
 codemeta.json
 docs
@@ -111,3 +110,10 @@ others
 pdfs
 tododata
 vignettes
+
+meddecide
+ClinicoPathDescriptives
+ClinicoPathLinuxDescriptives
+jsurvival
+jbbplot
+jjstatsplot

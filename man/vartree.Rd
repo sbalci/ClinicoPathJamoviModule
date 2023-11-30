@@ -16,7 +16,7 @@ vartree(
   follow,
   followLevel1,
   followLevel2,
-  excl = TRUE,
+  excl = FALSE,
   vp = TRUE,
   horizontal = FALSE,
   sline = TRUE,

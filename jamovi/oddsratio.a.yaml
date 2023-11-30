@@ -32,4 +32,9 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
+    # - name: outcomeLevel
+    #   title: Event Level
+    #   type: Level
+    #   variable: (outcome)
+
 ...

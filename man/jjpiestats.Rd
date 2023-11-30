@@ -4,7 +4,18 @@
 \alias{jjpiestats}
 \title{Pie Charts}
 \usage{
-jjpiestats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
+jjpiestats(
+  data,
+  dep,
+  group,
+  grvar,
+  excl = TRUE,
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  pairwisedisplay = "significant",
+  padjustmethod = "holm",
+  originaltheme = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,6 +27,14 @@ jjpiestats(data, dep, group, grvar, excl = TRUE, originaltheme = FALSE)
 \item{grvar}{.}
 
 \item{excl}{.}
+
+\item{typestatistics}{.}
+
+\item{pairwisecomparisons}{.}
+
+\item{pairwisedisplay}{.}
+
+\item{padjustmethod}{.}
 
 \item{originaltheme}{.}
 }

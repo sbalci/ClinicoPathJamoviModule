@@ -29,8 +29,6 @@ items:
 
 refs:
     - benford.analysis
-    - benford.nedir
     - ClinicoPathJamoviModule
-
 
 ...

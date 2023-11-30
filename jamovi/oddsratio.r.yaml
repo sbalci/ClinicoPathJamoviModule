@@ -12,6 +12,12 @@ items:
           - explanatory
           - outcome
 
+
+    # - name:  textmydata
+    #   title: 'textmydata'
+    #   type:  Preformatted
+
+
     - name:  text
       title: Odds Ratio Table
       type:  Html
@@ -50,6 +56,8 @@ items:
 
 refs:
     - finalfit
+    - survivaltutorial
+    - ClinicoPathJamoviModule
 
 
 

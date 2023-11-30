@@ -22,15 +22,17 @@ multisurvival(
   analysistype = "overall",
   timetypedata = "ymd",
   timetypeoutput = "months",
+  uselandmark = FALSE,
+  landmark = 3,
   hr = FALSE,
   sty = "t1",
   km = FALSE,
-  ac = FALSE,
-  adjexplanatory,
   endplot = 60,
   byplot = 12,
   ci95 = FALSE,
-  risktable = FALSE
+  risktable = FALSE,
+  censored = FALSE,
+  pplot = TRUE
 )
 }
 \arguments{
@@ -68,15 +70,15 @@ multisurvival(
 
 \item{timetypeoutput}{select the time type in output}
 
+\item{uselandmark}{.}
+
+\item{landmark}{.}
+
 \item{hr}{.}
 
 \item{sty}{.}
 
 \item{km}{.}
-
-\item{ac}{.}
-
-\item{adjexplanatory}{.}
 
 \item{endplot}{.}
 
@@ -85,6 +87,10 @@ multisurvival(
 \item{ci95}{.}
 
 \item{risktable}{.}
+
+\item{censored}{.}
+
+\item{pplot}{.}
 }
 \value{
 A results object containing:
@@ -95,7 +101,6 @@ A results object containing:
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }

@@ -11,8 +11,15 @@ items:
       clearWith:
           - vars
           - group
-          - cont
-          - pcat
+
+    - name:  todo2
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+          - group
+          - sty
+
 
     # - name:  tablearsenal_output
     #   title: tablearsenal_output
@@ -27,6 +34,7 @@ items:
       clearWith:
           - vars
           - group
+          - sty
       visible: (sty:arsenal)
       refs: arsenal
 
@@ -39,6 +47,7 @@ items:
           - group
           - cont
           - pcat
+          - sty
       visible: (sty:finalfit)
       refs: finalfit
 
@@ -49,6 +58,7 @@ items:
       clearWith:
           - vars
           - group
+          - sty
       visible: (sty:gtsummary)
       refs: gtsummary
 
@@ -59,6 +69,7 @@ items:
       clearWith:
           - vars
           - group
+          - sty
       visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
 
