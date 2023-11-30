@@ -1,0 +1,117 @@
+---
+name:  kappaSizeCI
+title: Confidence Interval Approach for the Number of Subjects Required
+menuGroup: meddecide
+menuSubgroup: Power Analysis
+menuSubtitle: Find sample size based on Kappa confidence
+version: '1.0.0'
+jas: '1.2'
+
+
+description:
+    main: >
+        Power Analysis for Interobserver Agreement Analysis.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: outcome
+      title: Number of outcome level
+      type: List
+      options:
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      default: "2"
+
+
+    # - name: outcome
+    #   title: Number of outcome level
+    #   type: List
+    #   options:
+    #   - name: "2"
+    #     title: "2"
+    #   - name: "3"
+    #     title: "3"
+    #   - name: "4"
+    #     title: "4"
+    #   - name: "5"
+    #     title: "5"
+    #   default: "2"
+    #
+    #   u.yaml
+    #
+    # children:
+    #   - type: Label
+    #     label: Number of outcome level
+    #     children:
+    #       - type: RadioButton
+    #         name: outcome_2
+    #         optionName: outcome
+    #         optionPart: "2"
+    #         label: "2"
+    #       - type: RadioButton
+    #         name: outcome_3
+    #         optionName: outcome
+    #         optionPart: "3"
+    #         label: "3"
+    #       - type: RadioButton
+    #         name: outcome_4
+    #         optionName: outcome
+    #         optionPart: "4"
+    #         label: "4"
+    #       - type: RadioButton
+    #         name: outcome_5
+    #         optionName: outcome
+    #         optionPart: "5"
+    #         label: "5"
+
+
+    - name: kappa0
+      title: kappa0
+      type: Number
+      default: 0.60
+      min: 0.01
+      max: 0.99
+
+    - name: kappaL
+      title: kappaL
+      type: Number
+      default: 0.40
+      min: 0.01
+      max: 0.99
+
+    - name: kappaU
+      title: kappaU
+      type: Number
+      default: 0.80
+      min: 0.01
+      max: 0.99
+
+    - name: props
+      title: Proportions of outcome level
+      type: String
+      default: '0.20 , 0.80'
+
+    - name: raters
+      title: raters
+      type: List
+      options:
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      default: "2"
+
+
+    - name: alpha
+      title: alpha
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.99
+
+...

@@ -1,0 +1,21 @@
+---
+name:  kappaSizeCI
+title: Confidence Interval Approach for the Number of Subjects Required
+jrs:   '1.1'
+
+items:
+    - name:  text1
+      title: Analysis result
+      type:  Preformatted
+
+    - name:  text2
+      title: Study Explanation
+      type:  Preformatted
+
+refs:
+    - ClinicoPathJamoviModule
+    - kappaSize
+
+
+
+...

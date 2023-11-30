@@ -589,4 +589,42 @@ refs:
         note: "[Online; accessed 3-April-2022]"
 
 
+
+    kappaSize:
+        type: 'software'
+        author: Michael A Rotondi
+        year: 2022
+        title: "kappaSize: Sample Size Estimation Functions for Studies of Interobserver Agreement"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/web/packages/kappaSize/'
+        url: https://cran.r-project.org/web/packages/kappaSize/
+
+
+
+    survivaltutorial:
+        type: 'article'
+        author: Emily C. Zabor
+        year: 2022
+        title: "Survival analysis in R: A detailed tutorial on conducting survival analyses in R, including an introduction to the basics of survival analysis, landmark analyses and time-dependent covariates, competing risks, and a selection of advanced topics."
+        publisher: '[GitHub Repository]. Retrieved from https://github.com/zabore/tutorials'
+        url: https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html
+
+    survivalrviews:
+        type: 'article'
+        author: Joseph Rickert
+        year: 2017
+        title: "Survival Analysis with R"
+        publisher: 'R Views, An R community blog edited by RStudio'
+        url: https://rviews.rstudio.com/2017/09/25/survival-analysis-with-r/
+
+
+    appliedsurvivalanalysisR:
+        type: 'book'
+        author: Dirk F. Moore
+        year: 2016
+        title: "Applied Survival Analysis Using R"
+        publisher: 'Springer Cham'
+        doi: 10.1007/978-3-319-31245-3
+        url: https://link.springer.com/book/10.1007/978-3-319-31245-3
+
+
 ...

@@ -1,8 +1,4 @@
 #' @title Plots and Graphs Based on Variable Types
-#'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr

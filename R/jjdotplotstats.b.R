@@ -1,6 +1,4 @@
 #' @title Dot Chart
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'

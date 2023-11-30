@@ -1,0 +1,66 @@
+---
+name:  kappaSizeFixedN
+title: Lowest Expected Value for a fixed sample size
+menuGroup: meddecide
+menuSubgroup: Power Analysis
+menuSubtitle: Find lower Kappa based on sample size
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Lowest Expected Value for a fixed sample size.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: outcome
+      title: Number of outcome level
+      type: List
+      options:
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      default: "2"
+
+
+    - name: kappa0
+      title: kappa0
+      type: Number
+      default: 0.40
+      min: 0.01
+      max: 0.99
+
+    - name: props
+      title: Proportions of outcome level
+      type: String
+      default: '0.20 , 0.80'
+
+
+    - name: raters
+      title: raters
+      type: List
+      options:
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      default: "2"
+
+
+    - name: alpha
+      title: alpha
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.99
+
+    - name: n
+      title: N
+      type: Number
+      default: 100
+
+...

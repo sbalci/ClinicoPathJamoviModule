@@ -1,8 +1,4 @@
 #' @title Scatter Plot
-#'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'

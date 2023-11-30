@@ -9,7 +9,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             vars = NULL,
             group = NULL,
             sty = "nejm",
-            excl = TRUE,
+            excl = FALSE,
             cont = "mean",
             pcat = "chisq", ...) {
 
@@ -44,7 +44,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..cont <- jmvcore::OptionList$new(
                 "cont",
                 cont,
@@ -88,6 +88,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        todo2 = function() private$.items[["todo2"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
@@ -107,16 +108,23 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "vars",
+                    "group")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo2",
+                title="To Do",
+                clearWith=list(
+                    "vars",
                     "group",
-                    "cont",
-                    "pcat")))
+                    "sty")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle1",
                 title="`Cross Table - ${group}`",
                 clearWith=list(
                     "vars",
-                    "group"),
+                    "group",
+                    "sty"),
                 visible="(sty:arsenal)",
                 refs="arsenal"))
             self$add(jmvcore::Html$new(
@@ -127,7 +135,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "cont",
-                    "pcat"),
+                    "pcat",
+                    "sty"),
                 visible="(sty:finalfit)",
                 refs="finalfit"))
             self$add(jmvcore::Html$new(
@@ -136,7 +145,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="`Cross Table - ${group}`",
                 clearWith=list(
                     "vars",
-                    "group"),
+                    "group",
+                    "sty"),
                 visible="(sty:gtsummary)",
                 refs="gtsummary"))
             self$add(jmvcore::Html$new(
@@ -145,7 +155,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="`Cross Table - ${group}`",
                 clearWith=list(
                     "vars",
-                    "group"),
+                    "group",
+                    "sty"),
                 visible="(sty:nejm || sty:lancet || sty:hmisc)",
                 refs="tangram"))}))
 
@@ -166,7 +177,8 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Cross Tables
@@ -187,6 +199,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
@@ -199,7 +212,7 @@ crosstable <- function(
     vars,
     group,
     sty = "nejm",
-    excl = TRUE,
+    excl = FALSE,
     cont = "mean",
     pcat = "chisq") {
 

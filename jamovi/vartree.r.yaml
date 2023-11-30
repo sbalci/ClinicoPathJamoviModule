@@ -12,6 +12,14 @@ items:
     - name:  text1
       title: Variable Tree
       type:  Html
+      clearWith:
+          - maxwidth
+
+    # - name:  text4
+    #   title: "Deneme"
+    #   type: Html
+
+
 
     - name:  text2
       title: Pattern Table
@@ -26,5 +34,6 @@ items:
 
 refs:
     - vtree
+    - ClinicoPathJamoviModule
 
 ...

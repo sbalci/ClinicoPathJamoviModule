@@ -80,6 +80,7 @@ options:
       title: Event Level
       type: Level
       variable: (outcome)
+
     - name: dod
       title: Dead of Disease
       type: Level
@@ -262,6 +263,11 @@ options:
       title: censored
       type: Bool
       default: false
+
+    - name: pplot
+      title: p-value
+      type: Bool
+      default: true
 
 
     - name: sas

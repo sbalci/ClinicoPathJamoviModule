@@ -11,16 +11,6 @@ items:
     #   clearWith:
     #       - vars
 
-    - name:  text
-      title: 'Table'
-      type:  Preformatted
-      visible: (sft)
-      clearWith:
-          - vars
-          - wght
-          - exct
-
-
     # - name: result_cohen
     #   title: 'result_cohen'
     #   type: Preformatted
@@ -97,9 +87,52 @@ items:
           - wght
           - exct
 
+
+    - name:  text2
+      title: 'Table'
+      type:  Html
+      visible: (sft)
+      clearWith:
+          - vars
+          - wght
+          - exct
+
+
+    - name:  text
+      title: 'Table'
+      type:  Preformatted
+      visible: (sft)
+      clearWith:
+          - vars
+          - wght
+          - exct
+
+
+
+
+
+    # - name:  freqtable
+    #   title: 'Frequency Table'
+    #   type: Table
+    #   columns:
+    #     - name: values
+    #       title: 'Values'
+    #       type: text
+    #   clearWith:
+    #       - vars
+    #       - wght
+    #       - exct
+
+
+
+
+
+
+
 refs:
     - irr
     - PathologyKappa
+    - ClinicoPathJamoviModule
 
 
 ...

@@ -1,6 +1,4 @@
 #' @title Cross Table
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
@@ -17,8 +15,6 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Select Style ----
 
             sty <- self$options$sty
-
-
 
 
             if (is.null(self$options$vars) || is.null(self$options$group)) {
@@ -41,27 +37,32 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
+            }
 
 
                 if (sty == "finalfit") {
 
-
-                    todo <- glue::glue("
+                    todo2 <- glue::glue("
                     <br>
                     <b>finalfit</b> uses
                     <em>aov (analysis of variance) or t.test for Welch two sample t-test. Note continuous non-parametric test is always Kruskal Wallis (kruskal.test) which in two-group setting is equivalent to Mann-Whitney U /Wilcoxon rank sum test</em>. See full documentation <a href= 'https://finalfit.org/reference/summary_factorlist.html'>here</a>.
                     "
                     )
 
-
-                    html <- self$results$todo
-                    html$setContent(todo)
-
                 }
+
+
+            if (sty != "finalfit") {
+
+                    todo2 <- glue::glue("")
+                }
+
+                    html <- self$results$todo2
+                    html$setContent(todo2)
 
                 # Error Message ----
 
-                if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
                 # Prepare Data ----
 
@@ -151,41 +152,48 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         na_include = FALSE,
                         na_to_p = FALSE,
                         cont = self$options$cont,
+                        cont_nonpara = NULL,
+                        cont_cut = 5,
                         cont_range = TRUE,
-
 
                         p_cont_para = "aov",
                         p_cat = self$options$pcat,
 
-
-
-
-
-
-
-
-                        cont_nonpara = NULL,
-                        cont_cut = 5,
                         dependent_label_prefix = "Dependent: ",
                         dependent_label_suffix = "",
                         row_totals_colname = "Total N",
                         row_missing_colname = "Missing N",
 
 
-
-
                         column = TRUE,
+
                         orderbytotal = FALSE,
-                        digits = c(1, 1, 3, 1),
+                        digits = c(1, 1, 3, 1, 0),
+
+
                         na_include_dependent = FALSE,
                         na_complete_cases = FALSE,
                         fit_id = FALSE,
-                        add_col_totals = FALSE,
+
+                        na_to_prop = TRUE,
+
+
+                        add_col_totals = TRUE,
                         include_col_totals_percent = TRUE,
                         col_totals_rowname = NULL,
                         col_totals_prefix = "",
                         add_row_totals = FALSE,
-                        include_row_missing_col = TRUE
+                        include_row_totals_percent = TRUE,
+                        include_row_missing_col = TRUE,
+
+                        catTest = NULL,
+                        weights = NULL
+
+
+
+
+
+
 
                 ) -> tablefinalfit
 
@@ -215,10 +223,22 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 tablegtsummary <-
                     gtsummary::tbl_summary(data = mydata,
-                                           by = self$options$group) %>%
-                    gtsummary::modify_header(stat_by =
-                                                 gt::md("**{level}** N =  {n} ({style_percent(p)}%)")) %>%
+                                           by = self$options$group,
+                                           statistic = list(
+                                               gtsummary::all_continuous() ~ "{mean} ({sd})",
+                                               gtsummary::all_categorical() ~ "{n} / {N} ({p}%)"
+                                           ),
+                                           digits = gtsummary::all_continuous() ~ 2,
+                                           missing_text = "(Missing)"
+
+                                           ) %>%
+                    gtsummary::modify_header(
+                        update = gtsummary::all_stat_cols() ~ structure("**{level}** N =  {n} ({style_percent(p)}%)", class = "from_markdown")
+                        # stat_by =
+                        #                          gt::md("**{level}** N =  {n} ({style_percent(p)}%)")
+                                                  ) %>%
                     gtsummary::add_n(x = .) %>%
+                    gtsummary::add_overall() %>%
                     gtsummary::bold_labels(x = .) %>%
                     gtsummary::add_p(x = .,
                                      pvalue_fun =
@@ -227,6 +247,11 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              digits = 2)
                                      ) %>%
                     gtsummary::add_q()
+                # %>%
+                #     gtsummary::bold_labels() %>%
+                #     gtsummary::bold_levels() %>%
+                #     gtsummary::bold_p()
+
 
                 tablegtsummary <-
                     gtsummary::as_kable_extra(tablegtsummary)
@@ -286,5 +311,5 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # tab3 <- CreateTableOne(vars = myVars, strata = "trt" , data = pbc, factorVars = catVars)
 
             }
-        })
+        )
 )

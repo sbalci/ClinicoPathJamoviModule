@@ -150,6 +150,29 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             self$results$text$setContent(result)
 
 
+
+            result3 <- ratings %>%
+                dplyr::group_by_all() %>%
+                dplyr::count() %>%
+                as.data.frame() %>%
+                htmlTable::htmlTable()
+
+            self$results$text2$setContent(result3)
+
+
+
+            # freqtable <- self$results$freqtable
+            #
+            # data_frame <- result3
+            # for (i in seq_along(data_frame[, 1, drop = T])) {
+            #     freqtable$addRow(rowKey = i, values = c(data_frame[i,]))
+            # }
+
+
+
+
+
+
             result1 <- irr::agree(ratings)
 
             # self$results$text1$setContent(result1[["value"]])

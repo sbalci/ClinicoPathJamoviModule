@@ -30,7 +30,7 @@ options:
     - name: excl
       title: Exclude missing (NA)
       type: Bool
-      default: true
+      default: false
 
     - name: marg
       title: Marginal plots

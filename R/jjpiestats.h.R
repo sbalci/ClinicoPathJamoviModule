@@ -10,6 +10,10 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             grvar = NULL,
             excl = TRUE,
+            typestatistics = "parametric",
+            pairwisecomparisons = TRUE,
+            pairwisedisplay = "significant",
+            padjustmethod = "holm",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -46,6 +50,40 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "excl",
                 excl,
                 default=TRUE)
+            private$..typestatistics <- jmvcore::OptionList$new(
+                "typestatistics",
+                typestatistics,
+                options=list(
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parametric")
+            private$..pairwisecomparisons <- jmvcore::OptionBool$new(
+                "pairwisecomparisons",
+                pairwisecomparisons,
+                default=TRUE)
+            private$..pairwisedisplay <- jmvcore::OptionList$new(
+                "pairwisedisplay",
+                pairwisedisplay,
+                options=list(
+                    "significant",
+                    "non-significant",
+                    "everything"),
+                default="significant")
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY",
+                    "fdr",
+                    "none"),
+                default="holm")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -55,6 +93,10 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..excl)
+            self$.addOption(private$..typestatistics)
+            self$.addOption(private$..pairwisecomparisons)
+            self$.addOption(private$..pairwisedisplay)
+            self$.addOption(private$..padjustmethod)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
@@ -62,12 +104,20 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         excl = function() private$..excl$value,
+        typestatistics = function() private$..typestatistics$value,
+        pairwisecomparisons = function() private$..pairwisecomparisons$value,
+        pairwisedisplay = function() private$..pairwisedisplay$value,
+        padjustmethod = function() private$..padjustmethod$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
         ..excl = NA,
+        ..typestatistics = NA,
+        ..pairwisecomparisons = NA,
+        ..pairwisedisplay = NA,
+        ..padjustmethod = NA,
         ..originaltheme = NA)
 )
 
@@ -179,7 +229,8 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Pie Charts
@@ -195,6 +246,10 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param group .
 #' @param grvar .
 #' @param excl .
+#' @param typestatistics .
+#' @param pairwisecomparisons .
+#' @param pairwisedisplay .
+#' @param padjustmethod .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -212,6 +267,10 @@ jjpiestats <- function(
     group,
     grvar,
     excl = TRUE,
+    typestatistics = "parametric",
+    pairwisecomparisons = TRUE,
+    pairwisedisplay = "significant",
+    padjustmethod = "holm",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -236,6 +295,10 @@ jjpiestats <- function(
         group = group,
         grvar = grvar,
         excl = excl,
+        typestatistics = typestatistics,
+        pairwisecomparisons = pairwisecomparisons,
+        pairwisedisplay = pairwisedisplay,
+        padjustmethod = padjustmethod,
         originaltheme = originaltheme)
 
     analysis <- jjpiestatsClass$new(

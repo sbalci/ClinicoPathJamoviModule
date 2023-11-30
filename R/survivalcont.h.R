@@ -21,6 +21,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             cutp = "12, 36, 60",
             timetypedata = "ymd",
             timetypeoutput = "months",
+            uselandmark = FALSE,
+            landmark = 3,
             sc = FALSE,
             kmunicate = FALSE,
             ce = FALSE,
@@ -128,6 +130,14 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "months",
                     "years"),
                 default="months")
+            private$..uselandmark <- jmvcore::OptionBool$new(
+                "uselandmark",
+                uselandmark,
+                default=FALSE)
+            private$..landmark <- jmvcore::OptionInteger$new(
+                "landmark",
+                landmark,
+                default=3)
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -190,6 +200,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
+            self$.addOption(private$..uselandmark)
+            self$.addOption(private$..landmark)
             self$.addOption(private$..sc)
             self$.addOption(private$..kmunicate)
             self$.addOption(private$..ce)
@@ -220,6 +232,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
+        uselandmark = function() private$..uselandmark$value,
+        landmark = function() private$..landmark$value,
         sc = function() private$..sc$value,
         kmunicate = function() private$..kmunicate$value,
         ce = function() private$..ce$value,
@@ -249,6 +263,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
+        ..uselandmark = NA,
+        ..landmark = NA,
         ..sc = NA,
         ..kmunicate = NA,
         ..ce = NA,
@@ -296,7 +312,9 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "finalfit",
                     "survival",
                     "survminer",
-                    "dichotomizing"),
+                    "dichotomizing",
+                    "survivaltutorial",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -572,7 +590,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'none')
         }))
 
 #' Survival Analysis for Continuous Variable
@@ -594,6 +613,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cutp .
 #' @param timetypedata select the time type in data
 #' @param timetypeoutput select the time type in output
+#' @param uselandmark .
+#' @param landmark .
 #' @param sc .
 #' @param kmunicate .
 #' @param ce .
@@ -649,6 +670,8 @@ survivalcont <- function(
     cutp = "12, 36, 60",
     timetypedata = "ymd",
     timetypeoutput = "months",
+    uselandmark = FALSE,
+    landmark = 3,
     sc = FALSE,
     kmunicate = FALSE,
     ce = FALSE,
@@ -694,6 +717,8 @@ survivalcont <- function(
         cutp = cutp,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
+        uselandmark = uselandmark,
+        landmark = landmark,
         sc = sc,
         kmunicate = kmunicate,
         ce = ce,

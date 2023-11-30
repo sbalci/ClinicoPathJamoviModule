@@ -8,7 +8,7 @@ alluvial(
   data,
   vars,
   condensationvar,
-  excl = TRUE,
+  excl = FALSE,
   marg = FALSE,
   fill = "first_variable",
   bin = "default",

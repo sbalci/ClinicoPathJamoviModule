@@ -1,0 +1,288 @@
+---
+name:  singlearm
+title: Single Arm Survival
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
+
+
+    - name:  medianSummary
+      title: Median Survival Summary and Table
+      type:  Preformatted
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    # - name:  medianSummary2
+    #   title: medianSummary2
+    #   type:  Preformatted
+
+    - name:  medianTable
+      title: Median Survival Table
+      type:  Table
+      rows: 0
+      columns:
+        - name: records
+          title: "Records"
+          type: integer
+        # - name: n_max
+        #   title: "n_max"
+        #   type: number
+        # - name: n_start
+        #   title: "n_start"
+        #   type: number
+        - name: events
+          title: "Events"
+          type: integer
+        - name: rmean
+          title: "rmean"
+          type: number
+        - name: se_rmean
+          title: "se_rmean"
+          type: number
+        - name: median
+          title: "Median"
+          type: number
+        - name: x0_95lcl
+          title: "Lower"
+          superTitle: '95% Confidence Interval'
+          type: number
+        - name: x0_95ucl
+          title: "Upper"
+          superTitle: '95% Confidence Interval'
+          type: number
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+    - name:  survTableSummary
+      title: '1, 3, 5-yr Survival Summary and Table'
+      type:  Preformatted
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+
+    - name:  survTable
+      title: '1, 3, 5 year Survival'
+      type:  Table
+      rows: 0
+      columns:
+        - name: 'time'
+          title: "time"
+          type: integer
+        - name: n.risk
+          title: "Number at Risk"
+          type: integer
+        - name: n.event
+          title: "Number of Events"
+          type: integer
+        - name: surv
+          title: "Survival"
+          type: number
+          format: pc
+        - name: lower
+          title: "Lower"
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: "Upper"
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+
+    - name: plot
+      title: Survival Plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      visible: (sc)
+      requiresData: true
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - sas
+          - ci95
+          - risktable
+          - censored
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+    - name: plot2
+      title: Cumulative Events
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      visible: (ce)
+      requiresData: true
+      clearWith:
+          - ce
+          - endplot
+          - byplot
+          - sas
+          - ci95
+          - risktable
+          - censored
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+    - name: plot3
+      title: Cumulative Hazard
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot3
+      visible: (ch)
+      requiresData: true
+      clearWith:
+          - ch
+          - endplot
+          - byplot
+          - sas
+          - ci95
+          - risktable
+          - censored
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+    - name: plot6
+      title: 'KMunicate-Style Plot'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot6
+      visible: (kmunicate)
+      requiresData: true
+      clearWith:
+          - kmunicate
+          - endplot
+          - byplot
+          - sas
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+      refs:
+          - KMunicate
+          - KMunicate2
+
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      clearWith:
+          - outcome
+          - analysistype
+          - multievent
+          - explanatory
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+refs:
+    - finalfit
+    - survival
+    - survminer
+    - ClinicoPathJamoviModule
+    - survivaltutorial
+
+
+...

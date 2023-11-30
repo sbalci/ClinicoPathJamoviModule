@@ -42,6 +42,13 @@ items:
     #   type:  Preformatted
 
 
+    # - name:  text3
+    #   title: resultsdeneme2
+    #   type:  Preformatted
+
+
+
+
     - name:  text
       title: Multivariable Survival
       type:  Html
@@ -165,34 +172,40 @@ items:
           - tint
           - multievent
           - adjexplanatory
+          - pplot
+          - censored
 
-    - name: plot7
-      title: '`Adjusted Survival Curve - ${adjexplanatory}`'
-      type: Image
-      width:  800
-      height: 600
-      renderFun: .plot7
-      requiresData: true
-      visible: (ac)
-      refs: survminer
-      clearWith:
-          - ac
-          - adjexplanatory
-          - endplot
-          - byplot
-          - ci95
-          - risktable
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - adjexplanatory
 
+#
+    # - name: plot7
+    #   title: '`Adjusted Survival Curve - ${adjexplanatory}`'
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot7
+    #   requiresData: true
+    #   visible: (ac)
+    #   refs: survminer
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+    #       - endplot
+    #       - byplot
+    #       - ci95
+    #       - risktable
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - adjexplanatory
+    #       - pplot
+    #       - censored
+#
 
 
     - name: calculatedtime
@@ -219,6 +232,8 @@ items:
 
 refs:
     - multivariable
+    - survivaltutorial
+    - ClinicoPathJamoviModule
 
     # - name: model
     #   type: Property

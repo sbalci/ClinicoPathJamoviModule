@@ -1,8 +1,4 @@
 #' @title Odds Ratio Table and Plot
-#'
-#'
-#'
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
@@ -89,11 +85,49 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
+                mydata <- self$data
+
+                mydata <- jmvcore::naOmit(mydata)
+
+                # outcomeLevel <- self$options$outcomeLevel
+                # outcome_name <- self$options$outcome
+
+                # outcome1 <- self$data[[outcome_name]]
+
+                # mydata[["outcome2"]] <-
+                #     ifelse(
+                #         test = outcome1 == outcomeLevel,
+                #         yes = "Event",
+                #         no = "NoEvent"
+                #     )
+
+
+                # mydata[[outcome_name]] <-
+                #     ifelse(
+                #         test = outcome1 == outcomeLevel,
+                #         yes = "Event",
+                #         no = "NoEvent"
+                #     )
+
+
+
+
+
+                # self$results$textmydata$setContent(
+                #     list(
+                #         outcomeLevel,
+                #         outcome_name,
+                #         outcome1,
+                #         head(mydata)
+                #         )
+                # )
+
+
 
                 # Check if outcome variable is suitable or stop ----
-                myoutcome2 <- self$options$outcome
-                myoutcome2 <- self$data[[myoutcome2]]
-                myoutcome2 <- na.omit(myoutcome2)
+                # myoutcome2 <- self$options$outcome
+                # myoutcome2 <- self$data[[myoutcome2]]
+                # myoutcome2 <- na.omit(myoutcome2)
 
                 # if (class(myoutcome2) == "factor")
                 #     stop("Please use a continuous variable for outcome.")
@@ -101,11 +135,18 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # if (any(myoutcome2 != 0 & myoutcome2 != 1))
                 #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
-                mydata <- self$data
 
                 formula2 <- as.vector(self$options$explanatory)
 
-                formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+                formulaR <- jmvcore::constructFormula(terms =
+                                                          # outcome_name
+                                                      self$options$outcome
+                                                      )
+
+                # formulaR2 <- jmvcore::composeTerm(components = outcome_name)
+
+                # formulaR3 <- as.vector(self$options$outcome)
+
 
                 # formulaR <- jmvcore::toNumeric(formulaR)
 
@@ -121,24 +162,41 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # glm(depdendent ~ explanatory, family="binomial")
 
                 finalfit::finalfit(.data = mydata,
-                                   dependent = formulaR,
+                                   dependent = formulaR3,
                                    explanatory = formula2,
                                    metrics = TRUE
                                    ) -> tOdds
 
 
-                text2 <- glue::glue("
-                                <br>
-                                <b>Model Metrics:</b>
-                                  ",
-                                unlist(
-                                    tOdds[[2]]
-                                ),
-                                "
-                                <br>
-                                ")
+                # self$results$textmydata$setContent(
+                #     list(
+                #         outcomeLevel,
+                #         outcome_name,
+                #         outcome1,
+                #         mydata,
+                #         formula2,
+                #         formulaR,
+                #         # formulaR2,
+                #         # formulaR3,
+                #         names(mydata)
+                #         # ,
+                #         # tOdds
+                #     )
+                # )
 
 
+                # text2 <- glue::glue("
+                #                 <br>
+                #                 <b>Model Metrics:</b>
+                #                   ",
+                #                 unlist(
+                #                     tOdds[[2]]
+                #                 ),
+                #                 "
+                #                 <br>
+                #                 ")
+                
+                
                 self$results$text2$setContent(text2)
 
 
@@ -146,7 +204,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              row.names=FALSE,
                              align=c("l", "l", "r", "r", "r", "r"),
                              format = "html")
-
                 self$results$text$setContent(results1)
 
             }
@@ -154,41 +211,29 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ,
-
-        .plot = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
-
-            # plotData <- image$state
-
-            if (is.null(self$options$explanatory) || is.null(self$options$outcome))
+                .plot = function(image, ggtheme, theme, ...) {
+          # -- the plot function ----
+                    # plotData <- image$state
+                    if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
-
-            if (nrow(self$data) == 0)
+                    if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
-
             # Check if outcome variable is suitable or stop ----
             myoutcome2 <- self$options$outcome
             myoutcome2 <- self$data[[myoutcome2]]
             myoutcome2 <- na.omit(myoutcome2)
-
-            # if (class(myoutcome2) == "factor")
+                    # if (class(myoutcome2) == "factor")
             #     stop("Please use a continuous variable for outcome.")
             #
             #
             # if (any(myoutcome2 != 0 & myoutcome2 != 1))
             #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-
-            mydata <- self$data
-
-            formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
-
-            formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-
-            # formulaR <- jmvcore::toNumeric(formulaR)
-
-
-            # https://finalfit.org/reference/or_plot.html
-
-            plot <-
+                    mydata <- self$data
+                    formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
+                    formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
+                    # formulaR <- jmvcore::toNumeric(formulaR)
+                    # https://finalfit.org/reference/or_plot.html
+                    plot <-
                 # finalfit::or_plot(
                 finalfit::ff_plot(
                     .data = mydata,
@@ -214,15 +259,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     )
                     )
-
-
-
-
-
             print(plot)
             TRUE
         }
-#
+
+
+
 #         ,
 #
 #         .plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot function ----

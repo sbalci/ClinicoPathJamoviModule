@@ -27,8 +27,9 @@ than 3 observers.}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
+\code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

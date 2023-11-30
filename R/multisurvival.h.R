@@ -22,15 +22,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             analysistype = "overall",
             timetypedata = "ymd",
             timetypeoutput = "months",
+            uselandmark = FALSE,
+            landmark = 3,
             hr = FALSE,
             sty = "t1",
             km = FALSE,
-            ac = FALSE,
-            adjexplanatory = NULL,
             endplot = 60,
             byplot = 12,
             ci95 = FALSE,
-            risktable = FALSE, ...) {
+            risktable = FALSE,
+            censored = FALSE,
+            pplot = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -136,6 +138,14 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "months",
                     "years"),
                 default="months")
+            private$..uselandmark <- jmvcore::OptionBool$new(
+                "uselandmark",
+                uselandmark,
+                default=FALSE)
+            private$..landmark <- jmvcore::OptionInteger$new(
+                "landmark",
+                landmark,
+                default=3)
             private$..hr <- jmvcore::OptionBool$new(
                 "hr",
                 hr,
@@ -151,18 +161,6 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "km",
                 km,
                 default=FALSE)
-            private$..ac <- jmvcore::OptionBool$new(
-                "ac",
-                ac,
-                default=FALSE)
-            private$..adjexplanatory <- jmvcore::OptionVariable$new(
-                "adjexplanatory",
-                adjexplanatory,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
             private$..endplot <- jmvcore::OptionInteger$new(
                 "endplot",
                 endplot,
@@ -179,6 +177,14 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "risktable",
                 risktable,
                 default=FALSE)
+            private$..censored <- jmvcore::OptionBool$new(
+                "censored",
+                censored,
+                default=FALSE)
+            private$..pplot <- jmvcore::OptionBool$new(
+                "pplot",
+                pplot,
+                default=TRUE)
             private$..calculatedtime <- jmvcore::OptionOutput$new(
                 "calculatedtime")
             private$..outcomeredifened <- jmvcore::OptionOutput$new(
@@ -200,15 +206,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..analysistype)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
+            self$.addOption(private$..uselandmark)
+            self$.addOption(private$..landmark)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
             self$.addOption(private$..km)
-            self$.addOption(private$..ac)
-            self$.addOption(private$..adjexplanatory)
             self$.addOption(private$..endplot)
             self$.addOption(private$..byplot)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
+            self$.addOption(private$..censored)
+            self$.addOption(private$..pplot)
             self$.addOption(private$..calculatedtime)
             self$.addOption(private$..outcomeredifened)
         }),
@@ -229,15 +237,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         analysistype = function() private$..analysistype$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
+        uselandmark = function() private$..uselandmark$value,
+        landmark = function() private$..landmark$value,
         hr = function() private$..hr$value,
         sty = function() private$..sty$value,
         km = function() private$..km$value,
-        ac = function() private$..ac$value,
-        adjexplanatory = function() private$..adjexplanatory$value,
         endplot = function() private$..endplot$value,
         byplot = function() private$..byplot$value,
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
+        censored = function() private$..censored$value,
+        pplot = function() private$..pplot$value,
         calculatedtime = function() private$..calculatedtime$value,
         outcomeredifened = function() private$..outcomeredifened$value),
     private = list(
@@ -257,15 +267,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..analysistype = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
+        ..uselandmark = NA,
+        ..landmark = NA,
         ..hr = NA,
         ..sty = NA,
         ..km = NA,
-        ..ac = NA,
-        ..adjexplanatory = NA,
         ..endplot = NA,
         ..byplot = NA,
         ..ci95 = NA,
         ..risktable = NA,
+        ..censored = NA,
+        ..pplot = NA,
         ..calculatedtime = NA,
         ..outcomeredifened = NA)
 )
@@ -280,7 +292,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
         plotKM = function() private$.items[["plotKM"]],
-        plot7 = function() private$.items[["plot7"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
@@ -291,7 +302,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Multivariable Survival Analysis",
                 refs=list(
-                    "multivariable"),
+                    "multivariable",
+                    "survivaltutorial",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -421,34 +434,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
-                    "adjexplanatory")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot7",
-                title="`Adjusted Survival Curve - ${adjexplanatory}`",
-                width=800,
-                height=600,
-                renderFun=".plot7",
-                requiresData=TRUE,
-                visible="(ac)",
-                refs="survminer",
-                clearWith=list(
-                    "ac",
                     "adjexplanatory",
-                    "endplot",
-                    "byplot",
-                    "ci95",
-                    "risktable",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "explanatory",
-                    "contexpl",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent",
-                    "adjexplanatory")))
+                    "pplot",
+                    "censored")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -487,7 +475,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'none')
         }))
 
 #' Multivariable Survival Analysis
@@ -515,15 +504,17 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param analysistype .
 #' @param timetypedata select the time type in data
 #' @param timetypeoutput select the time type in output
+#' @param uselandmark .
+#' @param landmark .
 #' @param hr .
 #' @param sty .
 #' @param km .
-#' @param ac .
-#' @param adjexplanatory .
 #' @param endplot .
 #' @param byplot .
 #' @param ci95 .
 #' @param risktable .
+#' @param censored .
+#' @param pplot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -532,7 +523,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
@@ -556,15 +546,17 @@ multisurvival <- function(
     analysistype = "overall",
     timetypedata = "ymd",
     timetypeoutput = "months",
+    uselandmark = FALSE,
+    landmark = 3,
     hr = FALSE,
     sty = "t1",
     km = FALSE,
-    ac = FALSE,
-    adjexplanatory,
     endplot = 60,
     byplot = 12,
     ci95 = FALSE,
-    risktable = FALSE) {
+    risktable = FALSE,
+    censored = FALSE,
+    pplot = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -575,7 +567,6 @@ multisurvival <- function(
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
     if ( ! missing(contexpl)) contexpl <- jmvcore::resolveQuo(jmvcore::enquo(contexpl))
-    if ( ! missing(adjexplanatory)) adjexplanatory <- jmvcore::resolveQuo(jmvcore::enquo(adjexplanatory))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -584,11 +575,9 @@ multisurvival <- function(
             `if`( ! missing(fudate), fudate, NULL),
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(explanatory), explanatory, NULL),
-            `if`( ! missing(contexpl), contexpl, NULL),
-            `if`( ! missing(adjexplanatory), adjexplanatory, NULL))
+            `if`( ! missing(contexpl), contexpl, NULL))
 
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in adjexplanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- multisurvivalOptions$new(
         elapsedtime = elapsedtime,
@@ -607,15 +596,17 @@ multisurvival <- function(
         analysistype = analysistype,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
+        uselandmark = uselandmark,
+        landmark = landmark,
         hr = hr,
         sty = sty,
         km = km,
-        ac = ac,
-        adjexplanatory = adjexplanatory,
         endplot = endplot,
         byplot = byplot,
         ci95 = ci95,
-        risktable = risktable)
+        risktable = risktable,
+        censored = censored,
+        pplot = pplot)
 
     analysis <- multisurvivalClass$new(
         options = options,

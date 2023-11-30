@@ -33,7 +33,6 @@ children:
             name: contexpl
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Finding Cut-off
     collapsed: false
@@ -47,8 +46,6 @@ children:
             children:
               - type: CheckBox
                 name: findcut
-
-
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -133,8 +130,11 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
-
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: uselandmark
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -178,6 +178,12 @@ children:
               - type: CheckBox
                 name: risktable
                 enable: (findcut)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: landmark
+        format: number
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -190,7 +196,6 @@ children:
             enable: (findcut)
             format: string
             width: large
-
   - type: CollapseBox
     label: Save Converted Variables to Data
     collapsed: true

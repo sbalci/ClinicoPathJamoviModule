@@ -263,6 +263,24 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
                 }
                 }
 
+
+                # Landmark ----
+                # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#landmark_method
+                if (self$options$uselandmark) {
+
+                  landmark <- jmvcore::toNumeric(self$options$landmark)
+
+                  mydata <- mydata %>%
+                    dplyr::filter(mytime >= landmark) %>%
+                    dplyr::mutate(mytime = mytime - landmark)
+                }
+
+
+
+
+
+
+
                 # Define Data For Analysis ----
 
                 # naOmit ----
@@ -304,6 +322,20 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
                                 "
                                 <br>
                                 ")
+
+
+                if (self$options$uselandmark) {
+
+                  landmark <- jmvcore::toNumeric(self$options$landmark)
+
+                  tCoxtext2 <- glue::glue(tCoxtext2,
+                                      "Landmark time used as: ",
+                                      landmark, " ",
+                                      self$options$timetypeoutput, "."
+                  )
+                }
+
+
 
 
                 self$results$tCoxtext2$setContent(tCoxtext2)

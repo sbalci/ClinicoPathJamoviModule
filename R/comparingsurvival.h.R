@@ -213,7 +213,8 @@ comparingSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Comparing Survival Outcomes

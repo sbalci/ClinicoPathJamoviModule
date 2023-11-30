@@ -16,7 +16,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             follow = NULL,
             followLevel1 = NULL,
             followLevel2 = NULL,
-            excl = TRUE,
+            excl = FALSE,
             vp = TRUE,
             horizontal = FALSE,
             sline = TRUE,
@@ -31,7 +31,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             mytitle = "",
             useprunesmaller = FALSE,
             prunesmaller = 5,
-            summarylocation = "leafonly", ...) {
+            summarylocation = "leafonly",
+            maxwidth = 100, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -105,7 +106,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..vp <- jmvcore::OptionBool$new(
                 "vp",
                 vp,
@@ -169,6 +170,10 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "allnodes",
                     "leafonly"),
                 default="leafonly")
+            private$..maxwidth <- jmvcore::OptionInteger$new(
+                "maxwidth",
+                maxwidth,
+                default=100)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..percvar)
@@ -196,6 +201,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..useprunesmaller)
             self$.addOption(private$..prunesmaller)
             self$.addOption(private$..summarylocation)
+            self$.addOption(private$..maxwidth)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -223,7 +229,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         mytitle = function() private$..mytitle$value,
         useprunesmaller = function() private$..useprunesmaller$value,
         prunesmaller = function() private$..prunesmaller$value,
-        summarylocation = function() private$..summarylocation$value),
+        summarylocation = function() private$..summarylocation$value,
+        maxwidth = function() private$..maxwidth$value),
     private = list(
         ..vars = NA,
         ..percvar = NA,
@@ -250,7 +257,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..mytitle = NA,
         ..useprunesmaller = NA,
         ..prunesmaller = NA,
-        ..summarylocation = NA)
+        ..summarylocation = NA,
+        ..maxwidth = NA)
 )
 
 vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -268,7 +276,8 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Variable Tree",
                 refs=list(
-                    "vtree"))
+                    "vtree",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -276,7 +285,9 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Variable Tree"))
+                title="Variable Tree",
+                clearWith=list(
+                    "maxwidth")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
@@ -300,7 +311,8 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Variable Tree
@@ -338,6 +350,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param useprunesmaller .
 #' @param prunesmaller .
 #' @param summarylocation .
+#' @param maxwidth .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -358,7 +371,7 @@ vartree <- function(
     follow,
     followLevel1,
     followLevel2,
-    excl = TRUE,
+    excl = FALSE,
     vp = TRUE,
     horizontal = FALSE,
     sline = TRUE,
@@ -373,7 +386,8 @@ vartree <- function(
     mytitle = "",
     useprunesmaller = FALSE,
     prunesmaller = 5,
-    summarylocation = "leafonly") {
+    summarylocation = "leafonly",
+    maxwidth = 100) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("vartree requires jmvcore to be installed (restart may be required)")
@@ -423,7 +437,8 @@ vartree <- function(
         mytitle = mytitle,
         useprunesmaller = useprunesmaller,
         prunesmaller = prunesmaller,
-        summarylocation = summarylocation)
+        summarylocation = summarylocation,
+        maxwidth = maxwidth)
 
     analysis <- vartreeClass$new(
         options = options,

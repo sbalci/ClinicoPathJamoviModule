@@ -31,7 +31,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<br>
                     Welcome to ClinicoPath
                 <br><br>
-                This tool will help you generate Bar Charts.
+                This tool will help you generate Histograms.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html' target='_blank'>gghistostats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_gghistostats.html' target='_blank'>grouped_gghistostats</a>.
                 <br>
@@ -168,14 +168,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             data = mydata,
                             x = !!dep,
 
-                            # binwidth = binwidth,
-                            # bar.measure = barmeasure,
+                            binwidth = binwidth,
+                            # bar.measure = barmeasure, ----
                             # xlab = NULL,
                             # title = NULL,
                             # subtitle = NULL,
                             # caption = NULL,
 
-                            # type = typestatistics,
+                            type = typestatistics,
 
 
                             # test.value = 0,
@@ -183,30 +183,31 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             # bf.message = TRUE,
                             # effsize.type = "g",
                             # conf.level = 0.95,
+                            # tr = 0.2,
                             # nboot = 100,
                             # k = 2L,
 
-                            # ggtheme = ggplot2::theme_bw(),
-                            # ggstatsplot.layer = TRUE,
+                            ggtheme = ggplot2::theme_bw(),
+                            ggstatsplot.layer = TRUE,
 
 
 
-                            # bar.fill = "grey50",
-                            # results.subtitle = self$options$resultssubtitle,
-                            # test.k = 0,
-                            # test.value.line = FALSE,
-                            # test.value.line.args = list(size = 1),
-                            # test.value.label.args = list(size = 3),
+                            bar.fill = "grey50",
+                            results.subtitle = self$options$resultssubtitle,
+                            test.k = 0,
+                            test.value.line = FALSE,
+                            test.value.line.args = list(size = 1),
+                            test.value.label.args = list(size = 3),
 
-                            # centrality.parameter = centralityparameter,
-                            # centrality.k = 2,
-                            # centrality.line.args = list(size = 1, color = "blue"),
-                            # centrality.label.args = list(color = "blue", size = 3),
-                            # normal.curve = self$options$normalcurve,
-                            # normal.curve.args = list(size = 3),
-                            # ggplot.component = NULL,
-                            # output = "plot"
-                        )
+                            centrality.parameter = centralityparameter,
+                            centrality.k = 2,
+                            centrality.line.args = list(size = 1, color = "blue"),
+                            centrality.label.args = list(color = "blue", size = 3),
+                            normal.curve = self$options$normalcurve,
+                            normal.curve.args = list(size = 3),
+                            ggplot.component = NULL,
+                            output = "plot"
+                    )
 
 
 

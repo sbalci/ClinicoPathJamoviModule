@@ -1,0 +1,117 @@
+---
+name:  TestROC
+title: TestROC
+jrs:   '1.1'
+
+items:
+    #- name: debug
+    #  type: Preformatted
+
+    - name: instructions
+      type: Html
+      visible: True
+
+    - name: procedureNotes
+      type: Html
+
+    - name: resultsTable
+      refs: 
+        - cutpointr
+        - testROC
+      title: Results Table
+      type: Array
+      visible: True
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+      template:
+        type: Table
+        rows: 0
+        columns:
+          #- name: scaleName
+          #  title: Scale
+          #  type: text
+          - name: cutpoint
+            title: Cutpoint
+            type: text
+          - name: sensitivity
+            title: 'Sensitivity (%)'
+            type: text
+          - name: specificity
+            title: 'Specificity (%)'
+            type: text
+          - name: ppv
+            title: 'PPV (%)'
+            type: text
+          - name: npv
+            title: 'NPV (%)'
+            type: text
+          - name: youden
+            title: Youden's index
+            type: number
+          - name: AUC
+            title: AUC
+            type: number
+          - name: metricValue
+            title: Metric Score
+            type: number
+
+    - name: delongTest
+      title: DeLong Test of Difference between AUCs
+      type: Preformatted
+      visible: false #(delongTest)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+
+    - name: plotROC
+      type: Array
+      title: ROC Curves
+      template:
+        type: Image
+        width:  550
+        height: 450
+        renderFun: .plotROC
+        visible: (plotROC)
+
+    - name: sensSpecTable
+      title: Sensitivity & Specificity
+      type: Array
+      visible: False
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+      template:
+        type: Html
+
+...

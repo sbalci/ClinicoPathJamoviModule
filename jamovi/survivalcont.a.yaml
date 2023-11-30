@@ -130,6 +130,18 @@ options:
       description:
           R: select the time type in output
 
+    - name: uselandmark
+      title: Use Landmark Time
+      type: Bool
+      default: false
+
+    - name: landmark
+      title: Landmark Time
+      type: Integer
+      default: 3
+
+
+
 
     # - name: pw
     #   title: Pairwise comparisons

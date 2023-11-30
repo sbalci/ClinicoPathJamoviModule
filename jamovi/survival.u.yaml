@@ -195,6 +195,8 @@ children:
                 name: risktable
               - type: CheckBox
                 name: censored
+              - type: CheckBox
+                name: pplot
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
