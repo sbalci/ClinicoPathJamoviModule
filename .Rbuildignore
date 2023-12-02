@@ -40,9 +40,9 @@
 .jmo$
 ^build/R/
 ^build/js/
-^tododata/
-/tododata/
-tododata
+^_tododata/
+/_tododata/
+_tododata
 ^vignettes/
 ^docs/
 ^temp/
@@ -81,7 +81,7 @@ modellingSurvival\\.
 
 
 ClinicoPath.code-workspace
-others
+_others
 pdfs
 
 ^module-updates.R$
@@ -106,9 +106,9 @@ docs_pkgdown
 module-updates-jjstatsplot.R
 module-updates.R
 NEWS.md
-others
+_others
 pdfs
-tododata
+_tododata
 vignettes
 
 meddecide

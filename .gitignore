@@ -34,7 +34,7 @@ po/*~
 .Rhistory
 .RData
 .Ruserdata
-others
+_others
 build
 *.jmo
 .DS_Store
@@ -42,5 +42,5 @@ ClinicoPath.code-workspace
 docs
 pdfs
 temp
-tododata
+_tododata
 ^docs$
