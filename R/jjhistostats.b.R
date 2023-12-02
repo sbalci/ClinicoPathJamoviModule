@@ -267,6 +267,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             # test.value.line = FALSE,
                             # test.value.line.args = list(size = 1),
                             # test.value.label.args = list(size = 3),
+
+                            centrality.plotting = self$options$centralityline,
+
                             centrality.parameter = centralityparameter,
                             centrality.k = 2,
                             centrality.line.args = list(size = 1, color = "blue"),
@@ -412,6 +415,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         , centrality.parameter = centralityparameter
                         , results.subtitle = self$options$resultssubtitle
                         , normal.curve = self$options$normalcurve
+                        , centrality.plotting = self$options$centralityline
 
 
                     )
@@ -450,6 +454,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             , centrality.parameter = centralityparameter
                             , results.subtitle = self$options$resultssubtitle
                             , normal.curve = self$options$normalcurve
+                            , centrality.plotting = self$options$centralityline
 
 
                         )
