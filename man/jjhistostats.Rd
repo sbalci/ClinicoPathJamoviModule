@@ -11,6 +11,7 @@ jjhistostats(
   excl = TRUE,
   typestatistics = "parametric",
   centralityparameter = "mean",
+  centralityline = TRUE,
   changebinwidth = FALSE,
   binwidth = 1.1,
   barmeasure = "count",
@@ -43,6 +44,8 @@ jjhistostats(
 \item{typestatistics}{.}
 
 \item{centralityparameter}{.}
+
+\item{centralityline}{.}
 
 \item{changebinwidth}{.}
 

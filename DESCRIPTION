@@ -2,7 +2,7 @@ Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
 Version: 0.0.2.08
-Date: 2023-11-28
+Date: 2023-12-02
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -66,7 +66,8 @@ Imports:
     forcats,
     e1071,
     epiR,
-    kappaSize
+    kappaSize,
+    gtExtras
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 VignetteBuilder:

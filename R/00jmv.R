@@ -496,6 +496,13 @@
         `title`="kappaSize: Sample Size Estimation Functions for Studies of Interobserver Agreement", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/web/packages/kappaSize/", 
         `url`="https://cran.r-project.org/web/packages/kappaSize/"), 
+    `gtExtras`=list(
+        `type`="software", 
+        `author`="Thomas Mock, Daniel D. Sjoberg", 
+        `year`=2023, 
+        `title`="gtExtras", 
+        `publisher`="[R package]. Retrieved from https://cran.r-project.org/web/packages/gtExtras/", 
+        `url`="https://cran.r-project.org/web/packages/gtExtras/"), 
     `survivaltutorial`=list(
         `type`="article", 
         `author`="Emily C. Zabor", 

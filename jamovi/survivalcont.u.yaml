@@ -217,7 +217,7 @@ children:
             enable: (multievent)
             fitToGrid: true
       - type: Label
-        label: Add Redefined Outcome to Data
+        label: Add Calculated Cut-off Group to Data
         fitToGrid: true
         children:
           - type: Output
