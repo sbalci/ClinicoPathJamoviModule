@@ -11,6 +11,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             excl = TRUE,
             typestatistics = "parametric",
             centralityparameter = "mean",
+            centralityline = TRUE,
             changebinwidth = FALSE,
             binwidth = 1.1,
             barmeasure = "count",
@@ -71,6 +72,10 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "median",
                     "none"),
                 default="mean")
+            private$..centralityline <- jmvcore::OptionBool$new(
+                "centralityline",
+                centralityline,
+                default=TRUE)
             private$..changebinwidth <- jmvcore::OptionBool$new(
                 "changebinwidth",
                 changebinwidth,
@@ -154,6 +159,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..excl)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..centralityparameter)
+            self$.addOption(private$..centralityline)
             self$.addOption(private$..changebinwidth)
             self$.addOption(private$..binwidth)
             self$.addOption(private$..barmeasure)
@@ -179,6 +185,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         excl = function() private$..excl$value,
         typestatistics = function() private$..typestatistics$value,
         centralityparameter = function() private$..centralityparameter$value,
+        centralityline = function() private$..centralityline$value,
         changebinwidth = function() private$..changebinwidth$value,
         binwidth = function() private$..binwidth$value,
         barmeasure = function() private$..barmeasure$value,
@@ -203,6 +210,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..excl = NA,
         ..typestatistics = NA,
         ..centralityparameter = NA,
+        ..centralityline = NA,
         ..changebinwidth = NA,
         ..binwidth = NA,
         ..barmeasure = NA,
@@ -300,6 +308,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl .
 #' @param typestatistics .
 #' @param centralityparameter .
+#' @param centralityline .
 #' @param changebinwidth .
 #' @param binwidth .
 #' @param barmeasure .
@@ -333,6 +342,7 @@ jjhistostats <- function(
     excl = TRUE,
     typestatistics = "parametric",
     centralityparameter = "mean",
+    centralityline = TRUE,
     changebinwidth = FALSE,
     binwidth = 1.1,
     barmeasure = "count",
@@ -371,6 +381,7 @@ jjhistostats <- function(
         excl = excl,
         typestatistics = typestatistics,
         centralityparameter = centralityparameter,
+        centralityline = centralityline,
         changebinwidth = changebinwidth,
         binwidth = binwidth,
         barmeasure = barmeasure,

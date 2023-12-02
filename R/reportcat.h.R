@@ -36,7 +36,8 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -46,6 +47,7 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Summary of Categorical Variables",
                 refs=list(
                     "report",
+                    "gtExtras",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -56,7 +58,11 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title=""))}))
+                title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text1",
+                title="Categorical Data"))}))
 
 reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "reportcatBase",
@@ -94,6 +100,7 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

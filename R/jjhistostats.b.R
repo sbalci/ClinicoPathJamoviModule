@@ -199,6 +199,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             test.value.line.args = list(size = 1),
                             test.value.label.args = list(size = 3),
 
+                            centrality.plotting = self$options$centralityline,
+
                             centrality.parameter = centralityparameter,
                             centrality.k = 2,
                             centrality.line.args = list(size = 1, color = "blue"),

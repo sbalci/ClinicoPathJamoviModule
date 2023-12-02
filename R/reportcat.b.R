@@ -4,6 +4,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
+#' @importFrom gtExtras gt_plt_summary
 #'
 
 reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -188,8 +189,17 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+            plot_mydata <- mydata %>%
+                gtExtras::gt_plt_summary()
+
+            print_plot_mydata <- print(plot_mydata)
+
+            plot_mydata <- htmltools::HTML(print_plot_mydata[["children"]][[2]])
+
+            self$results$text1$setContent(plot_mydata)
+
+        }
 
 
-
-        })
+        )
 )

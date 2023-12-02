@@ -15,8 +15,15 @@ items:
       title: ''
       type:  Preformatted
 
+    - name:  text1
+      title: 'Categorical Data'
+      type:  Html
+
+
 refs:
     - report
+    - gtExtras
     - ClinicoPathJamoviModule
+
 
 ...

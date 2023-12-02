@@ -14,7 +14,14 @@ items:
       type:  Preformatted
 
 
+    - name:  text1
+      title: 'Continuous Data Plots'
+      type:  Html
+
+
+
 refs:
+    - gtExtras
     - ClinicoPathJamoviModule
 
 ...

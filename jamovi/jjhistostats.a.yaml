@@ -105,6 +105,11 @@ options:
 # Plot ----
 
 
+    - name: centralityline
+      title: Centrality Line
+      type: Bool
+      default: true
+
     - name: changebinwidth
       title: Change Bin Width
       type: Bool

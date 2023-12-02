@@ -35,7 +35,8 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -44,6 +45,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Summary of Continuous Variables",
                 refs=list(
+                    "gtExtras",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -52,7 +54,11 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title=""))}))
+                title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text1",
+                title="Continuous Data Plots"))}))
 
 summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "summarydataBase",
@@ -90,6 +96,7 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

@@ -81,7 +81,6 @@ children:
             children:
               - type: ComboBox
                 name: barmeasure
-
       - type: Label
         label: Change Label and Titles
       - type: LayoutBox
@@ -127,7 +126,6 @@ children:
                 format: string
                 width: large
                 enable: (useplotcaption)
-
           - type: CheckBox
             name: usetitleprefix
             enable: (grvar)
@@ -137,3 +135,8 @@ children:
                 format: string
                 width: large
                 enable: (grvar && usetitleprefix)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: centralityline

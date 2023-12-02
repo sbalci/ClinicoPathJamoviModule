@@ -599,6 +599,14 @@ refs:
         url: https://cran.r-project.org/web/packages/kappaSize/
 
 
+    gtExtras:
+        type: 'software'
+        author: Thomas Mock, Daniel D. Sjoberg
+        year: 2023
+        title: "gtExtras"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/web/packages/gtExtras/'
+        url: https://cran.r-project.org/web/packages/gtExtras/
+
 
     survivaltutorial:
         type: 'article'
