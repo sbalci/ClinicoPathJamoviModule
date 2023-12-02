@@ -997,14 +997,14 @@ jmvcore::decomposeTerm(term = composeTerm)
 
 ```r
 read data, eval=FALSE, include=FALSE
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ```
 
 
 ```r
 writesummary, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 # library("ClinicoPath")
 
@@ -1030,7 +1030,7 @@ devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
 library(survival)
 library(finalfit)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::finalfit(data = deneme,
                       explanatory = Sex,
                       outcome = Outcome,
@@ -1042,7 +1042,7 @@ ClinicoPath::finalfit(data = deneme,
 ```r
 decision, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 ClinicoPath::decision(
     data = deneme,
@@ -1061,7 +1061,7 @@ ClinicoPath::decision(
 
 ```r
 eval=FALSE, include=FALSE
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ggstatsplot::ggbetweenstats(data = deneme,
                             x = LVI,
                             y = Age)
@@ -1075,7 +1075,7 @@ ggstatsplot::ggbetweenstats(data = deneme,
 ```r
 statsplot, eval=FALSE, include=FALSE
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::statsplot(
     data = deneme,
     dep = Age,
@@ -1149,7 +1149,7 @@ myformula <- jmvcore::composeTerm(myformula)
 
 ```r
 eval=FALSE, include=FALSE
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 library(survival)
 km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
@@ -1169,7 +1169,7 @@ construct formula 2, eval=FALSE, include=FALSE
 library(dplyr)
 library(survival)
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 myoveralltime <- deneme$OverallTime
 myoutcome <- deneme$Outcome
@@ -1209,7 +1209,7 @@ tUni
 ```r
 eval=FALSE, include=FALSE
 library(dplyr)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 results <- deneme %>%
                 ggstatsplot::ggbetweenstats(LVI, Age)
@@ -1309,7 +1309,7 @@ finalfit::finalfit(myformula, explanatory) -> tUni
 
 ```r
 table tangram, eval=FALSE, include=FALSE
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 
 table3 <-
@@ -1509,7 +1509,7 @@ rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
 
 ```r
 pairwise, eval=FALSE, include=FALSE
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 # names(deneme)
 
 mypairwise <-  survminer::pairwise_survdiff(
@@ -2503,9 +2503,9 @@ file.copy(from = files_data,
 
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 library(magrittr)
 
@@ -2544,7 +2544,7 @@ ClinicoPath::statsplot2(
 
 
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 # library("ClinicoPath")
 
@@ -2564,14 +2564,14 @@ devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
 library(survival)
 library(finalfit)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::finalfit(data = deneme,
                       explanatory = Sex,
                       outcome = Outcome,
                       overalltime = OverallTime)
 
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 ClinicoPath::decision(
     data = deneme,
@@ -2587,7 +2587,7 @@ ClinicoPath::decision(
     newtest = PNI,
     testPositive = "Present")
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ggstatsplot::ggbetweenstats(data = deneme, 
                             x = LVI,
                             y = Age)
@@ -2595,7 +2595,7 @@ ggstatsplot::ggbetweenstats(data = deneme,
 
 
 devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 ClinicoPath::statsplot(
     data = deneme,
     dep = Age,
@@ -2650,7 +2650,7 @@ myformula <- jmvcore::composeTerm(myformula)
 
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 library(survival)
 km_fit <- survfit(Surv(OverallTime, Outcome) ~ LVI, data = deneme)
@@ -2665,7 +2665,7 @@ km_fit_median_df <- as.data.frame(km_fit_median_df$table) %>%
 library(dplyr)
 library(survival)
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 myoveralltime <- deneme$OverallTime
 myoutcome <- deneme$Outcome
@@ -2701,7 +2701,7 @@ deneme %>%
 tUni
 
 library(dplyr)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 results <- deneme %>%
                 ggstatsplot::ggbetweenstats(LVI, Age)
@@ -2789,7 +2789,7 @@ deneme %>%
 finalfit::finalfit(myformula, explanatory) -> tUni
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 
 table3 <-
@@ -2837,7 +2837,7 @@ table
 
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 
 mydata <- deneme
@@ -3015,7 +3015,7 @@ rio::export(x = BreastCancer, file = "data/BreastCancer.csv")
 
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 # names(deneme)
 
 mypairwise <-  survminer::pairwise_survdiff(
@@ -3148,7 +3148,7 @@ formula <- as.formula(formula)
 devtools::install(upgrade = FALSE, quick = TRUE)
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 
 ClinicoPath::statsplotbetween(
@@ -3244,7 +3244,7 @@ mymatrix2
 devtools::install(upgrade = FALSE, quick = TRUE)
 library(dplyr)
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 ratings <- deneme %>% 
     dplyr::select(LVI, PNI, Age, ID)
@@ -3287,14 +3287,14 @@ result2 <- irr::kappam.fleiss(
 
 
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 mytree <- vtree::vtree(deneme, "LVI PNI")
 
 # write(mytree[["x"]][["diagram"]], 
-#       file = here::here("/tododata/trial1.gv"))
+#       file = here::here("/_tododata/trial1.gv"))
 
-# DiagrammeR::grViz(diagram = here::here("/tododata/trial1.gv"))
+# DiagrammeR::grViz(diagram = here::here("/_tododata/trial1.gv"))
 
 diagram <- mytree[["x"]][["diagram"]]
 
@@ -3610,7 +3610,7 @@ position = "left")
 
 library(dplyr)
 
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 
 varsName <- c("LVI", "PNI")
@@ -3786,7 +3786,7 @@ tablelist
 
 library(magrittr)
 # devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 mydata <- deneme
 
@@ -3854,7 +3854,7 @@ myvars <- c("Cl.thickness",
 # install.packages("easyalluvial")
 library(magrittr)
 # devtools::install(upgrade = FALSE, quick = TRUE)
-deneme <- readxl::read_xlsx(path = here::here("tododata", "histopathology-template2019-11-25.xlsx"))
+deneme <- readxl::read_xlsx(path = here::here("_tododata", "histopathology-template2019-11-25.xlsx"))
 
 mydata <- deneme
 

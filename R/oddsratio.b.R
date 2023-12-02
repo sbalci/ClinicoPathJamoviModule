@@ -56,6 +56,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         Outcome variable should be coded binary, defining whether the patient is dead or event (recurrence) occured
                     or censored (patient is alive or free of disease) at the last visit.
                     <br><br>
+                        Variable names with empty spaces or special characters may not work properly. Consider renaming them.
+                    <br><br>
                         This function uses finalfit package. Please cite jamovi and the packages as given below.
                     <br><br>
                     ")
@@ -147,22 +149,24 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # formulaR3 <- as.vector(self$options$outcome)
 
+                # formulaL <- jmvcore::composeTerms(listOfComponents =
+                #                                       self$options$explanatory)
+
+                # formulaL <- as.vector(formulaL)
+
+
+                # formula2 <- jmvcore::constructFormula(terms = formulaL)
+
+                # formulaL2 <- jmvcore::constructFormula(terms =
+                #                                       self$options$explanatory)
 
                 # formulaR <- jmvcore::toNumeric(formulaR)
-
-
-                # results1 <- list(
-                #     formulaR,
-                #     formula2
-                # )
-                #
-                # self$results$text$setContent(results1)
 
 
                 # glm(depdendent ~ explanatory, family="binomial")
 
                 finalfit::finalfit(.data = mydata,
-                                   dependent = formulaR3,
+                                   dependent = formulaR,
                                    explanatory = formula2,
                                    metrics = TRUE
                                    ) -> tOdds
@@ -170,39 +174,40 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # self$results$textmydata$setContent(
                 #     list(
-                #         outcomeLevel,
-                #         outcome_name,
-                #         outcome1,
-                #         mydata,
-                #         formula2,
-                #         formulaR,
-                #         # formulaR2,
+                #         # outcomeLevel,
+                #         # outcome_name,
+                #         # outcome1,
+                #         head = head(mydata),
+                #         formula2 = formula2,
+                #         formulaR = formulaR,
+                #         formulaL = formulaL,
+                #         formulaL2 = formulaL2,
                 #         # formulaR3,
-                #         names(mydata)
+                #         names_dara = names(mydata)
                 #         # ,
                 #         # tOdds
                 #     )
                 # )
 
 
-                # text2 <- glue::glue("
-                #                 <br>
-                #                 <b>Model Metrics:</b>
-                #                   ",
-                #                 unlist(
-                #                     tOdds[[2]]
-                #                 ),
-                #                 "
-                #                 <br>
-                #                 ")
-                
-                
+                text2 <- glue::glue("
+                                <br>
+                                <b>Model Metrics:</b>
+                                  ",
+                                unlist(
+                                    tOdds[[2]]
+                                ),
+                                "
+                                <br>
+                                ")
+
+
                 self$results$text2$setContent(text2)
 
 
                 results1 <-  knitr::kable(tOdds[[1]],
-                             row.names=FALSE,
-                             align=c("l", "l", "r", "r", "r", "r"),
+                             row.names = FALSE,
+                             align = c("l", "l", "r", "r", "r", "r"),
                              format = "html")
                 self$results$text$setContent(results1)
 
