@@ -58,9 +58,9 @@ options:
       type: Variable
 
 
-    - name: calculatedtime
-      title: Add Calculated Time to Data
-      type: Output
+    # - name: calculatedtime
+    #   title: Add Calculated Time to Data
+    #   type: Output
 
 
     - name: outcome
@@ -107,9 +107,9 @@ options:
       default: overall
 
 
-    - name: outcomeredifened
-      title: Add Redefined Outcome to Data
-      type: Output
+    # - name: outcomeredifened
+    #   title: Add Redefined Outcome to Data
+    #   type: Output
 
 
 

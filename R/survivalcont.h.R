@@ -178,12 +178,6 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "risktable",
                 risktable,
                 default=FALSE)
-            private$..calculatedtime <- jmvcore::OptionOutput$new(
-                "calculatedtime")
-            private$..outcomeredifened <- jmvcore::OptionOutput$new(
-                "outcomeredifened")
-            private$..calculatedcutoff <- jmvcore::OptionOutput$new(
-                "calculatedcutoff")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -212,9 +206,6 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
-            self$.addOption(private$..calculatedtime)
-            self$.addOption(private$..outcomeredifened)
-            self$.addOption(private$..calculatedcutoff)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -243,10 +234,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         findcut = function() private$..findcut$value,
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
-        risktable = function() private$..risktable$value,
-        calculatedtime = function() private$..calculatedtime$value,
-        outcomeredifened = function() private$..outcomeredifened$value,
-        calculatedcutoff = function() private$..calculatedcutoff$value),
+        risktable = function() private$..risktable$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -274,10 +262,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..findcut = NA,
         ..multievent = NA,
         ..ci95 = NA,
-        ..risktable = NA,
-        ..calculatedtime = NA,
-        ..outcomeredifened = NA,
-        ..calculatedcutoff = NA)
+        ..risktable = NA)
 )
 
 survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -591,7 +576,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'none')
+                weightsSupport = 'auto')
         }))
 
 #' Survival Analysis for Continuous Variable

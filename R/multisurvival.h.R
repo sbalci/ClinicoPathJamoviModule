@@ -185,10 +185,6 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "pplot",
                 pplot,
                 default=TRUE)
-            private$..calculatedtime <- jmvcore::OptionOutput$new(
-                "calculatedtime")
-            private$..outcomeredifened <- jmvcore::OptionOutput$new(
-                "outcomeredifened")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -217,8 +213,6 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
             self$.addOption(private$..pplot)
-            self$.addOption(private$..calculatedtime)
-            self$.addOption(private$..outcomeredifened)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -247,9 +241,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
         censored = function() private$..censored$value,
-        pplot = function() private$..pplot$value,
-        calculatedtime = function() private$..calculatedtime$value,
-        outcomeredifened = function() private$..outcomeredifened$value),
+        pplot = function() private$..pplot$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -277,9 +269,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ci95 = NA,
         ..risktable = NA,
         ..censored = NA,
-        ..pplot = NA,
-        ..calculatedtime = NA,
-        ..outcomeredifened = NA)
+        ..pplot = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -476,7 +466,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'none')
+                weightsSupport = 'auto')
         }))
 
 #' Multivariable Survival Analysis
