@@ -67,7 +67,8 @@ Imports:
     e1071,
     epiR,
     kappaSize,
-    gtExtras
+    gtExtras,
+    labelled
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 VignetteBuilder:

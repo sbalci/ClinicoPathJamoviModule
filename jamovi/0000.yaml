@@ -420,6 +420,11 @@ analyses:
     ns: ClinicoPath
     menuGroup: PPDA
     menuTitle: Test ROC
+  - title: multisurvival2
+    name: multisurvival2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuTitle: multisurvival2
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
