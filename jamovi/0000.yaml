@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2023-12-02'
+date: '2023-12-03'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
