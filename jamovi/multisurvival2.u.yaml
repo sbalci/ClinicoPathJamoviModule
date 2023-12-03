@@ -1,0 +1,212 @@
+title: multisurvival2
+name: multisurvival2
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Elapsed
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Outcome
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            fitToGrid: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome && !multievent)
+      - type: TargetLayoutBox
+        label: Explanatory Variables
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Continuous Explanatory Variable
+        children:
+          - type: VariablesListBox
+            name: contexpl
+            isTarget: true
+  - type: CollapseBox
+    label: Advanced Elapsed Time Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Time Interval
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: tint
+                fitToGrid: true
+      - type: Label
+        label: Date Variables
+        fitToGrid: true
+        stretchFactor: 1
+        children:
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                children:
+                  - type: VariablesListBox
+                    name: dxdate
+                    maxItemCount: 1
+                    isTarget: true
+                    fitToGrid: true
+                    stretchFactor: 1
+              - type: TargetLayoutBox
+                children:
+                  - type: VariablesListBox
+                    name: fudate
+                    maxItemCount: 1
+                    isTarget: true
+                    fitToGrid: true
+                    stretchFactor: 1
+      - type: Label
+        label: Time Type
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            fitToGrid: true
+            children:
+              - type: ComboBox
+                name: timetypedata
+                enable: (tint)
+              - type: ComboBox
+                name: timetypeoutput
+      - type: Label
+        label: Landmark Time
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: uselandmark
+                children:
+                  - type: TextBox
+                    name: landmark
+                    format: number
+                    enable: (uselandmark)
+  - type: CollapseBox
+    label: Analysis with Multiple Outcomes
+    collapsed: true
+    children:
+      - type: Label
+        label: Multiple Event Levels
+        fitToGrid: true
+        children:
+          - type: CheckBox
+            name: multievent
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: LevelSelector
+                name: dod
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: dooc
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awd
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awod
+                enable: (outcome && multievent)
+      - type: Label
+        label: Analysis Type
+        children:
+          - type: ComboBox
+            name: analysistype
+            enable: (outcome && multievent)
+  - type: CollapseBox
+    label: Plots
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Hazard Regression Plots
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: CheckBox
+                name: hr
+                children:
+                  - type: ComboBox
+                    name: sty
+                    enable: (hr)
+      - type: Label
+        label: Kaplan-Meier Plots
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: CheckBox
+                name: km
+      - type: Label
+        label: Plot Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: endplot
+                format: number
+                enable: (km || ac)
+              - type: TextBox
+                name: byplot
+                format: number
+                enable: (km || ac)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: ci95
+                enable: (km || ac)
+              - type: CheckBox
+                name: risktable
+                enable: (km || ac)
+              - type: CheckBox
+                name: censored
+                enable: (km || ac)
+              - type: CheckBox
+                name: pplot
+                enable: (km || ac)
+      - type: Label
+        label: Adjusted Survival Curve (Being Updated)
+        fitToGrid: true
+        stretchFactor: 1
+        children: []
+  - type: CollapseBox
+    label: Save Converted Variables to Data
+    collapsed: true
+    children:
+      - type: Label
+        label: Add Calculated Time to Your Data
+        fitToGrid: true
+        children: []
+      - type: Label
+        label: Add Redefined Outcome to Data
+        fitToGrid: true
+        children: []
