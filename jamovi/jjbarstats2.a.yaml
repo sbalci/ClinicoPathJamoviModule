@@ -1,9 +1,9 @@
 ---
 name:  jjbarstats2
 title: Bar Charts
-menuGroup: ClinicoPath
-menuSubgroup: 'Categorical vs Categorical'
-# menuSubtitle: 'Bar Charts, Grouped Bar Charts'
+menuGroup: Graphs
+menuSubgroup: Drafts JJStatsPlot
+menuSubtitle: 'Bar Charts, Grouped Bar Charts: Categorical vs Categorical'
 version: '1.0.0'
 jas: '1.2'
 

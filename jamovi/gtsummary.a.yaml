@@ -1,8 +1,9 @@
 ---
 name:  gtsummary
 title: Tables via gtsummary
-menuGroup: ClinicoPath
-menuSubgroup: Comparisons
+menuGroup: Exploration
+menuSubgroup: Drafts
+menuSubtitle: Comparisons
 version: '1.0.0'
 jas: '1.2'
 

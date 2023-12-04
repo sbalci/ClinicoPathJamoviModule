@@ -1,7 +1,9 @@
 ---
 name:  parallelplot
 title: Parallel Plot
-menuGroup: ClinicoPath
+menuGroup: Graphs
+menuSubgroup: Drafts
+menuSubtitle: Exploration
 version: '1.0.0'
 jas: '1.2'
 

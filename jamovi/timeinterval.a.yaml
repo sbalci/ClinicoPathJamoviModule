@@ -1,8 +1,9 @@
 ---
 name:  timeinterval
 title: Time Interval
-menuGroup: ClinicoPath
-menuSubgroup: ClinicoPath Survival
+menuGroup: Survival
+menuSubgroup: Drafts
+menuSubtitle: Time Interval
 version: '1.0.0'
 jas: '1.2'
 

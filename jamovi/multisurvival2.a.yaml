@@ -1,7 +1,9 @@
 ---
 name:  multisurvival2
 title: multisurvival2
-menuGroup: ClinicoPath
+menuGroup: Survival
+menuSubgroup: Drafts
+menuSubtitle: Multivariable Survival Analysis
 version: '1.0.0'
 jas: '1.2'
 

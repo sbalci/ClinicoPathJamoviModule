@@ -1,8 +1,9 @@
 ---
 name:  roc
 title: ROC
-menuGroup: ClinicoPath
-menuSubgroup: Decision
+menuGroup: meddecide
+menuSubgroup: Drafts
+menuSubtitle: Decision
 version: '1.0.0'
 jas: '1.2'
 

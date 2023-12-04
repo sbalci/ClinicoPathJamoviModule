@@ -1,7 +1,9 @@
 ---
 name:  comparingSurvival
 title: Comparing Survival Outcomes
-menuGroup: SimpleSurvival
+menuGroup: Survival
+menuSubgroup: Drafts
+menuSubtitle: SimpleSurvival
 version: '1.0.0'
 jas: '1.2'
 
@@ -13,7 +15,7 @@ options:
       title: Time
       type: Variable
       suggested: [ continuous ]
-    
+
     - name: status
       title: Event indicator
       type: Variable
@@ -49,5 +51,5 @@ options:
         - name: Years
           title: Years
       default: None
- 
+
 ...

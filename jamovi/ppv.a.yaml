@@ -1,7 +1,8 @@
 ---
 name:  ppv
 title: Positive Predictive Value
-menuGroup: Demo
+menuGroup: meddecide
+menuSubgroup: Drafts
 version: '1.0.0'
 jas: '1.2'
 

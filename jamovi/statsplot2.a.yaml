@@ -1,8 +1,9 @@
 ---
 name:  statsplot2
 title: Graphs and Plots
-menuGroup: JJStatsPlot
-menuSubgroup: Variable Type Based Graphs and Plots
+menuGroup: Graphs
+menuSubgroup: Drafts JJStatsPlot
+menuSubtitle: Variable Type Based Graphs and Plots
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,8 +1,9 @@
 ---
 name:  retracted
 title: Find Retracted Papers from DOI
-menuGroup: ClinicoPath
-menuSubgroup: Bibliometrics
+menuGroup: Exploration
+menuSubgroup: Drafts
+menuSubtitle: Bibliometrics
 version: '1.0.0'
 jas: '1.2'
 
