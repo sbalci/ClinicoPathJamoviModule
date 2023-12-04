@@ -22,8 +22,10 @@ children:
             name: outcome
             maxItemCount: 1
             isTarget: true
+            fitToGrid: true
           - type: LevelSelector
             name: outcomeLevel
+            enable: (outcome && !multievent)
       - type: TargetLayoutBox
         label: Explanatory Variables
         children:
@@ -57,6 +59,7 @@ children:
                 name: dxdate
                 maxItemCount: 1
                 isTarget: true
+                enable: (tint)
           - type: TargetLayoutBox
             label: Follow-up Date
             children:
@@ -64,31 +67,30 @@ children:
                 name: fudate
                 maxItemCount: 1
                 isTarget: true
-
+                enable: (tint)
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: timetypedata
+            enable: (tint)
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: timetypeoutput
+            enable: (tint)
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: uselandmark
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: landmark
-            format: number
-
-
-
+            enable: (tint)
+            children:
+              - type: TextBox
+                name: landmark
+                format: number
+                enable: (uselandmark)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: false
@@ -99,84 +101,65 @@ children:
         children:
           - type: CheckBox
             name: multievent
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: dod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: dooc
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: awd
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: awod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: analysistype
-
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: hr
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: sty
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: km
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: endplot
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: byplot
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ci95
-      - type: CheckBox
-        name: risktable
-      - type: CheckBox
-        name: censored
-      - type: CheckBox
-        name: pplot
-  - type: Label
-    label: Adjusted Survival Curve (Being Updated)
-    fitToGrid: true
-    stretchFactor: 1
-    children: []
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: LevelSelector
+                name: dod
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: dooc
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awd
+                enable: (outcome && multievent)
+              - type: LevelSelector
+                name: awod
+                enable: (outcome && multievent)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: analysistype
   - type: CollapseBox
-    label: Save Converted Variables to Data
+    label: Plots
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Hazard Regression Plots
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            fitToGrid: true
+            children:
+              - type: CheckBox
+                name: hr
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: sty
+                enable: (hr)
+  - type: CollapseBox
+    label: Adjusted Survival Curve (Being Updated)
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Adjusted Survival Curve (Being Updated)
+        fitToGrid: true
+        stretchFactor: 1
+        children: []
+  - type: CollapseBox
+    label: Save Converted Variables to Data (Being Updated)
     collapsed: true
     children:
       - type: Label
-        label: Add Calculated Time to Your Data
+        label: Add Calculated Time to Your Data  (Being Updated)
         fitToGrid: true
         children: []
       - type: Label
-        label: Add Redefined Outcome to Data
+        label: Add Redefined Outcome to Data (Being Updated)
         fitToGrid: true
         children: []
