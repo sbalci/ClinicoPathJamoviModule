@@ -1,8 +1,9 @@
 ---
 name:  tree
 title: Decision Tree
-menuGroup: ClinicoPath
-menuSubgroup: Decision
+menuGroup: meddecide
+menuSubgroup: Drafts
+menuSubtitle: Classification
 version: '1.0.0'
 jas: '1.2'
 

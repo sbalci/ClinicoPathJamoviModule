@@ -1,8 +1,8 @@
 ---
 name:  lollipop
 title: Lollipop Chart
-menuGroup: Exploration
-menuSubgroup: ClinicoPath Descriptive Plots
+menuGroup: Graphs
+menuSubgroup: Drafts
 version: '1.0.0'
 jas: '1.2'
 

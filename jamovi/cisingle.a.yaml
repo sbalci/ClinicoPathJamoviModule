@@ -1,7 +1,8 @@
 ---
 name:  ciSingle
 title: Confidence interval for a mean
-menuGroup: PUBH5018
+menuGroup: fromOthers
+menuSubgroup: PUBH5018
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,7 +1,8 @@
 ---
 name:  toolssummary
 title: Tools for data summary
-menuGroup: ClinicoPath
+menuGroup: Exploration
+menuSubgroup: Drafts
 version: '1.0.0'
 jas: '1.2'
 

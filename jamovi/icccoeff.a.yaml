@@ -1,8 +1,9 @@
 ---
 name:  icccoeff
 title: ICC coefficients
-menuGroup: ClinicoPath
-menuSubgroup: Agreement
+menuGroup: meddecide
+menuSubgroup: Drafts
+menuSubtitle: Agreement
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,7 +1,8 @@
 ---
 name:  TestROC
 title: Test ROC
-menuGroup: PPDA
+menuGroup: fromOthers
+menuSubgroup: PPDA
 version: '1.0.0'
 jas: '1.2'
 

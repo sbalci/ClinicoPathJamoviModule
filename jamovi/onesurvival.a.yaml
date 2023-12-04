@@ -1,7 +1,9 @@
 ---
 name:  oneSurvival
 title: One Survival Outcome
-menuGroup: SimpleSurvival
+menuGroup: Survival
+menuSubgroup: Drafts
+menuSubtitle: SimpleSurvival
 version: '1.0.0'
 jas: '1.2'
 

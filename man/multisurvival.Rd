@@ -25,14 +25,7 @@ multisurvival(
   uselandmark = FALSE,
   landmark = 3,
   hr = FALSE,
-  sty = "t1",
-  km = FALSE,
-  endplot = 60,
-  byplot = 12,
-  ci95 = FALSE,
-  risktable = FALSE,
-  censored = FALSE,
-  pplot = TRUE
+  sty = "t1"
 )
 }
 \arguments{
@@ -77,20 +70,6 @@ multisurvival(
 \item{hr}{.}
 
 \item{sty}{.}
-
-\item{km}{.}
-
-\item{endplot}{.}
-
-\item{byplot}{.}
-
-\item{ci95}{.}
-
-\item{risktable}{.}
-
-\item{censored}{.}
-
-\item{pplot}{.}
 }
 \value{
 A results object containing:

@@ -1,8 +1,8 @@
 ---
 name:  competingsurvival
 title: Overall, Cause Specific, and Competing Survival
-menuGroup: ClinicoPath
-menuSubgroup: ClinicoPath Survival
+menuGroup: Survival
+menuSubgroup: Drafts
 menuSubtitle: 'Survival for Different Outcomes'
 version: '1.0.0'
 jas: '1.2'

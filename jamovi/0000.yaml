@@ -131,35 +131,37 @@ analyses:
   - title: Decision Tree
     name: tree
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Decision
+    menuGroup: meddecide
+    menuSubgroup: Drafts
     menuTitle: Decision Tree
     description: Function for making Decision Trees.
+    menuSubtitle: Classification
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Bibliometrics
+    menuGroup: Exploration
+    menuSubgroup: Drafts
     menuTitle: Find Retracted Papers from DOI
+    menuSubtitle: Bibliometrics
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Categorical vs Continuous
+    menuGroup: Graphs
+    menuSubgroup: Drafts JJStatsPlot
     menuTitle: Box-Violin Plots to Compare Within Groups
-    menuSubtitle: Repeated Measurements
+    menuSubtitle: Categorical vs Continuous Repeated Measurements
   - title: Violin Plots to Compare Within Groups for Wide Data Format
     name: jjwithinstats2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Categorical vs Continuous
+    menuGroup: Graphs
+    menuSubgroup: Drafts JJStatsPlot
     menuTitle: Violin Plots to Compare Within Groups for Wide Data Format
-    menuSubtitle: Paired Measurements
+    menuSubtitle: Categorical vs Continuous Paired Measurements
   - title: Violin Plots to Compare Repeated Measurements for Continuous Variables
     name: jjwithinstats3
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Repeated Measurements
+    menuGroup: Graphs
+    menuSubgroup: Drafts JJStatsPlot
     menuTitle: Violin Plots to Compare Repeated Measurements for Continuous Variables
     menuSubtitle: Repeated Measurements for Continuous Variables
   - title: Histogram
@@ -174,36 +176,42 @@ analyses:
   - title: Checking data
     name: checkdata
     ns: ClinicoPath
-    menuGroup: PUBH5018
+    menuGroup: fromOthers
     menuTitle: Checking data
+    menuSubgroup: PUBH5018
   - title: Confidence interval for a mean
     name: ciSingle
     ns: ClinicoPath
-    menuGroup: PUBH5018
+    menuGroup: fromOthers
     menuTitle: Confidence interval for a mean
+    menuSubgroup: PUBH5018
   - title: Decision tree
     name: classification
     ns: ClinicoPath
-    menuGroup: Classification
+    menuGroup: meddecide
     menuTitle: Decision tree
+    menuSubgroup: Drafts
+    menuSubtitle: Classification
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SimpleSurvival
+    menuGroup: Survival
     menuTitle: Comparing Survival Outcomes
+    menuSubgroup: Drafts
+    menuSubtitle: SimpleSurvival
   - title: 'Overall, Cause Specific, and Competing Survival'
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: ClinicoPath Survival
+    menuGroup: Survival
+    menuSubgroup: Drafts
     menuTitle: 'Overall, Cause Specific, and Competing Survival'
     menuSubtitle: Survival for Different Outcomes
     description: 'Overall, Cause Specific, and Competing Survival.'
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
-    menuGroup: Frequencies
-    menuSubgroup: Contingency Tables
+    menuGroup: fromOthers
+    menuSubgroup: Frequencies Contingency Tables
     menuTitle: Independent Samples
     menuSubtitle: χ² test of association
     description: >
@@ -214,23 +222,24 @@ analyses:
   - title: Paired Samples Contingency Tables
     name: contTablesPaired
     ns: ClinicoPath
-    menuGroup: Frequencies
-    menuSubgroup: Contingency Tables
+    menuGroup: fromOthers
+    menuSubgroup: Frequencies Contingency Tables
     menuTitle: Paired Samples
     menuSubtitle: McNemar test
     description: McNemar test
   - title: Correlation
     name: correlation
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Correlation
+    menuGroup: Exploration
+    menuSubgroup: Drafts
     menuTitle: Correlation
     description: Function for Correlation.
+    menuSubtitle: Correlation
   - title: Decision 2 for using init
     name: decision2
     ns: ClinicoPath
     menuGroup: meddecide
-    menuSubgroup: Decision
+    menuSubgroup: Drafts
     menuTitle: Decision 2 for using init
     menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
     description: >
@@ -239,28 +248,32 @@ analyses:
   - title: Dendogram
     name: dendogram
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: meddecide
     menuTitle: Dendogram
+    menuSubgroup: Drafts
   - title: Tables via gtsummary
     name: gtsummary
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Comparisons
+    menuGroup: Exploration
+    menuSubgroup: Drafts
     menuTitle: Tables via gtsummary
+    menuSubtitle: Comparisons
   - title: ICC coefficients
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Agreement
+    menuGroup: meddecide
+    menuSubgroup: Drafts
     menuTitle: ICC coefficients
     description: Function for Interclass Correlation Coefficient Calculation.
+    menuSubtitle: Agreement
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Variable Type Based Graphs and Plots
+    menuGroup: Graphs
+    menuSubgroup: Drafts JJStatsPlot
     menuTitle: Graphs and Plots
     description: Function for Generating Plots and Graphs Based on Variable Types.
+    menuSubtitle: Variable Type Based Graphs and Plots
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
@@ -273,12 +286,13 @@ analyses:
   - title: Bar Charts
     name: jjbarstats2
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Categorical vs Categorical
+    menuGroup: Graphs
+    menuSubgroup: Drafts JJStatsPlot
     menuTitle: Bar Charts
     description: |
       'Wrapper Function for ggstatsplot::ggbarstats and
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    menuSubtitle: 'Bar Charts, Grouped Bar Charts: Categorical vs Categorical'
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
@@ -313,55 +327,64 @@ analyses:
   - title: Violin Plot
     name: jviolin
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: R-Graph-Gallery
+    menuGroup: Graphs
+    menuSubgroup: Drafts
     menuTitle: Violin Plot
     menuSubtitle: R Graph Gallery Violin
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Exploration
+    menuGroup: Graphs
+    menuSubgroup: Drafts
     menuTitle: Line Chart
-    menuSubtitle: ClinicoPath Descriptive Plots
+    menuSubtitle: Exploration
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: Exploration
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuGroup: Graphs
+    menuSubgroup: Drafts
     menuTitle: Lollipop Chart
   - title: Nomogram
     name: nomogram
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: meddecide
     menuTitle: Nomogram
+    menuSubgroup: Drafts
   - title: One Survival Outcome
     name: oneSurvival
     ns: ClinicoPath
-    menuGroup: SimpleSurvival
+    menuGroup: Survival
     menuTitle: One Survival Outcome
+    menuSubgroup: Drafts
+    menuSubtitle: SimpleSurvival
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: Exploration
     menuTitle: Pairwise Chi-Square Test
+    menuSubgroup: Drafts
+    menuSubtitle: Association
   - title: Parallel Plot
     name: parallelplot
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: Graphs
     menuTitle: Parallel Plot
+    menuSubgroup: Drafts
+    menuSubtitle: Exploration
   - title: Positive Predictive Value
     name: ppv
     ns: ClinicoPath
-    menuGroup: Demo
+    menuGroup: meddecide
     menuTitle: Positive Predictive Value
+    menuSubgroup: Drafts
   - title: ROC
     name: roc
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: Decision
+    menuGroup: meddecide
+    menuSubgroup: Drafts
     menuTitle: ROC
     description: Function for ROC Analysis.
+    menuSubtitle: Decision
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
@@ -372,14 +395,16 @@ analyses:
   - title: Time Interval
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: ClinicoPath
-    menuSubgroup: ClinicoPath Survival
+    menuGroup: Survival
+    menuSubgroup: Drafts
     menuTitle: Time Interval
+    menuSubtitle: Time Interval
   - title: Tools for data summary
     name: toolssummary
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: Exploration
     menuTitle: Tools for data summary
+    menuSubgroup: Drafts
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
@@ -418,13 +443,16 @@ analyses:
   - title: Test ROC
     name: TestROC
     ns: ClinicoPath
-    menuGroup: PPDA
+    menuGroup: fromOthers
     menuTitle: Test ROC
+    menuSubgroup: PPDA
   - title: multisurvival2
     name: multisurvival2
     ns: ClinicoPath
-    menuGroup: ClinicoPath
+    menuGroup: Survival
     menuTitle: multisurvival2
+    menuSubgroup: Drafts
+    menuSubtitle: Multivariable Survival Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

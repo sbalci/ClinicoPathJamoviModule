@@ -1,8 +1,8 @@
 ---
 name:  jjwithinstats3
 title: Violin Plots to Compare Repeated Measurements for Continuous Variables
-menuGroup: JJStatsPlot
-menuSubgroup: Repeated Measurements
+menuGroup: Graphs
+menuSubgroup: Drafts JJStatsPlot
 menuSubtitle: Repeated Measurements for Continuous Variables
 version: '1.0.0'
 jas: '1.2'

@@ -1,7 +1,9 @@
 ---
 name:  classification
 title: Decision tree
-menuGroup: Classification
+menuGroup: meddecide
+menuSubgroup: Drafts
+menuSubtitle: Classification
 version: '1.0.0'
 jas: '1.2'
 

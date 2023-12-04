@@ -1,7 +1,8 @@
 ---
 name:  dendogram
 title: Dendogram
-menuGroup: ClinicoPath
+menuGroup: meddecide
+menuSubgroup: Drafts
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,9 +1,9 @@
 ---
 name:  linechart
 title: Line Chart
-menuGroup: ClinicoPath
-menuSubgroup: Exploration
-menuSubtitle: ClinicoPath Descriptive Plots
+menuGroup: Graphs
+menuSubgroup: Drafts
+menuSubtitle: Exploration
 version: '1.0.0'
 jas: '1.2'
 
