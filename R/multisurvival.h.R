@@ -25,14 +25,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             uselandmark = FALSE,
             landmark = 3,
             hr = FALSE,
-            sty = "t1",
-            km = FALSE,
-            endplot = 60,
-            byplot = 12,
-            ci95 = FALSE,
-            risktable = FALSE,
-            censored = FALSE,
-            pplot = TRUE, ...) {
+            sty = "t1", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -157,34 +150,6 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "t1",
                     "t3"),
                 default="t1")
-            private$..km <- jmvcore::OptionBool$new(
-                "km",
-                km,
-                default=FALSE)
-            private$..endplot <- jmvcore::OptionInteger$new(
-                "endplot",
-                endplot,
-                default=60)
-            private$..byplot <- jmvcore::OptionInteger$new(
-                "byplot",
-                byplot,
-                default=12)
-            private$..ci95 <- jmvcore::OptionBool$new(
-                "ci95",
-                ci95,
-                default=FALSE)
-            private$..risktable <- jmvcore::OptionBool$new(
-                "risktable",
-                risktable,
-                default=FALSE)
-            private$..censored <- jmvcore::OptionBool$new(
-                "censored",
-                censored,
-                default=FALSE)
-            private$..pplot <- jmvcore::OptionBool$new(
-                "pplot",
-                pplot,
-                default=TRUE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -206,13 +171,6 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..landmark)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
-            self$.addOption(private$..km)
-            self$.addOption(private$..endplot)
-            self$.addOption(private$..byplot)
-            self$.addOption(private$..ci95)
-            self$.addOption(private$..risktable)
-            self$.addOption(private$..censored)
-            self$.addOption(private$..pplot)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -234,14 +192,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         uselandmark = function() private$..uselandmark$value,
         landmark = function() private$..landmark$value,
         hr = function() private$..hr$value,
-        sty = function() private$..sty$value,
-        km = function() private$..km$value,
-        endplot = function() private$..endplot$value,
-        byplot = function() private$..byplot$value,
-        ci95 = function() private$..ci95$value,
-        risktable = function() private$..risktable$value,
-        censored = function() private$..censored$value,
-        pplot = function() private$..pplot$value),
+        sty = function() private$..sty$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -262,14 +213,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..uselandmark = NA,
         ..landmark = NA,
         ..hr = NA,
-        ..sty = NA,
-        ..km = NA,
-        ..endplot = NA,
-        ..byplot = NA,
-        ..ci95 = NA,
-        ..risktable = NA,
-        ..censored = NA,
-        ..pplot = NA)
+        ..sty = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -498,13 +442,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param landmark .
 #' @param hr .
 #' @param sty .
-#' @param km .
-#' @param endplot .
-#' @param byplot .
-#' @param ci95 .
-#' @param risktable .
-#' @param censored .
-#' @param pplot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -539,14 +476,7 @@ multisurvival <- function(
     uselandmark = FALSE,
     landmark = 3,
     hr = FALSE,
-    sty = "t1",
-    km = FALSE,
-    endplot = 60,
-    byplot = 12,
-    ci95 = FALSE,
-    risktable = FALSE,
-    censored = FALSE,
-    pplot = TRUE) {
+    sty = "t1") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -589,14 +519,7 @@ multisurvival <- function(
         uselandmark = uselandmark,
         landmark = landmark,
         hr = hr,
-        sty = sty,
-        km = km,
-        endplot = endplot,
-        byplot = byplot,
-        ci95 = ci95,
-        risktable = risktable,
-        censored = censored,
-        pplot = pplot)
+        sty = sty)
 
     analysis <- multisurvivalClass$new(
         options = options,

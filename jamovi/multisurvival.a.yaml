@@ -89,9 +89,6 @@ options:
       permitted: [ numeric ]
 
 
-
-
-
     - name: multievent
       title: Multiple Event Levels
       type: Bool
@@ -161,15 +158,10 @@ options:
       type: Integer
       default: 3
 
-
-
-
-
     - name: hr
       title: Hazards Regression Plot
       type: Bool
       default: false
-
 
     - name: sty
       title: Plot Style
@@ -183,10 +175,11 @@ options:
           name: t3
       default: t1
 
-    - name: km
-      title: Kaplan-Meier
-      type: Bool
-      default: false
+
+    # - name: km
+    #   title: Kaplan-Meier
+    #   type: Bool
+    #   default: false
 
 
     # - name: ac
@@ -202,36 +195,36 @@ options:
     #   permitted: [ factor ]
 
 
-    - name: endplot
-      title: Plot End Time
-      type: Integer
-      default: 60
+    # - name: endplot
+    #   title: Plot End Time
+    #   type: Integer
+    #   default: 60
 
 
-    - name: byplot
-      title: Time Interval
-      type: Integer
-      default: 12
+    # - name: byplot
+    #   title: Time Interval
+    #   type: Integer
+    #   default: 12
 
-    - name: ci95
-      title: '95% CI'
-      type: Bool
-      default: false
+    # - name: ci95
+    #   title: '95% CI'
+    #   type: Bool
+    #   default: false
 
-    - name: risktable
-      title: risktable
-      type: Bool
-      default: false
+    # - name: risktable
+    #   title: risktable
+    #   type: Bool
+    #   default: false
 
-    - name: censored
-      title: censored
-      type: Bool
-      default: false
+    # - name: censored
+    #   title: censored
+    #   type: Bool
+    #   default: false
 
-    - name: pplot
-      title: p-value
-      type: Bool
-      default: true
+    # - name: pplot
+    #   title: p-value
+    #   type: Bool
+    #   default: true
 
     # - name: calculatedtime
     #   title: Add Calculated Time to Data
