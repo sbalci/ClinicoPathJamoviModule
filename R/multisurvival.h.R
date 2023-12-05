@@ -225,9 +225,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
-        plotKM = function() private$.items[["plotKM"]],
-        calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredifened = function() private$.items[["outcomeredifened"]]),
+        plot4 = function() private$.items[["plot4"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -345,52 +343,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "adjexplanatory")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plotKM",
-                title="Kaplan-Meier",
-                width=600,
-                height=450,
-                renderFun=".plotKM",
-                requiresData=TRUE,
-                visible="(km)",
-                refs="finalfit",
-                clearWith=list(
-                    "km",
-                    "endplot",
-                    "byplot",
-                    "ci95",
-                    "risktable",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "explanatory",
-                    "contexpl",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent",
-                    "adjexplanatory",
-                    "pplot",
-                    "censored")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="calculatedtime",
-                title="Add Calculated Time to Data",
-                varTitle="`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates",
-                clearWith=list(
-                    "tint",
-                    "dxdate",
-                    "fudate")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="outcomeredifened",
-                title="Add Redefined Outcome to Data",
-                varTitle="`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type",
-                clearWith=list(
-                    "outcome",
-                    "analysistype",
-                    "multievent")))}))
+                name="plot4",
+                title="coxzph Plot",
+                width=800,
+                height=600,
+                renderFun=".plot4"))}))
 
 multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "multisurvivalBase",
@@ -449,9 +406,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

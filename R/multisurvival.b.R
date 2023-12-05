@@ -405,8 +405,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                             image3 <- self$results$plot3
                             image3$setState(mydata)
 
-                            imageKM <- self$results$plotKM
-                            imageKM$setState(mydata)
+
+                            image4 <- self$results$plot4
+                            image4$setState(mydata)
+
+
+                            # imageKM <- self$results$plotKM
+                            # imageKM$setState(mydata)
 
                             # image7 <- self$results$plot7
                             # image7$setState(mydata)
@@ -531,7 +536,52 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 summarycoxmodel <- summary(coxmodel)
 
 
-# https://forum.jamovi.org/viewtopic.php?p=9359&hilit=typeof#p9359
+
+                # Diagnostics of Cox Model ----
+
+                # https://forum.jamovi.org/viewtopic.php?t=2563&sid=1e80bc4f5cc91581b11be1ca1b9cc169
+
+
+                # fit <- coxph(Surv(futime, fustat) ~ age + ecog.ps + rx, data=ovarian)
+                # cox_zph_fit <- survival::cox.zph(coxmodel)
+
+
+                # plot all variables
+                # ggcoxzph(cox.zph.fit)
+
+                # plot all variables in specified order
+                # ggcoxzph(cox.zph.fit,
+                #          var = c("ecog.ps", "rx", "age"))
+
+                # plot specified variables in specified order
+                # ggcoxzph(cox.zph.fit,
+                #          var = c("ecog.ps", "rx"),
+                #          font.main = 12,
+                #          caption = "Caption goes here")
+
+
+
+
+                # ggcoxzph(): Graphical test of proportional hazards. Displays a graph of the scaled Schoenfeld residuals, along with a smooth curve using ggplot2.
+                # Wrapper around plot.cox.zph().
+                # ggcoxdiagnostics(): Displays diagnostics graphs presenting goodness of Cox Proportional Hazards Model fit.
+                # ggcoxfunctional(): Displays graphs of continuous explanatory variable against martingale residuals of null cox proportional hazards model. It helps to properly choose the functional form of continuous variable in cox model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                # https://forum.jamovi.org/viewtopic.php?p=9359&hilit=typeof#p9359
 
                 # # Create a function ----
                 # type_info <- function(x) {
@@ -731,8 +781,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # }
 
 
-
-
                 # Forest plot ----
             ,
             .plot3 = function(image3, ggtheme, theme, ...) {
@@ -776,50 +824,108 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             }
 
+
+
+
+            # coxzph plot ----
+            ,
+            .plot4 = function(image4, ggtheme, theme, ...) {
+
+                plotData <- image4$state
+
+                formula2 <-
+                    jmvcore::constructFormula(terms = c(self$options$explanatory, self$options$contexpl))
+
+                formula3 <-
+                    paste("survival::Surv(mytime, myoutcome) ~ ", formula2)
+
+                formula3 <- as.formula(formula3)
+
+                cox_model <-
+                    survival::coxph(formula = formula3,
+                                    data = plotData)
+
+
+
+                cox_zph_fit <- survival::cox.zph(cox_model)
+
+
+                # plot all variables
+                plot4 <- survminer::ggcoxzph(cox_zph_fit)
+
+
+                # print plot ----
+
+                print(plot4)
+                TRUE
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             # Kaplan-Meier ----
 
-            ,
-            .plotKM = function(imageKM, ggtheme, theme, ...) {
-
-                        plotData <- imageKM$state
-
-                        thefactor <- jmvcore::constructFormula(terms = self$options$explanatory)
-
-                        if (length(self$options$explanatory) > 2)
-                            stop("Kaplan-Meier function allows maximum of 2 explanatory variables")
-
-                        if (!is.null(self$options$contexpl))
-                            stop("Kaplan-Meier function does not use continuous explanatory variables.")
-
-                        title2 <- as.character(thefactor)
-
-                        plotKM <- plotData %>%
-                            finalfit::surv_plot(.data = .,
-                                                dependent = 'survival::Surv(mytime, myoutcome)',
-                                                explanatory = as.vector(self$options$explanatory),
-                                                xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-                                                pval = self$options$pplot,
-                                                pval.method	= self$options$pplot,
-                                                # pval = TRUE,
-                                                legend = 'none',
-                                                break.time.by = self$options$byplot,
-                                                xlim = c(0,self$options$endplot),
-                                                title = paste0("Survival curves for ", title2),
-                                                subtitle = "Based on Kaplan-Meier estimates",
-                                                risk.table = self$options$risktable,
-                                                conf.int = self$options$ci95,
-                                                censored = self$options$censored
-
-                            )
-
-                        # plot <- plot + ggtheme
-
-                        print(plotKM)
-                        TRUE
-
-
-
-                    }
+            # ,
+            # .plotKM = function(imageKM, ggtheme, theme, ...) {
+            #
+            #             plotData <- imageKM$state
+            #
+            #             thefactor <- jmvcore::constructFormula(terms = self$options$explanatory)
+            #
+            #             if (length(self$options$explanatory) > 2)
+            #                 stop("Kaplan-Meier function allows maximum of 2 explanatory variables")
+            #
+            #             if (!is.null(self$options$contexpl))
+            #                 stop("Kaplan-Meier function does not use continuous explanatory variables.")
+            #
+            #             title2 <- as.character(thefactor)
+            #
+            #             plotKM <- plotData %>%
+            #                 finalfit::surv_plot(.data = .,
+            #                                     dependent = 'survival::Surv(mytime, myoutcome)',
+            #                                     explanatory = as.vector(self$options$explanatory),
+            #                                     xlab = paste0('Time (', self$options$timetypeoutput, ')'),
+            #                                     pval = self$options$pplot,
+            #                                     pval.method	= self$options$pplot,
+            #                                     # pval = TRUE,
+            #                                     legend = 'none',
+            #                                     break.time.by = self$options$byplot,
+            #                                     xlim = c(0,self$options$endplot),
+            #                                     title = paste0("Survival curves for ", title2),
+            #                                     subtitle = "Based on Kaplan-Meier estimates",
+            #                                     risk.table = self$options$risktable,
+            #                                     conf.int = self$options$ci95,
+            #                                     censored = self$options$censored
+            #
+            #                 )
+            #
+            #             # plot <- plot + ggtheme
+            #
+            #             print(plotKM)
+            #             TRUE
+            #
+            #
+            #
+            #         }
 
 
 

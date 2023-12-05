@@ -147,33 +147,44 @@ items:
           - adjexplanatory
 
 
-    - name: plotKM
-      title: Kaplan-Meier
+
+    - name: plot4
+      title: coxzph Plot
       type: Image
-      width:  600
-      height: 450
-      renderFun: .plotKM
-      requiresData: true
-      visible: (km)
-      refs: finalfit
-      clearWith:
-          - km
-          - endplot
-          - byplot
-          - ci95
-          - risktable
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - adjexplanatory
-          - pplot
-          - censored
+      width:  800
+      height: 600
+      renderFun: .plot4
+
+
+
+
+    # - name: plotKM
+    #   title: Kaplan-Meier
+    #   type: Image
+    #   width:  600
+    #   height: 450
+    #   renderFun: .plotKM
+    #   requiresData: true
+    #   visible: (km)
+    #   refs: finalfit
+    #   clearWith:
+    #       - km
+    #       - endplot
+    #       - byplot
+    #       - ci95
+    #       - risktable
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - adjexplanatory
+    #       - pplot
+    #       - censored
 
 
 #
@@ -208,26 +219,26 @@ items:
 #
 
 
-    - name: calculatedtime
-      title: Add Calculated Time to Data
-      type: Output
-      varTitle: '`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates
-      clearWith:
-          - tint
-          - dxdate
-          - fudate
+    # - name: calculatedtime
+    #   title: Add Calculated Time to Data
+    #   type: Output
+    #   varTitle: '`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`'
+    #   varDescription: Calculated Time from given Dates
+    #   clearWith:
+    #       - tint
+    #       - dxdate
+    #       - fudate
 
 
-    - name: outcomeredifened
-      title: Add Redefined Outcome to Data
-      type: Output
-      varTitle: '`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`'
-      varDescription: Redefined Outcome from Outcome based on Analysis Type
-      clearWith:
-          - outcome
-          - analysistype
-          - multievent
+    # - name: outcomeredifened
+    #   title: Add Redefined Outcome to Data
+    #   type: Output
+    #   varTitle: '`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`'
+    #   varDescription: Redefined Outcome from Outcome based on Analysis Type
+    #   clearWith:
+    #       - outcome
+    #       - analysistype
+    #       - multievent
 
 
 refs:

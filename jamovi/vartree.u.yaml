@@ -125,9 +125,3 @@ children:
                     name: ptable
                   - type: ComboBox
                     name: summarylocation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: maxwidth
-        format: number
