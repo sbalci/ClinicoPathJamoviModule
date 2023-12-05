@@ -31,8 +31,7 @@ vartree(
   mytitle = "",
   useprunesmaller = FALSE,
   prunesmaller = 5,
-  summarylocation = "leafonly",
-  maxwidth = 100
+  summarylocation = "leafonly"
 )
 }
 \arguments{
@@ -89,8 +88,6 @@ vartree(
 \item{prunesmaller}{.}
 
 \item{summarylocation}{.}
-
-\item{maxwidth}{.}
 }
 \value{
 A results object containing:

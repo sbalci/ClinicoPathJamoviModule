@@ -171,10 +171,10 @@ options:
           name: leafonly
       default: leafonly
 
-    - name: maxwidth
-      title: Image Width
-      type: Integer
-      default: 100
+    # - name: maxwidth
+    #   title: Image Width
+    #   type: Integer
+    #   default: 100
 
     # - name: width
     #   title: Image Width
