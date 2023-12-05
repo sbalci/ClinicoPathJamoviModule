@@ -68,7 +68,8 @@ Imports:
     epiR,
     kappaSize,
     gtExtras,
-    labelled
+    labelled,
+    PMCMRplus
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 VignetteBuilder:
