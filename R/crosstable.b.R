@@ -8,6 +8,96 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = crosstableBase,
     private = list(
 
+
+        # labelData ----
+
+        .labelData = function() {
+
+
+            # Prepare data for analysis
+            mydata <- self$data
+
+            ## Get rownames to data
+            # mydata$rownames <- rownames(mydata)
+
+            ## Correct variable names and labels
+            # Get original variable names
+            original_names <- names(mydata)
+
+            # Save original names as a named vector where the names are the original names,
+            # and the values are the labels you want to set, which are also the original names.
+            labels <- setNames(original_names, original_names)
+
+            # Clean variable names
+            mydata <- mydata %>% janitor::clean_names()
+
+            # Now apply the labels to the cleaned names.
+            # Since the variable names have been cleaned, you must match the labels to the cleaned names.
+            # The labels vector should have names that are the cleaned names and values that are the original names.
+            corrected_labels <-
+                setNames(original_names, names(mydata))
+
+            # Apply the corrected labels
+            mydata <- labelled::set_variable_labels(.data = mydata,
+                                                    .labels = corrected_labels)
+
+            # Retrieve all variable labels
+            all_labels <- labelled::var_label(mydata)
+
+            # # Retrieve the variable name from the label
+            # # Tek değişken için
+            # dependent_variable_name_from_label <-
+            #     names(all_labels)[all_labels == self$options$outcome]
+            #
+            # # Retrieve the variable names vector from the label vector
+            # # Birden fazla değişkenler için
+            # labels <- self$options$explanatory
+            #
+            # explanatory_variable_names <-
+            #     names(all_labels)[match(labels, all_labels)]
+
+
+            myvars <-  self$options$vars
+            myvars <-
+                names(all_labels)[match(myvars, all_labels)]
+
+
+            mygroup <-
+                names(all_labels)[all_labels == self$options$group]
+
+
+            return(list(
+                "mydata" = mydata
+                , "myvars" = myvars
+                , "mygroup" = mygroup
+            ))
+
+
+        }
+        ,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         .run = function() {
 
 
@@ -64,20 +154,60 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
+
+
+
+
+                    # Read Labelled Data ----
+
+                    cleaneddata <- private$.labelData()
+
+                    mydata <- cleaneddata$mydata
+                    myvars <- cleaneddata$myvars
+                    mygroup <- cleaneddata$mygroup
+
+
+
                 # Prepare Data ----
 
-            mydata <- self$data
+            # mydata <- self$data
 
             # formulaR <- jmvcore::constructFormula(terms = self$options$vars)
             # formulaL <- jmvcore::constructFormula(terms = self$options$group)
 
             formula <- jmvcore::constructFormula(
-                terms = self$options$vars,
-                dep = self$options$group)
+                terms = myvars, #self$options$vars,
+                dep = mygroup #self$options$group
+                )
 
 
             # formula <- paste(formulaL, '~', formulaR)
             formula <- as.formula(formula)
+
+
+            # self$results$r_cleaneddata$setContent(
+            #     list(
+            #         "mydata" = head(mydata)
+            #         , "myvars" = myvars
+            #         , "mygroup" = mygroup
+            #         , "formula" = formula
+            #         , "names" = names(mydata)
+            #         , "mygroup2" = mydata[[mygroup]][1:10]
+            #
+            #         ))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -134,7 +264,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # https://finalfit.org/reference/summary_factorlist.html
 
 
-                myvars <- jmvcore::composeTerm(components = self$options$vars)
+                myvars <- jmvcore::composeTerm(components = myvars #self$options$vars
+                                               )
 
                 myvars <- jmvcore::decomposeTerm(term = myvars)
 
@@ -144,7 +275,7 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata %>%
                     finalfit::summary_factorlist(
                         .data = .,
-                        dependent = self$options$group,
+                        dependent = mygroup, #self$options$group,
                         explanatory = myvars,
                         total_col = TRUE,
                         p = TRUE,
@@ -223,34 +354,39 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 tablegtsummary <-
                     gtsummary::tbl_summary(data = mydata,
-                                           by = self$options$group,
-                                           statistic = list(
-                                               gtsummary::all_continuous() ~ "{mean} ({sd})",
-                                               gtsummary::all_categorical() ~ "{n} / {N} ({p}%)"
-                                           ),
-                                           digits = gtsummary::all_continuous() ~ 2,
-                                           missing_text = "(Missing)"
+                                           by = mygroup
+                    )
 
-                                           ) %>%
-                    gtsummary::modify_header(
-                        update = gtsummary::all_stat_cols() ~ structure("**{level}** N =  {n} ({style_percent(p)}%)", class = "from_markdown")
-                        # stat_by =
-                        #                          gt::md("**{level}** N =  {n} ({style_percent(p)}%)")
-                                                  ) %>%
-                    gtsummary::add_n(x = .) %>%
-                    gtsummary::add_overall() %>%
-                    gtsummary::bold_labels(x = .) %>%
-                    gtsummary::add_p(x = .,
-                                     pvalue_fun =
-                                         purrr::partial(
-                                             gtsummary::style_pvalue,
-                                             digits = 2)
-                                     ) %>%
-                    gtsummary::add_q()
-                # %>%
-                #     gtsummary::bold_labels() %>%
-                #     gtsummary::bold_levels() %>%
-                #     gtsummary::bold_p()
+
+
+                #                            , #self$options$group,
+                #                            statistic = list(
+                #                                gtsummary::all_continuous() ~ "{mean} ({sd})",
+                #                                gtsummary::all_categorical() ~ "{n} / {N} ({p}%)"
+                #                            ),
+                #                            digits = gtsummary::all_continuous() ~ 2,
+                #                            missing_text = "(Missing)"
+                #
+                #                            ) %>%
+                #     gtsummary::modify_header(
+                #         update = gtsummary::all_stat_cols() ~ structure("**{level}** N =  {n} ({style_percent(p)}%)", class = "from_markdown")
+                #         # stat_by =
+                #         #                          gt::md("**{level}** N =  {n} ({style_percent(p)}%)")
+                #                                   ) %>%
+                #     gtsummary::add_n(x = .) %>%
+                #     gtsummary::add_overall() %>%
+                #     gtsummary::bold_labels(x = .) %>%
+                #     gtsummary::add_p(x = .,
+                #                      pvalue_fun =
+                #                          purrr::partial(
+                #                              gtsummary::style_pvalue,
+                #                              digits = 2)
+                #                      ) %>%
+                #     gtsummary::add_q()
+                # # %>%
+                # #     gtsummary::bold_labels() %>%
+                # #     gtsummary::bold_levels() %>%
+                # #     gtsummary::bold_p()
 
 
                 tablegtsummary <-
@@ -283,7 +419,8 @@ crosstableClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         style = sty,
                         caption = paste0(
                             "Cross Table for Dependent ",
-                            self$options$group),
+                            mygroup #self$options$group
+                            ),
                         id = "tbl3")
 
                 self$results$tablestyle4$setContent(tabletangram)

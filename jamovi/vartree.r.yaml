@@ -19,7 +19,9 @@ items:
     #   title: "Deneme"
     #   type: Html
 
-
+    # - name:  r_cleaneddata
+    #   title: Cleaned Data
+    #   type:  Preformatted
 
     - name:  text2
       title: Pattern Table
