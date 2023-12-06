@@ -21,6 +21,15 @@ items:
           - sty
 
 
+    # - name:  r_cleaneddata
+    #   title: Cleaned Data
+    #   type:  Preformatted
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - sty
+
+
     # - name:  tablearsenal_output
     #   title: tablearsenal_output
     #   type:  Html

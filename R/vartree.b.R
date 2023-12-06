@@ -19,6 +19,86 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # ,
 
 
+        # labelData ----
+
+        .labelData = function() {
+
+
+            # Prepare data for analysis
+            mydata <- self$data
+
+            ## Get rownames to data
+            mydata$rownames <- rownames(mydata)
+
+            ## Correct variable names and labels
+            # Get original variable names
+            original_names <- names(mydata)
+
+            # Save original names as a named vector where the names are the original names,
+            # and the values are the labels you want to set, which are also the original names.
+            labels <- setNames(original_names, original_names)
+
+            # Clean variable names
+            mydata <- mydata %>% janitor::clean_names()
+
+            # Now apply the labels to the cleaned names.
+            # Since the variable names have been cleaned, you must match the labels to the cleaned names.
+            # The labels vector should have names that are the cleaned names and values that are the original names.
+            corrected_labels <-
+                setNames(original_names, names(mydata))
+
+            # Apply the corrected labels
+            mydata <- labelled::set_variable_labels(.data = mydata,
+                                                    .labels = corrected_labels)
+
+            # Retrieve all variable labels
+            all_labels <- labelled::var_label(mydata)
+
+            # # Retrieve the variable name from the label
+            # # Tek değişken için
+            # dependent_variable_name_from_label <-
+            #     names(all_labels)[all_labels == self$options$outcome]
+            #
+            # # Retrieve the variable names vector from the label vector
+            # # Birden fazla değişkenler için
+            # labels <- self$options$explanatory
+            #
+            # explanatory_variable_names <-
+            #     names(all_labels)[match(labels, all_labels)]
+
+
+            myvars <-  self$options$vars
+            myvars <-
+                names(all_labels)[match(myvars, all_labels)]
+
+
+            percvar <-
+                names(all_labels)[all_labels == self$options$percvar]
+
+            summaryvar <-
+                names(all_labels)[all_labels == self$options$summaryvar]
+
+            follow <-
+                names(all_labels)[all_labels == self$options$follow]
+
+            prunebelow <-
+                names(all_labels)[all_labels == self$options$prunebelow]
+
+
+
+            return(list(
+                "mydata" = mydata
+                , "myvars" = myvars
+                , "percvar" = percvar
+                , "summaryvar" = summaryvar
+                , "follow" = follow
+                , "prunebelow" = prunebelow
+
+                ))
+
+
+        }
+        ,
 
 
 
@@ -47,18 +127,39 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
 
-            # Read Data ----
+            # Read Labelled Data ----
 
-            mydata <- self$data
+            cleaneddata <- private$.labelData()
+
+            mydata <- cleaneddata$mydata
+            myvars <- cleaneddata$myvars
+            percvar <- cleaneddata$percvar
+            summaryvar <- cleaneddata$summaryvar
+
+            # self$results$r_cleaneddata$setContent(cleaneddata)
+
+
+            # formulaDependent <- jmvcore::constructFormula(terms = dependent_variable_name_from_label)
+
+            # formulaExplanatory <- jmvcore::composeTerms(listOfComponents = explanatory_variable_names)
+
+
+
+            # Read Labelled Variables ----
+
+
+            # myvars <-  self$options$vars
+            # percvar <- self$options$percvar
+            # summaryvar <- self$options$summaryvar
+
+
 
             # Read Arguments ----
 
             horizontal <- self$options$horizontal
             sline <- self$options$sline
             mytitle <- self$options$mytitle
-            myvars <-  self$options$vars
-            percvar <- self$options$percvar
-            summaryvar <- self$options$summaryvar
+
 
             # Default Arguments ----
 
@@ -156,13 +257,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Prepare Formula ----
 
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
+            # formula <- jmvcore::constructFormula(terms = self$options$vars)
 
-            myvars1 <- jmvcore::decomposeFormula(formula = formula)
+            # myvars1 <- jmvcore::decomposeFormula(formula = formula)
 
-            myvars1 <- unlist(myvars1)
+            # myvars1 <- unlist(myvars1)
 
-            myvars1 <- paste0(myvars1, collapse = " ")
+            # myvars1 <- paste0(myvars1, collapse = " ")
+
+            myvars1 <- myvars
 
 
                 # myvars2 <- self$options$vars
@@ -172,7 +275,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Percentage Variable ----
             if ( !is.null(self$options$percvar) ) {
-                percvar <- self$options$percvar
+                # percvar <- self$options$percvar
                 xsummary <- paste0(percvar,"=", self$options$percvarLevel
                                    #, "\n%pct%"
                                    )
@@ -187,7 +290,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Continuous Variable for Summaries ----
 
             if ( !is.null(self$options$summaryvar) ) {
-                summaryvar <- self$options$summaryvar
+                # summaryvar <- self$options$summaryvar
 
                 summarylocation <- self$options$summarylocation
 
@@ -214,7 +317,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if ( !is.null(self$options$prunebelow) ) {
 
-                prunebelow <- self$options$prunebelow
+                # prunebelow <- self$options$prunebelow
+
+                prunebelow <- cleaneddata$prunebelow
+
+
                 prunebelow <- jmvcore::composeTerm(prunebelow)
 
                 pruneLevel1 <- self$options$pruneLevel1
@@ -232,7 +339,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if ( !is.null(self$options$follow) ) {
 
-                follow <- self$options$follow
+                follow <- cleaneddata$follow
+
+                # follow <- self$options$follow
                 follow <- jmvcore::composeTerm(follow)
 
                 followLevel1 <- self$options$followLevel1
