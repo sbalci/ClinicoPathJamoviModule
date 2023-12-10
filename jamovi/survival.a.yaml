@@ -208,7 +208,6 @@ options:
       default: holm
 
 
-
     - name: ph_cox
       title: Proportional Hazards Assumption
       type: Bool
@@ -241,6 +240,16 @@ options:
       title: Plot End Time
       type: Integer
       default: 60
+
+    - name: ybegin_plot
+      title: Start y-axis
+      type: Number
+      default: 0.00
+
+    - name: yend_plot
+      title: End y-axis
+      type: Number
+      default: 1.00
 
 
     - name: byplot

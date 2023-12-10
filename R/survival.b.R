@@ -9,10 +9,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
         "survivalClass",
         inherit = survivalBase,
         private = list(
-            
-            
-            
-            
+
+
+
+
             .init = function() {
 
 
@@ -36,7 +36,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # }
 
             }
-            
+
             ,
 
 
@@ -66,7 +66,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
             all_labels <- labelled::var_label(mydata)
 
-            
+
             mytime <-
                 names(all_labels)[all_labels == self$options$elapsedtime]
 
@@ -79,9 +79,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
             myfudate <-
                 names(all_labels)[all_labels == self$options$fudate]
 
-            myexplanatory <- 
+            myexplanatory <-
                 names(all_labels)[all_labels == self$options$explanatory]
-            
+
             return(list(
                 "mydata_labelled" = mydata
                 , "mytime_labelled" = mytime
@@ -90,14 +90,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 , "myfudate_labelled" = myfudate
                 , "myexplanatory_labelled" = myexplanatory
             ))
-              
+
 
             }
 
 
 
 
-            
+
             # ,
             # .todo = function() {
             #     if (
@@ -108,7 +108,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             #              is.null(self$options$dod) &&
             #              is.null(self$options$dooc) &&
             #              is.null(self$options$awd) && is.null(self$options$awod)
-                     
+
             #          )
             #          ) ||
 
@@ -184,7 +184,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     mydata[["mytime"]] <-
                         jmvcore::toNumeric(mydata[[mytime_labelled]])
-                    
+
 
                 } else if (tint) {
                     # Time Interval ----
@@ -272,8 +272,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Define Outcome ----
             ,
             .definemyoutcome = function() {
-                
-                
+
+
             labelled_data <- private$.getData()
 
             mydata <- labelled_data$mydata_labelled
@@ -293,17 +293,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 #         myexplanatory_labelled = myexplanatory_labelled
                 #     )
                 #     )
-                
-                
-                
+
+
+
                 # mydata <- mydata_labelled #self$data
 
                 contin <- c("integer", "numeric", "double")
 
                 outcomeLevel <- self$options$outcomeLevel
                 multievent <- self$options$multievent
-                
-                
+
+
                 # outcome1 <- self$options$outcome
                 # outcome1 <- self$data[[outcome1]]
                 outcome1 <- mydata[[myoutcome_labelled]]
@@ -325,7 +325,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
 
                         mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
-                            # mydata[[self$options$outcome]] 
+                            # mydata[[self$options$outcome]]
 
                     } else if (inherits(outcome1, "factor")) {
                         mydata[["myoutcome"]] <-
@@ -425,8 +425,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # mydata <- self$data
 
                 # expl <- self$options$explanatory
-                
-                
+
+
                 labelled_data <- private$.getData()
 
             mydata_labelled <- labelled_data$mydata_labelled
@@ -491,7 +491,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-                cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>% 
+                cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
                     dplyr::left_join(factor, by = "row_names")
                     #  %>%
                     # dplyr::select(-row_names)
@@ -556,8 +556,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             !!name2outcome := myoutcome,
                             !!name3explanatory := myfactor
                         )
-                        
-                        
+
+
 
                 # names(cleanData) <-
                 #     c(name1time, name2outcome, name3explanatory)
@@ -971,7 +971,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Proportional Hazards Assumption ----
 
                 if (self$options$ph_cox) {
-                    
+
                     # self$results$mydataview$setContent(
                     # list(
                     #     mydata = head(mydata),
@@ -994,7 +994,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
-                    
+
 
                                     formula <-
                     paste('survival::Surv(',
@@ -1009,14 +1009,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
                     cox_model <- survival::coxph(formula, data = mydata)
-                    
+
                     zph <- survival::cox.zph(cox_model)
-                    
+
                     self$results$cox_ph$setContent(print(zph))
-                    
+
                     image7 <- self$results$plot7
                     image7$setState(zph)
-                
+
                     }
 
             }
@@ -1264,6 +1264,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
+                        ylim = c(
+                            self$options$ybegin_plot,
+                            self$options$yend_plot),
                         title = paste0("Survival curves for ", title2),
                         subtitle = "Based on Kaplan-Meier estimates",
                         risk.table = self$options$risktable,
@@ -1332,6 +1335,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
+                        ylim = c(
+                            self$options$ybegin_plot,
+                            self$options$yend_plot),
                         title = paste0("Cumulative Events ", title2),
                         fun = "event",
                         risk.table = self$options$risktable,
@@ -1399,6 +1405,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         legend = 'none',
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
+                        ylim = c(
+                            self$options$ybegin_plot,
+                            self$options$yend_plot),
                         title = paste0("Cumulative Hazard ", title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
@@ -1483,7 +1492,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # cox.zph ----
             ,
             .plot7 = function(image7, ggtheme, theme, ...) {
-                
+
                 ph_cox <- self$options$ph_cox
 
                 if (!ph_cox)

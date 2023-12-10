@@ -181,6 +181,12 @@ children:
               - type: TextBox
                 name: byplot
                 format: number
+              - type: TextBox
+                name: ybegin_plot
+                format: number
+              - type: TextBox
+                name: yend_plot
+                format: number
               - type: CheckBox
                 name: ci95
               - type: CheckBox

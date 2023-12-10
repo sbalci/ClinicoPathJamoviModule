@@ -31,6 +31,8 @@ survival(
   ce = FALSE,
   ch = FALSE,
   endplot = 60,
+  ybegin_plot = 0,
+  yend_plot = 1,
   byplot = 12,
   multievent = FALSE,
   ci95 = FALSE,
@@ -91,6 +93,10 @@ survival(
 \item{ch}{.}
 
 \item{endplot}{.}
+
+\item{ybegin_plot}{.}
+
+\item{yend_plot}{.}
 
 \item{byplot}{.}
 
