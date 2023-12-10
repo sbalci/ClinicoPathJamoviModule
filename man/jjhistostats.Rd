@@ -8,7 +8,7 @@ jjhistostats(
   data,
   dep,
   grvar,
-  excl = TRUE,
+  excl = FALSE,
   typestatistics = "parametric",
   centralityparameter = "mean",
   centralityline = TRUE,

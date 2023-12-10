@@ -134,16 +134,6 @@ children:
             name: analysistype
             enable: (outcome && multievent)
   - type: CollapseBox
-    label: Single Arm Survival
-    collapsed: true
-    children:
-      - type: Label
-        label: Single Arm Survival
-        fitToGrid: true
-        children:
-          - type: CheckBox
-            name: sas
-  - type: CollapseBox
     label: Pairwise Comparisons
     collapsed: true
     children:
@@ -169,6 +159,8 @@ children:
           - type: LayoutBox
             fitToGrid: true
             children:
+              - type: CheckBox
+                name: ph_cox
               - type: CheckBox
                 name: sc
               - type: CheckBox
@@ -197,6 +189,7 @@ children:
                 name: censored
               - type: CheckBox
                 name: pplot
+
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -208,23 +201,3 @@ children:
             name: cutp
             format: string
             width: large
-  # - type: CollapseBox
-  #   label: Save Converted Variables to Data
-  #   collapsed: true
-  #   children:
-  #     - type: Label
-  #       label: Add Calculated Time to Your Data
-  #       fitToGrid: true
-  #       children:
-  #         - type: Output
-  #           name: calculatedtime
-  #           enable: (tint)
-  #           fitToGrid: true
-  #     - type: Label
-  #       label: Add Redefined Outcome to Data
-  #       fitToGrid: true
-  #       children:
-  #         - type: Output
-  #           name: outcomeredifened
-  #           enable: (multievent)
-  #           fitToGrid: true

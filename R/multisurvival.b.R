@@ -9,62 +9,62 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         inherit = multisurvivalBase,
         private = list(
 
-            .todo = function() {
-                # If no variable selected Initial Message ----
-
-                if (
-
-                    (is.null(self$options$outcome) && !(self$options$multievent)) ||
-
-                    (self$options$multievent && (is.null(self$options$dod) && is.null(self$options$dooc) && is.null(self$options$awd) && is.null(self$options$awod))) ||
-
-                    (is.null(self$options$elapsedtime) && !(self$options$tint)) ||
-
-                    (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
-
-                    is.null(self$options$explanatory)
-
-                    # ||
-
-                    # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
-
-
-                    )
-                {
-                    # TODO ----
-
-                    todo <- glue::glue(
-                        "
-                    <br>Welcome to ClinicoPath
-                    <br><br>
-                        This tool will help you perform a multivariable survival analysis.
-                    <br><br>
-                        Explanatory variables can be categorical (ordinal or nominal) or continuous.
-                    <br><br>
-                    Select outcome level from Outcome variable.
-                    <br><br>
-                    Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
-                    <br><br>
-                        Survival time should be numeric, continuous, and in months. You may also use dates to calculate survival time in advanced elapsed time options.
-                    <br><br>
-                        This function uses finalfit, survival, survminer and ggstatsplot packages. Please cite jamovi and the packages as given below.
-                    <br><br>
-                    "
-                    )
-                    # https://finalfit.org/articles/all_tables_examples.html#cox-proportional-hazards-model-survival-time-to-event
-
-
-                    html <- self$results$todo
-                    html$setContent(todo)
-                    return()
-
-                } else {
-                    if (nrow(self$data) == 0)
-                        stop('Data contains no (complete) rows')
-                }
-
-            }
-            ,
+            # .todo = function() {
+            #     # If no variable selected Initial Message ----
+            #
+            #     if (
+            #
+            #         (is.null(self$options$outcome) && !(self$options$multievent)) ||
+            #
+            #         (self$options$multievent && (is.null(self$options$dod) && is.null(self$options$dooc) && is.null(self$options$awd) && is.null(self$options$awod))) ||
+            #
+            #         (is.null(self$options$elapsedtime) && !(self$options$tint)) ||
+            #
+            #         (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
+            #
+            #         is.null(self$options$explanatory)
+            #
+            #         # ||
+            #
+            #         # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
+            #
+            #
+            #         )
+            #     {
+            #         # TODO ----
+            #
+            #         todo <- glue::glue(
+            #             "
+            #         <br>Welcome to ClinicoPath
+            #         <br><br>
+            #             This tool will help you perform a multivariable survival analysis.
+            #         <br><br>
+            #             Explanatory variables can be categorical (ordinal or nominal) or continuous.
+            #         <br><br>
+            #         Select outcome level from Outcome variable.
+            #         <br><br>
+            #         Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
+            #         <br><br>
+            #             Survival time should be numeric, continuous, and in months. You may also use dates to calculate survival time in advanced elapsed time options.
+            #         <br><br>
+            #             This function uses finalfit, survival, survminer and ggstatsplot packages. Please cite jamovi and the packages as given below.
+            #         <br><br>
+            #         "
+            #         )
+            #         # https://finalfit.org/articles/all_tables_examples.html#cox-proportional-hazards-model-survival-time-to-event
+            #
+            #
+            #         html <- self$results$todo
+            #         html$setContent(todo)
+            #         # return()
+            #
+            #     } else {
+            #         if (nrow(self$data) == 0)
+            #             stop('Data contains no (complete) rows')
+            #     }
+            #
+            # }
+            # ,
 
 
             .cleandata = function() {
@@ -81,6 +81,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 elapsedtime <- self$options$elapsedtime
                 outcome <- self$options$outcome
                 explanatory <- self$options$explanatory
+                contexpl <- self$options$contexpl
                 outcomeLevel <- self$options$outcomeLevel
                 tint <- self$options$tint
 
@@ -285,26 +286,35 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 myfactors <- c(myexplanatory, mycontexpl)
 
 
+                self$results$mydataview$setContent(
+                    list(
+                        head(mydata, n = 10),
+                        myexplanatory = myexplanatory,
+                        mycontexpl = mycontexpl,
+                        myfactors = myfactors
+                    )
+                )
+
 
                 # Add Redefined Outcome to Data ----
 
-                if (self$options$multievent) {
-
-                    if (self$options$outcomeredifened &&
-                        self$results$outcomeredifened$isNotFilled()) {
-                        self$results$outcomeredifened$setValues(mydata[["myoutcome"]])
-                    }
-                }
+                # if (self$options$multievent) {
+                #
+                #     if (self$options$outcomeredifened &&
+                #         self$results$outcomeredifened$isNotFilled()) {
+                #         self$results$outcomeredifened$setValues(mydata[["myoutcome"]])
+                #     }
+                # }
 
                 # Add Calculated Time to Data ----
 
-                if (self$options$tint) {
-
-                    if (self$options$calculatedtime &&
-                        self$results$calculatedtime$isNotFilled()) {
-                        self$results$calculatedtime$setValues(mydata[["mytime"]])
-                    }
-                }
+                # if (self$options$tint) {
+                #
+                #     if (self$options$calculatedtime &&
+                #         self$results$calculatedtime$isNotFilled()) {
+                #         self$results$calculatedtime$setValues(mydata[["mytime"]])
+                #     }
+                # }
 
 
 
@@ -332,7 +342,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 mydata <- jmvcore::select(df = mydata, columnNames = c("mytime", "myoutcome", myfactors))
 
-
+                # self$results$mydataview$setContent(
+                #     list(
+                #         head(mydata, n = 30)
+                #     )
+                # )
 
 
                 # naOmit ----
@@ -355,24 +369,24 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
                 # Errors ----
-                if (
-
-                    (is.null(self$options$outcome) && !(self$options$multievent)) ||
-
-                    (self$options$multievent && (is.null(self$options$dod) && is.null(self$options$dooc) && is.null(self$options$awd) && is.null(self$options$awod))) ||
-
-                    (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
-
-                    is.null(self$options$explanatory)
-
-                    # ||
-                    #
-                    # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
-
-                    ) {
-                    private$.todo()
-                    return()
-                }
+                # if (
+                #
+                #     (is.null(self$options$outcome) && !(self$options$multievent)) ||
+                #
+                #     (self$options$multievent && (is.null(self$options$dod) && is.null(self$options$dooc) && is.null(self$options$awd) && is.null(self$options$awod))) ||
+                #
+                #     (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
+                #
+                #     is.null(self$options$explanatory)
+                #
+                #     #
+                #    #
+                #     # (!is.null(self$options$explanatory) && is.null(self$options$contexpl))
+                #
+                #     ) {
+                #     private$.todo()
+                #     # return()
+                # }
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
@@ -382,6 +396,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 cleaneddata <- private$.cleandata()
 
                 mydata <- cleaneddata$mydata
+
+
+
 
 
                 # Cox ----
@@ -396,7 +413,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 #     )
 
 
-                #             # Prepare Data For Plots ----
+                # Prepare Data For Plots ----
 
 
                             image <- self$results$plot
@@ -406,8 +423,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                             image3$setState(mydata)
 
 
-                            image4 <- self$results$plot4
-                            image4$setState(mydata)
+                            # image4 <- self$results$plot4
+                            # image4$setState(mydata)
 
 
                             # imageKM <- self$results$plotKM
@@ -827,39 +844,39 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-            # coxzph plot ----
-            ,
-            .plot4 = function(image4, ggtheme, theme, ...) {
-
-                plotData <- image4$state
-
-                formula2 <-
-                    jmvcore::constructFormula(terms = c(self$options$explanatory, self$options$contexpl))
-
-                formula3 <-
-                    paste("survival::Surv(mytime, myoutcome) ~ ", formula2)
-
-                formula3 <- as.formula(formula3)
-
-                cox_model <-
-                    survival::coxph(formula = formula3,
-                                    data = plotData)
-
-
-
-                cox_zph_fit <- survival::cox.zph(cox_model)
-
-
-                # plot all variables
-                plot4 <- survminer::ggcoxzph(cox_zph_fit)
-
-
-                # print plot ----
-
-                print(plot4)
-                TRUE
-
-            }
+            # # coxzph plot ----
+            # ,
+            # .plot4 = function(image4, ggtheme, theme, ...) {
+            #
+            #     plotData <- image4$state
+            #
+            #     formula2 <-
+            #         jmvcore::constructFormula(terms = c(self$options$explanatory, self$options$contexpl))
+            #
+            #     formula3 <-
+            #         paste("survival::Surv(mytime, myoutcome) ~ ", formula2)
+            #
+            #     formula3 <- as.formula(formula3)
+            #
+            #     cox_model <-
+            #         survival::coxph(formula = formula3,
+            #                         data = plotData)
+            #
+            #
+            #
+            #     cox_zph_fit <- survival::cox.zph(cox_model)
+            #
+            #
+            #     # plot all variables
+            #     plot4 <- survminer::ggcoxzph(cox_zph_fit)
+            #
+            #
+            #     # print plot ----
+            #
+            #     print(plot4)
+            #     TRUE
+            #
+            # }
 
 
 

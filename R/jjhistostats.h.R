@@ -8,7 +8,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         initialize = function(
             dep = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             typestatistics = "parametric",
             centralityparameter = "mean",
             centralityline = TRUE,
@@ -55,7 +55,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -339,7 +339,7 @@ jjhistostats <- function(
     data,
     dep,
     grvar,
-    excl = TRUE,
+    excl = FALSE,
     typestatistics = "parametric",
     centralityparameter = "mean",
     centralityline = TRUE,
