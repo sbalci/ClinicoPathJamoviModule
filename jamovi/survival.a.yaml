@@ -209,6 +209,11 @@ options:
 
 
 
+    - name: ph_cox
+      title: Proportional Hazards Assumption
+      type: Bool
+      default: false
+
     - name: sc
       title: Survival Plot
       type: Bool
@@ -270,10 +275,10 @@ options:
       default: true
 
 
-    - name: sas
-      title: Single Arm Survival
-      type: Bool
-      default: false
+    # - name: sas
+    #   title: Single Arm Survival
+    #   type: Bool
+    #   default: false
 
 
 ...

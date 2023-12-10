@@ -169,7 +169,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             x = !!dep,
 
                             binwidth = binwidth,
-                            # bar.measure = barmeasure, ----
+                            # bar.measure = barmeasure,
                             # xlab = NULL,
                             # title = NULL,
                             # subtitle = NULL,

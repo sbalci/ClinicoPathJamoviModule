@@ -25,6 +25,7 @@ survival(
   landmark = 3,
   pw = FALSE,
   padjustmethod = "holm",
+  ph_cox = FALSE,
   sc = FALSE,
   kmunicate = FALSE,
   ce = FALSE,
@@ -35,8 +36,7 @@ survival(
   ci95 = FALSE,
   risktable = FALSE,
   censored = FALSE,
-  pplot = TRUE,
-  sas = FALSE
+  pplot = TRUE
 )
 }
 \arguments{
@@ -80,6 +80,8 @@ survival(
 
 \item{padjustmethod}{.}
 
+\item{ph_cox}{.}
+
 \item{sc}{.}
 
 \item{kmunicate}{.}
@@ -101,19 +103,20 @@ survival(
 \item{censored}{.}
 
 \item{pplot}{.}
-
-\item{sas}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
+\code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -122,8 +125,6 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
-\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

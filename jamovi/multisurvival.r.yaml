@@ -33,13 +33,13 @@ items:
           - dxdate
           - tint
           - multievent
-          - adjexplanatory
+          # - adjexplanatory
 
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
 
 
     # - name:  text3
@@ -63,7 +63,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - adjexplanatory
+          # - adjexplanatory
 
     - name:  text2
       title: ''
@@ -79,7 +79,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - adjexplanatory
+          # - adjexplanatory
 
 
     - name: plot
@@ -103,7 +103,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - adjexplanatory
+          # - adjexplanatory
 
     # - name: plot2
     #   title: Hazards Regression Plot
@@ -144,16 +144,16 @@ items:
           - dxdate
           - tint
           - multievent
-          - adjexplanatory
+          # - adjexplanatory
 
 
 
-    - name: plot4
-      title: coxzph Plot
-      type: Image
-      width:  800
-      height: 600
-      renderFun: .plot4
+    # - name: plot4
+    #   title: coxzph Plot
+    #   type: Image
+    #   width:  800
+    #   height: 600
+    #   renderFun: .plot4
 
 
 

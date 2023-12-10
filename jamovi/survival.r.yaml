@@ -26,9 +26,9 @@ items:
           - multievent
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
 
 
     # - name:  medianSummary2
@@ -41,7 +41,7 @@ items:
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${explanatory}`'
       type:  Preformatted
-      visible: (!sas)
+      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -93,7 +93,7 @@ items:
           title: "Upper"
           superTitle: '95% Confidence Interval'
           type: number
-          visible: (!sas)
+          # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -109,7 +109,7 @@ items:
       # title: Cox Regression Summary and Table
       title: '`Cox Regression Summary and Table - ${explanatory}`'
       type:  Preformatted
-      visible: (!sas)
+      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -140,7 +140,7 @@ items:
         - name: 'HR_univariable'
           title: "HR (Univariable)"
           type: text
-          visible: (!sas)
+          # visible: (!sas)
         # - name: 'HR_multivariable'
         #   title: "HR (Multivariable)"
         #   type: text
@@ -170,14 +170,53 @@ items:
           - tint
           - multievent
           - contexpl
-      visible: (!sas)
+    #   visible: (!sas)
+
+
+
+    - name: cox_ph
+      title: 'Proportional Hazards Assumption'
+      type:  Preformatted
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - contexpl
+
+
+
+    - name: plot7
+      title: '`Proportional Hazards Assumption - ${explanatory}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot7
+      visible: (ph_cox)
+      requiresData: true
+      clearWith:
+          - ph_cox
+          - endplot
+          - byplot
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
     - name:  survTableSummary
       # title: '1, 3, 5-yr Survival Summary and Table'
       title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
       type:  Preformatted
-      visible: (!sas)
+      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -223,7 +262,7 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
           format: pc
-      visible: (!sas)
+      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -251,7 +290,7 @@ items:
           - dxdate
           - tint
           - multievent
-      visible: (pw && !sas)
+      visible: (pw) # && !sas)
 
 
 
@@ -270,7 +309,7 @@ items:
           title: p-value
           type: number
           format: zto,pvalue
-      visible: (pw && !sas)
+      visible: (pw) # && !sas)
       clearWith:
           - pw
           - explanatory
@@ -299,7 +338,6 @@ items:
           - sc
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored
@@ -312,6 +350,7 @@ items:
           - tint
           - multievent
           - pplot
+          # - sas
 
 
 
@@ -328,7 +367,6 @@ items:
           - ce
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored
@@ -340,6 +378,7 @@ items:
           - dxdate
           - tint
           - multievent
+          # - sas
 
 
 
@@ -356,7 +395,6 @@ items:
           - ch
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored
@@ -368,6 +406,7 @@ items:
           - dxdate
           - tint
           - multievent
+          # - sas
 
 
 
@@ -383,7 +422,6 @@ items:
           - kmunicate
           - endplot
           - byplot
-          - sas
           - explanatory
           - outcome
           - outcomeLevel
@@ -392,47 +430,55 @@ items:
           - dxdate
           - tint
           - multievent
+          # - sas
       refs:
           - KMunicate
           - KMunicate2
 
 
-    - name: calculatedtime
-      title: Add Calculated Time to Data
-      type: Output
-      varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates
-      clearWith:
-          - tint
-          - dxdate
-          - fudate
-          - explanatory
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
 
 
 
-    - name: outcomeredifened
-      title: Add Redefined Outcome to Data
-      type: Output
-      varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
-      varDescription: Redefined Outcome from Outcome based on Analysis Type
-      clearWith:
-          - outcome
-          - analysistype
-          - multievent
-          - explanatory
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
+
+
+
+
+    # - name: calculatedtime
+    #   title: Add Calculated Time to Data
+    #   type: Output
+    #   varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+    #   varDescription: Calculated Time from given Dates
+    #   clearWith:
+    #       - tint
+    #       - dxdate
+    #       - fudate
+    #       - explanatory
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+
+
+
+    # - name: outcomeredifened
+    #   title: Add Redefined Outcome to Data
+    #   type: Output
+    #   varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
+    #   varDescription: Redefined Outcome from Outcome based on Analysis Type
+    #   clearWith:
+    #       - outcome
+    #       - analysistype
+    #       - multievent
+    #       - explanatory
+    #       - outcomeLevel
+    #       - overalltime
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
 
 refs:
     - finalfit
