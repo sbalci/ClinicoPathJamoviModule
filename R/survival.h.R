@@ -31,6 +31,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ce = FALSE,
             ch = FALSE,
             endplot = 60,
+            ybegin_plot = 0,
+            yend_plot = 1,
             byplot = 12,
             multievent = FALSE,
             ci95 = FALSE,
@@ -184,6 +186,14 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "endplot",
                 endplot,
                 default=60)
+            private$..ybegin_plot <- jmvcore::OptionNumber$new(
+                "ybegin_plot",
+                ybegin_plot,
+                default=0)
+            private$..yend_plot <- jmvcore::OptionNumber$new(
+                "yend_plot",
+                yend_plot,
+                default=1)
             private$..byplot <- jmvcore::OptionInteger$new(
                 "byplot",
                 byplot,
@@ -234,6 +244,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ce)
             self$.addOption(private$..ch)
             self$.addOption(private$..endplot)
+            self$.addOption(private$..ybegin_plot)
+            self$.addOption(private$..yend_plot)
             self$.addOption(private$..byplot)
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
@@ -267,6 +279,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ce = function() private$..ce$value,
         ch = function() private$..ch$value,
         endplot = function() private$..endplot$value,
+        ybegin_plot = function() private$..ybegin_plot$value,
+        yend_plot = function() private$..yend_plot$value,
         byplot = function() private$..byplot$value,
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
@@ -299,6 +313,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ce = NA,
         ..ch = NA,
         ..endplot = NA,
+        ..ybegin_plot = NA,
+        ..yend_plot = NA,
         ..byplot = NA,
         ..multievent = NA,
         ..ci95 = NA,
@@ -642,6 +658,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sc",
                     "endplot",
                     "byplot",
+                    "ybegin_plot",
+                    "yend_plot",
                     "ci95",
                     "risktable",
                     "censored",
@@ -667,6 +685,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ce",
                     "endplot",
                     "byplot",
+                    "ybegin_plot",
+                    "yend_plot",
                     "ci95",
                     "risktable",
                     "censored",
@@ -691,6 +711,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ch",
                     "endplot",
                     "byplot",
+                    "ybegin_plot",
+                    "yend_plot",
                     "ci95",
                     "risktable",
                     "censored",
@@ -715,6 +737,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "kmunicate",
                     "endplot",
                     "byplot",
+                    "ybegin_plot",
+                    "yend_plot",
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
@@ -781,6 +805,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ce .
 #' @param ch .
 #' @param endplot .
+#' @param ybegin_plot .
+#' @param yend_plot .
 #' @param byplot .
 #' @param multievent .
 #' @param ci95 .
@@ -843,6 +869,8 @@ survival <- function(
     ce = FALSE,
     ch = FALSE,
     endplot = 60,
+    ybegin_plot = 0,
+    yend_plot = 1,
     byplot = 12,
     multievent = FALSE,
     ci95 = FALSE,
@@ -895,6 +923,8 @@ survival <- function(
         ce = ce,
         ch = ch,
         endplot = endplot,
+        ybegin_plot = ybegin_plot,
+        yend_plot = yend_plot,
         byplot = byplot,
         multievent = multievent,
         ci95 = ci95,

@@ -338,6 +338,8 @@ items:
           - sc
           - endplot
           - byplot
+          - ybegin_plot
+          - yend_plot
           - ci95
           - risktable
           - censored
@@ -367,6 +369,8 @@ items:
           - ce
           - endplot
           - byplot
+          - ybegin_plot
+          - yend_plot
           - ci95
           - risktable
           - censored
@@ -395,6 +399,8 @@ items:
           - ch
           - endplot
           - byplot
+          - ybegin_plot
+          - yend_plot
           - ci95
           - risktable
           - censored
@@ -422,6 +428,8 @@ items:
           - kmunicate
           - endplot
           - byplot
+          - ybegin_plot
+          - yend_plot
           - explanatory
           - outcome
           - outcomeLevel
