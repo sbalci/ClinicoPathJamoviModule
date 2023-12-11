@@ -58,9 +58,9 @@ options:
       type: Variable
 
 
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
 
 
     - name: explanatory
@@ -110,14 +110,14 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        # - title: Competing Risk
-        #   name: compete
+        - title: Competing Risk
+          name: compete
       default: overall
 
 
-    # - name: outcomeredifened
-    #   title: Add Redefined Outcome to Data
-    #   type: Output
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
 
 
 
@@ -282,12 +282,6 @@ options:
       title: p-value
       type: Bool
       default: true
-
-
-    # - name: sas
-    #   title: Single Arm Survival
-    #   type: Bool
-    #   default: false
 
 
 ...

@@ -41,7 +41,6 @@ items:
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${explanatory}`'
       type:  Preformatted
-      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -93,7 +92,6 @@ items:
           title: "Upper"
           superTitle: '95% Confidence Interval'
           type: number
-          # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -109,7 +107,6 @@ items:
       # title: Cox Regression Summary and Table
       title: '`Cox Regression Summary and Table - ${explanatory}`'
       type:  Preformatted
-      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -140,7 +137,6 @@ items:
         - name: 'HR_univariable'
           title: "HR (Univariable)"
           type: text
-          # visible: (!sas)
         # - name: 'HR_multivariable'
         #   title: "HR (Multivariable)"
         #   type: text
@@ -170,7 +166,6 @@ items:
           - tint
           - multievent
           - contexpl
-    #   visible: (!sas)
 
 
 
@@ -217,7 +212,6 @@ items:
       # title: '1, 3, 5-yr Survival Summary and Table'
       title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
       type:  Preformatted
-      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -229,10 +223,10 @@ items:
           - multievent
 
 
-    - name:  tableview
-      title: tableview
-      type:  Preformatted
-      
+    # - name:  tableview
+    #   title: tableview
+    #   type:  Preformatted
+
 
     - name:  survTable
       title: '`1, 3, 5 year Survival - ${explanatory}`'
@@ -266,7 +260,6 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
           format: pc
-      # visible: (!sas)
       clearWith:
           - explanatory
           - outcome
@@ -294,7 +287,7 @@ items:
           - dxdate
           - tint
           - multievent
-      visible: (pw) # && !sas)
+      visible: (pw)
 
 
 
@@ -314,7 +307,7 @@ items:
           title: p-value
           type: number
           format: zto,pvalue
-      visible: (pw) # && !sas)
+      visible: (pw)
       clearWith:
           - pw
           - explanatory
@@ -331,7 +324,6 @@ items:
 
 
     - name: plot
-      # title: Survival Plot
       title: '`Survival Plot - ${explanatory}`'
       type: Image
       width:  600
@@ -357,12 +349,10 @@ items:
           - tint
           - multievent
           - pplot
-          # - sas
 
 
 
     - name: plot2
-      # title: Cumulative Events
       title: '`Cumulative Events - ${explanatory}`'
       type: Image
       width:  600
@@ -387,12 +377,10 @@ items:
           - dxdate
           - tint
           - multievent
-          # - sas
 
 
 
     - name: plot3
-      # title: Cumulative Hazard
       title: '`Cumulative Hazard - ${explanatory}`'
       type: Image
       width:  600
@@ -417,7 +405,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - sas
 
 
 
@@ -443,7 +430,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - sas
       refs:
           - KMunicate
           - KMunicate2
@@ -452,46 +438,38 @@ items:
 
 
 
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
 
 
 
-
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
-    #   varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-    #   varDescription: Calculated Time from given Dates
-    #   clearWith:
-    #       - tint
-    #       - dxdate
-    #       - fudate
-    #       - explanatory
-    #       - outcome
-    #       - outcomeLevel
-    #       - overalltime
-    #       - fudate
-    #       - dxdate
-    #       - tint
-    #       - multievent
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+      varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate }`'
+      measureType: continuous
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+          - overalltime
+          - calculatedtime
 
 
 
-    # - name: outcomeredifened
-    #   title: Add Redefined Outcome to Data
-    #   type: Output
-    #   varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
-    #   varDescription: Redefined Outcome from Outcome based on Analysis Type
-    #   clearWith:
-    #       - outcome
-    #       - analysistype
-    #       - multievent
-    #       - explanatory
-    #       - outcomeLevel
-    #       - overalltime
-    #       - fudate
-    #       - dxdate
-    #       - tint
-    #       - multievent
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      clearWith:
+          - outcome
+          - analysistype
+          - multievent
+          - explanatory
+          - outcomeLevel
 
 refs:
     - finalfit
