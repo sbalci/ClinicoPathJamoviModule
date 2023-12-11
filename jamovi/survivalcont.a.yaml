@@ -196,7 +196,7 @@ options:
 
 
     - name: findcut
-      title: Cut-off for Continious Explanatory
+      title: Find Cut-off for Continious Explanatory Variable
       type: Bool
       default: false
 

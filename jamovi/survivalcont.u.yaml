@@ -41,11 +41,10 @@ children:
         label: Cut-off
         fitToGrid: true
         children:
-          - type: Label
-            label: Cut-off
-            children:
-              - type: CheckBox
-                name: findcut
+          - type: CheckBox
+            name: findcut
+          - type: Output
+            name: calculatedcutoff
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -99,11 +98,24 @@ children:
                 enable: (tint)
               - type: ComboBox
                 name: timetypeoutput
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: calculatedcutoff
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: uselandmark
+          - type: TextBox
+            name: landmark
+            format: number
+
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Output
+            name: calculatedtime
+
+
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -135,21 +147,15 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: calculatedtime
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: outcomeredifened
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: uselandmark
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Output
+            name: outcomeredifened
+
+
+
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -173,6 +179,7 @@ children:
               - type: CheckBox
                 name: ch
                 enable: (findcut)
+
       - type: Label
         label: Plot Arguments
         children:
@@ -187,6 +194,14 @@ children:
                 name: byplot
                 enable: (findcut)
                 format: number
+              - type: TextBox
+                name: ybegin_plot
+                enable: (findcut)
+                format: number
+              - type: TextBox
+                name: yend_plot
+                format: number
+                enable: (findcut)
               - type: CheckBox
                 name: ci95
                 enable: (findcut)
@@ -195,18 +210,11 @@ children:
                 enable: (findcut)
               - type: CheckBox
                 name: censored
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: landmark
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ybegin_plot
-        format: number
+                enable: (findcut)
+
+
+
+
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -219,9 +227,4 @@ children:
             enable: (findcut)
             format: string
             width: large
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: yend_plot
-        format: number
+
