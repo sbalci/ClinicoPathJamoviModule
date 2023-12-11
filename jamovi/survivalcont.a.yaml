@@ -35,6 +35,10 @@ options:
       title: 'Follow-up Date'
       type: Variable
 
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+
     - name: contexpl
       title: Continuous Explanatory Variable
       type: Variable
@@ -51,6 +55,7 @@ options:
       title: Event Level
       type: Level
       variable: (outcome)
+
     - name: dod
       title: Dead of Disease
       type: Level
@@ -80,10 +85,13 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        # - title: Competing Risk
-        #   name: compete
+        - title: Competing Risk
+          name: compete
       default: overall
 
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
 
     - name: cutp
       title: Cutpoints
@@ -142,13 +150,6 @@ options:
 
 
 
-
-    # - name: pw
-    #   title: Pairwise comparisons
-    #   type: Bool
-    #   default: false
-
-
     - name: sc
       title: Survival Plot
       type: Bool
@@ -177,6 +178,15 @@ options:
       type: Integer
       default: 60
 
+    - name: ybegin_plot
+      title: Start y-axis
+      type: Number
+      default: 0.00
+
+    - name: yend_plot
+      title: End y-axis
+      type: Number
+      default: 1.00
 
     - name: byplot
       title: Time Interval
@@ -189,6 +199,10 @@ options:
       title: Cut-off for Continious Explanatory
       type: Bool
       default: false
+
+    - name: calculatedcutoff
+      title: Add Calculated Cut-off Group to Data
+      type: Output
 
 
     - name: multievent
@@ -206,24 +220,10 @@ options:
       type: Bool
       default: false
 
-
-    # - name: sas
-    #   title: Single Arm Survival
-    #   type: Bool
-    #   default: false
-
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
-
-    # - name: outcomeredifened
-    #   title: Add Redefined Outcome to Data
-    #   type: Output
-
-
-    # - name: calculatedcutoff
-    #   title: Add Calculated Cut-off Group to Data
-    #   type: Output
+    - name: censored
+      title: censored
+      type: Bool
+      default: false
 
 
 ...

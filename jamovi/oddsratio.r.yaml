@@ -13,9 +13,9 @@ items:
           - outcome
 
 
-    - name:  textmydata
-      title: 'textmydata'
-      type:  Preformatted
+    # - name:  textmydata
+    #   title: 'textmydata'
+    #   type:  Preformatted
 
 
     - name:  text

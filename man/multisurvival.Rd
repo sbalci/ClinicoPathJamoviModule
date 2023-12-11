@@ -80,6 +80,8 @@ A results object containing:
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }
 }
 \description{

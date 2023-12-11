@@ -236,24 +236,24 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #                    ) -> tOdds
 
 
-                self$results$textmydata$setContent(
-                    list(
-                        head = head(mydata),
-                        names_data = names(mydata),
-                        all_labels = all_labels,
-                        explanatory_variable_names = explanatory_variable_names,
-                        dependent_variable_name_from_label = dependent_variable_name_from_label,
-                        formulaDependent = formulaDependent,
-                        formulaExplanatory = formulaExplanatory
-                        # formula2 = formula2,
-                        # formulaR = formulaR,
-                        # formulaL = formulaL,
-                        # formulaL2 = formulaL2,
-                        # formulaR3,
-                        ,
-                        tOdds
-                    )
-                )
+                # self$results$textmydata$setContent(
+                #     list(
+                #         head = head(mydata),
+                #         names_data = names(mydata),
+                #         all_labels = all_labels,
+                #         explanatory_variable_names = explanatory_variable_names,
+                #         dependent_variable_name_from_label = dependent_variable_name_from_label,
+                #         formulaDependent = formulaDependent,
+                #         formulaExplanatory = formulaExplanatory
+                #         # formula2 = formula2,
+                #         # formulaR = formulaR,
+                #         # formulaL = formulaL,
+                #         # formulaL2 = formulaL2,
+                #         # formulaR3,
+                #         ,
+                #         tOdds
+                #     )
+                # )
 
 
                 text2 <- glue::glue("
