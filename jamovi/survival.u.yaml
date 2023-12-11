@@ -102,6 +102,17 @@ children:
                     name: landmark
                     format: number
                     enable: (uselandmark)
+      - type: Label
+        label: Calculated Time to Data
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: calculatedtime
+                fitToGrid: true
+                enable: (tint)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -133,6 +144,19 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
+
+      - type: Label
+        label: Calculated Outcome to Data
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: outcomeredifened
+                fitToGrid: true
+                enable: (outcome && multievent)
+
   - type: CollapseBox
     label: Pairwise Comparisons
     collapsed: true
@@ -148,6 +172,7 @@ children:
               - type: ComboBox
                 name: padjustmethod
                 enable: (pw)
+
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -195,7 +220,6 @@ children:
                 name: censored
               - type: CheckBox
                 name: pplot
-
   - type: CollapseBox
     label: Survival Tables
     collapsed: true

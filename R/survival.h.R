@@ -63,6 +63,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
                 fudate)
+            private$..calculatedtime <- jmvcore::OptionOutput$new(
+                "calculatedtime")
             private$..explanatory <- jmvcore::OptionVariable$new(
                 "explanatory",
                 explanatory,
@@ -110,8 +112,11 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 analysistype,
                 options=list(
                     "overall",
-                    "cause"),
+                    "cause",
+                    "compete"),
                 default="overall")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -223,6 +228,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
             self$.addOption(private$..fudate)
+            self$.addOption(private$..calculatedtime)
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
@@ -231,6 +237,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
+            self$.addOption(private$..outcomeredifened)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -258,6 +265,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
         fudate = function() private$..fudate$value,
+        calculatedtime = function() private$..calculatedtime$value,
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
@@ -266,6 +274,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
+        outcomeredifened = function() private$..outcomeredifened$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -292,6 +301,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..tint = NA,
         ..dxdate = NA,
         ..fudate = NA,
+        ..calculatedtime = NA,
         ..explanatory = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
@@ -300,6 +310,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
+        ..outcomeredifened = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -337,14 +348,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cox_ph = function() private$.items[["cox_ph"]],
         plot7 = function() private$.items[["plot7"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
-        tableview = function() private$.items[["tableview"]],
         survTable = function() private$.items[["survTable"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
-        plot6 = function() private$.items[["plot6"]]),
+        plot6 = function() private$.items[["plot6"]],
+        calculatedtime = function() private$.items[["calculatedtime"]],
+        outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -547,10 +559,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="tableview",
-                title="tableview"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -750,7 +758,32 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "multievent"),
                 refs=list(
                     "KMunicate",
-                    "KMunicate2")))}))
+                    "KMunicate2")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedtime",
+                title="Add Calculated Time to Data",
+                varTitle="`Calculated Time - from ${ dxdate } to { fudate }`",
+                varDescription="`Calculated Time from Given Dates - from ${ dxdate } to { fudate }`",
+                measureType="continuous",
+                clearWith=list(
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "overalltime",
+                    "calculatedtime")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="outcomeredifened",
+                title="Add Redefined Outcome to Data",
+                varTitle="`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
+                    "multievent",
+                    "explanatory",
+                    "outcomeLevel")))}))
 
 survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalBase",
@@ -770,7 +803,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Survival Analysis
@@ -826,7 +859,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$tableview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
@@ -834,6 +866,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
