@@ -21,18 +21,63 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
             }
 
+
+            ,
+            .getData = function() {
+
+            mydata <- self$data
+
+            mydata$row_names <- rownames(mydata)
+
+            original_names <- names(mydata)
+
+            labels <- setNames(original_names, original_names)
+
+            mydata <- mydata %>% janitor::clean_names()
+
+            corrected_labels <-
+                setNames(original_names, names(mydata))
+
+            mydata <- labelled::set_variable_labels(.data = mydata,
+                                                    .labels = corrected_labels)
+
+            all_labels <- labelled::var_label(mydata)
+
+
+            mytime <-
+                names(all_labels)[all_labels == self$options$elapsedtime]
+
+            myoutcome <-
+                names(all_labels)[all_labels == self$options$outcome]
+
+            mydxdate <-
+                names(all_labels)[all_labels == self$options$dxdate]
+
+            myfudate <-
+                names(all_labels)[all_labels == self$options$fudate]
+
+            myexplanatory <-
+                names(all_labels)[all_labels == self$options$explanatory]
+
+            return(list(
+                "mydata_labelled" = mydata
+                , "mytime_labelled" = mytime
+                , "myoutcome_labelled" = myoutcome
+                , "mydxdate_labelled" = mydxdate
+                , "myfudate_labelled" = myfudate
+                , "myexplanatory_labelled" = myexplanatory
+            ))
+
+
+            }
+
+
+
+
+
             ,
             .todo = function() {
 
-                if (
-
-                    (is.null(self$options$outcome) && !(self$options$multievent)) ||
-
-                    (self$options$multievent && (is.null(self$options$dod) && is.null(self$options$dooc) && is.null(self$options$awd) && is.null(self$options$awod))) ||
-
-                    (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) ||
-
-                    is.null(self$options$contexpl)) {
                     todo <- glue::glue(
                         "
                 <br>Welcome to ClinicoPath
@@ -57,7 +102,6 @@ survivalcontClass <- if (requireNamespace('jmvcore'))
 
                     html <- self$results$todo
                     html$setContent(todo)
-                }
 
             }
 

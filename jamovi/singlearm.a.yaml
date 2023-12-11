@@ -58,9 +58,9 @@ options:
       type: Variable
 
 
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
 
 
     - name: outcome
@@ -102,14 +102,14 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        # - title: Competing Risk
-        #   name: compete
+        - title: Competing Risk
+          name: compete
       default: overall
 
 
-    # - name: outcomeredifened
-    #   title: Add Redefined Outcome to Data
-    #   type: Output
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
 
 
 
@@ -199,6 +199,15 @@ options:
       type: Integer
       default: 60
 
+    - name: ybegin_plot
+      title: Start y-axis
+      type: Number
+      default: 0.00
+
+    - name: yend_plot
+      title: End y-axis
+      type: Number
+      default: 1.00
 
     - name: byplot
       title: Time Interval

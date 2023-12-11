@@ -102,10 +102,13 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
-        # - title: Competing Risk
-        #   name: compete
+        - title: Competing Risk
+          name: compete
       default: overall
 
+    - name: outcomeredifened
+      title: Add Redefined Outcome to Data
+      type: Output
 
 
     - name: timetypedata
@@ -157,6 +160,12 @@ options:
       title: Landmark Time
       type: Integer
       default: 3
+
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+
 
     - name: hr
       title: Hazards Regression Plot
@@ -225,16 +234,6 @@ options:
     #   title: p-value
     #   type: Bool
     #   default: true
-
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
-
-    # - name: outcomeredifened
-    #   title: Add Redefined Outcome to Data
-    #   type: Output
-
-
 
 
     # - name: modelTerms

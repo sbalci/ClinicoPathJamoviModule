@@ -27,6 +27,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ce = FALSE,
             ch = FALSE,
             endplot = 60,
+            ybegin_plot = 0,
+            yend_plot = 1,
             byplot = 12,
             multievent = FALSE,
             ci95 = FALSE,
@@ -56,6 +58,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
                 fudate)
+            private$..calculatedtime <- jmvcore::OptionOutput$new(
+                "calculatedtime")
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -95,8 +99,11 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 analysistype,
                 options=list(
                     "overall",
-                    "cause"),
+                    "cause",
+                    "compete"),
                 default="overall")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -150,6 +157,14 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "endplot",
                 endplot,
                 default=60)
+            private$..ybegin_plot <- jmvcore::OptionNumber$new(
+                "ybegin_plot",
+                ybegin_plot,
+                default=0)
+            private$..yend_plot <- jmvcore::OptionNumber$new(
+                "yend_plot",
+                yend_plot,
+                default=1)
             private$..byplot <- jmvcore::OptionInteger$new(
                 "byplot",
                 byplot,
@@ -175,6 +190,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
             self$.addOption(private$..fudate)
+            self$.addOption(private$..calculatedtime)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..dod)
@@ -182,6 +198,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
+            self$.addOption(private$..outcomeredifened)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -192,6 +209,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ce)
             self$.addOption(private$..ch)
             self$.addOption(private$..endplot)
+            self$.addOption(private$..ybegin_plot)
+            self$.addOption(private$..yend_plot)
             self$.addOption(private$..byplot)
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
@@ -203,6 +222,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
         fudate = function() private$..fudate$value,
+        calculatedtime = function() private$..calculatedtime$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         dod = function() private$..dod$value,
@@ -210,6 +230,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
+        outcomeredifened = function() private$..outcomeredifened$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -220,6 +241,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ce = function() private$..ce$value,
         ch = function() private$..ch$value,
         endplot = function() private$..endplot$value,
+        ybegin_plot = function() private$..ybegin_plot$value,
+        yend_plot = function() private$..yend_plot$value,
         byplot = function() private$..byplot$value,
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
@@ -230,6 +253,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..tint = NA,
         ..dxdate = NA,
         ..fudate = NA,
+        ..calculatedtime = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..dod = NA,
@@ -237,6 +261,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
+        ..outcomeredifened = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -247,6 +272,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ce = NA,
         ..ch = NA,
         ..endplot = NA,
+        ..ybegin_plot = NA,
+        ..yend_plot = NA,
         ..byplot = NA,
         ..multievent = NA,
         ..ci95 = NA,
@@ -554,7 +581,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Single Arm Survival
@@ -586,6 +613,8 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ce .
 #' @param ch .
 #' @param endplot .
+#' @param ybegin_plot .
+#' @param yend_plot .
 #' @param byplot .
 #' @param multievent .
 #' @param ci95 .
@@ -636,6 +665,8 @@ singlearm <- function(
     ce = FALSE,
     ch = FALSE,
     endplot = 60,
+    ybegin_plot = 0,
+    yend_plot = 1,
     byplot = 12,
     multievent = FALSE,
     ci95 = FALSE,
@@ -680,6 +711,8 @@ singlearm <- function(
         ce = ce,
         ch = ch,
         endplot = endplot,
+        ybegin_plot = ybegin_plot,
+        yend_plot = yend_plot,
         byplot = byplot,
         multievent = multievent,
         ci95 = ci95,

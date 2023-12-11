@@ -108,8 +108,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 analysistype,
                 options=list(
                     "overall",
-                    "cause"),
+                    "cause",
+                    "compete"),
                 default="overall")
+            private$..outcomeredifened <- jmvcore::OptionOutput$new(
+                "outcomeredifened")
             private$..timetypedata <- jmvcore::OptionList$new(
                 "timetypedata",
                 timetypedata,
@@ -139,6 +142,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "landmark",
                 landmark,
                 default=3)
+            private$..calculatedtime <- jmvcore::OptionOutput$new(
+                "calculatedtime")
             private$..hr <- jmvcore::OptionBool$new(
                 "hr",
                 hr,
@@ -165,10 +170,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..contexpl)
             self$.addOption(private$..multievent)
             self$.addOption(private$..analysistype)
+            self$.addOption(private$..outcomeredifened)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..uselandmark)
             self$.addOption(private$..landmark)
+            self$.addOption(private$..calculatedtime)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
         }),
@@ -187,10 +194,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         contexpl = function() private$..contexpl$value,
         multievent = function() private$..multievent$value,
         analysistype = function() private$..analysistype$value,
+        outcomeredifened = function() private$..outcomeredifened$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
         uselandmark = function() private$..uselandmark$value,
         landmark = function() private$..landmark$value,
+        calculatedtime = function() private$..calculatedtime$value,
         hr = function() private$..hr$value,
         sty = function() private$..sty$value),
     private = list(
@@ -208,10 +217,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..contexpl = NA,
         ..multievent = NA,
         ..analysistype = NA,
+        ..outcomeredifened = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
         ..uselandmark = NA,
         ..landmark = NA,
+        ..calculatedtime = NA,
         ..hr = NA,
         ..sty = NA)
 )
@@ -225,7 +236,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
-        plot3 = function() private$.items[["plot3"]]),
+        plot3 = function() private$.items[["plot3"]],
+        calculatedtime = function() private$.items[["calculatedtime"]],
+        outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -339,6 +352,26 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
+                    "multievent")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedtime",
+                title="Add Calculated Time to Data",
+                varTitle="`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`",
+                varDescription="Calculated Time from given Dates",
+                clearWith=list(
+                    "tint",
+                    "dxdate",
+                    "fudate")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="outcomeredifened",
+                title="Add Redefined Outcome to Data",
+                varTitle="`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                clearWith=list(
+                    "outcome",
+                    "analysistype",
                     "multievent")))}))
 
 multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -359,7 +392,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Multivariable Survival Analysis
@@ -399,6 +432,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' @export

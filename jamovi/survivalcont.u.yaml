@@ -99,6 +99,11 @@ children:
                 enable: (tint)
               - type: ComboBox
                 name: timetypeoutput
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: calculatedcutoff
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -130,6 +135,16 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: calculatedtime
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: outcomeredifened
   - type: LayoutBox
     margin: large
     children:
@@ -178,11 +193,19 @@ children:
               - type: CheckBox
                 name: risktable
                 enable: (findcut)
+              - type: CheckBox
+                name: censored
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: landmark
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ybegin_plot
         format: number
   - type: CollapseBox
     label: Survival Tables
@@ -196,31 +219,9 @@ children:
             enable: (findcut)
             format: string
             width: large
-  # - type: CollapseBox
-  #   label: Save Converted Variables to Data
-  #   collapsed: true
-  #   children:
-  #     - type: Label
-  #       label: Add Calculated Time to Your Data
-  #       fitToGrid: true
-  #       children:
-  #         - type: Output
-  #           name: calculatedtime
-  #           enable: (tint)
-  #           fitToGrid: true
-  #     - type: Label
-  #       label: Add Redefined Outcome to Data
-  #       fitToGrid: true
-  #       children:
-  #         - type: Output
-  #           name: outcomeredifened
-  #           enable: (multievent)
-  #           fitToGrid: true
-  #     - type: Label
-  #       label: Add Calculated Cut-off Group to Data
-  #       fitToGrid: true
-  #       children:
-  #         - type: Output
-  #           name: calculatedcutoff
-  #           enable: (findcut)
-  #           fitToGrid: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: yend_plot
+        format: number
