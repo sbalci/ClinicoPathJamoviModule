@@ -1,5 +1,4 @@
 #' @title Histogram
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
@@ -15,7 +14,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .init = function() {
                 deplen <- length(self$options$dep)
 
-                self$results$plot$setSize(400, deplen * 300)
+                self$results$plot$setSize(deplen * 800,
+                                          600)
 
                 self$results$plot2$setSize(800, deplen * 300)
 
@@ -398,24 +398,26 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     plot2 <- ggstatsplot::grouped_gghistostats(
                         data = mydata,
                         x = !!dep,
-                        grouping.var = !!grvar,
-                        binwidth = binwidth,
-                        title.prefix = NULL,
-                        output = "plot",
-                        plotgrid.args = list(),
-                        title.text = NULL,
-                        title.args = list(size = 16, fontface = "bold"),
-                        caption.text = NULL,
-                        caption.args = list(size = 10),
-                        sub.text = NULL,
-                        sub.args = list(size = 12)
-
-                        , type = typestatistics
-                        , bar.measure = barmeasure
-                        , centrality.parameter = centralityparameter
-                        , results.subtitle = self$options$resultssubtitle
-                        , normal.curve = self$options$normalcurve
-                        , centrality.plotting = self$options$centralityline
+                        grouping.var = !!grvar
+                        # ,
+                        # binwidth = binwidth,
+                        # title.prefix = NULL,
+                        # output = "plot",
+                        # plotgrid.args = list(),
+                        # title.text = NULL,
+                        # title.args = list(size = 16,
+                        #                   fontface = "bold"),
+                        # caption.text = NULL,
+                        # caption.args = list(size = 10),
+                        # sub.text = NULL,
+                        # sub.args = list(size = 12)
+                        #
+                        # , type = typestatistics
+                        # , bar.measure = barmeasure
+                        # , centrality.parameter = centralityparameter
+                        # , results.subtitle = self$options$resultssubtitle
+                        # , normal.curve = self$options$normalcurve
+                        # , centrality.plotting = self$options$centralityline
 
 
                     )
@@ -437,24 +439,26 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                       messages = FALSE),
                             .f = ggstatsplot::grouped_gghistostats,
                             data = mydata,
-                            grouping.var = !!grvar,
-                            binwidth = binwidth,
-                            title.prefix = NULL,
-                            output = "plot",
-                            plotgrid.args = list(),
-                            title.text = NULL,
-                            title.args = list(size = 16, fontface = "bold"),
-                            caption.text = NULL,
-                            caption.args = list(size = 10),
-                            sub.text = NULL,
-                            sub.args = list(size = 12)
-
-                            , type = typestatistics
-                            , bar.measure = barmeasure
-                            , centrality.parameter = centralityparameter
-                            , results.subtitle = self$options$resultssubtitle
-                            , normal.curve = self$options$normalcurve
-                            , centrality.plotting = self$options$centralityline
+                            grouping.var = !!grvar
+                            # ,
+                            # binwidth = binwidth,
+                            # title.prefix = NULL,
+                            # output = "plot",
+                            # plotgrid.args = list(),
+                            # title.text = NULL,
+                            # title.args = list(size = 16,
+                            #                   fontface = "bold"),
+                            # caption.text = NULL,
+                            # caption.args = list(size = 10),
+                            # sub.text = NULL,
+                            # sub.args = list(size = 12)
+                            #
+                            # , type = typestatistics
+                            # , bar.measure = barmeasure
+                            # , centrality.parameter = centralityparameter
+                            # , results.subtitle = self$options$resultssubtitle
+                            # , normal.curve = self$options$normalcurve
+                            # , centrality.plotting = self$options$centralityline
 
 
                         )

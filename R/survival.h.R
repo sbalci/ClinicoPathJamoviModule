@@ -329,7 +329,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
-        mydataview = function() private$.items[["mydataview"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
         coxSummary = function() private$.items[["coxSummary"]],
@@ -338,6 +337,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cox_ph = function() private$.items[["cox_ph"]],
         plot7 = function() private$.items[["plot7"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
+        tableview = function() private$.items[["tableview"]],
         survTable = function() private$.items[["survTable"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
@@ -377,10 +377,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview",
-                title="mydataview"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -506,6 +502,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="cox_ph",
                 title="Proportional Hazards Assumption",
+                visible="(ph_cox)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -550,6 +547,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="tableview",
+                title="tableview"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -817,7 +818,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -826,6 +826,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$tableview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr

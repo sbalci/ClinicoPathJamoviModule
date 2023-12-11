@@ -10,17 +10,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
         inherit = survivalBase,
         private = list(
 
-
-
-
             .init = function() {
 
-
-
-                if(self$options$ph_cox) {
+                if (self$options$ph_cox) {
                     # Disable tables
                     self$results$cox_ph$setVisible(TRUE)
                 }
+
+                if (!(self$options$ph_cox)) {
+                    # Disable tables
+                    self$results$cox_ph$setVisible(FALSE)
+                }
+
 
                 # if (self$options$sas) {
                 #     # Disable tables
@@ -34,16 +35,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 #     self$results$pairwiseSummary$setVisible(FALSE)
                 #     self$results$pairwiseTable$setVisible(FALSE)
                 # }
-
             }
-
             ,
-
-
-
-
-
-
 
 
             .getData = function() {
@@ -98,60 +91,60 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-            # ,
-            # .todo = function() {
-            #     if (
-            #         (is.null(self$options$outcome) && !(self$options$multievent)) ||
+            ,
+            .todo = function() {
 
-            #         (self$options$multievent &&
-            #          (
-            #              is.null(self$options$dod) &&
-            #              is.null(self$options$dooc) &&
-            #              is.null(self$options$awd) && is.null(self$options$awod)
+                # # Define your subconditions
+                # subcondition1a <- !is.null(self$options$outcome)
+                # subcondition1b1 <- !is.null(self$options$multievent)
+                # subcondition1b2 <- !is.null(self$options$dod)
+                # subcondition1b3 <- !is.null(self$options$dooc)
+                # subcondition1b4 <- !is.null(self$options$awd)
+                # subcondition1b5 <- !is.null(self$options$awod)
+                # subcondition2a <- !is.null(self$options$elapsedtime)
+                # subcondition2b1 <- !is.null(self$options$tint)
+                # subcondition2b2 <- !is.null(self$options$dxdate)
+                # subcondition2b3 <- !is.null(self$options$fudate)
+                # condition3 <- !is.null(self$options$explanatory)
+                #
+                #
+                #
+                #
+                # condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+                #
+                #
+                #
+                # condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+                #
+                #
+                # if (!(condition1 && condition2 && condition3)) {
 
-            #          )
-            #          ) ||
+                 todo <- glue::glue(
+                        "
+                <br>Welcome to ClinicoPath
+                <br><br>
+                This tool will help you calculate median survivals and 1,3,5-yr survivals for a given fisk factor.
+                <br><br>
+                Explanatory variable should be categorical (ordinal or nominal).
+                <br><br>
+                Select outcome level from Outcome variable.
+                <br><br>
+                Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
+                <br><br>
+                Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
+                <br><br>
+                This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
+                <br><hr>
+                <br>
+                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
+                    )
 
-            #         (self$options$tint &&
-            #          (
-            #              is.null(self$options$dxdate) || is.null(self$options$fudate)
-            #          )) ||
+                    html <- self$results$todo
+                    html$setContent(todo)
 
-            #         (is.null(self$options$explanatory)
+                # }
 
-            #          #
-            #          # || (is.null(self$explanatory$sas))
-            #          #
-
-            #          )
-            #          ) {
-
-            #       todo <- glue::glue(
-            #             "
-            #     <br>Welcome to ClinicoPath
-            #     <br><br>
-            #     This tool will help you calculate median survivals and 1,3,5-yr survivals for a given fisk factor.
-            #     <br><br>
-            #     Explanatory variable should be categorical (ordinal or nominal).
-            #     <br><br>
-            #     Select outcome level from Outcome variable.
-            #     <br><br>
-            #     Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
-            #     <br><br>
-            #     Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
-            #     <br><br>
-            #     This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-            #     <br><hr>
-            #     <br>
-            #     See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
-            #         )
-
-            #         html <- self$results$todo
-            #         html$setContent(todo)
-
-            #     }
-
-            # }
+            }
 
 
 
@@ -173,7 +166,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             myfudate_labelled <- labelled_data$myfudate_labelled
             # myexplanatory_labelled <- labelled_data$myexplanatory_labelled
 
-                tint <- self$options$tint
+            tint <- self$options$tint
 
 
                 if (!tint) {
@@ -192,6 +185,24 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dxdate <- mydxdate_labelled # self$options$dxdate
                     fudate <- myfudate_labelled #self$options$fudate
                     timetypedata <- self$options$timetypedata
+
+
+                    # # Define a mapping from timetypedata to lubridate functions
+                    # lubridate_functions <- list(
+                    #     ymdhms = lubridate::ymd_hms,
+                    #     ymd = lubridate::ymd,
+                    #     ydm = lubridate::ydm,
+                    #     mdy = lubridate::mdy,
+                    #     myd = lubridate::myd,
+                    #     dmy = lubridate::dmy,
+                    #     dym = lubridate::dym
+                    # )
+                    # # Apply the appropriate lubridate function based on timetypedata
+                    # if (timetypedata %in% names(lubridate_functions)) {
+                    #     func <- lubridate_functions[[timetypedata]]
+                    #     mydata[["start"]] <- func(mydata[[dxdate]])
+                    #     mydata[["end"]] <- func(mydata[[fudate]])
+                    # }
 
 
                     if (timetypedata == "ymdhms") {
@@ -427,13 +438,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # expl <- self$options$explanatory
 
 
-                labelled_data <- private$.getData()
+            labelled_data <- private$.getData()
 
             mydata_labelled <- labelled_data$mydata_labelled
-            mytime_labelled <- labelled_data$mytime_labelled
-            myoutcome_labelled <- labelled_data$myoutcome_labelled
-            mydxdate_labelled <- labelled_data$mydxdate_labelled
-            myfudate_labelled <- labelled_data$myfudate_labelled
+            # mytime_labelled <- labelled_data$mytime_labelled
+            # myoutcome_labelled <- labelled_data$myoutcome_labelled
+            # mydxdate_labelled <- labelled_data$mydxdate_labelled
+            # myfudate_labelled <- labelled_data$myfudate_labelled
             myexplanatory_labelled <- labelled_data$myexplanatory_labelled
 
 
@@ -467,13 +478,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .cleandata = function() {
 
-                labelled_data <- private$.getData()
+            labelled_data <- private$.getData()
 
-            mydata_labelled <- labelled_data$mydata_labelled
-            mytime_labelled <- labelled_data$mytime_labelled
-            myoutcome_labelled <- labelled_data$myoutcome_labelled
-            mydxdate_labelled <- labelled_data$mydxdate_labelled
-            myfudate_labelled <- labelled_data$myfudate_labelled
+            mydata_labelled        <- labelled_data$mydata_labelled
+            mytime_labelled        <- labelled_data$mytime_labelled
+            myoutcome_labelled     <- labelled_data$myoutcome_labelled
+            mydxdate_labelled      <- labelled_data$mydxdate_labelled
+            myfudate_labelled      <- labelled_data$myfudate_labelled
             myexplanatory_labelled <- labelled_data$myexplanatory_labelled
 
 
@@ -609,7 +620,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "name1time" = name1time,
                         "name2outcome" = name2outcome,
                         "name3explanatory" = name3explanatory,
-                        "cleanData" = cleanData
+                        "cleanData" = cleanData,
+                        "mytime_labelled" = mytime_labelled,
+                        "myoutcome_labelled" = myoutcome_labelled,
+                        "mydxdate_labelled" = mydxdate_labelled,
+                        "myfudate_labelled" = myfudate_labelled,
+                        "myexplanatory_labelled" = myexplanatory_labelled
                     )
                 )
 
@@ -619,45 +635,56 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Run Analysis ----
             ,
             .run = function() {
-                # Common Errors, Warnings ----
+
+                # Errors, Warnings ----
 
                 # No variable TODO ----
-                if ((is.null(self$options$outcome) &&
-                     !(self$options$multievent)) ||
 
-                    (self$options$multievent &&
-                     (
-                         is.null(self$options$dod) &&
-                         is.null(self$options$dooc) &&
-                         is.null(self$options$awd) && is.null(self$options$awod)
-                     )) ||
+                # Define your subconditions
+                subcondition1a <- !is.null(self$options$outcome)
+                subcondition1b1 <- !is.null(self$options$multievent)
+                subcondition1b2 <- !is.null(self$options$dod)
+                subcondition1b3 <- !is.null(self$options$dooc)
+                subcondition1b4 <- !is.null(self$options$awd)
+                subcondition1b5 <- !is.null(self$options$awod)
+                subcondition2a <- !is.null(self$options$elapsedtime)
+                subcondition2b1 <- !is.null(self$options$tint)
+                subcondition2b2 <- !is.null(self$options$dxdate)
+                subcondition2b3 <- !is.null(self$options$fudate)
+                condition3 <- !is.null(self$options$explanatory)
 
-                    (self$options$tint &&
-                     (
-                         is.null(self$options$dxdate) || is.null(self$options$fudate)
-                     )) ||
 
-                    is.null(self$options$explanatory)) {
+
+
+                condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+
+
+
+                condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+
+
+                if (!(condition1 && condition2 && condition3)) {
                     private$.todo()
-
                     return()
                 } else {
                   self$results$todo$setVisible(FALSE)
                 }
 
+
+
                 # Empty data ----
+
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
 
-                    labelled_data <- private$.getData()
-
-            mydata_labelled <- labelled_data$mydata_labelled
-            mytime_labelled <- labelled_data$mytime_labelled
-            myoutcome_labelled <- labelled_data$myoutcome_labelled
-            mydxdate_labelled <- labelled_data$mydxdate_labelled
-            myfudate_labelled <- labelled_data$myfudate_labelled
-            myexplanatory_labelled <- labelled_data$myexplanatory_labelled
+            # labelled_data <- private$.getData()
+            # mydata_labelled <- labelled_data$mydata_labelled
+            # mytime_labelled <- labelled_data$mytime_labelled
+            # myoutcome_labelled <- labelled_data$myoutcome_labelled
+            # mydxdate_labelled <- labelled_data$mydxdate_labelled
+            # myfudate_labelled <- labelled_data$myfudate_labelled
+            # myexplanatory_labelled <- labelled_data$myexplanatory_labelled
 
 
 
@@ -687,26 +714,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-                    self$results$mydataview$setContent(
-                    list(
-                        mydata_labelled = head(mydata_labelled),
-                        mytime_labelled = mytime_labelled,
-                        myoutcome_labelled = myoutcome_labelled,
-                        mydxdate_labelled = mydxdate_labelled,
-                        myfudate_labelled = myfudate_labelled,
-                        myexplanatory_labelled = myexplanatory_labelled,
-                        # time = head(time),
-                        # outcome = head(outcome),
-                        # factor = head(factor),
-                        results = head(results)
-                    )
-                    )
-
-
-
-
-
-
+                    # self$results$mydataview$setContent(
+                    # list(
+                    #     mydata_labelled = head(mydata_labelled),
+                    #     mytime_labelled = mytime_labelled,
+                    #     myoutcome_labelled = myoutcome_labelled,
+                    #     mydxdate_labelled = mydxdate_labelled,
+                    #     myfudate_labelled = myfudate_labelled,
+                    #     myexplanatory_labelled = myexplanatory_labelled,
+                    #     # time = head(time),
+                    #     # outcome = head(outcome),
+                    #     # factor = head(factor),
+                    #     results = head(results)
+                    # )
+                    # )
 
 
                 # Run Analysis ----
@@ -726,36 +747,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.pairwise(results)
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             }
 
             # Median Survival Function ----
             ,
             .medianSurv = function(results) {
+
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
                 myfactor <- results$name3explanatory
+                # mytime_labelled <- results$mytime_labelled
+                # myoutcome_labelled <- results$myoutcome_labelled
+                # mydxdate_labelled <- results$mydxdate_labelled
+                # myfudate_labelled <- results$myfudate_labelled
+                myexplanatory_labelled <- results$myexplanatory_labelled
 
                 mydata <- results$cleanData
 
@@ -800,8 +805,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 names(results1table)[1] <- "factor"
 
+
+                results2table <- results1table
+
+                results2table$factor <- gsub(pattern = paste0(myexplanatory_labelled,"="),
+                                             replacement = "",
+                                             x = results1table$factor)
+
+
+                # self$results$medianSummary2$setContent(results2table)
+
+
+
+
                 medianTable <- self$results$medianTable
-                data_frame <- results1table
+                data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = T])) {
                     medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
                 }
@@ -828,6 +846,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                   dplyr::mutate(description = gsub(
                     pattern = "=",
                     replacement = " is ",
+                    x = description
+                  )) %>%
+                  dplyr::mutate(description = gsub(
+                    pattern = myexplanatory_labelled,
+                    replacement = self$options$explanatory,
                     x = description
                   )) %>%
                     dplyr::select(description) %>%
@@ -989,10 +1012,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # )
 
 
-
-
-
-
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
 
@@ -1005,8 +1024,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                           myfactor)
 
                 formula <- as.formula(formula)
-
-
 
                     cox_model <- survival::coxph(formula, data = mydata)
 
@@ -1022,14 +1039,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
             }
 
 
-
-
             # Survival Table Function ----
             ,
             .survTable = function(results) {
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
                 myfactor <- results$name3explanatory
+                myexplanatory_labelled <- results$myexplanatory_labelled
 
                 mydata <- results$cleanData
 
@@ -1072,12 +1088,23 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                                    "lower",
                                                    "upper")])
 
+                # self$results$tableview$setContent(km_fit_df)
+
+
                 km_fit_df[, 1] <- gsub(
                     pattern = "thefactor=",
                     replacement = paste0(self$options$explanatory, " "),
                     x = km_fit_df[, 1]
                 )
 
+
+                km_fit_df2 <- km_fit_df
+
+                km_fit_df[, 1] <- gsub(
+                    pattern = paste0(myexplanatory_labelled,"="),
+                    replacement = paste0(self$options$explanatory, " "),
+                    x = km_fit_df[, 1]
+                )
 
                 survTable <- self$results$survTable
 
@@ -1087,11 +1114,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
 
-
-
                 # survTableSummary 1,3,5-yr survival summary ----
 
-                km_fit_df %>%
+                km_fit_df2[, 1] <- gsub(
+                    pattern = paste0(myexplanatory_labelled,"="),
+                    replacement = paste0(self$options$explanatory, " is "),
+                    x = km_fit_df2[, 1]
+                )
+
+                km_fit_df2 %>%
                     dplyr::mutate(
                         description =
                             glue::glue(
@@ -1187,9 +1218,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(
                         description =
                             glue::glue(
-                                "The difference",
+                                "The difference of ",
                                 title2,
-                                "between {rowname} and {name}",
+                                " between {rowname} and {name}",
                                 " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}."
                             )
                     ) %>%
