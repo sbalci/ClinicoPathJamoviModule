@@ -26,9 +26,9 @@ items:
           - multievent
 
 
-    - name:  mydataview
-      title: mydataview
-      type:  Preformatted
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
 
 
     # - name:  medianSummary2
@@ -177,6 +177,7 @@ items:
     - name: cox_ph
       title: 'Proportional Hazards Assumption'
       type:  Preformatted
+      visible: (ph_cox)
       clearWith:
           - explanatory
           - outcome
@@ -228,7 +229,10 @@ items:
           - multievent
 
 
-
+    - name:  tableview
+      title: tableview
+      type:  Preformatted
+      
 
     - name:  survTable
       title: '`1, 3, 5 year Survival - ${explanatory}`'
@@ -291,6 +295,7 @@ items:
           - tint
           - multievent
       visible: (pw) # && !sas)
+
 
 
 
