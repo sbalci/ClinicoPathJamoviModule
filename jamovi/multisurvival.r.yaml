@@ -5,17 +5,17 @@ jrs:   '1.1'
 
 
 
-clearWith:
-    - outcome
-    - outcomeLevel
-    - overalltime
-    - explanatory
-    - contexpl
-    - fudate
-    - dxdate
-    - tint
-    - multievent
-    - adjexplanatory
+# clearWith:
+    # - outcome
+    # - outcomeLevel
+    # - overalltime
+    # - explanatory
+    # - contexpl
+    # - fudate
+    # - dxdate
+    # - tint
+    # - multievent
+    # - adjexplanatory
 
 
 items:
@@ -33,7 +33,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - adjexplanatory
 
 
 
@@ -63,7 +62,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - adjexplanatory
 
     - name:  text2
       title: ''
@@ -79,8 +77,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - adjexplanatory
-
 
     - name: plot
       title: Hazards Regression Plot
@@ -103,7 +99,6 @@ items:
           - dxdate
           - tint
           - multievent
-          # - adjexplanatory
 
     # - name: plot2
     #   title: Hazards Regression Plot
@@ -144,8 +139,45 @@ items:
           - dxdate
           - tint
           - multievent
-          # - adjexplanatory
 
+
+    - name: cox_ph
+      title: 'Proportional Hazards Assumption'
+      type:  Preformatted
+      visible: (ph_cox)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - contexpl
+
+
+    - name: plot8
+      title: 'Proportional Hazards Assumption'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot8
+      visible: (ph_cox)
+      requiresData: true
+      clearWith:
+          - ph_cox
+          - endplot
+          - byplot
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - contexpl
 
 
     # - name: plot4
@@ -223,7 +255,7 @@ items:
       title: Add Calculated Time to Data
       type: Output
       varTitle: '`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates
+      varDescription: Calculated Time from given Dates in Multivariable Survival Analysis
       clearWith:
           - tint
           - dxdate
@@ -234,7 +266,7 @@ items:
       title: Add Redefined Outcome to Data
       type: Output
       varTitle: '`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`'
-      varDescription: Redefined Outcome from Outcome based on Analysis Type
+      varDescription: Redefined Outcome from Outcome based on Analysis Type in Multivariable Survival Analysis
       clearWith:
           - outcome
           - analysistype

@@ -185,6 +185,12 @@ options:
       default: t1
 
 
+    - name: ph_cox
+      title: Proportional Hazards Assumption
+      type: Bool
+      default: false
+
+
     # - name: km
     #   title: Kaplan-Meier
     #   type: Bool

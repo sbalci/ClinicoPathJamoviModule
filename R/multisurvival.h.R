@@ -25,7 +25,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             uselandmark = FALSE,
             landmark = 3,
             hr = FALSE,
-            sty = "t1", ...) {
+            sty = "t1",
+            ph_cox = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -155,6 +156,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "t1",
                     "t3"),
                 default="t1")
+            private$..ph_cox <- jmvcore::OptionBool$new(
+                "ph_cox",
+                ph_cox,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -178,6 +183,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..calculatedtime)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
+            self$.addOption(private$..ph_cox)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -201,7 +207,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         landmark = function() private$..landmark$value,
         calculatedtime = function() private$..calculatedtime$value,
         hr = function() private$..hr$value,
-        sty = function() private$..sty$value),
+        sty = function() private$..sty$value,
+        ph_cox = function() private$..ph_cox$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -224,7 +231,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..landmark = NA,
         ..calculatedtime = NA,
         ..hr = NA,
-        ..sty = NA)
+        ..sty = NA,
+        ..ph_cox = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -236,6 +244,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
+        cox_ph = function() private$.items[["cox_ph"]],
+        plot8 = function() private$.items[["plot8"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredifened = function() private$.items[["outcomeredifened"]]),
     private = list(),
@@ -248,18 +258,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs=list(
                     "multivariable",
                     "survivaltutorial",
-                    "ClinicoPathJamoviModule"),
-                clearWith=list(
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "explanatory",
-                    "contexpl",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent",
-                    "adjexplanatory"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -348,12 +347,49 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cox_ph",
+                title="Proportional Hazards Assumption",
+                visible="(ph_cox)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "contexpl")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot8",
+                title="Proportional Hazards Assumption",
+                width=600,
+                height=450,
+                renderFun=".plot8",
+                visible="(ph_cox)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "ph_cox",
+                    "endplot",
+                    "byplot",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "contexpl")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
                 title="Add Calculated Time to Data",
                 varTitle="`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates",
+                varDescription="Calculated Time from given Dates in Multivariable Survival Analysis",
                 clearWith=list(
                     "tint",
                     "dxdate",
@@ -363,7 +399,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="outcomeredifened",
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type in Multivariable Survival Analysis",
                 clearWith=list(
                     "outcome",
                     "analysistype",
@@ -419,6 +455,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param landmark .
 #' @param hr .
 #' @param sty .
+#' @param ph_cox .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -426,6 +463,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 #' }
@@ -452,7 +491,8 @@ multisurvival <- function(
     uselandmark = FALSE,
     landmark = 3,
     hr = FALSE,
-    sty = "t1") {
+    sty = "t1",
+    ph_cox = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -495,7 +535,8 @@ multisurvival <- function(
         uselandmark = uselandmark,
         landmark = landmark,
         hr = hr,
-        sty = sty)
+        sty = sty,
+        ph_cox = ph_cox)
 
     analysis <- multisurvivalClass$new(
         options = options,

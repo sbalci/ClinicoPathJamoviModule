@@ -533,7 +533,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="calculatedtime",
                 title="Add Calculated Time to Data",
                 varTitle="`Calculated Time - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates",
+                varDescription="Calculated Time from given Dates in Single Arm Analysis",
                 clearWith=list(
                     "tint",
                     "dxdate",
@@ -550,7 +550,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="outcomeredifened",
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome - from ${ outcome } for analysis { analysistype }`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type in Single Arm Analysis",
                 clearWith=list(
                     "outcome",
                     "analysistype",

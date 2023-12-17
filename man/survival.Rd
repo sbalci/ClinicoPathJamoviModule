@@ -121,7 +121,7 @@ A results object containing:
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr

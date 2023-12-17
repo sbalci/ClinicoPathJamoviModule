@@ -346,7 +346,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         coxTable = function() private$.items[["coxTable"]],
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
         cox_ph = function() private$.items[["cox_ph"]],
-        plot7 = function() private$.items[["plot7"]],
+        plot8 = function() private$.items[["plot8"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
         survTable = function() private$.items[["survTable"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
@@ -527,11 +527,11 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "contexpl")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot7",
+                name="plot8",
                 title="`Proportional Hazards Assumption - ${explanatory}`",
                 width=600,
                 height=450,
-                renderFun=".plot7",
+                renderFun=".plot8",
                 visible="(ph_cox)",
                 requiresData=TRUE,
                 clearWith=list(
@@ -764,7 +764,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="calculatedtime",
                 title="Add Calculated Time to Data",
                 varTitle="`Calculated Time - from ${ dxdate } to { fudate }`",
-                varDescription="`Calculated Time from Given Dates - from ${ dxdate } to { fudate }`",
+                varDescription="`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`",
                 measureType="continuous",
                 clearWith=list(
                     "tint",
@@ -777,7 +777,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="outcomeredifened",
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type",
+                varDescription="Redefined Outcome from Outcome based on Analysis Type in Survival Analysis",
                 clearWith=list(
                     "outcome",
                     "analysistype",
@@ -857,7 +857,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr

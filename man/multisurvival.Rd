@@ -25,7 +25,8 @@ multisurvival(
   uselandmark = FALSE,
   landmark = 3,
   hr = FALSE,
-  sty = "t1"
+  sty = "t1",
+  ph_cox = FALSE
 )
 }
 \arguments{
@@ -70,16 +71,19 @@ multisurvival(
 \item{hr}{.}
 
 \item{sty}{.}
+
+\item{ph_cox}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
 }

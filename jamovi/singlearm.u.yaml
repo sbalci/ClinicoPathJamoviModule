@@ -68,20 +68,21 @@ children:
                             isTarget: true
                             fitToGrid: true
                             stretchFactor: 1
-
-      - type: Label
-        label: Time Type
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            fitToGrid: true
-            children:
-              - type: ComboBox
-                name: timetypedata
-                enable: (tint)
-              - type: ComboBox
-                name: timetypeoutput
+              - type: Label
+                label: Time Type
+                fitToGrid: true
+                stretchFactor: 1
+                children:
+                  - type: LayoutBox
+                    margin: large
+                    fitToGrid: true
+                    children:
+                      - type: ComboBox
+                        name: timetypedata
+                        enable: (tint)
+                      - type: ComboBox
+                        name: timetypeoutput
+                        enable: (tint)
       - type: Label
         label: Landmark Time
         fitToGrid: true

@@ -206,6 +206,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
 
+                    if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
+                        stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
+                        )
+                    }
 
                     timetypeoutput <-
                         jmvcore::constructFormula(terms = self$options$timetypeoutput)
@@ -214,7 +218,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     mydata <- mydata %>%
                         dplyr::mutate(interval = lubridate::interval(start, end))
 
-                    stopifnot(lubridate::is.interval(mydata[["interval"]]))
+
 
                     mydata <- mydata %>%
                         dplyr::mutate(mytime = lubridate::time_length(interval, timetypeoutput))
@@ -380,6 +384,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 outcome <- private$.definemyoutcome()
                 factor <- private$.definemyfactor()
 
+                if (is.null(time) || is.null(outcome) || is.null(factor)) {
+                    stop("Error: Data could not be cleaned for analysis.")
+                }
+
                 cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
                     dplyr::left_join(factor, by = "row_names")
 
@@ -478,31 +486,50 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Errors, Warnings ----
 
-                ## No variable TODO ----
+                ## No variable todo ----
 
                 ## Define subconditions ----
 
                 subcondition1a <- !is.null(self$options$outcome)
-                subcondition1b1 <- !is.null(self$options$multievent)
+                subcondition1b1 <- self$options$multievent
                 subcondition1b2 <- !is.null(self$options$dod)
                 subcondition1b3 <- !is.null(self$options$dooc)
-                subcondition1b4 <- !is.null(self$options$awd)
-                subcondition1b5 <- !is.null(self$options$awod)
+                # subcondition1b4 <- !is.null(self$options$awd)
+                # subcondition1b5 <- !is.null(self$options$awod)
                 subcondition2a <- !is.null(self$options$elapsedtime)
-                subcondition2b1 <- !is.null(self$options$tint)
+                subcondition2b1 <- self$options$tint
                 subcondition2b2 <- !is.null(self$options$dxdate)
                 subcondition2b3 <- !is.null(self$options$fudate)
                 condition3 <- !is.null(self$options$explanatory)
 
-                condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
 
-                condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+                condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
 
-                if (!(condition1 && condition2 && condition3)) {
+                condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
+
+                not_continue_analysis <- !(condition1 && condition2 && condition3)
+
+                if (not_continue_analysis) {
                     private$.todo()
+                    self$results$medianSummary$setVisible(FALSE)
+                    self$results$medianTable$setVisible(FALSE)
+                    self$results$coxSummary$setVisible(FALSE)
+                    self$results$coxTable$setVisible(FALSE)
+                    self$results$tCoxtext2$setVisible(FALSE)
+                    self$results$cox_ph$setVisible(FALSE)
+                    self$results$plot8$setVisible(FALSE)
+                    self$results$survTableSummary$setVisible(FALSE)
+                    self$results$survTable$setVisible(FALSE)
+                    self$results$pairwiseSummary$setVisible(FALSE)
+                    self$results$pairwiseTable$setVisible(FALSE)
+                    self$results$plot$setVisible(FALSE)
+                    self$results$plot2$setVisible(FALSE)
+                    self$results$plot3$setVisible(FALSE)
+                    self$results$plot6$setVisible(FALSE)
+                    self$results$todo$setVisible(TRUE)
                     return()
                 } else {
-                  self$results$todo$setVisible(FALSE)
+                    self$results$todo$setVisible(FALSE)
                 }
 
 
@@ -513,6 +540,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Get Clean Data ----
                 results <- private$.cleandata()
+
+                if (is.null(results)) {
+                    return()
+                }
 
                 # Run Analysis ----
                 ## Median Survival ----
@@ -803,10 +834,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$cox_ph$setContent(print(zph))
 
-                    image7 <- self$results$plot7
-                    image7$setState(zph)
+                    image8 <- self$results$plot8
+                    image8$setState(zph)
 
                     }
+
 
             }
 
@@ -874,7 +906,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 km_fit_df[, 1] <- gsub(
                     pattern = paste0(myexplanatory_labelled,"="),
-                    replacement = paste0(self$options$explanatory, " "),
+                    replacement = paste0(
+                        # self$options$explanatory,
+                        ""),
                     x = km_fit_df[, 1]
                 )
 
@@ -1016,6 +1050,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 results <- image$state
 
+                if (is.null(results)) {
+                    return()
+                }
+
                 mytime <- results$name1time
                 mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -1079,6 +1117,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 results <- image2$state
 
+                if (is.null(results)) {
+                    return()
+                }
+
                 mytime <- results$name1time
                 mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -1138,6 +1180,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
 
                 results <- image3$state
+
+                if (is.null(results)) {
+                    return()
+                }
 
                 mytime <- results$name1time
                 mytime <- jmvcore::constructFormula(terms = mytime)
@@ -1199,6 +1245,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 results <- image6$state
 
+                if (is.null(results)) {
+                    return()
+                }
+
                 mytime <- results$name1time
                 mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -1253,18 +1303,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
             # cox.zph ----
             ,
-            .plot7 = function(image7, ggtheme, theme, ...) {
+            .plot8 = function(image8, ggtheme, theme, ...) {
 
                 ph_cox <- self$options$ph_cox
 
                 if (!ph_cox)
                     return()
 
-                zph <- image7$state
+                zph <- image8$state
 
-                plot7 <- plot(zph)
+                if (is.null(zph)) {
+                    return()
+                }
 
-                print(plot7)
+                plot8 <- plot(zph)
+
+                print(plot8)
                 TRUE
 
             }
