@@ -43,6 +43,7 @@ children:
         children:
           - type: CheckBox
             name: findcut
+            enable: (contexpl)
           - type: Output
             name: calculatedcutoff
   - type: CollapseBox

@@ -4,42 +4,44 @@ title: Survival Analysis for Continuous Explanatory Variable
 jrs:   '1.1'
 
 
-
-clearWith:
-    - outcome
-    - outcomeLevel
-    - overalltime
-    - findcut
-    - contexpl
-    - fudate
-    - dxdate
-    - tint
-    - multievent
-
-
 items:
 
     - name:  todo
       title: To Do
       type:  Html
 
+    # - name:  mydataview2
+    #   title: mydataview2
+    #   type:  Preformatted
+
     # - name:  mydataview
     #   title: mydataview
     #   type:  Preformatted
 
     - name:  coxSummary
-      # title: Cox Regression Summary and Table
       title: '`Cox Regression Summary and Table - ${contexpl}`'
       type:  Preformatted
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name:  coxTable
-      # title: Cox Table
       title: '`Cox Table- ${contexpl}`'
       type:  Table
       rows: 0
       columns:
-      # columns: &idcols
         - name: Explanatory
           title: "Explanatory"
           type: text
@@ -55,12 +57,41 @@ items:
         - name: 'HR_multivariable'
           title: "HR (Multivariable)"
           type: text
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name:  tCoxtext2
       title: ''
       type:  Html
       refs: finalfit
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name:  rescutTable
       title: Cut Point
@@ -74,7 +105,21 @@ items:
           title: 'Statistic'
           type: number
       visible: (findcut)
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: plot4
       title: 'Cutpoint Plot'
@@ -84,10 +129,24 @@ items:
       renderFun: .plot4
       visible: (findcut)
       requiresData: true
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: plot5
-      title: 'Survival Plot with new Cut-off'
+      title: '`Survival Plot - ${contexpl} Grouped with New Cut-Off`'
       type: Image
       width:  600
       height: 450
@@ -100,18 +159,39 @@ items:
           - byplot
           - ci95
           - risktable
-
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${contexpl}`'
       type:  Preformatted
       visible: (findcut)
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
     - name:  medianTable
-      # title: Median Survival Table
       title: '`Median Survival Table: Levels for ${contexpl}`'
       type:  Table
       rows: 0
@@ -119,7 +199,7 @@ items:
       # columns: &idcols
         - name: factor
           title: "Levels"
-          # title: '`Factor - ${explanatory}`'
+          # title: '`Factor - ${contexpl}`'
           type: text
         - name: records
           title: "Records"
@@ -151,21 +231,47 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
       visible: (findcut)
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
 
     - name:  survTableSummary
-      # title: '1, 3, 5-yr Survival Summary and Table'
       title: '`1, 3, 5-yr Survival Summary and Table  - ${contexpl}`'
       type:  Preformatted
       visible: (findcut)
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
     - name:  survTable
       title: '`1, 3, 5 year Survival - ${contexpl}`'
-      # title: '1, 3, 5 year Survival'
       type:  Table
       rows: 0
       columns:
@@ -197,11 +303,24 @@ items:
           type: number
           format: pc
       visible: (findcut)
-
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: plot2
-      # title: Cumulative Events
-      title: '`Cumulative Events  - ${contexpl}`'
+      title: '`Cumulative Events  - ${contexpl} Grouped with New Cut-Off`'
       type: Image
       width:  600
       height: 450
@@ -214,11 +333,18 @@ items:
           - byplot
           - ci95
           - risktable
-
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: plot3
-      # title: Cumulative Hazard
-      title: '`Cumulative Hazard  - ${contexpl}`'
+      title: '`Cumulative Hazard  - ${contexpl} Grouped with New Cut-Off`'
       type: Image
       width:  600
       height: 450
@@ -231,10 +357,18 @@ items:
           - byplot
           - ci95
           - risktable
-
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: plot6
-      title: '`KMunicate-Style Plot  - ${contexpl}`'
+      title: '`KMunicate-Style Plot  - ${contexpl} Grouped with New Cut-Off`'
       type: Image
       width:  600
       height: 450
@@ -245,6 +379,17 @@ items:
           - kmunicate
           - endplot
           - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
       refs:
           - KMunicate
           - KMunicate2
@@ -259,7 +404,20 @@ items:
           - tint
           - dxdate
           - fudate
-
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: outcomeredifened
       title: Add Redefined Outcome to Data
@@ -270,7 +428,20 @@ items:
           - outcome
           - analysistype
           - multievent
-
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: calculatedcutoff
       title: Add Calculated Cut-off Group to Data
@@ -283,7 +454,20 @@ items:
           - multievent
           - contexpl
           - findcut
-
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
 
 

@@ -123,6 +123,14 @@ children:
             children:
               - type: ComboBox
                 name: analysistype
+
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: outcomeredifened
+
+
   - type: CollapseBox
     label: Plots
     collapsed: false
@@ -143,11 +151,7 @@ children:
               - type: ComboBox
                 name: sty
                 enable: (hr)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: outcomeredifened
+
   - type: CollapseBox
     label: Adjusted Survival Curve (Being Updated)
     collapsed: true

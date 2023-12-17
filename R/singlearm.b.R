@@ -9,24 +9,60 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = singlearmBase,
     private = list(
 
+
+      .getData = function() {
+
+        mydata <- self$data
+
+        mydata$row_names <- rownames(mydata)
+
+        original_names <- names(mydata)
+
+        labels <- setNames(original_names, original_names)
+
+        mydata <- mydata %>% janitor::clean_names()
+
+        corrected_labels <-
+          setNames(original_names, names(mydata))
+
+        mydata <- labelled::set_variable_labels(.data = mydata,
+                                                .labels = corrected_labels)
+
+        all_labels <- labelled::var_label(mydata)
+
+
+        mytime <-
+          names(all_labels)[all_labels == self$options$elapsedtime]
+
+        myoutcome <-
+          names(all_labels)[all_labels == self$options$outcome]
+
+        mydxdate <-
+          names(all_labels)[all_labels == self$options$dxdate]
+
+        myfudate <-
+          names(all_labels)[all_labels == self$options$fudate]
+
+        return(list(
+          "mydata_labelled" = mydata
+          , "mytime_labelled" = mytime
+          , "myoutcome_labelled" = myoutcome
+          , "mydxdate_labelled" = mydxdate
+          , "myfudate_labelled" = myfudate
+        ))
+
+
+      }
+
+
+
+
+
+      ,
       .todo = function() {
-        if ((is.null(self$options$outcome) && !(self$options$multievent)) ||
 
-            (self$options$multievent &&
-             (
-               is.null(self$options$dod) &&
-               is.null(self$options$dooc) &&
-               is.null(self$options$awd) && is.null(self$options$awod)
-             )) ||
-
-            (self$options$tint &&
-             (
-               is.null(self$options$dxdate) || is.null(self$options$fudate)
-             ))
-            ) {
-
-          todo <- glue::glue(
-            "
+        todo <- glue::glue(
+          "
                 <br>Welcome to ClinicoPath
                 <br><br>
                 This tool will help you calculate median survivals and 1,3,5-yr survivals for your whole population.
@@ -41,19 +77,26 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <br><hr>
                 <br>
                 See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
-          )
+        )
 
-          html <- self$results$todo
-          html$setContent(todo)
-
-        }
+        html <- self$results$todo
+        html$setContent(todo)
 
       }
+
 
       # Define Survival Time ----
       ,
       .definemytime = function() {
-        mydata <- self$data
+
+        # Read Labelled Data ----
+
+        labelled_data <- private$.getData()
+
+        mydata <- labelled_data$mydata_labelled
+        mytime_labelled <- labelled_data$mytime_labelled
+        mydxdate_labelled <- labelled_data$mydxdate_labelled
+        myfudate_labelled <- labelled_data$myfudate_labelled
 
         tint <- self$options$tint
 
@@ -61,18 +104,34 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!tint) {
           # Precalculated Time ----
 
-          # mydata[[self$options$elapsedtime]] <- jmvcore::toNumeric(mydata[[self$options$elapsedtime]])
-
           mydata[["mytime"]] <-
-            jmvcore::toNumeric(mydata[[self$options$elapsedtime]])
+            jmvcore::toNumeric(mydata[[mytime_labelled]])
 
 
         } else if (tint) {
           # Time Interval ----
 
-          dxdate <- self$options$dxdate
-          fudate <- self$options$fudate
+          dxdate <- mydxdate_labelled # self$options$dxdate
+          fudate <- myfudate_labelled #self$options$fudate
           timetypedata <- self$options$timetypedata
+
+
+          # # Define a mapping from timetypedata to lubridate functions
+          # lubridate_functions <- list(
+          #     ymdhms = lubridate::ymd_hms,
+          #     ymd = lubridate::ymd,
+          #     ydm = lubridate::ydm,
+          #     mdy = lubridate::mdy,
+          #     myd = lubridate::myd,
+          #     dmy = lubridate::dmy,
+          #     dym = lubridate::dym
+          # )
+          # # Apply the appropriate lubridate function based on timetypedata
+          # if (timetypedata %in% names(lubridate_functions)) {
+          #     func <- lubridate_functions[[timetypedata]]
+          #     mydata[["start"]] <- func(mydata[[dxdate]])
+          #     mydata[["end"]] <- func(mydata[[fudate]])
+          # }
 
 
           if (timetypedata == "ymdhms") {
@@ -129,34 +188,32 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
 
-        return(mydata[["mytime"]])
+        df_time <- mydata %>% jmvcore::select(c("row_names", "mytime"))
 
 
-      }
 
-      # Add Calculated Time to Data ----
-      ,
-      .mytimetodata = function() {
-        mycalculatedtime <- private$.definemytime()
+        return(df_time)
 
-        if (self$options$calculatedtime &&
-            self$results$calculatedtime$isNotFilled()) {
-          self$results$calculatedtime$setValues(mycalculatedtime)
-        }
 
       }
 
       # Define Outcome ----
       ,
       .definemyoutcome = function() {
-        mydata <- self$data
+
+
+        labelled_data <- private$.getData()
+
+        mydata <- labelled_data$mydata_labelled
+        myoutcome_labelled <- labelled_data$myoutcome_labelled
+
 
         contin <- c("integer", "numeric", "double")
 
         outcomeLevel <- self$options$outcomeLevel
         multievent <- self$options$multievent
-        outcome1 <- self$options$outcome
-        outcome1 <- self$data[[outcome1]]
+
+        outcome1 <- mydata[[myoutcome_labelled]]
 
         if (!multievent) {
           if (inherits(outcome1, contin)) {
@@ -171,8 +228,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }
 
-            mydata[["myoutcome"]] <-
-              mydata[[self$options$outcome]]
+            mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
+            # mydata[[self$options$outcome]]
 
           } else if (inherits(outcome1, "factor")) {
             mydata[["myoutcome"]] <-
@@ -241,47 +298,53 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         }
 
+        df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
-        return(mydata[["myoutcome"]])
-
-      }
-
-
-      # Add Redefined Outcome to Data ----
-      ,
-      .myoutcometodata = function() {
-        mydefinedoutcome <- private$.definemyoutcome()
-
-        if (self$options$outcomeredifened &&
-            self$results$outcomeredifened$isNotFilled()) {
-          self$results$outcomeredifened$setValues(mydefinedoutcome)
-        }
+        return(df_outcome)
 
       }
-
-
-
 
 
       # Define Factor ----
       ,
+
       .definemyfactor = function() {
-        mydata <- self$data
+
+
+        labelled_data <- private$.getData()
+
+        mydata_labelled <- labelled_data$mydata_labelled
+
+        mydata <- mydata_labelled
+
         mydata[["myfactor"]] <- "1"
-        return(mydata[["myfactor"]])
+
+
+        df_factor <- mydata %>% jmvcore::select(c("row_names","myfactor"))
+
+        return(df_factor)
+
       }
 
 
       # Clean Data For Analysis ----
       ,
       .cleandata = function() {
+
+        labelled_data <- private$.getData()
+
+        mydata_labelled        <- labelled_data$mydata_labelled
+        mytime_labelled        <- labelled_data$mytime_labelled
+        myoutcome_labelled     <- labelled_data$myoutcome_labelled
+        mydxdate_labelled      <- labelled_data$mydxdate_labelled
+        myfudate_labelled      <- labelled_data$myfudate_labelled
+
         time <- private$.definemytime()
         outcome <- private$.definemyoutcome()
         factor <- private$.definemyfactor()
 
-        cleanData <- data.frame("mytime" = time,
-                                "myoutcome" = outcome,
-                                "factor" = factor)
+        cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
+          dplyr::left_join(factor, by = "row_names")
 
         # Landmark ----
         # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#landmark_method
@@ -308,36 +371,28 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (!self$options$tint &&
             !is.null(self$options$elapsedtime)) {
-          name1time <- jmvcore::composeTerm(self$options$elapsedtime)
+          name1time <- mytime_labelled
         }
 
-        name2outcome <-
-          jmvcore::composeTerm(self$options$outcome)
+        name2outcome <- myoutcome_labelled
+
+        if (self$options$tint) {
+          name2outcome <- "CalculatedOutcome"
+        }
 
 
-          name3explanatory <- "SingleArm"
+        name3explanatory <- "SingleArm"
 
-
-        names(cleanData) <-
-          c(name1time, name2outcome, name3explanatory)
+        cleanData <- cleanData %>%
+          dplyr::rename(
+            !!name1time := mytime,
+            !!name2outcome := myoutcome,
+            !!name3explanatory := myfactor
+          )
 
         # naOmit ----
 
         cleanData <- jmvcore::naOmit(cleanData)
-
-
-
-
-
-
-        # # View mydata ----
-        # self$results$mydataview$setContent(list(time,
-        #                                         outcome,
-        #                                         factor,
-        #                                         name1time,
-        #                                         name2outcome,
-        #                                         name3explanatory,
-        #                                         head(cleanData, n = 30)))
 
 
         # Prepare Data For Plots ----
@@ -368,7 +423,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             "name1time" = name1time,
             "name2outcome" = name2outcome,
             "name3explanatory" = name3explanatory,
-            "cleanData" = cleanData
+            "cleanData" = cleanData,
+            "mytime_labelled" = mytime_labelled,
+            "myoutcome_labelled" = myoutcome_labelled,
+            "mydxdate_labelled" = mydxdate_labelled,
+            "myfudate_labelled" = myfudate_labelled
           )
         )
 
@@ -378,64 +437,73 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # Run Analysis ----
       ,
       .run = function() {
-        # Common Errors, Warnings ----
 
-        # No variable TODO ----
-        if ((is.null(self$options$outcome) &&
-             !(self$options$multievent)) ||
+        # Errors, Warnings ----
 
-            (self$options$multievent &&
-             (
-               is.null(self$options$dod) &&
-               is.null(self$options$dooc) &&
-               is.null(self$options$awd) && is.null(self$options$awod)
-             )) ||
+        ## No variable todo ----
 
-            (self$options$tint &&
-             (
-               is.null(self$options$dxdate) || is.null(self$options$fudate)
-             ))
-            ) {
+        ## Define subconditions ----
+
+        subcondition1a <- !is.null(self$options$outcome)
+        subcondition1b1 <- !is.null(self$options$multievent)
+        subcondition1b2 <- !is.null(self$options$dod)
+        subcondition1b3 <- !is.null(self$options$dooc)
+        subcondition1b4 <- !is.null(self$options$awd)
+        subcondition1b5 <- !is.null(self$options$awod)
+        subcondition2a <- !is.null(self$options$elapsedtime)
+        subcondition2b1 <- !is.null(self$options$tint)
+        subcondition2b2 <- !is.null(self$options$dxdate)
+        subcondition2b3 <- !is.null(self$options$fudate)
+
+        condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+
+        condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+
+        if (!(condition1 && condition2)) {
           private$.todo()
-
           return()
+        } else {
+          self$results$todo$setVisible(FALSE)
         }
+
 
         # Empty data ----
+
         if (nrow(self$data) == 0)
           stop('Data contains no (complete) rows')
-
-        # Add Calculated Time to Data ----
-
-        if (self$options$tint) {
-          private$.mytimetodata()
-        }
-
-        # mycalculatedtime <- private$.definemytime()
-        #
-        # if (self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
-        #     self$results$calculatedtime$setValues(mycalculatedtime)
-        # }
-
-        # Add Redefined Outcome to Data ----
-
-        if (self$options$multievent) {
-          private$.myoutcometodata()
-        }
-
 
         # Get Clean Data ----
         results <- private$.cleandata()
 
-
         # Run Analysis ----
-          # Median Survival ----
-          private$.medianSurv(results)
-
-          # Survival Table ----
-          private$.survTable(results)
+        ## Median Survival ----
+        private$.medianSurv(results)
 
 
+        ## Survival Table ----
+        private$.survTable(results)
+
+        # Add Calculated Time to Data ----
+
+        # self$results$mydataview$setContent(
+        #     list(
+        #         results
+        #     )
+        # )
+
+
+        if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
+          self$results$calculatedtime$setRowNums(results$cleanData$row_names)
+          self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
+        }
+
+
+        # Add Redefined Outcome to Data ----
+
+        if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
+          self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
+          self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
+        }
       }
 
       # Median Survival Function ----
@@ -450,7 +518,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         mydata[[mytime]] <-
           jmvcore::toNumeric(mydata[[mytime]])
 
-        # Median Survival Table ----
+        ## Median Survival Table ----
 
         formula <-
           paste('survival::Surv(',
@@ -466,14 +534,21 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         km_fit_median_df <- summary(km_fit)
 
+
+        # medianSummary2 <-
+        #   as.data.frame(km_fit_median_df$table)
+        # self$results$medianSummary2$setContent(medianSummary2)
+
+
+
         results1html <-
           as.data.frame(km_fit_median_df$table) %>%
           t() %>%
           as.data.frame() %>%
           janitor::clean_names(dat = ., case = "snake")
-
+          
         results1table <- results1html
-
+        
 
         medianTable <- self$results$medianTable
         data_frame <- results1table
@@ -482,21 +557,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
 
-        # medianSummary2 <-
-        #   as.data.frame(km_fit_median_df$table) %>%
-        #   # janitor::clean_names(dat = ., case = "snake") %>%
-        #   t() %>%
-        #   as.data.frame() %>%
-        #   janitor::clean_names(dat = ., case = "snake")
-        # # medianSummary2 <- class(medianSummary2)
-        #
-        #
-        # self$results$medianSummary2$setContent(medianSummary2)
-
-
-
-
-        # Median Survival Summary ----
+        ## Median Survival Summary ----
 
         results1table %>%
           dplyr::mutate(
@@ -507,6 +568,23 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "."
               )
           ) %>%
+          # dplyr::mutate(
+          #   description = dplyr::case_when(
+          #     is.na(median) ~ paste0(
+          #       glue::glue("{description} \n Note that when {factor}, the survival curve does not drop below 1/2 during \n the observation period, thus the median survival is undefined.")),
+          #     TRUE ~ paste0(description)
+          #   )
+          # ) %>%
+          # dplyr::mutate(description = gsub(
+          #   pattern = "=",
+          #   replacement = " is ",
+          #   x = description
+          # )) %>%
+          # dplyr::mutate(description = gsub(
+          #   pattern = myexplanatory_labelled,
+          #   replacement = self$options$explanatory,
+          #   x = description
+          # )) %>%
           dplyr::select(description) %>%
           dplyr::pull(.) -> km_fit_median_definition
 
@@ -531,7 +609,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         mydata[[mytime]] <-
           jmvcore::toNumeric(mydata[[mytime]])
 
-        # Median Survival Table ----
+        ## Median Survival Table ----
 
         formula <-
           paste('survival::Surv(',
@@ -568,7 +646,23 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                          "lower",
                                          "upper")])
 
+        # self$results$tableview$setContent(km_fit_df)
 
+
+        # km_fit_df[, 1] <- gsub(
+        #   pattern = "thefactor=",
+        #   replacement = paste0(self$options$explanatory, " "),
+        #   x = km_fit_df[, 1]
+        # )
+
+
+        # km_fit_df2 <- km_fit_df
+
+        # km_fit_df[, 1] <- gsub(
+        #   pattern = paste0(myexplanatory_labelled,"="),
+        #   replacement = paste0(self$options$explanatory, " "),
+        #   x = km_fit_df[, 1]
+        # )
 
         survTable <- self$results$survTable
 
@@ -578,9 +672,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
 
+        ## survTableSummary 1,3,5-yr survival summary ----
 
+        # km_fit_df2[, 1] <- gsub(
+        #   pattern = paste0(myexplanatory_labelled,"="),
+        #   replacement = paste0(self$options$explanatory, " is "),
+        #   x = km_fit_df2[, 1]
+        # )
 
-        # survTableSummary 1,3,5-yr survival summary ----
+        ## survTableSummary 1,3,5-yr survival summary ----
 
         km_fit_df %>%
           dplyr::mutate(
@@ -620,7 +720,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         myfactor <- results$name3explanatory
         myfactor <-
-          jmvcore::constructFormula(terms = myfactor)
+        jmvcore::constructFormula(terms = myfactor)
 
         plotData <- results$cleanData
 
@@ -629,8 +729,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         myformula <-
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
-
-          title2 <- "Overall"
 
 
 
@@ -645,7 +743,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
-            title = paste0("Survival curves for ", title2),
+            ylim = c(
+              self$options$ybegin_plot,
+              self$options$yend_plot),
+            title = "Survival of the Whole Group",
             subtitle = "Based on Kaplan-Meier estimates",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
@@ -656,8 +757,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         print(plot)
         TRUE
-
-
 
       }
 
@@ -684,7 +783,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         myfactor <- results$name3explanatory
         myfactor <-
-          jmvcore::constructFormula(terms = myfactor)
+        jmvcore::constructFormula(terms = myfactor)
 
         plotData <- results$cleanData
 
@@ -695,30 +794,29 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
 
 
-          title2 <- "Overall"
-
         plot2 <- plotData %>%
           finalfit::surv_plot(
             .data = .,
             dependent = myformula,
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-            # pval = TRUE,
+            # pval = self$options$pplot,
+            # pval.method	= self$options$pplot,
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
-            title = paste0("Cumulative Events ", title2),
+            ylim = c(
+              self$options$ybegin_plot,
+              self$options$yend_plot),
+            title = "Cumulative Events of the Whole Group",
             fun = "event",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
             censored = self$options$censored
           )
 
-
         print(plot2)
         TRUE
-
-
 
       }
 
@@ -744,7 +842,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         myfactor <- results$name3explanatory
         myfactor <-
-          jmvcore::constructFormula(terms = myfactor)
+        jmvcore::constructFormula(terms = myfactor)
 
         plotData <- results$cleanData
 
@@ -755,20 +853,21 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
 
 
-          title2 <- "Overall"
-
-
         plot3 <- plotData %>%
           finalfit::surv_plot(
             .data = .,
             dependent = myformula,
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-            # pval = TRUE,
+            # pval = self$options$pplot,
+            # pval.method	= self$options$pplot,
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
-            title = paste0("Cumulative Hazard ", title2),
+            ylim = c(
+              self$options$ybegin_plot,
+              self$options$yend_plot),
+            title = "Cumulative Hazard of the Whole Group",
             fun = "cumhaz",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
@@ -809,8 +908,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::toNumeric(plotData[[mytime]])
 
 
+        title2 <- "Single Arm Survival"
 
-          title2 <- "Overall"
 
         myformula <-
           paste('survival::Surv(',

@@ -66,7 +66,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "myoutcome_labelled" = myoutcome,
                     "mydxdate_labelled" = mydxdate,
                     "myfudate_labelled" = myfudate,
-                    "mymycontexpl_labelled" = mycontexpl
+                    "mycontexpl_labelled" = mycontexpl
                 ))
             }
 
@@ -330,11 +330,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             labelled_data <- private$.getData()
 
             mydata_labelled <- labelled_data$mydata_labelled
-            mymycontexpl_labelled <- labelled_data$mymycontexpl_labelled
+            mycontexpl_labelled <- labelled_data$mycontexpl_labelled
 
             mydata <- mydata_labelled
 
-            mydata[["myfactor"]] <- mydata[[mymycontexpl_labelled]]
+            mydata[["myfactor"]] <- mydata[[mycontexpl_labelled]]
 
 
             df_factor <- mydata %>% jmvcore::select(c("row_names","myfactor"))
@@ -355,7 +355,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             myoutcome_labelled     <- labelled_data$myoutcome_labelled
             mydxdate_labelled      <- labelled_data$mydxdate_labelled
             myfudate_labelled      <- labelled_data$myfudate_labelled
-            mymycontexpl_labelled <- labelled_data$mymycontexpl_labelled
+            mycontexpl_labelled <- labelled_data$mycontexpl_labelled
 
                 time <- private$.definemytime()
                 outcome <- private$.definemyoutcome()
@@ -394,7 +394,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 if (!is.null(self$options$contexpl)
                     ) {
-                    name3contexpl <- mymycontexpl_labelled
+                    name3contexpl <- mycontexpl_labelled
                     }
 
                     cleanData <- cleanData %>%
@@ -420,7 +420,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         "myoutcome_labelled" = myoutcome_labelled,
                         "mydxdate_labelled" = mydxdate_labelled,
                         "myfudate_labelled" = myfudate_labelled,
-                        "mymycontexpl_labelled" = mymycontexpl_labelled
+                        "mycontexpl_labelled" = mycontexpl_labelled
                     )
                 )
 
@@ -454,8 +454,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
 
-                if (!(condition1 && condition2 && condition3)) {
+                not_continue_analysis <- !(condition1 && condition2 && condition3)
+
+
+                if (not_continue_analysis) {
                     private$.todo()
+                    self$results$coxSummary$setVisible(FALSE)
+                    self$results$coxTable$setVisible(FALSE)
+                    self$results$tCoxtext2$setVisible(FALSE)
+                    self$results$rescutTable$setVisible(FALSE)
+                    self$results$medianSummary$setVisible(FALSE)
+                    self$results$medianTable$setVisible(FALSE)
+                    self$results$survTableSummary$setVisible(FALSE)
+                    self$results$survTable$setVisible(FALSE)
+                    self$results$plot4$setVisible(FALSE)
+                    self$results$plot5$setVisible(FALSE)
+                    self$results$plot2$setVisible(FALSE)
+                    self$results$plot3$setVisible(FALSE)
+                    self$results$plot6$setVisible(FALSE)
+                    self$results$todo$setVisible(TRUE)
                     return()
                 } else {
                   self$results$todo$setVisible(FALSE)
@@ -482,86 +499,96 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 ## Run Cut-off calculation ----
-                # res.cut <- private$.cutoff(results)
+                res.cut <- private$.cutoff(results)
 
                 ## Run Cut-off Table ----
-                # private$.cutoffTable(res.cut)
+                private$.cutoffTable(res.cut)
 
                 ## Run Categorise Data ----
-                # cutoffdata <- private$.cutoff2(res.cut)
+                cutoffdata <- private$.cutoff2(res.cut)
 
 
-                ## Add Calculated Time to Data ----
 
-                # if (self$options$findcut && self$results$calculatedcutoff$isNotFilled()) {
-                #     # Set rownames ----
 
-                #     rowNums <- rownames(mydata)
-                #     self$results$calculatedcutoff$setRowNums(rowNums)
+                # self$results$mydataview$setContent(
+                #     list(
+                #         res.cut = res.cut,
+                #         cutoffdata = cutoffdata,
+                #         not_continue_analysis = not_continue_analysis
+                #     )
+                # )
 
-                #     # Add calculatedcutoff to Data ----
-
-                #     cutoffgr <- cutoffdata[[self$options$contexpl]]
-
-                #     if (self$options$calculatedcutoff &&
-                #         self$results$calculatedcutoff$isNotFilled()) {
-                #         self$results$calculatedcutoff$setValues(cutoffgr)
-                #     }
-                # }
 
 
                 ## Run median cutoff ----
 
-                # private$.mediancutoff(cutoffdata)
+                private$.mediancutoff(cutoffdata)
 
                 ## Run life table cutoff ----
 
-                # private$.lifetablecutoff(cutoffdata)
+                private$.lifetablecutoff(cutoffdata)
 
                 # Prepare Data For Plots ----
 
-                # plotData1 <- res.cut
-                # image4 <- self$results$plot4
-                # image4$setState(plotData1)
+                plotData1 <- list(res.cut = res.cut,
+                                  name3contexpl = results$name3contexpl
+                                  # ,
+                                  # not_continue_analysis = not_continue_analysis
+                )
 
-                # plotData2 <- cutoffdata
-
-                # image5 <- self$results$plot5
-                # image5$setState(plotData2)
-
-                # image2 <- self$results$plot2
-                # image2$setState(plotData2)
-
-                # image3 <- self$results$plot3
-                # image3$setState(plotData2)
-
-                # image6 <- self$results$plot6
-                # image6$setState(plotData2)
+                # self$results$mydataview2$setContent(plotData1)
 
 
+                image4 <- self$results$plot4
+                image4$setState(plotData1)
+
+                plotData2 <- list(
+                    cutoffdata = cutoffdata,
+                    results = results
+                    # ,
+                    # not_continue_analysis = not_continue_analysis
+                    )
+
+                image5 <- self$results$plot5
+                image5$setState(plotData2)
+
+                image2 <- self$results$plot2
+                image2$setState(plotData2)
+
+                image3 <- self$results$plot3
+                image3$setState(plotData2)
+
+                image6 <- self$results$plot6
+                image6$setState(plotData2)
 
 
-                # # Add Calculated Time to Data ----
 
-                # # self$results$mydataview$setContent(
-                # #     list(
-                # #         results
-                # #     )
-                # # )
+                # Add Calculated Time to Data ----
 
 
-                # if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
-                #     self$results$calculatedtime$setRowNums(results$cleanData$row_names)
-                #     self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
-                # }
+                if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
+                    self$results$calculatedtime$setRowNums(results$cleanData$row_names)
+                    self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
+                }
 
 
-                # # Add Redefined Outcome to Data ----
+                # Add Redefined Outcome to Data ----
 
-                # if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
-                #     self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
-                #     self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
-                # }
+                if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
+                    self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
+                    self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
+                }
+
+
+                # Add calculatedcutoff to Data ----
+
+                cutoffgr <- cutoffdata[[results$name3contexpl]]
+
+                if (self$options$calculatedcutoff &&
+                        self$results$calculatedcutoff$isNotFilled()) {
+                        self$results$calculatedcutoff$setValues(cutoffgr)
+                }
+
             }
 
 
@@ -702,18 +729,37 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .cutoff = function(results) {
 
 
+                mytime <- results$name1time
+                mytime <- jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <- results$name2outcome
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+
+                myfactor <- results$name3contexpl
+                myfactor <-
+                    jmvcore::constructFormula(terms = myfactor)
+
+                mydata <- results$cleanData
+
+                mydata[[mytime]] <-
+                    jmvcore::toNumeric(mydata[[mytime]])
+
                 # https://rpkgs.datanovia.com/survminer/reference/surv_cutpoint.html
 
                 res.cut <- survminer::surv_cutpoint(
                     mydata,
-                    time = "mytime",
-                    event = "myoutcome",
-                    self$options$contexpl,
+                    time = mytime,
+                    event = myoutcome,
+                    variables = myfactor,
                     minprop = 0.1
                     # ,
                     # progressbar = TRUE
                 )
+
                 return(res.cut)
+
             }
 
             # Cut-off Table ----
@@ -742,22 +788,47 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Median ----
             ,
             .mediancutoff = function(cutoffdata) {
+
+                results <- private$.cleandata()
+
                 mydata <- cutoffdata
 
                 # Median Survival Table ----
 
-                thefactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
+
+                mydata[[mytime]] <-
+                    jmvcore::toNumeric(mydata[[mytime]])
 
 
                 formula <-
-                    paste("survival::Surv(mytime, myoutcome) ~ ", thefactor)
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ') ~ ',
+                          mycontexpl)
+
                 formula <- as.formula(formula)
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
 
                 km_fit_median_df <- summary(km_fit)
+
                 results1html <-
                     as.data.frame(km_fit_median_df$table) %>%
                     janitor::clean_names(dat = ., case = "snake") %>%
@@ -772,16 +843,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 results1table <- results1html
 
+                results1table <- results1html
+
                 names(results1table)[1] <- "factor"
 
+
+                results2table <- results1table
+
+                results2table$factor <- gsub(pattern = paste0(mycontexpl,"="),
+                                             replacement = "",
+                                             x = results1table$factor)
+
+
+
+
                 medianTable <- self$results$medianTable
-                data_frame <- results1table
+                data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = T])) {
-                    medianTable$addRow(rowKey = i, values = c(data_frame[i, ]))
+                    medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
                 }
 
 
-                # Median Survival Summary ----
+                ## Median Survival Summary ----
 
                 results1table %>%
                     dplyr::mutate(
@@ -792,9 +875,21 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 "."
                             )
                     ) %>%
+                    dplyr::mutate(
+                        description = dplyr::case_when(
+                            is.na(median) ~ paste0(
+                                glue::glue("{description} \n Note that when {factor}, the survival curve does not drop below 1/2 during \n the observation period, thus the median survival is undefined.")),
+                            TRUE ~ paste0(description)
+                        )
+                    ) %>%
                     dplyr::mutate(description = gsub(
                         pattern = "=",
                         replacement = " is ",
+                        x = description
+                    )) %>%
+                    dplyr::mutate(description = gsub(
+                        pattern = mycontexpl,
+                        replacement = self$options$contexpl,
                         x = description
                     )) %>%
                     dplyr::select(description) %>%
@@ -802,15 +897,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 medianSummary <- km_fit_median_definition
 
-
                 self$results$medianSummary$setContent(medianSummary)
+
             }
 
 
             # Life Table ----
             ,
             .lifetablecutoff = function(cutoffdata) {
-                mydata <- cutoffdata
 
 
                 # survival table 1,3,5-yr survival ----
@@ -825,18 +919,40 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     utimes <- c(12, 36, 60)
                 }
 
+                results <- private$.cleandata()
 
-                thefactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
+                mydata <- cutoffdata
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
+
+                mydata[[mytime]] <-
+                    jmvcore::toNumeric(mydata[[mytime]])
 
 
                 formula <-
-                    paste("survival::Surv(mytime, myoutcome) ~ ", thefactor)
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ') ~ ',
+                          mycontexpl)
+
                 formula <- as.formula(formula)
 
                 km_fit <- survival::survfit(formula, data = mydata)
-
-
 
                 km_fit_summary <- summary(km_fit, times = utimes)
 
@@ -859,9 +975,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 )
 
 
+                km_fit_df2 <- km_fit_df
+
+                km_fit_df2$strata <- gsub(pattern = paste0(mycontexpl,"="),
+                                             replacement = "",
+                                             x =km_fit_df2$strata)
+
+                data_frame <- km_fit_df2
+
                 survTable <- self$results$survTable
 
-                data_frame <- km_fit_df
+
                 for (i in seq_along(data_frame[, 1, drop = T])) {
                     survTable$addRow(rowKey = i, values = c(data_frame[i, ]))
                 }
@@ -870,6 +994,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 # survTableSummary 1,3,5-yr survival summary ----
+
+                km_fit_df[, 1] <- gsub(
+                    pattern = paste0(mycontexpl,"="),
+                    replacement = paste0(self$options$contexpl, " is "),
+                    x = km_fit_df[, 1]
+                )
+
 
                 km_fit_df %>%
                     dplyr::mutate(
@@ -887,12 +1018,27 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Cut-off Plot ----
             ,
             .plot4 = function(image4, ggtheme, theme, ...) {
+
+                if (!self$options$findcut) {
+                    return()
+                }
+
                 plotData <- image4$state
 
-                res.cut <- plotData
+                if (is.null(plotData)) {
+                    return()
+                }
+
+                # if (plotData$not_continue_analysis) {
+                #     return()
+                # }
+
+                res.cut <- plotData$res.cut
+
+                name3contexpl <- plotData$name3contexpl
 
                 plot4 <-
-                    plot(res.cut, self$options$contexpl, palette = "npg")
+                    plot(res.cut, name3contexpl, palette = "npg")
 
                 print(plot4)
                 TRUE
@@ -902,17 +1048,54 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Survival Curve with new cut-off ----
             ,
             .plot5 = function(image5, ggtheme, theme, ...) {
+
+
+
+                if (!self$options$findcut) {
+                    return()
+                }
+
                 plotData <- image5$state
 
-                res.cat <- plotData
+                if (is.null(plotData)) {
+                    return()
+                }
 
-                contfactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
+                # if (plotData$not_continue_analysis) {
+                #     return()
+                # }
 
-                myformula <-
-                    paste0("survival::Surv(mytime, myoutcome) ~ ", contfactor)
 
-                myformula <- as.formula(myformula)
+
+                res.cat <- plotData$cutoffdata
+
+                results <- plotData$results
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
+
+                formula <-
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ') ~ ',
+                          mycontexpl)
+
+                myformula <- as.formula(formula)
+
 
                 fit <- survminer::surv_fit(
                     formula = myformula,
@@ -924,6 +1107,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     data = res.cat,
                     risk.table = self$options$risktable,
                     conf.int = self$options$ci95
+
                 )
                 print(plot5)
                 TRUE
@@ -934,27 +1118,66 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
             ,
             .plot2 = function(image2, ggtheme, theme, ...) {
+
+                if (!self$options$findcut) {
+                    return()
+                }
+
+                if (!self$options$ce) {
+                    return()
+                }
+
                 plotData <- image2$state
 
-                contfactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
 
-                myformula <- paste0("survival::Surv(mytime, myoutcome)")
+                if (is.null(plotData)) {
+                    return()
+                }
 
-                # myformula <- as.formula(myformula)
+                # if (plotData$not_continue_analysis) {
+                #     return()
+                # }
 
-                title2 <- as.character(contfactor)
+                res.cat <- plotData$cutoffdata
 
-                plot2 <- plotData %>%
+                results <- plotData$results
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
+
+                myformula <-
+                    paste0('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ')')
+
+                title2 <- as.character(mycontexpl)
+
+                plot2 <- res.cat %>%
                     finalfit::surv_plot(
                         .data = .,
                         dependent = myformula,
-                        explanatory = contfactor,
+                        explanatory = mycontexpl,
                         xlab = paste0("Time (", self$options$timetypeoutput, ")"),
                         # pval = TRUE,
                         legend = "none",
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
+                        ylim = c(
+                            self$options$ybegin_plot,
+                            self$options$yend_plot),
                         title = paste0("Cumulative Events ", title2),
                         fun = "event",
                         risk.table = self$options$risktable,
@@ -971,34 +1194,66 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Cumulative Hazard with new cut-off ----
             ,
             .plot3 = function(image3, ggtheme, theme, ...) {
-                ch <- self$options$ch
 
-                if (!ch) {
+                if (!self$options$findcut) {
+                    return()
+                }
+
+                if (!self$options$ch) {
                     return()
                 }
 
                 plotData <- image3$state
 
-                contfactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
+                if (is.null(plotData)) {
+                    return()
+                }
+
+                # if (plotData$not_continue_analysis) {
+                #     return()
+                # }
+
+                res.cat <- plotData$cutoffdata
+
+                results <- plotData$results
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
 
                 myformula <-
-                    paste0("survival::Surv(mytime, myoutcome)")
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ')')
 
-                # myformula <- as.formula(myformula)
+                title2 <- as.character(mycontexpl)
 
-                title2 <- as.character(contfactor)
-
-                plot3 <- plotData %>%
+                plot3 <- res.cat %>%
                     finalfit::surv_plot(
                         .data = .,
                         dependent = myformula,
-                        explanatory = contfactor,
+                        explanatory = mycontexpl,
                         xlab = paste0("Time (", self$options$timetypeoutput, ")"),
                         # pval = TRUE,
                         legend = "none",
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
+                        ylim = c(
+                            self$options$ybegin_plot,
+                            self$options$yend_plot),
                         title = paste0("Cumulative Hazard ", title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
@@ -1014,23 +1269,58 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # KMunicate Style with new cut-off ----
             ,
             .plot6 = function(image6, ggtheme, theme, ...) {
-                kmunicate <- self$options$kmunicate
 
-                if (!kmunicate) {
+                if (!self$options$findcut) {
+                    return()
+                }
+
+                if (!self$options$kmunicate) {
                     return()
                 }
 
                 plotData <- image6$state
 
-                contfactor <-
-                    jmvcore::constructFormula(terms = self$options$contexpl)
+                if (is.null(plotData)) {
+                    return()
+                }
+
+                # if (plotData$not_continue_analysis) {
+                #     return()
+                # }
+
+                res.cat <- plotData$cutoffdata
+
+                results <- plotData$results
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+
+
+                mytime <-
+                    jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                mycontexpl <-
+                    jmvcore::constructFormula(terms = mycontexpl)
+
 
                 myformula <-
-                    paste0("survival::Surv(mytime, myoutcome) ~ ", contfactor)
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ') ~ ',
+                          mycontexpl)
 
                 myformula <- as.formula(myformula)
 
-                km_fit <- survival::survfit(myformula, data = plotData)
+                # myformula <-
+                #     paste0("survival::Surv(mytime, myoutcome) ~ ", contfactor)
+
+                km_fit <- survival::survfit(myformula, data = res.cat)
 
                 time_scale <-
                     seq(0, self$options$endplot, by = self$options$byplot)
