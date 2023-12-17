@@ -189,6 +189,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     }
 
 
+                    if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
+                        stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
+                        )
+                    }
 
                     timetypeoutput <-
                         jmvcore::constructFormula(terms = self$options$timetypeoutput)
@@ -197,7 +201,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     mydata <- mydata %>%
                         dplyr::mutate(interval = lubridate::interval(start, end))
 
-                    stopifnot(lubridate::is.interval(mydata[["interval"]]))
 
                     mydata <- mydata %>%
                         dplyr::mutate(mytime = lubridate::time_length(interval,
@@ -434,25 +437,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Errors, Warnings ----
 
-                ## No variable TODO ----
+                ## No variable todo ----
 
                 ## Define subconditions ----
 
                 subcondition1a <- !is.null(self$options$outcome)
-                subcondition1b1 <- !is.null(self$options$multievent)
+                subcondition1b1 <- self$options$multievent
                 subcondition1b2 <- !is.null(self$options$dod)
                 subcondition1b3 <- !is.null(self$options$dooc)
-                subcondition1b4 <- !is.null(self$options$awd)
-                subcondition1b5 <- !is.null(self$options$awod)
+                # subcondition1b4 <- !is.null(self$options$awd)
+                # subcondition1b5 <- !is.null(self$options$awod)
                 subcondition2a <- !is.null(self$options$elapsedtime)
-                subcondition2b1 <- !is.null(self$options$tint)
+                subcondition2b1 <- self$options$tint
                 subcondition2b2 <- !is.null(self$options$dxdate)
                 subcondition2b3 <- !is.null(self$options$fudate)
                 condition3 <- !is.null(self$options$contexpl)
 
-                condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+                condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
 
-                condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+                condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
 
                 not_continue_analysis <- !(condition1 && condition2 && condition3)
 
@@ -793,7 +796,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 mydata <- cutoffdata
 
-                # Median Survival Table ----
+                ## Median Survival Table ----
 
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
@@ -854,7 +857,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              replacement = "",
                                              x = results1table$factor)
 
-
+                self$results$mydataview$setContent(
+                    list(
+                        results2table = results2table
+                    )
+                )
 
 
                 medianTable <- self$results$medianTable

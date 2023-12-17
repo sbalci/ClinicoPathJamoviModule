@@ -13,6 +13,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # init ----
             .init = function() {
 
+                explanatory_len <- length(self$options$explanatory)
+
+                contexpl_len <- length(self$options$contexpl)
+
+                self$results$plot8$setSize(explanatory_len * 400,
+                                           contexpl_len * 300)
+
             }
 
             # getData ----
@@ -197,6 +204,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     }
 
 
+                    if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
+                        stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
+                        )
+                    }
 
                     timetypeoutput <-
                         jmvcore::constructFormula(terms = self$options$timetypeoutput)
@@ -205,7 +216,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     mydata <- mydata %>%
                         dplyr::mutate(interval = lubridate::interval(start, end))
 
-                    stopifnot(lubridate::is.interval(mydata[["interval"]]))
+
 
                     mydata <- mydata %>%
                         dplyr::mutate(mytime = lubridate::time_length(interval,
@@ -420,11 +431,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     name2outcome <- "CalculatedOutcome"
                 }
 
+                name3expl <- NULL
+
                 if (!is.null(self$options$explanatory)
                 ) {
                     name3expl <- myexplanatory_labelled
                 }
 
+
+                name3contexpl <- NULL
 
                 if (!is.null(self$options$contexpl)
                 ) {
@@ -498,21 +513,22 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 ## Define subconditions ----
 
                 subcondition1a <- !is.null(self$options$outcome)
-                subcondition1b1 <- !is.null(self$options$multievent)
+                subcondition1b1 <- self$options$multievent
                 subcondition1b2 <- !is.null(self$options$dod)
                 subcondition1b3 <- !is.null(self$options$dooc)
-                subcondition1b4 <- !is.null(self$options$awd)
-                subcondition1b5 <- !is.null(self$options$awod)
+                # subcondition1b4 <- !is.null(self$options$awd)
+                # subcondition1b5 <- !is.null(self$options$awod)
                 subcondition2a <- !is.null(self$options$elapsedtime)
-                subcondition2b1 <- !is.null(self$options$tint)
+                subcondition2b1 <- self$options$tint
                 subcondition2b2 <- !is.null(self$options$dxdate)
                 subcondition2b3 <- !is.null(self$options$fudate)
                 condition3a <- !is.null(self$options$contexpl)
                 condition3b <- !is.null(self$options$explanatory)
 
-                condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+                condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
 
-                condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+                condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
+
 
                 condition3 <- condition3a || condition3b
 
@@ -525,6 +541,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     self$results$text2$setVisible(FALSE)
                     self$results$plot$setVisible(FALSE)
                     self$results$plot3$setVisible(FALSE)
+                    self$results$plot8$setVisible(FALSE)
                     self$results$todo$setVisible(TRUE)
                     return()
                 } else {
@@ -723,7 +740,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 self$results$text$setContent(results1)
 
-                ## coxph ----
+                ## coxph Proportional Hazards Assumption ----
+                if (self$options$ph_cox) {
+
 
                 LHT <- "survival::Surv(mytime, myoutcome)"
 
@@ -735,13 +754,52 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 coxformula <- as.formula(coxformula)
 
-                coxmodel <- survival::coxph(
+                cox_model <- survival::coxph(
                   coxformula,
                   data = mydata
                 )
 
-                summarycoxmodel <- summary(coxmodel)
+                zph <- survival::cox.zph(cox_model)
 
+                self$results$cox_ph$setContent(print(zph))
+
+
+                # myfactor <- c("Smoker", "LVI", "PNI", "MeasurementB", "Measurement2")
+
+                # formula <-
+                #     paste0("survival::Surv(",
+                #            "mytime",
+                #            ",",
+                #            "myoutcome",
+                #            ") ~ ",
+                #            paste0(myfactor, collapse = " + ")
+                #     )
+
+                # formula <- as.formula(formula)
+
+
+
+                # cox_model <- survival::coxph(formula, data = histopathology)
+
+                # summary(cox_model)
+
+                # plot(survival::survfit(formula, data = histopathology), xlab = "Time (days)", ylab = "Survival probability")
+
+                # cox.zph.fit <- survival::cox.zph(cox_model)
+
+                # summary(cox.zph.fit)
+
+                # plot(cox.zph.fit, var = 4, xlab = "Time (days)", ylab = "Scaled Schoenfeld residuals")
+
+                # survminer::ggcoxzph(cox.zph.fit)
+
+
+
+
+                image8 <- self$results$plot8
+                image8$setState(zph)
+
+                }
 
 
                 # Diagnostics of Cox Model ----
@@ -1120,6 +1178,29 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             }
 
 
+        # cox.zph ----
+        ,
+        .plot8 = function(image8, ggtheme, theme, ...) {
+
+            ph_cox <- self$options$ph_cox
+
+            if (!ph_cox)
+                return()
+
+            zph <- image8$state
+
+            if (is.null(zph)) {
+                return()
+            }
+
+            # plot8 <- plot(zph)
+
+            plot8 <- survminer::ggcoxzph(zph)
+
+            print(plot8)
+            TRUE
+
+        }
 
 
             # # coxzph plot ----

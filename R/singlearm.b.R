@@ -10,6 +10,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
 
 
+      # get and label Data ----
       .getData = function() {
 
         mydata <- self$data
@@ -54,10 +55,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       }
 
-
-
-
-
+      # todo ----
       ,
       .todo = function() {
 
@@ -89,7 +87,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ,
       .definemytime = function() {
 
-        # Read Labelled Data ----
+        ## Read Labelled Data ----
 
         labelled_data <- private$.getData()
 
@@ -102,14 +100,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
         if (!tint) {
-          # Precalculated Time ----
+          ## Precalculated Time ----
 
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
 
 
         } else if (tint) {
-          # Time Interval ----
+          ## Time Interval ----
 
           dxdate <- mydxdate_labelled # self$options$dxdate
           fudate <- myfudate_labelled #self$options$fudate
@@ -172,6 +170,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
 
+          if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
+            stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
+            )
+          }
+
+
           timetypeoutput <-
             jmvcore::constructFormula(terms = self$options$timetypeoutput)
 
@@ -179,7 +183,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           mydata <- mydata %>%
             dplyr::mutate(interval = lubridate::interval(start, end))
 
-          stopifnot(lubridate::is.interval(mydata[["interval"]]))
+
+          # self$results$mydataview$setContent(
+          #     list(
+          #       "mydata" = head(mydata),
+          #       "start" = sum(!is.na(mydata[["start"]])),
+          #       "end" = sum(!is.na(mydata[["end"]]))
+          #     )
+          # )
 
           mydata <- mydata %>%
             dplyr::mutate(mytime = lubridate::time_length(interval, timetypeoutput))
@@ -307,7 +318,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       # Define Factor ----
       ,
-
       .definemyfactor = function() {
 
 
@@ -442,48 +452,60 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## No variable todo ----
 
-        ## Define subconditions ----
+        ### Define subconditions ----
 
         subcondition1a <- !is.null(self$options$outcome)
-        subcondition1b1 <- !is.null(self$options$multievent)
+        subcondition1b1 <- self$options$multievent
         subcondition1b2 <- !is.null(self$options$dod)
         subcondition1b3 <- !is.null(self$options$dooc)
-        subcondition1b4 <- !is.null(self$options$awd)
-        subcondition1b5 <- !is.null(self$options$awod)
+        # subcondition1b4 <- !is.null(self$options$awd)
+        # subcondition1b5 <- !is.null(self$options$awod)
         subcondition2a <- !is.null(self$options$elapsedtime)
-        subcondition2b1 <- !is.null(self$options$tint)
+        subcondition2b1 <- self$options$tint
         subcondition2b2 <- !is.null(self$options$dxdate)
         subcondition2b3 <- !is.null(self$options$fudate)
 
-        condition1 <- subcondition1a || (subcondition1b1 && (subcondition1b2 || subcondition1b3 || subcondition1b4 || subcondition1b5))
+        condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
 
-        condition2 <- subcondition2a || (subcondition2b1 && subcondition2b2 && subcondition2b3)
+        condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
 
-        if (!(condition1 && condition2)) {
+
+        not_continue_analysis <- !(condition1 && condition2)
+
+        if (not_continue_analysis) {
           private$.todo()
+          self$results$medianSummary$setVisible(FALSE)
+          self$results$medianTable$setVisible(FALSE)
+          self$results$survTableSummary$setVisible(FALSE)
+          self$results$survTable$setVisible(FALSE)
+          self$results$plot$setVisible(FALSE)
+          self$results$plot2$setVisible(FALSE)
+          self$results$plot3$setVisible(FALSE)
+          self$results$plot6$setVisible(FALSE)
+          self$results$todo$setVisible(TRUE)
           return()
         } else {
           self$results$todo$setVisible(FALSE)
         }
 
-
-        # Empty data ----
+        ## Empty data ----
 
         if (nrow(self$data) == 0)
           stop('Data contains no (complete) rows')
 
-        # Get Clean Data ----
+        ## Get Clean Data ----
         results <- private$.cleandata()
 
-        # Run Analysis ----
-        ## Median Survival ----
+        ## Run Analysis ----
+
+        ### Median Survival ----
         private$.medianSurv(results)
 
 
-        ## Survival Table ----
+        ### Survival Table ----
         private$.survTable(results)
 
-        # Add Calculated Time to Data ----
+        ## Add Calculated Time to Data ----
 
         # self$results$mydataview$setContent(
         #     list(
@@ -498,7 +520,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
 
-        # Add Redefined Outcome to Data ----
+        ## Add Redefined Outcome to Data ----
 
         if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
           self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
@@ -546,9 +568,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           t() %>%
           as.data.frame() %>%
           janitor::clean_names(dat = ., case = "snake")
-          
+
         results1table <- results1html
-        
+
 
         medianTable <- self$results$medianTable
         data_frame <- results1table
@@ -710,6 +732,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         results <- image$state
 
+        if (is.null(results)) {
+          return()
+        }
+
         mytime <- results$name1time
         mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -773,6 +799,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         results <- image2$state
 
+        if (is.null(results)) {
+          return()
+        }
+
         mytime <- results$name1time
         mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -832,6 +862,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         results <- image3$state
 
+        if (is.null(results)) {
+          return()
+        }
+
         mytime <- results$name1time
         mytime <- jmvcore::constructFormula(terms = mytime)
 
@@ -889,6 +923,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()
 
         results <- image6$state
+
+        if (is.null(results)) {
+          return()
+        }
 
         mytime <- results$name1time
         mytime <- jmvcore::constructFormula(terms = mytime)

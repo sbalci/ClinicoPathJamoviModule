@@ -66,6 +66,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 html <- self$results$todo
                 html$setContent(todo)
+                self$results$text$setVisible(FALSE)
+                self$results$text2$setVisible(FALSE)
+                self$results$plot$setVisible(FALSE)
                 return()
 
             } else {
