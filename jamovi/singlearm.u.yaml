@@ -68,11 +68,7 @@ children:
                             isTarget: true
                             fitToGrid: true
                             stretchFactor: 1
-              - type: LayoutBox
-                margin: large
-                children:
-                  - type: Output
-                    name: calculatedtime
+
       - type: Label
         label: Time Type
         fitToGrid: true
@@ -100,6 +96,15 @@ children:
                     name: landmark
                     format: number
                     enable: (uselandmark)
+      - type: Label
+        label: Calculated Time to Data 
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: calculatedtime
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -131,6 +136,11 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Output
+            name: outcomeredifened
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -162,23 +172,18 @@ children:
               - type: TextBox
                 name: byplot
                 format: number
+              - type: TextBox
+                name: ybegin_plot
+                format: number
+              - type: TextBox
+                name: yend_plot
+                format: number
               - type: CheckBox
                 name: ci95
               - type: CheckBox
                 name: risktable
               - type: CheckBox
                 name: censored
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: outcomeredifened
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ybegin_plot
-        format: number
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -190,9 +195,4 @@ children:
             name: cutp
             format: string
             width: large
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: yend_plot
-        format: number
+
