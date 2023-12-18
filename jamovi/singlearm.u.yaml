@@ -106,6 +106,7 @@ children:
             children:
               - type: Output
                 name: calculatedtime
+                enable: (tint)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -142,6 +143,7 @@ children:
         children:
           - type: Output
             name: outcomeredifened
+            enable: (multievent)
   - type: CollapseBox
     label: Plots
     collapsed: true
