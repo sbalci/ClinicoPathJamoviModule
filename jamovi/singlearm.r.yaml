@@ -18,9 +18,9 @@ items:
           - multievent
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
 
 
     - name:  medianSummary
@@ -244,38 +244,24 @@ items:
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
-      varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates in Single Arm Analysis
+      varTitle: 'Calculated Time Single Arm'
+      varDescription: '`Calculated Time from given Dates in Single Arm Analysis - from ${ dxdate } to { fudate }`'
       clearWith:
           - tint
           - dxdate
           - fudate
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-
 
 
     - name: outcomeredifened
       title: Add Redefined Outcome to Data
       type: Output
-      varTitle: '`Redefined Outcome - from ${ outcome } for analysis { analysistype }`'
-      varDescription: Redefined Outcome from Outcome based on Analysis Type in Single Arm Analysis
+      varTitle: 'Redefined Outcome Single Arm'
+      varDescription: '`Redefined Outcome - from ${ outcome } for analysis { analysistype } in Single Arm Analysis`'
       clearWith:
           - outcome
           - analysistype
           - multievent
-          - explanatory
           - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
 
 refs:
     - finalfit

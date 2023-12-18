@@ -286,6 +286,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        mydataview = function() private$.items[["mydataview"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
@@ -321,6 +322,10 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview",
+                title="mydataview"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -532,36 +537,23 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="calculatedtime",
                 title="Add Calculated Time to Data",
-                varTitle="`Calculated Time - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates in Single Arm Analysis",
+                varTitle="Calculated Time Single Arm",
+                varDescription="`Calculated Time from given Dates in Single Arm Analysis - from ${ dxdate } to { fudate }`",
                 clearWith=list(
                     "tint",
                     "dxdate",
-                    "fudate",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))
+                    "fudate")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="outcomeredifened",
                 title="Add Redefined Outcome to Data",
-                varTitle="`Redefined Outcome - from ${ outcome } for analysis { analysistype }`",
-                varDescription="Redefined Outcome from Outcome based on Analysis Type in Single Arm Analysis",
+                varTitle="Redefined Outcome Single Arm",
+                varDescription="`Redefined Outcome - from ${ outcome } for analysis { analysistype } in Single Arm Analysis`",
                 clearWith=list(
                     "outcome",
                     "analysistype",
                     "multievent",
-                    "explanatory",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))}))
+                    "outcomeLevel")))}))
 
 singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "singlearmBase",
@@ -623,6 +615,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr

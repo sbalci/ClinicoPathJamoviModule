@@ -386,7 +386,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         name2outcome <- myoutcome_labelled
 
-        if (self$options$tint) {
+        if (self$options$multievent) {
           name2outcome <- "CalculatedOutcome"
         }
 
@@ -507,14 +507,16 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Add Calculated Time to Data ----
 
-        # self$results$mydataview$setContent(
-        #     list(
-        #         results
-        #     )
-        # )
+        self$results$mydataview$setContent(
+            list(
+                head(results$cleanData)
+            )
+        )
 
 
-        if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
+        if (
+          # self$options$tint &&
+            self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
           self$results$calculatedtime$setRowNums(results$cleanData$row_names)
           self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
         }

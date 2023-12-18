@@ -391,7 +391,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 name2outcome <- myoutcome_labelled
 
-                if (self$options$tint) {
+                if (self$options$multievent) {
                     name2outcome <- "CalculatedOutcome"
                 }
 
