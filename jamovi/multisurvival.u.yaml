@@ -119,6 +119,7 @@ children:
             children:
               - type: Output
                 name: calculatedtime
+                enable: (tint)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -150,11 +151,16 @@ children:
           - type: ComboBox
             name: analysistype
             enable: (outcome && multievent)
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Calculated Outcome to Data 
+        fitToGrid: true
         children:
-          - type: Output
-            name: outcomeredifened
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: outcomeredifened
+                enable: (outcome && multievent)
 
 
   - type: CollapseBox
@@ -177,7 +183,7 @@ children:
               - type: ComboBox
                 name: sty
                 enable: (hr)
-                
+
       - type: Label
         label: Proportional Hazards Assumption
         fitToGrid: true

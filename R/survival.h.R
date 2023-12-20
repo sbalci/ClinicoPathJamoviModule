@@ -369,6 +369,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survival",
                     "survminer",
                     "survivaltutorial",
+                    "survivalrwnahhas",
                     "survivalrviews",
                     "appliedsurvivalanalysisR",
                     "ClinicoPathJamoviModule"))
