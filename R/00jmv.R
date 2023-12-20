@@ -524,4 +524,10 @@
         `title`="Applied Survival Analysis Using R", 
         `publisher`="Springer Cham", 
         `doi`="10.1007/978-3-319-31245-3", 
-        `url`="https://link.springer.com/book/10.1007/978-3-319-31245-3"))
+        `url`="https://link.springer.com/book/10.1007/978-3-319-31245-3"), 
+    `survivalrwnahhas`=list(
+        `type`="book chapter", 
+        `author`="Ramzi W. Nahhas", 
+        `year`=2023, 
+        `title`="Chapter 7 Survival Analysis. Introduction to Regression Methods for Public Health Using R.", 
+        `url`="https://bookdown.org/rwnahhas/RMPH/survival.html"))

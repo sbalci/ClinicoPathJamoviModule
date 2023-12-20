@@ -18,9 +18,9 @@ items:
           - multievent
 
 
-    - name:  mydataview
-      title: mydataview
-      type:  Preformatted
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
 
 
     - name:  medianSummary
@@ -269,6 +269,7 @@ refs:
     - survminer
     - ClinicoPathJamoviModule
     - survivaltutorial
+    - survivalrwnahhas
 
 
 ...

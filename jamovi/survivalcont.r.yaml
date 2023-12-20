@@ -14,9 +14,9 @@ items:
     #   title: mydataview2
     #   type:  Preformatted
 
-    - name:  mydataview
-      title: mydataview
-      type:  Preformatted
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
 
     - name:  coxSummary
       title: '`Cox Regression Summary and Table - ${contexpl}`'
@@ -478,6 +478,7 @@ refs:
     - survminer
     - dichotomizing
     - survivaltutorial
+    - survivalrwnahhas
     - ClinicoPathJamoviModule
 
 ...

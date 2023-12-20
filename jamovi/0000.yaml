@@ -385,13 +385,6 @@ analyses:
     menuTitle: ROC
     description: Function for ROC Analysis.
     menuSubtitle: Decision
-  - title: Graphs and Plots
-    name: statsplot2
-    ns: ClinicoPath
-    menuGroup: JJStatsPlot
-    menuSubgroup: Variable Type Based Graphs and Plots
-    menuTitle: Graphs and Plots
-    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Time Interval
     name: timeinterval
     ns: ClinicoPath
