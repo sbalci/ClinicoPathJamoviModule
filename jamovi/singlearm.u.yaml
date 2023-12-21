@@ -117,6 +117,7 @@ children:
         children:
           - type: CheckBox
             name: multievent
+            enable: (outcome)
           - type: LayoutBox
             fitToGrid: true
             children:

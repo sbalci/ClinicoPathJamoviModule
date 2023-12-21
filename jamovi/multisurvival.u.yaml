@@ -130,6 +130,7 @@ children:
         children:
           - type: CheckBox
             name: multievent
+            enable: (outcome)
           - type: LayoutBox
             fitToGrid: true
             children:
@@ -203,16 +204,4 @@ children:
         label: Adjusted Survival Curve (Being Updated)
         fitToGrid: true
         stretchFactor: 1
-        children: []
-  - type: CollapseBox
-    label: Save Converted Variables to Data (Being Updated)
-    collapsed: true
-    children:
-      - type: Label
-        label: Add Calculated Time to Your Data  (Being Updated)
-        fitToGrid: true
-        children: []
-      - type: Label
-        label: Add Redefined Outcome to Data (Being Updated)
-        fitToGrid: true
         children: []

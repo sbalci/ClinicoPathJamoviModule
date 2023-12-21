@@ -124,6 +124,7 @@ children:
         children:
           - type: CheckBox
             name: multievent
+            enable: (outcome)
           - type: LayoutBox
             fitToGrid: true
             children:
@@ -154,7 +155,7 @@ children:
             children:
               - type: Output
                 name: outcomeredifened
-                enable: (multievent)
+                enable: (outcome && multievent)
 
 
   - type: CollapseBox
