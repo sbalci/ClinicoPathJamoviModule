@@ -55,7 +55,7 @@ children:
   - type: CollapseBox
     label: Options
     stretchFactor: 1
-    collapsed: false
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large

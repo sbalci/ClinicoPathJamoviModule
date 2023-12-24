@@ -104,7 +104,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # group <- self$options$group
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
 
             # group <- jmvcore::composeTerm(components = group)
@@ -123,7 +123,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot1 <-
                 ggstatsplot::ggpiestats(
                     data = mydata,
-                    x = !!dep,
+                    x = !!rlang::sym(dep),
                     y = NULL,
                     counts = NULL,
                     ratio = NULL,

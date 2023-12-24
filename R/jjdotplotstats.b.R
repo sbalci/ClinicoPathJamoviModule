@@ -116,9 +116,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
             # ggdotplotstats ----
@@ -129,8 +129,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <-
                 ggstatsplot::ggdotplotstats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
                     xlab = NULL,
                     ylab = NULL,
                     title = NULL,
