@@ -46,6 +46,7 @@ children:
             enable: (contexpl)
           - type: Output
             name: calculatedcutoff
+            enable: (findcut)
 
 
   - type: CollapseBox
