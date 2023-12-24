@@ -12,7 +12,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             direction = "independent",
             distribution = "p",
             alluvsty = "t1",
-            excl = TRUE,
+            excl = FALSE,
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -54,7 +54,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -204,7 +204,7 @@ statsplot2 <- function(
     direction = "independent",
     distribution = "p",
     alluvsty = "t1",
-    excl = TRUE,
+    excl = FALSE,
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

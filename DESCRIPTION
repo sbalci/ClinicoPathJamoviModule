@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.16
+Version: 0.0.2.17
 Date: 2023-12-24
 Authors@R: 
     person(given = "Serdar",
@@ -70,8 +70,6 @@ Imports:
     gtExtras,
     labelled,
     PMCMRplus
-Remotes:
-    nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 VignetteBuilder:
     knitr
 Encoding: UTF-8

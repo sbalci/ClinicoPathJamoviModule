@@ -35,7 +35,7 @@ children:
             isTarget: true
   - type: CollapseBox
     label: Finding Cut-off
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Cut-off

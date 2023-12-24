@@ -149,9 +149,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
             # ggbetweenstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
@@ -161,8 +161,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$dep) == 1) {
             plot <- ggstatsplot::ggbetweenstats(
                 data = mydata,
-                x = !!group,
-                y = !!dep
+                x = !!rlang::sym(group),
+                y = !!rlang::sym(dep)
                 , type = typestatistics
                 , ggtheme = ggtheme
                 , ggstatsplot.layer = originaltheme
@@ -249,8 +249,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     )
 
-                plot <- ggstatsplot::combine_plots(plotlist = plotlist,
-                                                   nrow = length(self$options$dep))
+                plot <- ggstatsplot::combine_plots(
+                    plotlist = plotlist,
+                            plotgrid.args = list(ncol = 1)
+                            )
 
 
 
@@ -425,8 +427,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     )
 
-                plot2 <- ggstatsplot::combine_plots(plotlist = plotlist,
-                                                    ncol = 1)
+                plot2 <- ggstatsplot::combine_plots(
+                    plotlist = plotlist,
+                            plotgrid.args = list(ncol = 1)
+                            )
 
             }
 

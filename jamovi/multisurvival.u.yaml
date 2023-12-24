@@ -166,7 +166,7 @@ children:
 
   - type: CollapseBox
     label: Plots
-    collapsed: false
+    collapsed: true
     stretchFactor: 1
     children:
       - type: Label

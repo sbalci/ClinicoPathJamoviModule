@@ -31,7 +31,7 @@ children:
             isTarget: true
   - type: CollapseBox
     label: Data
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Data
@@ -44,7 +44,7 @@ children:
                 name: excl
   - type: CollapseBox
     label: Analysis
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Analysis
@@ -66,7 +66,7 @@ children:
                     enable: (pairwisecomparisons)
   - type: CollapseBox
     label: Plot
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Plot

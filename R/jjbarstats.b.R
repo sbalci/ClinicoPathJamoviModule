@@ -121,9 +121,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # dep1 <- jmvcore::composeTerms(listOfComponents = dep)
 
-                dep1 <- jmvcore::composeTerm(components = dep)
+                # dep1 <- jmvcore::composeTerm(components = dep)
 
-                group <- jmvcore::composeTerm(components = group)
+                # group <- jmvcore::composeTerm(components = group)
 
 
                 # ggbarstats ----
@@ -137,8 +137,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     plot <-
                         ggstatsplot::ggbarstats(
                             data = mydata,
-                            x = !!dep1,
-                            y = !!group,
+                            x = !!rlang::sym(dep),
+                            y = !!rlang::sym(group),
 
                             # paired = paired,
 
@@ -234,8 +234,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             # y = NULL
                         )
 
-                    plot <- ggstatsplot::combine_plots(plotlist = plotlist,
-                                                       nrow = length(self$options$dep))
+                    plot <- ggstatsplot::combine_plots(
+                        plotlist = plotlist,
+                            plotgrid.args = list(ncol = 1)
+                            )
 
 
 
@@ -384,8 +386,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             # ggstatsplot.layer = originaltheme
                         )
 
-                    plot2 <- ggstatsplot::combine_plots(plotlist = plotlist,
-                                                        ncol = 1)
+                    plot2 <- ggstatsplot::combine_plots(
+                        plotlist = plotlist,
+                            plotgrid.args = list(ncol = 1)
+                            )
 
                     }
 

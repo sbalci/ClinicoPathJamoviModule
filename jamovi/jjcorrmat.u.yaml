@@ -24,7 +24,7 @@ children:
 
   - type: CollapseBox
     label: Data
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Data
@@ -38,7 +38,7 @@ children:
 
   - type: CollapseBox
     label: Analysis
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Analysis
@@ -63,7 +63,7 @@ children:
 
   - type: CollapseBox
     label: Plot
-    collapsed: false
+    collapsed: true
     children:
       - type: Label
         label: Plot
