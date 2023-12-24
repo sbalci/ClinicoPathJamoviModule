@@ -857,11 +857,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              replacement = "",
                                              x = results1table$factor)
 
-                self$results$mydataview$setContent(
-                    list(
-                        results2table = results2table
-                    )
-                )
+                # self$results$mydataview$setContent(
+                #     list(
+                #         results2table = results2table
+                #     )
+                # )
 
 
                 medianTable <- self$results$medianTable
