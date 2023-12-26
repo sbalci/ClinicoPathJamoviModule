@@ -10,7 +10,7 @@ jviolin(
   group,
   col,
   fill,
-  excl = TRUE,
+  excl = FALSE,
   flip = FALSE,
   themex = "ipsum",
   usexlabel = FALSE,

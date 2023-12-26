@@ -225,9 +225,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
             # ggpiestats ----
@@ -236,8 +236,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot2 <-
                 ggstatsplot::ggpiestats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
                     counts = NULL,
                     ratio = NULL,
                     paired = FALSE,
@@ -322,7 +322,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # group <- self$options$group
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
             # group <- jmvcore::composeTerm(components = group)
 
@@ -339,15 +339,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             grvar <- self$options$grvar
 
-            grvar <- jmvcore::composeTerm(components = grvar)
+            # grvar <- jmvcore::composeTerm(components = grvar)
 
 
                 plot3 <- ggstatsplot::grouped_ggpiestats(
                     data = mydata,
-                    x = !!dep,
+                    x = !!rlang::sym(dep),
                     y = NULL,
                     counts = NULL,
-                    grouping.var = !!grvar,
+                    grouping.var = !!rlang::sym(grvar),
                     title.prefix = NULL,
                     output = "plot",
                     plotgrid.args = list(),
@@ -421,9 +421,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
             # grouped_ggpiestats ----
@@ -433,15 +433,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 grvar <- self$options$grvar
 
-                grvar <- jmvcore::composeTerm(components = grvar)
+                # grvar <- jmvcore::composeTerm(components = grvar)
 
 
                 plot4 <- ggstatsplot::grouped_ggpiestats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
                     counts = NULL,
-                    grouping.var = !!grvar,
+                    grouping.var = !!rlang::sym(grvar),
                     title.prefix = NULL,
                     output = "plot",
                     plotgrid.args = list(),

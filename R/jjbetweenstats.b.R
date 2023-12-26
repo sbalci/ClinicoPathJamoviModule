@@ -19,8 +19,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$plot2$setSize(1200, deplen * 450)
 
         }
-        ,
 
+        ,
         .run = function() {
 
             # Initial Message ----
@@ -56,7 +56,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
         }
-
 
         ,
         .plot = function(image, ggtheme, theme, ...) {
@@ -225,15 +224,20 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$dep) > 1) {
                 dep2 <- as.list(self$options$dep)
+                dep2_symbols <- purrr::map(dep2, rlang::sym)
 
                 plotlist <-
                     purrr::pmap(
-                        .l = list(y = dep2,
-                                  # title = list(dep),
-                                  messages = FALSE),
-                        .f = ggstatsplot::ggbetweenstats,
-                        data = mydata,
-                        x = !!group,
+                        .l = list(
+                            y = dep2_symbols,
+                            messages = FALSE),
+
+                        .f = function(y, messages) {
+                            ggstatsplot::ggbetweenstats(
+                                data = mydata,
+                                y = !!y,
+                                messages = messages,
+                        x = !!rlang::sym(group),
                         , type = typestatistics
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
@@ -248,17 +252,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                     )
+                        }
+                    )
 
                 plot <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
                             plotgrid.args = list(ncol = 1)
                             )
-
-
-
-            }
-
-
 
 
             # Print Plot ----
@@ -268,6 +268,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         }
 
+            }
 
         ,
         .plot2 = function(image, ggtheme, theme, ...) {
@@ -356,9 +357,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
 
@@ -375,9 +376,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot2 <- ggstatsplot::grouped_ggbetweenstats(
                     data = mydata,
-                    x = !!group,
-                    y = !! dep,
-                    grouping.var = !!grvar
+                    x = !!rlang::sym(group),
+                    y = !!rlang::sym(dep),
+                    grouping.var = !!rlang::sym(grvar)
                     , type = typestatistics
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
@@ -397,17 +398,27 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # dep > 1 ----
 
             if (length(self$options$dep) > 1) {
+
                 dep2 <- as.list(self$options$dep)
+                dep2_symbols <- purrr::map(dep2, rlang::sym)
 
                 plotlist <-
                     purrr::pmap(
-                        .l = list(y = dep2,
-                                  # title = list(dep),
-                                  messages = FALSE),
-                        .f = ggstatsplot::grouped_ggbetweenstats,
+                        .l = list(
+                            y = dep2_symbols,
+                            messages = FALSE
+                            ),
+                        .f = function(y, messages) {
+                            ggstatsplot::grouped_ggbetweenstats(
+
                         data = mydata,
-                        x = !!group,
-                        grouping.var = !!grvar
+                        y = !!y,
+                        messages = messages,
+
+
+
+                        x = !!rlang::sym(group),
+                        grouping.var = !!rlang::sym(grvar)
                         , type = typestatistics
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
@@ -417,23 +428,15 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         , p.adjust.method = padjustmethod
 
 
-
-
-
-
-
-
-
-
                     )
+                    }
+                    )
+
 
                 plot2 <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
                             plotgrid.args = list(ncol = 1)
                             )
-
-            }
-
 
 
             # Print Plot ----
@@ -441,10 +444,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot2)
             TRUE
 
+            }
+
         }
 
-
-
-
     )
+
 )

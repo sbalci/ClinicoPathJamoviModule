@@ -8,7 +8,7 @@ jjcorrmat(
   data,
   dep,
   grvar,
-  excl = TRUE,
+  excl = FALSE,
   typestatistics = "parametric",
   pairwisecomparisons = TRUE,
   pairwisedisplay = "significant",

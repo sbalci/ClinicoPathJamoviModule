@@ -8,7 +8,7 @@ roc(
   data,
   measurement,
   status,
-  excl = TRUE,
+  excl = FALSE,
   sty = FALSE,
   quant = FALSE,
   label = FALSE,

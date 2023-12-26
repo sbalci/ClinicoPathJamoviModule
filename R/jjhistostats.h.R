@@ -237,7 +237,10 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        e_stats = function() private$.items[["e_stats"]],
+        e_subtitle = function() private$.items[["e_subtitle"]],
+        e_caption = function() private$.items[["e_caption"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -267,7 +270,19 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="plot",
                 title="Histogram",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_stats",
+                title="e_stats"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_subtitle",
+                title="e_subtitle"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_caption",
+                title="e_caption"))}))
 
 jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjhistostatsBase",
@@ -330,6 +345,9 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

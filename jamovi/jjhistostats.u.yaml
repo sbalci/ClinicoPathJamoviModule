@@ -67,6 +67,9 @@ children:
                 name: normalcurve
               - type: CheckBox
                 name: testvalueline
+              - type: CheckBox
+                name: centralityline
+
           - type: LayoutBox
             margin: large
             children:
@@ -136,8 +139,4 @@ children:
                 format: string
                 width: large
                 enable: (grvar && usetitleprefix)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: centralityline
+

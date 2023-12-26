@@ -12,7 +12,7 @@ statsplot2(
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
-  excl = TRUE,
+  excl = FALSE,
   originaltheme = FALSE
 )
 }

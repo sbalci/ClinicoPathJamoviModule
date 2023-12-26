@@ -16,7 +16,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 self$results$plot$setSize(400, deplen * 300)
 
-                # self$results$plot2$setSize(800, deplen * 300)
+                self$results$plot2$setSize(800, deplen * 300)
             }
 
             # run ----
@@ -88,23 +88,23 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 dep <- self$options$dep
 
-
-
                 ## arguments ----
 
-                #     binwidth <- NULL
-                #
-                #     if(self$options$changebinwidth) {
-                #         binwidth <- self$options$binwidth
-                #     }
-                #
-                #
-                #     barmeasure <-
-                #         jmvcore::constructFormula(terms = self$options$barmeasure)
-                #
-                #     centralityparameter <-
-                #         jmvcore::constructFormula(terms = self$options$centralityparameter)
-                #
+                    binwidth <- NULL
+
+                    if(self$options$changebinwidth) {
+                        binwidth <- self$options$binwidth
+                    }
+
+
+                    barmeasure <-
+                        jmvcore::constructFormula(
+                            terms = self$options$barmeasure)
+
+                    centralityparameter <-
+                        jmvcore::constructFormula(
+                            terms = self$options$centralityparameter)
+
 
 
                 ## direction, paired ----
@@ -194,6 +194,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
 
                         )
+
+extracted_stats <- ggstatsplot::extract_stats(plot)
+extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
+extracted_caption <- ggstatsplot::extract_caption(plot)
+
+self$results$e_stats$setContent(extracted_stats)
+self$results$e_subtitle$setContent(extracted_subtitle)
+self$results$e_caption$setContent(extracted_caption)
+
+
+
                 }
 
 
@@ -368,8 +379,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (length(self$options$dep) == 1) {
                     plot2 <- ggstatsplot::grouped_gghistostats(
                         data = mydata,
-                        x = !!dep,
-                        grouping.var = !!grvar
+                        x = !!rlang::sym(dep),
+                        grouping.var = !!rlang::sym(grvar)
                         # ,
                         # binwidth = binwidth,
                         # title.prefix = NULL,
@@ -399,15 +410,20 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 if (length(self$options$dep) > 1) {
                     dep2 <- as.list(self$options$dep)
+                    dep2_symbols <- purrr::map(dep2, rlang::sym)
 
                     plotlist <-
                         purrr::pmap(
-                            .l = list(x = dep2,
-                                      # title = list(dep),
-                                      messages = FALSE),
-                            .f = ggstatsplot::grouped_gghistostats,
-                            data = mydata,
-                            grouping.var = !!grvar
+                            .l = list(
+                                x = dep2_symbols,
+                                messages = FALSE),
+                            .f = function(x, messages) {
+                                ggstatsplot::grouped_gghistostats(
+                                    data = mydata,
+                                    x = !!x,
+                                    messages = messages,
+                                    grouping.var = !!rlang::sym(grvar)
+
                             # ,
                             # binwidth = binwidth,
                             # title.prefix = NULL,
@@ -427,9 +443,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             # , results.subtitle = self$options$resultssubtitle
                             # , normal.curve = self$options$normalcurve
                             # , centrality.plotting = self$options$centralityline
+)
+                            }
+)
 
-
-                        )
 
                     plot2 <-
                         ggstatsplot::combine_plots(

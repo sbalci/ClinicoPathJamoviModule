@@ -9,7 +9,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             pointpath = TRUE,
             meanpath = TRUE,
             typestatistics = "parametric",
@@ -51,7 +51,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..pointpath <- jmvcore::OptionBool$new(
                 "pointpath",
                 pointpath,
@@ -154,7 +154,11 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         todo = function() private$.items[["todo"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        e_stats = function() private$.items[["e_stats"]],
+        e_subtitle = function() private$.items[["e_subtitle"]],
+        e_caption = function() private$.items[["e_caption"]],
+        e_plot = function() private$.items[["e_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -189,7 +193,23 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="plot",
                 title="Violin Plots",
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_stats",
+                title="e_stats"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_subtitle",
+                title="e_subtitle"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_caption",
+                title="e_caption"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="e_plot",
+                title="e_plot"))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",
@@ -238,6 +258,10 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$e_plot} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
@@ -246,7 +270,7 @@ jjwithinstats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE,
+    excl = FALSE,
     pointpath = TRUE,
     meanpath = TRUE,
     typestatistics = "parametric",

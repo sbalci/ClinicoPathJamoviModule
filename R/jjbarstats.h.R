@@ -9,7 +9,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = TRUE,
             pairwisedisplay = "significant",
@@ -49,7 +49,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -217,7 +217,7 @@ jjbarstats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE,
+    excl = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = TRUE,
     pairwisedisplay = "significant",

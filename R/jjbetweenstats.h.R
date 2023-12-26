@@ -9,7 +9,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = TRUE,
             pairwisedisplay = "significant",
@@ -50,7 +50,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -229,7 +229,7 @@ jjbetweenstats <- function(
     dep,
     group,
     grvar = NULL,
-    excl = TRUE,
+    excl = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = TRUE,
     pairwisedisplay = "significant",

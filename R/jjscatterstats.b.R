@@ -119,9 +119,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
             # ggscatterstats ----
@@ -132,8 +132,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <-
                 ggstatsplot::ggscatterstats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
 
                     type = typestatistics,
 
@@ -245,9 +245,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
 
@@ -263,9 +263,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot2 <- ggstatsplot::grouped_ggscatterstats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
-                    grouping.var = !!grvar,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
+                    grouping.var = !!rlang::sym(grvar),
                     label.var = NULL,
                     label.expression = NULL,
                     title.prefix = NULL,

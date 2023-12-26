@@ -201,7 +201,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     cor.vars = myvars,
                     cor.vars.names = NULL,
-                    grouping.var = !!grvar,
+                    grouping.var = !!rlang::sym(grvar),
                     title.prefix = NULL,
                     output = "plot",
                     plotgrid.args = list(),

@@ -255,9 +255,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot2 <- ggstatsplot::grouped_ggdotplotstats(
                     data = mydata,
-                    x = !!dep,
-                    y = !!group,
-                    grouping.var = !!grvar,
+                    x = !!rlang::sym(dep),
+                    y = !!rlang::sym(group),
+                    grouping.var = !!rlang::sym(grvar),
                     title.prefix = NULL,
                     output = "plot",
                     plotgrid.args = list(),
