@@ -9,7 +9,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = TRUE,
             pairwisedisplay = "significant",
@@ -47,7 +47,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -218,7 +218,7 @@ jjscatterstats <- function(
     dep,
     group,
     grvar,
-    excl = TRUE,
+    excl = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = TRUE,
     pairwisedisplay = "significant",

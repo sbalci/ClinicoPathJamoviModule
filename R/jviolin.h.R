@@ -10,7 +10,7 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             col = NULL,
             fill = NULL,
-            excl = TRUE,
+            excl = FALSE,
             flip = FALSE,
             themex = "ipsum",
             usexlabel = FALSE,
@@ -39,7 +39,7 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..flip <- jmvcore::OptionBool$new(
                 "flip",
                 flip,
@@ -210,7 +210,7 @@ jviolin <- function(
     group,
     col,
     fill,
-    excl = TRUE,
+    excl = FALSE,
     flip = FALSE,
     themex = "ipsum",
     usexlabel = FALSE,

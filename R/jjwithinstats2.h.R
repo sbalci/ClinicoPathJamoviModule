@@ -7,7 +7,7 @@ jjwithinstats2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     public = list(
         initialize = function(
             pairs = NULL,
-            excl = TRUE,
+            excl = FALSE,
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -26,7 +26,7 @@ jjwithinstats2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -129,7 +129,7 @@ jjwithinstats2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 jjwithinstats2 <- function(
     data,
     pairs,
-    excl = TRUE,
+    excl = FALSE,
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

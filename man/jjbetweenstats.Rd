@@ -9,7 +9,7 @@ jjbetweenstats(
   dep,
   group,
   grvar = NULL,
-  excl = TRUE,
+  excl = FALSE,
   typestatistics = "parametric",
   pairwisecomparisons = TRUE,
   pairwisedisplay = "significant",

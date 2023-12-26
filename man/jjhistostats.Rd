@@ -89,6 +89,9 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

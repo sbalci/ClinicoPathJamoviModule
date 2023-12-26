@@ -4,7 +4,7 @@
 \alias{jjwithinstats2}
 \title{Violin Plots to Compare Within Groups for Wide Data Format}
 \usage{
-jjwithinstats2(data, pairs, excl = TRUE, originaltheme = FALSE)
+jjwithinstats2(data, pairs, excl = FALSE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}

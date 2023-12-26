@@ -4,7 +4,7 @@
 \alias{jjwithinstats3}
 \title{Violin Plots to Compare Repeated Measurements for Continuous Variables}
 \usage{
-jjwithinstats3(data, dep, excl = TRUE, originaltheme = FALSE)
+jjwithinstats3(data, dep, excl = FALSE, originaltheme = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}

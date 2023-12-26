@@ -10,7 +10,7 @@ jjbarstats2(
   group,
   grvar,
   direction = "independent",
-  excl = TRUE,
+  excl = FALSE,
   originaltheme = FALSE
 )
 }

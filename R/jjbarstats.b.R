@@ -185,15 +185,20 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 if (length(self$options$dep) > 1) {
                     dep2 <- as.list(self$options$dep)
+                    dep2_symbols <- purrr::map(dep2, rlang::sym)
 
                     plotlist <-
                         purrr::pmap(
-                            .l = list(x = dep2,
-                                      # title = list(dep),
-                                      messages = TRUE),
-                            .f = ggstatsplot::ggbarstats,
-                            data = mydata,
-                            y = !!group,
+                            .l = list(
+                                x = dep2_symbols,
+                                messages = FALSE
+                                ),
+                            .f = function(x, messages) {
+                                 ggstatsplot::ggbarstats(
+                                    data = mydata,
+                                        x = !!x,
+                                        messages = messages,
+                            y = !!rlang::sym(group),
 
                             # paired = paired,
                             paired = FALSE,
@@ -232,6 +237,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             # messages = TRUE,
                             # x = NULL,
                             # y = NULL
+                        )
+                            }
                         )
 
                     plot <- ggstatsplot::combine_plots(
@@ -301,9 +308,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # originaltheme <- self$options$originaltheme
 
-                dep1 <- jmvcore::composeTerm(components = dep)
+                # dep1 <- jmvcore::composeTerm(components = dep)
 
-                group <- jmvcore::composeTerm(components = group)
+                # group <- jmvcore::composeTerm(components = group)
 
 
 
@@ -311,6 +318,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html
 
 
+                dep1 <- self$options$dep
 
                 grvar <- self$options$grvar
 
@@ -319,9 +327,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (length(self$options$dep) == 1) {
                     plot2 <- ggstatsplot::grouped_ggbarstats(
                         data = mydata,
-                        x = !!dep1,
-                        y = !!group,
-                        grouping.var = !!grvar,
+                        x = !!rlang::sym(dep1),
+                        y = !!rlang::sym(group),
+                        grouping.var = !!rlang::sym(grvar),
 
                         # paired = paired,
                         paired = FALSE,
@@ -351,18 +359,24 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # dep > 1 ----
 
                 if (length(self$options$dep) > 1) {
+                    
                     dep2 <- as.list(self$options$dep)
-
+                    dep2_symbols <- purrr::map(dep2, rlang::sym)
+                    
                     plotlist <-
                         purrr::pmap(
-                            .l = list(x = dep2,
-                                      # title = list(dep),
-                                      messages = TRUE),
-                            .f = ggstatsplot::grouped_ggbarstats,
+                            .l = list(
+                                x = dep2_symbols,
+                                messages = FALSE
+                                ),
+                            .f = function(x, messages) {
+                                ggstatsplot::grouped_ggbarstats(
                             data = mydata,
+                            x = !!x,
+                            messages = messages,
 
-                            y = !!group,
-                            grouping.var = !!grvar,
+                            y = !!rlang::sym(group),
+                            grouping.var = !!rlang::sym(grvar),
 
                             # paired = paired,
 
@@ -384,6 +398,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             # ,
                             # ggtheme = ggtheme,
                             # ggstatsplot.layer = originaltheme
+                        )
+                            }
                         )
 
                     plot2 <- ggstatsplot::combine_plots(
