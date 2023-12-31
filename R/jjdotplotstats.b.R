@@ -238,9 +238,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             originaltheme <- self$options$originaltheme
 
 
-            dep <- jmvcore::composeTerm(components = dep)
+            # dep <- jmvcore::composeTerm(components = dep)
 
-            group <- jmvcore::composeTerm(components = group)
+            # group <- jmvcore::composeTerm(components = group)
 
 
 

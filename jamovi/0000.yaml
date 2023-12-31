@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.17
+version: 0.0.2.18
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2023-12-26'
+date: '2023-12-31'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -146,24 +146,10 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: Graphs
-    menuSubgroup: Drafts JJStatsPlot
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
-    menuSubtitle: Categorical vs Continuous Repeated Measurements
-  - title: Violin Plots to Compare Within Groups for Wide Data Format
-    name: jjwithinstats2
-    ns: ClinicoPath
-    menuGroup: Graphs
-    menuSubgroup: Drafts JJStatsPlot
-    menuTitle: Violin Plots to Compare Within Groups for Wide Data Format
-    menuSubtitle: Categorical vs Continuous Paired Measurements
-  - title: Violin Plots to Compare Repeated Measurements for Continuous Variables
-    name: jjwithinstats3
-    ns: ClinicoPath
-    menuGroup: Graphs
-    menuSubgroup: Drafts JJStatsPlot
-    menuTitle: Violin Plots to Compare Repeated Measurements for Continuous Variables
-    menuSubtitle: Repeated Measurements for Continuous Variables
+    menuSubtitle: Repeated Continuous Measurements
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath

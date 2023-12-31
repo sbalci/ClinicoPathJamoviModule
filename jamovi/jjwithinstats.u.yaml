@@ -9,38 +9,42 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variables
+        label: First Measurement
         children:
           - type: VariablesListBox
-            name: dep
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Grouping Variable
-        children:
-          - type: VariablesListBox
-            name: group
+            name: dep1
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Split By (Optional)
+        label: Second Measurement
         children:
           - type: VariablesListBox
-            name: grvar
+            name: dep2
             maxItemCount: 1
             isTarget: true
-  - type: CollapseBox
-    label: Data
-    collapsed: true
-    children:
-      - type: Label
-        label: Data
-        fitToGrid: true
-        children: []
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: excl
+      - type: TargetLayoutBox
+        label: Third Measurement (Optional)
+        children:
+          - type: VariablesListBox
+            name: dep3
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Fourth Measurement (Optional)
+        children:
+          - type: VariablesListBox
+            name: dep4
+            maxItemCount: 1
+            isTarget: true
+
+  # - type: CollapseBox
+  #   label: Data
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: Data
+  #       fitToGrid: true
+  #       children: []
   - type: CollapseBox
     label: Analysis
     collapsed: true
@@ -67,13 +71,6 @@ children:
     label: Plot
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: pointpath
-          - type: CheckBox
-            name: meanpath
       - type: Label
         label: Plot
         fitToGrid: true
@@ -83,8 +80,10 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: plottype
+              - type: CheckBox
+                name: pointpath
+              - type: CheckBox
+                name: meanpath
+              - type: ComboBox
+                name: plottype
+

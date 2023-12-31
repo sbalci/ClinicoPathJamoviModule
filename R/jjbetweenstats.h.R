@@ -11,7 +11,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             grvar = NULL,
             excl = FALSE,
             typestatistics = "parametric",
-            pairwisecomparisons = TRUE,
+            pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             plottype = "boxviolin",
@@ -63,7 +63,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
-                default=TRUE)
+                default=FALSE)
             private$..pairwisedisplay <- jmvcore::OptionList$new(
                 "pairwisedisplay",
                 pairwisedisplay,
@@ -231,7 +231,7 @@ jjbetweenstats <- function(
     grvar = NULL,
     excl = FALSE,
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
+    pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     plottype = "boxviolin",

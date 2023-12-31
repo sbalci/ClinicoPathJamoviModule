@@ -6,14 +6,14 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            grvar = NULL,
-            excl = FALSE,
+            dep1 = NULL,
+            dep2 = NULL,
+            dep3 = NULL,
+            dep4 = NULL,
             pointpath = TRUE,
             meanpath = TRUE,
             typestatistics = "parametric",
-            pairwisecomparisons = TRUE,
+            pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             plottype = "boxviolin",
@@ -25,33 +25,34 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariables$new(
-                "dep",
-                dep,
+            private$..dep1 <- jmvcore::OptionVariable$new(
+                "dep1",
+                dep1,
                 suggested=list(
                     "continuous"),
                 permitted=list(
                     "numeric"))
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group,
+            private$..dep2 <- jmvcore::OptionVariable$new(
+                "dep2",
+                dep2,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
-            private$..grvar <- jmvcore::OptionVariable$new(
-                "grvar",
-                grvar,
+                    "numeric"))
+            private$..dep3 <- jmvcore::OptionVariable$new(
+                "dep3",
+                dep3,
                 suggested=list(
-                    "ordinal",
-                    "nominal"),
+                    "continuous"),
                 permitted=list(
-                    "factor"))
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
-                default=FALSE)
+                    "numeric"))
+            private$..dep4 <- jmvcore::OptionVariable$new(
+                "dep4",
+                dep4,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..pointpath <- jmvcore::OptionBool$new(
                 "pointpath",
                 pointpath,
@@ -72,7 +73,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
-                default=TRUE)
+                default=FALSE)
             private$..pairwisedisplay <- jmvcore::OptionList$new(
                 "pairwisedisplay",
                 pairwisedisplay,
@@ -107,10 +108,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 originaltheme,
                 default=FALSE)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..grvar)
-            self$.addOption(private$..excl)
+            self$.addOption(private$..dep1)
+            self$.addOption(private$..dep2)
+            self$.addOption(private$..dep3)
+            self$.addOption(private$..dep4)
             self$.addOption(private$..pointpath)
             self$.addOption(private$..meanpath)
             self$.addOption(private$..typestatistics)
@@ -121,10 +122,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..originaltheme)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value,
+        dep1 = function() private$..dep1$value,
+        dep2 = function() private$..dep2$value,
+        dep3 = function() private$..dep3$value,
+        dep4 = function() private$..dep4$value,
         pointpath = function() private$..pointpath$value,
         meanpath = function() private$..meanpath$value,
         typestatistics = function() private$..typestatistics$value,
@@ -134,10 +135,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plottype = function() private$..plottype$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..grvar = NA,
-        ..excl = NA,
+        ..dep1 = NA,
+        ..dep2 = NA,
+        ..dep3 = NA,
+        ..dep4 = NA,
         ..pointpath = NA,
         ..meanpath = NA,
         ..typestatistics = NA,
@@ -153,12 +154,12 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
         e_stats = function() private$.items[["e_stats"]],
         e_subtitle = function() private$.items[["e_subtitle"]],
         e_caption = function() private$.items[["e_caption"]],
-        e_plot = function() private$.items[["e_plot"]]),
+        e_plot = function() private$.items[["e_plot"]],
+        mydataview = function() private$.items[["mydataview"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -171,9 +172,10 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ggstatsplot",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
+                    "dep1",
+                    "dep2",
+                    "dep3",
+                    "dep4",
                     "typestatistics",
                     "originaltheme",
                     "excl"))
@@ -181,13 +183,6 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="todo",
                 title="To Do"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot2",
-                title="`Violin Plots by ${grvar}`",
-                renderFun=".plot2",
-                requiresData=TRUE,
-                visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -209,7 +204,11 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="e_plot",
-                title="e_plot"))}))
+                title="e_plot"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview",
+                title="mydataview"))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",
@@ -241,10 +240,10 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
-#' @param excl .
+#' @param dep1 .
+#' @param dep2 .
+#' @param dep3 .
+#' @param dep4 .
 #' @param pointpath .
 #' @param meanpath .
 #' @param typestatistics .
@@ -256,25 +255,25 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$e_plot} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
 jjwithinstats <- function(
     data,
-    dep,
-    group,
-    grvar,
-    excl = FALSE,
+    dep1,
+    dep2,
+    dep3,
+    dep4,
     pointpath = TRUE,
     meanpath = TRUE,
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
+    pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     plottype = "boxviolin",
@@ -283,24 +282,24 @@ jjwithinstats <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
-    if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
+    if ( ! missing(dep1)) dep1 <- jmvcore::resolveQuo(jmvcore::enquo(dep1))
+    if ( ! missing(dep2)) dep2 <- jmvcore::resolveQuo(jmvcore::enquo(dep2))
+    if ( ! missing(dep3)) dep3 <- jmvcore::resolveQuo(jmvcore::enquo(dep3))
+    if ( ! missing(dep4)) dep4 <- jmvcore::resolveQuo(jmvcore::enquo(dep4))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL),
-            `if`( ! missing(grvar), grvar, NULL))
+            `if`( ! missing(dep1), dep1, NULL),
+            `if`( ! missing(dep2), dep2, NULL),
+            `if`( ! missing(dep3), dep3, NULL),
+            `if`( ! missing(dep4), dep4, NULL))
 
-    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjwithinstatsOptions$new(
-        dep = dep,
-        group = group,
-        grvar = grvar,
-        excl = excl,
+        dep1 = dep1,
+        dep2 = dep2,
+        dep3 = dep3,
+        dep4 = dep4,
         pointpath = pointpath,
         meanpath = meanpath,
         typestatistics = typestatistics,

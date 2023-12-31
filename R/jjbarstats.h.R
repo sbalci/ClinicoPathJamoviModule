@@ -11,7 +11,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             grvar = NULL,
             excl = FALSE,
             typestatistics = "parametric",
-            pairwisecomparisons = TRUE,
+            pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             originaltheme = FALSE, ...) {
@@ -62,7 +62,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
-                default=TRUE)
+                default=FALSE)
             private$..pairwisedisplay <- jmvcore::OptionList$new(
                 "pairwisedisplay",
                 pairwisedisplay,
@@ -219,7 +219,7 @@ jjbarstats <- function(
     grvar,
     excl = FALSE,
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
+    pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     originaltheme = FALSE) {

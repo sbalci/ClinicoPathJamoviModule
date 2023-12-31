@@ -21,7 +21,6 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Data
     collapsed: true
@@ -35,7 +34,6 @@ children:
             children:
               - type: CheckBox
                 name: excl
-
   - type: CollapseBox
     label: Analysis
     collapsed: true
@@ -58,9 +56,6 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
-
-
-
   - type: CollapseBox
     label: Plot
     collapsed: true
@@ -74,5 +69,3 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-              - type: ComboBox
-                name: plottype

@@ -10,10 +10,9 @@ jjcorrmat(
   grvar,
   excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
+  pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
-  plottype = "boxviolin",
   originaltheme = FALSE
 )
 }
@@ -33,8 +32,6 @@ jjcorrmat(
 \item{pairwisedisplay}{.}
 
 \item{padjustmethod}{.}
-
-\item{plottype}{.}
 
 \item{originaltheme}{.}
 }
