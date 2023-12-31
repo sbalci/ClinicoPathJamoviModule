@@ -28,7 +28,11 @@ copy_module_files <- function(module_names, source_dir, dest_dir, file_extension
     }
 }
 
-# Example usage
+
+new_version <- "0.0.2.18"
+new_date <- "2023-12-31"
+
+
 description_paths <-
     c("./DESCRIPTION",
     "./jjstatsplot/DESCRIPTION",
@@ -36,7 +40,10 @@ description_paths <-
     "./jsurvival/DESCRIPTION",
     "./ClinicoPathDescriptives/DESCRIPTION")
 
-update_description_files(description_paths, "0.0.2.17", "2023-12-26")
+update_description_files(paths = description_paths,
+                         version = new_version,
+                         date = new_date
+                         )
 
 yaml_paths <-
     c("./jamovi/0000.yaml",
@@ -45,13 +52,17 @@ yaml_paths <-
       "./jsurvival/jamovi/0000.yaml",
       "./ClinicoPathDescriptives/jamovi/0000.yaml")
 
-update_yaml_files(yaml_paths, "0.0.2.17", "2023-12-26")
+update_yaml_files(paths = yaml_paths,
+                  version = new_version,
+                  date = new_date
+                  )
 
 
 
 jjstatsplot_modules <- c(
     "jjbarstats",
     "jjbetweenstats",
+    "jjwithinstats",
     "jjcorrmat",
     "jjdotplotstats",
     "jjhistostats",
@@ -104,4 +115,14 @@ ClinicoPathDescriptives_modules <- c(
 
 copy_module_files(ClinicoPathDescriptives_modules, "./R/", "./ClinicoPathDescriptives/R/", c(".b.R"))
 copy_module_files(ClinicoPathDescriptives_modules, "./jamovi/", "./ClinicoPathDescriptives/jamovi/", c(".a.yaml", ".r.yaml", ".u.yaml"))
+
+
+jmvtools::prepare(".")
+devtools::document(".")
+jmvtools::prepare(".")
+devtools::document(".")
+jmvtools::install(".")
+
+
+
 

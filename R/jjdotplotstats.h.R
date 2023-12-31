@@ -11,7 +11,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             grvar = NULL,
             excl = FALSE,
             typestatistics = "parametric",
-            pairwisecomparisons = TRUE,
+            pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             originaltheme = FALSE, ...) {
@@ -61,7 +61,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
-                default=TRUE)
+                default=FALSE)
             private$..pairwisedisplay <- jmvcore::OptionList$new(
                 "pairwisedisplay",
                 pairwisedisplay,
@@ -221,7 +221,7 @@ jjdotplotstats <- function(
     grvar,
     excl = FALSE,
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
+    pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     originaltheme = FALSE) {

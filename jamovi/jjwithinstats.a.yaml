@@ -1,9 +1,9 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: Graphs
-menuSubgroup: Drafts JJStatsPlot
-menuSubtitle: Categorical vs Continuous Repeated Measurements
+menuGroup: JJStatsPlot
+menuSubgroup: 'Categorical vs Continuous'
+menuSubtitle: Repeated Continuous Measurements
 version: '1.0.0'
 jas: '1.2'
 
@@ -25,44 +25,30 @@ options:
           R: >
             The data as a data frame.
 
-
-    - name: dep
-      title: Dependent Variables
-      type: Variables
+    - name: dep1
+      title: First Measurement
+      type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-    - name: group
-      title: Grouping Variable
+    - name: dep2
+      title: Second Measurement
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
-    - name: grvar
-      title: 'Split By (Optional)'
+    - name: dep3
+      title: Third Measurement (Optional)
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
 
-    # - name: direction
-    #   title: 'Measurement Type'
-    #   type: List
-    #   options:
-    #     - title: Repeated (within groups)
-    #       name: repeated
-    #     - title: Independent (between groups)
-    #       name: independent
-    #   default: independent
-    #   description:
-    #       ui: options for measurement type
-    #       R: select measurement type (repeated or independent)
-
-
-    - name: excl
-      title: Exclude Missing (NA)
-      type: Bool
-      default: false
+    - name: dep4
+      title: Fourth Measurement (Optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
 
     - name: pointpath
@@ -94,7 +80,7 @@ options:
     - name: pairwisecomparisons
       title: Pairwise Comparisons
       type: Bool
-      default: true
+      default: false
 
     - name: pairwisedisplay
       title: 'Pairwise Display'

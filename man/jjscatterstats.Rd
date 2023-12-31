@@ -11,7 +11,7 @@ jjscatterstats(
   grvar,
   excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
+  pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   originaltheme = FALSE

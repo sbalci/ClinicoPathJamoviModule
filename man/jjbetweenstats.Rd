@@ -11,7 +11,7 @@ jjbetweenstats(
   grvar = NULL,
   excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
+  pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   plottype = "boxviolin",

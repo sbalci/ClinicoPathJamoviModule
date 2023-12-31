@@ -87,7 +87,7 @@ options:
     - name: pairwisecomparisons
       title: Pairwise Comparisons
       type: Bool
-      default: true
+      default: false
 
     - name: pairwisedisplay
       title: 'Pairwise Display'

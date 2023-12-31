@@ -6,14 +6,14 @@
 \usage{
 jjwithinstats(
   data,
-  dep,
-  group,
-  grvar,
-  excl = FALSE,
+  dep1,
+  dep2,
+  dep3,
+  dep4,
   pointpath = TRUE,
   meanpath = TRUE,
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
+  pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   plottype = "boxviolin",
@@ -23,13 +23,13 @@ jjwithinstats(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep1}{.}
 
-\item{group}{.}
+\item{dep2}{.}
 
-\item{grvar}{.}
+\item{dep3}{.}
 
-\item{excl}{.}
+\item{dep4}{.}
 
 \item{pointpath}{.}
 
@@ -51,11 +51,12 @@ jjwithinstats(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$e_plot} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

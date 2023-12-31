@@ -4,9 +4,10 @@ title: Violin Plots to Compare Within Groups
 jrs:   '1.1'
 
 clearWith:
-    - dep
-    - group
-    - grvar
+    - dep1
+    - dep2
+    - dep3
+    - dep4
     - typestatistics
     - originaltheme
     - excl
@@ -19,22 +20,9 @@ items:
       type:  Html
 
 
-    - name: plot2
-      title: '`Violin Plots by ${grvar}`'
-      # title: '`${group} - {dep} by {grvar}`'
-      type: Image
-      # width:  800
-      # height: 600
-      renderFun: .plot2
-      requiresData: true
-      visible: (grvar)
-
     - name: plot
-      # title: '`${group} - {dep}`'
       title: 'Violin Plots'
       type: Image
-      # width:  800
-      # height: 600
       renderFun: .plot
       requiresData: true
 
@@ -56,6 +44,9 @@ items:
       title: e_plot
       type:  Preformatted
 
+    - name:  mydataview
+      title: mydataview
+      type:  Preformatted
 
 
 refs:
