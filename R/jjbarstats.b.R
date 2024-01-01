@@ -12,15 +12,30 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             # init ----
 
             .init = function() {
+
                 deplen <- length(self$options$dep)
 
-                self$results$plot$setSize(400, deplen * 300)
+                self$results$plot$setSize(600, deplen * 450)
 
-                self$results$plot2$setSize(800, deplen * 300)
+
+                if (!is.null(self$options$grvar)) {
+
+                    mydata <- self$data
+
+                    grvar <-  self$options$grvar
+
+                    num_levels <- nlevels(
+                        as.factor(mydata[[grvar]])
+                    )
+
+                    self$results$plot2$setSize(num_levels * 600, deplen * 450)
+
+                }
 
             }
-            ,
 
+            # run ----
+            ,
             .run = function() {
                 # Initial Message ----
                 if (is.null(self$options$dep) ||
@@ -359,10 +374,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # dep > 1 ----
 
                 if (length(self$options$dep) > 1) {
-                    
+
                     dep2 <- as.list(self$options$dep)
                     dep2_symbols <- purrr::map(dep2, rlang::sym)
-                    
+
                     plotlist <-
                         purrr::pmap(
                             .l = list(

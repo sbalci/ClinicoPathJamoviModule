@@ -12,11 +12,28 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             # init ----
             .init = function() {
+
                 deplen <- length(self$options$dep)
 
-                self$results$plot$setSize(400, deplen * 300)
+                self$results$plot$setSize(600, deplen * 450)
 
-                self$results$plot2$setSize(800, deplen * 300)
+
+                if (!is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+
+                }
+
+
+
             }
 
             # run ----
@@ -195,13 +212,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                         )
 
-extracted_stats <- ggstatsplot::extract_stats(plot)
-extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
-extracted_caption <- ggstatsplot::extract_caption(plot)
-
-self$results$e_stats$setContent(extracted_stats)
-self$results$e_subtitle$setContent(extracted_subtitle)
-self$results$e_caption$setContent(extracted_caption)
+# extracted_stats <- ggstatsplot::extract_stats(plot)
+# extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
+# extracted_caption <- ggstatsplot::extract_caption(plot)
+#
+# self$results$e_stats$setContent(extracted_stats)
+# self$results$e_subtitle$setContent(extracted_subtitle)
+# self$results$e_caption$setContent(extracted_caption)
 
 
 

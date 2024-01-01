@@ -8,6 +8,76 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjpiestatsBase,
     private = list(
 
+        # init ----
+
+        .init = function() {
+
+            self$results$plot1$setSize(650, 450)
+
+            self$results$plot2$setSize(650, 450)
+
+            if (!is.null(self$options$dep) && !is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                self$results$plot3$setSize(num_levels * 600, 450)
+
+            }
+
+            if (!is.null(self$options$grvar) && !is.null(self$options$group)) {
+
+                mydata <- self$data
+
+                group <-  self$options$group
+
+                num_levels_group <- nlevels(
+                    as.factor(mydata[[group]])
+                )
+
+                self$results$plot4$setSize(num_levels_group * 600, 450)
+
+            }
+
+
+
+
+            if (!is.null(self$options$group) && !is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                group <-  self$options$group
+
+                num_levels_group <- nlevels(
+                    as.factor(mydata[[group]])
+                )
+
+                self$results$plot3$setSize((num_levels + num_levels_group) * 600, 450)
+
+                self$results$plot4$setSize((num_levels + num_levels_group) * 600, 450)
+
+            }
+
+
+
+
+        }
+
+
+
+        # run ----
+        ,
         .run = function() {
 
             # Initial Message ----
@@ -380,7 +450,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Error messages ----
 
-            if ( is.null(self$options$dep) || is.null(self$options$group) ||is.null(self$options$grvar) )
+            if ( is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar) )
                 return()
 
             if (nrow(self$data) == 0)

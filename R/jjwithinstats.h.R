@@ -10,13 +10,16 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             dep2 = NULL,
             dep3 = NULL,
             dep4 = NULL,
-            pointpath = TRUE,
-            meanpath = TRUE,
+            pointpath = FALSE,
+            meanpath = FALSE,
+            meanplotting = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
+            effsizetype = "biased",
             plottype = "boxviolin",
+            mytitle = "Within Group Comparison",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -56,11 +59,15 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..pointpath <- jmvcore::OptionBool$new(
                 "pointpath",
                 pointpath,
-                default=TRUE)
+                default=FALSE)
             private$..meanpath <- jmvcore::OptionBool$new(
                 "meanpath",
                 meanpath,
-                default=TRUE)
+                default=FALSE)
+            private$..meanplotting <- jmvcore::OptionBool$new(
+                "meanplotting",
+                meanplotting,
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -95,6 +102,15 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fdr",
                     "none"),
                 default="holm")
+            private$..effsizetype <- jmvcore::OptionList$new(
+                "effsizetype",
+                effsizetype,
+                options=list(
+                    "biased",
+                    "unbiased",
+                    "eta",
+                    "omega"),
+                default="biased")
             private$..plottype <- jmvcore::OptionList$new(
                 "plottype",
                 plottype,
@@ -103,6 +119,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "violin",
                     "boxviolin"),
                 default="boxviolin")
+            private$..mytitle <- jmvcore::OptionString$new(
+                "mytitle",
+                mytitle,
+                default="Within Group Comparison")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -114,11 +134,14 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..dep4)
             self$.addOption(private$..pointpath)
             self$.addOption(private$..meanpath)
+            self$.addOption(private$..meanplotting)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
+            self$.addOption(private$..effsizetype)
             self$.addOption(private$..plottype)
+            self$.addOption(private$..mytitle)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
@@ -128,11 +151,14 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         dep4 = function() private$..dep4$value,
         pointpath = function() private$..pointpath$value,
         meanpath = function() private$..meanpath$value,
+        meanplotting = function() private$..meanplotting$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
+        effsizetype = function() private$..effsizetype$value,
         plottype = function() private$..plottype$value,
+        mytitle = function() private$..mytitle$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep1 = NA,
@@ -141,11 +167,14 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..dep4 = NA,
         ..pointpath = NA,
         ..meanpath = NA,
+        ..meanplotting = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
+        ..effsizetype = NA,
         ..plottype = NA,
+        ..mytitle = NA,
         ..originaltheme = NA)
 )
 
@@ -154,12 +183,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]],
-        e_stats = function() private$.items[["e_stats"]],
-        e_subtitle = function() private$.items[["e_subtitle"]],
-        e_caption = function() private$.items[["e_caption"]],
-        e_plot = function() private$.items[["e_plot"]],
-        mydataview = function() private$.items[["mydataview"]]),
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -188,27 +212,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="plot",
                 title="Violin Plots",
                 renderFun=".plot",
-                requiresData=TRUE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="e_stats",
-                title="e_stats"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="e_subtitle",
-                title="e_subtitle"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="e_caption",
-                title="e_caption"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="e_plot",
-                title="e_plot"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview",
-                title="mydataview"))}))
+                requiresData=TRUE))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",
@@ -246,21 +250,19 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep4 .
 #' @param pointpath .
 #' @param meanpath .
+#' @param meanplotting .
 #' @param typestatistics .
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .
+#' @param effsizetype .
 #' @param plottype .
+#' @param mytitle .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$e_plot} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
@@ -270,13 +272,16 @@ jjwithinstats <- function(
     dep2,
     dep3,
     dep4,
-    pointpath = TRUE,
-    meanpath = TRUE,
+    pointpath = FALSE,
+    meanpath = FALSE,
+    meanplotting = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
+    effsizetype = "biased",
     plottype = "boxviolin",
+    mytitle = "Within Group Comparison",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -302,11 +307,14 @@ jjwithinstats <- function(
         dep4 = dep4,
         pointpath = pointpath,
         meanpath = meanpath,
+        meanplotting = meanplotting,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
+        effsizetype = effsizetype,
         plottype = plottype,
+        mytitle = mytitle,
         originaltheme = originaltheme)
 
     analysis <- jjwithinstatsClass$new(
