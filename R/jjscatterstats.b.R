@@ -10,6 +10,32 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjscatterstatsBase,
     private = list(
 
+
+        # init ----
+
+        .init = function() {
+
+            self$results$plot$setSize(600, 450)
+
+
+            if (!is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                self$results$plot2$setSize(num_levels * 600, 450)
+
+            }
+
+        }
+
+        # run ----
+        ,
         .run = function() {
 
             # Initial Message ----

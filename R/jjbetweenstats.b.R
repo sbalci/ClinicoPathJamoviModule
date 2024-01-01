@@ -12,14 +12,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # init ----
 
         .init = function() {
+
             deplen <- length(self$options$dep)
 
             self$results$plot$setSize(600, deplen * 450)
 
-            self$results$plot2$setSize(1200, deplen * 450)
+
+            if (!is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+
+            }
 
         }
 
+        # run ----
         ,
         .run = function() {
 
@@ -146,7 +161,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-
+            # # mydataview ----
+            # self$results$mydataview$setContent(
+            #     list(
+            #         dep1 = dep,
+            #         group = group,
+            #         mydata = head(mydata)
+            #         )
+            # )
 
             # dep <- jmvcore::composeTerm(components = dep)
 
@@ -158,10 +180,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # dep == 1 ----
 
             if (length(self$options$dep) == 1) {
+
             plot <- ggstatsplot::ggbetweenstats(
                 data = mydata,
                 x = !!rlang::sym(group),
                 y = !!rlang::sym(dep)
+
                 , type = typestatistics
                 , ggtheme = ggtheme
                 , ggstatsplot.layer = originaltheme
@@ -199,8 +223,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outlier.color = "black",
                 outlier.label.args = list(size = 3),
                 outlier.point.args = list(),
-                point.args = list(position = ggplot2::position_jitterdodge(dodge.width = 0.6), alpha
-                                  = 0.4, size = 3, stroke = 0),
+                point.args = list(
+                    position = ggplot2::position_jitterdodge(dodge.width = 0.6),
+                    alpha = 0.4, size = 3, stroke = 0),
                 violin.args = list(width = 0.5, alpha = 0.2),
                 ggsignif.args = list(textsize = 3, tip_length = 0.01),
 
@@ -209,12 +234,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggplot.component = NULL,
                 output = "plot"
             )
-
-
-
-
-
-
 
             }
 
@@ -237,7 +256,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 data = mydata,
                                 y = !!y,
                                 messages = messages,
-                        x = !!rlang::sym(group),
+                        x = !!rlang::sym(group)
                         , type = typestatistics
                         , ggtheme = ggtheme
                         , ggstatsplot.layer = originaltheme
@@ -245,11 +264,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         , pairwise.comparisons = pairwisecomparisons
                         , pairwise.display = pairwisedisplay
                         , p.adjust.method = padjustmethod
-
-
-
-
-
 
                     )
                         }
@@ -260,13 +274,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             plotgrid.args = list(ncol = 1)
                             )
 
+        }
 
-            # Print Plot ----
+            ## Print Plot ----
 
             print(plot)
             TRUE
 
-        }
 
             }
 
@@ -387,9 +401,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , pairwise.display = pairwisedisplay
                     , p.adjust.method = padjustmethod
 
-
-
-
                 )
 
             }
@@ -439,12 +450,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             )
 
 
-            # Print Plot ----
+            }
+
+            ## Print Plot ----
 
             print(plot2)
             TRUE
-
-            }
 
         }
 

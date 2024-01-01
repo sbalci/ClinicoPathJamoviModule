@@ -112,16 +112,16 @@ This function does not allow missing values and works on long data format. Pleas
 
 
             # mydataview ----
-            self$results$mydataview$setContent(
-                list(
-                dep1 = dep1,
-                dep2 = dep2,
-                dep3 = dep3,
-                dep4 = dep4,
-                mydata = head(mydata),
-                long_data = head(long_data)
-            )
-            )
+            # self$results$mydataview$setContent(
+            #     list(
+            #     dep1 = dep1,
+            #     dep2 = dep2,
+            #     dep3 = dep3,
+            #     dep4 = dep4,
+            #     mydata = head(mydata),
+            #     long_data = head(long_data)
+            # )
+            # )
 
 
 
@@ -155,6 +155,15 @@ This function does not allow missing values and works on long data format. Pleas
                 jmvcore::constructFormula(terms = self$options$padjustmethod)
 
 
+            mytitle <- self$options$mytitle
+
+            effsizetype <- self$options$effsizetype
+
+            pointpath <- self$options$pointpath
+
+            meanpath <- self$options$meanpath
+
+            meanplotting <- self$options$meanplotting
 
 
 
@@ -170,15 +179,10 @@ This function does not allow missing values and works on long data format. Pleas
                     x = measurement,
                     y = value,
                     paired = TRUE,
-                    id = rowid,
+                    id = rowid
 
 
-                    title = "Your Title Here",
-                    caption = "Your Caption Here"
-
-
-
-
+                    , title = mytitle
                     , type = typestatistics
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = originaltheme
@@ -186,8 +190,8 @@ This function does not allow missing values and works on long data format. Pleas
                     , pairwise.comparisons = pairwisecomparisons
                     , pairwise.display = pairwisedisplay
                     , p.adjust.method = padjustmethod
+                    , effsize.type = effsizetype
 
-                    # effsize.type = "unbiased",
                     # partial = TRUE,
                     # bf.prior = 0.707,
                     # bf.message = TRUE,
@@ -203,13 +207,13 @@ This function does not allow missing values and works on long data format. Pleas
                     # conf.level = 0.95,
                     # nboot = 100L,
                     # tr = 0.1,
-                    # mean.plotting = TRUE,
+                    , mean.plotting = meanplotting
                     # mean.ci = FALSE,
                     # mean.point.args = list(size = 5, color = "darkred"),
                     # mean.label.args = list(size = 3),
-                    # point.path = pointpath,
+                    , point.path = pointpath
                     # point.path.args = list(alpha = 0.5, linetype = "dashed"),
-                    # mean.path = meanpath,
+                    , mean.path = meanpath
                     # mean.path.args = list(color = "red", size = 1, alpha = 0.5),
                     # notch = FALSE,
                     # notchwidth = 0.5,
@@ -222,7 +226,7 @@ This function does not allow missing values and works on long data format. Pleas
                     # ggsignif.args = list(textsize = 3, tip_length = 0.01),
                     # ggtheme = ggtheme,
                     # # ggtheme = ggplot2::theme_bw(),
-                    # ggstatsplot.layer = originaltheme,
+
                     # package = "RColorBrewer",
                     # palette = "Dark2",
                     # ggplot.component = NULL,
@@ -232,22 +236,17 @@ This function does not allow missing values and works on long data format. Pleas
 
 
             # mydataview ----
-
-            extracted_stats <- ggstatsplot::extract_stats(plot)
-            extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
-            extracted_caption <- ggstatsplot::extract_caption(plot)
-
-            self$results$e_plot$setContent(
-                as.list(
-                    plot
-                )
-            )
-
-            self$results$e_stats$setContent(as.list(extracted_stats))
-
-            self$results$e_subtitle$setContent(as.list(extracted_subtitle))
-
-            self$results$e_caption$setContent(as.list(extracted_caption))
+            # extracted_stats <- ggstatsplot::extract_stats(plot)
+            # extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
+            # extracted_caption <- ggstatsplot::extract_caption(plot)
+            # self$results$e_plot$setContent(
+            #     as.list(
+            #         plot
+            #     )
+            # )
+            # self$results$e_stats$setContent(as.list(extracted_stats))
+            # self$results$e_subtitle$setContent(as.list(extracted_subtitle))
+            # self$results$e_caption$setContent(as.list(extracted_caption))
 
 
 

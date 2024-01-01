@@ -56,17 +56,17 @@ items:
       renderFun: .plot
       requiresData: true
 
-    - name:  e_stats
-      title: e_stats
-      type:  Preformatted
+    # - name:  e_stats
+    #   title: e_stats
+    #   type:  Preformatted
 
-    - name:  e_subtitle
-      title: e_subtitle
-      type:  Preformatted
+    # - name:  e_subtitle
+    #   title: e_subtitle
+    #   type:  Preformatted
 
-    - name:  e_caption
-      title: e_caption
-      type:  Preformatted
+    # - name:  e_caption
+    #   title: e_caption
+    #   type:  Preformatted
 
 refs:
     - ggplot2

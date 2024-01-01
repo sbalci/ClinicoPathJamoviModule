@@ -10,13 +10,16 @@ jjwithinstats(
   dep2,
   dep3,
   dep4,
-  pointpath = TRUE,
-  meanpath = TRUE,
+  pointpath = FALSE,
+  meanpath = FALSE,
+  meanplotting = FALSE,
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
+  effsizetype = "biased",
   plottype = "boxviolin",
+  mytitle = "Within Group Comparison",
   originaltheme = FALSE
 )
 }
@@ -35,6 +38,8 @@ jjwithinstats(
 
 \item{meanpath}{.}
 
+\item{meanplotting}{.}
+
 \item{typestatistics}{.}
 
 \item{pairwisecomparisons}{.}
@@ -43,7 +48,11 @@ jjwithinstats(
 
 \item{padjustmethod}{.}
 
+\item{effsizetype}{.}
+
 \item{plottype}{.}
+
+\item{mytitle}{.}
 
 \item{originaltheme}{.}
 }
@@ -52,11 +61,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$e_stats} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$e_subtitle} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$e_caption} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$e_plot} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{

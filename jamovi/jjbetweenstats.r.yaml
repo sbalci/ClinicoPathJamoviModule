@@ -39,6 +39,12 @@ items:
       requiresData: true
 
 
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
+
+
+
 refs:
     - ggplot2
     - ggstatsplot

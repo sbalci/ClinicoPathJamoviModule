@@ -36,15 +36,6 @@ children:
             name: dep4
             maxItemCount: 1
             isTarget: true
-
-  # - type: CollapseBox
-  #   label: Data
-  #   collapsed: true
-  #   children:
-  #     - type: Label
-  #       label: Data
-  #       fitToGrid: true
-  #       children: []
   - type: CollapseBox
     label: Analysis
     collapsed: true
@@ -67,6 +58,8 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
+              - type: ComboBox
+                name: effsizetype
   - type: CollapseBox
     label: Plot
     collapsed: true
@@ -84,6 +77,13 @@ children:
                 name: pointpath
               - type: CheckBox
                 name: meanpath
+              - type: CheckBox
+                name: meanplotting
               - type: ComboBox
                 name: plottype
+              - type: TextBox
+                name: mytitle
+                format: string
+                width: large
+
 

@@ -9,6 +9,34 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjdotplotstatsBase,
     private = list(
 
+
+        # init ----
+
+        .init = function() {
+
+            deplen <- length(self$options$dep)
+
+            self$results$plot$setSize(600, deplen * 450)
+
+
+            if (!is.null(self$options$grvar)) {
+
+                mydata <- self$data
+
+                grvar <-  self$options$grvar
+
+                num_levels <- nlevels(
+                    as.factor(mydata[[grvar]])
+                )
+
+                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+
+            }
+
+        }
+
+        # run ----
+        ,
         .run = function() {
 
             # Initial Message ----
@@ -226,7 +254,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
-
             # define main arguments ----
 
 
@@ -241,8 +268,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # dep <- jmvcore::composeTerm(components = dep)
 
             # group <- jmvcore::composeTerm(components = group)
-
-
 
 
             # grouped_ggdotplotstats ----

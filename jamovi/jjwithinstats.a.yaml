@@ -43,24 +43,26 @@ options:
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-
     - name: dep4
       title: Fourth Measurement (Optional)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
 
-
     - name: pointpath
       title: Show Point Path
       type: Bool
-      default: true
+      default: false
 
     - name: meanpath
       title: Show Mean Path
       type: Bool
-      default: true
+      default: false
 
+    - name: meanplotting
+      title: Show Mean Plotting
+      type: Bool
+      default: false
 
 
     - name: typestatistics
@@ -116,6 +118,20 @@ options:
           name: none
       default: holm
 
+    - name: effsizetype
+      title: 'Effect Size Needed for Parametric Tests'
+      type: List
+      options:
+        - title: biased
+          name: biased
+        - title: unbiased
+          name: unbiased
+        - title: eta
+          name: eta
+        - title: omega
+          name: omega
+      default: biased
+
 
     - name: plottype
       title: 'Plot Type'
@@ -129,19 +145,15 @@ options:
           name: boxviolin
       default: boxviolin
 
-
+    - name: mytitle
+      title: Title
+      type: String
+      default: 'Within Group Comparison'
 
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
-
-
-
-
-
-
-
 
 
 ...
@@ -193,31 +205,10 @@ options:
 #   output = "plot",
 #   ...
 # )
-# Arguments
-# data
-# A dataframe (or a tibble) from which variables specified are to be taken. A matrix or tables will not be accepted.
-#
-# x
-# The grouping variable from the dataframe data.
-#
-# y
-# The response (a.k.a. outcome or dependent) variable from the dataframe data.
-#
-# type
-# Type of statistic expected ("parametric" or "nonparametric" or "robust" or "bayes").Corresponding abbreviations are also accepted: "p" (for parametric), "np" (nonparametric), "r" (robust), or "bf"resp.
-#
-# pairwise.comparisons
-# Logical that decides whether pairwise comparisons are to be displayed (default: TRUE). Please note that only significant comparisons will be shown by default. To change this behavior, select appropriate option with pairwise.display argument. The pairwise comparison dataframes are prepared using the pairwiseComparisons::pairwise_comparisons function. For more details about pairwise comparisons, see the documentation for that function.
-#
-# pairwise.display
-# Decides which pairwise comparisons to display. Available options are "significant" (abbreviation accepted: "s") or "non-significant" (abbreviation accepted: "ns") or "everything"/"all". The default is "significant". You can use this argument to make sure that your plot is not uber-cluttered when you have multiple groups being compared and scores of pairwise comparisons being displayed.
-#
-# p.adjust.method
-# Adjustment method for p-values for multiple comparisons. Possible methods are: "holm" (default), "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
-#
-# effsize.type
-# Type of effect size needed for parametric tests. The argument can be "biased" (equivalent to "d" for Cohen's d for t-test; "eta" for partial eta-squared for anova) or "unbiased" (equivalent to "g" Hedge's g for t-test; "omega" for partial omega-squared for anova)).
-#
+
+
+
+
 # bf.prior
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
 #
@@ -235,10 +226,7 @@ options:
 #
 # caption
 # The text for the plot caption.
-#
-# title
-# The text for the plot title.
-#
+
 # subtitle
 # The text for the plot subtitle. Will work only if results.subtitle = FALSE.
 #
@@ -256,10 +244,7 @@ options:
 #
 # tr
 # Trim level for the mean when carrying out robust tests. If you get error stating "Standard error cannot be computed because of Winsorized variance of 0 (e.g., due to ties). Try to decrease the trimming level.", try to play around with the value of tr, which is by default set to 0.1. Lowering the value might help.
-#
-# mean.plotting
-# Logical that decides whether mean is to be highlighted and its value to be displayed (Default: TRUE).
-#
+
 # mean.ci
 # Logical that decides whether 95% confidence interval for mean is to be displayed (Default: FALSE).
 #
@@ -319,9 +304,8 @@ options:
 #
 # output
 # Character that describes what is to be returned: can be "plot" (default) or "subtitle" or "caption". Setting this to "subtitle" will return the expression containing statistical results. If you have set results.subtitle = FALSE, then this will return a NULL. Setting this to "caption" will return the expression containing details about Bayes Factor analysis, but valid only when type = "parametric" and bf.message = TRUE, otherwise this will return a NULL. For functions ggpiestats and ggbarstats, setting output = "proptest" will return a dataframe containing results from proportion tests.
-#
-#
-#
+
+
 # grouped_ggwithinstats(
 #   data,
 #   x,
