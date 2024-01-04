@@ -17,7 +17,11 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
-                explanatory)
+                explanatory,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -144,6 +148,7 @@ oddsratio <- function(
             `if`( ! missing(explanatory), explanatory, NULL),
             `if`( ! missing(outcome), outcome, NULL))
 
+    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- oddsratioOptions$new(

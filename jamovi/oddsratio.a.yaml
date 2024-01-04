@@ -25,6 +25,8 @@ options:
     - name: explanatory
       title: Explanatory Variables
       type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
 
     - name: outcome
       title: Mortality or Recurrence
