@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.19
+version: 0.0.2.20
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-01-01'
+date: '2024-01-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -425,13 +425,6 @@ analyses:
     menuGroup: fromOthers
     menuTitle: Test ROC
     menuSubgroup: PPDA
-  - title: multisurvival2
-    name: multisurvival2
-    ns: ClinicoPath
-    menuGroup: Survival
-    menuTitle: multisurvival2
-    menuSubgroup: Drafts
-    menuSubtitle: Multivariable Survival Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
