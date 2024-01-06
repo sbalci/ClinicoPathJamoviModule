@@ -28,23 +28,6 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
-
-
-
-  - type: CollapseBox
-    label: Data
-    collapsed: true
-    children:
-      - type: Label
-        label: Data
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: excl
-
   - type: CollapseBox
     label: Analysis
     collapsed: true
@@ -54,10 +37,17 @@ children:
         fitToGrid: true
         children:
           - type: LayoutBox
-            margin: large
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: ComboBox
+                name: effsizetype
+      - type: Label
+        label: Pairwise Comparisons
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            children:
               - type: CheckBox
                 name: pairwisecomparisons
                 children:
@@ -67,15 +57,12 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
-
-
-
   - type: CollapseBox
     label: Plot
     collapsed: true
     children:
       - type: Label
-        label: Plot
+        label: Theme
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -83,6 +70,49 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-              - type: ComboBox
-                name: plottype
+      - type: Label
+        label: Plot Features
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: centralityplotting
+                children:
+                  - type: ComboBox
+                    name: centralitytype
+                    enable: (centralityplotting)
+      - type: Label
+        label: Plot Type
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: violin
+              - type: CheckBox
+                name: boxplot
+              - type: CheckBox
+                name: point
+      - type: Label
+        label: Plot Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: mytitle
+                format: string
+                width: large
+              - type: TextBox
+                name: xtitle
+                format: string
+                width: large
+              - type: TextBox
+                name: ytitle
+                format: string
+                width: large
 

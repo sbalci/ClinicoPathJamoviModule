@@ -16,7 +16,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             deplen <- length(self$options$dep)
 
-            self$results$plot$setSize(600, deplen * 450)
+            self$results$plot$setSize(650, deplen * 450)
 
 
             if (!is.null(self$options$grvar)) {
@@ -29,7 +29,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+                self$results$plot2$setSize(num_levels * 650, deplen * 450)
 
             }
 
@@ -122,9 +122,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----
@@ -141,7 +139,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # dep <- jmvcore::composeTerm(components = dep)
@@ -185,13 +183,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     centrality.line.args = list(color = "blue", size = 1),
                     centrality.label.args = list(color = "blue", size = 3),
                     ggplot.component = NULL,
-                    ggtheme = ggtheme,
-                    # ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = originaltheme,
+
                     output = "plot",
                     messages = TRUE
                 )
 
+
+            originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+            }
 
             # Print Plot ----
 
@@ -242,9 +246,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----
@@ -262,7 +264,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- self$options$group
 
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # dep <- jmvcore::composeTerm(components = dep)
@@ -276,6 +278,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             if ( !is.null(self$options$grvar) ) {
+
+                originaltheme <- self$options$originaltheme
+
+                selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+
                 grvar <- self$options$grvar
 
                 plot2 <- ggstatsplot::grouped_ggdotplotstats(
@@ -292,15 +300,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption.args = list(size = 10),
                     sub.text = NULL,
                     sub.args = list(size = 12)
-                    , ggtheme = ggtheme
-                    , ggstatsplot.layer = originaltheme
                     , type = typestatistics
-
+                    , ggtheme = selected_theme
 
                 )
-
-
             }
+
 
             # Print Plot ----
 

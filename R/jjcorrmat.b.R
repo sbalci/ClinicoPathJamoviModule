@@ -123,7 +123,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # ggcorrmat ----
@@ -152,16 +152,24 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 package = "RColorBrewer",
                 palette = "Dark2",
                 colors = c("#E69F00", "white", "#009E73"),
-                ggtheme = ggtheme,
 
-                # ggtheme = ggplot2::theme_bw(),
-                ggstatsplot.layer = originaltheme,
                 ggplot.component = NULL,
                 title = NULL,
                 subtitle = NULL,
                 caption = NULL,
                 messages = TRUE
             )
+
+
+            # originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # } else {
+            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
+
 
 
             # Print Plot ----
@@ -214,7 +222,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             myvars <- unlist(myvars)
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # grouped_ggcorrmat ----
@@ -250,6 +258,16 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             }
+
+
+            # originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # } else {
+            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
 
             # Print Plot ----
 

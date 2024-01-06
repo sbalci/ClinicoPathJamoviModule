@@ -11,15 +11,20 @@ jjwithinstats(
   dep3,
   dep4,
   pointpath = FALSE,
-  meanpath = FALSE,
-  meanplotting = FALSE,
+  centralitypath = FALSE,
+  centralityplotting = FALSE,
+  centralitytype = "parameteric",
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   effsizetype = "biased",
-  plottype = "boxviolin",
+  violin = TRUE,
+  boxplot = TRUE,
+  point = TRUE,
   mytitle = "Within Group Comparison",
+  xtitle = "",
+  ytitle = "",
   originaltheme = FALSE
 )
 }
@@ -36,9 +41,11 @@ jjwithinstats(
 
 \item{pointpath}{.}
 
-\item{meanpath}{.}
+\item{centralitypath}{.}
 
-\item{meanplotting}{.}
+\item{centralityplotting}{.}
+
+\item{centralitytype}{.}
 
 \item{typestatistics}{.}
 
@@ -50,9 +57,17 @@ jjwithinstats(
 
 \item{effsizetype}{.}
 
-\item{plottype}{.}
+\item{violin}{.}
+
+\item{boxplot}{.}
+
+\item{point}{.}
 
 \item{mytitle}{.}
+
+\item{xtitle}{.}
+
+\item{ytitle}{.}
 
 \item{originaltheme}{.}
 }

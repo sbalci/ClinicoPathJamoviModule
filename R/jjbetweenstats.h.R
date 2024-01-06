@@ -9,12 +9,19 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = FALSE,
+            centralityplotting = FALSE,
+            centralitytype = "parameteric",
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
-            plottype = "boxviolin",
+            effsizetype = "biased",
+            violin = TRUE,
+            boxplot = TRUE,
+            point = TRUE,
+            mytitle = "Within Group Comparison",
+            xtitle = "",
+            ytitle = "",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -47,10 +54,19 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 permitted=list(
                     "factor"),
                 default=NULL)
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
+            private$..centralityplotting <- jmvcore::OptionBool$new(
+                "centralityplotting",
+                centralityplotting,
                 default=FALSE)
+            private$..centralitytype <- jmvcore::OptionList$new(
+                "centralitytype",
+                centralitytype,
+                options=list(
+                    "parameteric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parameteric")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -85,14 +101,39 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "fdr",
                     "none"),
                 default="holm")
-            private$..plottype <- jmvcore::OptionList$new(
-                "plottype",
-                plottype,
+            private$..effsizetype <- jmvcore::OptionList$new(
+                "effsizetype",
+                effsizetype,
                 options=list(
-                    "box",
-                    "violin",
-                    "boxviolin"),
-                default="boxviolin")
+                    "biased",
+                    "unbiased",
+                    "eta",
+                    "omega"),
+                default="biased")
+            private$..violin <- jmvcore::OptionBool$new(
+                "violin",
+                violin,
+                default=TRUE)
+            private$..boxplot <- jmvcore::OptionBool$new(
+                "boxplot",
+                boxplot,
+                default=TRUE)
+            private$..point <- jmvcore::OptionBool$new(
+                "point",
+                point,
+                default=TRUE)
+            private$..mytitle <- jmvcore::OptionString$new(
+                "mytitle",
+                mytitle,
+                default="Within Group Comparison")
+            private$..xtitle <- jmvcore::OptionString$new(
+                "xtitle",
+                xtitle,
+                default="")
+            private$..ytitle <- jmvcore::OptionString$new(
+                "ytitle",
+                ytitle,
+                default="")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -101,35 +142,56 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..excl)
+            self$.addOption(private$..centralityplotting)
+            self$.addOption(private$..centralitytype)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
-            self$.addOption(private$..plottype)
+            self$.addOption(private$..effsizetype)
+            self$.addOption(private$..violin)
+            self$.addOption(private$..boxplot)
+            self$.addOption(private$..point)
+            self$.addOption(private$..mytitle)
+            self$.addOption(private$..xtitle)
+            self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value,
+        centralityplotting = function() private$..centralityplotting$value,
+        centralitytype = function() private$..centralitytype$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
-        plottype = function() private$..plottype$value,
+        effsizetype = function() private$..effsizetype$value,
+        violin = function() private$..violin$value,
+        boxplot = function() private$..boxplot$value,
+        point = function() private$..point$value,
+        mytitle = function() private$..mytitle$value,
+        xtitle = function() private$..xtitle$value,
+        ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..excl = NA,
+        ..centralityplotting = NA,
+        ..centralitytype = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
-        ..plottype = NA,
+        ..effsizetype = NA,
+        ..violin = NA,
+        ..boxplot = NA,
+        ..point = NA,
+        ..mytitle = NA,
+        ..xtitle = NA,
+        ..ytitle = NA,
         ..originaltheme = NA)
 )
 
@@ -209,12 +271,19 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param excl .
+#' @param centralityplotting .
+#' @param centralitytype .
 #' @param typestatistics .
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .
-#' @param plottype .
+#' @param effsizetype .
+#' @param violin .
+#' @param boxplot .
+#' @param point .
+#' @param mytitle .
+#' @param xtitle .
+#' @param ytitle .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -229,12 +298,19 @@ jjbetweenstats <- function(
     dep,
     group,
     grvar = NULL,
-    excl = FALSE,
+    centralityplotting = FALSE,
+    centralitytype = "parameteric",
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
-    plottype = "boxviolin",
+    effsizetype = "biased",
+    violin = TRUE,
+    boxplot = TRUE,
+    point = TRUE,
+    mytitle = "Within Group Comparison",
+    xtitle = "",
+    ytitle = "",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -257,12 +333,19 @@ jjbetweenstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        excl = excl,
+        centralityplotting = centralityplotting,
+        centralitytype = centralitytype,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
-        plottype = plottype,
+        effsizetype = effsizetype,
+        violin = violin,
+        boxplot = boxplot,
+        point = point,
+        mytitle = mytitle,
+        xtitle = xtitle,
+        ytitle = ytitle,
         originaltheme = originaltheme)
 
     analysis <- jjbetweenstatsClass$new(

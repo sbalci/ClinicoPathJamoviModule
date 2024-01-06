@@ -63,9 +63,4 @@ children:
       - type: Label
         label: Plot
         fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: originaltheme
+        children: []

@@ -45,25 +45,24 @@ options:
       default: NULL
 
 
-
-    # - name: direction
-    #   title: 'Measurement Type'
-    #   type: List
-    #   options:
-    #     - title: Repeated (within groups)
-    #       name: repeated
-    #     - title: Independent (between groups)
-    #       name: independent
-    #   default: independent
-    #   description:
-    #       ui: options for measurement type
-    #       R: select measurement type (repeated or independent)
-
-
-    - name: excl
-      title: Exclude Missing (NA)
+    - name: centralityplotting
+      title: Show Centrality
       type: Bool
       default: false
+
+    - name: centralitytype
+      title: 'Centrality Type'
+      type: List
+      options:
+        - title: mean (parameteric)
+          name: parameteric
+        - title: median (nonparametric)
+          name: nonparametric
+        - title: robust (trimmed mean)
+          name: robust
+        - title: bayes (MAP estimator)
+          name: bayes 
+      default: parameteric
 
 
     - name: typestatistics
@@ -119,28 +118,54 @@ options:
           name: none
       default: holm
 
-
-
-    - name: plottype
-      title: 'Plot Type'
+    - name: effsizetype
+      title: 'Effect Size Needed for Parametric Tests'
       type: List
       options:
-        - title: box
-          name: box
-        - title: violin
-          name: violin
-        - title: boxviolin
-          name: boxviolin
-      default: boxviolin
+        - title: biased
+          name: biased
+        - title: unbiased
+          name: unbiased
+        - title: eta
+          name: eta
+        - title: omega
+          name: omega
+      default: biased
 
+    - name: violin
+      title: Violin Plot
+      type: Bool
+      default: true
 
+    - name: boxplot
+      title: Box Plot
+      type: Bool
+      default: true
 
+    - name: point
+      title: Points
+      type: Bool
+      default: true
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: 'Within Group Comparison'
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
 
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
-
 
 
 

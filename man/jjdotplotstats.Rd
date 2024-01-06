@@ -9,11 +9,7 @@ jjdotplotstats(
   dep,
   group,
   grvar,
-  excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = FALSE,
-  pairwisedisplay = "significant",
-  padjustmethod = "holm",
   originaltheme = FALSE
 )
 }
@@ -26,15 +22,7 @@ jjdotplotstats(
 
 \item{grvar}{.}
 
-\item{excl}{.}
-
 \item{typestatistics}{.}
-
-\item{pairwisecomparisons}{.}
-
-\item{pairwisedisplay}{.}
-
-\item{padjustmethod}{.}
 
 \item{originaltheme}{.}
 }

@@ -142,7 +142,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # dep <- jmvcore::composeTerm(components = dep)
@@ -197,9 +197,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     caption = NULL,
                     beta = 0.1,
                     k = 2L,
-                    ggtheme = ggtheme,
-                    # ggtheme = ggplot2::theme_bw(),
-                    ggstatsplot.layer = originaltheme,
+                    
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
@@ -207,6 +205,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+            originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                # ggplot2::theme_bw()
+            }
+            
             # Print Plot ----
 
             print(plot)
@@ -268,7 +275,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            originaltheme <- self$options$originaltheme
+            # originaltheme <- self$options$originaltheme
 
 
             # dep <- jmvcore::composeTerm(components = dep)
@@ -310,6 +317,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
+            
+            originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                # ggplot2::theme_bw()
+            }
+            
             # Print Plot ----
             print(plot2)
             TRUE

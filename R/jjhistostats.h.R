@@ -8,7 +8,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         initialize = function(
             dep = NULL,
             grvar = NULL,
-            excl = FALSE,
             typestatistics = "parametric",
             centralityparameter = "mean",
             centralityline = TRUE,
@@ -52,10 +51,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
-                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -156,7 +151,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..excl)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..centralityparameter)
             self$.addOption(private$..centralityline)
@@ -182,7 +176,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value,
         typestatistics = function() private$..typestatistics$value,
         centralityparameter = function() private$..centralityparameter$value,
         centralityline = function() private$..centralityline$value,
@@ -207,7 +200,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     private = list(
         ..dep = NA,
         ..grvar = NA,
-        ..excl = NA,
         ..typestatistics = NA,
         ..centralityparameter = NA,
         ..centralityline = NA,
@@ -303,7 +295,6 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param grvar .
-#' @param excl .
 #' @param typestatistics .
 #' @param centralityparameter .
 #' @param centralityline .
@@ -337,7 +328,6 @@ jjhistostats <- function(
     data,
     dep,
     grvar,
-    excl = FALSE,
     typestatistics = "parametric",
     centralityparameter = "mean",
     centralityline = TRUE,
@@ -376,7 +366,6 @@ jjhistostats <- function(
     options <- jjhistostatsOptions$new(
         dep = dep,
         grvar = grvar,
-        excl = excl,
         typestatistics = typestatistics,
         centralityparameter = centralityparameter,
         centralityline = centralityline,

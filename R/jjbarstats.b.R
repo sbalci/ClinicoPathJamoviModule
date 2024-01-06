@@ -15,7 +15,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 deplen <- length(self$options$dep)
 
-                self$results$plot$setSize(600, deplen * 450)
+                self$results$plot$setSize(650, deplen * 450)
 
 
                 if (!is.null(self$options$grvar)) {
@@ -28,7 +28,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         as.factor(mydata[[grvar]])
                     )
 
-                    self$results$plot2$setSize(num_levels * 600, deplen * 450)
+                    self$results$plot2$setSize(num_levels * 650, deplen * 450)
 
                 }
 
@@ -115,13 +115,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Exclude NA ----
 
-                excl <- self$options$excl
 
-                if (excl) {
                     mydata <- jmvcore::naOmit(mydata)
-                }
-
-
 
                 # mydep <- mydata[[self$options$dep]]
                 # mygroup <- mydata[[self$options$group]]
@@ -131,7 +126,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 group <- self$options$group
 
-                originaltheme <- self$options$originaltheme
+                # originaltheme <- self$options$originaltheme
 
 
                 # dep1 <- jmvcore::composeTerms(listOfComponents = dep)
@@ -180,10 +175,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             ylab = NULL,
                             k = 2,
                             proportion.test = TRUE,
-                            ggtheme = ggtheme,
 
-                            # ggtheme = ggplot2::theme_bw(),
-                            ggstatsplot.layer = originaltheme,
                             package = "RColorBrewer",
                             palette = "Dark2",
                             ggplot.component = NULL,
@@ -240,11 +232,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             # ylab = NULL,
                             # k = 2,
                             # proportion.test = TRUE,
-                            ggtheme = ggtheme,
 
-                            # ggtheme = ggplot2::theme_bw(),
-                            ggstatsplot.layer = originaltheme
-                            # ggstatsplot.layer = originaltheme,
                             # package = "RColorBrewer",
                             # palette = "Dark2",
                             # ggplot.component = NULL,
@@ -264,6 +252,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
 
                 }
+
+                originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                # ggplot2::theme_bw()
+            }
 
                 # Print Plot ----
 
@@ -308,12 +305,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # }
 
                 # Exclude NA ----
-
-                excl <- self$options$excl
-
-                if (excl) {
                     mydata <- jmvcore::naOmit(mydata)
-                }
 
 
 
@@ -348,7 +340,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                         # paired = paired,
                         paired = FALSE,
-                        ggtheme = ggtheme,
+
 
 
                         counts = NULL,
@@ -363,10 +355,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         caption.args = list(size = 10),
                         sub.text = NULL,
                         sub.args = list(size = 12)
-                        # ,
-                        # ggtheme = ggtheme,
-                        # ggstatsplot.layer = originaltheme
-                    )
+
+                        )
 
                 }
 
@@ -410,10 +400,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             caption.args = list(size = 10),
                             sub.text = NULL,
                             sub.args = list(size = 12)
-                            # ,
-                            # ggtheme = ggtheme,
-                            # ggstatsplot.layer = originaltheme
-                        )
+
+                            )
                             }
                         )
 
@@ -423,6 +411,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             )
 
                     }
+
+
+                    originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                # ggplot2::theme_bw()
+            }
+
 
                 # Print Plot ----
 

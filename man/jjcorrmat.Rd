@@ -12,8 +12,7 @@ jjcorrmat(
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
-  padjustmethod = "holm",
-  originaltheme = FALSE
+  padjustmethod = "holm"
 )
 }
 \arguments{
@@ -32,8 +31,6 @@ jjcorrmat(
 \item{pairwisedisplay}{.}
 
 \item{padjustmethod}{.}
-
-\item{originaltheme}{.}
 }
 \value{
 A results object containing:

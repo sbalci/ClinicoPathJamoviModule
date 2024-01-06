@@ -15,7 +15,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             deplen <- length(self$options$dep)
 
-            self$results$plot$setSize(600, deplen * 450)
+            self$results$plot$setSize(650, deplen * 450)
 
 
             if (!is.null(self$options$grvar)) {
@@ -28,7 +28,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+                self$results$plot2$setSize(num_levels * 650, deplen * 450)
 
             }
 
@@ -86,54 +86,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop('Data contains no (complete) rows')
 
 
-            # Prepare Data ----
-
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-            plottype <-
-                jmvcore::constructFormula(terms = self$options$plottype)
-
-            originaltheme <- self$options$originaltheme
-
-            pairwisecomparisons <- self$options$pairwisecomparisons
-
-            pairwisedisplay <-
-                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
-
-            padjustmethod <-
-                jmvcore::constructFormula(terms = self$options$padjustmethod)
-
-
-            # ADD HERE ----
-
-
-
             # read data ----
 
             mydata <- self$data
@@ -148,9 +100,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # read arguments ----
@@ -170,9 +120,73 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #         )
             # )
 
-            # dep <- jmvcore::composeTerm(components = dep)
 
-            # group <- jmvcore::composeTerm(components = group)
+
+
+            ## type of statistics ----
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+            # read arguments ----
+
+            mytitle <- self$options$mytitle
+
+            xtitle <- self$options$xtitle
+
+            if (xtitle == '') {
+                xtitle <- NULL
+            }
+
+            ytitle <- self$options$ytitle
+
+            if (ytitle == '') {
+                ytitle <- NULL
+            }
+
+            effsizetype <- self$options$effsizetype
+
+            centralityplotting <- self$options$centralityplotting
+
+            centralitytype <- self$options$centralitytype
+
+            violin <- self$options$violin
+
+            boxplot <- self$options$boxplot
+
+            point <- self$options$point
+
+            if (violin) {
+
+                violinargs <- list(width = 0.5, alpha = 0.2, na.rm = TRUE)
+
+                } else {
+
+                violinargs <- list(width = 0)
+            }
+
+
+            if (boxplot) {
+            boxplotargs <- list(width = 0.2, alpha = 0.5, na.rm = TRUE)
+            } else {
+            boxplotargs <- list(width = 0)
+            }
+
+            if (point) {
+            pointargs <- list(alpha = 0.5, linetype = "dashed")
+            } else {
+            pointargs <- list(alpha = 0)
+            }
+
 
             # ggbetweenstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
@@ -186,54 +200,33 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x = !!rlang::sym(group),
                 y = !!rlang::sym(dep)
 
+                    , title = mytitle
+                    , xlab = xtitle
+                    , ylab = ytitle
+
                 , type = typestatistics
-                , ggtheme = ggtheme
-                , ggstatsplot.layer = originaltheme
-                , plot.type = plottype
-                , pairwise.comparisons = pairwisecomparisons
-                , pairwise.display = pairwisedisplay
-                , p.adjust.method = padjustmethod
+                    , pairwise.comparisons = pairwisecomparisons
+                    , pairwise.display = pairwisedisplay
+                    , p.adjust.method = padjustmethod
+                    , effsize.type = effsizetype
+                    , centrality.plotting = centralityplotting
+                    , centrality.type = centralitytype
+                    , violin.args = violinargs
+                    , boxplot.args = boxplotargs
+                    , point.args = pointargs
 
-                ,
-                effsize.type = "unbiased",
-                bf.prior = 0.707,
-                bf.message = TRUE,
-                results.subtitle = TRUE,
-                xlab = NULL,
-                ylab = NULL,
-                caption = NULL,
-                title = NULL,
-                subtitle = NULL,
-                sample.size.label = TRUE,
-                k = 2L,
-                var.equal = FALSE,
-                conf.level = 0.95,
-                nboot = 100L,
-                tr = 0.1,
-                mean.plotting = TRUE,
-                mean.ci = FALSE,
-                mean.point.args = list(size = 5, color = "darkred"),
-                mean.label.args = list(size = 3),
-                notch = FALSE,
-                notchwidth = 0.5,
-                outlier.tagging = FALSE,
-                outlier.label = NULL,
-                outlier.coef = 1.5,
-                outlier.shape = 19,
-                outlier.color = "black",
-                outlier.label.args = list(size = 3),
-                outlier.point.args = list(),
-                point.args = list(
-                    position = ggplot2::position_jitterdodge(dodge.width = 0.6),
-                    alpha = 0.4, size = 3, stroke = 0),
-                violin.args = list(width = 0.5, alpha = 0.2),
-                ggsignif.args = list(textsize = 3, tip_length = 0.01),
 
-                package = "RColorBrewer",
-                palette = "Dark2",
-                ggplot.component = NULL,
-                output = "plot"
-            )
+                )
+
+            originaltheme <- self$options$originaltheme
+
+            if (!originaltheme) {
+                plot <- plot + ggtheme
+            } else {
+                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                # ggplot2::theme_bw()
+            }
+
 
             }
 
@@ -257,29 +250,52 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 y = !!y,
                                 messages = messages,
                         x = !!rlang::sym(group)
-                        , type = typestatistics
-                        , ggtheme = ggtheme
-                        , ggstatsplot.layer = originaltheme
-                        , plot.type = plottype
-                        , pairwise.comparisons = pairwisecomparisons
-                        , pairwise.display = pairwisedisplay
-                        , p.adjust.method = padjustmethod
+
+                    , type = typestatistics
+                    , title = mytitle
+                    , xlab = xtitle
+                    , ylab = ytitle
+                    , pairwise.comparisons = pairwisecomparisons
+                    , pairwise.display = pairwisedisplay
+                    , p.adjust.method = padjustmethod
+                    , effsize.type = effsizetype
+                    , centrality.plotting = centralityplotting
+                    , centrality.type = centralitytype
+                    , violin.args = violinargs
+                    , boxplot.args = boxplotargs
+                    , point.args = pointargs
+
 
                     )
                         }
                     )
 
+                originaltheme <- self$options$originaltheme
+
+
+                # Assuming plotlist is a list of plots
+                for (i in seq_along(plotlist)) {
+                    if (!originaltheme) {
+                        plotlist[[i]] <- plotlist[[i]] + ggtheme
+                    } else {
+                        plotlist[[i]] <- plotlist[[i]] + ggstatsplot::theme_ggstatsplot()
+                    }
+                }
+
+                # Now combine the plots with the applied themes
                 plot <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
-                            plotgrid.args = list(ncol = 1)
-                            )
+                    plotgrid.args = list(ncol = 1)
+                )
+
 
         }
 
-            ## Print Plot ----
 
-            print(plot)
-            TRUE
+                ## Print Plot ----
+
+                print(plot)
+                TRUE
 
 
             }
@@ -298,52 +314,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop('Data contains no (complete) rows')
 
 
-            # Prepare Data ----
-
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-            # pairw <- self$options$pairw
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-
-            plottype <-
-                jmvcore::constructFormula(terms = self$options$plottype)
-
-
-            originaltheme <- self$options$originaltheme
-
-            pairwisecomparisons <- self$options$pairwisecomparisons
-
-            pairwisedisplay <-
-                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
-
-            padjustmethod <-
-                jmvcore::constructFormula(terms = self$options$padjustmethod)
-
-            # ADD HERE ----
-
-
-
             # read data ----
 
             mydata <- self$data
@@ -358,9 +328,31 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
+            mydata <- jmvcore::naOmit(mydata)
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+
+
+            # type of statistics ----
+
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
+
+
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+
+            # read arguments ----
+
+            dep <- self$options$dep
+
+            group <- self$options$group
 
 
             # read arguments ----
@@ -371,11 +363,65 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # dep <- jmvcore::composeTerm(components = dep)
+            # # mydataview ----
+            # self$results$mydataview$setContent(
+            #     list(
+            #         dep1 = dep,
+            #         group = group,
+            #         mydata = head(mydata)
+            #         )
+            # )
 
-            # group <- jmvcore::composeTerm(components = group)
+
+            ## type of statistics ----
+
+            typestatistics <-
+                jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
+            pairwisecomparisons <- self$options$pairwisecomparisons
+
+            pairwisedisplay <-
+                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+
+            padjustmethod <-
+                jmvcore::constructFormula(terms = self$options$padjustmethod)
+
+            # read arguments ----
+
+            effsizetype <- self$options$effsizetype
+
+            centralityplotting <- self$options$centralityplotting
+
+            centralitytype <- self$options$centralitytype
+
+            violin <- self$options$violin
+
+            boxplot <- self$options$boxplot
+
+            point <- self$options$point
+
+            if (violin) {
+
+                violinargs <- list(width = 0.5, alpha = 0.2, na.rm = TRUE)
+
+            } else {
+
+                violinargs <- list(width = 0)
+            }
+
+
+            if (boxplot) {
+                boxplotargs <- list(width = 0.2, alpha = 0.5, na.rm = TRUE)
+            } else {
+                boxplotargs <- list(width = 0)
+            }
+
+            if (point) {
+                pointargs <- list(alpha = 0.5, linetype = "dashed")
+            } else {
+                pointargs <- list(alpha = 0)
+            }
 
 
             # grouped_ggbetweenstats ----
@@ -386,20 +432,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             grvar <- self$options$grvar
 
+            originaltheme <- self$options$originaltheme
+
             if (length(self$options$dep) == 1) {
 
+                selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+                # Create plot2 with the selected theme
                 plot2 <- ggstatsplot::grouped_ggbetweenstats(
                     data = mydata,
                     x = !!rlang::sym(group),
                     y = !!rlang::sym(dep),
-                    grouping.var = !!rlang::sym(grvar)
-                    , type = typestatistics
-                    , ggtheme = ggtheme
-                    , ggstatsplot.layer = originaltheme
-                    , plot.type = plottype
-                    , pairwise.comparisons = pairwisecomparisons
-                    , pairwise.display = pairwisedisplay
-                    , p.adjust.method = padjustmethod
+                    grouping.var = !!rlang::sym(grvar),
+                    type = typestatistics,
+                    pairwise.comparisons = pairwisecomparisons,
+                    pairwise.display = pairwisedisplay,
+                    p.adjust.method = padjustmethod,
+                    effsize.type = effsizetype,
+                    centrality.plotting = centralityplotting,
+                    centrality.type = centralitytype,
+                    violin.args = violinargs,
+                    boxplot.args = boxplotargs,
+                    point.args = pointargs,
+                    ggtheme = selected_theme
 
                 )
 
@@ -410,6 +465,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$dep) > 1) {
 
+                originaltheme <- self$options$originaltheme
+
+                selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+                # Convert 'dep' to a list and then to symbols
                 dep2 <- as.list(self$options$dep)
                 dep2_symbols <- purrr::map(dep2, rlang::sym)
 
@@ -420,35 +480,38 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             messages = FALSE
                             ),
                         .f = function(y, messages) {
-                            ggstatsplot::grouped_ggbetweenstats(
+
+
+                        ggstatsplot::grouped_ggbetweenstats(
 
                         data = mydata,
                         y = !!y,
                         messages = messages,
 
-
-
                         x = !!rlang::sym(group),
                         grouping.var = !!rlang::sym(grvar)
+
                         , type = typestatistics
-                        , ggtheme = ggtheme
-                        , ggstatsplot.layer = originaltheme
-                        , plot.type = plottype
                         , pairwise.comparisons = pairwisecomparisons
                         , pairwise.display = pairwisedisplay
                         , p.adjust.method = padjustmethod
-
+                        , effsize.type = effsizetype
+                        , centrality.plotting = centralityplotting
+                        , centrality.type = centralitytype
+                        , violin.args = violinargs
+                        , boxplot.args = boxplotargs
+                        , point.args = pointargs
+                        , ggtheme = selected_theme
 
                     )
                     }
                     )
 
-
+                # Combine plots into a single plot
                 plot2 <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
-                            plotgrid.args = list(ncol = 1)
-                            )
-
+                    plotgrid.args = list(ncol = 1)
+                )
 
             }
 

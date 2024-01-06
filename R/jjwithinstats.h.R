@@ -11,15 +11,20 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             dep3 = NULL,
             dep4 = NULL,
             pointpath = FALSE,
-            meanpath = FALSE,
-            meanplotting = FALSE,
+            centralitypath = FALSE,
+            centralityplotting = FALSE,
+            centralitytype = "parameteric",
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             effsizetype = "biased",
-            plottype = "boxviolin",
+            violin = TRUE,
+            boxplot = TRUE,
+            point = TRUE,
             mytitle = "Within Group Comparison",
+            xtitle = "",
+            ytitle = "",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -60,14 +65,23 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "pointpath",
                 pointpath,
                 default=FALSE)
-            private$..meanpath <- jmvcore::OptionBool$new(
-                "meanpath",
-                meanpath,
+            private$..centralitypath <- jmvcore::OptionBool$new(
+                "centralitypath",
+                centralitypath,
                 default=FALSE)
-            private$..meanplotting <- jmvcore::OptionBool$new(
-                "meanplotting",
-                meanplotting,
+            private$..centralityplotting <- jmvcore::OptionBool$new(
+                "centralityplotting",
+                centralityplotting,
                 default=FALSE)
+            private$..centralitytype <- jmvcore::OptionList$new(
+                "centralitytype",
+                centralitytype,
+                options=list(
+                    "parameteric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parameteric")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -111,18 +125,30 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "eta",
                     "omega"),
                 default="biased")
-            private$..plottype <- jmvcore::OptionList$new(
-                "plottype",
-                plottype,
-                options=list(
-                    "box",
-                    "violin",
-                    "boxviolin"),
-                default="boxviolin")
+            private$..violin <- jmvcore::OptionBool$new(
+                "violin",
+                violin,
+                default=TRUE)
+            private$..boxplot <- jmvcore::OptionBool$new(
+                "boxplot",
+                boxplot,
+                default=TRUE)
+            private$..point <- jmvcore::OptionBool$new(
+                "point",
+                point,
+                default=TRUE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
                 default="Within Group Comparison")
+            private$..xtitle <- jmvcore::OptionString$new(
+                "xtitle",
+                xtitle,
+                default="")
+            private$..ytitle <- jmvcore::OptionString$new(
+                "ytitle",
+                ytitle,
+                default="")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -133,15 +159,20 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..dep3)
             self$.addOption(private$..dep4)
             self$.addOption(private$..pointpath)
-            self$.addOption(private$..meanpath)
-            self$.addOption(private$..meanplotting)
+            self$.addOption(private$..centralitypath)
+            self$.addOption(private$..centralityplotting)
+            self$.addOption(private$..centralitytype)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..effsizetype)
-            self$.addOption(private$..plottype)
+            self$.addOption(private$..violin)
+            self$.addOption(private$..boxplot)
+            self$.addOption(private$..point)
             self$.addOption(private$..mytitle)
+            self$.addOption(private$..xtitle)
+            self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
@@ -150,15 +181,20 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         dep3 = function() private$..dep3$value,
         dep4 = function() private$..dep4$value,
         pointpath = function() private$..pointpath$value,
-        meanpath = function() private$..meanpath$value,
-        meanplotting = function() private$..meanplotting$value,
+        centralitypath = function() private$..centralitypath$value,
+        centralityplotting = function() private$..centralityplotting$value,
+        centralitytype = function() private$..centralitytype$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
         effsizetype = function() private$..effsizetype$value,
-        plottype = function() private$..plottype$value,
+        violin = function() private$..violin$value,
+        boxplot = function() private$..boxplot$value,
+        point = function() private$..point$value,
         mytitle = function() private$..mytitle$value,
+        xtitle = function() private$..xtitle$value,
+        ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep1 = NA,
@@ -166,15 +202,20 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..dep3 = NA,
         ..dep4 = NA,
         ..pointpath = NA,
-        ..meanpath = NA,
-        ..meanplotting = NA,
+        ..centralitypath = NA,
+        ..centralityplotting = NA,
+        ..centralitytype = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
         ..effsizetype = NA,
-        ..plottype = NA,
+        ..violin = NA,
+        ..boxplot = NA,
+        ..point = NA,
         ..mytitle = NA,
+        ..xtitle = NA,
+        ..ytitle = NA,
         ..originaltheme = NA)
 )
 
@@ -249,15 +290,20 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep3 .
 #' @param dep4 .
 #' @param pointpath .
-#' @param meanpath .
-#' @param meanplotting .
+#' @param centralitypath .
+#' @param centralityplotting .
+#' @param centralitytype .
 #' @param typestatistics .
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .
 #' @param effsizetype .
-#' @param plottype .
+#' @param violin .
+#' @param boxplot .
+#' @param point .
 #' @param mytitle .
+#' @param xtitle .
+#' @param ytitle .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -273,15 +319,20 @@ jjwithinstats <- function(
     dep3,
     dep4,
     pointpath = FALSE,
-    meanpath = FALSE,
-    meanplotting = FALSE,
+    centralitypath = FALSE,
+    centralityplotting = FALSE,
+    centralitytype = "parameteric",
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     effsizetype = "biased",
-    plottype = "boxviolin",
+    violin = TRUE,
+    boxplot = TRUE,
+    point = TRUE,
     mytitle = "Within Group Comparison",
+    xtitle = "",
+    ytitle = "",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -306,15 +357,20 @@ jjwithinstats <- function(
         dep3 = dep3,
         dep4 = dep4,
         pointpath = pointpath,
-        meanpath = meanpath,
-        meanplotting = meanplotting,
+        centralitypath = centralitypath,
+        centralityplotting = centralityplotting,
+        centralitytype = centralitytype,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
         effsizetype = effsizetype,
-        plottype = plottype,
+        violin = violin,
+        boxplot = boxplot,
+        point = point,
         mytitle = mytitle,
+        xtitle = xtitle,
+        ytitle = ytitle,
         originaltheme = originaltheme)
 
     analysis <- jjwithinstatsClass$new(

@@ -9,12 +9,19 @@ jjbetweenstats(
   dep,
   group,
   grvar = NULL,
-  excl = FALSE,
+  centralityplotting = FALSE,
+  centralitytype = "parameteric",
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
-  plottype = "boxviolin",
+  effsizetype = "biased",
+  violin = TRUE,
+  boxplot = TRUE,
+  point = TRUE,
+  mytitle = "Within Group Comparison",
+  xtitle = "",
+  ytitle = "",
   originaltheme = FALSE
 )
 }
@@ -27,7 +34,9 @@ jjbetweenstats(
 
 \item{grvar}{.}
 
-\item{excl}{.}
+\item{centralityplotting}{.}
+
+\item{centralitytype}{.}
 
 \item{typestatistics}{.}
 
@@ -37,7 +46,19 @@ jjbetweenstats(
 
 \item{padjustmethod}{.}
 
-\item{plottype}{.}
+\item{effsizetype}{.}
+
+\item{violin}{.}
+
+\item{boxplot}{.}
+
+\item{point}{.}
+
+\item{mytitle}{.}
+
+\item{xtitle}{.}
+
+\item{ytitle}{.}
 
 \item{originaltheme}{.}
 }
