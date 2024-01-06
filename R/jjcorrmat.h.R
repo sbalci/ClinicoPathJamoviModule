@@ -12,8 +12,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
-            padjustmethod = "holm",
-            originaltheme = FALSE, ...) {
+            padjustmethod = "holm", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -74,10 +73,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fdr",
                     "none"),
                 default="holm")
-            private$..originaltheme <- jmvcore::OptionBool$new(
-                "originaltheme",
-                originaltheme,
-                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -86,7 +81,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
-            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -95,8 +89,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
-        padjustmethod = function() private$..padjustmethod$value,
-        originaltheme = function() private$..originaltheme$value),
+        padjustmethod = function() private$..padjustmethod$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
@@ -104,8 +97,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
-        ..padjustmethod = NA,
-        ..originaltheme = NA)
+        ..padjustmethod = NA)
 )
 
 jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -191,7 +183,6 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .
-#' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -208,8 +199,7 @@ jjcorrmat <- function(
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
-    padjustmethod = "holm",
-    originaltheme = FALSE) {
+    padjustmethod = "holm") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjcorrmat requires jmvcore to be installed (restart may be required)")
@@ -231,8 +221,7 @@ jjcorrmat <- function(
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
-        padjustmethod = padjustmethod,
-        originaltheme = originaltheme)
+        padjustmethod = padjustmethod)
 
     analysis <- jjcorrmatClass$new(
         options = options,

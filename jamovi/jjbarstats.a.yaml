@@ -64,12 +64,6 @@ options:
     #       R: select measurement type (repeated or independent)
 
 
-    - name: excl
-      title: Exclude Missing (NA)
-      type: Bool
-      default: false
-
-
     - name: typestatistics
       title: 'Type of Statistic'
       type: List

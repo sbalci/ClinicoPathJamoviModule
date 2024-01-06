@@ -9,7 +9,6 @@ jjbarstats(
   dep,
   group,
   grvar,
-  excl = FALSE,
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
@@ -25,8 +24,6 @@ jjbarstats(
 \item{group}{.}
 
 \item{grvar}{.}
-
-\item{excl}{.}
 
 \item{typestatistics}{.}
 

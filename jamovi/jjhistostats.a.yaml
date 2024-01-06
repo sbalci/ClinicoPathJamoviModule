@@ -38,12 +38,6 @@ options:
 
 # Data ----
 
-    - name: excl
-      title: Exclude Missing (NA)
-      type: Bool
-      default: false
-
-
 
 # Analysis ----
 
@@ -189,7 +183,7 @@ options:
       default: ''
 
     - name: usetitleprefix
-      title: Plot Caption
+      title: Title Prefix
       type: Bool
       default: false
 
@@ -218,7 +212,6 @@ options:
       title: Test Value
       type: Bool
       default: false
-
 
 
 ...

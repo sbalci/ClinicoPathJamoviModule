@@ -54,15 +54,30 @@ options:
       type: Bool
       default: false
 
-    - name: meanpath
-      title: Show Mean Path
+    - name: centralitypath
+      title: Centrality Path
       type: Bool
       default: false
 
-    - name: meanplotting
-      title: Show Mean Plotting
+
+    - name: centralityplotting
+      title: Show Centrality
       type: Bool
       default: false
+
+    - name: centralitytype
+      title: 'Centrality Type'
+      type: List
+      options:
+        - title: mean (parameteric)
+          name: parameteric
+        - title: median (nonparametric)
+          name: nonparametric
+        - title: robust (trimmed mean)
+          name: robust
+        - title: bayes (MAP estimator)
+          name: bayes 
+      default: parameteric
 
 
     - name: typestatistics
@@ -132,23 +147,35 @@ options:
           name: omega
       default: biased
 
+    - name: violin
+      title: Violin Plot
+      type: Bool
+      default: true
 
-    - name: plottype
-      title: 'Plot Type'
-      type: List
-      options:
-        - title: box
-          name: box
-        - title: violin
-          name: violin
-        - title: boxviolin
-          name: boxviolin
-      default: boxviolin
+    - name: boxplot
+      title: Box Plot
+      type: Bool
+      default: true
+
+    - name: point
+      title: Points
+      type: Bool
+      default: true
 
     - name: mytitle
       title: Title
       type: String
       default: 'Within Group Comparison'
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
 
     - name: originaltheme
       title: Add GGStatsPlot Layer

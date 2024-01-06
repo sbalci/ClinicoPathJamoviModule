@@ -22,20 +22,6 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Data
-    collapsed: true
-    children:
-      - type: Label
-        label: Data
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: excl
-
-  - type: CollapseBox
     label: Analysis
     collapsed: true
     children:
@@ -69,7 +55,6 @@ children:
                 name: testvalueline
               - type: CheckBox
                 name: centralityline
-
           - type: LayoutBox
             margin: large
             children:
@@ -139,4 +124,3 @@ children:
                 format: string
                 width: large
                 enable: (grvar && usetitleprefix)
-

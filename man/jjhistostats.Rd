@@ -8,7 +8,6 @@ jjhistostats(
   data,
   dep,
   grvar,
-  excl = FALSE,
   typestatistics = "parametric",
   centralityparameter = "mean",
   centralityline = TRUE,
@@ -38,8 +37,6 @@ jjhistostats(
 \item{dep}{.}
 
 \item{grvar}{.}
-
-\item{excl}{.}
 
 \item{typestatistics}{.}
 

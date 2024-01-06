@@ -9,7 +9,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = FALSE,
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
@@ -46,10 +45,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
-                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -92,7 +87,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..excl)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
@@ -103,7 +97,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        excl = function() private$..excl$value,
         typestatistics = function() private$..typestatistics$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
@@ -113,7 +106,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..excl = NA,
         ..typestatistics = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
@@ -198,7 +190,6 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param excl .
 #' @param typestatistics .
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
@@ -217,7 +208,6 @@ jjbarstats <- function(
     dep,
     group,
     grvar,
-    excl = FALSE,
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
@@ -245,7 +235,6 @@ jjbarstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        excl = excl,
         typestatistics = typestatistics,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,

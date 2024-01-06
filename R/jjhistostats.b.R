@@ -96,12 +96,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
 
                 ## Exclude NA ----
-
-                excl <- self$options$excl
-
-                if (excl) {
                     mydata <- jmvcore::naOmit(mydata)
-                }
 
                 dep <- self$options$dep
 
@@ -307,6 +302,15 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             )
                 }
 
+            # originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # } else {
+            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
+
                 ## Print Plot ----
                 print(plot)
                 TRUE
@@ -354,11 +358,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 ## Exclude NA ----
 
-                excl <- self$options$excl
-
-                if (excl) {
                     mydata <- jmvcore::naOmit(mydata)
-                }
 
                 ## type of statistics ----
 
@@ -472,6 +472,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                          )
 
                 }
+
+            #     originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # } else {
+            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
+
 
                 ## Print Plot 2 ----
 
