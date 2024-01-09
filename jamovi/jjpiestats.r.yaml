@@ -37,20 +37,20 @@ items:
 
 
 
-    - name: plot3
-      title: '`${dep} by {grvar}`'
-      type: Image
-      width:  800
-      height: 300
-      renderFun: .plot3
-      requiresData: true
-      clearWith:
-          - dep
-          - group
-          - grvar
-          - direction
-          - originaltheme
-      visible: (grvar)
+    # - name: plot3
+    #   title: '`${dep} by {grvar}`'
+    #   type: Image
+    #   width:  800
+    #   height: 300
+    #   renderFun: .plot3
+    #   requiresData: true
+    #   clearWith:
+    #       - dep
+    #       - group
+    #       - grvar
+    #       - direction
+    #       - originaltheme
+    #   visible: (grvar)
 
 
     - name: plot2

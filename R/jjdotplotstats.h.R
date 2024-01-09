@@ -10,6 +10,12 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             group = NULL,
             grvar = NULL,
             typestatistics = "parametric",
+            effsizetype = "biased",
+            centralityplotting = FALSE,
+            centralitytype = "parameteric",
+            mytitle = "",
+            xtitle = "",
+            ytitle = "",
             originaltheme = FALSE, ...) {
 
             super$initialize(
@@ -50,6 +56,40 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..effsizetype <- jmvcore::OptionList$new(
+                "effsizetype",
+                effsizetype,
+                options=list(
+                    "biased",
+                    "unbiased",
+                    "eta",
+                    "omega"),
+                default="biased")
+            private$..centralityplotting <- jmvcore::OptionBool$new(
+                "centralityplotting",
+                centralityplotting,
+                default=FALSE)
+            private$..centralitytype <- jmvcore::OptionList$new(
+                "centralitytype",
+                centralitytype,
+                options=list(
+                    "parameteric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parameteric")
+            private$..mytitle <- jmvcore::OptionString$new(
+                "mytitle",
+                mytitle,
+                default="")
+            private$..xtitle <- jmvcore::OptionString$new(
+                "xtitle",
+                xtitle,
+                default="")
+            private$..ytitle <- jmvcore::OptionString$new(
+                "ytitle",
+                ytitle,
+                default="")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -59,6 +99,12 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..effsizetype)
+            self$.addOption(private$..centralityplotting)
+            self$.addOption(private$..centralitytype)
+            self$.addOption(private$..mytitle)
+            self$.addOption(private$..xtitle)
+            self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
         }),
     active = list(
@@ -66,12 +112,24 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
+        effsizetype = function() private$..effsizetype$value,
+        centralityplotting = function() private$..centralityplotting$value,
+        centralitytype = function() private$..centralitytype$value,
+        mytitle = function() private$..mytitle$value,
+        xtitle = function() private$..xtitle$value,
+        ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
         ..typestatistics = NA,
+        ..effsizetype = NA,
+        ..centralityplotting = NA,
+        ..centralitytype = NA,
+        ..mytitle = NA,
+        ..xtitle = NA,
+        ..ytitle = NA,
         ..originaltheme = NA)
 )
 
@@ -156,6 +214,12 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param group .
 #' @param grvar .
 #' @param typestatistics .
+#' @param effsizetype .
+#' @param centralityplotting .
+#' @param centralitytype .
+#' @param mytitle .
+#' @param xtitle .
+#' @param ytitle .
 #' @param originaltheme .
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -171,6 +235,12 @@ jjdotplotstats <- function(
     group,
     grvar,
     typestatistics = "parametric",
+    effsizetype = "biased",
+    centralityplotting = FALSE,
+    centralitytype = "parameteric",
+    mytitle = "",
+    xtitle = "",
+    ytitle = "",
     originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -194,6 +264,12 @@ jjdotplotstats <- function(
         group = group,
         grvar = grvar,
         typestatistics = typestatistics,
+        effsizetype = effsizetype,
+        centralityplotting = centralityplotting,
+        centralitytype = centralitytype,
+        mytitle = mytitle,
+        xtitle = xtitle,
+        ytitle = ytitle,
         originaltheme = originaltheme)
 
     analysis <- jjdotplotstatsClass$new(

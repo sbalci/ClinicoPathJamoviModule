@@ -9,10 +9,10 @@ jjbarstats(
   dep,
   group,
   grvar,
-  typestatistics = "parametric",
-  pairwisecomparisons = FALSE,
-  pairwisedisplay = "significant",
-  padjustmethod = "holm",
+  direction = "independent",
+  mytitle = "",
+  xtitle = "",
+  ytitle = "",
   originaltheme = FALSE
 )
 }
@@ -25,13 +25,13 @@ jjbarstats(
 
 \item{grvar}{.}
 
-\item{typestatistics}{.}
+\item{direction}{select measurement type (repeated or independent)}
 
-\item{pairwisecomparisons}{.}
+\item{mytitle}{.}
 
-\item{pairwisedisplay}{.}
+\item{xtitle}{.}
 
-\item{padjustmethod}{.}
+\item{ytitle}{.}
 
 \item{originaltheme}{.}
 }

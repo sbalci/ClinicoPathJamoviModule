@@ -42,7 +42,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
-                # TODO ----
+                # todo ----
 
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
@@ -61,7 +61,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else {
 
-                # TODO ----
+                # todo ----
                 todo <- glue::glue(
                     "<br>You have selected to use a Dot Plot to compare continuous variables by groups.<br><hr>")
 
@@ -87,28 +87,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # Prepare Data ----
-
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
 
             mydata <- self$data
 
@@ -139,12 +117,33 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            # originaltheme <- self$options$originaltheme
+
+            # read arguments ----
+
+            mytitle <- self$options$mytitle
+
+            if (mytitle == '') {
+                mytitle <- NULL
+            }
 
 
-            # dep <- jmvcore::composeTerm(components = dep)
+            xtitle <- self$options$xtitle
 
-            # group <- jmvcore::composeTerm(components = group)
+            if (xtitle == '') {
+                xtitle <- NULL
+            }
+
+            ytitle <- self$options$ytitle
+
+            if (ytitle == '') {
+                ytitle <- NULL
+            }
+
+            effsizetype <- self$options$effsizetype
+
+            centralityplotting <- self$options$centralityplotting
+
+            centralitytype <- self$options$centralitytype
 
 
             # ggdotplotstats ----
@@ -156,36 +155,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggstatsplot::ggdotplotstats(
                     data = mydata,
                     x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group),
-                    xlab = NULL,
-                    ylab = NULL,
-                    title = NULL,
-                    subtitle = NULL,
-                    caption = NULL,
-
-                    type = typestatistics,
-
-                    test.value = 0,
-                    bf.prior = 0.707,
-                    bf.message = TRUE,
-                    effsize.type = "g",
-                    conf.level = 0.95,
-                    nboot = 100,
-                    k = 2,
-                    results.subtitle = TRUE,
-                    point.args = list(color = "black", size = 3, shape = 16),
-                    test.k = 0,
-                    test.value.line = FALSE,
-                    test.value.line.args = list(size = 1),
-                    test.value.label.args = list(size = 3),
-                    centrality.parameter = "mean",
-                    centrality.k = 2,
-                    centrality.line.args = list(color = "blue", size = 1),
-                    centrality.label.args = list(color = "blue", size = 3),
-                    ggplot.component = NULL,
-
-                    output = "plot",
-                    messages = TRUE
+                    y = !!rlang::sym(group)
+                    , title = mytitle
+                    , xlab = xtitle
+                    , ylab = ytitle
+                    , type = typestatistics
+                    , effsize.type = effsizetype
+                    , centrality.plotting = centralityplotting
+                    , centrality.type = centralitytype
                 )
 
 
@@ -229,21 +206,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in vars)
                 mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
 
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
             # Exclude NA ----
 
             mydata <- jmvcore::naOmit(mydata)
@@ -264,12 +226,11 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- self$options$group
 
 
-            # originaltheme <- self$options$originaltheme
+            effsizetype <- self$options$effsizetype
 
+            centralityplotting <- self$options$centralityplotting
 
-            # dep <- jmvcore::composeTerm(components = dep)
-
-            # group <- jmvcore::composeTerm(components = group)
+            centralitytype <- self$options$centralitytype
 
 
             # grouped_ggdotplotstats ----
@@ -290,17 +251,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!rlang::sym(dep),
                     y = !!rlang::sym(group),
-                    grouping.var = !!rlang::sym(grvar),
-                    title.prefix = NULL,
-                    output = "plot",
-                    plotgrid.args = list(),
-                    title.text = NULL,
-                    title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
-                    caption.args = list(size = 10),
-                    sub.text = NULL,
-                    sub.args = list(size = 12)
+                    grouping.var = !!rlang::sym(grvar)
+
                     , type = typestatistics
+                    , effsize.type = effsizetype
+                    , centrality.plotting = centralityplotting
+                    , centrality.type = centralitytype
                     , ggtheme = selected_theme
 
                 )

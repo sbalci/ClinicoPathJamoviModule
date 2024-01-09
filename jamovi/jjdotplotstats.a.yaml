@@ -60,7 +60,54 @@ options:
           name: bayes
       default: parametric
 
+    - name: effsizetype
+      title: 'Effect Size Needed for Parametric Tests'
+      type: List
+      options:
+        - title: biased
+          name: biased
+        - title: unbiased
+          name: unbiased
+        - title: eta
+          name: eta
+        - title: omega
+          name: omega
+      default: biased
 
+
+    - name: centralityplotting
+      title: Show Centrality
+      type: Bool
+      default: false
+
+    - name: centralitytype
+      title: 'Centrality Type'
+      type: List
+      options:
+        - title: mean (parameteric)
+          name: parameteric
+        - title: median (nonparametric)
+          name: nonparametric
+        - title: robust (trimmed mean)
+          name: robust
+        - title: bayes (MAP estimator)
+          name: bayes 
+      default: parameteric
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
 
 
     - name: originaltheme

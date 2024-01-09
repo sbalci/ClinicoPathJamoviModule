@@ -16,19 +16,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$plot2$setSize(650, 450)
 
-            if (!is.null(self$options$dep) && !is.null(self$options$grvar)) {
-
-                mydata <- self$data
-
-                grvar <-  self$options$grvar
-
-                num_levels <- nlevels(
-                    as.factor(mydata[[grvar]])
-                )
-
-                self$results$plot3$setSize(num_levels * 600, 450)
-
-            }
+            # if (!is.null(self$options$dep) && !is.null(self$options$grvar)) {
+            #
+            #     mydata <- self$data
+            #
+            #     grvar <-  self$options$grvar
+            #
+            #     num_levels <- nlevels(
+            #         as.factor(mydata[[grvar]])
+            #     )
+            #
+            #     self$results$plot3$setSize(num_levels * 600, 450)
+            #
+            # }
 
             if (!is.null(self$options$grvar) && !is.null(self$options$group)) {
 
@@ -63,7 +63,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.factor(mydata[[group]])
                 )
 
-                self$results$plot3$setSize((num_levels + num_levels_group) * 600, 450)
+                # self$results$plot3$setSize((num_levels + num_levels_group) * 600, 450)
 
                 self$results$plot4$setSize((num_levels + num_levels_group) * 600, 450)
 
@@ -159,9 +159,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
 
@@ -214,7 +213,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     legend.title = NULL,
                     k = 2,
                     proportion.test = TRUE,
-                    
+
                     package = "RColorBrewer",
                     palette = "Dark2",
                     ggplot.component = NULL,
@@ -284,9 +283,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
 
@@ -333,7 +331,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     legend.title = NULL,
                     k = 2,
                     proportion.test = TRUE,
-                    
+
                     package = "RColorBrewer",
                     palette = "Dark2",
                     ggplot.component = NULL,
@@ -359,110 +357,110 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        # the plot3 function ----
-
-
-
-        , .plot3 = function(image, ggtheme, theme, ...) {
-
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$grvar) )
-                return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-            # Exclude NA ----
-
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-
-            dep <- self$options$dep
-
-            # group <- self$options$group
-
-
-            # dep <- jmvcore::composeTerm(components = dep)
-
-            # group <- jmvcore::composeTerm(components = group)
-
-
-
-            # originaltheme <- self$options$originaltheme
-
-
-            # grouped_ggpiestats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html
-
-
-            if ( !is.null(self$options$grvar) ) {
-
-            grvar <- self$options$grvar
-
-            # grvar <- jmvcore::composeTerm(components = grvar)
-
-
-                plot3 <- ggstatsplot::grouped_ggpiestats(
-                    data = mydata,
-                    x = !!rlang::sym(dep),
-                    y = NULL,
-                    counts = NULL,
-                    grouping.var = !!rlang::sym(grvar),
-                    title.prefix = NULL,
-                    output = "plot",
-                    plotgrid.args = list(),
-                    title.text = NULL,
-                    title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
-                    caption.args = list(size = 10),
-                    sub.text = NULL,
-                    sub.args = list(size = 12)
-                    , ggtheme = ggtheme
-                    , ggstatsplot.layer = originaltheme
-
-                )
-}
-
-
-            originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
-                plot3 <- plot3 + ggtheme
-            } else {
-                plot3 <- plot3 + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
-
-
-            # Print Plot3 ----
-            print(plot3)
-            TRUE
-        }
-
-
+#         # the plot3 function ----
+#
+#
+#
+#         , .plot3 = function(image, ggtheme, theme, ...) {
+#
+#             # Error messages ----
+#
+#             if ( is.null(self$options$dep) || is.null(self$options$grvar) )
+#                 return()
+#
+#             if (nrow(self$data) == 0)
+#                 stop('Data contains no (complete) rows')
+#
+#
+#             # Prepare Data ----
+#
+#             mydata <- self$data
+#
+#
+#             # # direction, paired ----
+#             #
+#             # direction <- self$options$direction
+#             #
+#             # if (direction == "repeated") {
+#             #
+#             #     paired <- TRUE
+#             #
+#             # } else if (direction == "independent") {
+#             #
+#             #     paired <- FALSE
+#             #
+#             # }
+#
+#             # Exclude NA ----
+#
+#             excl <- self$options$excl
+#
+#             if (excl) {mydata <- jmvcore::naOmit(mydata)}
+#
+#
+#             dep <- self$options$dep
+#
+#             # group <- self$options$group
+#
+#
+#             # dep <- jmvcore::composeTerm(components = dep)
+#
+#             # group <- jmvcore::composeTerm(components = group)
+#
+#
+#
+#             # originaltheme <- self$options$originaltheme
+#
+#
+#             # grouped_ggpiestats ----
+#             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html
+#
+#
+#             if ( !is.null(self$options$grvar) ) {
+#
+#             grvar <- self$options$grvar
+#
+#             # grvar <- jmvcore::composeTerm(components = grvar)
+#
+#
+#                 plot3 <- ggstatsplot::grouped_ggpiestats(
+#                     data = mydata,
+#                     x = !!rlang::sym(dep),
+#                     y = NULL,
+#                     counts = NULL,
+#                     grouping.var = !!rlang::sym(grvar),
+#                     title.prefix = NULL,
+#                     output = "plot",
+#                     plotgrid.args = list(),
+#                     title.text = NULL,
+#                     title.args = list(size = 16, fontface = "bold"),
+#                     caption.text = NULL,
+#                     caption.args = list(size = 10),
+#                     sub.text = NULL,
+#                     sub.args = list(size = 12)
+#                     , ggtheme = ggtheme
+#                     , ggstatsplot.layer = originaltheme
+#
+#                 )
+# }
+#
+#
+#             originaltheme <- self$options$originaltheme
+#
+#             if (!originaltheme) {
+#                 plot3 <- plot3 + ggtheme
+#             } else {
+#                 plot3 <- plot3 + ggstatsplot::theme_ggstatsplot()
+#                 # ggplot2::theme_bw()
+#             }
+#
+#
+#             # Print Plot3 ----
+#             print(plot3)
+#             TRUE
+#         }
+#
+#
 
 # the plot4 function ----
 
@@ -501,9 +499,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
 
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
 

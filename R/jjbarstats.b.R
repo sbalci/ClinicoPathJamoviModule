@@ -14,9 +14,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .init = function() {
 
                 deplen <- length(self$options$dep)
-
                 self$results$plot$setSize(650, deplen * 450)
-
 
                 if (!is.null(self$options$grvar)) {
 
@@ -40,7 +38,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Initial Message ----
                 if (is.null(self$options$dep) ||
                     is.null(self$options$group)) {
-                    # TODO ----
+                    # todo ----
 
                     todo <- glue::glue(
                         "<br>Welcome to ClinicoPath
@@ -58,7 +56,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return()
 
                 } else {
-                    # TODO ----
+                    # todo ----
                     todo <- glue::glue(
                         "<br>You have selected to use a barplot to compare a categorical variable with another.<br><hr>"
                     )
@@ -70,8 +68,6 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 }
             }
-
-
 
             ,
             .plot = function(image, ggtheme, theme, ...) {
@@ -88,58 +84,56 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Prepare Data ----
 
-
-                # # direction, paired ----
-                #
-                # direction <- self$options$direction
-                #
-                # if (direction == "repeated") {
-                #
-                #     paired <- TRUE
-                #
-                # } else if (direction == "independent") {
-                #
-                #     paired <- FALSE
-                #
-                # }
-
-
-                # distribution <-
-                #     jmvcore::constructFormula(terms = self$options$distribution)
-
-                # pairw <- self$options$pairw
-
-
                 mydata <- self$data
 
 
                 # Exclude NA ----
 
-
-                    mydata <- jmvcore::naOmit(mydata)
-
-                # mydep <- mydata[[self$options$dep]]
-                # mygroup <- mydata[[self$options$group]]
-
+                mydata <- jmvcore::naOmit(mydata)
 
                 dep <- self$options$dep
 
                 group <- self$options$group
 
-                # originaltheme <- self$options$originaltheme
+
+                mytitle <- self$options$mytitle
+
+                if (mytitle == '') {
+                    mytitle <- NULL
+                }
 
 
-                # dep1 <- jmvcore::composeTerms(listOfComponents = dep)
+                xtitle <- self$options$xtitle
 
-                # dep1 <- jmvcore::composeTerm(components = dep)
+                if (xtitle == '') {
+                    xtitle <- NULL
+                }
 
-                # group <- jmvcore::composeTerm(components = group)
+                ytitle <- self$options$ytitle
 
+                if (ytitle == '') {
+                    ytitle <- NULL
+                }
+
+
+                # direction, paired ----
+
+                direction <- self$options$direction
+
+                if (direction == "repeated") {
+                    paired <- TRUE
+                } else if (direction == "independent") {
+                    paired <- FALSE
+                }
 
                 # ggbarstats ----
                 # bar charts for categorical data
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html
 
+
+                # originaltheme <- self$options$originaltheme
+                #
+                # selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 
                 # dep == 1 ----
 
@@ -148,42 +142,24 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         ggstatsplot::ggbarstats(
                             data = mydata,
                             x = !!rlang::sym(dep),
-                            y = !!rlang::sym(group),
+                            y = !!rlang::sym(group)
 
-                            # paired = paired,
-
-                            paired = FALSE,
-
-                            counts = NULL,
-                            ratio = NULL,
-                            results.subtitle = TRUE,
-                            sample.size.label = TRUE,
-                            label = "percentage",
-                            perc.k = 0,
-                            label.args = list(alpha = 1, fill = "white"),
-                            bf.message = TRUE,
-                            sampling.plan = "indepMulti",
-                            fixed.margin = "rows",
-                            prior.concentration = 1,
-                            title = NULL,
-                            subtitle = NULL,
-                            caption = NULL,
-                            conf.level = 0.95,
-                            nboot = 100,
-                            legend.title = NULL,
-                            xlab = NULL,
-                            ylab = NULL,
-                            k = 2,
-                            proportion.test = TRUE,
-
-                            package = "RColorBrewer",
-                            palette = "Dark2",
-                            ggplot.component = NULL,
-                            output = "plot",
-                            messages = TRUE
-                            # x = NULL,
-                            # y = NULL
+                            , title = mytitle
+                            , xlab = xtitle
+                            , ylab = ytitle
+                            , paired = paired
+                            # , ggtheme = selected_theme
                         )
+
+                    originaltheme <- self$options$originaltheme
+
+                    if (!originaltheme) {
+                        plot <- plot + ggtheme
+                    } else {
+                        plot <- plot + ggstatsplot::theme_ggstatsplot()
+                        # ggplot2::theme_bw()
+                    }
+
 
                 }
 
@@ -207,60 +183,45 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                         messages = messages,
                             y = !!rlang::sym(group),
 
-                            # paired = paired,
-                            paired = FALSE,
+                            , title = mytitle
+                            , paired = paired
+                            # , ggtheme = selected_theme
 
-                            # ,
-                            # counts = NULL,
-                            # ratio = NULL,
-                            # results.subtitle = TRUE,
-                            # sample.size.label = TRUE,
-                            # label = "percentage",
-                            # perc.k = 0,
-                            # label.args = list(alpha = 1, fill = "white"),
-                            # bf.message = TRUE,
-                            # sampling.plan = "indepMulti",
-                            # fixed.margin = "rows",
-                            # prior.concentration = 1,
-                            # title = NULL,
-                            # subtitle = NULL,
-                            # caption = NULL,
-                            # conf.level = 0.95,
-                            # nboot = 100,
-                            # legend.title = NULL,
-                            # xlab = NULL,
-                            # ylab = NULL,
-                            # k = 2,
-                            # proportion.test = TRUE,
-
-                            # package = "RColorBrewer",
-                            # palette = "Dark2",
-                            # ggplot.component = NULL,
-                            # output = "plot",
-                            # messages = TRUE,
-                            # x = NULL,
-                            # y = NULL
                         )
                             }
                         )
 
+                    originaltheme <- self$options$originaltheme
+
+
+                    # Assuming plotlist is a list of plots
+                    for (i in seq_along(plotlist)) {
+                        if (!originaltheme) {
+                            plotlist[[i]] <- plotlist[[i]] + ggtheme
+                        } else {
+                            plotlist[[i]] <- plotlist[[i]] +
+                                ggstatsplot::theme_ggstatsplot()
+                        }
+                    }
+
                     plot <- ggstatsplot::combine_plots(
                         plotlist = plotlist,
-                            plotgrid.args = list(ncol = 1)
-                            )
+                        plotgrid.args = list(ncol = 1)
+                    )
+
 
 
 
                 }
 
-                originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
-                plot <- plot + ggtheme
-            } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
+            #     originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot <- plot + ggtheme
+            # } else {
+            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
 
                 # Print Plot ----
 
@@ -284,41 +245,49 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
-
                 # Prepare Data ----
 
                 mydata <- self$data
 
 
-                # # direction, paired ----
-                #
-                # direction <- self$options$direction
-                #
-                # if (direction == "repeated") {
-                #
-                #     paired <- TRUE
-                #
-                # } else if (direction == "independent") {
-                #
-                #     paired <- FALSE
-                #
-                # }
-
                 # Exclude NA ----
-                    mydata <- jmvcore::naOmit(mydata)
 
-
+                mydata <- jmvcore::naOmit(mydata)
 
                 dep <- self$options$dep
 
                 group <- self$options$group
 
-                # originaltheme <- self$options$originaltheme
 
-                # dep1 <- jmvcore::composeTerm(components = dep)
+                mytitle <- self$options$mytitle
 
-                # group <- jmvcore::composeTerm(components = group)
+                if (mytitle == '') {
+                    mytitle <- NULL
+                }
 
+
+                xtitle <- self$options$xtitle
+
+                if (xtitle == '') {
+                    xtitle <- NULL
+                }
+
+                ytitle <- self$options$ytitle
+
+                if (ytitle == '') {
+                    ytitle <- NULL
+                }
+
+
+                # direction, paired ----
+
+                direction <- self$options$direction
+
+                if (direction == "repeated") {
+                    paired <- TRUE
+                } else if (direction == "independent") {
+                    paired <- FALSE
+                }
 
 
                 # grouped_ggbarstats ----
@@ -329,34 +298,42 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 grvar <- self$options$grvar
 
+                # originaltheme <- self$options$originaltheme
+                #
+                # selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+
                 # dep = 1 ----
 
+                originaltheme <- self$options$originaltheme
+
                 if (length(self$options$dep) == 1) {
+
+                    selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
                     plot2 <- ggstatsplot::grouped_ggbarstats(
                         data = mydata,
                         x = !!rlang::sym(dep1),
                         y = !!rlang::sym(group),
                         grouping.var = !!rlang::sym(grvar),
 
-                        # paired = paired,
-                        paired = FALSE,
-
-
-
-                        counts = NULL,
-                        title.prefix = NULL,
-                        output = "plot",
-                        # x = NULL,
-                        # y = NULL,
-                        plotgrid.args = list(),
-                        title.text = NULL,
-                        title.args = list(size = 16, fontface = "bold"),
-                        caption.text = NULL,
-                        caption.args = list(size = 10),
-                        sub.text = NULL,
-                        sub.args = list(size = 12)
+                        # , title = mytitle
+                        # , xlab = xtitle
+                        # , ylab = ytitle
+                        , paired = paired
+                        , ggtheme = selected_theme
 
                         )
+
+                    # originaltheme <- self$options$originaltheme
+                    #
+                    # if (!originaltheme) {
+                    #     plot2 <- plot2 + ggtheme
+                    # } else {
+                    #     plot2 <- plot2 + ggstatsplot::theme_ggstatsplot()
+                    # }
+
+
 
                 }
 
@@ -364,6 +341,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # dep > 1 ----
 
                 if (length(self$options$dep) > 1) {
+
+                    originaltheme <- self$options$originaltheme
+
+                    selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+
 
                     dep2 <- as.list(self$options$dep)
                     dep2_symbols <- purrr::map(dep2, rlang::sym)
@@ -383,27 +366,30 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             y = !!rlang::sym(group),
                             grouping.var = !!rlang::sym(grvar),
 
-                            # paired = paired,
-
-                            paired = FALSE,
-
-
-                            counts = NULL,
-                            title.prefix = NULL,
-                            output = "plot",
-                            # x = NULL,
-                            # y = NULL,
-                            plotgrid.args = list(),
-                            title.text = NULL,
-                            title.args = list(size = 16, fontface = "bold"),
-                            caption.text = NULL,
-                            caption.args = list(size = 10),
-                            sub.text = NULL,
-                            sub.args = list(size = 12)
+                            # , title = mytitle
+                            # , xlab = xtitle
+                            # , ylab = ytitle
+                            , paired = paired
+                            , ggtheme = selected_theme
 
                             )
                             }
                         )
+
+
+                    # originaltheme <- self$options$originaltheme
+                    #
+                    #
+                    # # Assuming plotlist is a list of plots
+                    # for (i in seq_along(plotlist)) {
+                    #     if (!originaltheme) {
+                    #         plotlist[[i]] <- plotlist[[i]] + ggtheme
+                    #     } else {
+                    #         plotlist[[i]] <- plotlist[[i]] +
+                    #             ggstatsplot::theme_ggstatsplot()
+                    #     }
+                    # }
+
 
                     plot2 <- ggstatsplot::combine_plots(
                         plotlist = plotlist,
@@ -412,27 +398,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                     }
 
-
-                    originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
-                plot <- plot + ggtheme
-            } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
-
-
                 # Print Plot ----
 
                 print(plot2)
                 TRUE
-
             }
-
-
-
-
 
         )
     )
