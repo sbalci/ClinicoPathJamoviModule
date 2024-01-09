@@ -50,73 +50,34 @@ options:
     #   permitted: [ numeric ]
 
 
-    # - name: direction
-    #   title: 'Measurement Type'
-    #   type: List
-    #   options:
-    #     - title: Repeated (within groups)
-    #       name: repeated
-    #     - title: Independent (between groups)
-    #       name: independent
-    #   default: independent
-    #   description:
-    #       ui: options for measurement type
-    #       R: select measurement type (repeated or independent)
-
-
-    - name: typestatistics
-      title: 'Type of Statistic'
+    - name: direction
+      title: 'Measurement Type'
       type: List
       options:
-        - title: Parametric
-          name: parametric
-        - title: Nonparametric
-          name: nonparametric
-        - title: Robust
-          name: robust
-        - title: Bayes
-          name: bayes
-      default: parametric
-
-    - name: pairwisecomparisons
-      title: Pairwise Comparisons
-      type: Bool
-      default: false
-
-    - name: pairwisedisplay
-      title: 'Pairwise Display'
-      type: List
-      options:
-        - title: significant
-          name: significant
-        - title: non-significant
-          name: non-significant
-        - title: everything
-          name: everything
-      default: significant
+        - title: Repeated (within groups)
+          name: repeated
+        - title: Independent (between groups)
+          name: independent
+      default: independent
+      description:
+          ui: options for measurement type
+          R: select measurement type (repeated or independent)
 
 
-    - name: padjustmethod
-      title: 'Adjustment Method'
-      type: List
-      options:
-        - title: holm
-          name: holm
-        - title: hochberg
-          name: hochberg
-        - title: hommel
-          name: hommel
-        - title: bonferroni
-          name: bonferroni
-        - title: BH
-          name: BH
-        - title: BY
-          name: BY
-        - title: fdr
-          name: fdr
-        - title: none
-          name: none
-      default: holm
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
 
 
     - name: originaltheme

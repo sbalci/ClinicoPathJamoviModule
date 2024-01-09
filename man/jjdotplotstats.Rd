@@ -10,6 +10,12 @@ jjdotplotstats(
   group,
   grvar,
   typestatistics = "parametric",
+  effsizetype = "biased",
+  centralityplotting = FALSE,
+  centralitytype = "parameteric",
+  mytitle = "",
+  xtitle = "",
+  ytitle = "",
   originaltheme = FALSE
 )
 }
@@ -23,6 +29,18 @@ jjdotplotstats(
 \item{grvar}{.}
 
 \item{typestatistics}{.}
+
+\item{effsizetype}{.}
+
+\item{centralityplotting}{.}
+
+\item{centralitytype}{.}
+
+\item{mytitle}{.}
+
+\item{xtitle}{.}
+
+\item{ytitle}{.}
 
 \item{originaltheme}{.}
 }

@@ -94,15 +94,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
-
-
-
-
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----
@@ -200,9 +194,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----

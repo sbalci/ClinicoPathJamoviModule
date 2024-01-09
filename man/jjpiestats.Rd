@@ -9,11 +9,7 @@ jjpiestats(
   dep,
   group,
   grvar,
-  excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = FALSE,
-  pairwisedisplay = "significant",
-  padjustmethod = "holm",
   originaltheme = FALSE
 )
 }
@@ -26,15 +22,7 @@ jjpiestats(
 
 \item{grvar}{.}
 
-\item{excl}{.}
-
 \item{typestatistics}{.}
-
-\item{pairwisecomparisons}{.}
-
-\item{pairwisedisplay}{.}
-
-\item{padjustmethod}{.}
 
 \item{originaltheme}{.}
 }
@@ -43,7 +31,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 }

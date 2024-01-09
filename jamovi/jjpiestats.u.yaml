@@ -30,19 +30,6 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Data
-    collapsed: true
-    children:
-      - type: Label
-        label: Data
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: excl
-  - type: CollapseBox
     label: Analysis
     collapsed: true
     children:
@@ -55,15 +42,6 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
-              - type: CheckBox
-                name: pairwisecomparisons
-                children:
-                  - type: ComboBox
-                    name: pairwisedisplay
-                    enable: (pairwisecomparisons)
-                  - type: ComboBox
-                    name: padjustmethod
-                    enable: (pairwisecomparisons)
   - type: CollapseBox
     label: Plot
     collapsed: true

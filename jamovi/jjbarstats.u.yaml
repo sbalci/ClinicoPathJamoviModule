@@ -40,22 +40,13 @@ children:
             margin: large
             children:
               - type: ComboBox
-                name: typestatistics
-              - type: CheckBox
-                name: pairwisecomparisons
-                children:
-                  - type: ComboBox
-                    name: pairwisedisplay
-                    enable: (pairwisecomparisons)
-                  - type: ComboBox
-                    name: padjustmethod
-                    enable: (pairwisecomparisons)
+                name: direction
   - type: CollapseBox
     label: Plot
     collapsed: true
     children:
       - type: Label
-        label: Plot
+        label: Theme
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -63,3 +54,22 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
+      - type: Label
+        label: Plot Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: mytitle
+                format: string
+                width: large
+              - type: TextBox
+                name: xtitle
+                format: string
+                width: large
+              - type: TextBox
+                name: ytitle
+                format: string
+                width: large

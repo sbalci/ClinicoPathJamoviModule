@@ -41,7 +41,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
-                # TODO ----
+                # todo ----
 
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
@@ -60,7 +60,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else {
 
-                # TODO ----
+                # todo ----
                 todo <- glue::glue(
                     "<br>You have selected to use a scatter plot.<br><hr>")
 
@@ -89,27 +89,6 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Data ----
 
 
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
-
             mydata <- self$data
 
 
@@ -122,9 +101,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----
@@ -134,20 +111,30 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::constructFormula(terms = self$options$typestatistics)
 
 
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
-
             dep <- self$options$dep
 
             group <- self$options$group
 
-            # originaltheme <- self$options$originaltheme
 
 
-            # dep <- jmvcore::composeTerm(components = dep)
+            mytitle <- self$options$mytitle
 
-            # group <- jmvcore::composeTerm(components = group)
+            if (mytitle == '') {
+                mytitle <- NULL
+            }
+
+
+            xtitle <- self$options$xtitle
+
+            if (xtitle == '') {
+                xtitle <- NULL
+            }
+
+            ytitle <- self$options$ytitle
+
+            if (ytitle == '') {
+                ytitle <- NULL
+            }
 
 
             # ggscatterstats ----
@@ -159,11 +146,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggstatsplot::ggscatterstats(
                     data = mydata,
                     x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group),
+                    y = !!rlang::sym(group)
 
-                    type = typestatistics,
+                    , type = typestatistics
 
+                    , title = mytitle
+                    , xlab = xtitle
+                    , ylab = ytitle
 
+                    ,
                     conf.level = 0.95,
                     bf.prior = 0.707,
                     bf.message = TRUE,
@@ -190,14 +181,12 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     vline.args = list(color = xfill, size = 1, linetype = "dashed"),
                     hline.args = list(color = yfill, size = 1, linetype = "dashed"),
                     results.subtitle = TRUE,
-                    xlab = NULL,
-                    ylab = NULL,
-                    title = NULL,
+
                     subtitle = NULL,
                     caption = NULL,
                     beta = 0.1,
                     k = 2L,
-                    
+
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
@@ -213,7 +202,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
                 # ggplot2::theme_bw()
             }
-            
+
             # Print Plot ----
 
             print(plot)
@@ -244,25 +233,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in vars)
                 mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
 
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
 
             # Exclude NA ----
 
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
+            mydata <- jmvcore::naOmit(mydata)
 
 
             # type of statistics ----
@@ -275,14 +249,12 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             group <- self$options$group
 
-            # originaltheme <- self$options$originaltheme
 
+            mytitle <- self$options$mytitle
 
-            # dep <- jmvcore::composeTerm(components = dep)
-
-            # group <- jmvcore::composeTerm(components = group)
-
-
+            if (mytitle == '') {
+                mytitle <- NULL
+            }
 
 
             # grouped_ggscatterstats ----
@@ -312,21 +284,22 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
                     , type = typestatistics
+                    , title = mytitle
 
 
                 )
             }
 
-            
+
             originaltheme <- self$options$originaltheme
 
             if (!originaltheme) {
-                plot <- plot + ggtheme
+                plot2 <- plot2 + ggtheme
             } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                plot2 <- plot2 + ggstatsplot::theme_ggstatsplot()
                 # ggplot2::theme_bw()
             }
-            
+
             # Print Plot ----
             print(plot2)
             TRUE

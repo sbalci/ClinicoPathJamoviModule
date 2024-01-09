@@ -45,25 +45,6 @@ options:
       permitted: [ factor ]
 
 
-    # - name: direction
-    #   title: 'Measurement Type'
-    #   type: List
-    #   options:
-    #     - title: Repeated (within groups)
-    #       name: repeated
-    #     - title: Independent (between groups)
-    #       name: independent
-    #   default: independent
-    #   description:
-    #       ui: options for measurement type
-    #       R: select measurement type (repeated or independent)
-
-
-    - name: excl
-      title: Exclude Missing (NA)
-      type: Bool
-      default: false
-
 
     - name: typestatistics
       title: 'Type of Statistic'
@@ -78,46 +59,6 @@ options:
         - title: Bayes
           name: bayes
       default: parametric
-
-    - name: pairwisecomparisons
-      title: Pairwise Comparisons
-      type: Bool
-      default: false
-
-    - name: pairwisedisplay
-      title: 'Pairwise Display'
-      type: List
-      options:
-        - title: significant
-          name: significant
-        - title: non-significant
-          name: non-significant
-        - title: everything
-          name: everything
-      default: significant
-
-    - name: padjustmethod
-      title: 'Adjustment Method'
-      type: List
-      options:
-        - title: holm
-          name: holm
-        - title: hochberg
-          name: hochberg
-        - title: hommel
-          name: hommel
-        - title: bonferroni
-          name: bonferroni
-        - title: BH
-          name: BH
-        - title: BY
-          name: BY
-        - title: fdr
-          name: fdr
-        - title: none
-          name: none
-      default: holm
-
 
     - name: originaltheme
       title: Add GGStatsPlot Layer
