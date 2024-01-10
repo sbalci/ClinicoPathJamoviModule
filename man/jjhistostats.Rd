@@ -9,26 +9,11 @@ jjhistostats(
   dep,
   grvar,
   typestatistics = "parametric",
-  centralityparameter = "mean",
   centralityline = TRUE,
   changebinwidth = FALSE,
   binwidth = 1.1,
-  barmeasure = "count",
-  usexlab = FALSE,
-  xlab = "",
-  useylab = FALSE,
-  ylab = "",
-  usetitle = FALSE,
-  title = "",
-  usesubtitle = FALSE,
-  subtitle = "",
-  useplotcaption = FALSE,
-  plotcaption = "",
-  usetitleprefix = FALSE,
-  titleprefix = "",
   resultssubtitle = TRUE,
-  normalcurve = FALSE,
-  testvalueline = FALSE
+  normalcurve = FALSE
 )
 }
 \arguments{
@@ -40,45 +25,15 @@ jjhistostats(
 
 \item{typestatistics}{.}
 
-\item{centralityparameter}{.}
-
 \item{centralityline}{.}
 
 \item{changebinwidth}{.}
 
 \item{binwidth}{.}
 
-\item{barmeasure}{.}
-
-\item{usexlab}{.}
-
-\item{xlab}{.}
-
-\item{useylab}{.}
-
-\item{ylab}{.}
-
-\item{usetitle}{.}
-
-\item{title}{.}
-
-\item{usesubtitle}{.}
-
-\item{subtitle}{.}
-
-\item{useplotcaption}{.}
-
-\item{plotcaption}{.}
-
-\item{usetitleprefix}{.}
-
-\item{titleprefix}{.}
-
 \item{resultssubtitle}{.}
 
 \item{normalcurve}{.}
-
-\item{testvalueline}{.}
 }
 \value{
 A results object containing:

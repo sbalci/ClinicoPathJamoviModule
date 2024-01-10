@@ -48,51 +48,13 @@ options:
       options:
         - title: Parametric
           name: parametric
-        # - title: Nonparametric
-        #   name: np
+        - title: Nonparametric
+          name: nonparametric
         - title: Robust
           name: robust
         - title: Bayes
           name: bayes
       default: parametric
-
-
-    - name: centralityparameter
-      title: 'Measure'
-      type: List
-      options:
-        - title: mean
-          name: mean
-        - title: median
-          name: median
-        - title: none
-          name: none
-      default: mean
-
-
-
-
-# test.value
-# A number specifying the value of the null hypothesis (Default: 0).
-
-# bf.message
-# Logical that decides whether to display Bayes Factor in favor of the null hypothesis. This argument is relevant only for parametric test (Default: TRUE).
-
-
-# bf.prior
-# A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
-
-# effsize.type
-# Type of effect size needed for parametric tests. The argument can be "d" (for Cohen's d) or "g" (for Hedge's g).
-
-# conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
-
-# nboot
-# Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
-
-
-
 
 
 
@@ -114,86 +76,6 @@ options:
       type: Number
       default: 1.1
 
-    - name: barmeasure
-      title: 'Values on Bars'
-      type: List
-      options:
-        - title: count
-          name: count
-        - title: density
-          name: density
-        - title: proportion
-          name: proportion
-        - title: mix
-          name: mix
-      default: count
-
-
-    - name: usexlab
-      title: Change x-label
-      type: Bool
-      default: false
-
-    - name: xlab
-      title: ''
-      type: String
-      default: ''
-
-    - name: useylab
-      title: Change y-label
-      type: Bool
-      default: false
-
-    - name: ylab
-      title: ''
-      type: String
-      default: ''
-
-
-    - name: usetitle
-      title: Change Title
-      type: Bool
-      default: false
-
-    - name: title
-      title: ''
-      type: String
-      default: ''
-
-
-    - name: usesubtitle
-      title: Change Subtitle
-      type: Bool
-      default: false
-
-    - name: subtitle
-      title: ''
-      type: String
-      default: ''
-
-
-    - name: useplotcaption
-      title: Plot Caption
-      type: Bool
-      default: false
-
-    - name: plotcaption
-      title: ''
-      type: String
-      default: ''
-
-    - name: usetitleprefix
-      title: Title Prefix
-      type: Bool
-      default: false
-
-    - name: titleprefix
-      title: ''
-      type: String
-      default: ''
-
-
-
 
 
 
@@ -207,11 +89,6 @@ options:
       type: Bool
       default: false
 
-
-    - name: testvalueline
-      title: Test Value
-      type: Bool
-      default: false
 
 
 ...

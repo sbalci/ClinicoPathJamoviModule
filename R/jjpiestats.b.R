@@ -483,20 +483,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
 
 
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
             # Exclude NA ----
 
 
@@ -523,7 +509,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 grvar <- self$options$grvar
 
-                # grvar <- jmvcore::composeTerm(components = grvar)
+
+                originaltheme <- self$options$originaltheme
+
+                selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 
 
                 plot4 <- ggstatsplot::grouped_ggpiestats(
@@ -531,30 +520,21 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!rlang::sym(dep),
                     y = !!rlang::sym(group),
                     counts = NULL,
-                    grouping.var = !!rlang::sym(grvar),
-                    title.prefix = NULL,
-                    output = "plot",
-                    plotgrid.args = list(),
-                    title.text = NULL,
-                    title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
-                    caption.args = list(size = 10),
-                    sub.text = NULL,
-                    sub.args = list(size = 12)
-                    , ggtheme = ggtheme
-                    , ggstatsplot.layer = originaltheme
+                    grouping.var = !!rlang::sym(grvar)
+
+                    , ggtheme = selected_theme
 
                 )
             }
 
-             originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
-                plot4 <- plot4 + ggtheme
-            } else {
-                plot4 <- plot4 + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
+            #  originaltheme <- self$options$originaltheme
+            #
+            # if (!originaltheme) {
+            #     plot4 <- plot4 + ggtheme
+            # } else {
+            #     plot4 <- plot4 + ggstatsplot::theme_ggstatsplot()
+            #     # ggplot2::theme_bw()
+            # }
 
             # Print Plot4 ----
             print(plot4)
