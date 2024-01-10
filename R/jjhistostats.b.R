@@ -109,43 +109,18 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
 
 
-                    barmeasure <-
-                        jmvcore::constructFormula(
-                            terms = self$options$barmeasure)
+                    typestatistics <- self$options$typestatistics
 
-                    centralityparameter <-
-                        jmvcore::constructFormula(
-                            terms = self$options$centralityparameter)
-
-
-
-                ## direction, paired ----
-
-                # direction <- self$options$direction
-                #
-                # if (direction == "repeated") {
-                #
-                #     paired <- TRUE
-                #
-                # } else if (direction == "independent") {
-                #
-                #     paired <- FALSE
-                #
-                # }
-
-
-                # distribution <-
-                #     jmvcore::constructFormula(
-                #     terms = self$options$distribution
-                #     )
-
-                # pairw <- self$options$pairw
 
 
 
 
                 # gghistostats
                 # https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html
+
+                    # originaltheme <- self$options$originaltheme
+                    #
+                    # selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 
                 ## dep == 1 ----
 
@@ -155,55 +130,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             data = mydata,
                             x = !!rlang::sym(dep)
 
-                            # ,
-                            #                 binwidth = binwidth,
-                            #                 # bar.measure = barmeasure,
-                            #                 # xlab = NULL,
-                            #                 # title = NULL,
-                            #                 # subtitle = NULL,
-                            #                 # caption = NULL,
-                            #
-                            #                 type = typestatistics,
-                            #
-                            #
-                            #                 # test.value = 0,
-                            #                 # bf.prior = 0.707,
-                            #                 # bf.message = TRUE,
-                            #                 # effsize.type = "g",
-                            #                 # conf.level = 0.95,
-                            #                 # tr = 0.2,
-                            #                 # nboot = 100,
-                            #                 # k = 2L,
-                            #
-                            #                 ggtheme = ggplot2::theme_bw(),
-                            #                 ggstatsplot.layer = TRUE,
-                            #
-                            #
-                            #
-                            #                 bar.fill = "grey50",
-                            #                 results.subtitle = self$options$resultssubtitle,
-                            #                 test.k = 0,
-                            #                 test.value.line = FALSE,
-                            #                 test.value.line.args = list(size = 1),
-                            #                 test.value.label.args = list(size = 3),
-                            #
-                            #                 centrality.plotting = self$options$centralityline,
-                            #
-                            #                 centrality.parameter = centralityparameter,
-                            #                 centrality.k = 2,
-                            #                 centrality.line.args = list(size = 1, color = "blue"),
-                            #                 centrality.label.args = list(color = "blue", size = 3),
-                            #                 normal.curve = self$options$normalcurve,
-                            #                 normal.curve.args = list(size = 3),
-                            #                 ggplot.component = NULL,
-                            #                 output = "plot"
-
-
-
-
-
-
-
+                            , type = typestatistics
+                            , normal.curve = self$options$normalcurve
+                            , results.subtitle = self$options$resultssubtitle
+                            , centrality.plotting = self$options$centralityline
+                            , binwidth = binwidth
 
                         )
 
@@ -216,6 +147,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 # self$results$e_caption$setContent(extracted_caption)
 
 
+                    # originaltheme <- self$options$originaltheme
+                    #
+                    # if (!originaltheme) {
+                    #     plot <- plot + ggtheme
+                    # } else {
+                    #     plot <- plot + ggstatsplot::theme_ggstatsplot()
+                    # }
 
                 }
 
@@ -238,58 +176,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                         x = !!x,
                                         messages = messages
 
-
-
-                                        # ,
-                                        #                 binwidth = binwidth,
-                                        #                 bar.measure = barmeasure,
-                                        #                 # xlab = NULL,
-                                        #                 # title = NULL,
-                                        #                 # subtitle = NULL,
-                                        #                 # caption = NULL,
-                                        #
-                                        #                 type = typestatistics,
-                                        #
-                                        #                 # test.value = 0,
-                                        #                 # bf.prior = 0.707,
-                                        #                 # bf.message = TRUE,
-                                        #                 # effsize.type = "g",
-                                        #                 # conf.level = 0.95,
-                                        #                 # nboot = 100,
-                                        #                 # k = 2L,
-                                        #
-                                        #                 ggtheme = ggplot2::theme_bw(),
-                                        #                 ggstatsplot.layer = TRUE,
-                                        #
-                                        #
-                                        #                 bar.fill = "grey50",
-                                        #                 results.subtitle = self$options$resultssubtitle,
-                                        #
-                                        #                 # test.k = 0,
-                                        #                 # test.value.line = FALSE,
-                                        #                 # test.value.line.args = list(size = 1),
-                                        #                 # test.value.label.args = list(size = 3),
-                                        #
-                                        #                 centrality.plotting = self$options$centralityline,
-                                        #
-                                        #                 centrality.parameter = centralityparameter,
-                                        #                 centrality.k = 2,
-                                        #                 centrality.line.args = list(size = 1, color = "blue"),
-                                        #                 centrality.label.args = list(color = "blue", size = 3),
-                                        #                 normal.curve = self$options$normalcurve,
-                                        #                 normal.curve.args = list(size = 3),
-                                        #                 ggplot.component = NULL,
-                                        #                 output = "plot"
-
-
-
-
-
-
-
-
-
-
+                                        , type = typestatistics
+                                        , normal.curve = self$options$normalcurve
+                                        , results.subtitle = self$options$resultssubtitle
+                                        , centrality.plotting = self$options$centralityline
+                                        , binwidth = binwidth
 
                                     )
                             }
@@ -341,21 +232,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
 
 
-
-                ## direction, paired ----
-
-                # direction <- self$options$direction
-                #
-                # if (direction == "repeated") {
-                #
-                #     paired <- TRUE
-                #
-                # } else if (direction == "independent") {
-                #
-                #     paired <- FALSE
-                #
-                # }
-
                 ## Exclude NA ----
 
                     mydata <- jmvcore::naOmit(mydata)
@@ -376,13 +252,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     binwidth <- self$options$binwidth
                 }
 
-                barmeasure <-
-                    jmvcore::constructFormula(
-                        terms = self$options$barmeasure)
-
-                centralityparameter <-
-                    jmvcore::constructFormula(
-                        terms = self$options$centralityparameter)
 
 
                 # grouped_gghistostats
@@ -398,25 +267,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         data = mydata,
                         x = !!rlang::sym(dep),
                         grouping.var = !!rlang::sym(grvar)
-                        # ,
-                        # binwidth = binwidth,
-                        # title.prefix = NULL,
-                        # output = "plot",
-                        # plotgrid.args = list(),
-                        # title.text = NULL,
-                        # title.args = list(size = 16,
-                        #                   fontface = "bold"),
-                        # caption.text = NULL,
-                        # caption.args = list(size = 10),
-                        # sub.text = NULL,
-                        # sub.args = list(size = 12)
-                        #
-                        # , type = typestatistics
-                        # , bar.measure = barmeasure
-                        # , centrality.parameter = centralityparameter
-                        # , results.subtitle = self$options$resultssubtitle
-                        # , normal.curve = self$options$normalcurve
-                        # , centrality.plotting = self$options$centralityline
+
+
+                        , type = typestatistics
+                        , normal.curve = self$options$normalcurve
+                        , results.subtitle = self$options$resultssubtitle
+                        , centrality.plotting = self$options$centralityline
+                        , binwidth = binwidth
+
 
 
                     )
@@ -441,25 +299,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                     messages = messages,
                                     grouping.var = !!rlang::sym(grvar)
 
-                            # ,
-                            # binwidth = binwidth,
-                            # title.prefix = NULL,
-                            # output = "plot",
-                            # plotgrid.args = list(),
-                            # title.text = NULL,
-                            # title.args = list(size = 16,
-                            #                   fontface = "bold"),
-                            # caption.text = NULL,
-                            # caption.args = list(size = 10),
-                            # sub.text = NULL,
-                            # sub.args = list(size = 12)
-                            #
-                            # , type = typestatistics
-                            # , bar.measure = barmeasure
-                            # , centrality.parameter = centralityparameter
-                            # , results.subtitle = self$options$resultssubtitle
-                            # , normal.curve = self$options$normalcurve
-                            # , centrality.plotting = self$options$centralityline
+
+                                    , type = typestatistics
+                                    , normal.curve = self$options$normalcurve
+                                    , results.subtitle = self$options$resultssubtitle
+                                    , centrality.plotting = self$options$centralityline
+                                    , binwidth = binwidth
+
 )
                             }
 )
@@ -473,15 +319,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 }
 
-            #     originaltheme <- self$options$originaltheme
-            #
-            # if (!originaltheme) {
-            #     plot <- plot + ggtheme
-            # } else {
-            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
-            #     # ggplot2::theme_bw()
-            # }
-
 
                 ## Print Plot 2 ----
 
@@ -489,10 +326,5 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 TRUE
 
             }
-
-
-
-
-
         )
     )

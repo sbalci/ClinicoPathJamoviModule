@@ -9,26 +9,11 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             dep = NULL,
             grvar = NULL,
             typestatistics = "parametric",
-            centralityparameter = "mean",
             centralityline = TRUE,
             changebinwidth = FALSE,
             binwidth = 1.1,
-            barmeasure = "count",
-            usexlab = FALSE,
-            xlab = "",
-            useylab = FALSE,
-            ylab = "",
-            usetitle = FALSE,
-            title = "",
-            usesubtitle = FALSE,
-            subtitle = "",
-            useplotcaption = FALSE,
-            plotcaption = "",
-            usetitleprefix = FALSE,
-            titleprefix = "",
             resultssubtitle = TRUE,
-            normalcurve = FALSE,
-            testvalueline = FALSE, ...) {
+            normalcurve = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -56,17 +41,10 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 typestatistics,
                 options=list(
                     "parametric",
+                    "nonparametric",
                     "robust",
                     "bayes"),
                 default="parametric")
-            private$..centralityparameter <- jmvcore::OptionList$new(
-                "centralityparameter",
-                centralityparameter,
-                options=list(
-                    "mean",
-                    "median",
-                    "none"),
-                default="mean")
             private$..centralityline <- jmvcore::OptionBool$new(
                 "centralityline",
                 centralityline,
@@ -79,63 +57,6 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "binwidth",
                 binwidth,
                 default=1.1)
-            private$..barmeasure <- jmvcore::OptionList$new(
-                "barmeasure",
-                barmeasure,
-                options=list(
-                    "count",
-                    "density",
-                    "proportion",
-                    "mix"),
-                default="count")
-            private$..usexlab <- jmvcore::OptionBool$new(
-                "usexlab",
-                usexlab,
-                default=FALSE)
-            private$..xlab <- jmvcore::OptionString$new(
-                "xlab",
-                xlab,
-                default="")
-            private$..useylab <- jmvcore::OptionBool$new(
-                "useylab",
-                useylab,
-                default=FALSE)
-            private$..ylab <- jmvcore::OptionString$new(
-                "ylab",
-                ylab,
-                default="")
-            private$..usetitle <- jmvcore::OptionBool$new(
-                "usetitle",
-                usetitle,
-                default=FALSE)
-            private$..title <- jmvcore::OptionString$new(
-                "title",
-                title,
-                default="")
-            private$..usesubtitle <- jmvcore::OptionBool$new(
-                "usesubtitle",
-                usesubtitle,
-                default=FALSE)
-            private$..subtitle <- jmvcore::OptionString$new(
-                "subtitle",
-                subtitle,
-                default="")
-            private$..useplotcaption <- jmvcore::OptionBool$new(
-                "useplotcaption",
-                useplotcaption,
-                default=FALSE)
-            private$..plotcaption <- jmvcore::OptionString$new(
-                "plotcaption",
-                plotcaption,
-                default="")
-            private$..usetitleprefix <- jmvcore::OptionBool$new(
-                "usetitleprefix",
-                usetitleprefix,
-                default=FALSE)
-            private$..titleprefix <- jmvcore::OptionString$new(
-                "titleprefix",
-                titleprefix,
-                default="")
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
@@ -144,83 +65,34 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "normalcurve",
                 normalcurve,
                 default=FALSE)
-            private$..testvalueline <- jmvcore::OptionBool$new(
-                "testvalueline",
-                testvalueline,
-                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
-            self$.addOption(private$..centralityparameter)
             self$.addOption(private$..centralityline)
             self$.addOption(private$..changebinwidth)
             self$.addOption(private$..binwidth)
-            self$.addOption(private$..barmeasure)
-            self$.addOption(private$..usexlab)
-            self$.addOption(private$..xlab)
-            self$.addOption(private$..useylab)
-            self$.addOption(private$..ylab)
-            self$.addOption(private$..usetitle)
-            self$.addOption(private$..title)
-            self$.addOption(private$..usesubtitle)
-            self$.addOption(private$..subtitle)
-            self$.addOption(private$..useplotcaption)
-            self$.addOption(private$..plotcaption)
-            self$.addOption(private$..usetitleprefix)
-            self$.addOption(private$..titleprefix)
             self$.addOption(private$..resultssubtitle)
             self$.addOption(private$..normalcurve)
-            self$.addOption(private$..testvalueline)
         }),
     active = list(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
-        centralityparameter = function() private$..centralityparameter$value,
         centralityline = function() private$..centralityline$value,
         changebinwidth = function() private$..changebinwidth$value,
         binwidth = function() private$..binwidth$value,
-        barmeasure = function() private$..barmeasure$value,
-        usexlab = function() private$..usexlab$value,
-        xlab = function() private$..xlab$value,
-        useylab = function() private$..useylab$value,
-        ylab = function() private$..ylab$value,
-        usetitle = function() private$..usetitle$value,
-        title = function() private$..title$value,
-        usesubtitle = function() private$..usesubtitle$value,
-        subtitle = function() private$..subtitle$value,
-        useplotcaption = function() private$..useplotcaption$value,
-        plotcaption = function() private$..plotcaption$value,
-        usetitleprefix = function() private$..usetitleprefix$value,
-        titleprefix = function() private$..titleprefix$value,
         resultssubtitle = function() private$..resultssubtitle$value,
-        normalcurve = function() private$..normalcurve$value,
-        testvalueline = function() private$..testvalueline$value),
+        normalcurve = function() private$..normalcurve$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
         ..typestatistics = NA,
-        ..centralityparameter = NA,
         ..centralityline = NA,
         ..changebinwidth = NA,
         ..binwidth = NA,
-        ..barmeasure = NA,
-        ..usexlab = NA,
-        ..xlab = NA,
-        ..useylab = NA,
-        ..ylab = NA,
-        ..usetitle = NA,
-        ..title = NA,
-        ..usesubtitle = NA,
-        ..subtitle = NA,
-        ..useplotcaption = NA,
-        ..plotcaption = NA,
-        ..usetitleprefix = NA,
-        ..titleprefix = NA,
         ..resultssubtitle = NA,
-        ..normalcurve = NA,
-        ..testvalueline = NA)
+        ..normalcurve = NA)
 )
 
 jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -296,26 +168,11 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep .
 #' @param grvar .
 #' @param typestatistics .
-#' @param centralityparameter .
 #' @param centralityline .
 #' @param changebinwidth .
 #' @param binwidth .
-#' @param barmeasure .
-#' @param usexlab .
-#' @param xlab .
-#' @param useylab .
-#' @param ylab .
-#' @param usetitle .
-#' @param title .
-#' @param usesubtitle .
-#' @param subtitle .
-#' @param useplotcaption .
-#' @param plotcaption .
-#' @param usetitleprefix .
-#' @param titleprefix .
 #' @param resultssubtitle .
 #' @param normalcurve .
-#' @param testvalueline .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -329,26 +186,11 @@ jjhistostats <- function(
     dep,
     grvar,
     typestatistics = "parametric",
-    centralityparameter = "mean",
     centralityline = TRUE,
     changebinwidth = FALSE,
     binwidth = 1.1,
-    barmeasure = "count",
-    usexlab = FALSE,
-    xlab = "",
-    useylab = FALSE,
-    ylab = "",
-    usetitle = FALSE,
-    title = "",
-    usesubtitle = FALSE,
-    subtitle = "",
-    useplotcaption = FALSE,
-    plotcaption = "",
-    usetitleprefix = FALSE,
-    titleprefix = "",
     resultssubtitle = TRUE,
-    normalcurve = FALSE,
-    testvalueline = FALSE) {
+    normalcurve = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjhistostats requires jmvcore to be installed (restart may be required)")
@@ -367,26 +209,11 @@ jjhistostats <- function(
         dep = dep,
         grvar = grvar,
         typestatistics = typestatistics,
-        centralityparameter = centralityparameter,
         centralityline = centralityline,
         changebinwidth = changebinwidth,
         binwidth = binwidth,
-        barmeasure = barmeasure,
-        usexlab = usexlab,
-        xlab = xlab,
-        useylab = useylab,
-        ylab = ylab,
-        usetitle = usetitle,
-        title = title,
-        usesubtitle = usesubtitle,
-        subtitle = subtitle,
-        useplotcaption = useplotcaption,
-        plotcaption = plotcaption,
-        usetitleprefix = usetitleprefix,
-        titleprefix = titleprefix,
         resultssubtitle = resultssubtitle,
-        normalcurve = normalcurve,
-        testvalueline = testvalueline)
+        normalcurve = normalcurve)
 
     analysis <- jjhistostatsClass$new(
         options = options,

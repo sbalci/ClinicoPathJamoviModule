@@ -34,8 +34,6 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
-              - type: ComboBox
-                name: centralityparameter
   - type: CollapseBox
     label: Plot
     collapsed: true
@@ -52,8 +50,6 @@ children:
               - type: CheckBox
                 name: normalcurve
               - type: CheckBox
-                name: testvalueline
-              - type: CheckBox
                 name: centralityline
           - type: LayoutBox
             margin: large
@@ -65,62 +61,3 @@ children:
                     name: binwidth
                     format: number
                     enable: (changebinwidth)
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: barmeasure
-      - type: Label
-        label: Change Label and Titles
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: usexlab
-            children:
-              - type: TextBox
-                name: xlab
-                format: string
-                width: large
-                enable: (usexlab)
-          - type: CheckBox
-            name: useylab
-            children:
-              - type: TextBox
-                name: ylab
-                format: string
-                width: large
-                enable: (useylab)
-          - type: CheckBox
-            name: usetitle
-            children:
-              - type: TextBox
-                name: title
-                format: string
-                width: large
-                enable: (usetitle)
-          - type: CheckBox
-            name: usesubtitle
-            children:
-              - type: TextBox
-                name: subtitle
-                format: string
-                width: large
-                enable: (usesubtitle)
-          - type: CheckBox
-            name: useplotcaption
-            children:
-              - type: TextBox
-                name: plotcaption
-                format: string
-                width: large
-                enable: (useplotcaption)
-          - type: CheckBox
-            name: usetitleprefix
-            enable: (grvar)
-            children:
-              - type: TextBox
-                name: titleprefix
-                format: string
-                width: large
-                enable: (grvar && usetitleprefix)
