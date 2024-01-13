@@ -214,6 +214,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , violin.args = violinargs
                     , boxplot.args = boxplotargs
                     , point.args = pointargs
+                    , results.subtitle = self$options$resultssubtitle
 
 
                 )
@@ -264,6 +265,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , violin.args = violinargs
                     , boxplot.args = boxplotargs
                     , point.args = pointargs
+                    , results.subtitle = self$options$resultssubtitle
 
 
                     )
@@ -454,7 +456,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     violin.args = violinargs,
                     boxplot.args = boxplotargs,
                     point.args = pointargs,
+                    results.subtitle = self$options$resultssubtitle,
+
+
                     ggtheme = selected_theme
+
 
                 )
 
@@ -502,6 +508,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         , boxplot.args = boxplotargs
                         , point.args = pointargs
                         , ggtheme = selected_theme
+                        , results.subtitle = self$options$resultssubtitle
+
 
                     )
                     }

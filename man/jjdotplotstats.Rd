@@ -16,7 +16,8 @@ jjdotplotstats(
   mytitle = "",
   xtitle = "",
   ytitle = "",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  resultssubtitle = TRUE
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ jjdotplotstats(
 \item{ytitle}{.}
 
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{.}
 }
 \value{
 A results object containing:

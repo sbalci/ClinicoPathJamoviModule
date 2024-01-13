@@ -54,4 +54,6 @@ children:
             margin: large
             children:
               - type: CheckBox
+                name: resultssubtitle
+              - type: CheckBox
                 name: originaltheme

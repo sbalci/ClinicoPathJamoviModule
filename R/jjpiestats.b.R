@@ -132,56 +132,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Prepare Data ----
 
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
-
             mydata <- self$data
-
 
             # Exclude NA ----
 
 
             mydata <- jmvcore::naOmit(mydata)
 
-
-
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
-
             dep <- self$options$dep
-
-            # group <- self$options$group
-
-
-            # dep <- jmvcore::composeTerm(components = dep)
-
-
-            # group <- jmvcore::composeTerm(components = group)
-
-
-            # originaltheme <- self$options$originaltheme
-
-
 
 
             # ggpiestats ----
@@ -197,7 +155,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     counts = NULL,
                     ratio = NULL,
                     paired = FALSE,
-                    results.subtitle = TRUE,
                     label = "percentage",
                     perc.k = 0,
                     label.args = list(alpha = 1, fill = "white"),
@@ -219,6 +176,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
+                    , results.subtitle = self$options$resultssubtitle
+
                     )
 
 
@@ -315,7 +274,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     counts = NULL,
                     ratio = NULL,
                     paired = FALSE,
-                    results.subtitle = TRUE,
                     label = "percentage",
                     perc.k = 0,
                     label.args = list(alpha = 1, fill = "white"),
@@ -337,6 +295,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
+                    , results.subtitle = self$options$resultssubtitle
                 )
 
 
@@ -523,6 +482,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     grouping.var = !!rlang::sym(grvar)
 
                     , ggtheme = selected_theme
+                    , ggstatsplot.layer = originaltheme
 
                 )
             }

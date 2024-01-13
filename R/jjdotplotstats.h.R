@@ -16,7 +16,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             mytitle = "",
             xtitle = "",
             ytitle = "",
-            originaltheme = FALSE, ...) {
+            originaltheme = FALSE,
+            resultssubtitle = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -94,6 +95,10 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..resultssubtitle <- jmvcore::OptionBool$new(
+                "resultssubtitle",
+                resultssubtitle,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -106,6 +111,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..xtitle)
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..resultssubtitle)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -118,7 +124,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
-        originaltheme = function() private$..originaltheme$value),
+        originaltheme = function() private$..originaltheme$value,
+        resultssubtitle = function() private$..resultssubtitle$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -130,7 +137,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..mytitle = NA,
         ..xtitle = NA,
         ..ytitle = NA,
-        ..originaltheme = NA)
+        ..originaltheme = NA,
+        ..resultssubtitle = NA)
 )
 
 jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -221,6 +229,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param xtitle .
 #' @param ytitle .
 #' @param originaltheme .
+#' @param resultssubtitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -241,7 +250,8 @@ jjdotplotstats <- function(
     mytitle = "",
     xtitle = "",
     ytitle = "",
-    originaltheme = FALSE) {
+    originaltheme = FALSE,
+    resultssubtitle = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjdotplotstats requires jmvcore to be installed (restart may be required)")
@@ -270,7 +280,8 @@ jjdotplotstats <- function(
         mytitle = mytitle,
         xtitle = xtitle,
         ytitle = ytitle,
-        originaltheme = originaltheme)
+        originaltheme = originaltheme,
+        resultssubtitle = resultssubtitle)
 
     analysis <- jjdotplotstatsClass$new(
         options = options,

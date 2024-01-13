@@ -25,7 +25,8 @@ jjwithinstats(
   mytitle = "Within Group Comparison",
   xtitle = "",
   ytitle = "",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  resultssubtitle = TRUE
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ jjwithinstats(
 \item{ytitle}{.}
 
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{.}
 }
 \value{
 A results object containing:

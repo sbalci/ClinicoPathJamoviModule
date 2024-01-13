@@ -148,6 +148,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             , xlab = xtitle
                             , ylab = ytitle
                             , paired = paired
+                            , results.subtitle = self$options$resultssubtitle
+
                             # , ggtheme = selected_theme
                         )
 
@@ -185,6 +187,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                             , title = mytitle
                             , paired = paired
+                            , results.subtitle = self$options$resultssubtitle
+
                             # , ggtheme = selected_theme
 
                         )
@@ -322,6 +326,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # , ylab = ytitle
                         , paired = paired
                         , ggtheme = selected_theme
+                        , results.subtitle = self$options$resultssubtitle
 
                         )
 
@@ -366,11 +371,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             y = !!rlang::sym(group),
                             grouping.var = !!rlang::sym(grvar),
 
+
                             # , title = mytitle
                             # , xlab = xtitle
                             # , ylab = ytitle
                             , paired = paired
                             , ggtheme = selected_theme
+                            , results.subtitle = self$options$resultssubtitle
+
 
                             )
                             }

@@ -60,12 +60,32 @@ options:
           name: bayes
       default: parametric
 
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
+
+
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
 
-
+    - name: resultssubtitle
+      title: Statistical Results
+      type: Bool
+      default: true
 ...
 
 
