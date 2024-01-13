@@ -13,7 +13,8 @@ jjbarstats(
   mytitle = "",
   xtitle = "",
   ytitle = "",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  resultssubtitle = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ jjbarstats(
 \item{ytitle}{.}
 
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{.}
 }
 \value{
 A results object containing:

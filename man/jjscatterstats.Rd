@@ -10,7 +10,11 @@ jjscatterstats(
   group,
   grvar,
   typestatistics = "parametric",
-  originaltheme = FALSE
+  mytitle = "",
+  xtitle = "",
+  ytitle = "",
+  originaltheme = FALSE,
+  resultssubtitle = TRUE
 )
 }
 \arguments{
@@ -24,7 +28,15 @@ jjscatterstats(
 
 \item{typestatistics}{.}
 
+\item{mytitle}{.}
+
+\item{xtitle}{.}
+
+\item{ytitle}{.}
+
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{.}
 }
 \value{
 A results object containing:

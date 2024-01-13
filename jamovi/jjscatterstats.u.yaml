@@ -55,4 +55,25 @@ children:
             margin: large
             children:
               - type: CheckBox
+                name: resultssubtitle
+              - type: CheckBox
                 name: originaltheme
+      - type: Label
+        label: Plot Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: mytitle
+                format: string
+                width: large
+              - type: TextBox
+                name: xtitle
+                format: string
+                width: large
+              - type: TextBox
+                name: ytitle
+                format: string
+                width: large

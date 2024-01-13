@@ -152,6 +152,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 subtitle = NULL,
                 caption = NULL,
                 messages = TRUE
+
             )
 
 

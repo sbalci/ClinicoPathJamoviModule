@@ -10,7 +10,8 @@ jjpiestats(
   group,
   grvar,
   typestatistics = "parametric",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  resultssubtitle = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ jjpiestats(
 \item{typestatistics}{.}
 
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{.}
 }
 \value{
 A results object containing:

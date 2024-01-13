@@ -163,6 +163,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , effsize.type = effsizetype
                     , centrality.plotting = centralityplotting
                     , centrality.type = centralitytype
+                    , results.subtitle = self$options$resultssubtitle
+
+
                 )
 
 
@@ -258,6 +261,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , centrality.plotting = centralityplotting
                     , centrality.type = centralitytype
                     , ggtheme = selected_theme
+                    , results.subtitle = self$options$resultssubtitle
+
+
 
                 )
             }

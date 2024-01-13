@@ -223,6 +223,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , violin.args = violinargs
                     , boxplot.args = boxplotargs
                     , point.args = pointargs
+                    , results.subtitle = self$options$resultssubtitle
 
                 )
 

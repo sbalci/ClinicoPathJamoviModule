@@ -3,8 +3,6 @@
 #' @import jmvcore
 #'
 
-
-
 jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjscatterstatsClass",
     inherit = jjscatterstatsBase,
@@ -154,42 +152,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     , xlab = xtitle
                     , ylab = ytitle
 
-                    ,
-                    conf.level = 0.95,
-                    bf.prior = 0.707,
-                    bf.message = TRUE,
-                    label.var = NULL,
-                    label.expression = NULL,
-                    point.label.args = list(size = 3),
-                    formula = y ~ x,
-                    smooth.line.args = list(size = 1.5, color = "blue"),
-                    method = "lm",
-                    method.args = list(),
-                    point.args = list(size = 3, alpha = 0.4),
-                    point.width.jitter = 0,
-                    point.height.jitter = 0,
-                    marginal = TRUE,
-                    marginal.type = "histogram",
-                    margins = "both",
-                    marginal.size = 5,
-                    xfill = "#009E73",
-                    yfill = "#D55E00",
-                    # xparams = list(fill = xfill),
-                    # yparams = list(fill = yfill),
-                    centrality.parameter = "none",
-                    centrality.label.args = list(size = 3),
-                    vline.args = list(color = xfill, size = 1, linetype = "dashed"),
-                    hline.args = list(color = yfill, size = 1, linetype = "dashed"),
-                    results.subtitle = TRUE,
+                    , results.subtitle = self$options$resultssubtitle
 
-                    subtitle = NULL,
-                    caption = NULL,
-                    beta = 0.1,
-                    k = 2L,
-
-                    ggplot.component = NULL,
-                    output = "plot",
-                    messages = TRUE
                 )
 
 
@@ -271,20 +235,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!rlang::sym(dep),
                     y = !!rlang::sym(group),
                     grouping.var = !!rlang::sym(grvar),
-                    label.var = NULL,
-                    label.expression = NULL,
-                    title.prefix = NULL,
-                    output = "plot",
-                    plotgrid.args = list(),
-                    title.text = NULL,
-                    title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
-                    caption.args = list(size = 10),
-                    sub.text = NULL,
-                    sub.args = list(size = 12)
-                    , ggtheme = ggtheme
+
                     , type = typestatistics
-                    , title = mytitle
+                    # , title = mytitle
+                    , results.subtitle = self$options$resultssubtitle
 
 
                 )

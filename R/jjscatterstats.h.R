@@ -10,7 +10,11 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             group = NULL,
             grvar = NULL,
             typestatistics = "parametric",
-            originaltheme = FALSE, ...) {
+            mytitle = "",
+            xtitle = "",
+            ytitle = "",
+            originaltheme = FALSE,
+            resultssubtitle = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -49,29 +53,57 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..mytitle <- jmvcore::OptionString$new(
+                "mytitle",
+                mytitle,
+                default="")
+            private$..xtitle <- jmvcore::OptionString$new(
+                "xtitle",
+                xtitle,
+                default="")
+            private$..ytitle <- jmvcore::OptionString$new(
+                "ytitle",
+                ytitle,
+                default="")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..resultssubtitle <- jmvcore::OptionBool$new(
+                "resultssubtitle",
+                resultssubtitle,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..mytitle)
+            self$.addOption(private$..xtitle)
+            self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..resultssubtitle)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
-        originaltheme = function() private$..originaltheme$value),
+        mytitle = function() private$..mytitle$value,
+        xtitle = function() private$..xtitle$value,
+        ytitle = function() private$..ytitle$value,
+        originaltheme = function() private$..originaltheme$value,
+        resultssubtitle = function() private$..resultssubtitle$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
         ..typestatistics = NA,
-        ..originaltheme = NA)
+        ..mytitle = NA,
+        ..xtitle = NA,
+        ..ytitle = NA,
+        ..originaltheme = NA,
+        ..resultssubtitle = NA)
 )
 
 jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -155,7 +187,11 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param group .
 #' @param grvar .
 #' @param typestatistics .
+#' @param mytitle .
+#' @param xtitle .
+#' @param ytitle .
 #' @param originaltheme .
+#' @param resultssubtitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -170,7 +206,11 @@ jjscatterstats <- function(
     group,
     grvar,
     typestatistics = "parametric",
-    originaltheme = FALSE) {
+    mytitle = "",
+    xtitle = "",
+    ytitle = "",
+    originaltheme = FALSE,
+    resultssubtitle = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjscatterstats requires jmvcore to be installed (restart may be required)")
@@ -192,7 +232,11 @@ jjscatterstats <- function(
         group = group,
         grvar = grvar,
         typestatistics = typestatistics,
-        originaltheme = originaltheme)
+        mytitle = mytitle,
+        xtitle = xtitle,
+        ytitle = ytitle,
+        originaltheme = originaltheme,
+        resultssubtitle = resultssubtitle)
 
     analysis <- jjscatterstatsClass$new(
         options = options,

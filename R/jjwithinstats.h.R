@@ -25,7 +25,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             mytitle = "Within Group Comparison",
             xtitle = "",
             ytitle = "",
-            originaltheme = FALSE, ...) {
+            originaltheme = FALSE,
+            resultssubtitle = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -153,6 +154,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..resultssubtitle <- jmvcore::OptionBool$new(
+                "resultssubtitle",
+                resultssubtitle,
+                default=TRUE)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -174,6 +179,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..xtitle)
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..resultssubtitle)
         }),
     active = list(
         dep1 = function() private$..dep1$value,
@@ -195,7 +201,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
-        originaltheme = function() private$..originaltheme$value),
+        originaltheme = function() private$..originaltheme$value,
+        resultssubtitle = function() private$..resultssubtitle$value),
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
@@ -216,7 +223,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..mytitle = NA,
         ..xtitle = NA,
         ..ytitle = NA,
-        ..originaltheme = NA)
+        ..originaltheme = NA,
+        ..resultssubtitle = NA)
 )
 
 jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -305,6 +313,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param xtitle .
 #' @param ytitle .
 #' @param originaltheme .
+#' @param resultssubtitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -333,7 +342,8 @@ jjwithinstats <- function(
     mytitle = "Within Group Comparison",
     xtitle = "",
     ytitle = "",
-    originaltheme = FALSE) {
+    originaltheme = FALSE,
+    resultssubtitle = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
@@ -371,7 +381,8 @@ jjwithinstats <- function(
         mytitle = mytitle,
         xtitle = xtitle,
         ytitle = ytitle,
-        originaltheme = originaltheme)
+        originaltheme = originaltheme,
+        resultssubtitle = resultssubtitle)
 
     analysis <- jjwithinstatsClass$new(
         options = options,

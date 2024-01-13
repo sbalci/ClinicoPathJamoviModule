@@ -85,7 +85,10 @@ options:
       type: Bool
       default: false
 
-
+    - name: resultssubtitle
+      title: Statistical Results
+      type: Bool
+      default: true
 
     # - name: ratio
     #   title: >

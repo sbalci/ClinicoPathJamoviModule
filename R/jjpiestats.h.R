@@ -10,7 +10,8 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             grvar = NULL,
             typestatistics = "parametric",
-            originaltheme = FALSE, ...) {
+            originaltheme = FALSE,
+            resultssubtitle = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -55,25 +56,32 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..resultssubtitle <- jmvcore::OptionBool$new(
+                "resultssubtitle",
+                resultssubtitle,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..resultssubtitle)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
-        originaltheme = function() private$..originaltheme$value),
+        originaltheme = function() private$..originaltheme$value,
+        resultssubtitle = function() private$..resultssubtitle$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
         ..typestatistics = NA,
-        ..originaltheme = NA)
+        ..originaltheme = NA,
+        ..resultssubtitle = NA)
 )
 
 jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -186,6 +194,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param grvar .
 #' @param typestatistics .
 #' @param originaltheme .
+#' @param resultssubtitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -201,7 +210,8 @@ jjpiestats <- function(
     group,
     grvar,
     typestatistics = "parametric",
-    originaltheme = FALSE) {
+    originaltheme = FALSE,
+    resultssubtitle = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjpiestats requires jmvcore to be installed (restart may be required)")
@@ -225,7 +235,8 @@ jjpiestats <- function(
         group = group,
         grvar = grvar,
         typestatistics = typestatistics,
-        originaltheme = originaltheme)
+        originaltheme = originaltheme,
+        resultssubtitle = resultssubtitle)
 
     analysis <- jjpiestatsClass$new(
         options = options,
