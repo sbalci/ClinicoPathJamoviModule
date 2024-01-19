@@ -31,6 +31,17 @@ items:
       renderFun: .plot
       requiresData: true
 
+
+    - title: Upset Diagram
+      name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+
+
+
 refs:
     - venn
     - ClinicoPathJamoviModule
