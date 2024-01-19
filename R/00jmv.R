@@ -530,4 +530,12 @@
         `author`="Ramzi W. Nahhas", 
         `year`=2023, 
         `title`="Chapter 7 Survival Analysis. Introduction to Regression Methods for Public Health Using R.", 
-        `url`="https://bookdown.org/rwnahhas/RMPH/survival.html"))
+        `url`="https://bookdown.org/rwnahhas/RMPH/survival.html"), 
+    `upset`=list(
+        `type`="software", 
+        `author`="Jake R Conway, Alexander Lex, Nils Gehlenborg", 
+        `year`=2017, 
+        `title`="UpSetR: An R Package for the Visualization of Intersecting Sets and their Properties", 
+        `doi`="10.1093/bioinformatics/btx364", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=UpSetR", 
+        `url`="https://CRAN.R-project.org/package=UpSetR"))
