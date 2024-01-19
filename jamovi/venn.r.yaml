@@ -30,6 +30,8 @@ items:
       height: 450
       renderFun: .plot
       requiresData: true
+      refs:
+        - venn
 
 
     - title: Upset Diagram
@@ -39,11 +41,12 @@ items:
       height: 450
       renderFun: .plot2
       requiresData: true
+      refs:
+        - upset
 
 
 
 refs:
-    - venn
     - ClinicoPathJamoviModule
 
 ...

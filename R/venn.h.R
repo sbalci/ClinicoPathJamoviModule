@@ -114,7 +114,6 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Venn Diagram",
                 refs=list(
-                    "venn",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "var1",
@@ -136,7 +135,9 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                refs=list(
+                    "venn")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Upset Diagram",
@@ -144,7 +145,9 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot2",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                refs=list(
+                    "upset")))}))
 
 vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennBase",
