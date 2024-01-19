@@ -96,6 +96,19 @@ vennClass <- if (requireNamespace('jmvcore'))
                     image$setState(plotData)
 
 
+
+                    mydata2 <- mydata %>%
+                        dplyr::mutate(dplyr::across(.cols = dplyr::everything(), ~as.integer(.)))
+
+
+                    plotData2 <- list("mydata" = mydata2,
+                                     "names" = names(mydata2)
+                    )
+
+                    image2 <- self$results$plot2
+                    image2$setState(plotData2)
+
+
                 }
 
             }
@@ -146,6 +159,37 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Print Plot ----
                 print(plot)
+                TRUE
+            }
+
+
+            ,
+
+            .plot2 = function(image, ggtheme, theme, ...) {
+                # the plot2 function ----
+
+
+                #Errors ----
+
+                if (is.null(self$options$var1) || is.null(self$options$var2))
+                    return()
+
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+
+                # Prepare Data ----
+
+                results <- image$state
+
+                mydata2 <- results$mydata
+
+                # namescolumn2 <- results$names
+
+                plot2 <- UpSetR::upset(mydata2, order.by = "freq")
+
+                # Print plot2 ----
+                print(plot2)
                 TRUE
             }
         )

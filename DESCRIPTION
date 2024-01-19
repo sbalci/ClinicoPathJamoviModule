@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.24
-Date: 2024-01-13
+Version: 0.0.2.25
+Date: 2024-01-19
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -73,7 +73,8 @@ Imports:
     WRS2,
     BayesFactor,
     effectsize,
-    performance
+    performance,
+    UpSetR
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 VignetteBuilder:
