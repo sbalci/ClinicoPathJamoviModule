@@ -26,7 +26,7 @@ items:
     - title: Venn Diagram
       name: plot
       type: Image
-      width:  600
+      width:  700
       height: 450
       renderFun: .plot
       requiresData: true
@@ -37,7 +37,7 @@ items:
     - title: Upset Diagram
       name: plot2
       type: Image
-      width:  600
+      width:  700
       height: 450
       renderFun: .plot2
       requiresData: true
