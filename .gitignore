@@ -44,3 +44,4 @@ pdfs
 temp
 _tododata
 ^docs$
+inst/doc

@@ -1,0 +1,42 @@
+---
+title: "Use jsurvival in R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Use jsurvival in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+```{r}
+overall_survival$plot$saveAs("overall_survival.png")
+
+overall_survival <- png::readPNG("overall_survival.png")
+
+tiff::writeTIFF(what = overall_survival, where = "overall_survival.tiff", compression = "none")
+```
+ 
+ 
+
+
+```{r}
+htmlTable::htmlTable(
+  kableExtra::kable(
+    overall_survival$coxTable$asDF
+    ))
+
+
+```
+
+
