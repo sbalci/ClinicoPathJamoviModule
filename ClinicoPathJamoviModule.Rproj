@@ -2,9 +2,9 @@ Version: 1.0
 
 RestoreWorkspace: No
 SaveWorkspace: No
-AlwaysSaveHistory: Yes
+AlwaysSaveHistory: No
 
-EnableCodeIndexing: Yes
+EnableCodeIndexing: No
 UseSpacesForTab: Yes
 NumSpacesForTab: 4
 Encoding: UTF-8

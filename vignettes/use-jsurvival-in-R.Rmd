@@ -19,22 +19,164 @@ library(ClinicoPath)
 ```
 
 
+```{r data histopathology}
+data("histopathology")
+```
+
 ```{r}
-overall_survival$plot$saveAs("overall_survival.png")
+#| glimpse histopathology
 
-overall_survival <- png::readPNG("overall_survival.png")
+dplyr::glimpse(histopathology)
+```
 
-tiff::writeTIFF(what = overall_survival, where = "overall_survival.tiff", compression = "none")
+
+```{r}
+ClinicoPath::survival(
+    data = histopathology,
+    elapsedtime = "OverallTime",
+    tint = TRUE,
+    dxdate = SurgeryDate,
+    fudate = LastFollowUpDate,
+    explanatory = LVI,
+    outcome = Outcome,
+    outcomeLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL,
+    timetypedata = "ymdhms",
+    sc = TRUE,
+    ce = TRUE,
+    ch = TRUE
+    )
+```
+
+
+
+
+```{r}
+overall_survival <-
+ClinicoPath::survival(
+    data = histopathology,
+    elapsedtime = "OverallTime",
+    tint = TRUE,
+    dxdate = SurgeryDate,
+    fudate = LastFollowUpDate,
+    explanatory = LVI,
+    outcome = Outcome,
+    outcomeLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL,
+    timetypedata = "ymdhms",
+    sc = TRUE,
+    ce = TRUE,
+    ch = TRUE
+    )
+```
+
+
+```{r}
+ls(overall_survival)
+```
+
+
+
+```{r}
+overall_survival$tCoxtext2
+```
+
+
+```{r}
+overall_survival$survTableSummary
+```
+
+
+```{r}
+overall_survival$survTable
+```
+
+
+
+```{r}
+overall_survival$subtitle
+```
+
+
+
+```{r}
+overall_survival$plot3
+```
+
+
+
+```{r}
+overall_survival$plot2
+```
+
+
+
+```{r}
+overall_survival$plot
+```
+
+
+
+```{r}
+overall_survival$medianTable
+```
+
+
+```{r}
+overall_survival$medianSummary
+```
+
+
+
+```{r}
+overall_survival$coxTable
+```
+
+
+
+```{r}
+overall_survival$coxTable$asDF
+```
+
+
+
+
+```{r}
+overall_survival$coxSummary
+```
+
+
+
+
+```{r}
+overall_survival$plot
+
+```
+
+
+```{r}
+# overall_survival$plot$saveAs("overall_survival.png")
+# 
+# overall_survival <- png::readPNG("overall_survival.png")
+# 
+# tiff::writeTIFF(what = overall_survival, where = "overall_survival.tiff", compression = "none")
 ```
  
  
 
 
+
 ```{r}
-htmlTable::htmlTable(
-  kableExtra::kable(
-    overall_survival$coxTable$asDF
-    ))
+# htmlTable::htmlTable(
+#   kableExtra::kable(
+#     overall_survival$coxTable$asDF
+#     ))
 
 
 ```
