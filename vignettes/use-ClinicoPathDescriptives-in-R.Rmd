@@ -1,0 +1,183 @@
+---
+title: "Use ClinicoPathDescriptives in R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Use ClinicoPathDescriptives in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width = 6,
+  fig.height = 4,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+
+
+```{r data histopathology}
+data("histopathology")
+```
+
+```{r}
+#| glimpse histopathology
+
+dplyr::glimpse(histopathology)
+```
+
+
+
+```{r}
+ClinicoPath::agepyramid(
+    data = histopathology,
+    age = Age,
+    gender = Sex,
+    female = "Female")
+```
+
+
+
+```{r}
+age_pyramid <-
+ClinicoPath::agepyramid(
+    data = histopathology,
+    age = Age,
+    gender = Sex,
+    female = "Female")
+```
+
+
+
+```{r}
+age_pyramid$pyramidTable
+```
+
+
+```{r}
+age_pyramid$pyramidTable$asDF
+```
+
+
+```{r}
+age_pyramid$plot
+```
+
+
+
+```{r}
+age_pyramid$plot$state
+```
+
+
+
+```{r}
+age_pyramid$plot$plot
+```
+
+
+```{r}
+temp_file_png <- tempfile(fileext = ".png")
+age_pyramid$plot$saveAs(paste0(temp_file_png, ".png"))
+
+age_pyramid_plot <- png::readPNG(paste0(temp_file_png, ".png"))
+
+temp_file_tiff <- tempfile(fileext = ".tiff")
+
+tiff::writeTIFF(what = age_pyramid_plot,
+                where = paste0(temp_file_tiff, ".tiff"),
+                compression = "LZW")
+```
+
+
+
+
+```{r}
+htmlTable::htmlTable(
+  kableExtra::kable(
+    age_pyramid$pyramidTable$asDF
+    ))
+```
+
+
+
+Age Pyramid
+
+agepyramidClass
+	
+
+Age Pyramid
+
+alluvial()
+	
+
+Alluvial Diagrams
+
+alluvialClass
+	
+
+Alluvial Plot
+
+benford()
+	
+
+Benford Analysis
+
+crosstable()
+	
+
+Cross Tables
+
+crosstableClass
+	
+
+Cross Table
+
+histopathology
+	
+
+histopathology
+
+reportcat()
+	
+
+Summary of Categorical Variables
+
+reportcatClass
+	
+
+Summary of Categorical Variables
+
+summarydata()
+	
+
+Summary of Continuous Variables
+
+summarydataClass
+	
+
+Summary of Continuous Variables
+
+tableone()
+	
+
+Table One
+
+tableoneClass
+	
+
+Table One
+
+venn()
+	
+
+Venn Diagram
+
+vennClass 
