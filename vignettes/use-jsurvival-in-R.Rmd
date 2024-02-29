@@ -182,3 +182,71 @@ overall_survival$plot
 ```
 
 
+
+
+All functions
+
+histopathology
+	
+
+histopathology
+
+jsurvival-package _PACKAGE jsurvival
+	
+
+jsurvival: Analysis for jsurvivalological Research
+
+multisurvival()
+	
+
+Multivariable Survival Analysis
+
+multisurvivalClass
+	
+
+Multivariable Survival Analysis
+
+oddsratio()
+	
+
+Odds Ratio Table and Plot
+
+oddsratioClass
+	
+
+Odds Ratio Table and Plot
+
+singlearm()
+	
+
+Single Arm Survival
+
+singlearmClass
+	
+
+Single Arm Survival
+
+survival()
+	
+
+Survival Analysis
+
+survivalClass
+	
+
+Survival Analysis
+
+survivalcont()
+	
+
+Survival Analysis for Continuous Variable
+
+survivalcontClass
+	
+
+Survival Analysis for Continuous Explanatory Variable
+Contents
+
+    Reference
+
+
