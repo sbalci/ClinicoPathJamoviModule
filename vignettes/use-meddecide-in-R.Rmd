@@ -17,3 +17,67 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(ClinicoPath)
 ```
+
+
+agreement()
+	
+
+Interrater Reliability
+
+agreementClass
+	
+
+Interrater Reliability Analysis
+
+decision()
+	
+
+Medical Decision
+
+decisionClass
+	
+
+Medical Decision Making
+
+decisioncalculator()
+	
+
+Medical Decision Calculator
+
+decisioncalculatorClass
+	
+
+Decision Calculator
+
+histopathology
+	
+
+histopathology
+
+kappaSizeCI()
+	
+
+Confidence Interval Approach for the Number of Subjects Required
+
+kappaSizeCIClass
+	
+
+Confidence Interval Approach for the Number of Subjects Required
+
+kappaSizeFixedN()
+	
+
+Lowest Expected Value for a fixed sample size
+
+kappaSizeFixedNClass
+	
+
+Lowest Expected Value for a fixed sample size
+
+kappaSizePower()
+	
+
+Power Approach for the Number of Subjects Required
+
+kappaSizePowerClass 
+
