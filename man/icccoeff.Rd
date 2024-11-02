@@ -21,7 +21,7 @@ A results object containing:
 Function for Interclass Correlation Coefficient Calculation.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

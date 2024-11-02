@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: 'Dependent (y-axis, 1st measurement)'
+        label: Dependent (y-axis, 1st measurement)
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: 'Grouping (x-axis, 2nd measurement)'
+        label: Grouping (x-axis, 2nd measurement)
         children:
           - type: VariablesListBox
             name: group

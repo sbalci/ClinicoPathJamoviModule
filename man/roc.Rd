@@ -46,7 +46,7 @@ A results object containing:
 Function for ROC Analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

@@ -50,7 +50,7 @@ A results object containing:
 Scatter Plot
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

@@ -59,7 +59,7 @@ A results object containing:
 Dot Chart
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

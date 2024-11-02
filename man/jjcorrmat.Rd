@@ -27,7 +27,7 @@ A results object containing:
 Correlation Matrix
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

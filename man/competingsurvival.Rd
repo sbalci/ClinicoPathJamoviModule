@@ -46,7 +46,7 @@ A results object containing:
 Overall, Cause Specific, and Competing Survival.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

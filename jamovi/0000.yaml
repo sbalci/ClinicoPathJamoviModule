@@ -78,7 +78,7 @@ analyses:
     menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
-    menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
+    menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
     description: Function for Generating Summaries for Survival Analysis.
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
@@ -93,7 +93,7 @@ analyses:
     menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
-    menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
+    menuSubtitle: Multivariable Cox-regression, Adjusted Survival
     description: Function for Multivariable Survival Analysis using Cox-regression.
   - title: Odds Ratio Table and Plot
     name: oddsratio
@@ -116,7 +116,7 @@ analyses:
     menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision
-    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: >
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
@@ -126,7 +126,7 @@ analyses:
     menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
-    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: Function for Medical Decision Calculator.
   - title: Decision Tree
     name: tree
@@ -185,14 +185,14 @@ analyses:
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
-  - title: 'Overall, Cause Specific, and Competing Survival'
+  - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
     menuGroup: Survival
     menuSubgroup: Drafts
-    menuTitle: 'Overall, Cause Specific, and Competing Survival'
+    menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
-    description: 'Overall, Cause Specific, and Competing Survival.'
+    description: Overall, Cause Specific, and Competing Survival.
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
@@ -227,7 +227,7 @@ analyses:
     menuGroup: meddecide
     menuSubgroup: Drafts
     menuTitle: Decision 2 for using init
-    menuSubtitle: 'Sensitivity, Specificity, PPV, NPV, ...'
+    menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: >
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
@@ -407,7 +407,7 @@ analyses:
     menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
-    menuSubtitle: 'Survival for whole group, no explanatory factor'
+    menuSubtitle: Survival for whole group, no explanatory factor
     description: Function for Generating Summaries for Survival Analysis.
   - title: Test ROC
     name: TestROC
@@ -457,20 +457,20 @@ datasets:
       - Survival
   - name: melanoma
     path: melanoma.omv
-    description: 'melanoma dataset obtained from {boot}.'
+    description: melanoma dataset obtained from {boot}.
     tags:
       - Data Summary
       - Survival
       - Competing risks regression
   - name: colon
     path: colon.omv
-    description: 'colon cancer dataset, obtained from {survival}.'
+    description: colon cancer dataset, obtained from {survival}.
     tags:
       - Data Summary
       - Survival
   - name: BreastCancer
     path: BreastCancer.omv
-    description: 'Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.'
+    description: Wisconsin Breast Cancer Database dataset, obtained from {mlbench}.
     tags:
       - Classification
   - name: rocdata

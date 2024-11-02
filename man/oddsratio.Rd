@@ -26,7 +26,7 @@ A results object containing:
 Function for Odds Ratio Table and Plot.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

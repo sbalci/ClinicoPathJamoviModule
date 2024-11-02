@@ -24,7 +24,7 @@ A results object containing:
 Function for Generating Summaries for Continuous Variables.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

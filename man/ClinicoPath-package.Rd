@@ -3,7 +3,6 @@
 \docType{package}
 \name{ClinicoPath-package}
 \alias{ClinicoPath-package}
-\alias{_PACKAGE}
 \alias{ClinicoPath}
 \title{ClinicoPath: Analysis for Clinicopathological Research}
 \description{

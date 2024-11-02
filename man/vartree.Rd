@@ -101,7 +101,7 @@ A results object containing:
 Function for Generating Tree Summaries of Variables.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

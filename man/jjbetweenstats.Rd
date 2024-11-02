@@ -77,7 +77,7 @@ A results object containing:
 Box-Violin Plots to Compare Between Groups
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

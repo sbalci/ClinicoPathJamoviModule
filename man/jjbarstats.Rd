@@ -51,7 +51,7 @@ A results object containing:
 ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

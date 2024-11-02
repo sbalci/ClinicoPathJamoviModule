@@ -92,7 +92,7 @@ A results object containing:
 Function for Multivariable Survival Analysis using Cox-regression.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

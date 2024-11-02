@@ -57,7 +57,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Medical Decision Calculator.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

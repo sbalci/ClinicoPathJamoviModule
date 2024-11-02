@@ -132,7 +132,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for making Table One.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology')
 #' dat <- as.data.frame(histopathology)
 #' ClinicoPath::tableone(

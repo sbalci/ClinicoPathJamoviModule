@@ -42,7 +42,7 @@ A results object containing:
 Pie Charts
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

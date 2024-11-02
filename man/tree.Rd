@@ -48,7 +48,7 @@ A results object containing:
 Function for making Decision Trees.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }
