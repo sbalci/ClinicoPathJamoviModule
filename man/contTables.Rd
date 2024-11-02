@@ -122,7 +122,7 @@ associated. If the p-value is low, it suggests the variables are not
 independent, and that there is a relationship between the two variables.
 }
 \examples{
-\dontrun{
+\donttest{
 # data('HairEyeColor')
 # dat <- as.data.frame(HairEyeColor)
 

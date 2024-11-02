@@ -176,7 +176,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Generating Plots and Graphs Based on Variable Types.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.

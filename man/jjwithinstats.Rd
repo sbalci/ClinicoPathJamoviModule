@@ -85,7 +85,7 @@ A results object containing:
 Box-Violin Plots to Compare Within Groups
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

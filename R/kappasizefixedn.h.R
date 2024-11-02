@@ -133,7 +133,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # example will be added
 #'}
 #' @param outcome .

@@ -44,7 +44,7 @@ A results object containing:
 Function for making Cross Tables.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

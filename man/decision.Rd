@@ -67,7 +67,7 @@ Function for Medical Decision Analysis. Sensitivity, specificity, positive
 predictive value, negative predictive value.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

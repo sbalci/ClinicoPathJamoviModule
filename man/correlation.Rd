@@ -24,7 +24,7 @@ A results object containing:
 Function for Correlation.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

@@ -90,7 +90,7 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Generating Summaries for Categorical Variables.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # example will be added
 #'}
 #' @param data the data as a data frame

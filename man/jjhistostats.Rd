@@ -48,7 +48,7 @@ A results object containing:
 ggstatsplot::grouped_gghistostats to generate Histogram.'
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

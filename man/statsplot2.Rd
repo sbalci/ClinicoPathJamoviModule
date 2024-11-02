@@ -47,7 +47,7 @@ A results object containing:
 Function for Generating Plots and Graphs Based on Variable Types.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }
