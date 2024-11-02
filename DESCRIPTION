@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.26
-Date: 2024-01-19
+Version: 0.0.2.28
+Date: 2024-11-02
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -14,7 +14,7 @@ Description: Analysis for Clinicopathological Research ClinicoPath help
     researchers to generate natural language summaries of their dataset,
     generate cross tables with statistical tests, and survival analysis
     with survival tables, survival plots, and natural language summaries.
-License: GPL-3
+License: GPL (>= 2)
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
      https://github.com/sbalci/ClinicoPathJamoviModule/,
      https://github.com/sbalci/ClinicoPathDescriptives/,
