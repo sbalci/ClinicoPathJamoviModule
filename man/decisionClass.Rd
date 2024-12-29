@@ -2,12 +2,30 @@
 % Please edit documentation in R/decision.b.R
 \name{decisionClass}
 \alias{decisionClass}
-\title{Medical Decision Making}
+\title{Medical Decision Analysis}
 \description{
-Medical Decision Making
-
-Medical Decision Making
+Implements comprehensive medical decision analysis including:
+\itemize{
+\item Sensitivity and specificity calculation
+\item Predictive values
+\item ROC curve analysis
+\item Test comparison
+\item Confidence intervals
 }
+}
+\details{
+This module provides tools for analyzing diagnostic test performance
+with options for various visualization methods and statistical comparisons.
+}
+\section{Usage}{
+
+\enumerate{
+\item Provide test and reference standard data
+\item Select analysis options
+\item View results in tables and plots
+}
+}
+
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::decisionBase} -> \code{decisionClass}
 }

@@ -1,0 +1,68 @@
+---
+name:  lassocox
+title: Lasso-Cox Regression
+jrs:   '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: statistic
+          title: ""
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+
+    # - name: coefficients
+    #   title: Selected Variables
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: variable
+    #       title: "Variable"
+    #       type: text
+    #     - name: coefficient
+    #       title: "Coefficient"
+    #       type: number
+    #
+    # - name: cv_plot
+    #   title: Cross-validation Plot
+    #   type: Image
+    #   renderFun: .cvPlot
+    #   width: 600
+    #   height: 400
+    #   visible: (cv_plot)
+    #
+    # - name: coef_plot
+    #   title: Coefficient Plot
+    #   type: Image
+    #   renderFun: .coefPlot
+    #   width: 600
+    #   height: 400
+    #   visible: (coef_plot)
+    #
+    # - name: survival_plot
+    #   title: Risk Group Survival Plot
+    #   type: Image
+    #   renderFun: .survivalPlot
+    #   width: 600
+    #   height: 400
+    #   visible: (survival_plot)
+    #
+    # - name: performance
+    #   title: Model Performance
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: metric
+    #       title: "Metric"
+    #       type: text
+    #     - name: value
+    #       title: "Value"
+    #       type: number
+
+
+...

@@ -165,18 +165,19 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \donttest{
 #' # example will be added
 #'}
-#' @param data The data as a data frame.
+#' @param data The data as a data frame. The data should be in long format,
+#'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
-#'   diagnosis given by the observer, variable can be categorical, ordinal or
-#'   numeric.
+#'   diagnosis given by the observer, variable can be categorical or ordinal.
 #' @param sft Boolean selection whether to show frequency table. Default is
-#'   'false'.
+#'   'false'. If 'true', the function will show frequency table for each
+#'   observer.
 #' @param wght A list for the argument weight (wght), for weighted kappa
 #'   analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
 #'   only with ordinal variables. The function gives error if the variable type
-#'   is not ordinal.
+#'   is not ordinal. The default is 'unweighted'.
 #' @param exct Boolean selection whether to use exact kappa. Effects only more
-#'   than 3 observers.
+#'   than 3 observers. Default is 'false'.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr

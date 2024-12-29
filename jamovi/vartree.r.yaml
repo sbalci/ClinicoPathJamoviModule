@@ -12,16 +12,6 @@ items:
     - name:  text1
       title: Variable Tree
       type:  Html
-      clearWith:
-          - maxwidth
-
-    # - name:  text4
-    #   title: "Deneme"
-    #   type: Html
-
-    # - name:  r_cleaneddata
-    #   title: Cleaned Data
-    #   type:  Preformatted
 
     - name:  text2
       title: Pattern Table

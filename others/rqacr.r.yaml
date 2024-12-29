@@ -1,0 +1,187 @@
+---
+name:  rqaCR
+title: Cross RQA
+jrs:   '1.1'
+
+items:
+
+    - name:  tblTS
+      title: "Time series descriptives"
+      type: Table
+      rows:  2
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: vlevel
+         title: 'type'
+         type: text
+       - name: N
+         type: integer
+         title: "valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: transformed
+         title: "transformation"
+         type: text
+       - name: uni_obs
+         title: "# of unique values"
+         type: integer
+
+    - name: crpplot
+      title: "Cross Recurrence Plot"
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .crpplot
+      clearWith:
+        - y1
+        - y2
+        - emRad
+        - emLag
+        - emDim
+        - VLmin
+        - DLmin
+        - HLmin
+        - VLmax
+        - DLmax
+        - HLmax
+        - fixRR
+        - fixRAD
+        - fixed
+        - theiler
+        - norm
+        - standardise
+
+    - name:  tblRP
+      title: "Global CRQA measures"
+      type: Table
+      rows:  1
+      clearWith:
+        - y1
+        - y2
+        - emRad
+        - emLag
+        - emDim
+        - VLmin
+        - DLmin
+        - HLmin
+        - VLmax
+        - DLmax
+        - HLmax
+        - fixRR
+        - fixRAD
+        - fixed
+        - theiler
+        - norm
+        - standardise
+      columns:
+       - name: RP
+         title: "# recurrences"
+         type: number
+       - name: RN
+         title: "Max recurrences"
+         type: number
+       - name: RR
+         title: "Recurrence Rate"
+         type: number
+       - name: SING
+         title: "Singular points"
+         type: number
+       - name: DIV
+         title: "Divergence"
+         type: number
+       - name: REP
+         title: "Repetitiveness"
+         type: number
+       - name: ANI
+         title: "Anisotropy"
+         type: number
+
+    - name:  tblCRQA
+      title: "CRQA measures based on line structures"
+      type: Table
+      rows:  3
+      clearWith:
+        - y1
+        - y2
+        - emRad
+        - emLag
+        - emDim
+        - VLmin
+        - DLmin
+        - HLmin
+        - VLmax
+        - DLmax
+        - HLmax
+        - fixRR
+        - fixRAD
+        - fixed
+        - theiler
+        - norm
+        - standardise
+      columns:
+       - name: LineType
+         title: "Line type"
+       - name: NLines
+         title: "# Lines"
+         type: number
+       - name: Npoints
+         title: "# Points on lines"
+         type: number
+       - name: Measure
+         title: ""
+       - name: PoL
+         title: "Rate"
+         type: number
+       - name: MEAN
+         title: "Mean length"
+         type: number
+       - name: MAX
+         title: "Max length"
+         type: number
+       - name: ENT
+         title: "Entropy of lengths"
+         type: number
+       - name: relENT
+         title: "Relative entropy"
+         type: number
+       - name: CoV
+         title: "CoV of lengths"
+         type: number
+
+    - name: DPplot
+      title: "Diagonal Recurrence Profile"
+      type: Image
+      width: 600
+      height: 600
+      visible: false
+      renderFun: .DPplot
+      clearWith:
+        - y1
+        - y2
+        - emRad
+        - emLag
+        - emDim
+        - VLmin
+        - DLmin
+        - HLmin
+        - VLmax
+        - DLmax
+        - HLmax
+        - fixRR
+        - fixRAD
+        - fixed
+        - theiler
+        - norm
+        - plotDP
+        - diagWin
+        - standardise
+
+    - name: warnings
+      type: Preformatted
+      title: "Notes"
+
+
+...

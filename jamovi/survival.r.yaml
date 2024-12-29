@@ -53,6 +53,7 @@ items:
 
 
 
+
     - name:  medianTable
       # title: Median Survival Table
       title: '`Median Survival Table: Levels for ${explanatory}`'
@@ -448,7 +449,7 @@ items:
       title: Add Calculated Time to Data
       type: Output
       varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-      varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`' 
+      varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
       measureType: continuous
       clearWith:
           - tint
@@ -459,7 +460,7 @@ items:
 
 
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
       varTitle: '`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`'

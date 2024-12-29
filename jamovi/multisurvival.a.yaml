@@ -17,122 +17,83 @@ description:
 
 options:
 
+# Data ----
+
     - name: data
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The dataset to be analyzed, provided as a data frame. Must contain the
+            variables specified in the options below.
+
+# Time ----
+
+
 
     - name: elapsedtime
       title: 'Time Elapsed'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
-
+      description:
+        R: >
+          The numeric variable representing follow-up time until the event or last observation.
+          If `tint` = false, this should be a pre-calculated numeric time variable.
+          If `tint` = true, `dxdate` and `fudate` will be used to calculate this time.
 
     - name: tint
       title: Using Dates to Calculate Survival Time
       type: Bool
       default: false
+      description:
+        R: >
+          If true, survival time will be calculated from `dxdate` and `fudate`.
+          If false, `elapsedtime` should be provided as a pre-calculated numeric variable.
 
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      description:
+        R: >
+          Date of diagnosis. Required if `tint` = true.
+          Must match the format specified in `timetypedata`.
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
-
-    - name: outcome
-      title: 'Outcome'
-      type: Variable
-      suggested: [ ordinal, nominal, continuous ]
-      permitted: [ factor, numeric ]
-
-    - name: outcomeLevel
-      title: Event Level
-      type: Level
-      variable: (outcome)
-
-    - name: dod
-      title: Dead of Disease
-      type: Level
-      variable: (outcome)
-      allowNone: true
-    - name: dooc
-      title: Dead of Other
-      type: Level
-      variable: (outcome)
-      allowNone: true
-    - name: awd
-      title: Alive w Disease
-      type: Level
-      variable: (outcome)
-      allowNone: true
-    - name: awod
-      title: Alive w/o Disease
-      type: Level
-      variable: (outcome)
-      allowNone: true
+      description:
+        R: >
+          Follow-up date or date of last observation. Required if `tint` = true.
+          Must match the format specified in `timetypedata`.
 
 
-    - name: explanatory
-      title: Explanatory Variables
-      type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-
-    - name: contexpl
-      title: Continuous Explanatory Variable
-      type: Variables
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-
-
-    - name: multievent
-      title: Multiple Event Levels
-      type: Bool
-      default: false
-
-    - name: analysistype
-      title: 'Survival Type'
-      type: List
-      options:
-        - title: Overall
-          name: overall
-        - title: Cause Specific
-          name: cause
-        - title: Competing Risk
-          name: compete
-      default: overall
-
-    - name: outcomeredifened
-      title: Add Redefined Outcome to Data
-      type: Output
 
 
     - name: timetypedata
-      title: 'Time Type in Data (default: YYYY-MM-DD)'
+      title: 'Time Type in Data (e.g., YYYY-MM-DD)'
       type: List
       options:
-        - title: ymdhms
+        - title: 'Year-Month-Day Hour-Minute-Second'
           name: ymdhms
-        - title: ymd
+        - title: 'Year-Month-Day'
           name: ymd
-        - title: ydm
+        - title: 'Year-Day-Month'
           name: ydm
-        - title: mdy
+        - title: 'Month-Day-Year'
           name: mdy
-        - title: myd
+        - title: 'Month-Year-Day'
           name: myd
-        - title: dmy
+        - title: 'Day-Month-Year'
           name: dmy
-        - title: dym
+        - title: 'Day-Year-Month'
           name: dym
       default: ymd
       description:
-          R: select the time type in data
-
+        R: >
+          Specifies the format of the date variables in the input data.
+          This is critical if `tint = true`, as `dxdate` and `fudate` will be parsed
+          according to this format to calculate survival time. For example, if your
+          data files record dates as "YYYY-MM-DD", select `ymd`.
 
     - name: timetypeoutput
       title: Time Type in Output
@@ -148,29 +109,170 @@ options:
           name: years
       default: months
       description:
-          R: select the time type in output
-
+        R: >
+          The units in which survival time is reported in the output. Choose from days, weeks,
+          months, or years.
 
     - name: uselandmark
       title: Use Landmark Time
       type: Bool
       default: false
+      description:
+        R: >
+          If true, applies a landmark analysis starting at a specified time point.
 
     - name: landmark
       title: Landmark Time
       type: Integer
       default: 3
+      description:
+        R: >
+          The time point (in the units defined by `timetypeoutput`) at which to start landmark analyses.
+          Only used if `uselandmark` = true.
 
 
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
+      description:
+        R: >
+          If true, adds a calculated survival time variable to the dataset, based on `dxdate` and `fudate`
+          if `tint` = true, or confirms `elapsedtime` if already provided.
 
+
+
+# Outcome ----
+
+
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+        R: >
+          The outcome variable. Typically indicates event status (e.g., death, recurrence).
+          For survival analysis, this may be a factor or numeric event indicator.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          The level of `outcome` considered as the event. For example, if `outcome` is a factor,
+          specify which level indicates the event occurrence.
+
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+        R: >
+          The level of `outcome` corresponding to death due to disease, if applicable.
+
+    - name: dooc
+      title: Dead of Other
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+        R: >
+          The level of `outcome` corresponding to death due to other causes, if applicable.
+
+    - name: awd
+      title: Alive w Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+        R: >
+          The level of `outcome` corresponding to alive with disease, if applicable.
+
+    - name: awod
+      title: Alive w/o Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+        R: >
+          The level of `outcome` corresponding to alive without disease, if applicable.
+
+
+    - name: analysistype
+      title: 'Survival Type'
+      type: List
+      options:
+        - title: Overall
+          name: overall
+        - title: Cause Specific
+          name: cause
+        - title: Competing Risk
+          name: compete
+      default: overall
+      description:
+        R: >
+          Type of survival analysis:
+          - overall: All-cause survival
+          - cause: Cause-specific survival
+          - compete: Competing risks analysis
+
+
+
+    - name: outcomeredefined
+      title: Add Redefined Outcome to Data
+      type: Output
+      description:
+        R: >
+          If true, adds a new outcome variable (redefined based on the chosen event specification)
+          to the data set.
+
+# Explanatory ----
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Categorical explanatory (predictor) variables included in the Cox model.
+
+# Cont Explanatory ----
+
+    - name: contexpl
+      title: Continuous Explanatory Variable
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+        R: >
+          Continuous explanatory (predictor) variables included in the Cox model.
+
+
+# Multievent ----
+
+    - name: multievent
+      title: Multiple Event Levels
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, multiple event levels will be considered for competing risks analysis.
+          Requires specifying `dod`, `dooc`, etc.
+
+
+# Plots ----
 
     - name: hr
       title: Hazards Regression Plot
       type: Bool
       default: false
+      description:
+        R: >
+          If true, generates a plot of hazard ratios for each explanatory variable in the Cox model.
 
     - name: sty
       title: Plot Style
@@ -183,69 +285,388 @@ options:
         - title: survminer forestplot
           name: t3
       default: t1
+      description:
+        R: >
+          The style of the hazard ratio (forest) plot. "finalfit" or "survminer forestplot".
 
 
     - name: ph_cox
       title: Proportional Hazards Assumption
       type: Bool
       default: false
+      description:
+        R: >
+          If true, tests the proportional hazards assumption for the Cox model.
+          Use if you suspect violations of the PH assumption.
 
 
-    # - name: km
-    #   title: Kaplan-Meier
-    #   type: Bool
-    #   default: false
+
+    - name: km
+      title: Kaplan-Meier
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, produces a Kaplan-Meier survival plot. Useful for visualization of
+          survival functions without covariate adjustment.
+
+# Plot Options ----
 
 
-    # - name: ac
-    #   title: Adjusted Survival Curve
-    #   type: Bool
-    #   default: false
 
 
-    # - name: adjexplanatory
-    #   title: Variable for Adjusted Survival Curve
-    #   type: Variable
+    - name: endplot
+      title: Plot End Time
+      type: Integer
+      default: 60
+      description:
+        R: >
+          The maximum follow-up time (in units defined by `timetypeoutput`) to display on survival plots.
+
+
+    - name: byplot
+      title: Time Interval
+      type: Integer
+      default: 12
+      description:
+        R: >
+          The interval (in units defined by `timetypeoutput`) at which time points or labels are shown on plots.
+
+
+    - name: ci95
+      title: '95% CI'
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, displays 95% confidence intervals around the survival estimates on plots.
+
+    - name: risktable
+      title: risktable
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, displays the number of subjects at risk at each time point below the survival plot.
+
+    - name: censored
+      title: censored
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, marks censored observations (e.g., using tick marks) on the survival plot.
+
+    - name: pplot
+      title: p-value
+      type: Bool
+      default: true
+      description:
+        R: >
+          If true, displays the p-value from the survival comparison test on the survival plot.
+
+
+
+
+
+
+
+
+
+# Risk Score ----
+
+    - name: calculateRiskScore
+      title: Calculate Risk Score
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, calculates a risk score from the Cox model coefficients for each individual.
+
+    - name: plotRiskGroups
+      title: Plot Risk Group Survival
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, stratifies individuals into risk groups based on their calculated risk scores
+          and plots their survival curves.
+
+    - name: addRiskScore
+      title: Add Risk Score to Data
+      type: Output
+      description:
+        R: >
+          If true, adds a computed risk score variable to the dataset.
+
+
+    - name: addRiskGroup
+      title: Add Risk Group to Data
+      type: Output
+      description:
+        R: >
+          If true, adds a categorical variable indicating risk group assignment to the dataset.
+
+
+# Adjusted Survival ----
+
+    - name: ac
+      title: Adjusted Survival Curve
+      type: Bool
+      default: false
+
+    - name: adjexplanatory
+      title: Variable for Adjusted Curve
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    - name: ac_method
+      title: Adjustment Method
+      type: List
+      options:
+        - title: Average
+          name: average
+        - title: Conditional Mean
+          name: conditional
+        - title: Single
+          name: single
+        - title: Marginal
+          name: marginal
+      default: average
+      description:
+          R: Method for computing adjusted survival curves
+
+    - name: ac_summary
+      title: Show Summary Statistics
+      type: Bool
+      default: false
+      description:
+          R: Calculate and display summary statistics for adjusted curves
+
+    - name: ac_timepoints
+      title: Summary Timepoints
+      type: String
+      default: '12, 36, 60'
+      description:
+          R: Timepoints for calculating summary statistics (comma-separated)
+
+    - name: ac_compare
+      title: Compare Curves
+      type: Bool
+      default: false
+      description:
+          R: Perform statistical comparison between adjusted curves
+
+
+# Reduced Explanatory ----
+
+    # - name: reduced_explanatory
+    #   title: Reduced Model Variables
+    #   type: Variables
     #   suggested: [ ordinal, nominal ]
     #   permitted: [ factor ]
-
-
-    # - name: endplot
-    #   title: Plot End Time
-    #   type: Integer
-    #   default: 60
-
-
-    # - name: byplot
-    #   title: Time Interval
-    #   type: Integer
-    #   default: 12
-
-    # - name: ci95
-    #   title: '95% CI'
+    #   description:
+    #     R: >
+    #       Variables to include in a reduced model for comparison. This can be used to test
+    #       whether excluding some variables affects model fit.
+    #
+    #
+    # - name: compare_models
+    #   title: Compare with reduced model
     #   type: Bool
     #   default: false
+    #   description:
+    #     R: >
+    #       If true, compares the full model against the reduced model to assess the impact of removing
+    #       certain explanatory variables.
 
-    # - name: risktable
-    #   title: risktable
+
+  # - type: CollapseBox
+  #   label: Reduced Model Options
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: Model Comparison
+  #       children:
+  #         - type: CheckBox
+  #           name: compare_models
+  #           fitToGrid: true
+  #         - type: Label
+  #           label: Select Reduced Model Variables
+  #           fitToGrid: true
+  #           stretchFactor: 1
+  #           children:
+  #             - type: VariableSupplier
+  #               persistentItems: false
+  #               stretchFactor: 1
+  #               children:
+  #                 - type: TargetLayoutBox
+  #                   label: Reduced Model Variables
+  #                   children:
+  #                     - type: VariablesListBox
+  #                       name: reduced_explanatory
+  #                       isTarget: true
+  #                       fitToGrid: true
+  #                       stretchFactor: 1
+
+
+
+
+# Model Selection ----
+
+
+    # - name: use_modelSelection
+    #   title: Use Models
     #   type: Bool
     #   default: false
+    #   description:
+    #     R: >
+    #       If true, applies a variable selection procedure to find the best-fitting model based on
+    #       criteria like AIC or likelihood ratio tests.
+    #
+    # - name: modelSelection
+    #   title: Model Selection Method
+    #   type: List
+    #   options:
+    #     - title: Enter (No Selection)
+    #       name: enter
+    #     - title: Forward Selection
+    #       name: forward
+    #     - title: Backward Selection
+    #       name: backward
+    #     - title: Stepwise (Both)
+    #       name: both
+    #   default: enter
+    #   description:
+    #     R: >
+    #       The method used to select variables:
+    #       - enter: Includes all variables (no selection)
+    #       - forward: Adds variables one at a time if they improve the model
+    #       - backward: Removes variables that do not significantly contribute
+    #       - both: Combination of forward and backward steps
+    #
+    # - name: selectionCriteria
+    #   title: Selection Criteria
+    #   type: List
+    #   options:
+    #     - title: AIC (Akaike Information Criterion)
+    #       name: aic
+    #     - title: Likelihood Ratio Test
+    #       name: lrt
+    #   default: aic
+    #   description:
+    #     R: >
+    #       The criterion used for adding or removing variables in model selection:
+    #       - aic: Balances model fit and complexity
+    #       - lrt: Uses likelihood ratio tests to decide inclusion/removal
+    #
+    # - name: pEntry
+    #   title: Entry Significance
+    #   type: Number
+    #   min: 0
+    #   max: 1
+    #   default: 0.05
+    #   description:
+    #     R: >
+    #       Significance level at which a variable enters the model during forward or stepwise selection.
+    #
+    # - name: pRemoval
+    #   title: Removal Significance
+    #   type: Number
+    #   min: 0
+    #   max: 1
+    #   default: 0.10
+    #   description:
+    #     R: >
+    #       Significance level at which a variable is removed from the model during backward or stepwise selection.
 
-    # - name: censored
-    #   title: censored
-    #   type: Bool
-    #   default: false
+  # - type: CollapseBox
+  #   label: Model Selection
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: Variable Selection Method
+  #       children:
+  #         - type: CheckBox
+  #           name: use_modelSelection
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: ComboBox
+  #               name: modelSelection
+  #               enable: (use_modelSelection)
+  #             - type: ComboBox
+  #               name: selectionCriteria
+  #               enable: (use_modelSelection)
+  #             - type: TextBox
+  #               name: pEntry
+  #               format: number
+  #               label: Entry Significance (p-value)
+  #               enable: (use_modelSelection)
+  #             - type: TextBox
+  #               name: pRemoval
+  #               format: number
+  #               label: Removal Significance (p-value)
+  #               enable: (use_modelSelection)
 
-    # - name: pplot
-    #   title: p-value
-    #   type: Bool
-    #   default: true
 
 
-    # - name: modelTerms
-    #   title: Model Terms
-    #   type: Terms
-    #   default: null
+# Stratify Variables ----
+
+
+
+    - name: use_stratify
+      title: Use Variable Stratification
+      type: Bool
+      default: false
+    #   description:
+    #     R: >
+    #       If true, uses stratification to handle variables that violate the proportional hazards assumption.
+    #       Stratification creates separate baseline hazard functions for different groups.
+
+
+    # - name: stratvar
+    #   title: Stratification Variables
+    #   type: Variables
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
+    #   description:
+    #     R: >
+    #       Variables used for stratification. When proportional hazards are not met,
+    #       stratification can adjust the model to better fit the data by allowing different baseline hazards.
+
+  # - type: CollapseBox
+  #   label: Stratification Variables
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: Stratification Variables
+  #       children:
+  #         - type: CheckBox
+  #           name: use_stratify
+  #           fitToGrid: true
+  #         - type: Label
+  #           label: Select Stratification Variables
+  #           fitToGrid: true
+  #           stretchFactor: 1
+  #           children:
+  #             - type: VariableSupplier
+  #               persistentItems: false
+  #               stretchFactor: 1
+  #               children:
+  #                 - type: TargetLayoutBox
+  #                   label: Stratification Variables
+  #                   children:
+  #                     - type: VariablesListBox
+  #                       name: stratvar
+  #                       isTarget: true
+  #                       fitToGrid: true
+  #                       stretchFactor: 1
+
+
+
+
 
 
 ...

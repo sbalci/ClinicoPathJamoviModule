@@ -1,0 +1,72 @@
+---
+name:  tsACF
+title: Linear Temporal Correlations
+jrs:   '1.1'
+items:
+    - name:  tsdesc
+      title: Time series Descriptives
+      type: Table
+      rows:  2
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: N
+         type: integer
+         title: "Valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: minimum
+         type: number
+       - name: maximum
+         type: number
+       - name: q1
+         type: number
+       - name: q3
+         type: number
+       - name: median
+         type: number
+       - name: mad
+         type: number
+       - name: mean
+         type: number
+       - name: sd
+         type: number
+
+    - name: tsplot
+      title: "Time Series Plot"
+      type: Image
+      width: 600
+      height: 200
+      renderFun: .tsplot
+
+    - name: cfplot
+      title: "Correlation Function Plots"
+      type: Image
+      width: 600
+      height: 300
+      renderFun: .cfplot
+
+    - name: Xcfplot
+      title: "Cross-Correlation Function Plot"
+      type: Image
+      width: 600
+      height: 300
+      renderFun: .Xcfplot
+
+    - name: rtplot
+      title: "Return Plot"
+      type: Image
+      width: 600
+      height: 300
+      renderFun: .rtplot
+
+    - name: phdiagram
+      title: "Phase Diagram"
+      type: Image
+      width: 600
+      height: 300
+      renderFun: .phdiagram
+
+...

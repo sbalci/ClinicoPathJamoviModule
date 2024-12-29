@@ -111,8 +111,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "cause",
                     "compete"),
                 default="overall")
-            private$..outcomeredifened <- jmvcore::OptionOutput$new(
-                "outcomeredifened")
+            private$..outcomeredefined <- jmvcore::OptionOutput$new(
+                "outcomeredefined")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -214,7 +214,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
-            self$.addOption(private$..outcomeredifened)
+            self$.addOption(private$..outcomeredefined)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -249,7 +249,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
-        outcomeredifened = function() private$..outcomeredifened$value,
+        outcomeredefined = function() private$..outcomeredefined$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -283,7 +283,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
-        ..outcomeredifened = NA,
+        ..outcomeredefined = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -324,7 +324,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredifened = function() private$.items[["outcomeredifened"]],
+        outcomeredefined = function() private$.items[["outcomeredefined"]],
         calculatedcutoff = function() private$.items[["calculatedcutoff"]]),
     private = list(),
     public=list(
@@ -755,7 +755,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "multievent")))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="outcomeredifened",
+                name="outcomeredefined",
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome in Continious Survival Function - from ${ outcome } for analysis { analysistype }`",
                 varDescription="Redefined Outcome from Outcome based on Analysis Type in Continious Survival Function",
@@ -829,36 +829,76 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param elapsedtime .
-#' @param tint .
-#' @param dxdate .
-#' @param fudate .
-#' @param contexpl .
-#' @param outcome .
-#' @param outcomeLevel .
+#' @param elapsedtime The time-to-event or follow-up duration for each
+#'   patient. Should be numeric and continuous, measured in consistent units
+#'   (e.g., months or years). Can be calculated automatically from dates if
+#'   using the date options below.
+#' @param tint Enable this option if you want to calculate survival time from
+#'   dates in your data. This is useful when you have separate columns for
+#'   diagnosis date and follow-up date and want to calculate the time elapsed
+#'   between them.
+#' @param dxdate The date of diagnosis or study entry for each patient. Should
+#'   be in a consistent date format (e.g., YYYY-MM-DD).
+#' @param fudate The date of last follow-up or event for each patient. Should
+#'   be in a consistent date format (e.g., YYYY-MM-DD).
+#' @param contexpl The continuous explanatory variable to be used in the
+#'   analysis.
+#' @param outcome The outcome variable to be used in the analysis.
+#' @param outcomeLevel The level of the outcome variable that represents the
+#'   event of interest.
 #' @param dod .
 #' @param dooc .
 #' @param awd .
-#' @param awod .
-#' @param analysistype .
-#' @param cutp .
+#' @param awod Select the levels of the outcome variable that correspond to
+#'   different event types in your data. For example, you might have separate
+#'   levels for "Dead of Disease" and "Alive w Disease" in a survival analysis
+#'   of cancer patients.
+#' @param analysistype Select the type of survival analysis to perform.
+#'   "Overall" survival analysis considers all events as equivalent, while
+#'   "Cause Specific" analysis distinguishes between different event types.
+#'   "Competing Risk" analysis accounts for competing risks that may prevent the
+#'   event of interest from occurring.
+#' @param cutp Specify the cutpoints at which to divide the continuous
+#'   explanatory variable into groups for survival analysis. Separate multiple
+#'   cutpoints with commas (e.g., "12, 36, 60").
 #' @param timetypedata select the time type in data
 #' @param timetypeoutput select the time type in output
-#' @param uselandmark .
-#' @param landmark .
-#' @param sc .
-#' @param kmunicate .
-#' @param ce .
-#' @param ch .
-#' @param endplot .
-#' @param ybegin_plot .
-#' @param yend_plot .
-#' @param byplot .
-#' @param findcut .
-#' @param multievent .
-#' @param ci95 .
-#' @param risktable .
-#' @param censored .
+#' @param uselandmark Enable this option to perform landmark survival analysis
+#'   at a specified time point.
+#' @param landmark Specify the landmark time at which to evaluate survival
+#'   probabilities in landmark analysis. This option is only available if you
+#'   enable the "Use Landmark Time" option.
+#' @param sc Enable this option to create a Kaplan-Meier survival plot for the
+#'   continuous explanatory variable.
+#' @param kmunicate Enable this option to create a KMunicate-style survival
+#'   plot for the continuous explanatory variable.
+#' @param ce Enable this option to create a plot of cumulative events over
+#'   time for the continuous explanatory variable.
+#' @param ch Enable this option to create a plot of cumulative hazard over
+#'   time for the continuous explanatory variable.
+#' @param endplot Specify the end time for the survival plots. This option
+#'   determines the maximum time point to include in the plots.
+#' @param ybegin_plot Specify the starting value for the y-axis in the
+#'   survival plots. This option allows you to customize the range of the
+#'   y-axis.
+#' @param yend_plot Specify the ending value for the y-axis in the survival
+#'   plots. This option allows you to customize the range of the y-axis.
+#' @param byplot Specify the time interval for the survival plots. This option
+#'   determines the spacing of tick marks on the x-axis.
+#' @param findcut Enable this option to automatically find the optimal cut-off
+#'   point for the continuous explanatory variable using the maximally selected
+#'   rank statistic. This option is only available if you enable the "Survival
+#'   Plot" option. The optimal cut-off point will be displayed on the survival
+#'   plot as a vertical dashed line.
+#' @param multievent Enable this option if your data includes multiple event
+#'   levels (e.g., different types of events or outcomes). This option is
+#'   required for cause-specific and competing risk survival analyses.
+#' @param ci95 Enable this option to display 95\% confidence intervals around
+#'   the survival estimates in the plots.
+#' @param risktable Enable this option to display a table of risk estimates
+#'   for each group in the survival analysis.
+#' @param censored Enable this option to display censored observations in the
+#'   survival plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -876,7 +916,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'

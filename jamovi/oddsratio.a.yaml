@@ -21,18 +21,27 @@ options:
           R: >
             The data as a data frame.
 
-
     - name: explanatory
       title: Explanatory Variables
       type: Variables
       suggested: [ nominal, continuous ]
       permitted: [ factor, numeric ]
+      description:
+          main: >
+              The explanatory variables to be used in the analysis.
+          R: >
+              The explanatory variables to be used in the analysis.
 
     - name: outcome
       title: Mortality or Recurrence
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          main: >
+              The outcome variable to be used in the analysis.
+          R: >
+              The outcome variable to be used in the analysis.
 
     # - name: outcomeLevel
     #   title: Event Level

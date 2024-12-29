@@ -467,14 +467,6 @@
         `pages`="39-40", 
         `doi`="10.2105/AJPH.2012.300897", 
         `url`="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3518362/"), 
-    `ClinicoPathJamoviModule`=list(
-        `type`="software", 
-        `author`="Serdar Balci", 
-        `year`=2022, 
-        `title`="ClinicoPath jamovi Module doi:10.5281/zenodo.3997188", 
-        `publisher`="[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule", 
-        `doi`="10.17605/OSF.IO/9SZUD", 
-        `url`="https://www.serdarbalci.com/ClinicoPathJamoviModule/"), 
     `iwillsurvive`=list(
         `type`="software", 
         `author`="Nathaniel Phillips", 
@@ -538,4 +530,22 @@
         `title`="UpSetR: An R Package for the Visualization of Intersecting Sets and their Properties", 
         `doi`="10.1093/bioinformatics/btx364", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=UpSetR", 
-        `url`="https://CRAN.R-project.org/package=UpSetR"))
+        `url`="https://CRAN.R-project.org/package=UpSetR"), 
+    `whoisinthisstudy`=list(
+        `type`="article", 
+        `author`="Hayes-Larson E, Kezios KL, Mooney SJ, Lovasi G.", 
+        `year`=2019, 
+        `title`="Who is in this study, anyway? Guidelines for a useful Table 1.", 
+        `publisher`="J Clin Epidemiol.", 
+        `volume`=114, 
+        `pages`="125-132", 
+        `doi`="10.1016/j.jclinepi.2019.06.011", 
+        `url`="https://pubmed.ncbi.nlm.nih.gov/31229583/"), 
+    `ClinicoPathJamoviModule`=list(
+        `type`="software", 
+        `author`="Serdar Balci", 
+        `year`=2022, 
+        `title`="ClinicoPath jamovi Module doi:10.5281/zenodo.3997188", 
+        `publisher`="[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule", 
+        `doi`="10.17605/OSF.IO/9SZUD", 
+        `url`="https://www.serdarbalci.com/ClinicoPathJamoviModule/"))

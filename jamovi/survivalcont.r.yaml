@@ -419,7 +419,7 @@ items:
           - tint
           - multievent
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
       varTitle: '`Redefined Outcome in Continious Survival Function - from ${ outcome } for analysis { analysistype }`'

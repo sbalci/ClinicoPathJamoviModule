@@ -1,0 +1,26 @@
+---
+name:  tsSUR
+title: Generate random surrogates
+jrs:   '1.1'
+
+items:
+    - name: tsplot
+      title: "Time Series Plot"
+      type: Image
+      width: 600
+      height: 200
+      renderFun: .tsplot
+
+    - name: surplot
+      title: "Surrogate Series"
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .surplot
+
+    - name: savemessage
+      type: Preformatted
+      title: "Notes"
+
+
+...

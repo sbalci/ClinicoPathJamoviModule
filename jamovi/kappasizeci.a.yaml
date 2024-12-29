@@ -26,6 +26,11 @@ options:
         - "4"
         - "5"
       default: "2"
+      description:
+          ui: >
+            Number of outcome level.
+          R: >
+            Number of outcome level.
 
 
     # - name: outcome
@@ -76,6 +81,11 @@ options:
       default: 0.60
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+            The null hypothesis value of kappa.
+          R: >
+            The null hypothesis value of kappa.
 
     - name: kappaL
       title: kappaL
@@ -83,6 +93,11 @@ options:
       default: 0.40
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+            The lower limit of the kappa.
+          R: >
+            The lower limit of the kappa.
 
     - name: kappaU
       title: kappaU
@@ -90,11 +105,21 @@ options:
       default: 0.80
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+            The upper limit of the kappa.
+          R: >
+            The upper limit of the kappa.
 
     - name: props
       title: Proportions of outcome level
       type: String
       default: '0.20 , 0.80'
+      description:
+          ui: >
+            Proportions of outcome level.
+          R: >
+            Proportions of outcome level.
 
     - name: raters
       title: raters
@@ -105,6 +130,11 @@ options:
         - "4"
         - "5"
       default: "2"
+      description:
+          ui: >
+            Number of raters.
+          R: >
+            Number of raters.
 
 
     - name: alpha
@@ -113,5 +143,10 @@ options:
       default: 0.05
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+            The significance level.
+          R: >
+            The significance level.
 
 ...

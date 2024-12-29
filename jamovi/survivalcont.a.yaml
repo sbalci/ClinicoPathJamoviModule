@@ -20,41 +20,64 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description: >-
+        The time-to-event or follow-up duration for each patient. Should be numeric and
+        continuous, measured in consistent units (e.g., months or years). Can be calculated
+        automatically from dates if using the date options below.
 
 
     - name: tint
       title: Using Dates to Calculate Survival Time
       type: Bool
       default: false
+      description: >-
+        Enable this option if you want to calculate survival time from dates in your data.
+        This is useful when you have separate columns for diagnosis date and follow-up date
+        and want to calculate the time elapsed between them.
 
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      description: >-
+        The date of diagnosis or study entry for each patient. Should be in a consistent
+        date format (e.g., YYYY-MM-DD).
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      description: >-
+        The date of last follow-up or event for each patient. Should be in a consistent
+        date format (e.g., YYYY-MM-DD).
 
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
+      description: >-
+        If you enable this option, the calculated time-to-event or follow-up duration will be
+        added to your data as a new variable.
 
     - name: contexpl
       title: Continuous Explanatory Variable
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description: >-
+        The continuous explanatory variable to be used in the analysis.
 
     - name: outcome
       title: 'Outcome'
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
+      description: >-
+        The outcome variable to be used in the analysis.
 
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      description: >-
+        The level of the outcome variable that represents the event of interest.
 
     - name: dod
       title: Dead of Disease
@@ -76,6 +99,10 @@ options:
       type: Level
       variable: (outcome)
       allowNone: true
+      description: >-
+        Select the levels of the outcome variable that correspond to different event types
+        in your data. For example, you might have separate levels for "Dead of Disease" and
+        "Alive w Disease" in a survival analysis of cancer patients.
 
     - name: analysistype
       title: 'Survival Type'
@@ -88,19 +115,33 @@ options:
         - title: Competing Risk
           name: compete
       default: overall
+      description: >-
+        Select the type of survival analysis to perform. "Overall" survival analysis
+        considers all events as equivalent, while "Cause Specific" analysis distinguishes
+        between different event types. "Competing Risk" analysis accounts for competing
+        risks that may prevent the event of interest from occurring.
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
+      description: >-
+        If you enable this option, the redefined outcome variable will be added to your data
+        as a new variable. This variable will have two levels: "Event" for the event of
+        interest and "Censored" for patients who were lost to follow-up or experienced a
+        competing event.
 
     - name: cutp
       title: Cutpoints
       type: String
       default: '12, 36, 60'
+      description: >-
+        Specify the cutpoints at which to divide the continuous explanatory variable into
+        groups for survival analysis. Separate multiple cutpoints with commas (e.g., "12,
+        36, 60").
 
 
     - name: timetypedata
-      title: 'Time Type in Data (default: YYYY-MM-DD)'
+      title: 'Time Type in Data (e.g., YYYY-MM-DD)'
       type: List
       options:
         - title: ymdhms
@@ -142,11 +183,16 @@ options:
       title: Use Landmark Time
       type: Bool
       default: false
+      description: >-
+        Enable this option to perform landmark survival analysis at a specified time point.
 
     - name: landmark
       title: Landmark Time
       type: Integer
       default: 3
+      description: >-
+        Specify the landmark time at which to evaluate survival probabilities in landmark
+        analysis. This option is only available if you enable the "Use Landmark Time" option.
 
 
 
@@ -154,44 +200,68 @@ options:
       title: Survival Plot
       type: Bool
       default: false
+      description: >-
+        Enable this option to create a Kaplan-Meier survival plot for the continuous
+        explanatory variable.
 
     - name: kmunicate
       title: KMunicate-Style Plot
       type: Bool
       default: false
+      description: >-
+        Enable this option to create a KMunicate-style survival plot for the continuous
+        explanatory variable.
 
 
     - name: ce
       title: Cumulative Events
       type: Bool
       default: false
+      description: >-
+        Enable this option to create a plot of cumulative events over time for the continuous
+        explanatory variable.
 
 
     - name: ch
       title: Cumulative Hazard
       type: Bool
       default: false
+      description: >-
+        Enable this option to create a plot of cumulative hazard over time for the continuous
+        explanatory variable.
 
 
     - name: endplot
       title: Plot End Time
       type: Integer
       default: 60
+      description: >-
+        Specify the end time for the survival plots. This option determines the maximum time
+        point to include in the plots.
 
     - name: ybegin_plot
       title: Start y-axis
       type: Number
       default: 0.00
+      description: >-
+        Specify the starting value for the y-axis in the survival plots. This option allows
+        you to customize the range of the y-axis.
 
     - name: yend_plot
       title: End y-axis
       type: Number
       default: 1.00
+      description: >-
+        Specify the ending value for the y-axis in the survival plots. This option allows you
+        to customize the range of the y-axis.
 
     - name: byplot
       title: Time Interval
       type: Integer
       default: 12
+      description: >-
+        Specify the time interval for the survival plots. This option determines the spacing
+        of tick marks on the x-axis.
 
 
 
@@ -199,31 +269,51 @@ options:
       title: Find Cut-off for Continious Explanatory Variable
       type: Bool
       default: false
-
+      description: >-
+        Enable this option to automatically find the optimal cut-off point for the continuous explanatory variable using the maximally
+        selected rank statistic. This option is only available if you enable the "Survival Plot" option. The optimal cut-off point
+        will be displayed on the survival plot as a vertical dashed line.
+        
     - name: calculatedcutoff
       title: Add Calculated Cut-off Group to Data
       type: Output
+      description: >-
+        If you enable this option, the calculated cut-off group will be added to your data as a new variable. This variable will have
+        two levels: "Below Cut-off" and "Above Cut-off" based on the optimal cut-off point found using the maximally selected rank
+        statistic. This option is only available if you enable the "Find Cut-off for Continious Explanatory Variable" option.
 
 
     - name: multievent
       title: Multiple Event Levels
       type: Bool
       default: false
+      description: >-
+        Enable this option if your data includes multiple event levels (e.g., different types
+        of events or outcomes). This option is required for cause-specific and competing risk
+        survival analyses.
 
     - name: ci95
       title: '95% CI'
       type: Bool
       default: false
+      description: >-
+        Enable this option to display 95% confidence intervals around the survival estimates
+        in the plots.
 
     - name: risktable
       title: risktable
       type: Bool
       default: false
+      description: >-
+        Enable this option to display a table of risk estimates for each group in the survival
+        analysis.
 
     - name: censored
       title: censored
       type: Bool
       default: false
+      description: >-
+        Enable this option to display censored observations in the survival plots.
 
 
 ...

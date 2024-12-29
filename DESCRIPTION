@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.28
-Date: 2024-11-02
+Version: 0.0.2.39
+Date: 2024-12-29
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -14,75 +14,99 @@ Description: Analysis for Clinicopathological Research ClinicoPath help
     researchers to generate natural language summaries of their dataset,
     generate cross tables with statistical tests, and survival analysis
     with survival tables, survival plots, and natural language summaries.
-License: GPL (>= 2)
+License: GPL-3
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
-     https://github.com/sbalci/ClinicoPathJamoviModule/,
-     https://github.com/sbalci/ClinicoPathDescriptives/,
-     https://github.com/sbalci/jsurvival,
-     https://github.com/sbalci/meddecide,
-     https://github.com/sbalci/jjstatsplot,
-     https://sbalci.github.io/ClinicoPathJamoviModule/
+    https://github.com/sbalci/ClinicoPathJamoviModule/,
+    https://github.com/sbalci/ClinicoPathDescriptives/,
+    https://github.com/sbalci/jsurvival,
+    https://github.com/sbalci/meddecide,
+    https://github.com/sbalci/jjstatsplot,
+    https://sbalci.github.io/ClinicoPathJamoviModule/
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:
     R (>= 4.1.0)
-Imports:
-    dplyr,
+Imports: 
     magrittr,
-    ggplot2,
+    checkmate,
+    pammtools,
+    utils,
+    e1071,
+    covr,
+    arsenal,
+    DiagrammeRsvg,
+    dplyr,
     easyalluvial,
+    epiR,
+    explore,
+    finalfit,
+    forcats,
     glue,
+    gt,
+    gtsummary,
+    irr,
     janitor,
     jmvcore,
+    kableExtra,
+    KMunicate,
+    lubridate,
     purrr,
     R6,
+    rcrossref,
+    rpart,
+    rpart.plot,
     scales,
+    survival,
+    survminer,
     tableone,
+    tangram,
     tibble,
     tidyr,
-    kableExtra,
-    finalfit,
-    tangram,
-    arsenal,
+    caret,
+    ggalluvial,
+    ggplot2,
+    correlation,
+    cowplot,
+    ggcorrplot,
+    ggExtra,
+    ggrepel,
+    ggsignif,
+    insight,
+    paletteer,
+    parameters,
+    dunn.test,
+    zeallot,
+    ez,
+    metafor,
+    rcompanion,
+    WRS2,
+    PMCMRplus,
+    broom.mixed,
+    skimr,
+    kappaSize,
+    glmnet,
+    xml2,
+    labelled,
+    chisq.posthoc.test,
     ggvenn,
     benford.analysis,
     DiagrammeR,
-    DiagrammeRsvg,
     rsvg,
     shiny,
-    gtsummary,
-    KMunicate,
-    lubridate,
-    survival,
-    survminer,
-    checkmate,
-    pammtools,
-    xml2,
-    ggalluvial,
+    gtExtras,
+    stats,
     ggstatsplot,
     ggside,
-    ggcorrplot,
-    irr,
-    utils,
-    forcats,
-    e1071,
-    epiR,
-    kappaSize,
-    gtExtras,
-    labelled,
-    PMCMRplus,
     WRS2,
     BayesFactor,
     effectsize,
-    performance,
-    UpSetR
-Remotes:
-    nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
+    boot,
+    FFTrees
 VignetteBuilder:
-    knitr
+    knitr,
+    tiff
+Remotes:
+    nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
-Suggests: 
-    knitr,
-    rmarkdown
+RoxygenNote: 7.3.2

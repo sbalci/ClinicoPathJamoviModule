@@ -9,9 +9,9 @@ oddsratio(data, explanatory, outcome)
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{explanatory}{.}
+\item{explanatory}{The explanatory variables to be used in the analysis.}
 
-\item{outcome}{.}
+\item{outcome}{The outcome variable to be used in the analysis.}
 }
 \value{
 A results object containing:

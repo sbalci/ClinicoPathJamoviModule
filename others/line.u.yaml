@@ -1,0 +1,38 @@
+title: Line Chart
+name: line
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Color Variable
+        children:
+          - type: VariablesListBox
+            name: col
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Color Variable
+        children:
+          - type: VariablesListBox
+            name: fill
+            maxItemCount: 1
+            isTarget: true

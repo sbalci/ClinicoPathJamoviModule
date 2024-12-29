@@ -3,10 +3,17 @@
 \name{singlearmClass}
 \alias{singlearmClass}
 \title{Single Arm Survival}
+\value{
+A list containing cleaned data and metadata for plotting and analysis.
+}
 \description{
-Single Arm Survival
-
-Single Arm Survival
+This function prepares and cleans data for single-arm survival analysis by
+calculating survival time, filtering based on landmark time, and merging
+survival outcomes with other factors.
+}
+\note{
+Ensure the input data contains the required variables (elapsed time,
+outcome) and meets specified formatting criteria.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::singlearmBase} -> \code{singlearmClass}

@@ -1,0 +1,75 @@
+---
+name:  faDFA
+title: Detrended Fluctuation Analysis
+jrs:   '1.1'
+
+items:
+    - name:  tblTS
+      title: "Time series descriptives"
+      type: Table
+      rows:  2
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: N
+         type: integer
+         title: "valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: median
+         type: number
+       - name: mad
+         type: number
+       - name: mean
+         type: number
+       - name: sd
+         type: number
+       - name: standardise
+         type: text
+
+    - name:  tblDFA
+      title: "DFA parameters and results"
+      type: Table
+      rows:  2
+      columns:
+       - name: method
+         title: "regression method"
+         type: text
+       - name: Hadjust
+         title: "adjust H"
+         type: number
+       - name: detrending
+         title: "detrend method"
+         type: text
+       - name: minScale
+         title: "min. scale"
+         type: number
+       - name: maxScale
+         title: "max. scale"
+         type: number
+       - name: slope
+         title: "log-log slope"
+         type: number
+       - name: H
+         type: number
+       - name: FD
+         title: "informed FD"
+         type: number
+
+    - name: tsplot
+      title: "Time series"
+      type: Image
+      width: 700
+      height: 300
+      renderFun: .tsplot
+
+    - name: dfaplot
+      title: "log-log regression"
+      type: Image
+      width: 700
+      height: 400
+      renderFun: .dfaplot
+
+...

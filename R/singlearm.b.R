@@ -3,6 +3,15 @@
 #' @import jmvcore
 #' @import magrittr
 #'
+#' @description
+#' This function prepares and cleans data for single-arm survival analysis by
+#' calculating survival time, filtering based on landmark time, and merging
+#' survival outcomes with other factors.
+#'
+#' @return A list containing cleaned data and metadata for plotting and analysis.
+#' @note Ensure the input data contains the required variables (elapsed time,
+#' outcome) and meets specified formatting criteria.
+
 
 singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "singlearmClass",
@@ -74,7 +83,26 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
                 <br><hr>
                 <br>
-                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
+                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>.",
+
+
+            "<b>Welcome to Single-Arm Survival Analysis!</b><br><br>
+            This tool calculates <b>median survival</b> and <b>1-, 3-, 5-year survival rates</b>
+            for a single group.<br>
+            <ul>
+            <li><b>Median Survival:</b> The time by which 50% of subjects have experienced the event.</li>
+            <li><b>1-, 3-, 5-Year Survival:</b> Proportion of subjects surviving at these milestones.</li>
+            </ul>
+            <br><b>Key Features:</b><br>
+            <ul>
+            <li>Use dates or elapsed time to calculate survival.</li>
+            <li>Adjust results with landmark times.</li>
+            <li>Generate survival and cumulative hazard plots.</li>
+            </ul>
+            <br>Please cite jamovi and relevant packages (survival, survminer) in your publications.<br>
+            "
+
+
         )
 
         html <- self$results$todo
@@ -522,9 +550,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Add Redefined Outcome to Data ----
 
-        if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
-          self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
-          self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
+        if (self$options$multievent  && self$options$outcomeredefined && self$results$outcomeredefined$isNotFilled()) {
+          self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
+          self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
         }
       }
 
@@ -574,6 +602,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         medianTable <- self$results$medianTable
         data_frame <- results1table
+        data_frame <- data_frame %>%
+          dplyr::mutate(mean_time = round(rmean, 2),
+                        mean_ci = glue::glue("{round(lower, 2)} - {round(upper, 2)}"))
         for (i in seq_along(data_frame[, 1, drop = T])) {
           medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
         }
@@ -587,7 +618,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               glue::glue(
                 "Median survival is {round(median, digits = 1)} [{round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}, 95% CI] ",
                 self$options$timetypeoutput,
-                "."
+                ".",
+                "The median survival is {round(median, 2)} months [95% CI: {round(lower, 2)} - {round(upper, 2)}].
+       At 1 year, survival is approximately {scales::percent(surv_12)},
+       and at 5 years, it is {scales::percent(surv_60)}."
               )
           ) %>%
           # dplyr::mutate(
@@ -610,7 +644,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::select(description) %>%
           dplyr::pull(.) -> km_fit_median_definition
 
-        medianSummary <- km_fit_median_definition
+
+        medianSummary <- c(km_fit_median_definition,
+                           "The median survival time is when 50% of subjects have experienced the event.",
+                           "This means that 50% of subjects in this group survived longer than this time period."
+        )
 
 
         self$results$medianSummary$setContent(medianSummary)
@@ -655,7 +693,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           utimes <- c(12, 36, 60)
         }
 
-        km_fit_summary <- summary(km_fit, times = utimes)
+        km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
         km_fit_df <-
           as.data.frame(km_fit_summary[c(
@@ -708,7 +746,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::mutate(
             description =
               glue::glue(
-                "{time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
+                "{time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n The estimated probability of surviving beyond {time} months was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group."
               )
           ) %>%
           dplyr::select(description) %>%

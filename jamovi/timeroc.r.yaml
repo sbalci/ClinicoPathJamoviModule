@@ -1,0 +1,48 @@
+---
+name:  timeroc
+title: Time-Dependent ROC Analysis
+jrs:   '1.1'
+
+items:
+    - name: text
+      title: Time-Dependent ROC Analysis Results
+      type: Html
+
+    - name: aucTable
+      title: Area Under ROC Curve (AUC)
+      type: Table
+      rows: 0
+      columns:
+        - name: timepoint
+          title: "Timepoint"
+          type: integer
+        - name: auc
+          title: "AUC"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+
+    - name: rocPlot
+      title: ROC Curves
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotROC
+      visible: (plotROC)
+
+    - name: aucPlot
+      title: AUC Over Time
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotAUC
+      visible: (plotAUC)
+
+...

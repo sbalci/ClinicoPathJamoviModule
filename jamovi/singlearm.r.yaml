@@ -252,7 +252,7 @@ items:
           - fudate
 
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
       varTitle: 'Redefined Outcome Single Arm'

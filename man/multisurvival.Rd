@@ -10,69 +10,160 @@ multisurvival(
   tint = FALSE,
   dxdate,
   fudate,
+  timetypedata = "ymd",
+  timetypeoutput = "months",
+  uselandmark = FALSE,
+  landmark = 3,
   outcome,
   outcomeLevel,
   dod,
   dooc,
   awd,
   awod,
+  analysistype = "overall",
   explanatory,
   contexpl,
   multievent = FALSE,
-  analysistype = "overall",
-  timetypedata = "ymd",
-  timetypeoutput = "months",
-  uselandmark = FALSE,
-  landmark = 3,
   hr = FALSE,
   sty = "t1",
-  ph_cox = FALSE
+  ph_cox = FALSE,
+  km = FALSE,
+  endplot = 60,
+  byplot = 12,
+  ci95 = FALSE,
+  risktable = FALSE,
+  censored = FALSE,
+  pplot = TRUE,
+  calculateRiskScore = FALSE,
+  plotRiskGroups = FALSE,
+  ac = FALSE,
+  adjexplanatory,
+  ac_method = "average",
+  ac_summary = FALSE,
+  ac_timepoints = "12, 36, 60",
+  ac_compare = FALSE,
+  use_stratify = FALSE
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The dataset to be analyzed, provided as a data frame. Must
+contain the variables specified in the options below.}
 
-\item{elapsedtime}{.}
+\item{elapsedtime}{The numeric variable representing follow-up time until
+the event or last observation. If \code{tint} = false, this should be a
+pre-calculated numeric time variable. If \code{tint} = true, \code{dxdate}
+and \code{fudate} will be used to calculate this time.}
 
-\item{tint}{.}
+\item{tint}{If true, survival time will be calculated from \code{dxdate}
+and \code{fudate}. If false, \code{elapsedtime} should be provided as a
+pre-calculated numeric variable.}
 
-\item{dxdate}{.}
+\item{dxdate}{Date of diagnosis. Required if \code{tint} = true. Must match
+the format specified in \code{timetypedata}.}
 
-\item{fudate}{.}
+\item{fudate}{Follow-up date or date of last observation. Required if
+\code{tint} = true. Must match the format specified in \code{timetypedata}.}
 
-\item{outcome}{.}
+\item{timetypedata}{Specifies the format of the date variables in the input
+data. This is critical if \code{tint = true}, as \code{dxdate} and
+\code{fudate} will be parsed according to this format to calculate survival
+time. For example, if your data files record dates as "YYYY-MM-DD", select
+\code{ymd}.}
 
-\item{outcomeLevel}{.}
+\item{timetypeoutput}{The units in which survival time is reported in the
+output. Choose from days, weeks, months, or years.}
 
-\item{dod}{.}
+\item{uselandmark}{If true, applies a landmark analysis starting at a
+specified time point.}
 
-\item{dooc}{.}
+\item{landmark}{The time point (in the units defined by
+\code{timetypeoutput}) at which to start landmark analyses. Only used if
+\code{uselandmark} = true.}
 
-\item{awd}{.}
+\item{outcome}{The outcome variable. Typically indicates event status
+(e.g., death, recurrence). For survival analysis, this may be a factor or
+numeric event indicator.}
 
-\item{awod}{.}
+\item{outcomeLevel}{The level of \code{outcome} considered as the event.
+For example, if \code{outcome} is a factor, specify which level indicates
+the event occurrence.}
 
-\item{explanatory}{.}
+\item{dod}{The level of \code{outcome} corresponding to death due to
+disease, if applicable.}
 
-\item{contexpl}{.}
+\item{dooc}{The level of \code{outcome} corresponding to death due to other
+causes, if applicable.}
 
-\item{multievent}{.}
+\item{awd}{The level of \code{outcome} corresponding to alive with disease,
+if applicable.}
 
-\item{analysistype}{.}
+\item{awod}{The level of \code{outcome} corresponding to alive without
+disease, if applicable.}
 
-\item{timetypedata}{select the time type in data}
+\item{analysistype}{Type of survival analysis: - overall: All-cause
+survival - cause: Cause-specific survival - compete: Competing risks
+analysis}
 
-\item{timetypeoutput}{select the time type in output}
+\item{explanatory}{Categorical explanatory (predictor) variables included
+in the Cox model.}
 
-\item{uselandmark}{.}
+\item{contexpl}{Continuous explanatory (predictor) variables included in
+the Cox model.}
 
-\item{landmark}{.}
+\item{multievent}{If true, multiple event levels will be considered for
+competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.}
 
-\item{hr}{.}
+\item{hr}{If true, generates a plot of hazard ratios for each explanatory
+variable in the Cox model.}
 
-\item{sty}{.}
+\item{sty}{The style of the hazard ratio (forest) plot. "finalfit" or
+"survminer forestplot".}
 
-\item{ph_cox}{.}
+\item{ph_cox}{If true, tests the proportional hazards assumption for the
+Cox model. Use if you suspect violations of the PH assumption.}
+
+\item{km}{If true, produces a Kaplan-Meier survival plot. Useful for
+visualization of survival functions without covariate adjustment.}
+
+\item{endplot}{The maximum follow-up time (in units defined by
+\code{timetypeoutput}) to display on survival plots.}
+
+\item{byplot}{The interval (in units defined by \code{timetypeoutput}) at
+which time points or labels are shown on plots.}
+
+\item{ci95}{If true, displays 95\\% confidence intervals around the survival
+estimates on plots.}
+
+\item{risktable}{If true, displays the number of subjects at risk at each
+time point below the survival plot.}
+
+\item{censored}{If true, marks censored observations (e.g., using tick
+marks) on the survival plot.}
+
+\item{pplot}{If true, displays the p-value from the survival comparison
+test on the survival plot.}
+
+\item{calculateRiskScore}{If true, calculates a risk score from the Cox
+model coefficients for each individual.}
+
+\item{plotRiskGroups}{If true, stratifies individuals into risk groups
+based on their calculated risk scores and plots their survival curves.}
+
+\item{ac}{.}
+
+\item{adjexplanatory}{.}
+
+\item{ac_method}{Method for computing adjusted survival curves}
+
+\item{ac_summary}{Calculate and display summary statistics for adjusted
+curves}
+
+\item{ac_timepoints}{Timepoints for calculating summary statistics
+(comma-separated)}
+
+\item{ac_compare}{Perform statistical comparison between adjusted curves}
+
+\item{use_stratify}{.}
 }
 \value{
 A results object containing:
@@ -84,9 +175,43 @@ A results object containing:
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
+\code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
+\code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
+\code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
+\code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
+\code{results$adjustedSummaryTable2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedComparison} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedComparison_survdiff_res} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedSurvTable2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedPairwiseTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedPairwiseSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedMedianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedMedianSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxPHPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$model_comparison} \tab \tab \tab \tab \tab a html \cr
+\code{results$reduced_model_metrics} \tab \tab \tab \tab \tab a html \cr
+\code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
+\code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
+\code{results$selectionSteps} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$riskScoreTable$asDF}
+
+\code{as.data.frame(results$riskScoreTable)}
 }
 \description{
 Function for Multivariable Survival Analysis using Cox-regression.

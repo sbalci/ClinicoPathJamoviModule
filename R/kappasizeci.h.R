@@ -148,13 +148,13 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \donttest{
 #' # example will be added
 #'}
-#' @param outcome .
-#' @param kappa0 .
-#' @param kappaL .
-#' @param kappaU .
-#' @param props .
-#' @param raters .
-#' @param alpha .
+#' @param outcome Number of outcome level.
+#' @param kappa0 The null hypothesis value of kappa.
+#' @param kappaL The lower limit of the kappa.
+#' @param kappaU The upper limit of the kappa.
+#' @param props Proportions of outcome level.
+#' @param raters Number of raters.
+#' @param alpha The significance level.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr

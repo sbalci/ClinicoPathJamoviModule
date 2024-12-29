@@ -67,15 +67,21 @@ items:
           type: number
 
 
+    - name:  nTable2
+      title: nTable2
+      type: Preformatted
+
+
+
+
     - name:  nTable
-      title: ''
-      # title: 'Decision Test Statistics'
+      title: 'nTable'
       type: Table
       swapRowsColumns: true
       rows:  1
       columns:
         - name: tablename
-          title: ''
+          title: 'tablename'
           type: text
         - name: TotalPop
           title: 'Total'
@@ -105,13 +111,12 @@ items:
 
     - name:  ratioTable
       title: ''
-      # title: 'Decision Test Statistics'
       type: Table
       swapRowsColumns: true
       rows:  1
       columns:
         - name: tablename
-          title: ''
+          title: 'Ratios'
           type: text
         - name: Sens
           title: 'Sensitivity'
@@ -161,8 +166,7 @@ items:
 
 
     - name: epirTable_ratio
-      title: ''
-      # title: 'EpiR Table Ratios'
+      title: 'EpiR Table Ratios'
       type: Table
       visible: (ci)
       rows: 0
@@ -249,6 +253,20 @@ items:
       refs:
           - Fagan
           - Fagan2
+
+
+    # - name: plot2
+    #   title: 'ROC Curve'
+    #   type: Image
+    #   width: 600
+    #   height: 450
+    #   renderFun: .plot_roc
+    #   requiresData: true
+    #   visible: (roc)
+    #   clearWith:
+    #       - vars
+
+
 
 
 refs:

@@ -64,7 +64,8 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Table One",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "whoisinthisstudy"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

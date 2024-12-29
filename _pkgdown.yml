@@ -20,4 +20,4 @@ navbar:
 home:
   strip_header: true
 template:
-  package: preferably
+  bootstrap: 5

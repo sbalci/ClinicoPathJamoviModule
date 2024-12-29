@@ -1,0 +1,29 @@
+---
+name: Example04
+title: Example 4
+jrs:   '1.1'
+
+items:
+    - name: ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows: (deps)
+
+      columns:
+        - name: var
+          title: ''
+          content: ($key)
+          type: text
+
+        - name: stat
+          title: statistic
+          type: number
+
+        - name: df
+          title: df
+          type: number
+
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue

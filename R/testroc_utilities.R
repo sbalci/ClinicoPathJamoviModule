@@ -1,6 +1,13 @@
-
-
-
+#' @title Sensitivity and Specificity Table
+#'
+#' @param Title Title of the table
+#' @param TP True Positives
+#' @param FP False Positives
+#' @param TN True Negatives
+#' @param FN False Negatives
+#'
+#' @returns HTML table
+#'
 print.sensSpecTable <- function(Title, TP, FP, TN, FN) {
    res <- paste0(
       "<style type='text/css'>
@@ -76,9 +83,9 @@ deLong.test <-
             conf.level = 0.95) {
       # if (length(classVar) != dim(data)[1]) {
       #    stop("\n The number of rows in data must match the length of classVar\n")}
-      
+
       id.pos <- classVar == pos_class
-      
+
       if (sum(id.pos) < 1) {
          stop("\n wrong level specified.\n")
       }
@@ -88,11 +95,11 @@ deLong.test <-
       if (dim(data)[1] < 2) {
          stop("\n data must contain at least two dependent variables for DeLong's test.\n")
       }
-      
+
       nn <- sum(!id.pos)
       np <- sum(id.pos)
       nauc <- ncol(data)
-      
+
       if (is.null(ref)) {
          L <- matrix(0, nrow = nauc * (nauc - 1) / 2, ncol = nauc)
          newa <- 0
@@ -118,14 +125,14 @@ deLong.test <-
          L <- matrix(1, ncol = nauc, nrow = nauc - 1)
          L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
       }
-      
+
       markern <- as.matrix(data[!id.pos,])
       markerp <- as.matrix(data[id.pos,])
-      
+
       ###
       ### compute wilcox statistic
       ###
-      
+
       WK.STAT <- function(data, y) {
          r <- rank(c(data, y))
          n.data <- length(data)
@@ -134,13 +141,13 @@ deLong.test <-
             sum(r[seq_along(data)]) - n.data * (n.data + 1) / 2
          STATISTIC
       }
-      
+
       auc <- vector("numeric", length = nauc)
       for (r in 1:nauc) {
          auc[r] <- WK.STAT(markerp[, r], markern[, r])
       }
       auc <- auc / (nn * np)
-      
+
       ###
       ### if AUCs smaller than 0.5: 1-auc
       ###
@@ -150,10 +157,10 @@ deLong.test <-
          markern <- as.matrix(data[!id.pos,])
          markerp <- as.matrix(data[id.pos,])
       }
-      
+
       V10 <- matrix(0, nrow = np, ncol = nauc)
       V01 <- matrix(0, nrow = nn, ncol = nauc)
-      
+
       tmn <- t(markern)
       tmp <- t(markerp)
       for (i in 1:np) {
@@ -164,24 +171,24 @@ deLong.test <-
       }
       V10 <- V10 / nn
       V01 <- V01 / np
-      
+
       W10 <- cov(V10)
       W01 <- cov(V01)
-      
+
       ###
       ### estimated covariance matrix
       ###
-      
+
       S <- W10 / np + W01 / nn
-      
+
       ###
       ### compute variances of AUCs and test for AUC > 0.5
       ###
-      
+
       ### Hanley, McNeil (1982)
       q1 <- auc / (2 - auc)
       q2 <- 2 * auc ^ 2 / (1 + auc)
-      
+
       ### Haney, McNeil (1982) / Bamber (1975)
       aucvar <-
          (auc * (1 - auc) + (np - 1) * (q1 - auc ^ 2) + (nn - 1) * (q2 - auc ^ 2)) / (np *
@@ -190,8 +197,8 @@ deLong.test <-
       phalf <- 1 - pnorm(zhalf)
       zdelong <- (auc - 0.5) / sqrt(diag(S))
       pdelong <- 1 - pnorm(zdelong)
-      
-      
+
+
       ### global p-value
       ###
       aucdiff <- L %*% auc
@@ -200,7 +207,7 @@ deLong.test <-
       z <- t(aucdiff) %*% MASS::ginv(L %*% S %*% t(L)) %*% aucdiff
       p <-
          pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
-      
+
       if (is.null(ref)) {
          cor.auc <- matrix(ncol = 1, nrow = nauc * (nauc - 1) / 2)
          ci <- matrix(ncol = 2, nrow = nauc * (nauc - 1) / 2)
@@ -247,7 +254,7 @@ deLong.test <-
             rows[i] <- paste(ref, comp[i], sep = " vs. ")
          }
       }
-      
+
       newres <- as.data.frame(cbind(aucdiff, ci, pairp, cor.auc))
       names(newres) <-
          c("AUC Difference",
@@ -271,7 +278,7 @@ deLong.test <-
            "P(H0: AUC=0.5)",
            "SD(DeLong)",
            "P(H0: AUC=0.5)")
-      
+
       ERG <-
          list(
             AUC = auc,
@@ -284,6 +291,14 @@ deLong.test <-
       ERG
    }
 
+#' @title Print Method for DeLong
+#'
+#' @param x Object of class DeLong
+#' @param digits Number of digits to print
+#' @param ... Additional arguments
+#'
+#' @returns Prints the AUC, pairwise comparisons and overall test
+#'
 print.DeLong <-
    function(x, digits = max(3, getOption("digits") - 3), ...) {
       cat("Estimated AUC's:\n")

@@ -1,0 +1,121 @@
+---
+name:  ssgBI
+title: Bivariate State Space Grid
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: "Variable 1"
+      type: Variable
+      rejectUnusedLevels: false
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      default:
+      description:
+          R: An unordered categorical state variable
+
+    - name: y2
+      title: "Variable 2"
+      type: Variable
+      rejectUnusedLevels: false
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      default:
+      description:
+          R: An unordered categorical state variable
+
+    - name: time
+      title: "Time (optional)"
+      type: Variable
+      rejectUnusedLevels: true
+      suggested:
+        - ordinal
+        - continuous
+      default:
+      description:
+          R: A variable indicating time
+
+    - name: trajectories
+      title: "Trajectory ID (optional)"
+      type: Variable
+      rejectUnusedLevels: true
+      suggested:
+        - ordinal
+        - nominal
+      default:
+      description:
+          R: A variable indicating groups
+
+    - name: waves
+      title: "Waves within Trajectory ID (optional)"
+      type: Variable
+      rejectUnusedLevels: true
+      suggested:
+        - ordinal
+        - nominal
+      default:
+      description:
+          R: A variable indicating measurement occasions
+
+    - type: String
+      name: v1_labels
+      default: ""
+
+    - type: Integer
+      name: v1_Nstates
+      default: 0
+
+    - type: String
+      name: v2_labels
+      default: ""
+
+    - type: Integer
+      name: v2_Nstates
+      default: 0
+
+    - type: Number
+      name: MinReturns
+      title: "Minimum number of returns"
+      default: 2
+    - type: Number
+      name: MaxReturnTime
+      title: "Maximum return time"
+      default: 0
+    - type: Number
+      name: MaxReturnVisits
+      title: "Maximum number of return visits"
+      default: 0
+    - type: Number
+      name: MinEventDuration
+      title: "Minimum event duration"
+      default: 0
+    - type: Number
+      name: MinCellDuration
+      title: "Minimum cell duration"
+      default: 0
+
+    - type: Bool
+      name: doWinnowing
+      title: "Detect Attractors?"
+      default: false
+
+    - type: Number
+      title: "Drop in relative heterogeneity (0-1):"
+      name: screeCut
+      default: 0.5
+
+
+...

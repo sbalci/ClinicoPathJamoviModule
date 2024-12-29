@@ -1,0 +1,72 @@
+---
+name:  modellingSurvival
+title: Cox Proportional Hazard Model
+menuGroup: SimpleSurvival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: times
+      title: Time
+      type: Variable
+      suggested: [ continuous ]
+    
+    - name: status
+      title: Event indicator
+      type: Variable
+      suggested: [ continuous ]
+
+    - name: deps
+      title: Dependent Variable
+      type: Variables
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+
+    - name: forestyn
+      title: Add forest plot to visualize the Cox model?
+      type: Bool
+      default: false
+
+    - name: diagnosticsyn
+      title: Add diagnostics for the Cox model?
+      type: Bool
+      default: false
+
+    - name: survivaltreeyn
+      title: Add survival tree?
+      type: Bool
+      default: false
+
+
+    - name: plotvar
+      title: Variable to Plot
+      type: Variable
+
+    - name: ciyn
+      title: Add confidence intervals?
+      type: Bool
+      default: false
+
+    - name: timeunits
+      title: Time units
+      type: List
+      options:
+        - name: None
+          title: None
+        - name: Days
+          title: Days
+        - name: Weeks
+          title: Weeks
+        - name: Months
+          title: Months
+        - name: Years
+          title: Years
+      default: None
+
+
+...

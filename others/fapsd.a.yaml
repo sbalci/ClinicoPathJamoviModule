@@ -1,0 +1,63 @@
+---
+name:  faPSD
+title: Power Spectral Density Slope
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: Time series
+      type: Variable
+
+    - name: standardise
+      title: Standardisation
+      type: List
+      options:
+        - name: none
+          title: "No standardisation"
+        - name: meanSD
+          title: "Mean and SD"
+        - name: medianMAD
+          title: "Median and MAD"
+      default: meanSD
+
+    - name: removeTrend
+      title: "Remove trend:"
+      type: List
+      options:
+        - name: nodet
+          title: "No detrending"
+        - name: polydet
+          title: "Polynomial detrending"
+      default: nodet
+
+    - name: polydet_order
+      title: "Polynomial order"
+      type: Integer
+      default: 1
+
+    - name: fs
+      title: "Sample rate"
+      type: Integer
+      default: 1
+
+    - name: nfft
+      title: "Number of frequencies"
+      type: List
+      options:
+        - name: nyquist
+          title: "Use Nyquist criterion"
+        - name: user
+          title: "Enter value"
+      default: nyquist
+
+    - name: userNFFT
+      title: "Number of frequencies"
+      type: Integer
+      default: 256
+
+...

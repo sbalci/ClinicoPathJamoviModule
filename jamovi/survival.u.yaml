@@ -105,7 +105,7 @@ children:
                     format: number
                     enable: (uselandmark)
       - type: Label
-        label: Calculated Time to Data 
+        label: Calculated Time to Data
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -147,14 +147,14 @@ children:
             name: analysistype
             enable: (outcome && multievent)
       - type: Label
-        label: Calculated Outcome to Data 
+        label: Calculated Outcome to Data
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: Output
-                name: outcomeredifened
+                name: outcomeredefined
                 enable: (outcome && multievent)
 
 
