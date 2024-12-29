@@ -27,7 +27,7 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 # pkgdown site
-docs/
+# docs/
 # translation temp files
 po/*~
 .Rproj.user
@@ -39,7 +39,7 @@ build
 *.jmo
 .DS_Store
 ClinicoPath.code-workspace
-docs
+# docs
 pdfs
 temp
 _tododata
