@@ -102,8 +102,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cause",
                     "compete"),
                 default="overall")
-            private$..outcomeredifened <- jmvcore::OptionOutput$new(
-                "outcomeredifened")
+            private$..outcomeredefined <- jmvcore::OptionOutput$new(
+                "outcomeredefined")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -198,7 +198,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
-            self$.addOption(private$..outcomeredifened)
+            self$.addOption(private$..outcomeredefined)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -230,7 +230,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
-        outcomeredifened = function() private$..outcomeredifened$value,
+        outcomeredefined = function() private$..outcomeredefined$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -261,7 +261,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
-        ..outcomeredifened = NA,
+        ..outcomeredefined = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -295,7 +295,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredifened = function() private$.items[["outcomeredifened"]]),
+        outcomeredefined = function() private$.items[["outcomeredefined"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -541,7 +541,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate")))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="outcomeredifened",
+                name="outcomeredefined",
                 title="Add Redefined Outcome to Data",
                 varTitle="Redefined Outcome Single Arm",
                 varDescription="`Redefined Outcome - from ${ outcome } for analysis { analysistype } in Single Arm Analysis`",
@@ -574,40 +574,118 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Single Arm Survival
 #'
-#' Function for Generating Summaries for Survival Analysis.
+#' Performs survival analysis for a single cohort of patients without group 
+#' comparisons. Use this when you want to analyze overall survival 
+#' characteristics of your entire study population - for example, to determine 
+#' median survival time or 1/3/5-year survival rates for all patients 
+#' collectively. This differs from regular survival analysis which compares 
+#' survival between groups.
 #'
 #' @examples
-#' # example will be added
-#'
+#' \donttest{
+#' # Example analyzing overall survival for a patient cohort:
+#' singlearm(
+#'   data = patient_data,
+#'   time = "months_survival",
+#'   outcome = "death_status",
+#'   outcome_level = "Dead"
+#' )
+#'}
 #' @param data The data as a data frame.
-#' @param elapsedtime .
-#' @param tint .
-#' @param dxdate .
-#' @param fudate .
-#' @param outcome .
-#' @param outcomeLevel .
-#' @param dod .
-#' @param dooc .
-#' @param awd .
-#' @param awod .
-#' @param analysistype .
-#' @param cutp .
-#' @param timetypedata select the time type in data
-#' @param timetypeoutput select the time type in output
-#' @param uselandmark .
-#' @param landmark .
-#' @param sc .
-#' @param kmunicate .
-#' @param ce .
-#' @param ch .
-#' @param endplot .
-#' @param ybegin_plot .
-#' @param yend_plot .
-#' @param byplot .
-#' @param multievent .
-#' @param ci95 .
-#' @param risktable .
-#' @param censored .
+#' @param elapsedtime The time-to-event or follow-up duration for each
+#'   patient. Should be numeric and continuous, measured in consistent units
+#'   (e.g., months or years). Can be calculated automatically from dates if
+#'   using the date options below.
+#' @param tint Enable this option if you want to calculate survival time from
+#'   dates in your data. This is useful when you have separate columns for
+#'   diagnosis date and follow-up date and want to calculate the time elapsed
+#'   between them.
+#' @param dxdate The date of diagnosis or study entry for each patient. Should
+#'   be in a consistent date format (e.g., YYYY-MM-DD).
+#' @param fudate The date of last follow-up or event for each patient. Should
+#'   be in a consistent date format (e.g., YYYY-MM-DD).
+#' @param outcome The outcome or event of interest for each patient. Should be
+#'   a factor or numeric variable indicating whether the patient experienced the
+#'   event (e.g., death) or censoring (e.g., end of follow-up).
+#' @param outcomeLevel Select the level of the outcome variable that
+#'   represents the event of interest. For example, if the outcome variable is
+#'   "death_status" with levels "Alive" and "Dead", select "Dead" as the event
+#'   level.
+#' @param dod Select the level of the outcome variable that represents death
+#'   due to disease. This is useful for competing risk analysis when there are
+#'   multiple event types.
+#' @param dooc Select the level of the outcome variable that represents death
+#'   due to other causes. This is useful for competing risk analysis when there
+#'   are multiple event types.
+#' @param awd Select the level of the outcome variable that represents being
+#'   alive with disease. This is useful for competing risk analysis when there
+#'   are multiple event types.
+#' @param awod Select the level of the outcome variable that represents being
+#'   alive without disease. This is useful for competing risk analysis when
+#'   there are multiple event types.
+#' @param analysistype Select the type of survival analysis to perform.
+#'   "Overall" analyzes the survival of all patients regardless of event type.
+#'   "Cause Specific" analyzes the survival for a specific event type (e.g.,
+#'   death due to disease). "Competing Risk" analyzes the survival for multiple
+#'   event types simultaneously.
+#' @param cutp Specify the time points at which to calculate survival
+#'   probabilities. Enter a comma-separated list of time points in consistent
+#'   units (e.g., months or years). For example, "12, 36, 60" calculates
+#'   survival probabilities at 1, 3, and 5 years.
+#' @param timetypedata select the time type in data (e.g., YYYY-MM-DD)
+#' @param timetypeoutput select the time type in output (default is months)
+#' @param uselandmark Enables landmark analysis, which addresses immortal time
+#'   bias by analyzing survival only for patients who survive to a specified
+#'   timepoint (the landmark). Use this when you want to eliminate the effect of
+#'   early deaths or when comparing treatments that can only be given to
+#'   patients who survive long enough to receive them.
+#' @param landmark Enables landmark analysis, which addresses immortal time
+#'   bias by analyzing survival only for patients who survive to a specified
+#'   timepoint (the landmark). Use this when you want to eliminate the effect of
+#'   early deaths or when comparing treatments that can only be given to
+#'   patients who survive long enough to receive them.
+#' @param sc Enable this option to generate a Kaplan-Meier survival plot with
+#'   confidence intervals. This plot shows the estimated survival probability
+#'   over time and is useful for visualizing survival trends in your data.
+#' @param kmunicate Enable this option to generate a publication-ready
+#'   survival plot in the style of KMunicate. This plot shows the estimated
+#'   survival probability over time with confidence intervals and is suitable
+#'   for publication or presentation.
+#' @param ce Enable this option to calculate and plot the cumulative number of
+#'   events over time. This plot shows the total number of events (e.g., deaths)
+#'   that have occurred at each time point and is useful for visualizing event
+#'   rates in your data.
+#' @param ch Enable this option to calculate and plot the cumulative hazard
+#'   function over time. This plot shows the cumulative risk of experiencing the
+#'   event (e.g., death) at each time point and is useful for visualizing the
+#'   risk of the event over time.
+#' @param endplot The maximum time point to include in the survival plots.
+#'   This is the end time for the survival curves and cumulative event/hazard
+#'   plots. Enter a positive integer representing the time in consistent units
+#'   (e.g., months or years).
+#' @param ybegin_plot The minimum value for the y-axis in the survival plots.
+#'   Enter a number between 0 and 1 to set the lower limit of the y-axis.
+#' @param yend_plot The maximum value for the y-axis in the survival plots.
+#'   Enter a number between 0 and 1 to set the upper limit of the y-axis.
+#' @param byplot The interval for plotting survival probabilities. Enter a
+#'   positive integer representing the time interval in consistent units (e.g.,
+#'   months or years).
+#' @param multievent Enable this option to perform survival analysis for
+#'   datasets with multiple event levels. This is useful for competing risk
+#'   analysis when there are multiple event types (e.g., death due to disease,
+#'   death due to other causes).
+#' @param ci95 Enable this option to display 95\% confidence intervals on the
+#'   survival plots. These intervals show the range of uncertainty around the
+#'   estimated survival probabilities and are useful for assessing the precision
+#'   of the estimates.
+#' @param risktable Enable this option to display a table of risk estimates at
+#'   each time point. This table shows the estimated survival probability,
+#'   cumulative event rate, and cumulative hazard at each time point and is
+#'   useful for summarizing the survival characteristics of your data.
+#' @param censored Enable this option to display censored observations on the
+#'   survival plots. Censored observations are patients who have not experienced
+#'   the event of interest by the end of follow-up and are indicated by vertical
+#'   ticks on the survival curves.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -620,7 +698,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

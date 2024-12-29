@@ -1,0 +1,39 @@
+title: Generate random surrogates
+name: tsSUR
+jus: '2.0'
+stage: 2
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time series
+        children:
+          - type: VariablesListBox
+            name: y1
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: surmethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: numSUR
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: Save
+        children:
+         - type: TextBox
+           label: "Provide a valid path"
+           name: savePath
+           format: string
+           enable: (Save)

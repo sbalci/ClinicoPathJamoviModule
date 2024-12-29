@@ -15,19 +15,19 @@ kappaSizeCI(
 )
 }
 \arguments{
-\item{outcome}{.}
+\item{outcome}{Number of outcome level.}
 
-\item{kappa0}{.}
+\item{kappa0}{The null hypothesis value of kappa.}
 
-\item{kappaL}{.}
+\item{kappaL}{The lower limit of the kappa.}
 
-\item{kappaU}{.}
+\item{kappaU}{The upper limit of the kappa.}
 
-\item{props}{.}
+\item{props}{Proportions of outcome level.}
 
-\item{raters}{.}
+\item{raters}{Number of raters.}
 
-\item{alpha}{.}
+\item{alpha}{The significance level.}
 }
 \value{
 A results object containing:

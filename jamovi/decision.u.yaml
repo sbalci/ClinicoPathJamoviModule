@@ -60,3 +60,19 @@ children:
     children:
       - type: CheckBox
         name: fagan
+      # - type: CheckBox
+      #   name: roc
+
+
+  # - type: Label
+  #   label: Test Comparison
+  #   children:
+  #     - type: CheckBox
+  #       name: compare_tests
+  #       label: Compare Multiple Tests
+  #     - type: VariablesListBox
+  #       name: additional_tests
+  #       label: Additional Tests to Compare
+  #       enable: (compare_tests)
+  #       suggested: [nominal]
+  #       permitted: [factor]

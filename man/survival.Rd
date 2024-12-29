@@ -44,19 +44,31 @@ survival(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{elapsedtime}{.}
+\item{elapsedtime}{The time elapsed from the start of the study to the
+event or censoring.}
 
-\item{tint}{.}
+\item{tint}{If the time is in date format, select this option to calculate
+the survival time. The time will be calculated as the difference between
+the event date and the diagnosis date. If the follow-up date is available,
+the time will be  calculated as the difference between the event date and
+the follow-up date.}
 
-\item{dxdate}{.}
+\item{dxdate}{The date of diagnosis. If the time is in date format, the
+time will be calculated as the difference between the event date and the
+diagnosis date.}
 
-\item{fudate}{.}
+\item{fudate}{The date of follow-up. If the time is in date format, the
+time will be calculated as the difference between the event date and the
+follow-up date.}
 
-\item{explanatory}{.}
+\item{explanatory}{The explanatory variable that will be used to compare
+the survival times of different groups.}
 
-\item{outcome}{.}
+\item{outcome}{The outcome variable that will be used to compare the
+survival times of different groups.}
 
-\item{outcomeLevel}{.}
+\item{outcomeLevel}{The level of the outcome variable that will be used as
+the event level.}
 
 \item{dod}{.}
 
@@ -131,7 +143,7 @@ A results object containing:
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-\code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

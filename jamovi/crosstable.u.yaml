@@ -47,10 +47,22 @@ children:
           - type: ComboBox
             name: pcat
             enable: (sty:finalfit)
-
-      # - type: LayoutBox
-      #   margin: large
-      #   children:
-      #     - type: CheckBox
-      #       name: export
-      #       enable: (sty:nejm || sty:lancet || sty:hmisc)
+  # - type: CollapseBox
+  #   label: Post-hoc Analysis
+  #   collapsed: true
+  #   stretchFactor: 1
+  #   children:
+  #     - type: Label
+  #       label: Chi-Square Post-hoc Analysis
+  #       fitToGrid: true
+  #       stretchFactor: 1
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           stretchFactor: 1
+  #           children:
+  #             - type: Label
+  #               label: Variables for Post-hoc Analysis
+  #               fitToGrid: true
+  #               stretchFactor: 1
+  #               children: []

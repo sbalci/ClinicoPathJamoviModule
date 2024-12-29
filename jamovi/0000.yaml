@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.28
+version: 0.0.2.39
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-11-02'
+date: '2024-12-29'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -361,6 +361,13 @@ analyses:
     menuTitle: ROC
     description: Function for ROC Analysis.
     menuSubtitle: Decision
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Variable Type Based Graphs and Plots
+    menuTitle: Graphs and Plots
+    description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Time Interval
     name: timeinterval
     ns: ClinicoPath
@@ -408,13 +415,33 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
-    description: Function for Generating Summaries for Survival Analysis.
+    description: >-
+      Performs survival analysis for a single cohort of patients without group
+      comparisons. Use this when you want to analyze overall survival
+      characteristics of your entire study population - for example, to
+      determine median survival time or 1/3/5-year survival rates for all
+      patients collectively. This differs from regular survival analysis which
+      compares survival between groups.
   - title: Test ROC
     name: TestROC
     ns: ClinicoPath
     menuGroup: fromOthers
-    menuTitle: Test ROC
     menuSubgroup: PPDA
+    menuTitle: Test ROC
+  - title: Lasso-Cox Regression
+    name: lassocox
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Lasso-Cox Regression
+    menuSubtitle: Variable Selection with Lasso Regularization
+  - title: Time-Dependent ROC Analysis
+    name: timeroc
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Time-Dependent ROC Analysis
+    menuSubtitle: Predictive Performance Over Time
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

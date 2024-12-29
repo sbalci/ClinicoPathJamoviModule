@@ -1,0 +1,207 @@
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @import ggplot2
+#' @import ggstatsplot
+#' @import ggalluvial
+#' @importFrom rlang .data
+#'
+
+
+statsplot2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "statsplot2Class",
+    inherit = statsplot2Base,
+    private = list(
+        .run = function() {
+
+            # TODO
+
+            todo <- glue::glue(
+                "This Module is still under development
+                -
+                -  "
+            )
+
+            self$results$todo$setContent(todo)
+
+            if (length(self$options$dep) + length(self$options$group) < 2)
+                return()
+
+
+        },
+
+        .plot = function(image, ...) {  # <-- the plot function
+
+
+            if (length(self$options$dep) + length(self$options$group) < 2)
+                return()
+
+            direction <- self$options$direction
+            typex <- self$options$typex
+            typey <- self$options$typey
+
+            mydata <- self$data
+
+            mydep <- self$data[[self$options$dep]]
+
+            mygroup <- self$data[[self$options$group]]
+
+            # plotData <- data.frame(gr = mygroup, dp = jmvcore::toNumeric(mydep))
+            # plotData <- jmvcore::naOmit(plotData)
+            #
+            # plot <- ggstatsplot::ggbetweenstats(
+            #     data = plotData,
+            #     x = gr,
+            #     y = dp
+            # )
+
+
+
+
+            # https://indrajeetpatil.github.io/ggstatsplot/
+
+            if (direction == "independent") {
+
+                if (typex == "categorical" && typey == "continuous") {
+
+                # ggbetweenstats 	violin plots 	for comparisons between groups/conditions
+
+                    plotData <- data.frame(gr = mygroup, dp = jmvcore::toNumeric(mydep))
+                    plotData <- jmvcore::naOmit(plotData)
+
+                    plot <- ggstatsplot::ggbetweenstats(
+                        data = plotData,
+                        x = gr,
+                        y = dp
+                    )
+
+                } else if (typex == "continuous" && typey == "continuous") {
+
+                    # ggscatterstats 	scatterplots 	for correlations between two variables
+
+
+
+
+                    plotData <- data.frame(gr = jmvcore::toNumeric(mygroup),
+                                           dp = jmvcore::toNumeric(mydep))
+                    plotData <- jmvcore::naOmit(plotData)
+
+                    plot <- ggstatsplot::ggscatterstats(
+                        data = plotData,
+                        x = gr,
+                        y = dp
+                    )
+
+
+
+                } else if (typex == "categorical" && typey == "categorical") {
+
+                # ggbarstats 	bar charts 	for categorical data
+
+
+
+                    mydata <- self$data
+
+                    mydep <- self$data[[self$options$dep]]
+
+                    mygroup <- self$data[[self$options$group]]
+
+
+                    mydep <- self$options$dep
+
+
+                    for (dep in mydep)
+                        mydata[[dep]] <- as.factor(mydata[[dep]])
+
+                    for (group in mygroup)
+                        mydata[[group]] <- as.factor(mydata[[group]])
+
+
+                    plotData <- data.frame(gr = group,
+                                           dp = dep)
+
+                    plotData <- jmvcore::naOmit(plotData)
+
+
+                    plot <- ggstatsplot::ggbarstats(
+                        data = plotData,
+                        main = gr,
+                        condition = dp
+                    )
+
+
+                } else if (typex == "continuous" && typey == "categorical") {
+
+
+                    plot <- "Not Available"
+
+}
+
+
+                } else if (direction == "dependent") {
+
+
+
+
+                if (typex == "categorical" && typey == "continuous") {
+
+                    # ggwithinstats 	violin plots 	for comparisons within groups/conditions
+
+                    plot <- ggstatsplot::ggwithinstats(
+                        data = mydata,
+                        x = mygroup,
+                        y = mydep
+                    )
+
+                } else if (typex == "continuous" && typey == "continuous") {
+
+                    plot <- "Not Available"
+
+
+                } else if (typex == "categorical" && typey == "categorical") {
+
+                     # http://corybrunson.github.io/ggalluvial/
+
+
+                    # mydata_changes <- mydata %>%
+                    #     dplyr::select(.data[[mygroup]], .data[[mygroup]]) %>%
+                    #     dplyr::filter(complete.cases(.)) %>%
+                    #     dplyr::group_by(.data[[mygroup]], .data[[mygroup]]) %>%
+                    #     dplyr::tally(x = .)
+
+                    # plot <- ggplot(data = mydata_changes,
+                    #        aes(axis1 = TumorEcadherin, axis2 = TomurcukEcadherin,
+                    #            y = n)) +
+                    #     scale_x_discrete(limits = c("TumorEcadherin", "TomurcukEcadherin"),
+                    #                      expand = c(.1, .05)
+                    #     ) +
+                    #     xlab("Tumor Tomurcuk") +
+                    #     geom_alluvium(aes(fill = PeritumoralTomurcukGr4,
+                    #                       colour = PeritumoralTomurcukGr4
+                    #     )) +
+                    #     geom_stratum() +
+                    #     geom_text(stat = "stratum", label.strata = TRUE) +
+                    #     theme_minimal() +
+                    #     ggtitle("Changes in Ecadherin")
+
+
+
+                    plot <- "Under Construction"
+
+                } else if (typex == "continuous" && typey == "categorical") {
+
+
+                    plot <- "Not Available"
+
+}
+
+
+                }
+
+
+            print(plot)
+            TRUE
+
+
+
+        })
+)

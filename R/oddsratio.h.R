@@ -123,8 +123,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param explanatory .
-#' @param outcome .
+#' @param explanatory The explanatory variables to be used in the analysis.
+#' @param outcome The outcome variable to be used in the analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

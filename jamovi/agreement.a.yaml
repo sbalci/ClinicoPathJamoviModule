@@ -19,7 +19,7 @@ options:
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The data as a data frame. The data should be in long format, where each row is a unique observation.
 
     - name: vars
       title: Raters
@@ -29,7 +29,7 @@ options:
       description:
           R: >
             A string naming the variable from `data` that contains the
-            diagnosis given by the observer, variable can be categorical, ordinal or numeric.
+            diagnosis given by the observer, variable can be categorical or ordinal.
 
 
     - name: sft
@@ -38,7 +38,8 @@ options:
       default: false
       description:
           R: >
-            Boolean selection whether to show frequency table. Default is 'false'.
+            Boolean selection whether to show frequency table. Default is 'false'. If 'true', the function will show
+            frequency table for each observer.
 
 
     - name: wght
@@ -56,7 +57,7 @@ options:
           R: >
             A list for the argument weight (wght), for weighted kappa analysis. Default is 'unweighted'.
             'squared' or 'equal' should be selected only with ordinal variables. The function gives error if the variable type
-            is not ordinal.
+            is not ordinal. The default is 'unweighted'.
 
     - name: exct
       title: Exact Kappa (>=3 Variables)
@@ -64,7 +65,7 @@ options:
       default: false
       description:
           R: >
-            Boolean selection whether to use exact kappa. Effects only more than 3 observers.
+            Boolean selection whether to use exact kappa. Effects only more than 3 observers. Default is 'false'.
 
 
 ...

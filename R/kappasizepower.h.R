@@ -148,13 +148,13 @@ kappaSizePowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' \donttest{
 #' # example will be added
 #'}
-#' @param outcome .
-#' @param kappa0 .
-#' @param kappa1 .
-#' @param props .
-#' @param raters .
-#' @param alpha .
-#' @param power .
+#' @param outcome Number of outcome level.
+#' @param kappa0 Expected value of kappa.
+#' @param kappa1 Expected value of kappa.
+#' @param props Proportions of outcome level.
+#' @param raters Number of raters.
+#' @param alpha Significance level.
+#' @param power Power.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr

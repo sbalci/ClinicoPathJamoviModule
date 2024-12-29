@@ -1,0 +1,87 @@
+title: Lasso-Cox Regression
+name: lassocox
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  # - type: VariableSupplier
+  #   persistentItems: false
+  #   stretchFactor: 1
+  #   children:
+  #     - type: TargetLayoutBox
+  #       label: Time Elapsed
+  #       children:
+  #         - type: VariablesListBox
+  #           name: elapsedtime
+  #           maxItemCount: 1
+  #           isTarget: true
+  #     - type: TargetLayoutBox
+  #       label: Outcome
+  #       children:
+  #         - type: VariablesListBox
+  #           name: outcome
+  #           maxItemCount: 1
+  #           isTarget: true
+  #         - type: LevelSelector
+  #           name: outcomeLevel
+  #           enable: (outcome)
+  #     - type: TargetLayoutBox
+  #       label: Explanatory Variables
+  #       children:
+  #         - type: VariablesListBox
+  #           name: explanatory
+  #           isTarget: true
+  #
+  # - type: CollapseBox
+  #   label: Model Options
+  #   collapsed: true
+  #   stretchFactor: 1
+  #   children:
+  #     - type: Label
+  #       label: Lambda Selection
+  #       children:
+  #         - type: RadioButton
+  #           name: lambda
+  #           optionName: lambda.min
+  #           label: Minimum CV Error
+  #         - type: RadioButton
+  #           name: lambda
+  #           optionName: lambda.1se
+  #           label: 1SE Rule
+  #     - type: Label
+  #       label: Cross-validation
+  #       children:
+  #         - type: TextBox
+  #           name: nfolds
+  #           label: Number of Folds
+  #           format: number
+  #           enable: true
+  #     - type: CheckBox
+  #       name: standardize
+  #       label: Standardize Variables
+  #
+  # - type: CollapseBox
+  #   label: Plots
+  #   collapsed: true
+  #   stretchFactor: 1
+  #   children:
+  #     - type: CheckBox
+  #       name: cv_plot
+  #       label: Cross-validation Plot
+  #     - type: CheckBox
+  #       name: coef_plot
+  #       label: Coefficient Plot
+  #     - type: CheckBox
+  #       name: survival_plot
+  #       label: Risk Group Survival Plot
+  #
+  # - type: CollapseBox
+  #   label: Output Options
+  #   collapsed: true
+  #   stretchFactor: 1
+  #   children:
+  #     - type: Label
+  #       label: Save Variables
+  #       children:
+  #         - type: Output
+  #           name: riskScore

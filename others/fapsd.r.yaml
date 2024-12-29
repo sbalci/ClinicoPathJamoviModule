@@ -1,0 +1,73 @@
+---
+name:  faPSD
+title: Power Spectral Density Slope
+jrs:   '1.1'
+
+items:
+    - name:  tblTS
+      title: "Time series descriptives"
+      type: Table
+      rows:  2
+      columns:
+       - name: var
+         title: ''
+         type: text
+       - name: N
+         type: integer
+         title: "valid N"
+       - name: na
+         type: integer
+         title: "NA values"
+       - name: median
+         type: number
+       - name: mad
+         type: number
+       - name: mean
+         type: number
+       - name: sd
+         type: number
+       - name: standardise
+         type: text
+       - name: detrending
+         title: detrended
+         type: text
+
+    - name:  tblPSD
+      title: "PSD parameters and results"
+      type: Table
+      rows:  2
+      columns:
+       - name: method
+         title: "regression method"
+         type: text
+       - name: antiper
+         title: "antipersistent?"
+         type: text
+       - name: intercept
+         title: "log-log intercept"
+         type: number
+       - name: slope
+         title: "log-log slope"
+         type: number
+       - name: H
+         title: "Hurst"
+         type: number
+       - name: FD
+         title: "informed FD"
+         type: number
+
+    - name: tsplot
+      title: "Time series"
+      type: Image
+      width: 700
+      height: 300
+      renderFun: .tsplot
+
+    - name: psdplot
+      title: "log-log regression"
+      type: Image
+      width: 700
+      height: 400
+      renderFun: .psdplot
+
+...

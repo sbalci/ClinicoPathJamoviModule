@@ -1,0 +1,100 @@
+---
+title: Common Analysis for Clinicopathological Research
+name: ClinicoPath
+version: 0.0.1
+jms: '1.0'
+authors:
+  - Serdar Balci
+maintainer: Serdar Balci <drserdarbalci@gmail.com>
+date: '2020-01-28'
+type: R
+description: >-
+  I am collecting many different R-project packages here So credit should go to
+  main authors I just try to convert the codes that I often use into jamovi
+  module
+analyses:
+  - title: TableOne
+    name: tableone
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Descriptives
+    menuTitle: TableOne
+    description: Function for making Table-1.
+  - title: WriteSummary
+    name: writesummary
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Descriptives
+    menuTitle: WriteSummary
+  - title: Report General Features
+    name: report
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Descriptives
+    menuTitle: Report General Features
+  - title: CrossTables
+    name: crosstable
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Comparisons
+    menuTitle: CrossTables
+    description: Function for making Cross Tables.
+  - title: Survival FinalFit
+    name: finalfit
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: Survival FinalFit
+  - title: Interrater Intrarater Reliability
+    name: agreement
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Agreement
+    menuTitle: Interrater Intrarater Reliability
+    description: Function for Interrater Intrarater Reliability.
+  - title: Cluster Analysis
+    name: cluster
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Cluster Analysis
+    menuTitle: Cluster Analysis
+  - title: Correlation
+    name: correlation
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Correlation
+    menuTitle: Correlation
+  - title: Medical Decision
+    name: decision
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Medical Decision
+  - title: Decision Calculator
+    name: decisioncalculator
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision
+    menuTitle: Decision Calculator
+  - title: FinalFit Multivariate Survival
+    name: multisurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival
+    menuTitle: FinalFit Multivariate Survival
+  - title: Graphs and Plots
+    name: statsplot2
+    ns: ClinicoPath
+    menuGroup: ClinicoPath
+    menuSubgroup: Comparisons
+    menuTitle: Graphs and Plots
+  - title: Decision Tree
+    name: tree
+    ns: ClinicoPath
+    menuGroup: ClinicoPath2
+    menuSubgroup: Decision Tree
+    menuTitle: Decision Tree
+usesNative: true
+minApp: 1.0.8
+
+...

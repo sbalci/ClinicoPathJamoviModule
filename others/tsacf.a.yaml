@@ -1,0 +1,61 @@
+---
+name:  tsACF
+title: Linear Temporal Correlations
+menuGroup: casnetjmv
+version: '0.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dv1
+      title: "Time series Y1"
+      type: Variable
+
+    - name: dv2
+      title: "Time series Y2 (optional)"
+      type: Variable
+
+    - name: maxLAG
+      title: "Maximum lag"
+      type: Number
+      default: 20
+
+    - name: doTest
+      type: Bool
+      title: "Use Fisher r-to-Z test"
+      default: true
+
+    - name: siglevel
+      type: Number
+      title: "Significance level"
+      min: 0
+      max: 1
+      default: .05
+
+    - name: hypothesis
+      title: "Alternative hypothesis"
+      type: List
+      options:
+        - name: greater
+          title: "ρ > 0"
+        - name: less
+          title: "ρ < 0"
+        - name: both
+          title: "ρ ≠ 0"
+      default: both
+      description:
+          R: >
+             `'greater'`, `'less'`, or `'both'` (default).
+
+    - name: rtLAG1
+      title: "Plot Y1(t) against Y1(t+n)"
+      type: Number
+      default: 1
+
+    - name: rtLAG2
+      title: "Plot Y2(t) against Y2(t+n)"
+      type: Number
+      default: 1
+

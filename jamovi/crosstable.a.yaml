@@ -83,14 +83,57 @@ options:
           name: fisher
       default: chisq
 
+    # - name: perform_posthoc
+    #   title: Include Post-hoc Analysis
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #     Performs detailed post-hoc analysis of the contingency table
+
+
+    # - name: primary_var
+    #   title: Primary Variable
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
+    #   description: >
+    #     Variable to focus on in post-hoc analysis (typically the row variable)
+
+    # - name: secondary_var
+    #   title: Secondary Variable
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
+    #   description: >
+    #     Variable to analyze against (typically the column variable)
+
+
+
+    # - name: posthoc_method
+    #   title: Post-hoc Analysis Method
+    #   type: List
+    #   options:
+    #     - title: Both Methods
+    #       name: both
+    #     - title: Cell Residuals Only
+    #       name: residuals
+    #     - title: Pairwise Only
+    #       name: pairwise
+    #   default: both
+    #   description: >
+    #     Select method for post-hoc analysis of contingency tables.
+    #     'Both Methods' shows cell residuals and pairwise comparisons,
+    #     'Cell Residuals Only' shows standardized residuals analysis,
+    #     'Pairwise Only' shows traditional 2x2 comparisons,
+    #     'None' skips post-hoc analysis.
+
+
+
 
     # - name: export
     #   title: Export Html
     #   type: Bool
     #   default: false
-
-
-
 
 
     # - name: excl2

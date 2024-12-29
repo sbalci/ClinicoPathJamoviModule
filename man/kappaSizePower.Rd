@@ -15,19 +15,19 @@ kappaSizePower(
 )
 }
 \arguments{
-\item{outcome}{.}
+\item{outcome}{Number of outcome level.}
 
-\item{kappa0}{.}
+\item{kappa0}{Expected value of kappa.}
 
-\item{kappa1}{.}
+\item{kappa1}{Expected value of kappa.}
 
-\item{props}{.}
+\item{props}{Proportions of outcome level.}
 
-\item{raters}{.}
+\item{raters}{Number of raters.}
 
-\item{alpha}{.}
+\item{alpha}{Significance level.}
 
-\item{power}{.}
+\item{power}{Power.}
 }
 \value{
 A results object containing:

@@ -1,0 +1,27 @@
+---
+name:  tsENT
+title: Entropy & Roughness
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: Time Series
+      type: Variable
+
+    - name: Ent_edim
+      title: "Embedding dimension / Segment length"
+      type: Number
+      default: 3
+
+    - name: Ent_r
+      title: "Filter factor / Radius"
+      type: Number
+      default: 1
+
+
+...

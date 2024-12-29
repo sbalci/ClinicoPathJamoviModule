@@ -42,25 +42,42 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            The time elapsed from the start of the study to the event or censoring.
 
 
     - name: tint
       title: Using Dates to Calculate Survival Time
       type: Bool
       default: false
+      description:
+          R: >
+            If the time is in date format, select this option to calculate the survival time. The time will be calculated as the
+            difference between the event date and the diagnosis date. If the follow-up date is available, the time will be 
+            calculated as the difference between the event date and the follow-up date.
 
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      description:
+          R: >
+            The date of diagnosis. If the time is in date format, the time will be calculated as the difference between the event date and the diagnosis date.
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      description:
+          R: >
+            The date of follow-up. If the time is in date format, the time will be calculated as the difference between the event date and the follow-up date.
 
 
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
+      description:
+          R: >
+            If the time is in date format, the time will be calculated as the difference between the event date and the diagnosis date. If the follow-up date is available, the time will be calculated as the difference between the event date and the follow-up date.
 
 
     - name: explanatory
@@ -68,6 +85,9 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            The explanatory variable that will be used to compare the survival times of different groups.
 
 
     - name: outcome
@@ -75,11 +95,17 @@ options:
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
+      description:
+          R: >
+            The outcome variable that will be used to compare the survival times of different groups.
 
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      description:
+          R: >
+            The level of the outcome variable that will be used as the event level.
 
     - name: dod
       title: Dead of Disease
@@ -115,7 +141,7 @@ options:
       default: overall
 
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
 
@@ -129,7 +155,7 @@ options:
 
 
     - name: timetypedata
-      title: 'Time Type in Data (default: YYYY-MM-DD)'
+      title: 'Time Type in Data (e.g., YYYY-MM-DD)'
       type: List
       options:
         - title: ymdhms

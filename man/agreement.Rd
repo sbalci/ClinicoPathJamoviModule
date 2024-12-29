@@ -7,22 +7,23 @@
 agreement(data, vars, sft = FALSE, wght = "unweighted", exct = FALSE)
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame. The data should be in long format,
+where each row is a unique observation.}
 
 \item{vars}{A string naming the variable from \code{data} that contains the
-diagnosis given by the observer, variable can be categorical, ordinal or
-numeric.}
+diagnosis given by the observer, variable can be categorical or ordinal.}
 
 \item{sft}{Boolean selection whether to show frequency table. Default is
-'false'.}
+'false'. If 'true', the function will show frequency table for each
+observer.}
 
 \item{wght}{A list for the argument weight (wght), for weighted kappa
 analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
 only with ordinal variables. The function gives error if the variable type
-is not ordinal.}
+is not ordinal. The default is 'unweighted'.}
 
 \item{exct}{Boolean selection whether to use exact kappa. Effects only more
-than 3 observers.}
+than 3 observers. Default is 'false'.}
 }
 \value{
 A results object containing:

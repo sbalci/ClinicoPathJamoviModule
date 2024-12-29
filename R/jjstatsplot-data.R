@@ -4,4 +4,3 @@
 #' @usage data(histopathology)
 #' @format A data frame
 "histopathology"
-

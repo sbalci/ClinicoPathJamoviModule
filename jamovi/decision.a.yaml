@@ -21,7 +21,7 @@ options:
     - name: data
       type: Data
       description:
-          R: The data as a data frame.
+          R: The data as a data frame. The data frame should contain the variables specified in the 'variables' option.
 
 
     - name: gold
@@ -29,23 +29,43 @@ options:
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            The golden standard variable.
+          R: >
+            The golden standard variable.
 
 
     - name: goldPositive
       title: Positive Level
       type: Level
       variable: (gold)
+      description:
+          ui: >
+            The positive level of the golden standard variable.
+          R: >
+            The positive level of the golden standard variable.
 
     - name: newtest
       title: New Test
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      description:
+          ui: >
+            The new test variable.
+          R: >
+            The new test variable.
 
     - name: testPositive
       title: Positive Level
       type: Level
       variable: (newtest)
+      description:
+          ui: >
+            The positive level of the new test variable.
+          R: >
+            The positive level of the new test variable.
 
 
 
@@ -57,6 +77,9 @@ options:
       title: Prior Probability (prevalence)
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to show prior probability. Default is 'false'.
 
     - name: pprob
       title: Prior Probability (prevalence)
@@ -85,17 +108,53 @@ options:
       title: Footnotes
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to show footnotes. Default is 'false'.
 
     - name: ci
       title: '95% CI'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to show 95% confidence intervals. Default is 'false'.
 
 
     - name: fagan
       title: 'Fagan Nomogram'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to show Fagan Nomogram. Default is 'false'.
+
+    # - name: roc
+    #   title: 'ROC Curve'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean selection whether to show ROC curve. Default is 'false'.
+
+    # - name: compare_tests
+    #   title: 'Compare Multiple Tests'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Boolean selection whether to compare multiple tests. Default is 'false'.
+
+    # - name: additional_tests
+    #   title: 'Additional Tests'
+    #   type: Variables
+    #   suggested: [ nominal ]
+    #   permitted: [ factor ]
+    #   description:
+    #       ui: >
+    #         Additional tests to compare.
+    #       R: >
+    #         Additional tests to compare.
 
 
 ...

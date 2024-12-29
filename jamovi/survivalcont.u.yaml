@@ -170,7 +170,7 @@ children:
             margin: large
             children:
               - type: Output
-                name: outcomeredifened
+                name: outcomeredefined
                 enable: (outcome && multievent)
 
 

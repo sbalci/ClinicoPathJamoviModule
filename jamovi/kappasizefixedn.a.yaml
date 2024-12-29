@@ -25,6 +25,11 @@ options:
         - "4"
         - "5"
       default: "2"
+      description:
+          ui: >
+              Number of outcome level.
+          R: >
+              Number of outcome level.
 
 
     - name: kappa0
@@ -33,11 +38,21 @@ options:
       default: 0.40
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+              Expected value of kappa.
+          R: >
+              Expected value of kappa.
 
     - name: props
       title: Proportions of outcome level
       type: String
       default: '0.20 , 0.80'
+      description:
+          ui: >
+              Proportions of outcome level.
+          R: >
+              Proportions of outcome level.
 
 
     - name: raters
@@ -49,6 +64,11 @@ options:
         - "4"
         - "5"
       default: "2"
+      description:
+          ui: >
+              Number of raters.
+          R: >
+              Number of raters.
 
 
     - name: alpha
@@ -57,10 +77,20 @@ options:
       default: 0.05
       min: 0.01
       max: 0.99
+      description:
+          ui: >
+              Significance level.
+          R: >
+              Significance level.
 
     - name: n
       title: N
       type: Number
       default: 100
+      description:
+          ui: >
+              Sample size.
+          R: >
+              Sample size.
 
 ...

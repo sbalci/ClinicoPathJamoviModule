@@ -277,9 +277,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Variable Tree",
-                clearWith=list(
-                    "maxwidth")))
+                title="Variable Tree"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",

@@ -49,6 +49,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - whoisinthisstudy
 
 ...

@@ -577,9 +577,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Add Redefined Outcome to Data ----
 
-                if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
-                    self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
-                    self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
+                if (self$options$multievent  && self$options$outcomeredefined && self$results$outcomeredefined$isNotFilled()) {
+                    self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
+                    self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
                 }
 
 
@@ -772,7 +772,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 rescutTable <- self$results$rescutTable
 
-                rescutTable$setTitle(paste0(self$options$contexpl))
+                rescutTable$setTitle(paste0(
+                  "Optimal Cutpoint Analysis for ", self$options$contexpl,
+                  " \n The cutpoint maximizes the statistical difference between groups while maintaining sufficient sample sizes"
+                ))
+
+
+
+                # rescutTable$setTitle(paste0(self$options$contexpl))
 
                 data_frame <- rescut_summary
                 for (i in seq_along(data_frame[, 1, drop = T])) {
@@ -902,7 +909,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> km_fit_median_definition
 
-                medianSummary <- km_fit_median_definition
+                medianSummary <- c(km_fit_median_definition,
+                                   "The median survival time is when 50% of subjects have experienced the event.",
+                                   "This means that 50% of subjects in this group survived longer than this time period."
+                )
+
 
                 self$results$medianSummary$setContent(medianSummary)
 
@@ -961,7 +972,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
-                km_fit_summary <- summary(km_fit, times = utimes)
+                km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
                 km_fit_df <-
                     as.data.frame(km_fit_summary[c(

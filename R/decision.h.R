@@ -114,6 +114,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         cTable = function() private$.items[["cTable"]],
+        nTable2 = function() private$.items[["nTable2"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
@@ -161,16 +162,20 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="Total", 
                         `title`="Total", 
                         `type`="number"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="nTable2",
+                title="nTable2"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
-                title="",
+                title="nTable",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
                     list(
                         `name`="tablename", 
-                        `title`="", 
+                        `title`="tablename", 
                         `type`="text"),
                     list(
                         `name`="TotalPop", 
@@ -212,7 +217,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="tablename", 
-                        `title`="", 
+                        `title`="Ratios", 
                         `type`="text"),
                     list(
                         `name`="Sens", 
@@ -268,7 +273,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
-                title="",
+                title="EpiR Table Ratios",
                 visible="(ci)",
                 rows=0,
                 columns=list(
@@ -374,24 +379,30 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \donttest{
 #' # example will be added
 #'}
-#' @param data The data as a data frame.
-#' @param gold .
-#' @param goldPositive .
-#' @param newtest .
-#' @param testPositive .
-#' @param pp .
+#' @param data The data as a data frame. The data frame should contain the
+#'   variables specified in the 'variables' option.
+#' @param gold The golden standard variable.
+#' @param goldPositive The positive level of the golden standard variable.
+#' @param newtest The new test variable.
+#' @param testPositive The positive level of the new test variable.
+#' @param pp Boolean selection whether to show prior probability. Default is
+#'   'false'.
 #' @param pprob Prior probability (disease prevalence in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param od Boolean selection whether to show frequency table. Default is
 #'   'false'.
-#' @param fnote .
-#' @param ci .
-#' @param fagan .
+#' @param fnote Boolean selection whether to show footnotes. Default is
+#'   'false'.
+#' @param ci Boolean selection whether to show 95\% confidence intervals.
+#'   Default is 'false'.
+#' @param fagan Boolean selection whether to show Fagan Nomogram. Default is
+#'   'false'.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nTable2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr

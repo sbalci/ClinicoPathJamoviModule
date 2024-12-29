@@ -1,0 +1,46 @@
+---
+name:  tsSUR
+title: Generate random surrogates
+menuGroup: casnetjmv
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: y1
+      title: Time series
+      type: Variable
+
+    - name: surmethod
+      title: Surrogate method
+      type: List
+      options:
+        - title: Choose a method
+          name: choose
+        - title: Random shuffle
+          name:  randshuffle
+        - title: Block randomisation [not implemented]
+          name:  blockshuffle
+        - title: Random phases (FFT)
+          name:  randphase
+        - title: Amplitude adjusted random phases (AAFT)
+          name:  randphase
+      default: choose
+
+    - name: numSUR
+      title: "Number of surrogates to generate:"
+      type: Integer
+      default: 1
+
+    - name: Save
+      title: "Save surrogates to a file"
+      type: Bool
+      default: false
+
+    - name: savePath
+      title: "Provide a valid path"
+      type: String
+      default: ""
+...

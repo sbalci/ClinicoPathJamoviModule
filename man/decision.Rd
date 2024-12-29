@@ -19,17 +19,19 @@ decision(
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame. The data frame should contain the
+variables specified in the 'variables' option.}
 
-\item{gold}{.}
+\item{gold}{The golden standard variable.}
 
-\item{goldPositive}{.}
+\item{goldPositive}{The positive level of the golden standard variable.}
 
-\item{newtest}{.}
+\item{newtest}{The new test variable.}
 
-\item{testPositive}{.}
+\item{testPositive}{The positive level of the new test variable.}
 
-\item{pp}{.}
+\item{pp}{Boolean selection whether to show prior probability. Default is
+'false'.}
 
 \item{pprob}{Prior probability (disease prevalence in the community).
 Requires a value between 0.001 and 0.999, default 0.300.}
@@ -37,11 +39,14 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{od}{Boolean selection whether to show frequency table. Default is
 'false'.}
 
-\item{fnote}{.}
+\item{fnote}{Boolean selection whether to show footnotes. Default is
+'false'.}
 
-\item{ci}{.}
+\item{ci}{Boolean selection whether to show 95\\% confidence intervals.
+Default is 'false'.}
 
-\item{fagan}{.}
+\item{fagan}{Boolean selection whether to show Fagan Nomogram. Default is
+'false'.}
 }
 \value{
 A results object containing:
@@ -49,6 +54,7 @@ A results object containing:
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$nTable2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr

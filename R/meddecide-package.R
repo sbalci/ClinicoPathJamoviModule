@@ -1,6 +1,6 @@
 #' \code{meddecide}
 #'
-#' @title meddecide: Analysis for meddecideological Research
+#' @title Functions for Medical Decision Making in ClinicoPath jamovi Module
 #'
 #' @description `meddecide` meddecide help researchers to generate natural
 #' language summaries of their dataset, generate cross tables with statistical

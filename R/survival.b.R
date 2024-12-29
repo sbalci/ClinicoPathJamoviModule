@@ -578,9 +578,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Add Redefined Outcome to Data ----
 
-                if (self$options$multievent  && self$options$outcomeredifened && self$results$outcomeredifened$isNotFilled()) {
-                    self$results$outcomeredifened$setRowNums(results$cleanData$row_names)
-                    self$results$outcomeredifened$setValues(results$cleanData$CalculatedOutcome)
+                if (self$options$multievent  && self$options$outcomeredefined && self$results$outcomeredefined$isNotFilled()) {
+                    self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
+                    self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
                 }
             }
 
@@ -685,8 +685,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> km_fit_median_definition
 
-                medianSummary <- km_fit_median_definition
-
+                medianSummary <- c(km_fit_median_definition,
+                                   "The median survival time is when 50% of subjects have experienced the event.",
+                                   "This means that 50% of subjects in this group survived longer than this time period."
+                                   )
 
                 self$results$medianSummary$setContent(medianSummary)
 
@@ -800,7 +802,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
                         coxdescription = glue::glue(
-                            "When {Explanatory} is {Levels}, there is {HR_univariable} times risk than when {Explanatory} is {firstlevel}."
+                            "When {Explanatory} is {Levels}, there is {HR_univariable} times risk than when {Explanatory} is {firstlevel}. \n For {Explanatory}, compared to the reference group ({firstlevel}), subjects in the {Levels} group had {HR_univariable} times the risk of experiencing the event at any given time point."
+
                         )
                     ) %>%
                     dplyr::filter(HR_univariable != '-') %>%
@@ -808,8 +811,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
 
+
                 coxSummary <- unlist(coxSummary)
+
+                coxSummary <- c(coxSummary,
+                                "A hazard ratio greater than 1 indicates increased risk, while less than 1 indicates decreased risk compared to the reference group."
+                )
+
                 self$results$coxSummary$setContent(coxSummary)
+
+
+
 
 
                 ## Proportional Hazards Assumption ----
@@ -829,6 +841,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 formula <- as.formula(formula)
 
                     cox_model <- survival::coxph(formula, data = mydata)
+                                                 # , na.action = na.exclude)
 
                     zph <- survival::cox.zph(cox_model)
 
@@ -880,7 +893,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     utimes <- c(12, 36, 60)
                 }
 
-                km_fit_summary <- summary(km_fit, times = utimes)
+                km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
                 km_fit_df <-
                     as.data.frame(km_fit_summary[c("strata",
@@ -932,7 +945,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(
                         description =
                             glue::glue(
-                                "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
+                                "When {strata}, {time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n For the {strata} group, the estimated probability of surviving beyond {time} months was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group."
+
                             )
                     ) %>%
                     dplyr::select(description) %>%
@@ -1016,7 +1030,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 "The difference of ",
                                 title2,
                                 " between {rowname} and {name}",
-                                " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}."
+                                " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}.",
+
+                                "The survival difference between {rowname} and {name} groups was tested using a log-rank test. The p-value of {format.pval(value, digits = 3, eps = 0.001)} {ifelse(value < 0.05, 'indicates a statistically significant difference', 'suggests no statistically significant difference')} in survival between these groups (using {padjustmethod} adjustment for multiple comparisons)."
+
+
+
                             )
                     ) %>%
                     dplyr::pull(description) -> pairwiseSummary

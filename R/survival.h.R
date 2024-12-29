@@ -115,8 +115,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cause",
                     "compete"),
                 default="overall")
-            private$..outcomeredifened <- jmvcore::OptionOutput$new(
-                "outcomeredifened")
+            private$..outcomeredefined <- jmvcore::OptionOutput$new(
+                "outcomeredefined")
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -237,7 +237,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
-            self$.addOption(private$..outcomeredifened)
+            self$.addOption(private$..outcomeredefined)
             self$.addOption(private$..cutp)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -274,7 +274,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
         analysistype = function() private$..analysistype$value,
-        outcomeredifened = function() private$..outcomeredifened$value,
+        outcomeredefined = function() private$..outcomeredefined$value,
         cutp = function() private$..cutp$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -310,7 +310,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..awd = NA,
         ..awod = NA,
         ..analysistype = NA,
-        ..outcomeredifened = NA,
+        ..outcomeredefined = NA,
         ..cutp = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -356,7 +356,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredifened = function() private$.items[["outcomeredifened"]]),
+        outcomeredefined = function() private$.items[["outcomeredefined"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -775,7 +775,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "calculatedtime")))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="outcomeredifened",
+                name="outcomeredefined",
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`",
                 varDescription="Redefined Outcome from Outcome based on Analysis Type in Survival Analysis",
@@ -815,13 +815,25 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # example will be added
 #'
 #' @param data The data as a data frame.
-#' @param elapsedtime .
-#' @param tint .
-#' @param dxdate .
-#' @param fudate .
-#' @param explanatory .
-#' @param outcome .
-#' @param outcomeLevel .
+#' @param elapsedtime The time elapsed from the start of the study to the
+#'   event or censoring.
+#' @param tint If the time is in date format, select this option to calculate
+#'   the survival time. The time will be calculated as the difference between
+#'   the event date and the diagnosis date. If the follow-up date is available,
+#'   the time will be  calculated as the difference between the event date and
+#'   the follow-up date.
+#' @param dxdate The date of diagnosis. If the time is in date format, the
+#'   time will be calculated as the difference between the event date and the
+#'   diagnosis date.
+#' @param fudate The date of follow-up. If the time is in date format, the
+#'   time will be calculated as the difference between the event date and the
+#'   follow-up date.
+#' @param explanatory The explanatory variable that will be used to compare
+#'   the survival times of different groups.
+#' @param outcome The outcome variable that will be used to compare the
+#'   survival times of different groups.
+#' @param outcomeLevel The level of the outcome variable that will be used as
+#'   the event level.
 #' @param dod .
 #' @param dooc .
 #' @param awd .
@@ -868,7 +880,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$outcomeredifened} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

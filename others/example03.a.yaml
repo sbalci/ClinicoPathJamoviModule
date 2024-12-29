@@ -1,0 +1,24 @@
+---
+name:    Example03
+title:   Example 3
+menuGroup: ClinicoPath
+version: "1.0.0"
+jas: '1.2'
+
+
+options:
+    - name: data
+      type: Data
+
+    - name: dependent
+      title: Dependent variable
+      type: Variable
+
+    - name: group
+      title: Grouping variable
+      type: Variable
+
+    - name: equVar
+      title: Equal variances
+      type: Bool
+      default: true

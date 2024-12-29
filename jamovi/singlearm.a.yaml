@@ -8,11 +8,22 @@ version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for Generating Summaries for Survival Analysis.
+    main: >-
+      Performs survival analysis for a single cohort of patients without group comparisons.
+      Use this when you want to analyze overall survival characteristics of your entire
+      study population - for example, to determine median survival time or 1/3/5-year
+      survival rates for all patients collectively. This differs from regular survival
+      analysis which compares survival between groups.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            # example will be added
+            # Example analyzing overall survival for a patient cohort:
+            singlearm(
+              data = patient_data,
+              time = "months_survival",
+              outcome = "death_status",
+              outcome_level = "Dead"
+            )
 
 
 options:
@@ -42,25 +53,42 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description: >-
+        The time-to-event or follow-up duration for each patient. Should be numeric and
+        continuous, measured in consistent units (e.g., months or years). Can be calculated
+        automatically from dates if using the date options below.
 
 
     - name: tint
       title: Using Dates to Calculate Survival Time
       type: Bool
       default: false
+      description: >-
+        Enable this option if you want to calculate survival time from dates in your data.
+        This is useful when you have separate columns for diagnosis date and follow-up date
+        and want to calculate the time elapsed between them.
 
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      description: >-
+        The date of diagnosis or study entry for each patient. Should be in a consistent
+        date format (e.g., YYYY-MM-DD).
 
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      description: >-
+        The date of last follow-up or event for each patient. Should be in a consistent
+        date format (e.g., YYYY-MM-DD).
 
 
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
+      description: >-
+        If enabled, the calculated time-to-event will be added to your data as a new
+        variable. This is useful for verifying the accuracy of the calculated time.
 
 
     - name: outcome
@@ -68,31 +96,55 @@ options:
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
+      description: >-
+        The outcome or event of interest for each patient. Should be a factor or numeric
+        variable indicating whether the patient experienced the event (e.g., death) or
+        censoring (e.g., end of follow-up).
 
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      description: >-
+        Select the level of the outcome variable that represents the event of interest.
+        For example, if the outcome variable is "death_status" with levels "Alive" and
+        "Dead", select "Dead" as the event level.
+
     - name: dod
       title: Dead of Disease
       type: Level
       variable: (outcome)
       allowNone: true
+      description: >-
+        Select the level of the outcome variable that represents death due to disease.
+        This is useful for competing risk analysis when there are multiple event types.
+
     - name: dooc
       title: Dead of Other
       type: Level
       variable: (outcome)
       allowNone: true
+      description: >-
+        Select the level of the outcome variable that represents death due to other causes.
+        This is useful for competing risk analysis when there are multiple event types.
+
     - name: awd
       title: Alive w Disease
       type: Level
       variable: (outcome)
       allowNone: true
+      description: >-
+        Select the level of the outcome variable that represents being alive with disease.
+        This is useful for competing risk analysis when there are multiple event types.
+
     - name: awod
       title: Alive w/o Disease
       type: Level
       variable: (outcome)
       allowNone: true
+      description: >-
+        Select the level of the outcome variable that represents being alive without disease.
+        This is useful for competing risk analysis when there are multiple event types.
 
     - name: analysistype
       title: 'Survival Type'
@@ -105,11 +157,19 @@ options:
         - title: Competing Risk
           name: compete
       default: overall
+      description: >-
+        Select the type of survival analysis to perform. "Overall" analyzes the survival
+        of all patients regardless of event type. "Cause Specific" analyzes the survival
+        for a specific event type (e.g., death due to disease). "Competing Risk" analyzes
+        the survival for multiple event types simultaneously.
 
 
-    - name: outcomeredifened
+    - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
+      description: >-
+        If enabled, the redefined outcome variable will be added to your data as a new
+        variable. This is useful for verifying the accuracy of the redefined outcome.
 
 
 
@@ -118,10 +178,14 @@ options:
       title: Cutpoints
       type: String
       default: '12, 36, 60'
+      description: >-
+        Specify the time points at which to calculate survival probabilities. Enter a
+        comma-separated list of time points in consistent units (e.g., months or years).
+        For example, "12, 36, 60" calculates survival probabilities at 1, 3, and 5 years.
 
 
     - name: timetypedata
-      title: 'Time Type in Data (default: YYYY-MM-DD)'
+      title: 'Time Type in Data (e.g., YYYY-MM-DD)'
       type: List
       options:
         - title: ymdhms
@@ -140,7 +204,7 @@ options:
           name: dym
       default: ymd
       description:
-          R: select the time type in data
+          R: select the time type in data (e.g., YYYY-MM-DD)
 
 
     - name: timetypeoutput
@@ -157,83 +221,139 @@ options:
           name: years
       default: months
       description:
-          R: select the time type in output
+          R: select the time type in output (default is months)
 
 
     - name: uselandmark
       title: Use Landmark Time
       type: Bool
       default: false
+      description: >-
+        Enables landmark analysis, which addresses immortal time bias by analyzing survival
+        only for patients who survive to a specified timepoint (the landmark). Use this when
+        you want to eliminate the effect of early deaths or when comparing treatments that
+        can only be given to patients who survive long enough to receive them.
 
     - name: landmark
       title: Landmark Time
       type: Integer
       default: 3
-
+      description: >-
+        Enables landmark analysis, which addresses immortal time bias by analyzing survival
+        only for patients who survive to a specified timepoint (the landmark). Use this when
+        you want to eliminate the effect of early deaths or when comparing treatments that
+        can only be given to patients who survive long enough to receive them.
 
     - name: sc
-      title: Survival Plot
+      title: "Kaplan-Meier Survival Plot"
       type: Bool
       default: false
+      description: >-
+        Enable this option to generate a Kaplan-Meier survival plot with confidence intervals.
+        This plot shows the estimated survival probability over time and is useful for
+        visualizing survival trends in your data.
 
     - name: kmunicate
-      title: KMunicate-Style Plot
+      title: "KMunicate-Style Plot"
       type: Bool
       default: false
+      description: >-
+        Enable this option to generate a publication-ready survival plot in the style of
+        KMunicate. This plot shows the estimated survival probability over time with
+        confidence intervals and is suitable for publication or presentation.
 
 
     - name: ce
       title: Cumulative Events
       type: Bool
       default: false
+      description: >-
+        Enable this option to calculate and plot the cumulative number of events over time.
+        This plot shows the total number of events (e.g., deaths) that have occurred at each
+        time point and is useful for visualizing event rates in your data.
 
 
     - name: ch
       title: Cumulative Hazard
       type: Bool
       default: false
+      description: >-
+        Enable this option to calculate and plot the cumulative hazard function over time.
+        This plot shows the cumulative risk of experiencing the event (e.g., death) at each
+        time point and is useful for visualizing the risk of the event over time.
 
 
     - name: endplot
       title: Plot End Time
       type: Integer
       default: 60
+      description: >-
+        The maximum time point to include in the survival plots. This is the end time for
+        the survival curves and cumulative event/hazard plots. Enter a positive integer
+        representing the time in consistent units (e.g., months or years).
 
     - name: ybegin_plot
       title: Start y-axis
       type: Number
       default: 0.00
+      description: >-
+        The minimum value for the y-axis in the survival plots. Enter a number between 0
+        and 1 to set the lower limit of the y-axis.
 
     - name: yend_plot
       title: End y-axis
       type: Number
       default: 1.00
+      description: >-
+        The maximum value for the y-axis in the survival plots. Enter a number between 0
+        and 1 to set the upper limit of the y-axis.
 
     - name: byplot
       title: Time Interval
       type: Integer
       default: 12
+      description: >-
+        The interval for plotting survival probabilities. Enter a positive integer
+        representing the time interval in consistent units (e.g., months or years).
 
 
     - name: multievent
-      title: Multiple Event Levels
+      title: "Multiple Event Levels"
       type: Bool
       default: false
+      description: >-
+        Enable this option to perform survival analysis for datasets with multiple event
+        levels. This is useful for competing risk analysis when there are multiple event
+        types (e.g., death due to disease, death due to other causes).
 
     - name: ci95
       title: '95% CI'
       type: Bool
       default: false
+      description: >-
+        Enable this option to display 95% confidence intervals on the survival plots.
+        These intervals show the range of uncertainty around the estimated survival
+        probabilities and are useful for assessing the precision of the estimates.
 
     - name: risktable
       title: risktable
       type: Bool
       default: false
+      description: >-
+        Enable this option to display a table of risk estimates at each time point.
+        This table shows the estimated survival probability, cumulative event rate,
+        and cumulative hazard at each time point and is useful for summarizing the
+        survival characteristics of your data.
 
     - name: censored
       title: censored
       type: Bool
       default: false
+      description: >-
+        Enable this option to display censored observations on the survival plots.
+        Censored observations are patients who have not experienced the event of
+        interest by the end of follow-up and are indicated by vertical ticks on the
+        survival curves.
 
 
 ...
