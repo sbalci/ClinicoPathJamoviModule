@@ -2,7 +2,7 @@
 title: "Pathology Articles Using ClinicoPath"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Use jjstatsplot in R}
+  %\VignetteIndexEntry{Pathology Articles Using ClinicoPath}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,15 +15,11 @@ knitr::opts_chunk$set(
 ```
 
 
-Please let me know if you have used `ClinicoPath` in your research and would like to have it listed here.
-[serdarbalci@serdarbalci.com](mailto:serdarbalci@serdarbalci.com)
-
-
 # ClinicoPathDescriptives
 
 ## Alluvial Plot
 
-- Detecting Early Signs of Malignancy of Oral Leukoplakia in its Tissues and Saliva
+Detecting Early Signs of Malignancy of Oral Leukoplakia in its Tissues and Saliva
 https://dspace.rsu.lv/jspui/bitstream/123456789/16943/1/2024-19_Dzudzilo-Madara_DTS_IPD-5242.pdf
 
 
