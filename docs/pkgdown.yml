@@ -7,12 +7,13 @@ articles:
   module_development_jamovi: module_development_jamovi.html
   motivation: motivation.html
   pathology_jamovi: pathology_jamovi.html
+  pathology-articles-using-ClinicoPath: pathology-articles-using-ClinicoPath.html
   pkgnet-report: pkgnet-report.html
   use-ClinicoPathDescriptives-in-R: use-ClinicoPathDescriptives-in-R.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   use-jsurvival-in-R: use-jsurvival-in-R.html
   use-meddecide-in-R: use-meddecide-in-R.html
-last_built: 2024-12-29T14:39Z
+last_built: 2025-01-01T16:12Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles
