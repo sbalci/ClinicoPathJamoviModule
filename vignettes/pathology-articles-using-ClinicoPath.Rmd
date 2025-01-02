@@ -1,8 +1,8 @@
 ---
-title: "Pathology Articles Using ClinicoPath"
+title: "Users of ClinicoPath"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Pathology Articles Using ClinicoPath}
+  %\VignetteIndexEntry{Users of ClinicoPath}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,8 +14,49 @@ knitr::opts_chunk$set(
 )
 ```
 
+Here is the list of articles, videos, websites, and other resources that have used ClinicoPath in their research or projects. If you have used ClinicoPath in your work and would like to be included in this list, 
+please let us know by creating an issue in the [GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule/issues). 
+
+
+
+# Example Datasets
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/oMGEzrENE80?si=Wcv0c1XPSKVsIUJx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/XFYuL8lXlx8?si=JgWLAP4dKwlCK2Jr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 # ClinicoPathDescriptives
+
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/scbWIr52FOc?si=F2Gut7vNxS-u0RDn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+[https://www.youtube.com/shorts/Tr852pDJahY](https://www.youtube.com/shorts/Tr852pDJahY)
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/yUGOURDFhmQ?si=ZmLE63c80hj53G4b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+## Table One
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/f_Sn5muB98g?si=_I8rR0THAQkCLIqr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YYqONM-fweQ?si=hBGIdMwIImh0yt_e" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/B7FSM19JoB8?si=K5Q4W5j6atPBrUsB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+## Cross Tables
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7X1LA69D2VI?si=MQaay1MpULNkS0lV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/j9Y07jtWuFo?si=jOF2nuNa0FHGQC48" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 ## Alluvial Plot
 
@@ -29,9 +70,81 @@ https://dspace.rsu.lv/jspui/bitstream/123456789/16943/1/2024-19_Dzudzilo-Madara_
 https://pmc.ncbi.nlm.nih.gov/articles/PMC11162302/
 
 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YY6Fs1F_2Xk?si=W48XwjZ7GxYTLs8h" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gIPf4xIKAOU?si=nRHJZ2eK-g5nve8q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Single Arm Survival
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UMjW6PM4c4U?si=Ik-PtvoUeZWqx0jQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/n4-6a_99A0s?si=MxUlqusFjiI00QuU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ne2lURUJoGE?si=VKgamRUX98O7bHOT" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Survival Analysis
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UJLHPPrued0?si=LOSDuqsv1SNZrh8S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Af5t483vZCQ?si=bRRYme8gK2bO2qK5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+## Multivariable Survival Analysis
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/6bBGgHWcnTA?si=A0dkqep9JQQC5eYU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/owkduW39x94?si=8ZT4pLgi8LlB6LCA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2b10k7je7A8?si=iRwJuu3sNj0wIJvI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+
 # meddecide 
 
 - A review of user-friendly freely-available statistical analysis software for medical researchers and biostatisticians
 https://www.tandfonline.com/doi/full/10.1080/27684520.2024.2322630
 
+- The extent of neuroradiological findings in COVID-19 shows correlation with blood biomarkers, Glasgow coma scale score and days in intensive care 
+https://www.sciencedirect.com/science/article/pii/S015098612100167X 
+
+- Exercise & cardiopulmonary physiology in rheumatoid arthritis
+https://wlv.openrepository.com/handle/2436/624659
+
+- Comparing parent-child interaction during wordless book reading, print book reading and imaginative play
+https://www.cambridge.org/core/journals/journal-of-child-language/article/comparing-parentchild-interaction-during-wordless-book-reading-print-book-reading-and-imaginative-play/F1BB0E369ECE50AD4EA3906D9FF14710
+
+
+## Fagan Nomogram 
+- Transcranial doppler in the non-invasive estimation of intracranial pressure in traumatic brain injury compared to other non-invasive methods in lower-middle income countries: Systematic review and meta-analysis
+https://www.sciencedirect.com/science/article/pii/S0967586823001224
+
+
+# jjstatsplot 
+
+Some of the functions in this video are outdated.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/F8u_Xi58rBw?si=2U28xuhyuJFTCi9v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/m3uInetiC8w?si=WBqj4Tg8FH-Q_tPt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/-p6_K_l__N4?si=s36I1QDHu3aEz26h" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+There were some bugs when these videos were created. The bugs have been fixed in the latest version of the package. It takes time and effort to update the modules.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mhtbOQJzKIw?si=sdBy_f83ZbQ-m3zK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/0Yjg2E9aHJo?si=H7bTZH2k7QmdDFNK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+
+
+
+## Correlation 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hfLpoc9myqI?si=Hbq-wGViQvfCqS6c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
