@@ -117,3 +117,12 @@ ClinicoPathLinuxDescriptives
 jsurvival
 jbbplot
 jjstatsplot
+
+ClinicoPathJamoviModule.code-workspace
+DESCRIPTION-old.txt
+_updateModules.R
+oncology_response_data.R
+others
+preparations-1.R
+quarto.R
+tododata

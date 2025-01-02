@@ -541,6 +541,16 @@
         `pages`="125-132", 
         `doi`="10.1016/j.jclinepi.2019.06.011", 
         `url`="https://pubmed.ncbi.nlm.nih.gov/31229583/"), 
+    `recist`=list(
+        `type`="article", 
+        `author`="Eisenhauer EA, Therasse P, Bogaerts J, Schwartz LH, Sargent D, Ford R, Dancey J, Arbuck S, Gwyther S, Mooney M, Rubinstein L, Shankar L, Dodd L, Kaplan R, Lacombe D, Verweij J.", 
+        `year`=2009, 
+        `title`="New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1).", 
+        `publisher`="Eur J Cancer.", 
+        `volume`="45(2)", 
+        `pages`="228-47", 
+        `doi`="10.1016/j.ejca.2008.10.026", 
+        `url`="https://pubmed.ncbi.nlm.nih.gov/19097774/"), 
     `ClinicoPathJamoviModule`=list(
         `type`="software", 
         `author`="Serdar Balci", 

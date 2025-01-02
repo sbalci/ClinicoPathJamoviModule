@@ -298,13 +298,12 @@ ticks on the survival curves.</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Example analyzing overall survival for a patient cohort:</span></span></span>
-<span class="r-in"><span><span class="fu">singlearm</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">patient_data</span>,</span></span>
-<span class="r-in"><span>  time <span class="op">=</span> <span class="st">"months_survival"</span>,</span></span>
-<span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"death_status"</span>,</span></span>
-<span class="r-in"><span>  outcome_level <span class="op">=</span> <span class="st">"Dead"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in singlearm(data = patient_data, time = "months_survival", outcome = "death_status",     outcome_level = "Dead"):</span> argument 2 matches multiple formal arguments</span>
+<span class="r-in"><span><span class="co"># singlearm(</span></span></span>
+<span class="r-in"><span><span class="co">#   data = patient_data,</span></span></span>
+<span class="r-in"><span><span class="co">#   time = "months_survival",</span></span></span>
+<span class="r-in"><span><span class="co">#   outcome = "death_status",</span></span></span>
+<span class="r-in"><span><span class="co">#   outcome_level = "Dead"</span></span></span>
+<span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
