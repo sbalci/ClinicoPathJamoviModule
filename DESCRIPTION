@@ -96,11 +96,12 @@ Imports:
     stats,
     ggstatsplot,
     ggside,
-    WRS2,
     BayesFactor,
     effectsize,
     boot,
-    FFTrees
+    FFTrees,
+    knitr,
+    tiff
 VignetteBuilder:
     knitr,
     tiff

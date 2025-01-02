@@ -584,12 +584,12 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @examples
 #' \donttest{
 #' # Example analyzing overall survival for a patient cohort:
-#' singlearm(
-#'   data = patient_data,
-#'   time = "months_survival",
-#'   outcome = "death_status",
-#'   outcome_level = "Dead"
-#' )
+#' # singlearm(
+#' #   data = patient_data,
+#' #   time = "months_survival",
+#' #   outcome = "death_status",
+#' #   outcome_level = "Dead"
+#' # )
 #'}
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each

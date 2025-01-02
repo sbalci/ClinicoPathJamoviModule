@@ -194,11 +194,11 @@ survival between groups.
 \examples{
 \donttest{
 # Example analyzing overall survival for a patient cohort:
-singlearm(
-  data = patient_data,
-  time = "months_survival",
-  outcome = "death_status",
-  outcome_level = "Dead"
-)
+# singlearm(
+#   data = patient_data,
+#   time = "months_survival",
+#   outcome = "death_status",
+#   outcome_level = "Dead"
+# )
 }
 }
