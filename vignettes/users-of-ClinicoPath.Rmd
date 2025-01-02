@@ -30,7 +30,24 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 # ClinicoPathDescriptives
 
+-  COMPARATIVE MORPHOMETRIC ANALYSIS OF VARIOUS GROUPS - "OPTIMAL" AND "UNOPTIMAL" DICHOTOS OF THE INNER-ORDAINED ARTERIAL DRESS OF THE SPLEEN OF A PERSON
+https://discover-journal.ru/jour/index.php/sjlsa/article/view/925
 
+- Performance of the Wisconsin Card Sorting Test in Oncopediatric Patients in an Oncology Unit in Cali, Colombia: A Cross-Sectional Observational Study https://www.preprints.org/manuscript/202402.1056
+
+-  Multispectral UAV-Based Disease Identification Using Vegetation Indices for Maize Hybrids https://www.mdpi.com/2077-0472/14/11/2002 
+
+- Prospective association of occupational and leisure-time physical activity with orthostatic blood pressure changes in older adults https://www.nature.com/articles/s41598-023-46947-7 
+
+- How Much Students in Primary School Know about Waste Sorting? (Pilot Research) https://www.researchgate.net/profile/Sarah-Haines-2/publication/380424067_Integrated_STEM_Professional_Development_Utilizing_Best_Practices_in_an_Online_Format/links/663ba28006ea3d0b744200a0/Integrated-STEM-Professional-Development-Utilizing-Best-Practices-in-an-Online-Format.pdf
+
+-  BETWEEN LIKES AND ANXIETY: UNDERSTANDING INSTAGRAM ADDICTION'S ROLE IN APPEARANCE CONCERNS https://www.journals.aseiacademic.org/index.php/ijsei/article/view/395 
+
+- SATISFAÇÃO CORPORAL, TRANSTORNOS MENTAIS E PRÁTICA DE ATIVIDADE FÍSICA EM ESTUDANTES UNIVERSITÁRIOS
+
+- 'Hippocampal innate inflammatory gliosis only' in pharmacoresistant temporal lobe epilepsy https://doi.org/10.1093/brain/awac293
+
+-  Salmonella Typhi Vaccination Response as a Tool for the Stratification of Risk in Patients with Predominantly Antibody Deficiencies https://www.mdpi.com/2075-4418/12/10/2423 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/scbWIr52FOc?si=F2Gut7vNxS-u0RDn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
@@ -41,7 +58,11 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 <iframe width="560" height="315" src="https://www.youtube.com/embed/yUGOURDFhmQ?si=ZmLE63c80hj53G4b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
+
 ## Table One
+
+- A Systematic Review and Global Meta-analysis of Secondary Fungal Infections Associated with COVID-19
+https://www.medrxiv.org/content/10.1101/2024.10.25.24316125v1 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/f_Sn5muB98g?si=_I8rR0THAQkCLIqr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
@@ -52,6 +73,13 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 ## Cross Tables
 
+- Evaluation of a Telemergency Service for Older People Living at Home: A Cross-Sectional Study  https://www.mdpi.com/2079-9292/12/23/4786
+
+- Risk Factors for Cardiovascular-Specific Mortality in Patients With Prostate Cancer: A Surveillance, Epidemiology, and End Results (SEER)-Based Study https://pmc.ncbi.nlm.nih.gov/articles/PMC10823189/
+
+- Maker training for teachers: competencies developed through didactical engineering https://revistas.utfpr.edu.br/actio/article/view/19194 
+
+-  Adenomyomas of the Gallbladder: An Analysis of Frequency, Clinicopathologic Associations, and Relationship to Carcinoma of a Malformative Lesion https://meridian.allenpress.com/aplm/article/148/2/206/492905/Adenomyomas-of-the-Gallbladder-An-Analysis-of 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/7X1LA69D2VI?si=MQaay1MpULNkS0lV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
@@ -64,7 +92,13 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 https://dspace.rsu.lv/jspui/bitstream/123456789/16943/1/2024-19_Dzudzilo-Madara_DTS_IPD-5242.pdf
 
 
+- Relationship of the Behavior of Older Participants with Body Composition Change: Results of the Second Wave of the Cognition of Older People, Education, Recreational Activities, Nutrition, Comorbidities, and Functional Capacity Studies (COPERNICUS)
+https://www.mdpi.com/2072-6643/15/8/1834
+
+
 # jsurvival
+
+- Prognostic significance of necrosis in ampullary carcinomas https://link.springer.com/article/10.1007/s11845-024-03740-3
 
 - Bioinformatic Analysis of Gene Expression Related to Sialic Acid Biosynthesis in Patients With Medulloblastoma 
 https://pmc.ncbi.nlm.nih.gov/articles/PMC11162302/
@@ -74,6 +108,9 @@ https://academic.oup.com/bjs/article/111/1/znad408/7591126
 
 - Comprehensive frailty assessment with multidimensional frailty domains as a predictor of mortality among vascular and cardiac surgical patients
 https://akjournals.com/view/journals/2060/110/2/article-p191.xml 
+
+- Prognostic biomarker tumor-infiltrating lymphocytes failed to serve as a predictive biomarker for postoperative radiotherapy in completely resected pN2 non-small cell lung cancer: a retrospective analysis https://link.springer.com/article/10.1186/s12931-024-02863-6
+
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YY6Fs1F_2Xk?si=W48XwjZ7GxYTLs8h" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
@@ -91,6 +128,9 @@ https://akjournals.com/view/journals/2060/110/2/article-p191.xml
 
 ## Survival Analysis
 
+- Worse long-term renal outcome of lupus nephritis patients of African descent living in Europe
+https://rmdopen.bmj.com/content/8/2/e002386.abstract 
+
 -  Omission of intraoperative pyloric procedures in minimally invasive esophagectomy: assessing the impact on patients 
 https://academic.oup.com/dote/article/36/3/doac061/6694033
 
@@ -100,6 +140,12 @@ https://flore.unifi.it/handle/2158/1355782
 - Nodal Yield <15 Is Associated With Reduced Survival in Esophagectomy and Is a Quality Metric
 https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540 
 
+- Biomarkers of systemic treatment response: MR images of intratumoral fat deposition in colorectal liver metastases (CRLM) after chemotherapy https://link.springer.com/article/10.1007/s00384-024-04762-0 
+
+- Influence of time from admission to norepinephrine administration and volume of fluids received on outcomes of patients meeting sepsis-3 criteria: a retrospective study using the MIMIC-IV database https://tsaco.bmj.com/content/8/1/e001024
+
+-  Open-access SURVIVAL IN SPINAL CANCER SURGERY: ANALYSIS OF CASES OPERATED IN 2020 https://www.scielo.br/j/coluna/a/NmbGxGNSBnydKKJtXd9TK7M/ 
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/UJLHPPrued0?si=LOSDuqsv1SNZrh8S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
@@ -108,9 +154,11 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 ## Survival analysis for Continuous Variable
 
+- The Role of Endovascular Repair Timing in Uncomplicated Acute Type B Intramural Hematoma Management https://www.sciencedirect.com/science/article/abs/pii/S0890509623006702 
+
 - Prognostic factors affecting long-term outcomes in patients with concurrent IgA nephropathy and membranous nephropathy https://www.cell.com/heliyon/fulltext/S2405-8440(23)10644-X
 
-
+- Intratumoral spatial heterogeneity of tumor-infiltrating lymphocytes is a significant factor for precisely stratifying prognostic immune subgroups of microsatellite instability-high colorectal carcinomas https://www.sciencedirect.com/science/article/pii/S0893395222055132 
 
 ## Multivariable Survival Analysis
 
@@ -151,6 +199,7 @@ https://aap.onlinelibrary.wiley.com/doi/full/10.1002/JPER.24-0173
 
 - Demodex mites among solid organ transplant recipients: a cross-sectional study https://www.termedia.pl/Demodex-mites-among-solid-organ-transplant-recipients-a-cross-sectional-study,7,55181,0,1.html
 
+-  Bilimsel Yazılım Geliştirme Süreçleri için bir Yazılım Mühendisliği Yetkinlik Envanteri https://dergipark.org.tr/tr/pub/tbbmd/issue/80549/1159443 
 
 ## Fagan Nomogram 
 - Transcranial doppler in the non-invasive estimation of intracranial pressure in traumatic brain injury compared to other non-invasive methods in lower-middle income countries: Systematic review and meta-analysis
@@ -164,6 +213,11 @@ https://www.sciencedirect.com/science/article/pii/S0967586823001224
 
 # jjstatsplot 
 
+- α-Klotho is associated with cardiovascular and all-cause mortality in patients with stage 3b and 4 chronic kidney disease (CKD): a long-term prospective cohort study https://link.springer.com/article/10.1007/s40620-024-02069-5 
+
+- Assess the effectiveness of digital platforms in facilitating content delivery and pedagogical strategies http://efsupit.ro/images/stories/septembrie2024/Art%20254.pdf
+
+- Clinical practice selectively follows acute appendicitis guidelines https://link.springer.com/article/10.1007/s00068-022-02208-2 
 
 - Neuropsychological and Neuroimaging Correlates of High-Altitude Hypoxia Trekking During the “Gokyo Khumbu/Ama Dablam” Expedition https://www.liebertpub.com/doi/full/10.1089/ham.2021.0029
 
@@ -196,6 +250,7 @@ https://www.sciencedirect.com/science/article/pii/S0306453023003980
 - Artificial Intelligence (AI) Reveals Ethnic Disparities in Cataract Detection and Treatment 
 https://link.springer.com/article/10.1007/s40123-024-00945-8
 
+- Parameter validation for a genomics population analysis https://dugi-doc.udg.edu/handle/10256/24270?show=full
 
 
 Some of the functions in this video are outdated.
