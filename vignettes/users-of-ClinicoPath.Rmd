@@ -103,6 +103,8 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC11162302/
 <iframe width="560" height="315" src="https://www.youtube.com/embed/2b10k7je7A8?si=iRwJuu3sNj0wIJvI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
+![](./images/jsurvival-course.jpg)
+
 
 # meddecide 
 
@@ -118,11 +120,27 @@ https://wlv.openrepository.com/handle/2436/624659
 - Comparing parent-child interaction during wordless book reading, print book reading and imaginative play
 https://www.cambridge.org/core/journals/journal-of-child-language/article/comparing-parentchild-interaction-during-wordless-book-reading-print-book-reading-and-imaginative-play/F1BB0E369ECE50AD4EA3906D9FF14710
 
+- RCOVID: AN ALGORITHM TO DETECT COVID-19 REINFECTIONS IN LARGE-ROUTINE EXAM DATABASE
+https://essopenarchive.org/doi/full/10.22541/au.169639932.29863502
+
+- Variability of McMaster and Mini-FLOTAC techniques for equine strongyle eggs count: Novel analysis by Bland-Altman method
+https://www.researchsquare.com/article/rs-3133218/v1
+
+- Diagnostic reproducibility of the 2018 Classification of Gingival Recessions: Comparing photographic and in-person diagnoses
+https://aap.onlinelibrary.wiley.com/doi/full/10.1002/JPER.24-0173
+
+- Demodex mites among solid organ transplant recipients: a cross-sectional study https://www.termedia.pl/Demodex-mites-among-solid-organ-transplant-recipients-a-cross-sectional-study,7,55181,0,1.html
+
 
 ## Fagan Nomogram 
 - Transcranial doppler in the non-invasive estimation of intracranial pressure in traumatic brain injury compared to other non-invasive methods in lower-middle income countries: Systematic review and meta-analysis
 https://www.sciencedirect.com/science/article/pii/S0967586823001224
 
+
+## Power Analysis
+
+-  Concurrent Validity and Inter-Rater Reliability Assessment of Two Mental Toughness Instruments in Firefighting: A Two-Wave Longitudinal Study
+ https://www.mdpi.com/2076-328X/14/7/523
 
 # jjstatsplot 
 
