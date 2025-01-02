@@ -60,7 +60,7 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 ## Alluvial Plot
 
-Detecting Early Signs of Malignancy of Oral Leukoplakia in its Tissues and Saliva
+- Detecting Early Signs of Malignancy of Oral Leukoplakia in its Tissues and Saliva
 https://dspace.rsu.lv/jspui/bitstream/123456789/16943/1/2024-19_Dzudzilo-Madara_DTS_IPD-5242.pdf
 
 
@@ -78,6 +78,7 @@ https://akjournals.com/view/journals/2060/110/2/article-p191.xml
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YY6Fs1F_2Xk?si=W48XwjZ7GxYTLs8h" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/gIPf4xIKAOU?si=nRHJZ2eK-g5nve8q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 ## Single Arm Survival
 
