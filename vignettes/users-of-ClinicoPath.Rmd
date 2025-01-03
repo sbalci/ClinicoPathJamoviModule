@@ -49,6 +49,8 @@ https://discover-journal.ru/jour/index.php/sjlsa/article/view/925
 
 -  Salmonella Typhi Vaccination Response as a Tool for the Stratification of Risk in Patients with Predominantly Antibody Deficiencies https://www.mdpi.com/2075-4418/12/10/2423 
 
+- Análisis para datos biomédicos longitudinales: Análisis de supervivencia (jamovi) https://sites.google.com/iacs.es/analisis-supervivencia-jamovi/inicio
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/scbWIr52FOc?si=F2Gut7vNxS-u0RDn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
@@ -144,12 +146,15 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 - Influence of time from admission to norepinephrine administration and volume of fluids received on outcomes of patients meeting sepsis-3 criteria: a retrospective study using the MIMIC-IV database https://tsaco.bmj.com/content/8/1/e001024
 
--  Open-access SURVIVAL IN SPINAL CANCER SURGERY: ANALYSIS OF CASES OPERATED IN 2020 https://www.scielo.br/j/coluna/a/NmbGxGNSBnydKKJtXd9TK7M/ 
+- SURVIVAL IN SPINAL CANCER SURGERY: ANALYSIS OF CASES OPERATED IN 2020 https://www.scielo.br/j/coluna/a/NmbGxGNSBnydKKJtXd9TK7M/ 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/UJLHPPrued0?si=LOSDuqsv1SNZrh8S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Af5t483vZCQ?si=bRRYme8gK2bO2qK5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vElUhOods9o?si=lloQ_1GV881QQq8C&amp;start=3432" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 
 ## Survival analysis for Continuous Variable
@@ -162,6 +167,8 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 ## Multivariable Survival Analysis
 
+- The Importance of Stroma and Stromal SMA Expression in Pancreatic Ductal Adenocarcinoma https://turkjpath.org/text.php?id=2068 
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/6bBGgHWcnTA?si=A0dkqep9JQQC5eYU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
@@ -171,10 +178,16 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 <iframe width="560" height="315" src="https://www.youtube.com/embed/2b10k7je7A8?si=iRwJuu3sNj0wIJvI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
-![](./images/jsurvival-course.jpg)
+![](./images/jsurvival-course.jpg) https://stats-co.eu/analyse-de-survie_53/
 
 
 # meddecide 
+
+- The extent of neuroradiological findings in COVID-19 shows correlation with blood biomarkers, Glasgow coma scale score and days in intensive care
+https://www.sciencedirect.com/science/article/pii/S015098612100167X
+
+- Adipokines and Myokines as Markers of Malnutrition and Sarcopenia in Patients Receiving Kidney Replacement Therapy: An Observational, Cross-Sectional Study
+https://hal.science/hal-04720682v1/document
 
 - A review of user-friendly freely-available statistical analysis software for medical researchers and biostatisticians
 https://www.tandfonline.com/doi/full/10.1080/27684520.2024.2322630
