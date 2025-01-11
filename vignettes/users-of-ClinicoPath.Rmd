@@ -167,6 +167,9 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 ## Multivariable Survival Analysis
 
+- Baseline Ultrasound Assessment Improves the Response to Apremilast in Patients with Psoriatic Arthritis: Results from a Multicentre Study http://www.mjrheum.org/assets/files/792/file614_2232.pdf
+
+
 - The Importance of Stroma and Stromal SMA Expression in Pancreatic Ductal Adenocarcinoma https://turkjpath.org/text.php?id=2068 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/6bBGgHWcnTA?si=A0dkqep9JQQC5eYU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
