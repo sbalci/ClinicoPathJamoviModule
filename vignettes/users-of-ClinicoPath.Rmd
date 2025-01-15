@@ -165,6 +165,11 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 - Intratumoral spatial heterogeneity of tumor-infiltrating lymphocytes is a significant factor for precisely stratifying prognostic immune subgroups of microsatellite instability-high colorectal carcinomas https://www.sciencedirect.com/science/article/pii/S0893395222055132 
 
+- RISK STRATIFICATION FOR VENTRICULAR TACHYARRHYTHMIAS AFTER CARDIOVERTER-DEFIBRILLATOR IMPLANTATION FOR PRIMARY PREVENTION OF SUDDEN CARDIAC DEATH: RESULTS OF THE IDEAL SINGLE-CENTER PROSPECTIVE STUDY https://doi.org/10.35336/VA-1409
+
+
+
+
 ## Multivariable Survival Analysis
 
 - Baseline Ultrasound Assessment Improves the Response to Apremilast in Patients with Psoriatic Arthritis: Results from a Multicentre Study http://www.mjrheum.org/assets/files/792/file614_2232.pdf
