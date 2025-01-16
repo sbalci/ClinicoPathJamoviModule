@@ -637,6 +637,8 @@ https://paypal.me/serdarbalci
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
 [![Codecov test coverage](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg)](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule?branch=master)
+[![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sbalci/ClinicoPathJamoviModule/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/graph/badge.svg)](https://app.codecov.io/gh/sbalci/ClinicoPathJamoviModule)
 <!-- badges: end -->
 
 
