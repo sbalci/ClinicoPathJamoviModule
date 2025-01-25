@@ -18,6 +18,9 @@ Here is the list of articles, videos, websites, and other resources that have us
 please let us know by creating an issue in the [GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule/issues). 
 
 
+# General References
+
+- Jamovi ve Jasp Programı ile Temel ve İleri Düzey Nicel Veri Analizi https://depo.pegem.net/9786258044089.pdf
 
 # Example Datasets
 
@@ -30,24 +33,24 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 # ClinicoPathDescriptives
 
--  COMPARATIVE MORPHOMETRIC ANALYSIS OF VARIOUS GROUPS - "OPTIMAL" AND "UNOPTIMAL" DICHOTOS OF THE INNER-ORDAINED ARTERIAL DRESS OF THE SPLEEN OF A PERSON
+- COMPARATIVE MORPHOMETRIC ANALYSIS OF VARIOUS GROUPS - "OPTIMAL" AND "UNOPTIMAL" DICHOTOS OF THE INNER-ORDAINED ARTERIAL DRESS OF THE SPLEEN OF A PERSON
 https://discover-journal.ru/jour/index.php/sjlsa/article/view/925
 
 - Performance of the Wisconsin Card Sorting Test in Oncopediatric Patients in an Oncology Unit in Cali, Colombia: A Cross-Sectional Observational Study https://www.preprints.org/manuscript/202402.1056
 
--  Multispectral UAV-Based Disease Identification Using Vegetation Indices for Maize Hybrids https://www.mdpi.com/2077-0472/14/11/2002 
+- Multispectral UAV-Based Disease Identification Using Vegetation Indices for Maize Hybrids https://www.mdpi.com/2077-0472/14/11/2002 
 
 - Prospective association of occupational and leisure-time physical activity with orthostatic blood pressure changes in older adults https://www.nature.com/articles/s41598-023-46947-7 
 
 - How Much Students in Primary School Know about Waste Sorting? (Pilot Research) https://www.researchgate.net/profile/Sarah-Haines-2/publication/380424067_Integrated_STEM_Professional_Development_Utilizing_Best_Practices_in_an_Online_Format/links/663ba28006ea3d0b744200a0/Integrated-STEM-Professional-Development-Utilizing-Best-Practices-in-an-Online-Format.pdf
 
--  BETWEEN LIKES AND ANXIETY: UNDERSTANDING INSTAGRAM ADDICTION'S ROLE IN APPEARANCE CONCERNS https://www.journals.aseiacademic.org/index.php/ijsei/article/view/395 
+- BETWEEN LIKES AND ANXIETY: UNDERSTANDING INSTAGRAM ADDICTION'S ROLE IN APPEARANCE CONCERNS https://www.journals.aseiacademic.org/index.php/ijsei/article/view/395 
 
 - SATISFAÇÃO CORPORAL, TRANSTORNOS MENTAIS E PRÁTICA DE ATIVIDADE FÍSICA EM ESTUDANTES UNIVERSITÁRIOS
 
 - 'Hippocampal innate inflammatory gliosis only' in pharmacoresistant temporal lobe epilepsy https://doi.org/10.1093/brain/awac293
 
--  Salmonella Typhi Vaccination Response as a Tool for the Stratification of Risk in Patients with Predominantly Antibody Deficiencies https://www.mdpi.com/2075-4418/12/10/2423 
+- Salmonella Typhi Vaccination Response as a Tool for the Stratification of Risk in Patients with Predominantly Antibody Deficiencies https://www.mdpi.com/2075-4418/12/10/2423 
 
 - Análisis para datos biomédicos longitudinales: Análisis de supervivencia (jamovi) https://sites.google.com/iacs.es/analisis-supervivencia-jamovi/inicio
 
@@ -66,6 +69,8 @@ https://discover-journal.ru/jour/index.php/sjlsa/article/view/925
 - A Systematic Review and Global Meta-analysis of Secondary Fungal Infections Associated with COVID-19
 https://www.medrxiv.org/content/10.1101/2024.10.25.24316125v1 
 
+- Clinicopathological analysis of 38 male patients diagnosed with breast cancer https://journals.sagepub.com/doi/full/10.3233/BD-230050
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/f_Sn5muB98g?si=_I8rR0THAQkCLIqr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YYqONM-fweQ?si=hBGIdMwIImh0yt_e" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -81,7 +86,7 @@ https://www.medrxiv.org/content/10.1101/2024.10.25.24316125v1
 
 - Maker training for teachers: competencies developed through didactical engineering https://revistas.utfpr.edu.br/actio/article/view/19194 
 
--  Adenomyomas of the Gallbladder: An Analysis of Frequency, Clinicopathologic Associations, and Relationship to Carcinoma of a Malformative Lesion https://meridian.allenpress.com/aplm/article/148/2/206/492905/Adenomyomas-of-the-Gallbladder-An-Analysis-of 
+- Adenomyomas of the Gallbladder: An Analysis of Frequency, Clinicopathologic Associations, and Relationship to Carcinoma of a Malformative Lesion https://meridian.allenpress.com/aplm/article/148/2/206/492905/Adenomyomas-of-the-Gallbladder-An-Analysis-of 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/7X1LA69D2VI?si=MQaay1MpULNkS0lV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
@@ -105,7 +110,7 @@ https://www.mdpi.com/2072-6643/15/8/1834
 - Bioinformatic Analysis of Gene Expression Related to Sialic Acid Biosynthesis in Patients With Medulloblastoma 
 https://pmc.ncbi.nlm.nih.gov/articles/PMC11162302/
 
--  Patient-derived organoids for prediction of treatment response in oesophageal adenocarcinoma 
+- Patient-derived organoids for prediction of treatment response in oesophageal adenocarcinoma 
 https://academic.oup.com/bjs/article/111/1/znad408/7591126
 
 - Comprehensive frailty assessment with multidimensional frailty domains as a predictor of mortality among vascular and cardiac surgical patients
@@ -133,7 +138,7 @@ https://akjournals.com/view/journals/2060/110/2/article-p191.xml
 - Worse long-term renal outcome of lupus nephritis patients of African descent living in Europe
 https://rmdopen.bmj.com/content/8/2/e002386.abstract 
 
--  Omission of intraoperative pyloric procedures in minimally invasive esophagectomy: assessing the impact on patients 
+- Omission of intraoperative pyloric procedures in minimally invasive esophagectomy: assessing the impact on patients 
 https://academic.oup.com/dote/article/36/3/doac061/6694033
 
 - Integrating Red Blood Cell Features and Hemoglobin Levels in Metastatic Renal Cell Carcinoma Patients Treated with Pazopanib or Cabozantinib: An Easily Exploitable Prognostic Score
@@ -223,7 +228,7 @@ https://aap.onlinelibrary.wiley.com/doi/full/10.1002/JPER.24-0173
 
 - Demodex mites among solid organ transplant recipients: a cross-sectional study https://www.termedia.pl/Demodex-mites-among-solid-organ-transplant-recipients-a-cross-sectional-study,7,55181,0,1.html
 
--  Bilimsel Yazılım Geliştirme Süreçleri için bir Yazılım Mühendisliği Yetkinlik Envanteri https://dergipark.org.tr/tr/pub/tbbmd/issue/80549/1159443 
+- Bilimsel Yazılım Geliştirme Süreçleri için bir Yazılım Mühendisliği Yetkinlik Envanteri https://dergipark.org.tr/tr/pub/tbbmd/issue/80549/1159443 
 
 ## Fagan Nomogram 
 - Transcranial doppler in the non-invasive estimation of intracranial pressure in traumatic brain injury compared to other non-invasive methods in lower-middle income countries: Systematic review and meta-analysis
@@ -232,7 +237,7 @@ https://www.sciencedirect.com/science/article/pii/S0967586823001224
 
 ## Power Analysis
 
--  Concurrent Validity and Inter-Rater Reliability Assessment of Two Mental Toughness Instruments in Firefighting: A Two-Wave Longitudinal Study
+- Concurrent Validity and Inter-Rater Reliability Assessment of Two Mental Toughness Instruments in Firefighting: A Two-Wave Longitudinal Study
  https://www.mdpi.com/2076-328X/14/7/523
 
 # jjstatsplot 
