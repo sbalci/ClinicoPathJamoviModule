@@ -1,0 +1,40 @@
+---
+name:  tidyplots
+title: Tidy Plots
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: (xvar === null || yvar === null)
+
+    - name: plot
+      title: Plot
+      type: Image
+      renderFun: .plot
+      requiresData: true
+      width: 600
+      height: 400
+      clearWith:
+          - xvar
+          - yvar
+          - color
+          - plotType
+          - pointType
+          - showMean
+          - showSEM
+          - showCI
+          - colorScheme
+          - plotTitle
+          - xLabel
+          - yLabel
+
+refs:
+    - tidyplots
+    - ggplot2
+    - dplyr
+    - rlang
+    - jmvcore
+    - R6
+...

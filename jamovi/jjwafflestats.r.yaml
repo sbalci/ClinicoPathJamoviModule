@@ -1,0 +1,34 @@
+---
+name: jjwafflestats
+title: Waffle Charts
+jrs: '1.1'
+
+clearWith:
+    - counts
+    - groups
+    - facet
+    - rows
+    - flip
+    - color_palette
+    - show_legend
+    - mytitle
+    - legendtitle
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: plot
+      title: Waffle Chart
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - waffle
+    - ClinicoPathJamoviModule
+...

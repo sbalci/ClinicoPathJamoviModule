@@ -357,6 +357,24 @@ options:
         R: >
           If true, marks censored observations (e.g., using tick marks) on the survival plot.
 
+    - name: medianline
+      title: medianline
+      type: List
+      options:
+        - title: none
+          name: none
+        - title: horizontal
+          name: h
+        - title: vertical
+          name: v
+        - title: both
+          name: hv
+      default: none
+      description:
+        R: >
+          If true, displays a line indicating the median survival time on the survival plot.
+
+
     - name: pplot
       title: p-value
       type: Bool
@@ -367,7 +385,10 @@ options:
 
 
 
-
+    - name: cutp
+      title: Cutpoints
+      type: String
+      default: '12, 36, 60'
 
 
 
@@ -382,6 +403,23 @@ options:
       description:
         R: >
           If true, calculates a risk score from the Cox model coefficients for each individual.
+
+
+    - name: numRiskGroups
+      title: Number of Risk Groups
+      type: List
+      options:
+        - title: Two Groups
+          name: two
+        - title: Three Groups
+          name: three
+        - title: Four Groups
+          name: four
+      default: four
+      description: >-
+        Select the number of risk groups to create from the risk scores.
+        The data will be divided into equal quantiles based on this selection.
+
 
     - name: plotRiskGroups
       title: Plot Risk Group Survival
@@ -437,26 +475,35 @@ options:
       description:
           R: Method for computing adjusted survival curves
 
-    - name: ac_summary
-      title: Show Summary Statistics
+    # - name: ac_summary
+    #   title: Show Summary Statistics
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: Calculate and display summary statistics for adjusted curves
+
+    # - name: ac_timepoints
+    #   title: Summary Timepoints
+    #   type: String
+    #   default: '12, 36, 60'
+    #   description:
+    #       R: Timepoints for calculating summary statistics (comma-separated)
+
+    # - name: ac_compare
+    #   title: Compare Curves
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: Perform statistical comparison between adjusted curves
+
+
+# Nomogram ----
+
+    - name: showNomogram
+      title: Show Nomogram
       type: Bool
       default: false
-      description:
-          R: Calculate and display summary statistics for adjusted curves
 
-    - name: ac_timepoints
-      title: Summary Timepoints
-      type: String
-      default: '12, 36, 60'
-      description:
-          R: Timepoints for calculating summary statistics (comma-separated)
-
-    - name: ac_compare
-      title: Compare Curves
-      type: Bool
-      default: false
-      description:
-          R: Perform statistical comparison between adjusted curves
 
 
 # Reduced Explanatory ----
@@ -620,21 +667,21 @@ options:
       title: Use Variable Stratification
       type: Bool
       default: false
-    #   description:
-    #     R: >
-    #       If true, uses stratification to handle variables that violate the proportional hazards assumption.
-    #       Stratification creates separate baseline hazard functions for different groups.
+      description:
+        R: >
+          If true, uses stratification to handle variables that violate the proportional hazards assumption.
+          Stratification creates separate baseline hazard functions for different groups.
 
 
-    # - name: stratvar
-    #   title: Stratification Variables
-    #   type: Variables
-    #   suggested: [ ordinal, nominal ]
-    #   permitted: [ factor ]
-    #   description:
-    #     R: >
-    #       Variables used for stratification. When proportional hazards are not met,
-    #       stratification can adjust the model to better fit the data by allowing different baseline hazards.
+    - name: stratvar
+      title: Stratification Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Variables used for stratification. When proportional hazards are not met,
+          stratification can adjust the model to better fit the data by allowing different baseline hazards.
 
   # - type: CollapseBox
   #   label: Stratification Variables

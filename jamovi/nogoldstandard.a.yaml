@@ -1,0 +1,151 @@
+---
+name: nogoldstandard
+title: Analysis Without Gold Standard
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Multiple Test Analysis Without Gold Standard
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Analysis of diagnostic tests without a gold standard reference
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: test1
+      title: Test 1
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            First diagnostic test variable.
+
+    - name: test1Positive
+      title: Positive Level
+      type: Level
+      variable: (test1)
+      description:
+          R: >
+            The positive level for Test 1.
+
+    - name: test2
+      title: Test 2
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Second diagnostic test variable.
+
+    - name: test2Positive
+      title: Positive Level
+      type: Level
+      variable: (test2)
+      description:
+          R: >
+            The positive level for Test 2.
+
+    - name: test3
+      title: Test 3
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Third diagnostic test variable (optional).
+
+    - name: test3Positive
+      title: Positive Level
+      type: Level
+      variable: (test3)
+      description:
+          R: >
+            The positive level for Test 3.
+
+    - name: test4
+      title: Test 4
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Fourth diagnostic test variable (optional).
+
+    - name: test4Positive
+      title: Positive Level
+      type: Level
+      variable: (test4)
+      description:
+          R: >
+            The positive level for Test 4.
+
+    - name: test5
+      title: Test 5
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Fifth diagnostic test variable (optional).
+
+    - name: test5Positive
+      title: Positive Level
+      type: Level
+      variable: (test5)
+      description:
+          R: >
+            The positive level for Test 5.
+
+    - name: method
+      title: Analysis Method
+      type: List
+      options:
+        - title: Latent Class Analysis
+          name: latent_class
+        - title: Composite Reference
+          name: composite
+        - title: Bayesian Analysis
+          name: bayesian
+      default: latent_class
+      description:
+          R: >
+            Method for analyzing tests without gold standard.
+
+    - name: bootstrap
+      title: Bootstrap CI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals.
+
+    - name: nboot
+      title: Number of Bootstrap Samples
+      type: Number
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence intervals.
+
+    - name: alpha
+      title: Alpha Level
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.20
+      description:
+          R: >
+            Alpha level for confidence intervals.
+
+...

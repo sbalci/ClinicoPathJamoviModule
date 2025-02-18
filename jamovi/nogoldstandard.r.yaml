@@ -1,0 +1,100 @@
+---
+name: nogoldstandard
+title: Analysis Without Gold Standard
+jrs: '1.1'
+
+items:
+
+
+    # - name:  text1
+    #   title: text1
+    #   type: Preformatted
+    # - name:  text2
+    #   title: text2
+    #   type: Preformatted
+    # - name:  todo2
+    #   title: To Do 2
+    #   type: Preformatted
+    # - name:  todo
+    #   title: To Do
+    #   type: Preformatted
+
+    - name: prevalence
+      title: Disease Prevalence
+      type: Table
+      rows: 1
+      columns:
+        - name: estimate
+          title: Estimate
+          type: number
+          format: pc
+        - name: ci_lower
+          title: Lower CI
+          type: number
+          format: pc
+        - name: ci_upper
+          title: Upper CI
+          type: number
+          format: pc
+
+    - name: test_metrics
+      title: Test Performance Metrics
+      type: Table
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: sens_ci_lower
+          title: Lower CI
+          superTitle: Sensitivity
+          type: number
+          format: pc
+        - name: sens_ci_upper
+          title: Upper CI
+          superTitle: Sensitivity
+          type: number
+          format: pc
+        - name: specificity  
+          title: Specificity
+          type: number
+          format: pc
+        - name: spec_ci_lower
+          title: Lower CI
+          superTitle: Specificity
+          type: number
+          format: pc
+        - name: spec_ci_upper
+          title: Upper CI
+          superTitle: Specificity
+          type: number
+          format: pc
+
+    - name: model_fit
+      title: Model Fit Statistics
+      type: Table
+      visible: (method=="latent_class")
+      rows: 1
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+
+    - name: agreement_plot
+      title: Test Agreement Plot
+      type: Image
+      renderFun: .plot
+      width: 500
+      height: 400
+
+refs: 
+    - NoGoldDiagnostic
+    - ClinicoPathJamoviModule
+
+...

@@ -230,6 +230,9 @@ children:
               - type: CheckBox
                 name: censored
                 enable: (findcut)
+              - type: ComboBox
+                name: medianline
+                enable: (findcut)
 
 
 

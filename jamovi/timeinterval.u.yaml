@@ -1,4 +1,4 @@
-title: Time Interval
+title: Time Interval Calculator
 name: timeinterval
 jus: '3.0'
 stage: 0
@@ -9,26 +9,42 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Time Elapsed (in months)
+        label: Input Variables
         children:
           - type: VariablesListBox
-            name: overalltime
+            name: dx_date
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: 'Outcome'
-        children:
+            enable: (use_dates)
           - type: VariablesListBox
-            name: outcome
+            name: fu_date
             maxItemCount: 1
             isTarget: true
-          - type: LevelSelector
-            name: outcomeLevel
-            enable: (outcome)
-      - type: TargetLayoutBox
-        label: Explanatory Variable
+            enable: (use_dates)
+  - type: CollapseBox
+    label: Time Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: explanatory
-            isTarget: true
-
+          - type: ComboBox
+            name: time_format
+            enable: (use_dates)
+          - type: ComboBox
+            name: output_unit
+          - type: TextBox
+            name: landmark_time
+            format: number
+            enable: (use_dates || elapsed_time)
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: add_times
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: use_landmark

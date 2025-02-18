@@ -1,0 +1,42 @@
+---
+name: consort
+title: CONSORT Flowchart
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: summary
+      title: Summary Statistics
+      type: Table
+      rows: 0
+      columns:
+        - name: stage
+          title: "Stage"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: percent
+          title: "%"
+          type: number
+          format: pc
+
+    - name: plot
+      title: 'CONSORT Flowchart'
+      type: Image
+      width: 800
+      height: 1000
+      renderFun: .plot
+      requiresData: false
+
+    - name: text
+      title: 'Text Summary'
+      type: Preformatted
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+...

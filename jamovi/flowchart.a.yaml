@@ -1,0 +1,63 @@
+---
+name: flowchart
+title: Study Flowchart
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: title
+      title: Flowchart Title
+      type: String
+      default: "Study Flow Diagram"
+
+    - name: nodes
+      title: Node Data
+      type: Variables
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variables containing node labels/descriptions
+
+    - name: counts
+      title: Node Counts
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Variables containing counts for each node
+
+    - name: direction
+      title: Direction
+      type: List
+      options:
+        - title: Top to Bottom
+          name: tb
+        - title: Left to Right
+          name: lr
+      default: tb
+
+    - name: style
+      title: Style
+      type: List
+      options:
+        - title: Simple
+          name: simple
+        - title: Detailed
+          name: detailed
+      default: simple
+
+    - name: showCounts
+      title: Show Counts
+      type: Bool
+      default: true
+...

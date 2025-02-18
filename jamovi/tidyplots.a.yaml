@@ -1,0 +1,98 @@
+---
+name: tidyplots
+title: Tidy Plots
+menuGroup: Plots
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: xvar
+      title: X Variable
+      type: Variable
+
+    - name: yvar
+      title: Y Variable
+      type: Variable
+
+    - name: color
+      title: Color Variable
+      type: Variable
+
+    # Plot Types
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - name: points
+          title: Points
+        - name: line
+          title: Line
+        - name: bar
+          title: Bar
+        - name: boxplot
+          title: Box Plot
+      default: points
+
+    # Point Options
+    - name: pointType
+      title: Point Style
+      type: List
+      options:
+        - name: basic
+          title: Basic Points
+        - name: beeswarm
+          title: Beeswarm
+        - name: jitter
+          title: Jittered
+      default: basic
+
+    # Statistical Elements
+    - name: showMean
+      title: Show Mean
+      type: Bool
+      default: false
+
+    - name: showSEM
+      title: Show Standard Error
+      type: Bool
+      default: false
+
+    - name: showCI
+      title: Show Confidence Interval
+      type: Bool
+      default: false
+
+    # Aesthetics
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - name: friendly
+          title: Colorblind Friendly
+        - name: viridis
+          title: Viridis
+        - name: seaside
+          title: Seaside
+      default: friendly
+
+    - name: plotTitle
+      title: Plot Title
+      type: String
+      default: ''
+
+    - name: xLabel
+      title: X Axis Label
+      type: String
+      default: ''
+
+    - name: yLabel
+      title: Y Axis Label
+      type: String
+      default: ''
+...

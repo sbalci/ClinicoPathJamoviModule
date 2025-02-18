@@ -1,0 +1,104 @@
+---
+name: consort
+title: CONSORT Flowchart
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Reports
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    # Enrollment
+    - name: initialN
+      title: Initial Participants
+      type: Integer
+      default: 0
+      description:
+          R: Total number assessed for eligibility
+
+    - name: notEligibleN
+      title: Not Eligible
+      type: Integer
+      default: 0
+      description:
+          R: Number not meeting eligibility criteria
+
+    - name: notEligibleText
+      title: Reasons Not Eligible
+      type: String
+      default: ""
+      description:
+          R: List of reasons for exclusion (comma separated)
+
+    # Randomization
+    - name: randomizedN
+      title: Randomized
+      type: Integer
+      default: 0
+      description:
+          R: Number randomized to interventions
+
+    # Arm 1
+    - name: arm1Label
+      title: Arm 1 Label
+      type: String
+      default: "Intervention"
+
+    - name: arm1N
+      title: Arm 1 Allocated
+      type: Integer
+      default: 0
+
+    - name: arm1ReceivedN
+      title: Arm 1 Received
+      type: Integer
+      default: 0
+
+    - name: arm1LostN
+      title: Arm 1 Lost to Follow-up
+      type: Integer
+      default: 0
+
+    - name: arm1AnalyzedN
+      title: Arm 1 Analyzed
+      type: Integer
+      default: 0
+
+    # Arm 2
+    - name: arm2Label
+      title: Arm 2 Label
+      type: String
+      default: "Control"
+
+    - name: arm2N
+      title: Arm 2 Allocated
+      type: Integer
+      default: 0
+
+    - name: arm2ReceivedN
+      title: Arm 2 Received
+      type: Integer
+      default: 0
+
+    - name: arm2LostN
+      title: Arm 2 Lost to Follow-up
+      type: Integer
+      default: 0
+
+    - name: arm2AnalyzedN
+      title: Arm 2 Analyzed
+      type: Integer
+      default: 0
+
+    # Post-randomization exclusions
+    - name: excludedText
+      title: Reasons for Exclusion
+      type: String
+      default: ""
+      description:
+          R: Reasons for post-randomization exclusions (comma separated)
+...

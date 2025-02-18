@@ -1,0 +1,35 @@
+---
+name: jjridgestats
+title: Ridgeline Plot
+jrs: '1.1'
+
+clearWith:
+    - dep
+    - group
+    - scaling
+    - bandwidth
+    - fill
+    - colorscheme
+    - mytitle
+    - xtitle
+    - ytitle
+    - originaltheme
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: plot
+      title: Ridgeline Plot
+      type: Image
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - ggridges
+    - viridis
+    - ClinicoPathJamoviModule
+
+...

@@ -1,0 +1,46 @@
+---
+name: jjtreemap
+title: Treemap
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: plot
+      title: Treemap
+      type: Image
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - treemap
+    - ggfittext
+    - dplyr
+    - tibble
+    - ClinicoPathJamoviModule
+
+clearWith:
+    - group
+    - size
+    - color
+    - aspectRatio
+    - borderLevel1Width
+    - borderLevel2Width
+    - borderLevel1Color
+    - borderLevel2Color
+    - labelLevel1Size
+    - labelLevel2Size
+    - labelLevel1Color
+    - labelLevel2Color
+    - labelFontFace
+    - labelBackground
+    - labelOverlap
+    - labelAlignH
+    - labelAlignV
+    - title
+    - subtitle
+    - caption
+...

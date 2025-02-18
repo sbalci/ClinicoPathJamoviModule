@@ -1,0 +1,71 @@
+---
+name:  alluvialSurvival
+title: Treatment Pathway Alluvial Plot
+menuGroup: jsurvival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: timeVar
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: The name of the time variable in the dataset
+
+    - name: stageVar
+      title: Disease Stage
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: The name of the disease stage variable
+
+    - name: treatmentVar
+      title: Treatment
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: Treatment received at each time point
+
+    - name: patientId
+      title: Patient ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, id]
+      description:
+          R: Unique patient identifier for tracking
+
+    - name: survivalVar
+      title: Survival Status
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: Survival status at each time point
+
+    - name: showRightAxis
+      title: Show Percentage Axis
+      type: Bool
+      default: false
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Clinical
+          name: clinical
+        - title: Colorblind Safe
+          name: colorblind
+      default: clinical
+
+    - name: showSurvival
+      title: Show Survival Curve
+      type: Bool
+      default: false
+...

@@ -1,0 +1,128 @@
+---
+name: jjridgestats
+title: Ridgeline Plot
+menuGroup: JJStatsPlot
+menuSubgroup: 'Categorical vs Continuous'
+menuSubtitle: 'Distribution Comparison'
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: dep
+      title: Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: group
+      title: Groups
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+
+    # Plot Style Options
+    - name: plotStyle
+      title: Plot Style
+      type: List
+      options:
+        - title: Density
+          name: density
+        - title: Histogram
+          name: histogram
+        - title: Gradient
+          name: gradient
+      default: density
+
+    - name: scaling
+      title: Height Scale
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1.0
+
+    - name: bandwidth
+      title: Bandwidth
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1.0
+
+    - name: binwidth
+      title: Bin Width (for histogram)
+      type: Number
+      min: 0.1
+      default: 1.0
+
+    - name: fill
+      title: Fill Densities
+      type: Bool
+      default: true
+
+    - name: colorscheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Magma
+          name: magma
+        - title: Blues
+          name: blues
+        - title: Custom
+          name: custom
+      default: viridis
+
+    - name: customColor
+      title: Custom Fill Color
+      type: String
+      default: '#4682B4'
+
+    # Theme Options
+    - name: themeChoice
+      title: Theme Style
+      type: List
+      options:
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Dark
+          name: dark
+      default: minimal
+
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Right
+          name: right
+        - title: Bottom
+          name: bottom
+      default: none
+
+    # Labels
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
+...

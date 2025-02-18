@@ -1,0 +1,136 @@
+title: Treemap
+name: jjtreemap
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Size Variable
+        children:
+          - type: VariablesListBox
+            name: size
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Color Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: color
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Layout
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: aspectRatio
+                format: number
+                label: Aspect Ratio
+      - type: Label
+        label: Borders
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Level 1
+                children: []
+              - type: Label
+                label: Level 2
+                children: []
+      - type: Label
+        label: Labels
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Level 1
+                children:
+                  - type: TextBox
+                    name: labelLevel1Size
+                    format: number
+                    label: Size
+                  - type: TextBox
+                    name: labelLevel1Color
+                    format: string
+                    label: Color
+              - type: Label
+                label: Level 2
+                children:
+                  - type: TextBox
+                    name: labelLevel2Size
+                    format: number
+                    label: Size
+                  - type: TextBox
+                    name: labelLevel2Color
+                    format: string
+                    label: Color
+              - type: ComboBox
+                name: labelFontFace
+                label: Font Style
+              - type: TextBox
+                name: labelBackground
+                format: string
+                label: Background Color
+              - type: TextBox
+                name: labelOverlap
+                format: number
+                label: Overlap Tolerance
+              - type: Label
+                label: Alignment
+                children:
+                  - type: ComboBox
+                    name: labelAlignH
+                    label: Horizontal
+                  - type: ComboBox
+                    name: labelAlignV
+                    label: Vertical
+  - type: CollapseBox
+    label: Plot Labels
+    collapsed: true
+    children:
+      - type: Label
+        label: Text
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: title
+                format: string
+                label: Title
+                width: large
+              - type: TextBox
+                name: subtitle
+                format: string
+                label: Subtitle
+                width: large
+              - type: TextBox
+                name: caption
+                format: string
+                label: Caption
+                width: large
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: borderWidth
+        format: number

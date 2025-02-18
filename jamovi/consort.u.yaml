@@ -1,0 +1,89 @@
+title: CONSORT Flowchart
+name: consort
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: CollapseBox
+    label: Enrollment
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Initial Numbers
+            children:
+              - type: TextBox
+                name: initialN
+                format: number
+              - type: TextBox
+                name: notEligibleN
+                format: number
+              - type: TextBox
+                name: notEligibleText
+                format: string
+                width: large
+  - type: CollapseBox
+    label: Randomization & Arms
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Randomization
+            children:
+              - type: TextBox
+                name: randomizedN
+                format: number
+          - type: Label
+            label: Arm 1
+            children:
+              - type: TextBox
+                name: arm1Label
+                format: string
+              - type: TextBox
+                name: arm1N
+                format: number
+              - type: TextBox
+                name: arm1ReceivedN
+                format: number
+              - type: TextBox
+                name: arm1LostN
+                format: number
+              - type: TextBox
+                name: arm1AnalyzedN
+                format: number
+          - type: Label
+            label: Arm 2
+            children:
+              - type: TextBox
+                name: arm2Label
+                format: string
+              - type: TextBox
+                name: arm2N
+                format: number
+              - type: TextBox
+                name: arm2ReceivedN
+                format: number
+              - type: TextBox
+                name: arm2LostN
+                format: number
+              - type: TextBox
+                name: arm2AnalyzedN
+                format: number
+  - type: CollapseBox
+    label: Additional Information
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Exclusion Details
+            children:
+              - type: TextBox
+                name: excludedText
+                format: string
+                width: large
