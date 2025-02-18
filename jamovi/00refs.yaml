@@ -153,23 +153,6 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=semPlot'
         url: https://CRAN.R-project.org/package=semPlot
 
-    ggstatsplot:
-        type: 'software'
-        author: Patil, I.
-        year: 2018
-        title: "ggstatsplot: 'ggplot2' Based Plots with Statistical Details"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggstatsplot'
-        url: https://CRAN.R-project.org/package=ggstatsplot
-        doi: '10.5281/zenodo.2074621'
-
-    ggstatsplot_article:
-        type: 'article'
-        author: Patil, I.
-        year: 2021
-        title: "Visualizations with statistical details: The 'ggstatsplot' approach."
-        publisher: 'PsyArxiv'
-        doi: 'doi:10.31234/osf.io/p7mku'
-
 
     report:
         type: 'software'
@@ -187,55 +170,6 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=arsenal'
         url: https://CRAN.R-project.org/package=arsenal
 
-    tangram:
-        type: 'software'
-        author: Garbett, S.
-        year: 2018
-        title: "tangram: The Grammar of Tables"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tangram'
-        url: https://CRAN.R-project.org/package=tangram
-
-    irr:
-        type: 'software'
-        author: Matthias Gamer, Jim Lemon, Ian Fellows, Puspendra Singh
-        year: 2019
-        title: "Various Coefficients of Interrater Reliability and Agreement."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=irr'
-        url: https://CRAN.R-project.org/package=irr
-
-    tableone:
-        type: 'software'
-        author: Kazuki, Y.
-        year: 2019
-        title: "tableone: Create 'Table 1' to Describe Baseline Characteristics"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tableone'
-        url: https://CRAN.R-project.org/package=tableone
-
-    janitor:
-        type: 'software'
-        author: Firke, S.
-        year: 2019
-        title: "janitor: Simple Tools for Examining and Cleaning Dirty Data."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=janitor'
-        url: https://CRAN.R-project.org/package=janitor
-
-
-    finalfit:
-        type: 'software'
-        author: Ewen Harrison and Tom Drake and Riinu Ots
-        year: 2019
-        title: "finalfit: Quickly Create Elegant Regression Results Tables and Plots when Modelling"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=finalfit'
-        url: https://CRAN.R-project.org/package=finalfit
-
-
-    caret:
-        type: 'software'
-        author: Max Kuhn
-        year: 2020
-        title: "caret: Classification and Regression Training"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=caret'
-        url: https://CRAN.R-project.org/package=caret
 
     psycho:
         type: 'software'
@@ -269,147 +203,6 @@ refs:
         title: "ggalluvial: Alluvial Plots in 'ggplot2'."
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggalluvial'
         url: https://CRAN.R-project.org/package=ggalluvial
-
-    explore:
-        type: 'software'
-        author: Roland Krasser
-        year: 2020
-        title: "explore: Simplifies Exploratory Data Analysis."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=explore'
-        url: https://CRAN.R-project.org/package=explore
-
-    FFTrees:
-        type: 'software'
-        author: Nathaniel Phillips, Hansjoerg Neth, Jan Woike and Wolfgang Gaissmaer
-        year: 2019
-        title: "FFTrees: Generate, Visualise, and Evaluate Fast-and-Frugal Decision Trees"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=FFTrees'
-        url: https://CRAN.R-project.org/package=FFTrees
-
-
-    rpart:
-        type: 'software'
-        author: Terry Therneau and Beth Atkinson
-        year: 2019
-        title: "rpart: Recursive Partitioning and Regression Trees."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart'
-        url: https://CRAN.R-project.org/package=rpart
-
-    rpart.plot:
-        type: 'software'
-        author: Stephen Milborrow
-        year: 2019
-        title: "rpart.plot: Plot 'rpart' Models: An Enhanced Version of 'plot.rpart'"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart.plot'
-        url: https://CRAN.R-project.org/package=rpart.plot
-
-    gtsummary:
-        type: 'software'
-        author: Daniel D. Sjoberg, Margie Hannum, Karissa Whiting and Emily C. Zabor
-        year: 2020
-        title: "gtsummary: Presentation-Ready Data Summary and Analytic Result Tables"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gtsummary'
-        url: https://CRAN.R-project.org/package=gtsummary
-
-    rmngb:
-        type: 'software'
-        author: Antoine Filipovic Pierucci
-        year: 2014
-        title: "rmngb: Miscellaneous Collection of Functions for Medical Data Analysis"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rmngb'
-        url: https://CRAN.R-project.org/package=rmngb
-
-    RVAideMemoire:
-        type: 'software'
-        author: Maxime Hervé
-        year: 2020
-        title: "RVAideMemoire: Testing and Plotting Procedures for Biostatistics"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RVAideMemoire'
-        url: https://CRAN.R-project.org/package=RVAideMemoire
-
-
-    chisq.posthoc.test:
-        type: 'software'
-        author: Daniel Ebbert
-        year: 2019
-        title: "chisq.posthoc.test: A Post Hoc Analysis for Pearson's Chi-Squared Test for Count Data"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=chisq.posthoc.test'
-        url: https://CRAN.R-project.org/package=chisq.posthoc.test
-
-
-
-    easyalluvial:
-        type: 'software'
-        author: Bjoern Koneswarakantha
-        year: 2019
-        title: "easyalluvial: Generate Alluvial Plots with a Single Line of Code."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=easyalluvial'
-        url: https://CRAN.R-project.org/package=easyalluvial
-
-
-    parcats:
-        type: 'software'
-        author: Bjoern Koneswarakantha
-        year: 2019
-        title: "parcats: Interactive Parallel Categories Diagrams for 'easyalluvial'"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=parcats'
-        url: https://CRAN.R-project.org/package=parcats
-
-
-    plotROC:
-        type: 'software'
-        author: Michael C. Sachs
-        year: 2017
-        title: "plotROC: A Tool for Plotting ROC Curves.Journal of Statistical Software, Code Snippets, 79(2), 1-19. doi:10.18637/jss.v079.c02"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plotROC'
-        url: https://CRAN.R-project.org/package=plotROC
-
-
-    RGraphGallery:
-        type: 'website'
-        author: Holtz Yan
-        year: 2020
-        title: "The R Graph Gallery"
-        publisher: 'A website that displays hundreds of R charts https://www.r-graph-gallery.com'
-        url: https://github.com/holtzy/R-graph-gallery
-
-
-    hrbrthemes:
-        type: 'software'
-        author: Bob Rudis
-        year: 2020
-        title: "hrbrthemes: Additional Themes, Theme Components and Utilities for 'ggplot2'."
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=hrbrthemes'
-        url: https://CRAN.R-project.org/package=hrbrthemes
-
-
-    retractcheck:
-        type: 'software'
-        author: Chris Hartgerink and Frederik Aust
-        year: 2019
-        title: "retractcheck: Retraction Scanner"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=retractcheck'
-        url: https://CRAN.R-project.org/package=retractcheck
-
-
-    RefManageR:
-        type: 'software'
-        author: McLean MW
-        year: 2017
-        title: 'RefManageR: Import and Manage BibTeX and BibLaTeX References in R. The Journal of Open Source Software.'
-        doi: 10.21105/joss.00338
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RefManageR'
-        url: https://CRAN.R-project.org/package=RefManageR
-
-
-    rcrossref:
-        type: 'software'
-        author: Scott Chamberlain and Hao Zhu and Najko Jahn and Carl Boettiger and Karthik Ram
-        year: 2020
-        title: "rcrossref: Client for Various 'CrossRef' 'APIs'"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rcrossref'
-        url: https://CRAN.R-project.org/package=rcrossref
-
 
     epiR:
         type: 'software'
@@ -463,24 +256,6 @@ refs:
         url: http://www.pmean.com/definitions/fagan.htm
 
 
-    benford.analysis:
-        type: 'software'
-        author: Carlos Cinelli
-        year: 2020
-        title: "benford.analysis: Benford Analysis for Data Validation and Forensic Analytics"
-        publisher: '[R package]. Retrieved from http://github.com/carloscinelli/benford.analysis'
-        url: http://github.com/carloscinelli/benford.analysis
-
-
-    benford.nedir:
-        type: 'website'
-        author: "Ümit Işlak"
-        year: 2021
-        title: "Benford (ilk basamak) kanunu nedir?"
-        publisher: 'sarkac.org'
-        url: https://sarkac.org/2021/09/benford-ilk-basamak-kanunu-nedir/
-
-
     vtree:
         type: 'software'
         author: Nick Barrowman
@@ -488,37 +263,6 @@ refs:
         title: "vtree: Display Information About Nested Subsets of a Data Frame"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=vtree'
         url: https://CRAN.R-project.org/package=vtree
-
-
-    PathologyKappa:
-        type: 'article'
-        title: Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
-        year: 2020
-        author:
-        publisher: Annals of Diagnostic Pathology
-        volume: 47
-        url: https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040
-
-
-    DiagnosticTests:
-        type: 'article'
-        title: The Interpretation of SARS-CoV-2 Diagnostic Tests
-        year: 2020
-        author: Stites EC, Wilen CB.
-        publisher:  Med (N Y).
-        doi: 10.1016/j.medj.2020.08.001
-        url: https://www.cell.com/med/fulltext/S2666-6340(20)30016-7
-
-    dichotomizing:
-        type: 'article'
-        title: 'Dichotomizing continuous predictors in multiple regression: a bad idea.'
-        year: 2006
-        author: Royston, P., Altman, D.G. and Sauerbrei, W.
-        publisher:  Statist. Med.
-        volume: 25
-        pages: 127-141
-        doi: 10.1002/sim.2331
-        url: https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.2331
 
     bbccookbook:
         type: 'article'
@@ -543,6 +287,327 @@ refs:
         publisher: '[R package]. Retrieved from https://github.com/yanlinlin82/ggvenn'
         url: https://github.com/yanlinlin82/ggvenn
 
+
+    iwillsurvive:
+        type: 'software'
+        author: Nathaniel Phillips
+        year: 2021
+        title: "iwillsurvive"
+        publisher: '[R package]. Retrieved from https://github.com/ndphillips/iwillsurvive'
+        url: https://github.com/ndphillips/iwillsurvive
+
+
+    appliedsurvivalanalysisR:
+        type: 'book'
+        author: Dirk F. Moore
+        year: 2016
+        title: "Applied Survival Analysis Using R"
+        publisher: 'Springer Cham'
+        doi: 10.1007/978-3-319-31245-3
+        url: https://link.springer.com/book/10.1007/978-3-319-31245-3
+
+    survivalrwnahhas:
+        type: 'book chapter'
+        author: Ramzi W. Nahhas
+        year: 2023
+        title: "Chapter 7 Survival Analysis. Introduction to Regression Methods for Public Health Using R."
+        url: https://bookdown.org/rwnahhas/RMPH/survival.html
+
+    upset:
+        type: 'software'
+        author: Jake R Conway, Alexander Lex, Nils Gehlenborg
+        year: 2017
+        title: "UpSetR: An R Package for the Visualization of Intersecting Sets and their Properties"
+        doi: 10.1093/bioinformatics/btx364
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=UpSetR'
+        url: https://CRAN.R-project.org/package=UpSetR
+
+
+    finalfit:
+        type: 'software'
+        author: Ewen Harrison and Tom Drake and Riinu Ots
+        year: 2019
+        title: "finalfit: Quickly Create Elegant Regression Results Tables and Plots when Modelling"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=finalfit'
+        url: https://CRAN.R-project.org/package=finalfit
+
+
+    caret:
+        type: 'software'
+        author: Max Kuhn
+        year: 2020
+        title: "caret: Classification and Regression Training"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=caret'
+        url: https://CRAN.R-project.org/package=caret
+
+
+    hrbrthemes:
+        type: 'software'
+        author: Bob Rudis
+        year: 2020
+        title: "hrbrthemes: Additional Themes, Theme Components and Utilities for 'ggplot2'."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=hrbrthemes'
+        url: https://CRAN.R-project.org/package=hrbrthemes
+
+
+    retractcheck:
+        type: 'software'
+        author: Chris Hartgerink and Frederik Aust
+        year: 2019
+        title: "retractcheck: Retraction Scanner"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=retractcheck'
+        url: https://CRAN.R-project.org/package=retractcheck
+
+
+    RefManageR:
+        type: 'software'
+        author: McLean MW
+        year: 2017
+        title: 'RefManageR: Import and Manage BibTeX and BibLaTeX References in R. The Journal of Open Source Software.'
+        doi: 10.21105/joss.00338
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RefManageR'
+        url: https://CRAN.R-project.org/package=RefManageR
+
+
+    rcrossref:
+        type: 'software'
+        author: Scott Chamberlain and Hao Zhu and Najko Jahn and Carl Boettiger and Karthik Ram
+        year: 2020
+        title: "rcrossref: Client for Various 'CrossRef' 'APIs'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rcrossref'
+        url: https://CRAN.R-project.org/package=rcrossref
+
+    PathologyKappa:
+        type: 'article'
+        title: Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
+        year: 2020
+        author:
+        publisher: Annals of Diagnostic Pathology
+        volume: 47
+        url: https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040
+
+
+    DiagnosticTests:
+        type: 'article'
+        title: The Interpretation of SARS-CoV-2 Diagnostic Tests
+        year: 2020
+        author: Stites EC, Wilen CB.
+        publisher:  Med (N Y).
+        doi: 10.1016/j.medj.2020.08.001
+        url: https://www.cell.com/med/fulltext/S2666-6340(20)30016-7
+
+
+
+    ggstatsplot:
+        type: 'software'
+        author: Patil, I.
+        year: 2018
+        title: "ggstatsplot: 'ggplot2' Based Plots with Statistical Details"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggstatsplot'
+        url: https://CRAN.R-project.org/package=ggstatsplot
+        doi: '10.5281/zenodo.2074621'
+
+
+    irr:
+        type: 'software'
+        author: Matthias Gamer, Jim Lemon, Ian Fellows, Puspendra Singh
+        year: 2019
+        title: "Various Coefficients of Interrater Reliability and Agreement."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=irr'
+        url: https://CRAN.R-project.org/package=irr
+
+    tableone:
+        type: 'software'
+        author: Kazuki, Y.
+        year: 2019
+        title: "tableone: Create 'Table 1' to Describe Baseline Characteristics"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tableone'
+        url: https://CRAN.R-project.org/package=tableone
+
+    janitor:
+        type: 'software'
+        author: Firke, S.
+        year: 2019
+        title: "janitor: Simple Tools for Examining and Cleaning Dirty Data."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=janitor'
+        url: https://CRAN.R-project.org/package=janitor
+
+
+
+    easyalluvial:
+        type: 'software'
+        author: Bjoern Koneswarakantha
+        year: 2019
+        title: "easyalluvial: Generate Alluvial Plots with a Single Line of Code."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=easyalluvial'
+        url: https://CRAN.R-project.org/package=easyalluvial
+
+
+    parcats:
+        type: 'software'
+        author: Bjoern Koneswarakantha
+        year: 2019
+        title: "parcats: Interactive Parallel Categories Diagrams for 'easyalluvial'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=parcats'
+        url: https://CRAN.R-project.org/package=parcats
+
+
+    plotROC:
+        type: 'software'
+        author: Michael C. Sachs
+        year: 2017
+        title: "plotROC: A Tool for Plotting ROC Curves.Journal of Statistical Software, Code Snippets, 79(2), 1-19. doi:10.18637/jss.v079.c02"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plotROC'
+        url: https://CRAN.R-project.org/package=plotROC
+
+
+    RGraphGallery:
+        type: 'website'
+        author: Holtz Yan
+        year: 2020
+        title: "The R Graph Gallery"
+        publisher: 'A website that displays hundreds of R charts https://www.r-graph-gallery.com'
+        url: https://github.com/holtzy/R-graph-gallery
+
+    dichotomizing:
+        type: 'article'
+        title: 'Dichotomizing continuous predictors in multiple regression: a bad idea.'
+        year: 2006
+        author: Royston, P., Altman, D.G. and Sauerbrei, W.
+        publisher:  Statist. Med.
+        volume: 25
+        pages: 127-141
+        doi: 10.1002/sim.2331
+        url: https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.2331
+
+
+    tangram:
+        type: 'software'
+        author: Garbett, S.
+        year: 2018
+        title: "tangram: The Grammar of Tables"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tangram'
+        url: https://CRAN.R-project.org/package=tangram
+
+
+    gtsummary:
+        type: 'software'
+        author: Daniel D. Sjoberg, Margie Hannum, Karissa Whiting and Emily C. Zabor
+        year: 2020
+        title: "gtsummary: Presentation-Ready Data Summary and Analytic Result Tables"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gtsummary'
+        url: https://CRAN.R-project.org/package=gtsummary
+
+    rmngb:
+        type: 'software'
+        author: Antoine Filipovic Pierucci
+        year: 2014
+        title: "rmngb: Miscellaneous Collection of Functions for Medical Data Analysis"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rmngb'
+        url: https://CRAN.R-project.org/package=rmngb
+
+    RVAideMemoire:
+        type: 'software'
+        author: Maxime Hervé
+        year: 2020
+        title: "RVAideMemoire: Testing and Plotting Procedures for Biostatistics"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RVAideMemoire'
+        url: https://CRAN.R-project.org/package=RVAideMemoire
+
+
+    chisq.posthoc.test:
+        type: 'software'
+        author: Daniel Ebbert
+        year: 2019
+        title: "chisq.posthoc.test: A Post Hoc Analysis for Pearson's Chi-Squared Test for Count Data"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=chisq.posthoc.test'
+        url: https://CRAN.R-project.org/package=chisq.posthoc.test
+
+
+    whoisinthisstudy:
+        type: 'article'
+        author: Hayes-Larson E, Kezios KL, Mooney SJ, Lovasi G.
+        year: 2019
+        title: "Who is in this study, anyway? Guidelines for a useful Table 1."
+        publisher: J Clin Epidemiol.
+        volume: 114
+        pages: 125-132
+        doi: 10.1016/j.jclinepi.2019.06.011
+        url: https://pubmed.ncbi.nlm.nih.gov/31229583/
+
+
+    recist:
+        type: 'article'
+        author: Eisenhauer EA, Therasse P, Bogaerts J, Schwartz LH, Sargent D, Ford R, Dancey J, Arbuck S, Gwyther S, Mooney M, Rubinstein L, Shankar L, Dodd L, Kaplan R, Lacombe D, Verweij J.
+        year: 2009
+        title: "New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1)."
+        publisher: Eur J Cancer.
+        volume: 45(2)
+        pages: 228-47
+        doi: 10.1016/j.ejca.2008.10.026
+        url: https://pubmed.ncbi.nlm.nih.gov/19097774/
+
+
+    ggstatsplot_article:
+        type: 'article'
+        author: Patil, I.
+        year: 2021
+        title: "Visualizations with statistical details: The 'ggstatsplot' approach."
+        publisher: 'PsyArxiv'
+        doi: 'doi:10.31234/osf.io/p7mku'
+
+
+    explore:
+        type: 'software'
+        author: Roland Krasser
+        year: 2020
+        title: "explore: Simplifies Exploratory Data Analysis."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=explore'
+        url: https://CRAN.R-project.org/package=explore
+
+    FFTrees:
+        type: 'software'
+        author: Nathaniel Phillips, Hansjoerg Neth, Jan Woike and Wolfgang Gaissmaer
+        year: 2019
+        title: "FFTrees: Generate, Visualise, and Evaluate Fast-and-Frugal Decision Trees"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=FFTrees'
+        url: https://CRAN.R-project.org/package=FFTrees
+
+
+    rpart:
+        type: 'software'
+        author: Terry Therneau and Beth Atkinson
+        year: 2019
+        title: "rpart: Recursive Partitioning and Regression Trees."
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart'
+        url: https://CRAN.R-project.org/package=rpart
+
+    rpart.plot:
+        type: 'software'
+        author: Stephen Milborrow
+        year: 2019
+        title: "rpart.plot: Plot 'rpart' Models: An Enhanced Version of 'plot.rpart'"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rpart.plot'
+        url: https://CRAN.R-project.org/package=rpart.plot
+
+    benford.analysis:
+        type: 'software'
+        author: Carlos Cinelli
+        year: 2020
+        title: "benford.analysis: Benford Analysis for Data Validation and Forensic Analytics"
+        publisher: '[R package]. Retrieved from http://github.com/carloscinelli/benford.analysis'
+        url: http://github.com/carloscinelli/benford.analysis
+
+
+    benford.nedir:
+        type: 'website'
+        author: "Ümit Işlak"
+        year: 2021
+        title: "Benford (ilk basamak) kanunu nedir?"
+        publisher: 'sarkac.org'
+        url: https://sarkac.org/2021/09/benford-ilk-basamak-kanunu-nedir/
+
+
     padjust:
         type: 'website'
         year: 2020
@@ -562,14 +627,15 @@ refs:
         doi: 10.2105/AJPH.2012.300897
         url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3518362/
 
-
-    iwillsurvive:
+    ClinicoPathJamoviModule:
         type: 'software'
-        author: Nathaniel Phillips
-        year: 2021
-        title: "iwillsurvive"
-        publisher: '[R package]. Retrieved from https://github.com/ndphillips/iwillsurvive'
-        url: https://github.com/ndphillips/iwillsurvive
+        author: Serdar Balci
+        year: 2022
+        title: "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188"
+        publisher: '[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule'
+        doi: 10.17605/OSF.IO/9SZUD
+        url: https://www.serdarbalci.com/ClinicoPathJamoviModule/
+
 
     sensspecwiki:
         type: 'webpage'
@@ -615,63 +681,6 @@ refs:
         publisher: 'R Views, An R community blog edited by RStudio'
         url: https://rviews.rstudio.com/2017/09/25/survival-analysis-with-r/
 
-
-    appliedsurvivalanalysisR:
-        type: 'book'
-        author: Dirk F. Moore
-        year: 2016
-        title: "Applied Survival Analysis Using R"
-        publisher: 'Springer Cham'
-        doi: 10.1007/978-3-319-31245-3
-        url: https://link.springer.com/book/10.1007/978-3-319-31245-3
-
-    survivalrwnahhas:
-        type: 'book chapter'
-        author: Ramzi W. Nahhas
-        year: 2023
-        title: "Chapter 7 Survival Analysis. Introduction to Regression Methods for Public Health Using R."
-        url: https://bookdown.org/rwnahhas/RMPH/survival.html
-
-    upset:
-        type: 'software'
-        author: Jake R Conway, Alexander Lex, Nils Gehlenborg
-        year: 2017
-        title: "UpSetR: An R Package for the Visualization of Intersecting Sets and their Properties"
-        doi: 10.1093/bioinformatics/btx364
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=UpSetR'
-        url: https://CRAN.R-project.org/package=UpSetR
-
-
-    whoisinthisstudy:
-        type: 'article'
-        author: Hayes-Larson E, Kezios KL, Mooney SJ, Lovasi G.
-        year: 2019
-        title: "Who is in this study, anyway? Guidelines for a useful Table 1."
-        publisher: J Clin Epidemiol.
-        volume: 114
-        pages: 125-132
-        doi: 10.1016/j.jclinepi.2019.06.011
-        url: https://pubmed.ncbi.nlm.nih.gov/31229583/
-
-    recist:
-        type: 'article'
-        author: Eisenhauer EA, Therasse P, Bogaerts J, Schwartz LH, Sargent D, Ford R, Dancey J, Arbuck S, Gwyther S, Mooney M, Rubinstein L, Shankar L, Dodd L, Kaplan R, Lacombe D, Verweij J.
-        year: 2009
-        title: "New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1)."
-        publisher: Eur J Cancer.
-        volume: 45(2)
-        pages: 228-47
-        doi: 10.1016/j.ejca.2008.10.026
-        url: https://pubmed.ncbi.nlm.nih.gov/19097774/
-
-    ClinicoPathJamoviModule:
-        type: 'software'
-        author: Serdar Balci
-        year: 2022
-        title: "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188"
-        publisher: '[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule'
-        doi: 10.17605/OSF.IO/9SZUD
-        url: https://www.serdarbalci.com/ClinicoPathJamoviModule/
 
 
 ...

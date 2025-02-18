@@ -29,8 +29,21 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
+    label: Data
+    collapsed: false
+    children:
+      - type: Label
+        label: Data
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: excl
+  - type: CollapseBox
     label: Analysis
-    collapsed: true
+    collapsed: false
     children:
       - type: Label
         label: Analysis
@@ -40,38 +53,27 @@ children:
             margin: large
             children:
               - type: ComboBox
-                name: direction
+                name: typestatistics
+              - type: CheckBox
+                name: pairwisecomparisons
+                children:
+                  - type: ComboBox
+                    name: pairwisedisplay
+                    enable: (pairwisecomparisons)
+                  - type: ComboBox
+                    name: padjustmethod
+                    enable: (pairwisecomparisons)
   - type: CollapseBox
     label: Plot
-    collapsed: true
+    collapsed: false
     children:
       - type: Label
-        label: Theme
+        label: Plot
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
-              - type: CheckBox
-                name: resultssubtitle
               - type: CheckBox
                 name: originaltheme
-      - type: Label
-        label: Plot Labels
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: mytitle
-                format: string
-                width: large
-              - type: TextBox
-                name: xtitle
-                format: string
-                width: large
-              - type: TextBox
-                name: ytitle
-                format: string
-                width: large
+

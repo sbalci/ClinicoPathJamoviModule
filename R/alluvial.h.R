@@ -185,14 +185,14 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the values used for the Alluvial Diagram.
 #' @param condensationvar The primary variable to be used for condensation.
-#' @param excl .
-#' @param marg .
+#' @param excl Exclude missing values from the analysis.
+#' @param marg Include marginal plots.
 #' @param fill A list for the argument fill for selecting the variable to be
 #'   represented by color. Default is 'first_variable'.
 #' @param bin labels for the bins from low to high
-#' @param orient .
-#' @param usetitle .
-#' @param mytitle .
+#' @param orient Orientation of the plot. Default is 'vertical'.
+#' @param usetitle Use a custom title for the plot.
+#' @param mytitle Title for the plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

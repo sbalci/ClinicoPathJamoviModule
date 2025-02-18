@@ -355,6 +355,21 @@ options:
         interest by the end of follow-up and are indicated by vertical ticks on the
         survival curves.
 
-
+    - name: medianline
+      title: medianline
+      type: List
+      options:
+        - title: none
+          name: none
+        - title: horizontal
+          name: h
+        - title: vertical
+          name: v
+        - title: both
+          name: hv
+      default: none
+      description:
+        R: >
+          If true, displays a line indicating the median survival time on the survival plot.
 ...
 

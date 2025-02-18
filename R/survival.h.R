@@ -38,7 +38,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ci95 = FALSE,
             risktable = FALSE,
             censored = FALSE,
-            pplot = TRUE, ...) {
+            pplot = TRUE,
+            medianline = "none", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -223,6 +224,15 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pplot",
                 pplot,
                 default=TRUE)
+            private$..medianline <- jmvcore::OptionList$new(
+                "medianline",
+                medianline,
+                options=list(
+                    "none",
+                    "h",
+                    "v",
+                    "hv"),
+                default="none")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -259,6 +269,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
             self$.addOption(private$..pplot)
+            self$.addOption(private$..medianline)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -295,7 +306,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
         censored = function() private$..censored$value,
-        pplot = function() private$..pplot$value),
+        pplot = function() private$..pplot$value,
+        medianline = function() private$..medianline$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -331,7 +343,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ci95 = NA,
         ..risktable = NA,
         ..censored = NA,
-        ..pplot = NA)
+        ..pplot = NA,
+        ..medianline = NA)
 )
 
 survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -860,6 +873,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param risktable .
 #' @param censored .
 #' @param pplot .
+#' @param medianline If true, displays a line indicating the median survival
+#'   time on the survival plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -924,7 +939,8 @@ survival <- function(
     ci95 = FALSE,
     risktable = FALSE,
     censored = FALSE,
-    pplot = TRUE) {
+    pplot = TRUE,
+    medianline = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survival requires jmvcore to be installed (restart may be required)")
@@ -978,7 +994,8 @@ survival <- function(
         ci95 = ci95,
         risktable = risktable,
         censored = censored,
-        pplot = pplot)
+        pplot = pplot,
+        medianline = medianline)
 
     analysis <- survivalClass$new(
         options = options,

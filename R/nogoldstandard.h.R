@@ -22,7 +22,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             alpha = 0.05, ...) {
 
             super$initialize(
-                package="meddecide",
+                package="ClinicoPath",
                 name="nogoldstandard",
                 requiresData=TRUE,
                 ...)
@@ -265,7 +265,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "meddecide",
+                package = "ClinicoPath",
                 name = "nogoldstandard",
                 version = c(1,0,0),
                 options = options,

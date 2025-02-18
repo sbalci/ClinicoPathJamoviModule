@@ -11,13 +11,13 @@ description:
     R:
         dontrun: true
         usage: |
-            data('histopathology')
-            dat <- as.data.frame(histopathology)
-            ClinicoPath::tableone(
-            data = dat,
-            vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-            sty = "t3",
-            excl = TRUE)
+            # data('histopathology')
+            # dat <- as.data.frame(histopathology)
+            # ClinicoPathDescriptives::tableone(
+            # data = dat,
+            # vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+            # sty = "t3",
+            # excl = TRUE)
 
 
 options:
@@ -26,12 +26,17 @@ options:
       description:
           R: >
             The data as a data frame.
+          jamovi: >
+            The data as a data frame.
 
     - name: vars
       title: Variables
       type: Variables
       description:
           R: >
+            a string naming the variables from `data` that contains the
+            values used for the Table One.
+          jamovi: >
             a string naming the variables from `data` that contains the
             values used for the Table One.
 
@@ -49,12 +54,22 @@ options:
         - title: janitor
           name: t4
       default: t1
+      description:
+          R: >
+            a string naming the style of the table.
+          jamovi: >
+            a string naming the style of the table.
 
 
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
       default: false
+      description:
+          R: >
+            a boolean argument whether to exclude missing values. Default is false.
+          jamovi: >
+            a boolean argument whether to exclude missing values. Default is false.
 
 
     # - name: alllevels

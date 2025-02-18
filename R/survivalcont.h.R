@@ -35,7 +35,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             multievent = FALSE,
             ci95 = FALSE,
             risktable = FALSE,
-            censored = FALSE, ...) {
+            censored = FALSE,
+            medianline = "none", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -200,6 +201,15 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "censored",
                 censored,
                 default=FALSE)
+            private$..medianline <- jmvcore::OptionList$new(
+                "medianline",
+                medianline,
+                options=list(
+                    "none",
+                    "h",
+                    "v",
+                    "hv"),
+                default="none")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -234,6 +244,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
+            self$.addOption(private$..medianline)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -268,7 +279,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
-        censored = function() private$..censored$value),
+        censored = function() private$..censored$value,
+        medianline = function() private$..medianline$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -302,7 +314,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..multievent = NA,
         ..ci95 = NA,
         ..risktable = NA,
-        ..censored = NA)
+        ..censored = NA,
+        ..medianline = NA)
 )
 
 survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -899,6 +912,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for each group in the survival analysis.
 #' @param censored Enable this option to display censored observations in the
 #'   survival plots.
+#' @param medianline If true, displays a line indicating the median survival
+#'   time on the survival plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -958,7 +973,8 @@ survivalcont <- function(
     multievent = FALSE,
     ci95 = FALSE,
     risktable = FALSE,
-    censored = FALSE) {
+    censored = FALSE,
+    medianline = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalcont requires jmvcore to be installed (restart may be required)")
@@ -1008,7 +1024,8 @@ survivalcont <- function(
         multievent = multievent,
         ci95 = ci95,
         risktable = risktable,
-        censored = censored)
+        censored = censored,
+        medianline = medianline)
 
     analysis <- survivalcontClass$new(
         options = options,

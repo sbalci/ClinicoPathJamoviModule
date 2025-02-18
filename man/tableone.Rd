@@ -12,9 +12,10 @@ tableone(data, vars, sty = "t1", excl = FALSE)
 \item{vars}{a string naming the variables from \code{data} that contains
 the values used for the Table One.}
 
-\item{sty}{.}
+\item{sty}{a string naming the style of the table.}
 
-\item{excl}{.}
+\item{excl}{a boolean argument whether to exclude missing values. Default
+is false.}
 }
 \value{
 A results object containing:
@@ -31,12 +32,12 @@ Function for making Table One.
 }
 \examples{
 \donttest{
-data('histopathology')
-dat <- as.data.frame(histopathology)
-ClinicoPath::tableone(
-data = dat,
-vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-sty = "t3",
-excl = TRUE)
+# data('histopathology')
+# dat <- as.data.frame(histopathology)
+# ClinicoPathDescriptives::tableone(
+# data = dat,
+# vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+# sty = "t3",
+# excl = TRUE)
 }
 }

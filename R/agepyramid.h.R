@@ -125,9 +125,12 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param age .
-#' @param gender .
-#' @param female .
+#' @param age a string naming the variable from \code{data} that contains the
+#'   continuous values used for the report
+#' @param gender a string naming the variable from \code{data} that contains
+#'   the categorical values used for the report
+#' @param female a string naming the level from \code{gender} that contains
+#'   the level female
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr

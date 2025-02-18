@@ -1,12 +1,8 @@
 #' @title Medical Decision Analysis
 #' @description Implements comprehensive medical decision analysis including:
-#'   - Sensitivity and specificity calculation
-#'   - Predictive values
-#'   - ROC curve analysis
-#'   - Test comparison
-#'   - Confidence intervals
 #' @details This module provides tools for analyzing diagnostic test performance
 #'   with options for various visualization methods and statistical comparisons.
+#'   - Sensitivity, specificity and predictive values
 #' @section Usage:
 #'   1. Provide test and reference standard data
 #'   2. Select analysis options
@@ -16,10 +12,17 @@
 #' @import ggplot2
 #' @import boot
 #' @importFrom stats quantile qnorm
+#' @importFrom dplyr %>% mutate case_when
+#' @importFrom forcats as_factor fct_relevel
+#' @importFrom epiR epi.tests
+
+
 #  @references
 #    - DeLong et al. (1988) for ROC comparison
 #   - Hanley & McNeil (1982) for AUC confidence intervals
-
+#    - ROC curve analysis with confidence intervals
+#    - Multiple test comparison
+#    - Bootstrapped confidence intervals
 
 
 
@@ -29,43 +32,322 @@ decisionClass <- if (requireNamespace("jmvcore"))
         inherit = decisionBase,
         private = list(
             .state = NULL,
+
             # Add state field for storing data
 
-            .cache = new.env(),
+            # .cache = new.env(),
 
-            .get_cached = function(key) {
-                if (exists(key, envir=private$.cache)) {
-                    return(get(key, envir=private$.cache))
-                }
-                return(NULL)
-            },
+            # .get_cached = function(key) {
+            #     if (exists(key, envir=private$.cache)) {
+            #         return(get(key, envir=private$.cache))
+            #     }
+            #     return(NULL)
+            # },
 
-            .set_cached = function(key, value) {
-                assign(key, value, envir=private$.cache)
-            },
+            # .set_cached = function(key, value) {
+            #     assign(key, value, envir=private$.cache)
+            # },
 
             .init = function() {
-
                 cTable <- self$results$cTable
 
                 cTable$addRow(rowKey = "Test Positive",
                               values = list(newtest = "Test Positive"))
 
-
                 cTable$addRow(rowKey = "Test Negative",
                               values = list(newtest = "Test Negative"))
 
-
-
-
                 cTable$addRow(rowKey = "Total", values = list(newtest = "Total"))
 
+
+
+
+                # cTable2 <- self$results$cTable2
+                # cTable2$addRow(rowKey = "Test Positive",
+                #               values = list(newtest = "Test Positive"))
+                # cTable2$addRow(rowKey = "Test Negative",
+                #               values = list(newtest = "Test Negative"))
+                # cTable2$addRow(rowKey = "Total", values = list(newtest = "Total"))
+
             }
+
+
+
+            # Helper functions
+            # .calculate_basic_metrics = function(TP, FP, TN, FN) {
+            #     metrics <- list(
+            #         total_pop = TP + TN + FP + FN,
+            #         disease_pos = TP + FN,
+            #         disease_neg = TN + FP,
+            #         test_pos = TP + FP,
+            #         test_neg = TN + FN,
+            #         test_true = TP + TN,
+            #         test_wrong = FP + FN,
+            #         sensitivity = TP / (TP + FN),
+            #         specificity = TN / (TN + FP),
+            #         accuracy = (TP + TN) / (TP + TN + FP + FN),
+            #         ppv = TP / (TP + FP),
+            #         npv = TN / (TN + FN),
+            #         plr = (TP / (TP + FN)) / (1 - (TN / (TN + FP))),
+            #         nlr = (1 - (TP / (TP + FN))) / (TN / (TN + FP))
+            #     )
+            #     return(metrics)
+            # },
+
+            # .bootstrap_ci = function(data, index, metrics_func) {
+            #     # Resample data
+            #     resampled <- data[index,]
+            #     # Calculate confusion matrix
+            #     conf_mat <- table(resampled$test, resampled$gold)
+            #     # Extract values
+            #     TP <- conf_mat[2,2]
+            #     FP <- conf_mat[2,1]
+            #     TN <- conf_mat[1,1]
+            #     FN <- conf_mat[1,2]
+            #     # Calculate and return metrics
+            #     metrics <- metrics_func(TP, FP, TN, FN)
+            #     return(unlist(metrics))
+            # },
+
+            # .calculate_confidence_intervals = function(data, metrics, conf_level = 0.95) {
+            #     # Perform bootstrap
+            #     boot_results <- boot::boot(
+            #         data = data,
+            #         statistic = private$.bootstrap_ci,
+            #         R = 2000,
+            #         metrics_func = private$.calculate_basic_metrics
+            #     )
+            #
+            #     # Calculate CIs for each metric
+            #     ci_results <- list()
+            #     metric_names <- names(metrics)
+            #     for(i in seq_along(metrics)) {
+            #         ci <- boot::boot.ci(boot_results,
+            #                             type = "perc",
+            #                             index = i,
+            #                             conf = conf_level)
+            #         ci_results[[metric_names[i]]] <- list(
+            #             lower = ci$percent[4],
+            #             upper = ci$percent[5]
+            #         )
+            #     }
+            #     return(ci_results)
+            # },
+
+            # .create_roc_plot = function(sens, spec, ci = NULL) {
+            #     roc_data <- data.frame(
+            #         FPR = 1 - spec,
+            #         TPR = sens
+            #     )
+            #
+            #     p <- ggplot(roc_data, aes(x = FPR, y = TPR)) +
+            #         geom_point(size = 3, color = "blue") +
+            #         geom_line(size = 1) +
+            #         geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+            #         coord_equal() +
+            #         theme_minimal() +
+            #         labs(
+            #             x = "False Positive Rate (1 - Specificity)",
+            #             y = "True Positive Rate (Sensitivity)",
+            #             title = "ROC Curve"
+            #         )
+            #
+            #     if (!is.null(ci)) {
+            #         # Add confidence bands if provided
+            #         p <- p + geom_ribbon(
+            #             data = ci,
+            #             aes(ymin = lower, ymax = upper),
+            #             alpha = 0.2
+            #         )
+            #     }
+            #
+            #     return(p)
+            # },
+
+            # .compare_tests = function(test1_metrics, test2_metrics, n) {
+            #     # Calculate statistical differences between tests
+            #     # Using McNemar's test for paired comparisons
+            #     mcnemar_stat <- (abs(test1_metrics$sensitivity - test2_metrics$sensitivity))^2 * n
+            #     p_value <- 1 - pchisq(mcnemar_stat, df = 1)
+            #
+            #     return(list(
+            #         diff_sens = test1_metrics$sensitivity - test2_metrics$sensitivity,
+            #         diff_spec = test1_metrics$specificity - test2_metrics$specificity,
+            #         mcnemar_stat = mcnemar_stat,
+            #         p_value = p_value
+            #     ))
+            # }
+
+            # ,
+            # .prepare_data = function(data, vars) {
+            #     # Handle missing values
+            #     data <- jmvcore::naOmit(data)
+            #
+            #     # Convert variables to factors
+            #     data[[vars$test]] <- forcats::as_factor(data[[vars$test]])
+            #     data[[vars$gold]] <- forcats::as_factor(data[[vars$gold]])
+            #
+            #     # Recode variables to binary (Positive/Negative)
+            #     data <- data %>%
+            #         dplyr::mutate(
+            #             test = dplyr::case_when(
+            #                 .data[[vars$test]] == vars$test_pos ~ "Positive",
+            #                 TRUE ~ "Negative"
+            #             ),
+            #             gold = dplyr::case_when(
+            #                 .data[[vars$gold]] == vars$gold_pos ~ "Positive",
+            #                 TRUE ~ "Negative"
+            #             )
+            #         )
+            #
+            #     # Convert to factors with proper levels
+            #     data$test <- forcats::fct_relevel(data$test, "Positive")
+            #     data$gold <- forcats::fct_relevel(data$gold, "Positive")
+            #
+            #     return(data)
+            # },
+
+            # .populate_main_tables = function(conf_matrix, metrics) {
+            #     # Populate confusion matrix table
+            #     cTable2 <- self$results$cTable2
+            #
+            #     # conf_matrix <- metrics # table(self$data$test, self$data$gold)
+            #
+            #     cTable2$setRow(rowKey = "Test Positive", values = list(
+            #         newtest = "Test Positive",
+            #         GP = conf_matrix[2,2],  # TP
+            #         GN = conf_matrix[2,1],  # FP
+            #         Total = sum(conf_matrix[2,])
+            #     ))
+            #
+            #     cTable2$setRow(rowKey = "Test Negative", values = list(
+            #         newtest = "Test Negative",
+            #         GP = conf_matrix[1,2],  # FN
+            #         GN = conf_matrix[1,1],  # TN
+            #         Total = sum(conf_matrix[1,])
+            #     ))
+            #
+            #     cTable2$setRow(rowKey = "Total", values = list(
+            #         newtest = "Total",
+            #         GP = sum(conf_matrix[,2]),
+            #         GN = sum(conf_matrix[,1]),
+            #         Total = sum(conf_matrix)
+            #     ))
+            #
+            #     # Populate metrics table
+            #     ratioTable2 <- self$results$ratioTable2
+            #
+            #     ratioTable2$setRow(rowNo = 1, values = list(
+            #         tablename = "Ratios",
+            #         Sens = metrics$sensitivity,
+            #         Spec = metrics$specificity,
+            #         AccurT = metrics$accuracy,
+            #         # PrevalenceD = self$options$pp ? self$options$pprob : metrics$disease_pos/metrics$total_pop,
+            #         PPV = metrics$ppv,
+            #         NPV = metrics$npv,
+            #         # PostTestProbDisease = self$calculate_post_test_prob(metrics, positive = TRUE),
+            #         # PostTestProbHealthy = self$calculate_post_test_prob(metrics, positive = FALSE),
+            #         LRP = metrics$plr,
+            #         LRN = metrics$nlr
+            #     ))
+            #
+            #     # Add footnotes if requested
+            #     # if (self$options$fnote) {
+            #     #     self$add_table_footnotes()
+            #     # }
+            # },
+
+            # .populate_ci_tables = function(ci_results) {
+            #     if (!self$options$ci) return()
+            #
+            #     # Get epiR results
+            #     conf_matrix <- table(self$data$test, self$data$gold)
+            #     epir_results <- epiR::epi.tests(conf_matrix)
+            #     epir_summary <- summary(epir_results)
+            #
+            #     # Populate ratio CI table
+            #     ratio_table <- self$results$epirTable_ratio
+            #     ratio_metrics <- c("se", "sp", "pv.pos", "pv.neg")
+            #
+            #     for (metric in ratio_metrics) {
+            #         if (metric %in% rownames(epir_summary)) {
+            #             ratio_table$addRow(rowKey = metric, values = list(
+            #                 statsnames = epir_summary[metric, "statistic"],
+            #                 est = epir_summary[metric, "est"],
+            #                 lower = epir_summary[metric, "lower"],
+            #                 upper = epir_summary[metric, "upper"]
+            #             ))
+            #         }
+            #     }
+            #
+            #     # Populate number CI table
+            #     number_table <- self$results$epirTable_number
+            #     number_metrics <- c("diag.or", "nndx", "youden")
+            #
+            #     for (metric in number_metrics) {
+            #         if (metric %in% rownames(epir_summary)) {
+            #             number_table$addRow(rowKey = metric, values = list(
+            #                 statsnames = epir_summary[metric, "statistic"],
+            #                 est = epir_summary[metric, "est"],
+            #                 lower = epir_summary[metric, "lower"],
+            #                 upper = epir_summary[metric, "upper"]
+            #             ))
+            #         }
+            #     }
+            # },
+
+            # .populate_comparison_tables = function(comparison_results) {
+            #     if (!self$options$compare_tests) return()
+            #
+            #     comparison_table <- self$results$comparison_table
+            #     comparison_table$setRow(rowNo = 1, values = list(
+            #         diff_sens = comparison_results$diff_sens,
+            #         diff_spec = comparison_results$diff_spec,
+            #         mcnemar_stat = comparison_results$mcnemar_stat,
+            #         p_value = comparison_results$p_value
+            #     ))
+            # },
+
+            # calculate_post_test_prob = function(metrics, positive = TRUE) {
+            #     prior_prob <- self$options$pp ? self$options$pprob : metrics$disease_pos/metrics$total_pop
+            #
+            #     if (positive) {
+            #         # Calculate positive post-test probability
+            #         return((prior_prob * metrics$sensitivity) /
+            #                    (prior_prob * metrics$sensitivity + (1 - prior_prob) * (1 - metrics$specificity)))
+            #     } else {
+            #         # Calculate negative post-test probability
+            #         return(((1 - prior_prob) * metrics$specificity) /
+            #                    ((1 - prior_prob) * metrics$specificity + prior_prob * (1 - metrics$sensitivity)))
+            #     }
+            # },
+
+            # add_table_footnotes = function() {
+            #     # Add footnotes to ratio table
+            #     ratioTable <- self$results$ratioTable
+            #
+            #     footnotes <- list(
+            #         Sens = "Sensitivity (True Positives among Diseased)",
+            #         Spec = "Specificity (True Negatives among Healthy)",
+            #         AccurT = "Accuracy (True Test Result Ratio)",
+            #         PrevalenceD = "Disease Prevalence in this population",
+            #         PPV = "Positive Predictive Value (Probability of disease given positive test)",
+            #         NPV = "Negative Predictive Value (Probability of no disease given negative test)",
+            #         PostTestProbDisease = "Post-test Probability of Disease",
+            #         PostTestProbHealthy = "Post-test Probability of Being Healthy",
+            #         LRP = "Positive Likelihood Ratio",
+            #         LRN = "Negative Likelihood Ratio"
+            #     )
+            #
+            #     for (col in names(footnotes)) {
+            #         ratioTable$addFootnote(rowNo = 1, col = col, footnotes[[col]])
+            #     }
+            # }
+
             ,
             .run = function() {
 
-                private$.state <- list()  # Initialize empty state
-
+                # private$.state <- list()  # Initialize empty state
 
                 # # Error Message ----
                 #
@@ -90,12 +372,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 #
                 # }
 
-
-
-
-
-
-
+                # Input validation
+                # if (is.null(self$data) || nrow(self$data) == 0) {
+                #   jmvcore::reject("No data provided for analysis")
+                #   return()
+                # }
+                # if (any(sapply(vars, is.null))) {
+                #   jmvcore::reject("Missing required variables")
+                #   return()
+                # }
 
                 # TODO
 
@@ -190,6 +475,72 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     htmlTable::htmlTable()
 
                 self$results$text2$setContent(result2)
+
+
+                # Extract and validate variables
+                # vars <- list(
+                #   test = self$options$newtest,
+                #   gold = self$options$gold,
+                #   test_pos = self$options$testPositive,
+                #   gold_pos = self$options$goldPositive
+                # )
+
+
+                # Prepare data
+                # prepared_data <- private$.prepare_data(self$data, vars)
+                # self$results$text3$setContent(prepared_data)
+
+
+
+                # Calculate basic metrics
+                # conf_matrix <- table(prepared_data$test, prepared_data$gold)
+
+                # self$results$text3$setContent(conf_matrix)
+
+                # metrics <- private$.calculate_basic_metrics(
+                #   conf_matrix[2,2], # TP
+                #   conf_matrix[2,1], # FP
+                #   conf_matrix[1,1], # TN
+                #   conf_matrix[1,2]  # FN
+                # )
+
+                # self$results$text3$setContent(list(conf_matrix, metrics))
+
+                # Populate main results tables
+                # private$.populate_main_tables(conf_matrix, metrics)
+
+
+
+                # Calculate confidence intervals if requested
+                # if (self$options$ci) {
+                #   ci <- private$.calculate_confidence_intervals(data, metrics)
+                #
+                #   self$results$text3$setContent(ci)
+                #
+                #   # private$.populate_ci_tables(ci)
+                #
+                #   }
+
+                # Create ROC plot if requested
+                # if (self$options$roc) {
+                #   roc_plot <- private$.create_roc_plot(
+                #     metrics$sensitivity,
+                #     metrics$specificity,
+                #     ci
+                #   )
+                #   self$results$plot_roc$setState(roc_plot)
+                # }
+
+                # Compare tests if requested
+                # if (self$options$compare_tests && !is.null(self$options$additional_test)) {
+                #   test_comparison <- private$.compare_tests(
+                #     metrics,
+                #     private$.calculate_metrics_for_additional_test(),
+                #     nrow(data)
+                #   )
+                #   private$.populate_comparison_tables(test_comparison)
+                # }
+
 
 
 
@@ -396,18 +747,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                self$results$nTable2$setContent(
-                    list(
-                        tablename = "",
-                        TotalPop = TotalPop,
-                        DiseaseP = DiseaseP,
-                        DiseaseN = DiseaseN,
-                        TestP = TestP,
-                        TestN = TestN,
-                        TestT = TestT,
-                        TestW = TestW
-                    )
-                )
+                # self$results$nTable2$setContent(
+                #     list(
+                #         tablename = "",
+                #         TotalPop = TotalPop,
+                #         DiseaseP = DiseaseP,
+                #         DiseaseN = DiseaseN,
+                #         TestP = TestP,
+                #         TestN = TestN,
+                #         TestT = TestT,
+                #         TestW = TestW
+                #     )
+                # )
 
 
 
@@ -417,7 +768,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 nTable$setRow(
                     rowNo = 1,
                     values = list(
-                        tablename = "n",
+                        tablename = "",
                         TotalPop = TotalPop,
                         DiseaseP = DiseaseP,
                         DiseaseN = DiseaseN,
@@ -552,8 +903,6 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Reorganize Table
 
-
-
                 # caretresult[['positive']]
                 # caretresult[['table']]
                 # caretresult[['overall']]
@@ -577,16 +926,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # caretresult[['byClass']][['Balanced Accuracy']] caretresult[['mode']]
                 # caretresult[['dots']]
 
-
-
-
                 # Write Summary
-
-
-
-
-
-
 
                 # 95% CI ----
 
@@ -666,14 +1006,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     # epirTable_ratio footnotes ----
 
-                    # if (self$options$fnote) {
-                    #
-                    #     epirTable_ratio$addFootnote(
-                    #         rowNo = 5,
-                    #         col = "statsnames",
-                    #         "Proportion of all tests that give a correct result."
-                    #     )
-                    # }
+                    if (self$options$fnote) {
+
+                        epirTable_ratio$addFootnote(
+                            rowNo = 5,
+                            col = "statsnames",
+                            "Proportion of all tests that give a correct result."
+                        )
+                    }
 
 
 
@@ -695,58 +1035,36 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     # epirTable_number footnotes ----
 
-                    # if (self$options$fnote) {
-                    #
-                    #
-                    #     epirTable_number$addFootnote(
-                    #         rowNo = 1,
-                    #         col = "statsnames",
-                    #         "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
-                    #     )
-                    #
-                    #     epirTable_number$addFootnote(
-                    #         rowNo = 2,
-                    #         col = "statsnames",
-                    #         "Number of patients that need to be tested to give one correct positive test."
-                    #     )
-                    #
-                    #
-                    #     epirTable_number$addFootnote(
-                    #         rowNo = 3,
-                    #         col = "statsnames",
-                    #         "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
-                    #
-                    #     )
-                    #
-                    # }
+                    if (self$options$fnote) {
 
 
-                }
+                        epirTable_number$addFootnote(
+                            rowNo = 1,
+                            col = "statsnames",
+                            "How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."
+                        )
+
+                        epirTable_number$addFootnote(
+                            rowNo = 2,
+                            col = "statsnames",
+                            "Number of patients that need to be tested to give one correct positive test."
+                        )
 
 
-                if (self$options$compare_tests &&
-                    length(self$options$additional_tests) > 0) {
+                        epirTable_number$addFootnote(
+                            rowNo = 3,
+                            col = "statsnames",
+                            "Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."
 
-                    test_results <- list()
-                    test_results[[1]] <- list(
-                        sens = Sens,
-                        spec = Spec,
-                        n_pos = DiseaseP,
-                        n_neg = DiseaseN
-                    )
+                        )
 
-                    # Process additional tests
-                    for (i in seq_along(self$options$additional_tests)) {
-                        # Calculate metrics for each test
-                        test <- self$options$additional_tests[i]
-                        res <- calculate_test_metrics(mydata, test)
-                        test_results[[i+1]] <- res
                     }
 
-                    # Compare tests
-                    comp_results <- compare_tests(test_results)
-                    private$.state$test_comparison <- comp_results
+
                 }
+
+
+
 
 
                 # Send Data to Plot ----
@@ -772,7 +1090,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
                 # if (self$options$roc) {
-                #     private$.state <- list(
+                #     plotData2 <- list(
                 #         sens = Sens,
                 #         spec = Spec,
                 #         tp = TP,
@@ -784,8 +1102,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 #         thresholds = NULL  # Add thresholds if available
                 #     )
                 #
-                #     image2 <- self$results$plot2
-                #     image2$setState(private$.state)
+                #     image2 <- self$results$plot_roc
+                #     image2$setState(plotData2)
                 # }
 
 
@@ -794,7 +1112,6 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
             ,
-
             .plot1 = function(image1, ggtheme, ...) {
                 plotData1 <- image1$state
 
@@ -815,8 +1132,6 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             }
 
-
-            # drafts ----
 
 
             # matrixdetails <- list(results_caret[["positive"]], results_caret[["table"]],
@@ -882,29 +1197,31 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
             # ,
-            # .plot_roc = function(image, ggtheme, ...) {
-            #     plotData <- image$state
-            #     if (is.null(plotData)) return(FALSE)
+            # .plot_roc = function(image2, ggtheme, ...) {
+            #
+            #     plotData2 <- image2$state
+            #
+            #     if (is.null(plotData2)) return(FALSE)
             #
             #     # Calculate confidence intervals
-            #     auc <- 0.5 * (plotData$sens * (1-plotData$spec)) +
-            #         0.5 * (1 * (1-(1-plotData$spec))) +
-            #         0.5 * ((1-plotData$sens) * plotData$spec)
+            #     auc <- 0.5 * (plotData2$sens * (1-plotData2$spec)) +
+            #         0.5 * (1 * (1-(1-plotData2$spec))) +
+            #         0.5 * ((1-plotData2$sens) * plotData2$spec)
             #
-            #     ci <- auc_ci(auc, plotData$n_pos, plotData$n_neg)
+            #     ci <- auc_ci(auc, plotData2$n_pos, plotData2$n_neg)
             #
             #     # Create ROC curve points
             #     roc_points <- data.frame(
-            #         fpr = c(0, 1-plotData$spec, 1),
-            #         tpr = c(0, plotData$sens, 1)
+            #         fpr = c(0, 1-plotData2$spec, 1),
+            #         tpr = c(0, plotData2$sens, 1)
             #     )
             #
             #     # Create plot with confidence band
             #     p <- ggplot(roc_points, aes(x=fpr, y=tpr)) +
             #         geom_line(color="blue", size=1) +
             #         geom_point(data=data.frame(
-            #             fpr=1-plotData$spec,
-            #             tpr=plotData$sens),
+            #             fpr=1-plotData2$spec,
+            #             tpr=plotData2$sens),
             #             color="red", size=3) +
             #         geom_abline(slope=1, intercept=0,
             #                     linetype="dashed", color="gray") +

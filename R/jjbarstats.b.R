@@ -96,35 +96,35 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group <- self$options$group
 
 
-                mytitle <- self$options$mytitle
+                # mytitle <- self$options$title
 
-                if (mytitle == '') {
-                    mytitle <- NULL
-                }
+                # if (mytitle == '') {
+                #     mytitle <- NULL
+                # }
 
 
-                xtitle <- self$options$xtitle
+                # xtitle <- self$options$xtitle
+                #
+                # if (xtitle == '') {
+                #     xtitle <- NULL
+                # }
 
-                if (xtitle == '') {
-                    xtitle <- NULL
-                }
-
-                ytitle <- self$options$ytitle
-
-                if (ytitle == '') {
-                    ytitle <- NULL
-                }
+                # ytitle <- self$options$ytitle
+                #
+                # if (ytitle == '') {
+                #     ytitle <- NULL
+                # }
 
 
                 # direction, paired ----
 
-                direction <- self$options$direction
-
-                if (direction == "repeated") {
-                    paired <- TRUE
-                } else if (direction == "independent") {
-                    paired <- FALSE
-                }
+                # direction <- self$options$direction
+                #
+                # if (direction == "repeated") {
+                #     paired <- TRUE
+                # } else if (direction == "independent") {
+                #     paired <- FALSE
+                # }
 
                 # ggbarstats ----
                 # bar charts for categorical data
@@ -144,11 +144,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             x = !!rlang::sym(dep),
                             y = !!rlang::sym(group)
 
-                            , title = mytitle
-                            , xlab = xtitle
-                            , ylab = ytitle
-                            , paired = paired
-                            , results.subtitle = self$options$resultssubtitle
+                            # , title = mytitle
+                            # , xlab = xtitle
+                            # , ylab = ytitle
+                            # , paired = paired
+                            # , results.subtitle = self$options$resultssubtitle
 
                             # , ggtheme = selected_theme
                         )
@@ -183,11 +183,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                     data = mydata,
                                         x = !!x,
                                         messages = messages,
-                            y = !!rlang::sym(group),
+                            y = !!rlang::sym(group)
 
-                            , title = mytitle
-                            , paired = paired
-                            , results.subtitle = self$options$resultssubtitle
+                            # , title = mytitle
+                            # , paired = paired
+                            # , results.subtitle = self$options$resultssubtitle
 
                             # , ggtheme = selected_theme
 
@@ -263,35 +263,35 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group <- self$options$group
 
 
-                mytitle <- self$options$mytitle
+                # mytitle <- self$options$title
 
-                if (mytitle == '') {
-                    mytitle <- NULL
-                }
+                # if (mytitle == '') {
+                #     mytitle <- NULL
+                # }
 
 
-                xtitle <- self$options$xtitle
+                # xtitle <- self$options$xtitle
+                #
+                # if (xtitle == '') {
+                #     xtitle <- NULL
+                # }
 
-                if (xtitle == '') {
-                    xtitle <- NULL
-                }
-
-                ytitle <- self$options$ytitle
-
-                if (ytitle == '') {
-                    ytitle <- NULL
-                }
+                # ytitle <- self$options$ytitle
+                #
+                # if (ytitle == '') {
+                #     ytitle <- NULL
+                # }
 
 
                 # direction, paired ----
 
-                direction <- self$options$direction
-
-                if (direction == "repeated") {
-                    paired <- TRUE
-                } else if (direction == "independent") {
-                    paired <- FALSE
-                }
+                # direction <- self$options$direction
+                #
+                # if (direction == "repeated") {
+                #     paired <- TRUE
+                # } else if (direction == "independent") {
+                #     paired <- FALSE
+                # }
 
 
                 # grouped_ggbarstats ----
@@ -319,14 +319,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         data = mydata,
                         x = !!rlang::sym(dep1),
                         y = !!rlang::sym(group),
-                        grouping.var = !!rlang::sym(grvar),
+                        grouping.var = !!rlang::sym(grvar)
 
                         # , title = mytitle
                         # , xlab = xtitle
                         # , ylab = ytitle
-                        , paired = paired
+                        # , paired = paired
                         , ggtheme = selected_theme
-                        , results.subtitle = self$options$resultssubtitle
+                        # , results.subtitle = self$options$resultssubtitle
 
                         )
 
@@ -369,15 +369,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             messages = messages,
 
                             y = !!rlang::sym(group),
-                            grouping.var = !!rlang::sym(grvar),
+                            grouping.var = !!rlang::sym(grvar)
 
 
                             # , title = mytitle
                             # , xlab = xtitle
                             # , ylab = ytitle
-                            , paired = paired
+                            # , paired = paired
                             , ggtheme = selected_theme
-                            , results.subtitle = self$options$resultssubtitle
+                            # , results.subtitle = self$options$resultssubtitle
 
 
                             )

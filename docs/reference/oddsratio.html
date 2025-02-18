@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.42</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.60</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">oddsratio</span><span class="op">(</span><span class="va">data</span>, <span class="va">explanatory</span>, <span class="va">outcome</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">oddsratio</span><span class="op">(</span><span class="va">data</span>, <span class="va">explanatory</span>, <span class="va">outcome</span>, showNomogram <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,10 +71,16 @@
 <dt id="arg-outcome">outcome<a class="anchor" aria-label="anchor" href="#arg-outcome"></a></dt>
 <dd><p>The outcome variable to be used in the analysis.</p></dd>
 
+
+<dt id="arg-shownomogram">showNomogram<a class="anchor" aria-label="anchor" href="#arg-shownomogram"></a></dt>
+<dd><p>Display an interactive nomogram for converting pre-test
+to post-test  probabilities using likelihood ratios calculated from the
+data.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table></div>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$mydataview_nomogram</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

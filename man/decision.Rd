@@ -54,7 +54,6 @@ A results object containing:
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$nTable2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr

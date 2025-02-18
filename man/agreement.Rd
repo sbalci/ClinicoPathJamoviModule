@@ -4,7 +4,16 @@
 \alias{agreement}
 \title{Interrater Reliability}
 \usage{
-agreement(data, vars, sft = FALSE, wght = "unweighted", exct = FALSE)
+agreement(
+  data,
+  vars,
+  sft = FALSE,
+  wght = "unweighted",
+  exct = FALSE,
+  kripp = FALSE,
+  krippMethod = "nominal",
+  bootstrap = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame. The data should be in long format,
@@ -24,6 +33,15 @@ is not ordinal. The default is 'unweighted'.}
 
 \item{exct}{Boolean selection whether to use exact kappa. Effects only more
 than 3 observers. Default is 'false'.}
+
+\item{kripp}{Boolean selection whether to calculate Krippendorff's alpha.
+Default is 'false'.}
+
+\item{krippMethod}{Specifies the measurement level for Krippendorff's alpha
+calculation.}
+
+\item{bootstrap}{Calculate bootstrap confidence intervals for
+Krippendorff's alpha.}
 }
 \value{
 A results object containing:
@@ -31,6 +49,7 @@ A results object containing:
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

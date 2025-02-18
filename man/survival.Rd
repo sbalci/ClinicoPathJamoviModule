@@ -38,7 +38,8 @@ survival(
   ci95 = FALSE,
   risktable = FALSE,
   censored = FALSE,
-  pplot = TRUE
+  pplot = TRUE,
+  medianline = "none"
 )
 }
 \arguments{
@@ -121,6 +122,9 @@ the event level.}
 \item{censored}{.}
 
 \item{pplot}{.}
+
+\item{medianline}{If true, displays a line indicating the median survival
+time on the survival plot.}
 }
 \value{
 A results object containing:

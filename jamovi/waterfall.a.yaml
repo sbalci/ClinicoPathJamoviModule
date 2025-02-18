@@ -1,0 +1,226 @@
+---
+name: waterfall
+title: Treatment Response Analysis
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '1.0.0'
+jas: '1.2'
+
+
+description:
+    main: Creates a waterfall plot to visualize tumor response data following RECIST criteria.
+    R:
+        dontrun: true
+        usage: |
+            # data <- data.frame(
+            #     PatientID = paste0("PT", 1:10),
+            #     Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40)
+            # )
+            # ClinicoPathDescriptives::waterfall(
+            #     data = data,
+            #     patientID = "PatientID",
+            #     responseVar = "Response"
+            # )
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: patientID
+      title: Patient ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Variable containing patient identifiers.
+          jamovi: >
+            Variable containing patient identifiers.
+
+    - name: responseVar
+      title: Response Value
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Percentage change in tumor size.
+          jamovi: >
+            Percentage change in tumor size.
+
+
+    - name: timeVar
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time point of measurement for spider plot (e.g., months from baseline)
+          jamovi: >
+            Time point of measurement for spider plot (e.g., months from baseline)
+
+
+    - name: inputType
+      title: Input Type
+      type: List
+      options:
+        - title: Raw Measurements
+          name: raw
+        - title: Percentage Changes
+          name: percentage
+      default: percentage
+      description:
+          R: >
+            Specify data format: 'raw' for actual measurements (will calculate percent change)
+            or 'percentage' for pre-calculated percentage changes
+          jamovi: >
+            Select 'Raw Measurements' if providing actual tumor measurements,
+            or 'Percentage Changes' if changes from baseline are pre-calculated
+
+
+    - name: sortBy
+      title: Sort By
+      type: List
+      options:
+        - title: Best Response
+          name: response
+        - title: Patient ID
+          name: id
+      default: response
+      description:
+          R: >
+            Sort the waterfall plot by best response or patient ID.
+          jamovi: >
+            Sort the waterfall plot by best response or patient ID.
+
+    - name: showThresholds
+      title: Show RECIST Thresholds
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show +20 percent and -30 percent RECIST thresholds.
+          jamovi: >
+            Show +20 percent and -30 percent RECIST thresholds.
+
+    - name: labelOutliers
+      title: Label Large Changes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Label responses exceeding ±50 percent.
+          jamovi: >
+            Label responses exceeding ±50 percent.
+
+
+
+    - name: showMedian
+      title: Show Median Response
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show median response as a horizontal line.
+          jamovi: >
+            Show median response as a horizontal line.
+
+    - name: showCI
+      title: Show Confidence Interval
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show confidence interval around median response.
+          jamovi: >
+            Show confidence interval around median response.
+
+    - name: minResponseForLabel
+      title: Minimum Response for Labels (percent)
+      type: Number
+      default: 50
+      min: 0
+      max: 100
+      description:
+          R: >
+            Minimum response value for labels to be displayed.
+          jamovi: >
+            Minimum response value for labels to be displayed.
+
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: jamovi
+          name: jamovi
+        - title: RECIST (Red/Blue/Green)
+          name: recist
+        - title: Simple (Red/Green)
+          name: simple
+      default: jamovi
+      description:
+          R: >
+            Color scheme for waterfall plot.
+          jamovi: >
+            Color scheme for waterfall plot.
+
+
+    - name: barAlpha
+      title: Bar Transparency
+      type: Number
+      default: 1
+      min: 0
+      max: 1
+      description:
+          R: >
+            Transparency of bars in waterfall plot.
+          jamovi: >
+            Transparency of bars in waterfall plot.
+
+    - name: barWidth
+      title: Bar Width
+      type: Number
+      default: 0.7
+      min: 0.1
+      max: 1
+      description:
+          R: >
+            Width of bars in waterfall plot.
+          jamovi: >
+            Width of bars in waterfall plot.
+
+    - name: showWaterfallPlot
+      title: Show Waterfall Plot
+      type: Bool
+      default: false
+
+    - name: showSpiderPlot
+      title: Show Spider Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create an additional spider plot showing response over time if longitudinal data available
+          jamovi: >
+            Create an additional spider plot showing response over time if longitudinal data available
+
+    - name: addResponseCategory
+      title: Add Response Category to Data
+      type: Output
+      # description:
+      #     R: >
+      #       Add a new variable to the data frame indicating response category.
+      #     jamovi: >
+      #       Add a new variable to the data frame indicating response category.
+
+
+
+...

@@ -9,11 +9,14 @@ agepyramid(data, age, gender, female)
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{age}{.}
+\item{age}{a string naming the variable from \code{data} that contains the
+continuous values used for the report}
 
-\item{gender}{.}
+\item{gender}{a string naming the variable from \code{data} that contains
+the categorical values used for the report}
 
-\item{female}{.}
+\item{female}{a string naming the level from \code{gender} that contains
+the level female}
 }
 \value{
 A results object containing:

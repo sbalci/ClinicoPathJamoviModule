@@ -33,7 +33,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             multievent = FALSE,
             ci95 = FALSE,
             risktable = FALSE,
-            censored = FALSE, ...) {
+            censored = FALSE,
+            medianline = "none", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -185,6 +186,15 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "censored",
                 censored,
                 default=FALSE)
+            private$..medianline <- jmvcore::OptionList$new(
+                "medianline",
+                medianline,
+                options=list(
+                    "none",
+                    "h",
+                    "v",
+                    "hv"),
+                default="none")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -216,6 +226,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
+            self$.addOption(private$..medianline)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -247,7 +258,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
-        censored = function() private$..censored$value),
+        censored = function() private$..censored$value,
+        medianline = function() private$..medianline$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -278,7 +290,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..multievent = NA,
         ..ci95 = NA,
         ..risktable = NA,
-        ..censored = NA)
+        ..censored = NA,
+        ..medianline = NA)
 )
 
 singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -686,6 +699,8 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   survival plots. Censored observations are patients who have not experienced
 #'   the event of interest by the end of follow-up and are indicated by vertical
 #'   ticks on the survival curves.
+#' @param medianline If true, displays a line indicating the median survival
+#'   time on the survival plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -737,7 +752,8 @@ singlearm <- function(
     multievent = FALSE,
     ci95 = FALSE,
     risktable = FALSE,
-    censored = FALSE) {
+    censored = FALSE,
+    medianline = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("singlearm requires jmvcore to be installed (restart may be required)")
@@ -783,7 +799,8 @@ singlearm <- function(
         multievent = multievent,
         ci95 = ci95,
         risktable = risktable,
-        censored = censored)
+        censored = censored,
+        medianline = medianline)
 
     analysis <- singlearmClass$new(
         options = options,

@@ -13,17 +13,33 @@ options:
       description:
           R: >
             The data as a data frame.
+          jamovi: >
+            The data as a data frame.
 
     - name: var1
       title: 'Variable 1'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            the first variable used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            the first variable used for the report
 
     - name: var1true
       title: 'Select True Level'
       type: Level
       variable: (var1)
+      description:
+          R: >
+            a string naming the level from `var1` that contains the
+            the true level
+          jamovi: >
+            a string naming the level from `var1` that contains the
+            the true level
 
 
     - name: var2
@@ -31,11 +47,25 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            the second variable used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            the second variable used for the report
 
     - name: var2true
       title: 'Select True Level'
       type: Level
       variable: (var2)
+      description:
+          R: >
+            a string naming the level from `var2` that contains the
+            the true level
+          jamovi: >
+            a string naming the level from `var2` that contains the
+            the true level
 
 
     - name: var3
@@ -43,22 +73,50 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            the third variable used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            the third variable used for the report
 
     - name: var3true
       title: 'Select True Level'
       type: Level
       variable: (var3)
+      description:
+          R: >
+            a string naming the level from `var3` that contains the
+            the true level
+          jamovi: >
+            a string naming the level from `var3` that contains the
+            the true level
 
     - name: var4
       title: 'Variable 4'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            the fourth variable used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            the fourth variable used for the report
 
     - name: var4true
       title: 'Select True Level'
       type: Level
       variable: (var4)
+      description:
+          R: >
+            a string naming the level from `var4` that contains the
+            the true level
+          jamovi: >
+            a string naming the level from `var4` that contains the
+            the true level
 
 
 ...

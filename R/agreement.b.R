@@ -197,4 +197,105 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         }
 
 
+
+
+
+
+
+
+        if (self$options$kripp) {
+            # Convert ratings data frame to matrix
+            ratings_matrix <- as.matrix(ratings)
+
+            # Ensure numeric conversion if needed
+            if (!is.numeric(ratings_matrix)) {
+                # If categorical/factor data, convert to numeric codes
+                ratings_matrix <- matrix(
+                    as.numeric(factor(ratings_matrix)),
+                    nrow = nrow(ratings_matrix),
+                    ncol = ncol(ratings_matrix)
+                )
+            }
+
+            # Add error handling
+            tryCatch({
+                # Calculate Krippendorff's alpha
+                kripp_result <- irr::kripp.alpha(
+                    ratings_matrix,
+                    method = self$options$krippMethod
+                )
+
+                # Initialize values list for table
+                values_list <- list(
+                    method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                    subjects = nrow(ratings_matrix),
+                    raters = ncol(ratings_matrix),
+                    alpha = kripp_result$value
+                )
+
+                # Calculate bootstrap CI if requested
+                if (self$options$bootstrap) {
+                    set.seed(123) # for reproducibility
+                    n_boot <- 1000
+                    alpha_boots <- numeric(n_boot)
+
+                    for(i in 1:n_boot) {
+                        boot_indices <- sample(1:nrow(ratings_matrix), replace = TRUE)
+                        boot_data <- ratings_matrix[boot_indices,]
+
+                        boot_alpha <- try(irr::kripp.alpha(boot_data,
+                                                           method = self$options$krippMethod)$value,
+                                          silent = TRUE)
+
+                        if(!inherits(boot_alpha, "try-error")) {
+                            alpha_boots[i] <- boot_alpha
+                        }
+                    }
+
+                    # Calculate 95% confidence intervals
+                    ci <- quantile(alpha_boots, c(0.025, 0.975), na.rm = TRUE)
+
+                    # Add CI values to list
+                    values_list$ci_lower <- ci[1]
+                    values_list$ci_upper <- ci[2]
+                }
+
+                # Populate results table
+                krippTable <- self$results$krippTable
+                krippTable$setRow(rowNo = 1, values = values_list)
+
+            }, error = function(e) {
+                # Handle any errors that occur during calculation
+                errorMessage <- paste("Error calculating Krippendorff's alpha:", e$message)
+                warning(errorMessage)
+
+                # Initialize values list for error case
+                values_list <- list(
+                    method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                    subjects = nrow(ratings_matrix),
+                    raters = ncol(ratings_matrix),
+                    alpha = NA
+                )
+
+                if (self$options$bootstrap) {
+                    values_list$ci_lower <- NA
+                    values_list$ci_upper <- NA
+                }
+
+                # Populate table with NA values
+                krippTable <- self$results$krippTable
+                krippTable$setRow(rowNo = 1, values = values_list)
+
+                # Add error message as footnote
+                krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", e$message))
+            })
+        }
+
+
+
+
+
+
+
+
     }))

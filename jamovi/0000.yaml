@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.42
+version: 0.0.2.60
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-01-02'
+date: '2025-02-18'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -368,13 +368,13 @@ analyses:
     menuSubgroup: Variable Type Based Graphs and Plots
     menuTitle: Graphs and Plots
     description: Function for Generating Plots and Graphs Based on Variable Types.
-  - title: Time Interval
+  - title: Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
     menuGroup: Survival
-    menuSubgroup: Drafts
-    menuTitle: Time Interval
-    menuSubtitle: Time Interval
+    menuSubgroup: Time Analysis
+    menuTitle: Time Interval Calculator
+    menuSubtitle: Calculate time intervals from dates or values
   - title: Tools for data summary
     name: toolssummary
     ns: ClinicoPath
@@ -442,6 +442,91 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Time-Dependent ROC Analysis
     menuSubtitle: Predictive Performance Over Time
+  - title: Treatment Pathway Alluvial Plot
+    name: alluvialSurvival
+    ns: ClinicoPath
+    menuGroup: jsurvival
+    menuTitle: Treatment Pathway Alluvial Plot
+  - title: CONSORT Flowchart
+    name: consort
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Reports
+    menuTitle: CONSORT Flowchart
+  - title: Study Flowchart
+    name: flowchart
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Study Flowchart
+  - title: IHC Expression Analysis
+    name: ihcstats
+    ns: ClinicoPath
+    menuGroup: Pathology
+    menuSubgroup: IHC Analysis
+    menuTitle: IHC Expression Analysis
+  - title: Arc Diagram
+    name: jjarcdiagram
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Network
+    menuTitle: Arc Diagram
+    description: >
+      'Creates arc diagrams for network visualization using the arcdiagram
+      package.'
+  - title: Ridgeline Plot
+    name: jjridgestats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Ridgeline Plot
+    menuSubtitle: Distribution Comparison
+  - title: StreamGraphs
+    name: jjstreamgraph
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Time Series Visualization
+    menuTitle: StreamGraphs
+    description: |
+      'Create interactive StreamGraphs using R streamgraph package.'
+  - title: Treemap
+    name: jjtreemap
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical
+    menuTitle: Treemap
+    description: |
+      'Creates treemap visualizations for categorical data'
+  - title: Waffle Charts
+    name: jjwafflestats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Distribution
+    menuTitle: Waffle Charts
+    description: |
+      'Creates waffle charts to visualize distributions and proportions'
+  - title: Analysis Without Gold Standard
+    name: nogoldstandard
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Decision
+    menuTitle: Analysis Without Gold Standard
+    menuSubtitle: Multiple Test Analysis Without Gold Standard
+    description: Analysis of diagnostic tests without a gold standard reference
+  - title: Tidy Plots
+    name: tidyplots
+    ns: ClinicoPath
+    menuGroup: Plots
+    menuTitle: Tidy Plots
+  - title: Treatment Response Analysis
+    name: waterfall
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Treatment Response Analysis
+    description: >-
+      Creates a waterfall plot to visualize tumor response data following RECIST
+      criteria.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -12,22 +12,45 @@ options:
       description:
           R: >
             The data as a data frame.
+          jamovi: >
+            The data as a data frame.
 
     - name: age
       title: Age
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
 
     - name: gender
       title: Gender
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            categorical values used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            categorical values used for the report
+            
     - name: female
       title: Select Female
       type: Level
       variable: (gender)
+      description:
+          R: >
+            a string naming the level from `gender` that contains the
+            level female
+          jamovi: >
+            a string naming the level from `gender` that contains the
+            level female
 
 ...

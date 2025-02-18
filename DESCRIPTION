@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.42
-Date: 2025-01-02
+Version: 0.0.2.60
+Date: 2025-02-18
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -101,12 +101,20 @@ Imports:
     boot,
     FFTrees,
     knitr,
-    tiff
+    tiff,
+    ggbeeswarm,
+    ggrastr,
+    waffle,
+    xts,
+    streamgraph
 VignetteBuilder:
     knitr,
     tiff
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
+    gastonstat/arcdiagram,
+    hrbrmstr/streamgraph,
+    jbengler/tidyplots
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

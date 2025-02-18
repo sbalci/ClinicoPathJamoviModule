@@ -7,10 +7,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "oddsratioClass",
     inherit = oddsratioBase,
     private = list(
+
+        .nom_object = NULL,
+
+
         .run = function() {
 
 
-            # # Error Message ----
+            # # Error Message
             #
             # if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
             #
@@ -39,7 +43,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # If no variable selected Initial Message ----
+            # Initial Message ----
 
             if (is.null(self$options$explanatory) || is.null(self$options$outcome))
             {
@@ -193,7 +197,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                # Check if outcome variable is suitable or stop ----
+                # Check if outcome variable is suitable or stop
                 # myoutcome2 <- self$options$outcome
                 # myoutcome2 <- self$data[[myoutcome2]]
                 # myoutcome2 <- na.omit(myoutcome2)
@@ -283,6 +287,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
+                ## plot Data ----
                 plotData <- list(
                     "plotData" = mydata,
                     "formulaDependent" = formulaDependent,
@@ -291,6 +296,55 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 image <- self$results$plot
                 image$setState(plotData)
+
+
+
+
+                if (self$options$showNomogram) {
+                    # Calculate likelihood ratios
+                    lr_results <- private$.calculateLikelihoodRatios(
+                        mydata,
+                        dependent_variable_name_from_label,
+                        explanatory_variable_names[1]  # Start with first variable
+                    )
+
+                    # Create diagnostic metrics text
+                    metrics_text <- glue::glue("
+                    <br>
+                    <b>Diagnostic Metrics:</b><br>
+                    Sensitivity: {format(lr_results$sensitivity * 100, digits=2)}%<br>
+                    Specificity: {format(lr_results$specificity * 100, digits=2)}%<br>
+                    Positive LR: {format(lr_results$positive_lr, digits=2)}<br>
+                    Negative LR: {format(lr_results$negative_lr, digits=2)}<br>
+                    <br>
+                ")
+
+                    # Prepare data for nomogram
+                    nom_results <- private$.prepareRmsNomogram(
+                        mydata,
+                        dependent_variable_name_from_label,
+                        explanatory_variable_names
+                    )
+
+                    # Create nomogram if preparation was successful
+                    if (!is.null(nom_results$fit)) {
+                        private$.createNomogram(nom_results$fit, nom_results$dd)
+                    }
+
+                    # Update results
+                    self$results$text2$setContent(paste(text2, metrics_text))
+                }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -308,18 +362,144 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             }
+        }
 
+
+
+
+        ,
+        .calculateLikelihoodRatios = function(data, outcome_var, predictor_var) {
+            # Create contingency table
+            cont_table <- table(data[[predictor_var]], data[[outcome_var]])
+
+            # Calculate sensitivity and specificity
+            sensitivity <- cont_table[2,2] / sum(cont_table[,2])
+            specificity <- cont_table[1,1] / sum(cont_table[,1])
+
+            # Calculate likelihood ratios
+            positive_lr <- sensitivity / (1 - specificity)
+            negative_lr <- (1 - sensitivity) / specificity
+
+            return(list(
+                positive_lr = positive_lr,
+                negative_lr = negative_lr,
+                sensitivity = sensitivity,
+                specificity = specificity
+            ))
+        },
+
+        .prepareRmsNomogram = function(data, dependent, explanatory) {
+            tryCatch({
+                # First create datadist object
+                dd <- rms::datadist(data[, explanatory])
+                options(datadist = dd)
+
+                # Create formula for model
+                formula_str <- paste(dependent, "~", paste(explanatory, collapse = " + "))
+
+                # Fit logistic regression model
+                fit <- rms::lrm(
+                    formula = as.formula(formula_str),
+                    data = data,
+                    x = TRUE,
+                    y = TRUE
+                )
+
+                return(list(fit = fit, dd = dd))
+            }, error = function(e) {
+                warning(paste("Error preparing nomogram:", e$message))
+                return(list(fit = NULL, dd = NULL))
+            })
+        },
+
+        .createNomogram = function(fit, dd) {
+            if (is.null(fit)) return(NULL)
+
+            # Create nomogram
+            nom <- try({
+                rms::nomogram(fit,
+                              fun = stats::plogis,  # Convert from log odds to probability
+                              funlabel = "Predicted Probability"
+                )
+            })
+
+            if (!inherits(nom, "try-error")) {
+                private$.nom_object <- nom
+
+                # Create HTML content for display
+                html_content <- private$.createNomogramDisplay(nom)
+                self$results$nomogram$setContent(html_content)
+            }
+
+            # Save model summary and nomogram info for debugging
+            self$results$mydataview_nomogram$setContent(
+                list(
+                    model_summary = summary(fit),
+                    nomogram = if(!inherits(nom, "try-error")) nom else NULL,
+                    error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL
+                )
+            )
+        },
+
+        .createNomogramDisplay = function(nom) {
+            # Generate HTML display of nomogram points and predictions
+            if (is.null(nom)) return("")
+
+            # Capture the text output of the nomogram
+            nom_text <- capture.output(print(nom))
+
+            # Create HTML content with styling
+            html_content <- '
+            <div style="font-family: monospace; white-space: pre-wrap;">
+            <h3>Nomogram Scoring Guide</h3>
+            <p>To use this nomogram:</p>
+            <ol>
+                <li>For each variable, find the patient\'s value and read the corresponding points</li>
+                <li>Sum all points to get total points</li>
+                <li>Find the total points on the probability scale to get the predicted probability</li>
+            </ol>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+            '
+
+            # Add nomogram text
+            html_content <- paste0(
+                html_content,
+                paste(nom_text, collapse="<br>"),
+                '</div></div>'
+            )
+
+            return(html_content)
         }
 
         ,
-                .plot = function(image, ggtheme, theme, ...) {
+        # Plotting nomogram
+        .plot_nomogram = function(image, ggtheme, theme, ...) {
+            if(is.null(private$.nom_object)) {
+                return(FALSE)
+            }
+
+            par(mar = c(4, 4, 2, 2))
+            plot(private$.nom_object)
+            return(TRUE)
+        }
+
+
+
+
+
+
+
+
+        # plot ----
+        ,
+        .plot = function(image, ggtheme, theme, ...) {
           # -- the plot function ----
                     # plotData <- image$state
                     if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
                     if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
-            # Check if outcome variable is suitable or stop ----
+            # Check if outcome variable is suitable or stop
             # myoutcome2 <- self$options$outcome
             # myoutcome2 <- self$data[[myoutcome2]]
             # myoutcome2 <- na.omit(myoutcome2)
@@ -377,7 +557,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 #         ,
 #
-#         .plot2 = function(image, ggtheme, theme, ...) {  # <-- the plot function ----
+#         .plot2 = function(image, ggtheme, theme, ...) {
 #
 #             # plotData <- image$state
 #
@@ -387,7 +567,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 #             if (is.null(self$options$explanatory) || is.null(self$options$outcome))
 #                 return()
 #
-#             # Check if outcome variable is suitable or stop ----
+#             # Check if outcome variable is suitable or stop
 #             myoutcome2 <- self$options$outcome
 #             myoutcome2 <- self$data[[myoutcome2]]
 #             myoutcome2 <- na.omit(myoutcome2)

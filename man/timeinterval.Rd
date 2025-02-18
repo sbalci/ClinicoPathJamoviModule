@@ -2,37 +2,44 @@
 % Please edit documentation in R/timeinterval.h.R
 \name{timeinterval}
 \alias{timeinterval}
-\title{Time Interval}
+\title{Time Interval Calculator}
 \usage{
-timeinterval(data, explanatory, overalltime, outcome, outcomeLevel)
+timeinterval(
+  data,
+  dx_date,
+  fu_date,
+  time_format = "ymd",
+  output_unit = "months",
+  use_landmark = FALSE,
+  landmark_time = 3,
+  add_times = TRUE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{explanatory}{.}
+\item{dx_date}{Column containing start dates}
 
-\item{overalltime}{.}
+\item{fu_date}{Column containing end dates}
 
-\item{outcome}{.}
+\item{time_format}{.}
 
-\item{outcomeLevel}{.}
+\item{output_unit}{.}
+
+\item{use_landmark}{.}
+
+\item{landmark_time}{.}
+
+\item{add_times}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text1table} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text1html} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
-
-Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-
-\code{results$medianTable$asDF}
-
-\code{as.data.frame(results$medianTable)}
 }
 \description{
-Time Interval
+Time Interval Calculator
 }

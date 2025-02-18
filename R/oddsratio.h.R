@@ -7,7 +7,8 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             explanatory = NULL,
-            outcome = NULL, ...) {
+            outcome = NULL,
+            showNomogram = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -32,16 +33,23 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..showNomogram <- jmvcore::OptionBool$new(
+                "showNomogram",
+                showNomogram,
+                default=FALSE)
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..showNomogram)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
-        outcome = function() private$..outcome$value),
+        outcome = function() private$..outcome$value,
+        showNomogram = function() private$..showNomogram$value),
     private = list(
         ..explanatory = NA,
-        ..outcome = NA)
+        ..outcome = NA,
+        ..showNomogram = NA)
 )
 
 oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -51,7 +59,10 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        nomogram = function() private$.items[["nomogram"]],
+        mydataview_nomogram = function() private$.items[["mydataview_nomogram"]],
+        plot_nomogram = function() private$.items[["plot_nomogram"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -61,6 +72,9 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Odds Ratio Table and Plot",
                 refs=list(
                     "finalfit",
+                    "rms",
+                    "Hmisc",
+                    "survival",
                     "survivaltutorial",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
@@ -91,7 +105,26 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "explanatory",
-                    "outcome")))}))
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogram",
+                title="Nomogram",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview_nomogram",
+                title="Model Details",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_nomogram",
+                title="Nomogram",
+                width=800,
+                height=600,
+                requiresData=TRUE,
+                renderFun=".plot_nomogram",
+                visible="(showNomogram)"))}))
 
 oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "oddsratioBase",
@@ -125,19 +158,26 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.
+#' @param showNomogram Display an interactive nomogram for converting pre-test
+#'   to post-test  probabilities using likelihood ratios calculated from the
+#'   data.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 oddsratio <- function(
     data,
     explanatory,
-    outcome) {
+    outcome,
+    showNomogram = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("oddsratio requires jmvcore to be installed (restart may be required)")
@@ -154,7 +194,8 @@ oddsratio <- function(
 
     options <- oddsratioOptions$new(
         explanatory = explanatory,
-        outcome = outcome)
+        outcome = outcome,
+        showNomogram = showNomogram)
 
     analysis <- oddsratioClass$new(
         options = options,

@@ -9,21 +9,29 @@ venn(data, var1, var1true, var2, var2true, var3, var3true, var4, var4true)
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{var1}{.}
+\item{var1}{a string naming the variable from \code{data} that contains the
+the first variable used for the report}
 
-\item{var1true}{.}
+\item{var1true}{a string naming the level from \code{var1} that contains
+the the true level}
 
-\item{var2}{.}
+\item{var2}{a string naming the variable from \code{data} that contains the
+the second variable used for the report}
 
-\item{var2true}{.}
+\item{var2true}{a string naming the level from \code{var2} that contains
+the the true level}
 
-\item{var3}{.}
+\item{var3}{a string naming the variable from \code{data} that contains the
+the third variable used for the report}
 
-\item{var3true}{.}
+\item{var3true}{a string naming the level from \code{var3} that contains
+the the true level}
 
-\item{var4}{.}
+\item{var4}{a string naming the variable from \code{data} that contains the
+the fourth variable used for the report}
 
-\item{var4true}{.}
+\item{var4true}{a string naming the level from \code{var4} that contains
+the the true level}
 }
 \value{
 A results object containing:
