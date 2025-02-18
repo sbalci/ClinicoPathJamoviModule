@@ -1,0 +1,14 @@
+---
+name: jjstreamgraph
+title: StreamGraphs
+jrs: '1.1'
+
+items:
+
+    - name: StreamGraph
+      title: StreamGraph
+      type: Html
+
+refs:
+    - streamgraph
+...

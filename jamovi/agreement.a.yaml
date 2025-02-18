@@ -67,5 +67,38 @@ options:
           R: >
             Boolean selection whether to use exact kappa. Effects only more than 3 observers. Default is 'false'.
 
+    - name: kripp
+      title: "Krippendorff's Alpha"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to calculate Krippendorff's alpha. Default is 'false'.
+
+    - name: krippMethod
+      title: "Data Type for Krippendorff's Alpha" 
+      type: List
+      options:
+        - title: Nominal
+          name: nominal
+        - title: Ordinal
+          name: ordinal
+        - title: Interval
+          name: interval
+        - title: Ratio
+          name: ratio
+      default: nominal
+      description:
+          R: >
+            Specifies the measurement level for Krippendorff's alpha calculation.
+
+    - name: bootstrap
+      title: "Bootstrap Confidence Intervals"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for Krippendorff's alpha.
+
 
 ...

@@ -22,3 +22,10 @@ children:
             maxItemCount: 1
             isTarget: true
             fitToGrid: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showNomogram
+        label: Show diagnostic nomogram
+        # enable: ()

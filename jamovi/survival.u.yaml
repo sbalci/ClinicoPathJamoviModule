@@ -221,6 +221,8 @@ children:
                 name: censored
               - type: CheckBox
                 name: pplot
+              - type: ComboBox
+                name: medianline
   - type: CollapseBox
     label: Survival Tables
     collapsed: true

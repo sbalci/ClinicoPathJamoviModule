@@ -1,0 +1,115 @@
+---
+name: jjstreamgraph
+title: StreamGraphs
+menuGroup: JJStatsPlot
+menuSubgroup: 'Time Series Visualization'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        'Create interactive StreamGraphs using R streamgraph package.'
+    R:
+        dontrun: true
+        usage: |
+            # Example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: timeVar
+      title: Time Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Variable representing time points (x-axis)
+
+    - name: valueVar
+      title: Value Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Variable containing values to be plotted (y-axis)
+
+    - name: groupVar
+      title: Grouping Variable
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Categorical variable for grouping data into streams
+
+    - name: offset
+      title: Offset Type
+      type: List
+      options:
+        - title: Silhouette
+          name: silhouette
+        - title: Zero
+          name: zero
+        - title: Expand (Percentage)
+          name: expand
+      default: silhouette
+      description:
+          R: >
+            Type of offset to use for the streamgraph
+
+    - name: interpolate
+      title: Interpolation
+      type: List
+      options:
+        - title: Smooth
+          name: cardinal
+        - title: Linear
+          name: linear
+        - title: Step
+          name: step
+      default: cardinal
+      description:
+          R: >
+            Type of interpolation between points
+
+    - name: palette
+      title: Color Palette
+      type: List
+      options:
+        - name: Blues
+          title: Blues
+        - name: Greens
+          title: Greens
+        - name: Reds
+          title: Reds
+        - name: Pastel1
+          title: Pastel
+        - name: Set1
+          title: Colorful
+      default: Blues
+      description:
+          R: >
+            ColorBrewer palette to use for streams
+
+    - name: width
+      title: Width
+      type: String
+      default: "800px"
+      description:
+          R: >
+            Width of the plot
+
+    - name: height
+      title: Height
+      type: String
+      default: "500px"
+      description:
+          R: >
+            Height of the plot
+...

@@ -1,0 +1,104 @@
+---
+name:  jjwafflestats
+title: Waffle Charts
+menuGroup: JJStatsPlot
+menuSubgroup: 'Distribution'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        'Creates waffle charts to visualize distributions and proportions'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: counts
+      title: Counts
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            The numeric values to be represented in the waffle chart
+
+    - name: groups
+      title: Groups
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            The grouping variable for the waffle squares
+
+    - name: facet
+      title: Facet By (Optional)
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional variable to create faceted waffle charts
+
+    - name: rows
+      title: Number of Rows
+      type: Integer
+      default: 5
+      min: 1
+      description:
+          R: >
+            Number of rows in the waffle chart
+
+    - name: flip
+      title: Flip Chart
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to flip the orientation of the waffle chart
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default Colors
+          name: default
+        - title: Colorblind Friendly
+          name: colorblind
+        - title: Pastel Colors
+          name: pastel
+        - title: Dark Colors
+          name: dark
+      default: default
+      description:
+          R: >
+            Color scheme for the waffle squares
+
+    - name: show_legend
+      title: Show Legend
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display the legend
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom title for the plot
+
+    - name: legendtitle
+      title: Legend Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom title for the legend
+...

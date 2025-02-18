@@ -145,9 +145,9 @@ options:
     #       R: >
     #         Boolean selection whether to compare multiple tests. Default is 'false'.
 
-    # - name: additional_tests
-    #   title: 'Additional Tests'
-    #   type: Variables
+    # - name: additional_test
+    #   title: 'Additional Test'
+    #   type: Variable
     #   suggested: [ nominal ]
     #   permitted: [ factor ]
     #   description:
@@ -155,6 +155,18 @@ options:
     #         Additional tests to compare.
     #       R: >
     #         Additional tests to compare.
+
+
+    # - name: additionaltestPositive
+    #   title: Positive Level
+    #   type: Level
+    #   variable: (additional_test)
+    #   description:
+    #       ui: >
+    #         The positive level of the new test variable.
+    #       R: >
+    #         The positive level of the new test variable.
+
 
 
 ...

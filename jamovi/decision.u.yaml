@@ -41,20 +41,17 @@ children:
           - type: CheckBox
             name: ci
             enable: (!pp)
-
   - type: Label
     label: Prior Probability
     children:
-          - type: CheckBox
-            name: pp
-            enable: (!ci)
-          - type: TextBox
-            name: pprob
-            label: ''
-            format: number
-            enable: (!ci && pp)
-
-
+      - type: CheckBox
+        name: pp
+        enable: (!ci)
+      - type: TextBox
+        name: pprob
+        label: ''
+        format: number
+        enable: (!ci && pp)
   - type: Label
     label: Plots
     children:
@@ -62,17 +59,23 @@ children:
         name: fagan
       # - type: CheckBox
       #   name: roc
-
-
   # - type: Label
   #   label: Test Comparison
   #   children:
   #     - type: CheckBox
   #       name: compare_tests
   #       label: Compare Multiple Tests
-  #     - type: VariablesListBox
-  #       name: additional_tests
-  #       label: Additional Tests to Compare
-  #       enable: (compare_tests)
-  #       suggested: [nominal]
-  #       permitted: [factor]
+  # - type: VariableSupplier
+  #   persistentItems: false
+  #   stretchFactor: 1
+  #   children:
+  #     - type: TargetLayoutBox
+  #       label: Additional Test
+  #       children:
+  #         - type: VariablesListBox
+  #           name: additional_test
+  #           maxItemCount: 1
+  #           isTarget: true
+  #         - type: LevelSelector
+  #           name: additionaltestPositive
+  #           enable: (additional_test)

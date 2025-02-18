@@ -6,131 +6,113 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            explanatory = NULL,
-            overalltime = NULL,
-            outcome = NULL,
-            outcomeLevel = NULL, ...) {
+            dx_date = NULL,
+            fu_date = NULL,
+            time_format = "ymd",
+            output_unit = "months",
+            use_landmark = FALSE,
+            landmark_time = 3,
+            add_times = TRUE, ...) {
 
             super$initialize(
-                package="ClinicoPath",
+                package="jsurvival",
                 name="timeinterval",
                 requiresData=TRUE,
                 ...)
 
-            private$..explanatory <- jmvcore::OptionVariables$new(
-                "explanatory",
-                explanatory,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..overalltime <- jmvcore::OptionVariable$new(
-                "overalltime",
-                overalltime,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
-            private$..outcome <- jmvcore::OptionVariable$new(
-                "outcome",
-                outcome)
-            private$..outcomeLevel <- jmvcore::OptionLevel$new(
-                "outcomeLevel",
-                outcomeLevel,
-                variable="(outcome)")
+            private$..dx_date <- jmvcore::OptionVariable$new(
+                "dx_date",
+                dx_date)
+            private$..fu_date <- jmvcore::OptionVariable$new(
+                "fu_date",
+                fu_date)
+            private$..time_format <- jmvcore::OptionList$new(
+                "time_format",
+                time_format,
+                options=list(
+                    "ymdhms",
+                    "ymd",
+                    "dmy",
+                    "mdy",
+                    "ydm",
+                    "myd",
+                    "dym"),
+                default="ymd")
+            private$..output_unit <- jmvcore::OptionList$new(
+                "output_unit",
+                output_unit,
+                options=list(
+                    "days",
+                    "weeks",
+                    "months",
+                    "years"),
+                default="months")
+            private$..use_landmark <- jmvcore::OptionBool$new(
+                "use_landmark",
+                use_landmark,
+                default=FALSE)
+            private$..landmark_time <- jmvcore::OptionNumber$new(
+                "landmark_time",
+                landmark_time,
+                default=3)
+            private$..add_times <- jmvcore::OptionBool$new(
+                "add_times",
+                add_times,
+                default=TRUE)
 
-            self$.addOption(private$..explanatory)
-            self$.addOption(private$..overalltime)
-            self$.addOption(private$..outcome)
-            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..dx_date)
+            self$.addOption(private$..fu_date)
+            self$.addOption(private$..time_format)
+            self$.addOption(private$..output_unit)
+            self$.addOption(private$..use_landmark)
+            self$.addOption(private$..landmark_time)
+            self$.addOption(private$..add_times)
         }),
     active = list(
-        explanatory = function() private$..explanatory$value,
-        overalltime = function() private$..overalltime$value,
-        outcome = function() private$..outcome$value,
-        outcomeLevel = function() private$..outcomeLevel$value),
+        dx_date = function() private$..dx_date$value,
+        fu_date = function() private$..fu_date$value,
+        time_format = function() private$..time_format$value,
+        output_unit = function() private$..output_unit$value,
+        use_landmark = function() private$..use_landmark$value,
+        landmark_time = function() private$..landmark_time$value,
+        add_times = function() private$..add_times$value),
     private = list(
-        ..explanatory = NA,
-        ..overalltime = NA,
-        ..outcome = NA,
-        ..outcomeLevel = NA)
+        ..dx_date = NA,
+        ..fu_date = NA,
+        ..time_format = NA,
+        ..output_unit = NA,
+        ..use_landmark = NA,
+        ..landmark_time = NA,
+        ..add_times = NA)
 )
 
 timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timeintervalResults",
     inherit = jmvcore::Group,
     active = list(
-        text1 = function() private$.items[["text1"]],
-        text1table = function() private$.items[["text1table"]],
-        text1html = function() private$.items[["text1html"]],
-        text2 = function() private$.items[["text2"]],
-        medianTable = function() private$.items[["medianTable"]]),
+        todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        calculated_time = function() private$.items[["calculated_time"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Time Interval",
-                refs=list(
-                    "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+                title="Time Interval Calculator")
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text1",
-                title="denemeler"))
-            self$add(jmvcore::Preformatted$new(
+                name="todo",
+                title=""))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text1table",
-                title="fit"))
-            self$add(jmvcore::Preformatted$new(
+                name="summary",
+                title="Summary Statistics"))
+            self$add(jmvcore::Output$new(
                 options=options,
-                name="text1html",
-                title="fit"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Median Survival Summary and Table"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="medianTable",
-                title="Median Survival Table",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="factor", 
-                        `title`="Levels", 
-                        `type`="text"),
-                    list(
-                        `name`="records", 
-                        `title`="Records", 
-                        `type`="number"),
-                    list(
-                        `name`="events", 
-                        `title`="Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="rmean", 
-                        `title`="rmean", 
-                        `type`="number"),
-                    list(
-                        `name`="se_rmean", 
-                        `title`="se_rmean", 
-                        `type`="number"),
-                    list(
-                        `name`="median", 
-                        `title`="Median", 
-                        `type`="number"),
-                    list(
-                        `name`="x0_95lcl", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number"),
-                    list(
-                        `name`="x0_95ucl", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number"))))}))
+                name="calculated_time",
+                title="Calculated Time Intervals",
+                measureType="continuous"))}))
 
 timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timeintervalBase",
@@ -138,7 +120,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "ClinicoPath",
+                package = "jsurvival",
                 name = "timeinterval",
                 version = c(1,0,0),
                 options = options,
@@ -153,57 +135,55 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Time Interval
+#' Time Interval Calculator
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param explanatory .
-#' @param overalltime .
-#' @param outcome .
-#' @param outcomeLevel .
+#' @param dx_date Column containing start dates
+#' @param fu_date Column containing end dates
+#' @param time_format .
+#' @param output_unit .
+#' @param use_landmark .
+#' @param landmark_time .
+#' @param add_times .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1table} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text1html} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$medianTable$asDF}
-#'
-#' \code{as.data.frame(results$medianTable)}
 #'
 #' @export
 timeinterval <- function(
     data,
-    explanatory,
-    overalltime,
-    outcome,
-    outcomeLevel) {
+    dx_date,
+    fu_date,
+    time_format = "ymd",
+    output_unit = "months",
+    use_landmark = FALSE,
+    landmark_time = 3,
+    add_times = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeinterval requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
-    if ( ! missing(overalltime)) overalltime <- jmvcore::resolveQuo(jmvcore::enquo(overalltime))
-    if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
+    if ( ! missing(dx_date)) dx_date <- jmvcore::resolveQuo(jmvcore::enquo(dx_date))
+    if ( ! missing(fu_date)) fu_date <- jmvcore::resolveQuo(jmvcore::enquo(fu_date))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(explanatory), explanatory, NULL),
-            `if`( ! missing(overalltime), overalltime, NULL),
-            `if`( ! missing(outcome), outcome, NULL))
+            `if`( ! missing(dx_date), dx_date, NULL),
+            `if`( ! missing(fu_date), fu_date, NULL))
 
-    for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- timeintervalOptions$new(
-        explanatory = explanatory,
-        overalltime = overalltime,
-        outcome = outcome,
-        outcomeLevel = outcomeLevel)
+        dx_date = dx_date,
+        fu_date = fu_date,
+        time_format = time_format,
+        output_unit = output_unit,
+        use_landmark = use_landmark,
+        landmark_time = landmark_time,
+        add_times = add_times)
 
     analysis <- timeintervalClass$new(
         options = options,

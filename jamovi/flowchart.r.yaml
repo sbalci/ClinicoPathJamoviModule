@@ -1,0 +1,33 @@
+---
+name: flowchart
+title: Study Flowchart
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: diagram
+      title: 'Flowchart Diagram'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - nodes
+        - counts
+        - direction
+        - style
+        - showCounts
+
+    - name: diagramCode
+      title: 'Diagram Code'
+      type: Preformatted
+      visible: false
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -54,8 +54,32 @@ items:
     #       - explanatory
     #       - outcome
 
+
+    - name: nomogram
+      title: "Nomogram"
+      type: Html
+      visible: (showNomogram)
+
+    - name: mydataview_nomogram
+      title: "Model Details"
+      type: Preformatted
+      visible: (showNomogram)
+
+    - name: plot_nomogram
+      title: Nomogram
+      type: Image
+      width: 800
+      height: 600
+      requiresData: true
+      renderFun: .plot_nomogram
+      visible: (showNomogram)
+
+
 refs:
     - finalfit
+    - rms
+    - Hmisc
+    - survival
     - survivaltutorial
     - ClinicoPathJamoviModule
 

@@ -1,0 +1,117 @@
+---
+name: jjarcdiagram
+title: Arc Diagram
+menuGroup: JJStatsPlot
+menuSubgroup: Network
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        'Creates arc diagrams for network visualization using the arcdiagram package.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: source
+      title: Source Node
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: target
+      title: Target Node
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: weight
+      title: Edge Weight (Optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: group
+      title: Node Groups (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: showNodes
+      title: Show Nodes
+      type: Bool
+      default: true
+
+    - name: nodeSize
+      title: Node Size
+      type: List
+      options:
+        - title: Fixed
+          name: fixed
+        - title: By Degree
+          name: degree
+      default: fixed
+
+    - name: nodeSizeValue
+      title: Fixed Node Size
+      type: Number
+      default: 2
+      min: 0.1
+      max: 10
+
+    - name: sortNodes
+      title: Sort Nodes
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: By Name
+          name: name
+        - title: By Group
+          name: group
+        - title: By Degree
+          name: degree
+      default: none
+
+    - name: sortDecreasing
+      title: Sort Decreasing
+      type: Bool
+      default: false
+
+    - name: horizontal
+      title: Horizontal Layout
+      type: Bool
+      default: true
+
+    - name: arcWidth
+      title: Arc Width
+      type: List
+      options:
+        - title: Fixed
+          name: fixed
+        - title: By Weight
+          name: weight
+      default: fixed
+
+    - name: arcWidthValue
+      title: Fixed Arc Width
+      type: Number
+      default: 1
+      min: 0.1
+      max: 5
+
+    - name: arcTransparency
+      title: Arc Transparency
+      type: Number
+      default: 0.5
+      min: 0
+      max: 1
+...

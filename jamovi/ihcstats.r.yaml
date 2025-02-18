@@ -1,0 +1,62 @@
+---
+name: ihcstats
+title: IHC Expression Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Getting Started
+      type: Html
+
+    - name: hscoreTable
+      title: H-Score Analysis
+      type: Table
+      visible: (computeHScore)
+      columns:
+        - name: marker
+          title: "Marker"
+          type: text
+        - name: hscore
+          title: "H-Score"
+          type: number
+          format: zto
+        - name: dist
+          title: "Score Distribution"
+          type: text
+
+    - name: clusterSummary
+      title: Clustering Results
+      type: Table
+      columns:
+        - name: cluster
+          title: "Cluster"
+          type: integer
+        - name: size
+          title: "Size"
+          type: integer
+        - name: pattern
+          title: "Expression Pattern"
+          type: text
+
+    - name: clusterPlot
+      title: Expression Pattern Clustering
+      type: Image
+      renderFun: .clusterPlot
+      width: 600
+      height: 400
+
+    - name: heatmapPlot
+      title: Expression Heatmap
+      type: Image
+      renderFun: .heatmapPlot
+      width: 600
+      height: 400
+
+    - name: scoreDist
+      title: Score Distribution
+      type: Image
+      visible: (showScoreDist)
+      renderFun: .scoreDistPlot
+      width: 600
+      height: 400
+...

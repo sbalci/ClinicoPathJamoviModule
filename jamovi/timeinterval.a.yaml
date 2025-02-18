@@ -1,15 +1,14 @@
 ---
-name:  timeinterval
-title: Time Interval
+name: timeinterval
+title: Time Interval Calculator
 menuGroup: Survival
-menuSubgroup: Drafts
-menuSubtitle: Time Interval
+menuSubgroup: Time Analysis
+menuSubtitle: Calculate time intervals from dates or values
 version: '1.0.0'
 jas: '1.2'
 
 options:
-
-
+    # Data input options
     - name: data
       type: Data
       description:
@@ -17,27 +16,74 @@ options:
             The data as a data frame.
 
 
-    - name: explanatory
-      title: Explanatory Variable
-      type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+    # Time input options
 
-    - name: overalltime
-      title: 'Time (in months)'
+    - name: dx_date
+      title: Start Date
       type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
+      description:
+          R: >
+            Column containing start dates
 
-    - name: outcome
-      title: 'Outcome'
+    - name: fu_date
+      title: End Date
       type: Variable
+      description:
+          R: >
+            Column containing end dates
 
-    - name: outcomeLevel
-      title: Event Level
-      type: Level
-      variable: (outcome)
+    # Time format options
+    - name: time_format
+      title: Date Format
+      type: List
+      options:
+        - name: ymdhms
+          title: YYYY-MM-DD HH:MM:SS
+        - name: ymd
+          title: YYYY-MM-DD
+        - name: dmy
+          title: DD-MM-YYYY
+        - name: mdy
+          title: MM-DD-YYYY
+        - name: ydm
+          title: YY-DD-MM
+        - name: myd
+          title: MM-YY-DD
+        - name: dym
+          title: DD-YY-MM
+      default: ymd
 
+    - name: output_unit
+      title: Output Time Unit
+      type: List
+      options:
+        - name: days
+          title: Days
+        - name: weeks
+          title: Weeks
+        - name: months
+          title: Months
+        - name: years
+          title: Years
+      default: months
+
+    # Additional options
+
+
+    - name: use_landmark
+      title: Use Landmark Time
+      type: Bool
+      default: false
+
+    - name: landmark_time
+      title: Landmark Time
+      type: Number
+      default: 3
+
+    - name: add_times
+      title: Add calculated times to data
+      type: Bool
+      default: true
 
 
 ...

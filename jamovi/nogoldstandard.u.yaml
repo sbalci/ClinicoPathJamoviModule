@@ -1,0 +1,88 @@
+title: Analysis Without Gold Standard
+name: nogoldstandard
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Test 1
+        children:
+          - type: VariablesListBox
+            name: test1
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: test1Positive
+            enable: (test1)
+      - type: TargetLayoutBox
+        label: Test 2
+        children:
+          - type: VariablesListBox
+            name: test2
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: test2Positive
+            enable: (test2)
+      - type: TargetLayoutBox
+        label: Test 3 (Optional)
+        children:
+          - type: VariablesListBox
+            name: test3
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: test3Positive
+            enable: (test3)
+      - type: TargetLayoutBox
+        label: Test 4 (Optional)
+        children:
+          - type: VariablesListBox
+            name: test4
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: test4Positive
+            enable: (test4)
+      - type: TargetLayoutBox
+        label: Test 5 (Optional)
+        children:
+          - type: VariablesListBox
+            name: test5
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: test5Positive
+            enable: (test5)
+            
+  - type: Label
+    label: Analysis Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: method
+
+  - type: Label
+    label: Bootstrap Options  
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap
+          - type: TextBox
+            name: nboot
+            label: Samples
+            format: number
+            enable: (bootstrap)
+          - type: TextBox
+            name: alpha
+            label: Alpha
+            format: number
+            enable: (bootstrap)

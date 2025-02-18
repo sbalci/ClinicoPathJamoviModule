@@ -124,6 +124,36 @@ items:
     #       - exct
 
 
+    - name: krippTable
+      title: "Krippendorff's Alpha Results"
+      type: Table
+      visible: (kripp)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'  
+          type: integer
+        - name: alpha
+          title: 'Alpha'
+          type: number
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          visible: (bootstrap)
+        - name: ci_upper  
+          title: 'CI Upper'
+          type: number
+          visible: (bootstrap)
+      clearWith:
+          - vars
+          - krippMethod
+          - bootstrap
 
 
 

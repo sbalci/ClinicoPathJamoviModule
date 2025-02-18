@@ -34,3 +34,18 @@ children:
             name: exct
           - type: ComboBox
             name: wght
+
+  - type: Label
+    label: "Krippendorff's Alpha"
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: kripp
+          - type: ComboBox
+            name: krippMethod
+            enable: (kripp)
+          - type: CheckBox
+            name: bootstrap
+            enable: (kripp)

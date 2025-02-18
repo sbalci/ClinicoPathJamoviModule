@@ -1,0 +1,29 @@
+---
+name: jjarcdiagram
+title: Arc Diagram
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+
+    - name: plot
+      title: Arc Diagram
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - arcdiagram
+    - igraph
+    - dplyr
+
+...

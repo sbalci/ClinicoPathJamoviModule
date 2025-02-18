@@ -1,0 +1,71 @@
+---
+name: alluvialSurvival
+title: Treatment Pathway Alluvial Plot
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+
+
+    - name: mydataview
+      title: mydataview
+      type: Preformatted
+
+
+
+    - name: plot
+      title: Treatment Pathway Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: summaryTable
+      title: Summary Statistics
+      type: Table
+      rows: 0  # Allow dynamic number of rows
+      clearWith:
+        - timeVar
+        - stageVar
+        - treatmentVar
+      columns:
+        - name: timePoint
+          title: Time Point
+          type: number
+        - name: totalPatients
+          title: Total Patients
+          type: integer
+        - name: stageDistribution
+          title: By Stage
+          type: text
+        - name: treatmentDistribution
+          title: By Treatment
+          type: text
+
+    - name: survivalStats
+      title: Survival Statistics
+      type: Table
+      visible: (survivalVar)
+      rows: 0
+      clearWith:
+        - survivalVar
+      columns:
+        - name: stage
+          title: Disease Stage
+          type: text
+        - name: treatment
+          title: Treatment
+          type: text
+        - name: patients
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: survivalRate
+          title: Survival Rate
+          type: number
+          format: pc
+...

@@ -1,0 +1,135 @@
+---
+name: jjtreemap
+title: Treemap
+menuGroup: JJStatsPlot
+menuSubgroup: Categorical
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        'Creates treemap visualizations for categorical data'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: group
+      title: Group Variable
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+
+    - name: size
+      title: Size Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+
+    - name: color
+      title: Color Variable (Optional)
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+
+    - name: aspectRatio
+      title: Aspect Ratio
+      type: Number
+      default: 1.67
+
+    - name: borderWidth
+      title: Border Width
+      type: Number
+      default: 0.7
+
+    # Label Options
+    - name: labelLevel1Size
+      title: Level 1 Label Size
+      type: Number
+      default: 15
+
+    - name: labelLevel2Size
+      title: Level 2 Label Size
+      type: Number
+      default: 12
+
+    - name: labelLevel1Color
+      title: Level 1 Label Color
+      type: String
+      default: 'white'
+
+    - name: labelLevel2Color
+      title: Level 2 Label Color
+      type: String
+      default: 'black'
+
+    - name: labelFontFace
+      title: Label Font Style
+      type: List
+      options:
+        - name: normal
+          title: Normal
+        - name: bold
+          title: Bold
+        - name: italic
+          title: Italic
+        - name: bolditalic
+          title: Bold-Italic
+      default: normal
+
+    - name: labelBackground
+      title: Label Background
+      type: String
+      default: 'transparent'
+
+    - name: labelAlignH
+      title: Label Horizontal Alignment
+      type: List
+      options:
+        - name: left
+          title: Left
+        - name: center
+          title: Center
+        - name: right
+          title: Right
+      default: center
+
+    - name: labelAlignV
+      title: Label Vertical Alignment
+      type: List
+      options:
+        - name: top
+          title: Top
+        - name: center
+          title: Center
+        - name: bottom
+          title: Bottom
+      default: center
+
+    - name: labelOverlap
+      title: Label Overlap Tolerance
+      type: Number
+      default: 0.5
+
+    - name: title
+      title: Plot Title
+      type: String
+      default: ''
+
+    - name: subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+
+    - name: caption
+      title: Plot Caption
+      type: String
+      default: ''
+...

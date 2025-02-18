@@ -48,4 +48,18 @@ options:
     #   type: Level
     #   variable: (outcome)
 
+
+# Nomogram ----
+
+    - name: showNomogram
+      title: Show Diagnostic Nomogram
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display an interactive nomogram for converting pre-test to post-test 
+            probabilities using likelihood ratios calculated from the data.
+
+
+
 ...

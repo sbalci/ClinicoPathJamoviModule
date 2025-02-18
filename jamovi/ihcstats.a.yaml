@@ -1,0 +1,72 @@
+---
+name: ihcstats
+title: IHC Expression Analysis
+menuGroup: Pathology
+menuSubgroup: IHC Analysis
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: markers
+      title: IHC Markers
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            IHC marker variables with categorical expression scores
+
+    - name: computeHScore
+      title: Compute H-Score
+      type: Bool
+      default: false
+
+    - name: clusterMethod
+      title: Clustering Method
+      type: List
+      options:
+        - title: Hierarchical
+          name: hierarchical
+        - title: PAM (Medoids)
+          name: pam
+      default: hierarchical
+
+    - name: distanceMetric
+      title: Distance Metric
+      type: List
+      options:
+        - title: Gower
+          name: gower
+        - title: Jaccard
+          name: jaccard
+      default: gower
+
+    - name: nClusters
+      title: Number of Clusters
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+
+    - name: showDendrogram
+      title: Show Dendrogram
+      type: Bool
+      default: false
+
+    - name: showHeatmap
+      title: Show Expression Heatmap
+      type: Bool
+      default: false
+
+    - name: showScoreDist
+      title: Show Score Distribution
+      type: Bool
+      default: false
+
+...

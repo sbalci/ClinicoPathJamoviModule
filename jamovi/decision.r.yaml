@@ -25,6 +25,9 @@ items:
     #   title: Original Data
     #   type:  Preformatted
 
+    # - name:  text3
+    #   title: Preformatted
+    #   type:  Preformatted
 
 
     # - name:  text2
@@ -67,21 +70,43 @@ items:
           type: number
 
 
-    - name:  nTable2
-      title: nTable2
-      type: Preformatted
+    # - name:  cTable2
+    #   title: 'Recoded Data for Decision Test Statistics 2'
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: newtest
+    #       title: ''
+    #       type: text
+    #     - name: GP
+    #       title: 'Gold Positive'
+    #       type: number
+    #     - name: GN
+    #       title: 'Gold Negative'
+    #       type: number
+    #     - name: Total
+    #       title: 'Total'
+    #       type: number
+
+
+
+
+
+    # - name:  nTable2
+    #   title: nTable2
+    #   type: Preformatted
 
 
 
 
     - name:  nTable
-      title: 'nTable'
+      title: 'n'
       type: Table
       swapRowsColumns: true
       rows:  1
       columns:
         - name: tablename
-          title: 'tablename'
+          title: ''
           type: text
         - name: TotalPop
           title: 'Total'
@@ -116,7 +141,7 @@ items:
       rows:  1
       columns:
         - name: tablename
-          title: 'Ratios'
+          title: ''
           type: text
         - name: Sens
           title: 'Sensitivity'
@@ -162,6 +187,59 @@ items:
           - pp
           - pprob
 
+
+    # - name:  ratioTable2
+    #   title: ''
+    #   type: Table
+    #   swapRowsColumns: true
+    #   rows:  1
+    #   columns:
+    #     - name: tablename
+    #       title: ''
+    #       type: text
+    #     - name: Sens
+    #       title: 'Sensitivity'
+    #       type: number
+    #       format: pc
+    #     - name: Spec
+    #       title: 'Specificity'
+    #       type: number
+    #       format: pc
+    #     - name: AccurT
+    #       title: 'Accuracy'
+    #       type: number
+    #       format: pc
+    #     - name: PrevalenceD
+    #       title: 'Prevalence'
+    #       type: number
+    #       format: pc
+    #     - name: PPV
+    #       title: 'Positive Predictive Value'
+    #       type: number
+    #       format: pc
+    #     - name: NPV
+    #       title: 'Negative Predictive Value'
+    #       type: number
+    #       format: pc
+    #     - name: PostTestProbDisease
+    #       title: 'Post-test Disease Probability'
+    #       type: number
+    #       format: pc
+    #     - name: PostTestProbHealthy
+    #       title: 'Post-test Health Probability'
+    #       type: number
+    #       format: pc
+    #     - name: LRP
+    #       title: Positive Likelihood Ratio
+    #       type: number
+    #       # format: pc
+    #     - name: LRN
+    #       title: Negative Likelihood Ratio
+    #       type: number
+    #       # format: pc
+    #   clearWith:
+    #       - pp
+    #       - pprob
 
 
 
@@ -255,7 +333,7 @@ items:
           - Fagan2
 
 
-    # - name: plot2
+    # - name: plot_roc
     #   title: 'ROC Curve'
     #   type: Image
     #   width: 600
@@ -275,3 +353,4 @@ refs:
 
 
 ...
+

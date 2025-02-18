@@ -20,8 +20,13 @@ items:
           - tint
           - multievent
 
+    # - name:  mydataview
+    #   title: mydataview
+    #   type:  Preformatted
 
-
+    # - name:  mydataview_cox
+    #   title: mydataview_cox
+    #   type:  Preformatted
 
     - name:  text
       title: Multivariable Survival
@@ -206,6 +211,7 @@ items:
           - adjexplanatory
           - pplot
           - censored
+          - medianline
 
 
 
@@ -239,10 +245,29 @@ items:
     #       - censored
 
 
+    - name: risk_score_analysis
+      title: 'Risk Score Analysis'
+      type:  Preformatted
+      visible: (calculateRiskScore)
+      clearWith:
+          - calculateRiskScore
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - contexpl
+          - numRiskGroups
 
-
-
-
+    - name: risk_score_analysis2
+      title: 'Risk Score Analysis'
+      type:  Html
+      visible: (calculateRiskScore)
+      clearWith:
+          - calculateRiskScore
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - contexpl
+          - numRiskGroups
 
     - name: riskScoreTable
       title: Risk Score Summary
@@ -271,6 +296,7 @@ items:
           - outcomeLevel
           - explanatory
           - contexpl
+          - numRiskGroups
 
 
     - name: riskScoreMetrics
@@ -283,6 +309,7 @@ items:
           - outcomeLevel
           - explanatory
           - contexpl
+          - numRiskGroups
 
 
 
@@ -294,10 +321,24 @@ items:
       renderFun: .plotRiskGroups
       requiresData: true
       visible: (plotRiskGroups)
+      clearWith:
+          - calculateRiskScore
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - contexpl
+          - numRiskGroups
 
 
+# Startification
+
+    - name: stratificationExplanation
+      title: Stratification Notes
+      type: Html
+      visible: (use_stratify)
 
 
+# Outputs
 
     - name: calculatedtime
       title: Add Calculated Time to Data
@@ -388,323 +429,365 @@ items:
           - ci95
           - risktable
           - ac_method
-
-    - name: adjustedSummaryTable2
-      title: Adjusted Survival Summary 2
-      type: Preformatted
-      visible: (ac_summary)
-
-
-    - name: adjustedSummaryTable
-      title: Adjusted Survival Summary
-      type: Table
-      visible: (ac_summary)
-      rows: 0
-      columns:
-        - name: Level
-          title: Level
-          type: text
-        - name: Timepoint
-          title: "Time"
-          type: integer
-        - name: Survival
-          title: "Adjusted Survival"
-          type: number
-          format: proportion
-        - name: SE
-          title: "SE"
-          type: number
-        - name: CI_Lower
-          title: "95% CI Lower"
-          type: number
-          format: proportion
-        - name: CI_Upper
-          title: "95% CI Upper"
-          type: number
-          format: proportion
-      clearWith:
-          - ac_summary
-          - ac_timepoints
-          - ac_method
+          - endplot
+          - byplot
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
           - adjexplanatory
-
-    - name: adjustedComparison
-      title: Statistical Comparison of Adjusted Curves
-      type: Preformatted
-      visible: (ac_compare)
-      clearWith:
-          - ac_compare
-          - ac_method
-          - adjexplanatory
-
-    - name: adjustedComparison_survdiff_res
-      title: Statistical Comparison of Adjusted Curves
-      type: Preformatted
-      visible: (ac_compare)
-      clearWith:
-          - ac_compare
-          - ac_method
-          - adjexplanatory
-
-    - name: adjustedSurvTable2
-      title: Adjusted Survival Table 2
-      type: Preformatted
+          - pplot
+          - censored
+          - medianline
 
 
-    - name: adjustedSurvTable
-      title: Adjusted Survival Table
-      type: Table
-      rows: 0
-      columns:
-        - name: strata
-          title: "Level"
-          type: text
-        - name: time
-          title: "Time"
-          type: integer
-        - name: n.risk
-          title: "Number at Risk"
-          type: integer
-        - name: n.event
-          title: "Events"
-          type: integer
-        - name: surv
-          title: "Adjusted Survival"
-          type: text
-        - name: lower
-          title: "95% CI Lower"
-          type: text
-        - name: upper
-          title: "95% CI Upper"
-          type: text
-      clearWith:
-          - ac
-          - ac_timepoints
-          - adjexplanatory
+# Nomogram
 
-    - name: adjustedSurvTableSummary
-      title: Adjusted Survival Summary
-      type: Html
-      clearWith:
-          - ac
-          - ac_timepoints
-          - adjexplanatory
+    - name:  mydataview_nomogram2
+      title: mydataview_nomogram2
+      type:  Preformatted
 
-    - name: adjustedPairwiseTable
-      title: Pairwise Comparisons of Adjusted Survival
-      type: Table
-      rows: 0
-      columns:
-        - name: rowname
-          title: "Group 1"
-          type: text
-        - name: name
-          title: "Group 2"
-          type: text
-        - name: value
-          title: "Adjusted p-value"
-          type: number
-          format: zto,pvalue
-      visible: (ac_compare)
-      clearWith:
-          - ac
-          - ac_compare
-          - adjexplanatory
-          - padjustmethod
-      refs:
-          - padjust
+    - name:  mydataview_nomogram
+      title: mydataview_nomogram
+      type:  Preformatted
 
-    - name: adjustedPairwiseSummary
-      title: Pairwise Comparison Summary
-      type: Html
-      visible: (ac_compare)
-      clearWith:
-          - ac
-          - ac_compare
-          - adjexplanatory
-          - padjustmethod
 
-    - name: adjustedMedianTable
-      title: Adjusted Median Survival
-      type: Table
-      rows: 0
-      columns:
-        - name: factor
-          title: "Level"
-          type: text
-        - name: records
-          title: "Records"
-          type: integer
-        - name: events
-          title: "Events"
-          type: integer
-        - name: median
-          title: "Median"
-          type: number
-        - name: x0_95lcl
-          title: "Lower"
-          superTitle: "95% CI"
-          type: number
-        - name: x0_95ucl
-          title: "Upper"
-          superTitle: "95% CI"
-          type: number
-      clearWith:
-          - ac
-          - adjexplanatory
-
-    - name: adjustedMedianSummary
-      title: Adjusted Median Survival Summary
-      type: Html
-      clearWith:
-          - ac
-          - adjexplanatory
-
-    - name: adjustedCoxTable
-      title: Adjusted Cox Model Results
-      type: Table
-      rows: 0
-      columns:
-        - name: Variable
-          title: "Variable"
-          type: text
-        - name: HR
-          title: "HR (95% CI)"
-          type: text
-        - name: Pvalue
-          title: "P-value"
-          type: number
-          format: zto,pvalue
-      clearWith:
-          - ac
-          - adjexplanatory
-
-    - name: adjustedCoxText
-      title: Adjusted Cox Model Metrics
-      type: Html
-      clearWith:
-          - ac
-          - adjexplanatory
-
-    - name: adjustedCoxSummary
-      title: Adjusted Cox Model Interpretation
-      type: Html
-      clearWith:
-          - ac
-          - adjexplanatory
-
-    - name: adjustedCoxPH
-      title: Proportional Hazards Test
-      type: Html
-      visible: (ph_cox)
-      clearWith:
-          - ac
-          - adjexplanatory
-          - ph_cox
-
-    - name: adjustedCoxPHPlot
-      title: Proportional Hazards Plot
+    - name: plot_nomogram
+      title: Nomogram
       type: Image
-      width: 600
-      height: 450
-      renderFun: .plotAdjustedPH
-      visible: (ph_cox)
-      clearWith:
-          - ac
-          - adjexplanatory
-          - ph_cox
+      width: 800
+      height: 600
+      requiresData: true
+      renderFun: .plot_nomogram
+      visible: (showNomogram)
 
-
-
-    - name: model_comparison
-      title: Model Comparison
+    - name: nomogram_display
+      title: "Nomogram Scoring Guide"
       type: Html
-      visible: (compare_models)
-
-    - name: reduced_model_metrics
-      title: Reduced Model Performance Metrics
-      type: Html
-      visible: (compare_models)
+      visible: (showNomogram)
 
 
+    # - name: adjustedSummaryTable2
+    #   title: Adjusted Survival Summary 2
+    #   type: Preformatted
+    #   visible: (ac_summary)
 
 
-    - name:  text_model_selection
-      title: Multivariable Survival with Model Selection
-      type:  Html
-      refs: finalfit
-      visible: (use_modelSelection)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name: adjustedSummaryTable
+    #   title: Adjusted Survival Summary
+    #   type: Table
+    #   visible: (ac_summary)
+    #   rows: 0
+    #   columns:
+    #     - name: Level
+    #       title: Level
+    #       type: text
+    #     - name: Timepoint
+    #       title: "Time"
+    #       type: integer
+    #     - name: Survival
+    #       title: "Adjusted Survival"
+    #       type: number
+    #       format: proportion
+    #     - name: SE
+    #       title: "SE"
+    #       type: number
+    #     - name: CI_Lower
+    #       title: "95% CI Lower"
+    #       type: number
+    #       format: proportion
+    #     - name: CI_Upper
+    #       title: "95% CI Upper"
+    #       type: number
+    #       format: proportion
+    #   clearWith:
+    #       - ac_summary
+    #       - ac_timepoints
+    #       - ac_method
+    #       - adjexplanatory
+
+    # - name: adjustedComparison
+    #   title: Statistical Comparison of Adjusted Curves
+    #   type: Preformatted
+    #   visible: (ac_compare)
+    #   clearWith:
+    #       - ac_compare
+    #       - ac_method
+    #       - adjexplanatory
+
+    # - name: adjustedComparison_survdiff_res
+    #   title: Statistical Comparison of Adjusted Curves
+    #   type: Preformatted
+    #   visible: (ac_compare)
+    #   clearWith:
+    #       - ac_compare
+    #       - ac_method
+    #       - adjexplanatory
+
+    # - name: adjustedSurvTable2
+    #   title: Adjusted Survival Table 2
+    #   type: Preformatted
 
 
-    - name:  text2_model_selection
-      title: ''
-      type:  Html
-      refs: finalfit
-      visible: (use_modelSelection)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name: adjustedSurvTable
+    #   title: Adjusted Survival Table
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: strata
+    #       title: "Level"
+    #       type: text
+    #     - name: time
+    #       title: "Time"
+    #       type: integer
+    #     - name: n.risk
+    #       title: "Number at Risk"
+    #       type: integer
+    #     - name: n.event
+    #       title: "Events"
+    #       type: integer
+    #     - name: surv
+    #       title: "Adjusted Survival"
+    #       type: text
+    #     - name: lower
+    #       title: "95% CI Lower"
+    #       type: text
+    #     - name: upper
+    #       title: "95% CI Upper"
+    #       type: text
+    #   clearWith:
+    #       - ac
+    #       - ac_timepoints
+    #       - adjexplanatory
 
-    - name: selectionSteps
-      title: Model Selection Steps
-      type: Table
-      visible: (use_modelSelection)
-      columns:
-        - name: step
-          title: Step
-          type: integer
-        - name: variable
-          title: Variable
-          type: text
-        - name: action
-          title: Action
-          type: text
-        - name: criterion
-          title: Criterion Value
-          type: number
-        - name: pvalue
-          title: P-value
-          type: number
-      refs: finalfit
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name: adjustedSurvTableSummary
+    #   title: Adjusted Survival Summary
+    #   type: Html
+    #   clearWith:
+    #       - ac
+    #       - ac_timepoints
+    #       - adjexplanatory
+
+    # - name: adjustedPairwiseTable
+    #   title: Pairwise Comparisons of Adjusted Survival
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: rowname
+    #       title: "Group 1"
+    #       type: text
+    #     - name: name
+    #       title: "Group 2"
+    #       type: text
+    #     - name: value
+    #       title: "Adjusted p-value"
+    #       type: number
+    #       format: zto,pvalue
+    #   visible: (ac_compare)
+    #   clearWith:
+    #       - ac
+    #       - ac_compare
+    #       - adjexplanatory
+    #       - padjustmethod
+    #   refs:
+    #       - padjust
+
+    # - name: adjustedPairwiseSummary
+    #   title: Pairwise Comparison Summary
+    #   type: Html
+    #   visible: (ac_compare)
+    #   clearWith:
+    #       - ac
+    #       - ac_compare
+    #       - adjexplanatory
+    #       - padjustmethod
+
+    # - name: adjustedMedianTable
+    #   title: Adjusted Median Survival
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: factor
+    #       title: "Level"
+    #       type: text
+    #     - name: records
+    #       title: "Records"
+    #       type: integer
+    #     - name: events
+    #       title: "Events"
+    #       type: integer
+    #     - name: median
+    #       title: "Median"
+    #       type: number
+    #     - name: x0_95lcl
+    #       title: "Lower"
+    #       superTitle: "95% CI"
+    #       type: number
+    #     - name: x0_95ucl
+    #       title: "Upper"
+    #       superTitle: "95% CI"
+    #       type: number
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+
+    # - name: adjustedMedianSummary
+    #   title: Adjusted Median Survival Summary
+    #   type: Html
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+
+    # - name: adjustedCoxTable
+    #   title: Adjusted Cox Model Results
+    #   type: Table
+    #   rows: 0
+    #   columns:
+    #     - name: Variable
+    #       title: "Variable"
+    #       type: text
+    #     - name: HR
+    #       title: "HR (95% CI)"
+    #       type: text
+    #     - name: Pvalue
+    #       title: "P-value"
+    #       type: number
+    #       format: zto,pvalue
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+
+    # - name: adjustedCoxText
+    #   title: Adjusted Cox Model Metrics
+    #   type: Html
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+
+    # - name: adjustedCoxSummary
+    #   title: Adjusted Cox Model Interpretation
+    #   type: Html
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+
+    # - name: adjustedCoxPH
+    #   title: Proportional Hazards Test
+    #   type: Html
+    #   visible: (ph_cox)
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+    #       - ph_cox
+
+    # - name: adjustedCoxPHPlot
+    #   title: Proportional Hazards Plot
+    #   type: Image
+    #   width: 600
+    #   height: 450
+    #   renderFun: .plotAdjustedPH
+    #   visible: (ph_cox)
+    #   clearWith:
+    #       - ac
+    #       - adjexplanatory
+    #       - ph_cox
+
+
+
+    # - name: model_comparison
+    #   title: Model Comparison
+    #   type: Html
+    #   visible: (compare_models)
+
+    # - name: reduced_model_metrics
+    #   title: Reduced Model Performance Metrics
+    #   type: Html
+    #   visible: (compare_models)
+
+
+
+
+    # - name:  text_model_selection
+    #   title: Multivariable Survival with Model Selection
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
+
+
+    # - name:  text2_model_selection
+    #   title: ''
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
+
+    # - name: selectionSteps
+    #   title: Model Selection Steps
+    #   type: Table
+    #   visible: (use_modelSelection)
+    #   columns:
+    #     - name: step
+    #       title: Step
+    #       type: integer
+    #     - name: variable
+    #       title: Variable
+    #       type: text
+    #     - name: action
+    #       title: Action
+    #       type: text
+    #     - name: criterion
+    #       title: Criterion Value
+    #       type: number
+    #     - name: pvalue
+    #       title: P-value
+    #       type: number
+    #   refs: finalfit
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
 
 refs:
     - multivariable
