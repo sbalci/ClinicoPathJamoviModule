@@ -9,12 +9,12 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            direction = "independent",
-            mytitle = "",
-            xtitle = "",
-            ytitle = "",
-            originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            excl = TRUE,
+            typestatistics = "parametric",
+            pairwisecomparisons = TRUE,
+            pairwisedisplay = "significant",
+            padjustmethod = "holm",
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -46,64 +46,79 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..direction <- jmvcore::OptionList$new(
-                "direction",
-                direction,
+            private$..excl <- jmvcore::OptionBool$new(
+                "excl",
+                excl,
+                default=TRUE)
+            private$..typestatistics <- jmvcore::OptionList$new(
+                "typestatistics",
+                typestatistics,
                 options=list(
-                    "repeated",
-                    "independent"),
-                default="independent")
-            private$..mytitle <- jmvcore::OptionString$new(
-                "mytitle",
-                mytitle,
-                default="")
-            private$..xtitle <- jmvcore::OptionString$new(
-                "xtitle",
-                xtitle,
-                default="")
-            private$..ytitle <- jmvcore::OptionString$new(
-                "ytitle",
-                ytitle,
-                default="")
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="parametric")
+            private$..pairwisecomparisons <- jmvcore::OptionBool$new(
+                "pairwisecomparisons",
+                pairwisecomparisons,
+                default=TRUE)
+            private$..pairwisedisplay <- jmvcore::OptionList$new(
+                "pairwisedisplay",
+                pairwisedisplay,
+                options=list(
+                    "significant",
+                    "non-significant",
+                    "everything"),
+                default="significant")
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY",
+                    "fdr",
+                    "none"),
+                default="holm")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
-            private$..resultssubtitle <- jmvcore::OptionBool$new(
-                "resultssubtitle",
-                resultssubtitle,
-                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
-            self$.addOption(private$..direction)
-            self$.addOption(private$..mytitle)
-            self$.addOption(private$..xtitle)
-            self$.addOption(private$..ytitle)
+            self$.addOption(private$..excl)
+            self$.addOption(private$..typestatistics)
+            self$.addOption(private$..pairwisecomparisons)
+            self$.addOption(private$..pairwisedisplay)
+            self$.addOption(private$..padjustmethod)
             self$.addOption(private$..originaltheme)
-            self$.addOption(private$..resultssubtitle)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
-        direction = function() private$..direction$value,
-        mytitle = function() private$..mytitle$value,
-        xtitle = function() private$..xtitle$value,
-        ytitle = function() private$..ytitle$value,
-        originaltheme = function() private$..originaltheme$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        excl = function() private$..excl$value,
+        typestatistics = function() private$..typestatistics$value,
+        pairwisecomparisons = function() private$..pairwisecomparisons$value,
+        pairwisedisplay = function() private$..pairwisedisplay$value,
+        padjustmethod = function() private$..padjustmethod$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..grvar = NA,
-        ..direction = NA,
-        ..mytitle = NA,
-        ..xtitle = NA,
-        ..ytitle = NA,
-        ..originaltheme = NA,
-        ..resultssubtitle = NA)
+        ..excl = NA,
+        ..typestatistics = NA,
+        ..pairwisecomparisons = NA,
+        ..pairwisedisplay = NA,
+        ..padjustmethod = NA,
+        ..originaltheme = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -183,12 +198,12 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep .
 #' @param group .
 #' @param grvar .
-#' @param direction select measurement type (repeated or independent)
-#' @param mytitle .
-#' @param xtitle .
-#' @param ytitle .
+#' @param excl .
+#' @param typestatistics .
+#' @param pairwisecomparisons .
+#' @param pairwisedisplay .
+#' @param padjustmethod .
 #' @param originaltheme .
-#' @param resultssubtitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -202,12 +217,12 @@ jjbarstats <- function(
     dep,
     group,
     grvar,
-    direction = "independent",
-    mytitle = "",
-    xtitle = "",
-    ytitle = "",
-    originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    excl = TRUE,
+    typestatistics = "parametric",
+    pairwisecomparisons = TRUE,
+    pairwisedisplay = "significant",
+    padjustmethod = "holm",
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbarstats requires jmvcore to be installed (restart may be required)")
@@ -230,12 +245,12 @@ jjbarstats <- function(
         dep = dep,
         group = group,
         grvar = grvar,
-        direction = direction,
-        mytitle = mytitle,
-        xtitle = xtitle,
-        ytitle = ytitle,
-        originaltheme = originaltheme,
-        resultssubtitle = resultssubtitle)
+        excl = excl,
+        typestatistics = typestatistics,
+        pairwisecomparisons = pairwisecomparisons,
+        pairwisedisplay = pairwisedisplay,
+        padjustmethod = padjustmethod,
+        originaltheme = originaltheme)
 
     analysis <- jjbarstatsClass$new(
         options = options,

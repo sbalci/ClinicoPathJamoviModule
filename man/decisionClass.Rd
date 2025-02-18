@@ -5,17 +5,13 @@
 \title{Medical Decision Analysis}
 \description{
 Implements comprehensive medical decision analysis including:
-\itemize{
-\item Sensitivity and specificity calculation
-\item Predictive values
-\item ROC curve analysis
-\item Test comparison
-\item Confidence intervals
-}
 }
 \details{
 This module provides tools for analyzing diagnostic test performance
 with options for various visualization methods and statistical comparisons.
+\itemize{
+\item Sensitivity, specificity and predictive values
+}
 }
 \section{Usage}{
 

@@ -50,34 +50,79 @@ options:
     #   permitted: [ numeric ]
 
 
-    - name: direction
-      title: 'Measurement Type'
+    # - name: direction
+    #   title: 'Measurement Type'
+    #   type: List
+    #   options:
+    #     - title: Repeated (within groups)
+    #       name: repeated
+    #     - title: Independent (between groups)
+    #       name: independent
+    #   default: independent
+    #   description:
+    #       ui: options for measurement type
+    #       R: select measurement type (repeated or independent)
+
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: true
+
+
+    - name: typestatistics
+      title: 'Type of Statistic'
       type: List
       options:
-        - title: Repeated (within groups)
-          name: repeated
-        - title: Independent (between groups)
-          name: independent
-      default: independent
-      description:
-          ui: options for measurement type
-          R: select measurement type (repeated or independent)
+        - title: Parametric
+          name: parametric
+        - title: Nonparametric
+          name: nonparametric
+        - title: Robust
+          name: robust
+        - title: Bayes
+          name: bayes
+      default: parametric
+
+    - name: pairwisecomparisons
+      title: Pairwise Comparisons
+      type: Bool
+      default: true
+
+    - name: pairwisedisplay
+      title: 'Pairwise Display'
+      type: List
+      options:
+        - title: significant
+          name: significant
+        - title: non-significant
+          name: non-significant
+        - title: everything
+          name: everything
+      default: significant
 
 
-    - name: mytitle
-      title: Title
-      type: String
-      default: ''
-
-    - name: xtitle
-      title: X-Title
-      type: String
-      default: ''
-
-    - name: ytitle
-      title: Y-Title
-      type: String
-      default: ''
+    - name: padjustmethod
+      title: 'Adjustment Method'
+      type: List
+      options:
+        - title: holm
+          name: holm
+        - title: hochberg
+          name: hochberg
+        - title: hommel
+          name: hommel
+        - title: bonferroni
+          name: bonferroni
+        - title: BH
+          name: BH
+        - title: BY
+          name: BY
+        - title: fdr
+          name: fdr
+        - title: none
+          name: none
+      default: holm
 
 
     - name: originaltheme
@@ -85,10 +130,7 @@ options:
       type: Bool
       default: false
 
-    - name: resultssubtitle
-      title: Statistical Results
-      type: Bool
-      default: true
+
 
     # - name: ratio
     #   title: >
@@ -165,8 +207,8 @@ options:
     #   type: String
     #   default: ''
 
-    # - name: results.subtitle
-    #   title: results.subtitle
+    # - name: resultssubtitle
+    #   title: Results Subtitle
     #   type: Bool
     #   default: true
 

@@ -25,20 +25,20 @@ the values used for the Alluvial Diagram.}
 
 \item{condensationvar}{The primary variable to be used for condensation.}
 
-\item{excl}{.}
+\item{excl}{Exclude missing values from the analysis.}
 
-\item{marg}{.}
+\item{marg}{Include marginal plots.}
 
 \item{fill}{A list for the argument fill for selecting the variable to be
 represented by color. Default is 'first_variable'.}
 
 \item{bin}{labels for the bins from low to high}
 
-\item{orient}{.}
+\item{orient}{Orientation of the plot. Default is 'vertical'.}
 
-\item{usetitle}{.}
+\item{usetitle}{Use a custom title for the plot.}
 
-\item{mytitle}{.}
+\item{mytitle}{Title for the plot.}
 }
 \value{
 A results object containing:

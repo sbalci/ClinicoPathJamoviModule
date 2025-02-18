@@ -1113,7 +1113,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         subtitle = "Based on Kaplan-Meier estimates",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
-                        censor = self$options$censored
+                        censor = self$options$censored,
+                        surv.median.line = self$options$medianline
                     )
 
                 # plot <- plot + ggtheme
@@ -1180,7 +1181,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         fun = "event",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
-                        censored = self$options$censored
+                        censor = self$options$censored,
+                        surv.median.line = self$options$medianline
+
                     )
 
                 print(plot2)
@@ -1245,7 +1248,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
-                        censored = self$options$censored
+                        censor = self$options$censored,
+                        surv.median.line = self$options$medianline
+
                     )
 
 

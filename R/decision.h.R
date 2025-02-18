@@ -114,7 +114,6 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         cTable = function() private$.items[["cTable"]],
-        nTable2 = function() private$.items[["nTable2"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
@@ -162,20 +161,16 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="Total", 
                         `title`="Total", 
                         `type`="number"))))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="nTable2",
-                title="nTable2"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
-                title="nTable",
+                title="n",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
                     list(
                         `name`="tablename", 
-                        `title`="tablename", 
+                        `title`="", 
                         `type`="text"),
                     list(
                         `name`="TotalPop", 
@@ -217,7 +212,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="tablename", 
-                        `title`="Ratios", 
+                        `title`="", 
                         `type`="text"),
                     list(
                         `name`="Sens", 
@@ -402,7 +397,6 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$nTable2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr

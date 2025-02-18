@@ -4,7 +4,7 @@
 \alias{oddsratio}
 \title{Odds Ratio Table and Plot}
 \usage{
-oddsratio(data, explanatory, outcome)
+oddsratio(data, explanatory, outcome, showNomogram = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,6 +12,10 @@ oddsratio(data, explanatory, outcome)
 \item{explanatory}{The explanatory variables to be used in the analysis.}
 
 \item{outcome}{The outcome variable to be used in the analysis.}
+
+\item{showNomogram}{Display an interactive nomogram for converting pre-test
+to post-test  probabilities using likelihood ratios calculated from the
+data.}
 }
 \value{
 A results object containing:
@@ -20,6 +24,9 @@ A results object containing:
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

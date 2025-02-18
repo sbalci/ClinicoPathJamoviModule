@@ -22,7 +22,7 @@ jjridgestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             ytitle = "", ...) {
 
             super$initialize(
-                package="jjstatsplot",
+                package="ClinicoPath",
                 name="jjridgestats",
                 requiresData=TRUE,
                 ...)
@@ -207,7 +207,7 @@ jjridgestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jjstatsplot",
+                package = "ClinicoPath",
                 name = "jjridgestats",
                 version = c(1,0,0),
                 options = options,

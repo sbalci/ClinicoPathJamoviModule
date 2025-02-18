@@ -9,7 +9,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             vars = NULL,
             sft = FALSE,
             wght = "unweighted",
-            exct = FALSE, ...) {
+            exct = FALSE,
+            kripp = FALSE,
+            krippMethod = "nominal",
+            bootstrap = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -41,22 +44,48 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "exct",
                 exct,
                 default=FALSE)
+            private$..kripp <- jmvcore::OptionBool$new(
+                "kripp",
+                kripp,
+                default=FALSE)
+            private$..krippMethod <- jmvcore::OptionList$new(
+                "krippMethod",
+                krippMethod,
+                options=list(
+                    "nominal",
+                    "ordinal",
+                    "interval",
+                    "ratio"),
+                default="nominal")
+            private$..bootstrap <- jmvcore::OptionBool$new(
+                "bootstrap",
+                bootstrap,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
+            self$.addOption(private$..kripp)
+            self$.addOption(private$..krippMethod)
+            self$.addOption(private$..bootstrap)
         }),
     active = list(
         vars = function() private$..vars$value,
         sft = function() private$..sft$value,
         wght = function() private$..wght$value,
-        exct = function() private$..exct$value),
+        exct = function() private$..exct$value,
+        kripp = function() private$..kripp$value,
+        krippMethod = function() private$..krippMethod$value,
+        bootstrap = function() private$..bootstrap$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
         ..wght = NA,
-        ..exct = NA)
+        ..exct = NA,
+        ..kripp = NA,
+        ..krippMethod = NA,
+        ..bootstrap = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -65,7 +94,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         irrtable = function() private$.items[["irrtable"]],
         text2 = function() private$.items[["text2"]],
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        krippTable = function() private$.items[["krippTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -134,7 +164,44 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "wght",
-                    "exct")))}))
+                    "exct")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="krippTable",
+                title="Krippendorff's Alpha Results",
+                visible="(kripp)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="alpha", 
+                        `title`="Alpha", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `visible`="(bootstrap)"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `visible`="(bootstrap)")),
+                clearWith=list(
+                    "vars",
+                    "krippMethod",
+                    "bootstrap")))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -178,11 +245,18 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   is not ordinal. The default is 'unweighted'.
 #' @param exct Boolean selection whether to use exact kappa. Effects only more
 #'   than 3 observers. Default is 'false'.
+#' @param kripp Boolean selection whether to calculate Krippendorff's alpha.
+#'   Default is 'false'.
+#' @param krippMethod Specifies the measurement level for Krippendorff's alpha
+#'   calculation.
+#' @param bootstrap Calculate bootstrap confidence intervals for
+#'   Krippendorff's alpha.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -197,7 +271,10 @@ agreement <- function(
     vars,
     sft = FALSE,
     wght = "unweighted",
-    exct = FALSE) {
+    exct = FALSE,
+    kripp = FALSE,
+    krippMethod = "nominal",
+    bootstrap = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -214,7 +291,10 @@ agreement <- function(
         vars = vars,
         sft = sft,
         wght = wght,
-        exct = exct)
+        exct = exct,
+        kripp = kripp,
+        krippMethod = krippMethod,
+        bootstrap = bootstrap)
 
     analysis <- agreementClass$new(
         options = options,

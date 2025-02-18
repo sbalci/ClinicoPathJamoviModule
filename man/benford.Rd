@@ -7,9 +7,10 @@
 benford(data, var)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{var}{.}
+\item{var}{a string naming the variable from \code{data} that contains the
+continuous values used for the report}
 }
 \value{
 A results object containing:

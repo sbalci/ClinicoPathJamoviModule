@@ -35,7 +35,8 @@ survivalcont(
   multievent = FALSE,
   ci95 = FALSE,
   risktable = FALSE,
-  censored = FALSE
+  censored = FALSE,
+  medianline = "none"
 )
 }
 \arguments{
@@ -140,6 +141,9 @@ for each group in the survival analysis.}
 
 \item{censored}{Enable this option to display censored observations in the
 survival plots.}
+
+\item{medianline}{If true, displays a line indicating the median survival
+time on the survival plot.}
 }
 \value{
 A results object containing:

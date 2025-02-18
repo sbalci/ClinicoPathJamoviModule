@@ -599,12 +599,18 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         results1table <- results1html
 
+        # self$results$medianSummary2$setContent(results1table)
+
+        # records n_max n_start events rmean se_rmean median
+        # km_fit_median_df$table     247   247     247    167 22.06    1.234   15.9
+        # x0_95lcl x0_95ucl
+        # km_fit_median_df$table     11.4     20.2
 
         medianTable <- self$results$medianTable
         data_frame <- results1table
         data_frame <- data_frame %>%
           dplyr::mutate(mean_time = round(rmean, 2),
-                        mean_ci = glue::glue("{round(lower, 2)} - {round(upper, 2)}"))
+                        mean_ci = glue::glue("{x0_95lcl} - {x0_95ucl}"))
         for (i in seq_along(data_frame[, 1, drop = T])) {
           medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
         }
@@ -619,9 +625,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "Median survival is {round(median, digits = 1)} [{round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}, 95% CI] ",
                 self$options$timetypeoutput,
                 ".",
-                "The median survival is {round(median, 2)} months [95% CI: {round(lower, 2)} - {round(upper, 2)}].
-       At 1 year, survival is approximately {scales::percent(surv_12)},
-       and at 5 years, it is {scales::percent(surv_60)}."
+                "The median survival is {round(median, 2)} months [95% CI: {round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}]."
+       #          ,
+       # "At 1 year, survival is approximately {scales::percent(surv_12)},
+       # and at 5 years, it is {scales::percent(surv_60)}."
               )
           ) %>%
           # dplyr::mutate(
@@ -814,7 +821,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             subtitle = "Based on Kaplan-Meier estimates",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
-            censor = self$options$censored
+            censor = self$options$censored,
+            surv.median.line = self$options$medianline
+
           )
 
         # plot <- plot + ggtheme
@@ -880,7 +889,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             fun = "event",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
-            censored = self$options$censored
+            censor = self$options$censored,
+            surv.median.line = self$options$medianline
           )
 
         print(plot2)
@@ -943,7 +953,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             fun = "cumhaz",
             risk.table = self$options$risktable,
             conf.int = self$options$ci95,
-            censored = self$options$censored
+            censor = self$options$censored,
+            surv.median.line = self$options$medianline
           )
 
 

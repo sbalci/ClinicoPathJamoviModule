@@ -25,7 +25,7 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             caption = "", ...) {
 
             super$initialize(
-                package="jjstatsplot",
+                package="ClinicoPath",
                 name="jjtreemap",
                 requiresData=TRUE,
                 ...)
@@ -237,7 +237,7 @@ jjtreemapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jjstatsplot",
+                package = "ClinicoPath",
                 name = "jjtreemap",
                 version = c(1,0,0),
                 options = options,

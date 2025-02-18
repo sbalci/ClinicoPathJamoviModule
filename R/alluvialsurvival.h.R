@@ -16,7 +16,7 @@ alluvialSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             showSurvival = FALSE, ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="alluvialSurvival",
                 requiresData=TRUE,
                 ...)
@@ -198,7 +198,7 @@ alluvialSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jsurvival",
+                package = "ClinicoPath",
                 name = "alluvialSurvival",
                 version = c(1,0,0),
                 options = options,

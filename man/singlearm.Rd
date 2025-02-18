@@ -33,7 +33,8 @@ singlearm(
   multievent = FALSE,
   ci95 = FALSE,
   risktable = FALSE,
-  censored = FALSE
+  censored = FALSE,
+  medianline = "none"
 )
 }
 \arguments{
@@ -160,6 +161,9 @@ useful for summarizing the survival characteristics of your data.}
 survival plots. Censored observations are patients who have not experienced
 the event of interest by the end of follow-up and are indicated by vertical
 ticks on the survival curves.}
+
+\item{medianline}{If true, displays a line indicating the median survival
+time on the survival plot.}
 }
 \value{
 A results object containing:

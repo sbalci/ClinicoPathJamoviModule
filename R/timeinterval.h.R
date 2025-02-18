@@ -15,7 +15,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             add_times = TRUE, ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="timeinterval",
                 requiresData=TRUE,
                 ...)
@@ -120,7 +120,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jsurvival",
+                package = "ClinicoPath",
                 name = "timeinterval",
                 version = c(1,0,0),
                 options = options,

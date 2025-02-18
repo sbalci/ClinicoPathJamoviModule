@@ -98,7 +98,7 @@ children:
                     format: number
                     enable: (uselandmark)
       - type: Label
-        label: Calculated Time to Data
+        label: Calculated Time to Data 
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -140,7 +140,7 @@ children:
             name: analysistype
             enable: (outcome && multievent)
       - type: Label
-        label: Calculated Outcome to Data
+        label: Calculated Outcome to Data 
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -149,7 +149,7 @@ children:
               - type: Output
                 name: outcomeredefined
                 enable: (outcome && multievent)
-
+                
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -193,6 +193,8 @@ children:
                 name: risktable
               - type: CheckBox
                 name: censored
+              - type: ComboBox
+                name: medianline
   - type: CollapseBox
     label: Survival Tables
     collapsed: true

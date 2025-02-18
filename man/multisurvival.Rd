@@ -33,16 +33,18 @@ multisurvival(
   ci95 = FALSE,
   risktable = FALSE,
   censored = FALSE,
+  medianline = "none",
   pplot = TRUE,
+  cutp = "12, 36, 60",
   calculateRiskScore = FALSE,
+  numRiskGroups = "four",
   plotRiskGroups = FALSE,
   ac = FALSE,
   adjexplanatory,
   ac_method = "average",
-  ac_summary = FALSE,
-  ac_timepoints = "12, 36, 60",
-  ac_compare = FALSE,
-  use_stratify = FALSE
+  showNomogram = FALSE,
+  use_stratify = FALSE,
+  stratvar
 )
 }
 \arguments{
@@ -140,11 +142,20 @@ time point below the survival plot.}
 \item{censored}{If true, marks censored observations (e.g., using tick
 marks) on the survival plot.}
 
+\item{medianline}{If true, displays a line indicating the median survival
+time on the survival plot.}
+
 \item{pplot}{If true, displays the p-value from the survival comparison
 test on the survival plot.}
 
+\item{cutp}{.}
+
 \item{calculateRiskScore}{If true, calculates a risk score from the Cox
 model coefficients for each individual.}
+
+\item{numRiskGroups}{Select the number of risk groups to create from the
+risk scores. The data will be divided into equal quantiles based on this
+selection.}
 
 \item{plotRiskGroups}{If true, stratifies individuals into risk groups
 based on their calculated risk scores and plots their survival curves.}
@@ -155,15 +166,15 @@ based on their calculated risk scores and plots their survival curves.}
 
 \item{ac_method}{Method for computing adjusted survival curves}
 
-\item{ac_summary}{Calculate and display summary statistics for adjusted
-curves}
+\item{showNomogram}{.}
 
-\item{ac_timepoints}{Timepoints for calculating summary statistics
-(comma-separated)}
+\item{use_stratify}{If true, uses stratification to handle variables that
+violate the proportional hazards assumption. Stratification creates
+separate baseline hazard functions for different groups.}
 
-\item{ac_compare}{Perform statistical comparison between adjusted curves}
-
-\item{use_stratify}{.}
+\item{stratvar}{Variables used for stratification. When proportional
+hazards are not met, stratification can adjust the model to better fit the
+data by allowing different baseline hazards.}
 }
 \value{
 A results object containing:
@@ -176,35 +187,21 @@ A results object containing:
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
+\code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$stratificationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-\code{results$adjustedSummaryTable2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$adjustedSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedComparison} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$adjustedComparison_survdiff_res} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$adjustedSurvTable2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedPairwiseTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedPairwiseSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedMedianTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedMedianSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a html \cr
-\code{results$adjustedCoxPHPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$model_comparison} \tab \tab \tab \tab \tab a html \cr
-\code{results$reduced_model_metrics} \tab \tab \tab \tab \tab a html \cr
-\code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
-\code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
-\code{results$selectionSteps} \tab \tab \tab \tab \tab a table \cr
+\code{results$mydataview_nomogram2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

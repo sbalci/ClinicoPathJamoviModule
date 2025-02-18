@@ -8,7 +8,7 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function( ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="lassocox",
                 requiresData=TRUE,
                 ...)
@@ -52,7 +52,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jsurvival",
+                package = "ClinicoPath",
                 name = "lassocox",
                 version = c(1,0,0),
                 options = options,

@@ -93,8 +93,9 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Benford Analysis
 #'
 #' 
-#' @param data .
-#' @param var .
+#' @param data The data as a data frame.
+#' @param var a string naming the variable from \code{data} that contains the
+#'   continuous values used for the report
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

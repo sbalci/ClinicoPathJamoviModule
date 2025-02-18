@@ -9,12 +9,24 @@ jas: '1.2'
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
 
     - name: var
       title: Variable
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
+          jamovi: >
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
 
     # - name: li
     #   title: Load Image

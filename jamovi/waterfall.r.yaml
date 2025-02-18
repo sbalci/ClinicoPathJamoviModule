@@ -1,0 +1,132 @@
+---
+name:  waterfall
+title: Treatment Response Analysis
+jrs:   '1.1'
+
+items:
+
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+
+
+    - name: todo2
+      title: To Do
+      type: Html
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+
+    - name: summaryTable
+      title: Response Categories Based on RECIST v1.1 Criteria
+      type: Table
+      rows: 0
+      columns:
+        - name: category
+          title: "Category"
+          type: text
+        - name: n
+          title: "Number of Patients"
+          type: integer
+        - name: percent
+          title: "Percentage"
+          type: number
+          format: percent
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+
+
+    # - name: summaryTable_explanation
+    #   title: summaryTable
+    #   type: Html
+    #   clearWith:
+    #      - patientID
+    #      - responseVar
+    #      - timeVar
+    #      - inputType
+
+
+
+    - name: clinicalMetrics
+      title: Clinical Response Metrics
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+
+    - name: waterfallplot
+      title: 'Waterfall Plot'
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .waterfallplot
+      requiresData: true
+      visible: (showWaterfallPlot)
+      clearWith:
+        - patientID
+        - response
+        - sortBy
+        - showThresholds
+        - labelOutliers
+        - colorScheme
+        - showMedian
+        - showCI
+
+    - name: spiderplot
+      title: 'Spider Plot - Response Over Time'
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .spiderplot
+      requiresData: true
+      visible: (showSpiderPlot)
+      clearWith:
+        - patientID
+        - response
+        - timeVar
+        - inputType
+        - sortBy
+
+    - name: addResponseCategory
+      title: Add Response Category to Data
+      type: Output
+      varTitle: RECIST
+      varDescription: Calculated response category based on RECIST criteria.
+      measureType: nominal
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+
+
+    - name: mydataview
+      title: mydataview
+      type: Preformatted
+
+
+refs:
+    - recist
+    - ClinicoPathJamoviModule
+
+...

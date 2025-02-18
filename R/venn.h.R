@@ -174,14 +174,22 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param var1 .
-#' @param var1true .
-#' @param var2 .
-#' @param var2true .
-#' @param var3 .
-#' @param var3true .
-#' @param var4 .
-#' @param var4true .
+#' @param var1 a string naming the variable from \code{data} that contains the
+#'   the first variable used for the report
+#' @param var1true a string naming the level from \code{var1} that contains
+#'   the the true level
+#' @param var2 a string naming the variable from \code{data} that contains the
+#'   the second variable used for the report
+#' @param var2true a string naming the level from \code{var2} that contains
+#'   the the true level
+#' @param var3 a string naming the variable from \code{data} that contains the
+#'   the third variable used for the report
+#' @param var3true a string naming the level from \code{var3} that contains
+#'   the the true level
+#' @param var4 a string naming the variable from \code{data} that contains the
+#'   the fourth variable used for the report
+#' @param var4true a string naming the level from \code{var4} that contains
+#'   the the true level
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
