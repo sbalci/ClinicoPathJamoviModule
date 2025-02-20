@@ -29,7 +29,7 @@ copy_module_files <- function(module_names, source_dir, dest_dir, file_extension
 }
 
 
-new_version <- "0.0.2.61"
+new_version <- "0.0.2.62"
 new_date <- "2024-02-20"
 
 
