@@ -1,15 +1,24 @@
 [submodule "jsurvival"]
 	path = jsurvival
 	url = https://github.com/sbalci/jsurvival
+	branch = master
+
 [submodule "ClinicoPathDescriptives"]
 	path = ClinicoPathDescriptives
 	url = https://github.com/sbalci/ClinicoPathDescriptives/
+	branch = master
+
 [submodule "jjstatsplot"]
 	path = jjstatsplot
 	url = https://github.com/sbalci/jjstatsplot
+	branch = master
+
 [submodule "meddecide"]
 	path = meddecide
 	url = https://github.com/sbalci/meddecide/
+	branch = master
+
 [submodule "jbbplot"]
 	path = jbbplot
 	url = https://github.com/sbalci/jbbplot/
+	branch = master
