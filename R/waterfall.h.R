@@ -181,8 +181,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         clinicalMetrics = function() private$.items[["clinicalMetrics"]],
         waterfallplot = function() private$.items[["waterfallplot"]],
         spiderplot = function() private$.items[["spiderplot"]],
-        addResponseCategory = function() private$.items[["addResponseCategory"]],
-        mydataview = function() private$.items[["mydataview"]]),
+        addResponseCategory = function() private$.items[["addResponseCategory"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -298,11 +297,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "timeVar",
-                    "inputType")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview",
-                title="mydataview"))}))
+                    "inputType")))}))
 
 waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "waterfallBase",
@@ -372,7 +367,6 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
