@@ -441,32 +441,215 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
 
+
         .createNomogramDisplay = function(nom) {
-            # Generate HTML display of nomogram points and predictions
-            if (is.null(nom)) return("")
+            if(is.null(private$.nom_object)) {
+                return(FALSE)
+            }
 
-            # Capture the text output of the nomogram
-            nom_text <- capture.output(print(nom))
+            # Capture the nomogram output
+            nom_output <- capture.output(print(nom))
 
-            # Create HTML content with styling
-            html_content <- '
-            <div style="font-family: monospace; white-space: pre-wrap;">
-            <h3>Nomogram Scoring Guide</h3>
-            <p>To use this nomogram:</p>
+            # Extract technical details
+            tech_details <- c()
+            i <- 1
+            while(i <= length(nom_output) && !grepl("Points$", nom_output[i])) {
+                if(nzchar(nom_output[i])) {
+                    tech_details <- c(tech_details, nom_output[i])
+                }
+                i <- i + 1
+            }
+
+            # Initialize data structures
+            sections <- list()
+            current_section <- NULL
+            current_lines <- character(0)
+            risk_table <- NULL
+
+            # Process each line
+            while(i <= length(nom_output)) {
+                line <- nom_output[i]
+
+                # Check for new section or risk table
+                if(grepl("Total Points Predicted", line)) {
+                    # We've hit the risk table - save current section and start collecting risk data
+                    if(!is.null(current_section)) {
+                        sections[[current_section]] <- current_lines
+                    }
+                    risk_table <- c(line)  # Start risk table with header
+                    while(i < length(nom_output) && nzchar(trimws(nom_output[i + 1]))) {
+                        i <- i + 1
+                        risk_table <- c(risk_table, nom_output[i])
+                    }
+                    current_section <- NULL
+                    current_lines <- character(0)
+                } else if(grepl("Points$", line) && !grepl("Total Points", line)) {
+                    # New variable section
+                    if(!is.null(current_section)) {
+                        sections[[current_section]] <- current_lines
+                    }
+                    current_section <- trimws(sub("Points$", "", line))
+                    current_lines <- character(0)
+                } else if(nzchar(trimws(line))) {
+                    current_lines <- c(current_lines, line)
+                }
+                i <- i + 1
+            }
+
+            # Add final section if exists
+            if(!is.null(current_section) && length(current_lines) > 0) {
+                sections[[current_section]] <- current_lines
+            }
+
+            # Create HTML content
+            html_content <- paste0('
+    <style>
+        .nomogram-container {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .tech-details {
+            font-family: "Roboto Mono", monospace;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            color: #666;
+        }
+        .instructions {
+            background-color: #e8f5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .inputs-section {
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .variable-section {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
+        }
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .values {
+            font-family: "Roboto Mono", monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            color: #34495e;
+            padding-left: 20px;
+        }
+        .outputs-section {
+            margin-top: 30px;
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .prediction-section {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+        }
+        .notes {
+            background-color: #fffde7;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .risk-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            font-family: "Roboto Mono", monospace;
+        }
+        .risk-table th, .risk-table td {
+            padding: 8px 16px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        .risk-table th {
+            font-weight: 600;
+            background-color: #fff3e0;
+            text-align: center;
+        }
+        .risk-header {
+            padding: 10px 0;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #ff9800;
+            font-weight: 600;
+        }
+    </style>
+    <div class="nomogram-container">
+        <h2>Nomogram Scoring Guide</h2>
+
+        <div class="tech-details">
+            ', paste(tech_details, collapse="<br>"), '
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use This Nomogram:</h3>
             <ol>
-                <li>For each variable, find the patient\'s value and read the corresponding points</li>
-                <li>Sum all points to get total points</li>
-                <li>Find the total points on the probability scale to get the predicted probability</li>
+                <li>For each variable below, find your patient\'s value</li>
+                <li>Read across to the Points scale to determine points for that variable</li>
+                <li>Add up total points from all variables</li>
+                <li>Use total points to find predicted risk in the Risk Prediction section</li>
             </ol>
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
-            '
+        </div>
 
-            # Add nomogram text
-            html_content <- paste0(
-                html_content,
-                paste(nom_text, collapse="<br>"),
-                '</div></div>'
-            )
+        <div class="inputs-section">
+            <h3>Input Variables</h3>')
+
+            # Add variable sections
+            for(section_name in names(sections)) {
+                html_content <- paste0(html_content, '
+            <div class="variable-section">
+                <div class="section-title">', section_name, '</div>
+                <div class="values">',
+                                       paste(sections[[section_name]], collapse="<br>"),
+                                       '</div>
+            </div>')
+            }
+
+            # Add risk prediction section
+            html_content <- paste0(html_content, '
+        </div>
+
+        <div class="outputs-section">
+            <h3>Risk Prediction</h3>
+            <div class="prediction-section">
+                <div class="risk-header">Points to Risk Conversion</div>
+                <div class="values">',
+                                   if(!is.null(risk_table)) paste(risk_table, collapse="<br>") else "",
+                                   '</div>
+            </div>
+        </div>
+
+        <div class="notes">
+            <h3>Important Notes:</h3>
+            <ul>
+                <li>For continuous variables, interpolate between given values</li>
+                <li>For categorical variables, use exact points shown</li>
+                <li>The predicted risk is based on total points from all variables</li>
+                <li>Risk predictions are estimates and should be used in conjunction with clinical judgment</li>
+            </ul>
+        </div>
+    </div>')
 
             return(html_content)
         }

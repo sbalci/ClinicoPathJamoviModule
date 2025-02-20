@@ -1265,6 +1265,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
       ,
+
       .create_nomogram_display = function(nom) {
         if(is.null(private$.nom_object)) {
           return(FALSE)
@@ -1273,7 +1274,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Capture the nomogram output
         nom_output <- capture.output(print(nom))
 
-        # First extract the technical details
+        # Extract technical details
         tech_details <- c()
         i <- 1
         while(i <= length(nom_output) && !grepl("Points$", nom_output[i])) {
@@ -1283,40 +1284,45 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           i <- i + 1
         }
 
-        # Process the remaining output to extract sections
+        # Initialize data structures
         sections <- list()
         current_section <- NULL
         current_lines <- character(0)
+        risk_table <- NULL
 
+        # Process each line
         while(i <= length(nom_output)) {
           line <- nom_output[i]
 
-          # Check for section headers
-          if(grepl("Points$", line) && !grepl("Total Points", line)) {
-            # Store previous section if it exists
-            if(!is.null(current_section) && length(current_lines) > 0) {
+          # Check for new section or risk table
+          if(grepl("Total Points Predicted", line)) {
+            # We've hit the risk table - save current section and start collecting risk data
+            if(!is.null(current_section)) {
               sections[[current_section]] <- current_lines
             }
-            # Start new section
+            risk_table <- c(line)  # Start risk table with header
+            while(i < length(nom_output) && nzchar(trimws(nom_output[i + 1]))) {
+              i <- i + 1
+              risk_table <- c(risk_table, nom_output[i])
+            }
+            current_section <- NULL
+            current_lines <- character(0)
+          } else if(grepl("Points$", line) && !grepl("Total Points", line)) {
+            # New variable section
+            if(!is.null(current_section)) {
+              sections[[current_section]] <- current_lines
+            }
             current_section <- trimws(sub("Points$", "", line))
             current_lines <- character(0)
           } else if(nzchar(trimws(line))) {
-            # Add non-empty lines to current section
             current_lines <- c(current_lines, line)
           }
           i <- i + 1
         }
 
-        # Add the last section
+        # Add final section if exists
         if(!is.null(current_section) && length(current_lines) > 0) {
           sections[[current_section]] <- current_lines
-        }
-
-        # Separate out risk prediction table
-        risk_table <- NULL
-        if("Total Points" %in% names(sections)) {
-          risk_table <- sections[["Total Points"]]
-          sections[["Total Points"]] <- NULL
         }
 
         # Create HTML content
@@ -1331,20 +1337,32 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-radius: 8px;
         }
-        .section {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-            border-radius: 4px;
-        }
         .tech-details {
             font-family: "Roboto Mono", monospace;
             background-color: #f8f9fa;
-            padding: 10px;
+            padding: 15px;
             border-radius: 4px;
-            margin: 10px 0;
+            margin: 15px 0;
             color: #666;
+        }
+        .instructions {
+            background-color: #e8f5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .inputs-section {
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .variable-section {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
         }
         .section-title {
             font-size: 1.2em;
@@ -1359,12 +1377,31 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             color: #34495e;
             padding-left: 20px;
         }
-        .risk-table {
+        .outputs-section {
+            margin-top: 30px;
             background-color: #fff3e0;
-            border-left: 4px solid #ff9800;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 20px;
         }
-        .instructions {
-            background-color: #e9f7ef;
+        .prediction-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: "Roboto Mono", monospace;
+        }
+        .prediction-table th, .prediction-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid #ffe0b2;
+        }
+        .prediction-table th {
+            background-color: #fff3e0;
+            font-weight: 600;
+        }
+        .notes {
+            background-color: #fffde7;
             padding: 15px;
             margin-top: 20px;
             border-radius: 4px;
@@ -1379,49 +1416,74 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         <div class="instructions">
             <h3>How to Use This Nomogram:</h3>
-            <p>1. For each variable below, find your patient\'s value</p>
-            <p>2. Read across to the Points scale to determine points for that variable</p>
-            <p>3. Add up total points from all variables</p>
-            <p>4. Use total points to find predicted risk in the bottom section</p>
+            <ol>
+                <li>For each variable below, find your patient\'s value</li>
+                <li>Read across to the Points scale to determine points for that variable</li>
+                <li>Add up total points from all variables</li>
+                <li>Use total points to find predicted risk in the Risk Prediction section</li>
+            </ol>
         </div>
-    ')
+
+        <div class="inputs-section">
+            <h3>Input Variables</h3>')
 
         # Add variable sections
         for(section_name in names(sections)) {
           html_content <- paste0(html_content, '
-        <div class="section">
-            <div class="section-title">', section_name, '</div>
-            <div class="values">',
+            <div class="variable-section">
+                <div class="section-title">', section_name, '</div>
+                <div class="values">',
                                  paste(sections[[section_name]], collapse="<br>"),
                                  '</div>
-        </div>')
+            </div>')
         }
 
-        # Add risk prediction table
-        if(!is.null(risk_table)) {
-          html_content <- paste0(html_content, '
-        <div class="section risk-table">
-            <div class="section-title">Risk Prediction</div>
-            <div class="values">',
-                                 paste(risk_table, collapse="<br>"),
-                                 '</div>
-        </div>')
-        }
-
-        # Add closing notes
+        # Add risk prediction section with formatted table
         html_content <- paste0(html_content, '
-        <div class="instructions">
-            <h3>Notes:</h3>
-            <p>• For continuous variables (like Age and MeasurementA), interpolate between given values</p>
-            <p>• For categorical variables (like LVI, PNI, Smoker), use exact points shown</p>
-            <p>• Total points correspond directly to predicted 12-month risk</p>
+        </div>
+
+        <div class="outputs-section">
+            <h3>Risk Prediction</h3>
+            <div class="section-title">Points to Risk Conversion</div>
+            <table class="prediction-table">
+                <tr>
+                    <th>Total Points</th>
+                    <th>Predicted 12-month Risk</th>
+                </tr>')
+
+        # Format risk table into two columns
+        if(!is.null(risk_table)) {
+          # Skip the header line
+          risk_lines <- risk_table[-1]
+          for(line in risk_lines) {
+            values <- strsplit(trimws(line), "\\s+")[[1]]
+            if(length(values) == 2) {
+              html_content <- paste0(html_content, '
+                <tr>
+                    <td>', values[1], '</td>
+                    <td>', values[2], '</td>
+                </tr>')
+            }
+          }
+        }
+
+        html_content <- paste0(html_content, '
+            </table>
+        </div>
+
+        <div class="notes">
+            <h3>Important Notes:</h3>
+            <ul>
+                <li>For continuous variables, interpolate between given values</li>
+                <li>For categorical variables, use exact points shown</li>
+                <li>The predicted risk is based on total points from all variables</li>
+                <li>Risk predictions are estimates and should be used in conjunction with clinical judgment</li>
+            </ul>
         </div>
     </div>')
 
         return(html_content)
       }
-
-
 
 
       # coxph Proportional Hazards Assumption  ----
