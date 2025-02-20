@@ -147,7 +147,8 @@ update_modules <- function(new_version, new_date) {
     "summarydata",
     "tableone",
     "vartree",
-    "venn"
+    "venn",
+    "waterfall"
   )
   copy_module_files(ClinicoPathDescriptives_modules,
                     source_dir = file.path(main_repo_dir, "R"),
