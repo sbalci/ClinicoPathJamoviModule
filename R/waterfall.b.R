@@ -478,28 +478,28 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # mydataview ----
 
-        self$results$mydataview$setContent(
-          list(
-            "data" = processed_data,
-            "data_waterfall" = processed_data$waterfall,
-            "data_spider" = processed_data$spider,
-            options = list(
-              "patientID" = self$options$patientID,
-              "response" = self$options$responseVar,
-              "timeVar" = self$options$timeVar,
-              "sortBy" = self$options$sortBy,
-              "showThresholds" = self$options$showThresholds,
-              "labelOutliers" = self$options$labelOutliers,
-              "colorScheme" = self$options$colorScheme,
-              "barWidth" = self$options$barWidth,
-              "barAlpha" = self$options$barAlpha,
-              "showMedian" = self$options$showMedian,
-              "showCI" = self$options$showCI,
-              "minResponseForLabel" = self$options$minResponseForLabel
-            ),
-            "metrics" = metrics
-          )
-        )
+        # self$results$mydataview$setContent(
+        #   list(
+        #     "data" = processed_data,
+        #     "data_waterfall" = processed_data$waterfall,
+        #     "data_spider" = processed_data$spider,
+        #     options = list(
+        #       "patientID" = self$options$patientID,
+        #       "response" = self$options$responseVar,
+        #       "timeVar" = self$options$timeVar,
+        #       "sortBy" = self$options$sortBy,
+        #       "showThresholds" = self$options$showThresholds,
+        #       "labelOutliers" = self$options$labelOutliers,
+        #       "colorScheme" = self$options$colorScheme,
+        #       "barWidth" = self$options$barWidth,
+        #       "barAlpha" = self$options$barAlpha,
+        #       "showMedian" = self$options$showMedian,
+        #       "showCI" = self$options$showCI,
+        #       "minResponseForLabel" = self$options$minResponseForLabel
+        #     ),
+        #     "metrics" = metrics
+        #   )
+        # )
 
 
         ## Add response category to data ----

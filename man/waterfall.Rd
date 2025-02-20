@@ -71,7 +71,6 @@ A results object containing:
 \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
-\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

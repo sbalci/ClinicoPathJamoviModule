@@ -70,39 +70,47 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         todo <- glue::glue(
           "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you calculate median survivals and 1,3,5-yr survivals for your whole population.
-                <br><br>
-                Select outcome level from Outcome variable.
-                <br><br>
-                Outcome Level: if patient is dead or event (recurrence) occured. You may also use advanced outcome options depending on your analysis type.
-                <br><br>
-                Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
-                <br><br>
-                This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                <br><hr>
-                <br>
-                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>.",
+    <b>Welcome to Single-Arm Survival Analysis</b>
+    <br><br>
+    This tool analyzes survival outcomes for a single cohort of patients, calculating:
+    <ul>
+        <li><b>Median Survival Time:</b> The time at which 50% of subjects have experienced the event</li>
+        <li><b>Survival Rates:</b> Probability of survival at 1, 3, and 5 years</li>
+        <li><b>Survival Curves:</b> Visual representation of survival probability over time</li>
+    </ul>
 
-
-            "<b>Welcome to Single-Arm Survival Analysis!</b><br><br>
-            This tool calculates <b>median survival</b> and <b>1-, 3-, 5-year survival rates</b>
-            for a single group.<br>
+    <b>Input Requirements:</b>
+    <ul>
+        <li><b>Time Variable:</b> Either:
             <ul>
-            <li><b>Median Survival:</b> The time by which 50% of subjects have experienced the event.</li>
-            <li><b>1-, 3-, 5-Year Survival:</b> Proportion of subjects surviving at these milestones.</li>
+                <li>Pre-calculated follow-up time (numeric, continuous)</li>
+                <li>Start and end dates (will be converted to time intervals)</li>
             </ul>
-            <br><b>Key Features:</b><br>
+        </li>
+        <li><b>Outcome Variable:</b> Event indicator showing whether each subject experienced the event
             <ul>
-            <li>Use dates or elapsed time to calculate survival.</li>
-            <li>Adjust results with landmark times.</li>
-            <li>Generate survival and cumulative hazard plots.</li>
+                <li>For binary variables: Select the level representing the event</li>
+                <li>For multiple outcomes: Use advanced options to specify event types</li>
             </ul>
-            <br>Please cite jamovi and relevant packages (survival, survminer) in your publications.<br>
-            "
+        </li>
+    </ul>
 
+    <b>Analysis Options:</b>
+    <ul>
+        <li>Landmark analysis to handle immortal time bias</li>
+        <li>Various plot types: survival curves, cumulative hazard, cumulative events</li>
+        <li>Customizable time units and axis scales</li>
+        <li>Risk tables and confidence intervals</li>
+    </ul>
 
+    <b>Methodology:</b>
+    Utilizes the Kaplan-Meier method to estimate survival probabilities, handling right-censored data appropriately.
+    <br><br>
+    This analysis is implemented using the survival, survminer, and finalfit R packages. Please cite both jamovi and these packages in publications.
+    <br><hr>
+    For detailed information about survival analysis methods, see the
+    <a href='https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>survival package documentation</a>.
+    "
         )
 
         html <- self$results$todo
