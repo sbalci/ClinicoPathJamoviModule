@@ -1,5 +1,5 @@
 ---
-name:  jjwafflestats
+name:  waffle
 title: Waffle Charts
 menuGroup: JJStatsPlot
 menuSubgroup: 'Distribution'
@@ -18,13 +18,13 @@ options:
             The data as a data frame.
 
     - name: counts
-      title: Counts
+      title: Counts (Optional)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
           R: >
-            The numeric values to be represented in the waffle chart
+            Optional numeric values to be represented in the waffle chart. If not provided, will use number of cases.
 
     - name: groups
       title: Groups

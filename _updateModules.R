@@ -84,14 +84,21 @@ update_modules <- function(new_version, new_date) {
   # --- Copy module files ---
   ## jjstatsplot modules
   jjstatsplot_modules <- c(
-    "jjbarstats",
+    # ggstatsplot functions
+    "jjhistostats",
+
+    "jjscatterstats",
+    "jjcorrmat",
+
     "jjbetweenstats",
     "jjwithinstats",
-    "jjcorrmat",
     "jjdotplotstats",
-    "jjhistostats",
+
+    "jjbarstats",
     "jjpiestats",
-    "jjscatterstats"
+
+    # non-ggstatsplot functions
+    "waffle"
   )
   copy_module_files(jjstatsplot_modules,
                     source_dir = file.path(main_repo_dir, "R"),
@@ -122,11 +129,11 @@ update_modules <- function(new_version, new_date) {
 
   ## jsurvival modules
   jsurvival_modules <- c(
-    "multisurvival",
-    "oddsratio",
     "singlearm",
     "survival",
-    "survivalcont"
+    "survivalcont",
+    "multisurvival",
+    "oddsratio"
   )
   copy_module_files(jsurvival_modules,
                     source_dir = file.path(main_repo_dir, "R"),
@@ -139,16 +146,19 @@ update_modules <- function(new_version, new_date) {
 
   ## ClinicoPathDescriptives modules
   ClinicoPathDescriptives_modules <- c(
+    # Descriptives
+    "tableone",
+    "summarydata",
+    "reportcat",
+    "benford",
+    # Plots
     "agepyramid",
     "alluvial",
-    "benford",
-    "crosstable",
-    "reportcat",
-    "summarydata",
-    "tableone",
-    "vartree",
     "venn",
-    "waterfall"
+    "vartree",
+    "waterfall",
+    # Comparisons
+    "crosstable"
   )
   copy_module_files(ClinicoPathDescriptives_modules,
                     source_dir = file.path(main_repo_dir, "R"),
@@ -178,8 +188,15 @@ update_modules <- function(new_version, new_date) {
 }
 
 # Define the new version and date
-new_version <- "0.0.2.64"
+new_version <- "0.0.2.66"
 new_date <- "2024-02-21"
 
 # Run the update process
 update_modules(new_version, new_date)
+
+
+jmvtools::prepare()
+devtools::document()
+jmvtools::prepare()
+devtools::document()
+jmvtools::install()

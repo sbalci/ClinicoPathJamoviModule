@@ -1,5 +1,5 @@
 title: Waffle Charts
-name: jjwafflestats
+name: waffle
 jus: '3.0'
 stage: 0
 compilerMode: tame
@@ -10,7 +10,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Counts
+        label: Counts (Optional)
         children:
           - type: VariablesListBox
             name: counts
