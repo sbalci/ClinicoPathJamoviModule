@@ -115,12 +115,19 @@ waffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_groups <- length(unique(plotdata[[groups_var]]))
 
             # Generate color palettes based on number of groups
+            # Enhanced color palettes
             palettes <- list(
                 default = colorRampPalette(c("#4DA6FF", "#FFB84D"))(n_groups),
                 colorblind = colorRampPalette(c("#999999", "#E69F00", "#56B4E9", "#009E73"))(n_groups),
+                professional = colorRampPalette(c("#2C3E50", "#E74C3C", "#3498DB", "#2ECC71"))(n_groups),
+                presentation = colorRampPalette(c("#003f5c", "#bc5090", "#ffa600", "#58508d"))(n_groups),
+                journal = colorRampPalette(c("#334455", "#778899", "#99AABB", "#BBCCDD"))(n_groups),
                 pastel = colorRampPalette(c("#69b3a2", "#404080", "#FFA07A"))(n_groups),
                 dark = colorRampPalette(c("#1B9E77", "#D95F02", "#7570B3"))(n_groups)
             )
+
+
+
 
             sel_palette <- palettes[[self$options$color_palette]]
             if (is.null(sel_palette))
