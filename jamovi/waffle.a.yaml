@@ -69,6 +69,12 @@ options:
           name: default
         - title: Colorblind Friendly
           name: colorblind
+        - title: Professional
+          name: professional
+        - title: Presentation
+          name: presentation
+        - title: Journal
+          name: journal
         - title: Pastel Colors
           name: pastel
         - title: Dark Colors
