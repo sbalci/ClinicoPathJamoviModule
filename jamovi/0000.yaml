@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.64
+version: 0.0.2.66
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -498,7 +498,7 @@ analyses:
     description: |
       'Creates treemap visualizations for categorical data'
   - title: Waffle Charts
-    name: jjwafflestats
+    name: waffle
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuSubgroup: Distribution
