@@ -24,9 +24,8 @@ A results object containing:
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-\code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

@@ -434,8 +434,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         addRiskScore = function() private$.items[["addRiskScore"]],
         addRiskGroup = function() private$.items[["addRiskGroup"]],
         plot_adj = function() private$.items[["plot_adj"]],
-        mydataview_nomogram2 = function() private$.items[["mydataview_nomogram2"]],
-        mydataview_nomogram = function() private$.items[["mydataview_nomogram"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]]),
     private = list(),
@@ -783,14 +781,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "pplot",
                     "censored",
                     "medianline")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_nomogram2",
-                title="mydataview_nomogram2"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_nomogram",
-                title="mydataview_nomogram"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_nomogram",
@@ -944,8 +934,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$mydataview_nomogram2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 #' }

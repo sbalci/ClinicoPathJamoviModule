@@ -1219,22 +1219,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # mydataview_nomogram
           cox_summary <- cox_model$coefficient
           modelSummary <- summary(cox_model)
-          self$results$mydataview_nomogram$setContent(
-            list(
-              cox_model = cox_model,
-              modelSummary = modelSummary,
-              coef_table = modelSummary$coefficients,
-              conf_table = modelSummary$conf.int,
-              cox_summary = cox_summary,
-              dd = dd,
-              f = f,
-              pred_times = pred_times,
-              nomogram = if(!inherits(nom, "try-error")) nom else NULL,
-              error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL,
-              html_display = if(exists(html_display)) html_display else NULL
 
-            )
-          )
+          # self$results$mydataview_nomogram$setContent(
+          #   list(
+          #     cox_model = cox_model,
+          #     modelSummary = modelSummary,
+          #     coef_table = modelSummary$coefficients,
+          #     conf_table = modelSummary$conf.int,
+          #     cox_summary = cox_summary,
+          #     dd = dd,
+          #     f = f,
+          #     pred_times = pred_times,
+          #     nomogram = if(!inherits(nom, "try-error")) nom else NULL,
+          #     error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL,
+          #     html_display = if(exists(html_display)) html_display else NULL
+          #
+          #   )
+          # )
 
           self$results$nomogram_display$setContent(html_display)
 

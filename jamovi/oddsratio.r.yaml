@@ -55,15 +55,10 @@ items:
     #       - outcome
 
 
-    - name: nomogram
-      title: "Nomogram"
-      type: Html
-      visible: (showNomogram)
-
-    - name: mydataview_nomogram
-      title: "Model Details"
-      type: Preformatted
-      visible: (showNomogram)
+    # - name: mydataview_nomogram
+    #   title: "Model Details"
+    #   type: Preformatted
+    #   visible: (showNomogram)
 
     - name: plot_nomogram
       title: Nomogram
@@ -74,6 +69,10 @@ items:
       renderFun: .plot_nomogram
       visible: (showNomogram)
 
+    - name: nomogram
+      title: "Nomogram"
+      type: Html
+      visible: (showNomogram)
 
 refs:
     - finalfit
