@@ -448,13 +448,13 @@ items:
 
 # Nomogram
 
-    - name:  mydataview_nomogram2
-      title: mydataview_nomogram2
-      type:  Preformatted
+    # - name:  mydataview_nomogram2
+    #   title: mydataview_nomogram2
+    #   type:  Preformatted
 
-    - name:  mydataview_nomogram
-      title: mydataview_nomogram
-      type:  Preformatted
+    # - name:  mydataview_nomogram
+    #   title: mydataview_nomogram
+    #   type:  Preformatted
 
 
     - name: plot_nomogram

@@ -198,8 +198,6 @@ A results object containing:
 \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-\code{results$mydataview_nomogram2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 }

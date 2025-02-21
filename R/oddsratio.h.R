@@ -60,9 +60,8 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
-        nomogram = function() private$.items[["nomogram"]],
-        mydataview_nomogram = function() private$.items[["mydataview_nomogram"]],
-        plot_nomogram = function() private$.items[["plot_nomogram"]]),
+        plot_nomogram = function() private$.items[["plot_nomogram"]],
+        nomogram = function() private$.items[["nomogram"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -106,16 +105,6 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="nomogram",
-                title="Nomogram",
-                visible="(showNomogram)"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_nomogram",
-                title="Model Details",
-                visible="(showNomogram)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_nomogram",
@@ -124,6 +113,11 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=600,
                 requiresData=TRUE,
                 renderFun=".plot_nomogram",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogram",
+                title="Nomogram",
                 visible="(showNomogram)"))}))
 
 oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -167,9 +161,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview_nomogram} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

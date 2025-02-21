@@ -432,14 +432,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Save model summary and nomogram info for debugging
-            self$results$mydataview_nomogram$setContent(
-                list(
-                    model_summary = summary(fit),
-                    nomogram = if(!inherits(nom, "try-error")) nom else NULL,
-                    error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL
-                )
-            )
-        },
+            # self$results$mydataview_nomogram$setContent(
+            #     list(
+            #         model_summary = summary(fit),
+            #         nomogram = if(!inherits(nom, "try-error")) nom else NULL,
+            #         error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL
+            #     )
+            # )
+
+
+            },
 
 
         .createNomogramDisplay = function(nom) {
