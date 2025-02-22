@@ -10,6 +10,10 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             start = NULL,
             end = NULL,
             event = NULL,
+            milestoneVariable = NULL,
+            milestoneTime = NULL,
+            referenceLines = "none",
+            customReferenceTime = 12,
             timetype = "raw",
             timetypedata = "ymd",
             timetypeoutput = "months",
@@ -47,6 +51,32 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "factor"),
                 required=FALSE)
+            private$..milestoneVariable <- jmvcore::OptionVariable$new(
+                "milestoneVariable",
+                milestoneVariable,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                required=FALSE)
+            private$..milestoneTime <- jmvcore::OptionVariable$new(
+                "milestoneTime",
+                milestoneTime,
+                required=FALSE)
+            private$..referenceLines <- jmvcore::OptionList$new(
+                "referenceLines",
+                referenceLines,
+                options=list(
+                    "none",
+                    "median",
+                    "protocol",
+                    "custom"),
+                default="none")
+            private$..customReferenceTime <- jmvcore::OptionNumber$new(
+                "customReferenceTime",
+                customReferenceTime,
+                default=12)
             private$..timetype <- jmvcore::OptionList$new(
                 "timetype",
                 timetype,
@@ -96,6 +126,10 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..start)
             self$.addOption(private$..end)
             self$.addOption(private$..event)
+            self$.addOption(private$..milestoneVariable)
+            self$.addOption(private$..milestoneTime)
+            self$.addOption(private$..referenceLines)
+            self$.addOption(private$..customReferenceTime)
             self$.addOption(private$..timetype)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -108,6 +142,10 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         start = function() private$..start$value,
         end = function() private$..end$value,
         event = function() private$..event$value,
+        milestoneVariable = function() private$..milestoneVariable$value,
+        milestoneTime = function() private$..milestoneTime$value,
+        referenceLines = function() private$..referenceLines$value,
+        customReferenceTime = function() private$..customReferenceTime$value,
         timetype = function() private$..timetype$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -119,6 +157,10 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..start = NA,
         ..end = NA,
         ..event = NA,
+        ..milestoneVariable = NA,
+        ..milestoneTime = NA,
+        ..referenceLines = NA,
+        ..customReferenceTime = NA,
         ..timetype = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -241,6 +283,11 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param start Time/date when observation/treatment started.
 #' @param end Time/date when observation/treatment ended.
 #' @param event Optional variable for event types (e.g., CR, PR, PD).
+#' @param milestoneVariable Variable containing milestone events to mark on
+#'   timeline
+#' @param milestoneTime Times when milestones occurred
+#' @param referenceLines .
+#' @param customReferenceTime .
 #' @param timetype Select whether time values are raw numbers or dates
 #' @param timetypedata Select the time format in your data
 #' @param timetypeoutput Select the time unit for display
@@ -268,6 +315,10 @@ swimmerplot <- function(
     start,
     end,
     event,
+    milestoneVariable,
+    milestoneTime,
+    referenceLines = "none",
+    customReferenceTime = 12,
     timetype = "raw",
     timetypedata = "ymd",
     timetypeoutput = "months",
@@ -282,6 +333,8 @@ swimmerplot <- function(
     if ( ! missing(start)) start <- jmvcore::resolveQuo(jmvcore::enquo(start))
     if ( ! missing(end)) end <- jmvcore::resolveQuo(jmvcore::enquo(end))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
+    if ( ! missing(milestoneVariable)) milestoneVariable <- jmvcore::resolveQuo(jmvcore::enquo(milestoneVariable))
+    if ( ! missing(milestoneTime)) milestoneTime <- jmvcore::resolveQuo(jmvcore::enquo(milestoneTime))
     if ( ! missing(sortVariable)) sortVariable <- jmvcore::resolveQuo(jmvcore::enquo(sortVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -290,15 +343,22 @@ swimmerplot <- function(
             `if`( ! missing(start), start, NULL),
             `if`( ! missing(end), end, NULL),
             `if`( ! missing(event), event, NULL),
+            `if`( ! missing(milestoneVariable), milestoneVariable, NULL),
+            `if`( ! missing(milestoneTime), milestoneTime, NULL),
             `if`( ! missing(sortVariable), sortVariable, NULL))
 
     for (v in event) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in milestoneVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
         patientID = patientID,
         start = start,
         end = end,
         event = event,
+        milestoneVariable = milestoneVariable,
+        milestoneTime = milestoneTime,
+        referenceLines = referenceLines,
+        customReferenceTime = customReferenceTime,
         timetype = timetype,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,

@@ -4,7 +4,7 @@
 \alias{summarydataClass}
 \title{Summary of Continuous Variables}
 \value{
-Text
+Text and an HTML summary table
 }
 \description{
 Summary of Continuous Variables

@@ -4,12 +4,11 @@
 \alias{tableoneClass}
 \title{Table One}
 \value{
-Table
+A formatted table according to the chosen style.
 }
 \description{
-Table One
-
-Table One
+This function creates a “Table One” – a descriptive summary table commonly used in clinicopathological research.
+It offers several output styles using different packages (tableone, gtsummary, arsenal, and janitor).
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::tableoneBase} -> \code{tableoneClass}

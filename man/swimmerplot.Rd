@@ -10,6 +10,10 @@ swimmerplot(
   start,
   end,
   event,
+  milestoneVariable,
+  milestoneTime,
+  referenceLines = "none",
+  customReferenceTime = 12,
   timetype = "raw",
   timetypedata = "ymd",
   timetypeoutput = "months",
@@ -28,6 +32,15 @@ swimmerplot(
 \item{end}{Time/date when observation/treatment ended.}
 
 \item{event}{Optional variable for event types (e.g., CR, PR, PD).}
+
+\item{milestoneVariable}{Variable containing milestone events to mark on
+timeline}
+
+\item{milestoneTime}{Times when milestones occurred}
+
+\item{referenceLines}{.}
+
+\item{customReferenceTime}{.}
 
 \item{timetype}{Select whether time values are raw numbers or dates}
 

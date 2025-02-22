@@ -69,11 +69,11 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="Instructions"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle1",
-                title="",
+                title="Table One Output (tableone)",
                 clearWith=list(
                     "vars",
                     "excl"),
@@ -82,7 +82,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle2",
-                title="",
+                title="Summary Table (gtsummary)",
                 clearWith=list(
                     "vars",
                     "excl"),
@@ -91,16 +91,16 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle3",
-                title="",
+                title="Descriptive Table (arsenal)",
                 clearWith=list(
                     "vars",
                     "excl"),
                 visible="(sty:t3)",
                 refs="arsenal"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle4",
-                title="",
+                title="Frequency Tables (janitor)",
                 clearWith=list(
                     "vars",
                     "excl"),
@@ -130,31 +130,36 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Table One
 #'
-#' Function for making Table One.
+#' This function generates a "Table One", a descriptive summary table 
+#' frequently used in  clinicopathological research manuscripts. It supports 
+#' multiple output styles for flexible formatting.
+#' 
 #'
 #' @examples
 #' \donttest{
+#' # Example usage:
 #' # data('histopathology')
 #' # dat <- as.data.frame(histopathology)
 #' # ClinicoPathDescriptives::tableone(
-#' # data = dat,
-#' # vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-#' # sty = "t3",
-#' # excl = TRUE)
+#' #   data = dat,
+#' #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+#' #   sty = "t3",
+#' #   excl = TRUE)
 #'}
-#' @param data The data as a data frame.
-#' @param vars a string naming the variables from \code{data} that contains
-#'   the values used for the Table One.
-#' @param sty a string naming the style of the table.
-#' @param excl a boolean argument whether to exclude missing values. Default
-#'   is false.
+#' @param data The input data as a data frame.
+#' @param vars A set of variable names from \code{data} to include in the
+#'   Table One. Supports numeric, ordinal, and categorical variables.
+#' @param sty Specify the output style for the table. Each option uses a
+#'   different package for formatting.
+#' @param excl Boolean option to exclude missing values (NA) from the
+#'   analysis. Note: Exclusion may remove entire cases.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

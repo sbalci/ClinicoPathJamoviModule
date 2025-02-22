@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.68
+version: 0.0.2.69
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -58,7 +58,10 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
-    description: Function for making Table One.
+    description: >
+      This function generates a "Table One", a descriptive summary table
+      frequently used in  clinicopathological research manuscripts. It supports
+      multiple output styles for flexible formatting.
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
