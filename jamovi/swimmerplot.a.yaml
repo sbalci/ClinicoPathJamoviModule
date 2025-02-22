@@ -122,6 +122,20 @@ options:
           R: >
             Select the time unit for display
 
+    - name: startType
+      title: Start Time Display
+      type: List
+      options:
+        - title: Relative (all start from 0)
+          name: relative
+        - title: Absolute (use actual start times)
+          name: absolute
+      default: relative
+      description:
+          R: >
+            Choose whether to align all start times to 0 or use absolute start times
+
+
     - name: sortVariable
       title: Sort By Variable
       type: Variable

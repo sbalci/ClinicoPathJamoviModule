@@ -13,6 +13,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             timetype = "raw",
             timetypedata = "ymd",
             timetypeoutput = "months",
+            startType = "relative",
             sortVariable = NULL,
             barHeight = 3, ...) {
 
@@ -74,6 +75,13 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "months",
                     "years"),
                 default="months")
+            private$..startType <- jmvcore::OptionList$new(
+                "startType",
+                startType,
+                options=list(
+                    "relative",
+                    "absolute"),
+                default="relative")
             private$..sortVariable <- jmvcore::OptionVariable$new(
                 "sortVariable",
                 sortVariable)
@@ -91,6 +99,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..timetype)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
+            self$.addOption(private$..startType)
             self$.addOption(private$..sortVariable)
             self$.addOption(private$..barHeight)
         }),
@@ -102,6 +111,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         timetype = function() private$..timetype$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
+        startType = function() private$..startType$value,
         sortVariable = function() private$..sortVariable$value,
         barHeight = function() private$..barHeight$value),
     private = list(
@@ -112,6 +122,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..timetype = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
+        ..startType = NA,
         ..sortVariable = NA,
         ..barHeight = NA)
 )
@@ -160,7 +171,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timetype",
                     "timetypedata",
                     "timetypeoutput",
-                    "barHeight")))
+                    "barHeight",
+                    "startType")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -178,7 +190,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timetype",
                     "timetypedata",
                     "timetypeoutput",
-                    "barHeight")))}))
+                    "barHeight",
+                    "startType")))}))
 
 swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "swimmerplotBase",
@@ -231,6 +244,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param timetype Select whether time values are raw numbers or dates
 #' @param timetypedata Select the time format in your data
 #' @param timetypeoutput Select the time unit for display
+#' @param startType Choose whether to align all start times to 0 or use
+#'   absolute start times
 #' @param sortVariable Variable to sort the patient timelines.
 #' @param barHeight .
 #' @return A results object containing:
@@ -256,6 +271,7 @@ swimmerplot <- function(
     timetype = "raw",
     timetypedata = "ymd",
     timetypeoutput = "months",
+    startType = "relative",
     sortVariable,
     barHeight = 3) {
 
@@ -286,6 +302,7 @@ swimmerplot <- function(
         timetype = timetype,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
+        startType = startType,
         sortVariable = sortVariable,
         barHeight = barHeight)
 

@@ -13,6 +13,7 @@ swimmerplot(
   timetype = "raw",
   timetypedata = "ymd",
   timetypeoutput = "months",
+  startType = "relative",
   sortVariable,
   barHeight = 3
 )
@@ -33,6 +34,9 @@ swimmerplot(
 \item{timetypedata}{Select the time format in your data}
 
 \item{timetypeoutput}{Select the time unit for display}
+
+\item{startType}{Choose whether to align all start times to 0 or use
+absolute start times}
 
 \item{sortVariable}{Variable to sort the patient timelines.}
 
