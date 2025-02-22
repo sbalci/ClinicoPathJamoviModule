@@ -1,15 +1,16 @@
-title: Table One
+title: "Table One"
 name: tableone
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
+
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variables
+        label: "Select Variables"
         children:
           - type: VariablesListBox
             name: vars
@@ -19,8 +20,11 @@ children:
     children:
       - type: ComboBox
         name: sty
+        label: "Table Style" 
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
         name: excl
+        label: "Exclude Missing Values (NA)"  
+...

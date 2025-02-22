@@ -68,6 +68,43 @@ options:
           R: >
             Optional variable for event types (e.g., CR, PR, PD).
 
+# Add to options in swimmerplot.a.yaml:
+    - name: milestoneVariable
+      title: Milestone Events
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      required: false
+      description:
+          R: >
+            Variable containing milestone events to mark on timeline
+
+    - name: milestoneTime
+      title: Milestone Times
+      type: Variable
+      required: false
+      description:
+          R: >
+            Times when milestones occurred
+
+    - name: referenceLines
+      title: Reference Lines
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Median Duration
+          name: median
+        - title: Protocol Times
+          name: protocol
+        - title: Custom Time
+          name: custom
+      default: none
+
+    - name: customReferenceTime
+      title: Custom Reference Time
+      type: Number
+      default: 12
 
     - name: timetype
       title: Time Input Type
