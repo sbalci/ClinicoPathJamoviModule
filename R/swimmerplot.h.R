@@ -9,6 +9,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             patientID = NULL,
             start = NULL,
             end = NULL,
+            event = NULL,
             timetype = "raw",
             timetypedata = "ymd",
             timetypeoutput = "months",
@@ -36,6 +37,15 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..end <- jmvcore::OptionVariable$new(
                 "end",
                 end)
+            private$..event <- jmvcore::OptionVariable$new(
+                "event",
+                event,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"),
+                required=FALSE)
             private$..timetype <- jmvcore::OptionList$new(
                 "timetype",
                 timetype,
@@ -77,6 +87,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..patientID)
             self$.addOption(private$..start)
             self$.addOption(private$..end)
+            self$.addOption(private$..event)
             self$.addOption(private$..timetype)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
@@ -87,6 +98,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         patientID = function() private$..patientID$value,
         start = function() private$..start$value,
         end = function() private$..end$value,
+        event = function() private$..event$value,
         timetype = function() private$..timetype$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
@@ -96,6 +108,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..patientID = NA,
         ..start = NA,
         ..end = NA,
+        ..event = NA,
         ..timetype = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
@@ -128,9 +141,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="summary",
                 title="Timeline Summary",
                 rows=0,
-                clearWith=list(
-                    "start",
-                    "end"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -140,7 +150,17 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="value", 
                         `title`="Value", 
                         `type`="number", 
-                        `format`=".1f"))))
+                        `format`=".1f")),
+                clearWith=list(
+                    "patientID",
+                    "start",
+                    "end",
+                    "event",
+                    "sortVariable",
+                    "timetype",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "barHeight")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -155,6 +175,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "end",
                     "event",
                     "sortVariable",
+                    "timetype",
                     "timetypedata",
                     "timetypeoutput",
                     "barHeight")))}))
@@ -206,6 +227,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param patientID Variable containing patient identifiers.
 #' @param start Time/date when observation/treatment started.
 #' @param end Time/date when observation/treatment ended.
+#' @param event Optional variable for event types (e.g., CR, PR, PD).
 #' @param timetype Select whether time values are raw numbers or dates
 #' @param timetypedata Select the time format in your data
 #' @param timetypeoutput Select the time unit for display
@@ -230,6 +252,7 @@ swimmerplot <- function(
     patientID,
     start,
     end,
+    event,
     timetype = "raw",
     timetypedata = "ymd",
     timetypeoutput = "months",
@@ -242,6 +265,7 @@ swimmerplot <- function(
     if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
     if ( ! missing(start)) start <- jmvcore::resolveQuo(jmvcore::enquo(start))
     if ( ! missing(end)) end <- jmvcore::resolveQuo(jmvcore::enquo(end))
+    if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
     if ( ! missing(sortVariable)) sortVariable <- jmvcore::resolveQuo(jmvcore::enquo(sortVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -249,13 +273,16 @@ swimmerplot <- function(
             `if`( ! missing(patientID), patientID, NULL),
             `if`( ! missing(start), start, NULL),
             `if`( ! missing(end), end, NULL),
+            `if`( ! missing(event), event, NULL),
             `if`( ! missing(sortVariable), sortVariable, NULL))
 
+    for (v in event) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
         patientID = patientID,
         start = start,
         end = end,
+        event = event,
         timetype = timetype,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
