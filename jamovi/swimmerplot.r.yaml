@@ -12,9 +12,6 @@ items:
       title: Timeline Summary
       type: Table
       rows: 0
-      clearWith:
-        - start
-        - end
       columns:
         - name: metric
           title: "Metric"

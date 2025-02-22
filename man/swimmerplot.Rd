@@ -9,6 +9,7 @@ swimmerplot(
   patientID,
   start,
   end,
+  event,
   timetype = "raw",
   timetypedata = "ymd",
   timetypeoutput = "months",
@@ -24,6 +25,8 @@ swimmerplot(
 \item{start}{Time/date when observation/treatment started.}
 
 \item{end}{Time/date when observation/treatment ended.}
+
+\item{event}{Optional variable for event types (e.g., CR, PR, PD).}
 
 \item{timetype}{Select whether time values are raw numbers or dates}
 
