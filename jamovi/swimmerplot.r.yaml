@@ -30,6 +30,7 @@ items:
         - timetypedata
         - timetypeoutput
         - barHeight
+        - startType
 
 
     - name: plot
@@ -49,6 +50,7 @@ items:
         - timetypedata
         - timetypeoutput
         - barHeight
+        - startType
 
 refs:
     - ClinicoPathJamoviModule

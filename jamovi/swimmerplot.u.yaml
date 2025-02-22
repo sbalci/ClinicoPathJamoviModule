@@ -60,6 +60,9 @@ children:
                 enable: (timetype:datetime)
               - type: ComboBox
                 name: timetypeoutput
+              - type: ComboBox
+                name: startType
+                label: Start Time Display
           - type: Label
             label: Display Options  
             children:
