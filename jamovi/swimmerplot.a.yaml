@@ -1,0 +1,140 @@
+---
+name:  swimmerplot
+title: Swimmer Plot
+menuGroup: Exploration
+menuSubgroup: Patient Follow-Up Plots
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Creates a swimmer plot to visualize individual patient timelines and events.
+    R:
+        dontrun: true
+        usage: |
+            # Example will show patient timelines
+            data <- data.frame(
+                PatientID = paste0("PT", 1:10),
+                StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
+                Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD")
+            )
+            swimmerplot(
+                data = data,
+                patientID = "PatientID",
+                start = "StartTime",
+                end = "EndTime",
+                event = "Event"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: patientID
+      title: Patient ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Variable containing patient identifiers.
+
+
+    - name: start
+      title: Start Time
+      type: Variable
+      description:
+          R: >
+            Time/date when observation/treatment started.
+
+    - name: end
+      title: End Time 
+      type: Variable  
+      description:
+          R: >
+            Time/date when observation/treatment ended.
+
+
+    - name: event
+      title: Event Type (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      required: false
+      description:
+          R: >
+            Optional variable for event types (e.g., CR, PR, PD).
+
+
+    - name: timetype
+      title: Time Input Type
+      type: List
+      options:
+        - title: Raw Values (numeric)
+          name: raw
+        - title: Date/Time
+          name: datetime
+      default: raw
+      description:
+          R: >
+            Select whether time values are raw numbers or dates
+
+    - name: timetypedata
+      title: 'Time Format in Data'
+      type: List
+      options:
+        - title: YYYY-MM-DD HH:MM:SS
+          name: ymdhms
+        - title: YYYY-MM-DD
+          name: ymd
+        - title: YYYY-DD-MM
+          name: ydm
+        - title: MM-DD-YYYY
+          name: mdy
+        - title: MM-YYYY-DD
+          name: myd
+        - title: DD-MM-YYYY
+          name: dmy
+        - title: DD-YYYY-MM
+          name: dym
+      default: ymd
+      description:
+          R: >
+            Select the time format in your data
+
+    - name: timetypeoutput
+      title: Time Unit in Output
+      type: List
+      options:
+        - title: Days
+          name: days
+        - title: Weeks
+          name: weeks
+        - title: Months
+          name: months
+        - title: Years
+          name: years
+      default: months
+      description:
+          R: >
+            Select the time unit for display
+
+    - name: sortVariable
+      title: Sort By Variable
+      type: Variable
+      description:
+          R: >
+            Variable to sort the patient timelines.
+
+    - name: barHeight
+      title: Bar Height
+      type: Number
+      min: 0.1
+      max: 10
+      default: 3
+
+
+...
