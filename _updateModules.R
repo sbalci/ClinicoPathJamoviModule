@@ -156,6 +156,7 @@ update_modules <- function(new_version, new_date) {
     "alluvial",
     "venn",
     "vartree",
+    # Patient Follow-up
     "waterfall",
     # Comparisons
     "crosstable"
@@ -189,7 +190,7 @@ update_modules <- function(new_version, new_date) {
 
 # Define the new version and date
 new_version <- "0.0.2.66"
-new_date <- "2024-02-21"
+new_date <- "2024-02-22"
 
 # Run the update process
 update_modules(new_version, new_date)

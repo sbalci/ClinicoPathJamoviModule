@@ -1,0 +1,59 @@
+---
+name:  swimmerplot
+title: Patient Timeline Analysis
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+    
+    - name: summary
+      title: Timeline Summary
+      type: Table
+      rows: 0
+      clearWith:
+        - start
+        - end
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+          format: ".1f"
+      clearWith:
+        - patientID
+        - start 
+        - end
+        - event
+        - sortVariable
+        - timetype
+        - timetypedata
+        - timetypeoutput
+        - barHeight
+
+
+    - name: plot
+      title: 'Swimmer Plot'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - patientID
+        - start 
+        - end
+        - event
+        - sortVariable
+        - timetype
+        - timetypedata
+        - timetypeoutput
+        - barHeight
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

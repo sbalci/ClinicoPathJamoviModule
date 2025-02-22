@@ -60,6 +60,9 @@ waffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "default",
                     "colorblind",
+                    "professional",
+                    "presentation",
+                    "journal",
                     "pastel",
                     "dark"),
                 default="default")

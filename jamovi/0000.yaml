@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-02-21'
+date: '2024-02-22'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -522,11 +522,20 @@ analyses:
     name: waterfall
     ns: ClinicoPath
     menuGroup: Exploration
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >-
       Creates a waterfall plot to visualize tumor response data following RECIST
       criteria.
+  - title: Swimmer Plot
+    name: swimmerplot
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: Patient Follow-Up Plots
+    menuTitle: Swimmer Plot
+    description: >-
+      Creates a swimmer plot to visualize individual patient timelines and
+      events.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

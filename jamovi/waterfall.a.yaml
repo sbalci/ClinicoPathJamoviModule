@@ -2,7 +2,7 @@
 name: waterfall
 title: Treatment Response Analysis
 menuGroup: Exploration
-menuSubgroup: ClinicoPath Descriptive Plots
+menuSubgroup: Patient Follow-Up Plots
 version: '1.0.0'
 jas: '1.2'
 
