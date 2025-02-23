@@ -8,7 +8,9 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             age = NULL,
             gender = NULL,
-            female = NULL, ...) {
+            female = NULL,
+            bin_width = 5,
+            plot_title = "Age Pyramid", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,19 +37,33 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "female",
                 female,
                 variable="(gender)")
+            private$..bin_width <- jmvcore::OptionNumber$new(
+                "bin_width",
+                bin_width,
+                default=5)
+            private$..plot_title <- jmvcore::OptionString$new(
+                "plot_title",
+                plot_title,
+                default="Age Pyramid")
 
             self$.addOption(private$..age)
             self$.addOption(private$..gender)
             self$.addOption(private$..female)
+            self$.addOption(private$..bin_width)
+            self$.addOption(private$..plot_title)
         }),
     active = list(
         age = function() private$..age$value,
         gender = function() private$..gender$value,
-        female = function() private$..female$value),
+        female = function() private$..female$value,
+        bin_width = function() private$..bin_width$value,
+        plot_title = function() private$..plot_title$value),
     private = list(
         ..age = NA,
         ..gender = NA,
-        ..female = NA)
+        ..female = NA,
+        ..bin_width = NA,
+        ..plot_title = NA)
 )
 
 agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -73,7 +89,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="Pop", 
-                        `title`="Population", 
+                        `title`="Age Group", 
                         `type`="text"),
                     list(
                         `name`="Female", 
@@ -86,7 +102,9 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age",
                     "gender",
-                    "female")))
+                    "female",
+                    "bin_width",
+                    "plot_title")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -98,7 +116,9 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age",
                     "gender",
-                    "female")))}))
+                    "female",
+                    "bin_width",
+                    "plot_title")))}))
 
 agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agepyramidBase",
@@ -108,7 +128,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(1,0,0),
+                version = c(1,1,0),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,
@@ -125,12 +145,15 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param age a string naming the variable from \code{data} that contains the
-#'   continuous values used for the report
-#' @param gender a string naming the variable from \code{data} that contains
-#'   the categorical values used for the report
-#' @param female a string naming the level from \code{gender} that contains
-#'   the level female
+#' @param age A string naming the variable from \code{data} that contains the
+#'   continuous age values.
+#' @param gender A string naming the variable from \code{data} that contains
+#'   the categorical gender values.
+#' @param female A string naming the level from \code{gender} that should be
+#'   considered as 'Female'.
+#' @param bin_width The width of the age bins in years. Adjust this to change
+#'   the granularity of the age groups.
+#' @param plot_title The title displayed on the age pyramid plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
@@ -148,7 +171,9 @@ agepyramid <- function(
     data,
     age,
     gender,
-    female) {
+    female,
+    bin_width = 5,
+    plot_title = "Age Pyramid") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agepyramid requires jmvcore to be installed (restart may be required)")
@@ -166,7 +191,9 @@ agepyramid <- function(
     options <- agepyramidOptions$new(
         age = age,
         gender = gender,
-        female = female)
+        female = female,
+        bin_width = bin_width,
+        plot_title = plot_title)
 
     analysis <- agepyramidClass$new(
         options = options,

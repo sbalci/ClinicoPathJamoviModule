@@ -4,19 +4,31 @@
 \alias{agepyramid}
 \title{Age Pyramid}
 \usage{
-agepyramid(data, age, gender, female)
+agepyramid(
+  data,
+  age,
+  gender,
+  female,
+  bin_width = 5,
+  plot_title = "Age Pyramid"
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{age}{a string naming the variable from \code{data} that contains the
-continuous values used for the report}
+\item{age}{A string naming the variable from \code{data} that contains the
+continuous age values.}
 
-\item{gender}{a string naming the variable from \code{data} that contains
-the categorical values used for the report}
+\item{gender}{A string naming the variable from \code{data} that contains
+the categorical gender values.}
 
-\item{female}{a string naming the level from \code{gender} that contains
-the level female}
+\item{female}{A string naming the level from \code{gender} that should be
+considered as 'Female'.}
+
+\item{bin_width}{The width of the age bins in years. Adjust this to change
+the granularity of the age groups.}
+
+\item{plot_title}{The title displayed on the age pyramid plot.}
 }
 \value{
 A results object containing:
