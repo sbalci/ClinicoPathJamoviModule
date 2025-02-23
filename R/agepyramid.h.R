@@ -89,7 +89,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="Pop", 
-                        `title`="Age Group", 
+                        `title`="Population", 
                         `type`="text"),
                     list(
                         `name`="Female", 
@@ -102,9 +102,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age",
                     "gender",
-                    "female",
-                    "bin_width",
-                    "plot_title")))
+                    "female")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -116,9 +114,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age",
                     "gender",
-                    "female",
-                    "bin_width",
-                    "plot_title")))}))
+                    "female")))}))
 
 agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agepyramidBase",
@@ -128,7 +124,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(1,1,0),
+                version = c(1,0,0),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,
@@ -145,12 +141,12 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data The data as a data frame.
-#' @param age A string naming the variable from \code{data} that contains the
-#'   continuous age values.
-#' @param gender A string naming the variable from \code{data} that contains
-#'   the categorical gender values.
-#' @param female A string naming the level from \code{gender} that should be
-#'   considered as 'Female'.
+#' @param age a string naming the variable from \code{data} that contains the
+#'   continuous values used for the report
+#' @param gender a string naming the variable from \code{data} that contains
+#'   the categorical values used for the report
+#' @param female a string naming the level from \code{gender} that contains
+#'   the level female
 #' @param bin_width The width of the age bins in years. Adjust this to change
 #'   the granularity of the age groups.
 #' @param plot_title The title displayed on the age pyramid plot.

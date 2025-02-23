@@ -65,7 +65,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::count() %>%
                 dplyr::ungroup()
 
-            # Save state for plot rendering
+            # Save state for plot rendering; ensures plot gets updated when bin_width changes
             image <- self$results$plot
             image$setState(plotData)
 
@@ -98,6 +98,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Retrieve the prepared plot data
             plotData <- image$state
+
+            # Ensure that the age bins (Pop) reflect the latest bin width:
+            # Convert 'Pop' to character then back to factor with the order of appearance.
+            plotData$Pop <- factor(as.character(plotData$Pop), levels = unique(as.character(plotData$Pop)))
 
             # Set plot title (using user option if provided)
             plot_title <- if (!is.null(self$options$plot_title)) self$options$plot_title else "Age Pyramid"

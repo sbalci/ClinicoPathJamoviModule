@@ -24,7 +24,7 @@ update_description_files <- function(paths, version, date) {
 }
 
 # Function to update YAML files with new version and date
-update_yaml_files <- function(paths, version, date) {
+update_yaml_0000_files <- function(paths, version, date) {
   version_pattern <- "version:.*$"
   date_pattern <- "date:.*$"
   version_replacement <- paste0("version: ", version)
@@ -33,6 +33,14 @@ update_yaml_files <- function(paths, version, date) {
   xfun::gsub_files(files = paths, pattern = version_pattern, replacement = version_replacement)
   xfun::gsub_files(files = paths, pattern = date_pattern, replacement = date_replacement)
 }
+
+update_yaml_a_files <- function(paths, version) {
+    version_pattern <- "version:.*$"
+    version_replacement <- paste0("version: '", version, "'")
+
+    xfun::gsub_files(files = paths, pattern = version_pattern, replacement = version_replacement)
+}
+
 
 # Function to copy module files from source to destination directories
 copy_module_files <- function(module_names, source_dir, dest_dir, file_extensions) {
@@ -106,7 +114,7 @@ update_modules <- function(new_version, new_date) {
         "reportcat",
         "benford",
         # Plots
-        # "agepyramid",
+        "agepyramid",
         # "alluvial",
         # "venn",
         # "vartree",
@@ -130,22 +138,28 @@ update_modules <- function(new_version, new_date) {
                            date = new_date)
 
   # --- Update YAML files ---
-  yaml_paths <- c(
+  yaml_0000_paths <- c(
     file.path(main_repo_dir, "jamovi", "0000.yaml"),
     file.path(jjstatsplot_dir, "jamovi", "0000.yaml"),
     file.path(meddecide_dir, "jamovi", "0000.yaml"),
     file.path(jsurvival_dir, "jamovi", "0000.yaml"),
-    file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml"),
-    file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml")),
-    file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml")),
-    file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml")),
-    file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
+    file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml")
+  )
+
+  yaml_a_paths <- c(
+      file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml")),
+      file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml")),
+      file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml")),
+      file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
   )
 
 
-  update_yaml_files(paths = yaml_paths,
+update_yaml_0000_files(paths = yaml_0000_paths,
                     version = new_version,
                     date = new_date)
+
+update_yaml_a_files(paths = yaml_a_paths,
+                    version = new_version)
 
   # --- Copy module files ---
 
@@ -212,7 +226,7 @@ update_modules <- function(new_version, new_date) {
 }
 
 # Define the new version and date
-new_version <- "0.0.2.69"
+new_version <- "0.0.2.70"
 new_date <- "2024-02-23"
 
 # Run the update process

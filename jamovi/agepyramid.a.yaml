@@ -3,7 +3,7 @@ name:  agepyramid
 title: Age Pyramid
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '1.1.0'
+version: '1.0.0'
 jas: '1.2'
 
 options:
@@ -22,9 +22,11 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            A string naming the variable from `data` that contains the continuous age values.
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
           jamovi: >
-            A string naming the variable from `data` that contains the continuous age values.
+            a string naming the variable from `data` that contains the
+            continuous values used for the report
 
     - name: gender
       title: Gender
@@ -33,19 +35,24 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            A string naming the variable from `data` that contains the categorical gender values.
+            a string naming the variable from `data` that contains the
+            categorical values used for the report
           jamovi: >
-            A string naming the variable from `data` that contains the categorical gender values.
-
+            a string naming the variable from `data` that contains the
+            categorical values used for the report
+            
     - name: female
       title: Select Female
       type: Level
       variable: (gender)
       description:
           R: >
-            A string naming the level from `gender` that should be considered as 'Female'.
+            a string naming the level from `gender` that contains the
+            level female
           jamovi: >
-            A string naming the level from `gender` that should be considered as 'Female'.
+            a string naming the level from `gender` that contains the
+            level female
+
 
     - name: bin_width
       title: Bin Width (Years)
@@ -66,4 +73,7 @@ options:
             The title displayed on the age pyramid plot.
           jamovi: >
             The title displayed on the age pyramid plot.
+
+
+
 ...
