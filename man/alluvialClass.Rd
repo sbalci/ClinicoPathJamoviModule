@@ -4,12 +4,11 @@
 \alias{alluvialClass}
 \title{Alluvial Plot}
 \value{
-Alluvial Plot
+An Alluvial Plot is generated and printed.
 }
 \description{
-Alluvial Plot
-
-Alluvial Plot
+This function generates an Alluvial Diagram to visualize flows between multiple categorical variables.
+It supports optional features such as marginal histograms, and custom titles
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::alluvialBase} -> \code{alluvialClass}

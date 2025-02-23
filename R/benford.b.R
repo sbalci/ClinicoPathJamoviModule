@@ -42,12 +42,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                # <br>
                                # <hr>
                                # <br>,
-
-                               "<br>
-                               Also see <a href = 'https://www.iamnagdev.com/?p=926'>this blog post</a>.
-                               <br>
-                               <hr>
-                               ")
+)
 
             self$results$todo$setContent(todo)
 
