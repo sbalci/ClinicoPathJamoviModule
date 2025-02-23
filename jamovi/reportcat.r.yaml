@@ -13,7 +13,7 @@ items:
 
     - name:  text
       title: ''
-      type:  Preformatted
+      type:  Html
 
     - name:  text1
       title: 'Categorical Data'
