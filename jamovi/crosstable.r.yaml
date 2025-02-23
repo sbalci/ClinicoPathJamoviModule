@@ -5,24 +5,25 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
+    - name: todo
       title: To Do
-      type:  Html
-      clearWith:
-          - vars
-          - group
-
-    - name:  todo2
-      title: To Do
-      type:  Html
+      type: Html
       clearWith:
           - vars
           - group
           - sty
 
-    - name:  tablestyle1
+    - name: todo2
+      title: To Do
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+
+    - name: tablestyle1
       title: '`Cross Table - ${group}`'
-      type:  Html
+      type: Html
       clearWith:
           - vars
           - group
@@ -30,7 +31,7 @@ items:
       visible: (sty:arsenal)
       refs: arsenal
 
-    - name:  tablestyle2
+    - name: tablestyle2
       title: '`Cross Table - ${group}`'
       type: Html
       clearWith:
@@ -42,10 +43,9 @@ items:
       visible: (sty:finalfit)
       refs: finalfit
 
-
     - name: tablestyle3
       title: '`Cross Table - ${group}`'
-      type:  Html
+      type: Html
       clearWith:
           - vars
           - group
@@ -53,10 +53,9 @@ items:
       visible: (sty:gtsummary)
       refs: gtsummary
 
-
     - name: tablestyle4
       title: '`Cross Table - ${group}`'
-      type:  Html
+      type: Html
       clearWith:
           - vars
           - group
@@ -65,22 +64,6 @@ items:
       refs: tangram
 
 
-    # - name: basic_analysis
-    #   title: 'Contingency Table Analysis'
-    #   type: Html
-    #   clearWith:
-    #       - vars
-    #       - group
-    #       - excl
-
-
-    # - name: posthoc
-    #   title: '`Chi-Square Post-hoc Analysis ${group_posthoc} - ${var_posthoc}`'
-    #   type:  Html
-
-
 refs:
     - ClinicoPathJamoviModule
-
-
 ...

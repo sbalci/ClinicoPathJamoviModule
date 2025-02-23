@@ -19,9 +19,9 @@ items:
       title: To Do
       type:  Html
 
-    # - name: output1
-    #   title: To Do
-    #   type:  Preformatted
+    # - title: Summary of True Counts
+    #   name: summary
+    #   type: Preformatted
 
     - title: Venn Diagram
       name: plot
@@ -33,7 +33,6 @@ items:
       refs:
         - venn
 
-
     - title: Upset Diagram
       name: plot2
       type: Image
@@ -44,9 +43,6 @@ items:
       refs:
         - upset
 
-
-
 refs:
     - ClinicoPathJamoviModule
-
 ...

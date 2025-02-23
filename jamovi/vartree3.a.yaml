@@ -1,17 +1,17 @@
 ---
-name:  vartree
-title: Variable Tree
+name: vartree3 
+title: Variable Tree V3
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '0.0.2'
+version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for Generating Tree Summaries of Variables.
+    main: Function for Generating Enhanced Tree Summaries of Variables
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Example will be added
 
 options:
     - name: data
@@ -19,7 +19,6 @@ options:
       description:
           R: >
             The data as a data frame.
-
 
     - name: vars
       title: Variables
@@ -125,7 +124,6 @@ options:
       type: Bool
       default: false
 
-
     - name: pattern
       title: Pattern Tree
       type: Bool
@@ -138,13 +136,8 @@ options:
 
     - name: ptable
       title: Pattern Table
-      type: Bool
+      type: Bool 
       default: false
-
-    # - name: venntable
-    #   title: Venn Table
-    #   type: Bool
-    #   default: false
 
     - name: mytitle
       title: Root Title
@@ -152,17 +145,17 @@ options:
       default: ''
 
     - name: useprunesmaller
-      title: Prune
+      title: Prune Small Nodes
       type: Bool
       default: false
 
     - name: prunesmaller
-      title: 'counts <'
+      title: 'Prune counts <'
       type: Integer
       default: 5
 
     - name: summarylocation
-      title: 'Summary Location'
+      title: 'Summary Location'  
       type: List
       options:
         - title: 'All Nodes'
@@ -171,19 +164,39 @@ options:
           name: leafonly
       default: leafonly
 
-    # - name: maxwidth
-    #   title: Image Width
-    #   type: Integer
-    #   default: 100
 
-    # - name: width
-    #   title: Image Width
-    #   type: Integer
-    #   default: 100
+    - name: style
+      title: Visual Style
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: clean
+          title: Clean
+        - name: minimal
+          title: Minimal
+      default: default
 
-    # - name: height
-    #   title: Image Height
-    #   type: Integer
-    #   default: 100
+    - name: showInterpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+
+    - name: survival
+      title: Survival Analysis
+      type: Bool
+      default: false
+
+    - name: labs
+      title: Show Lab Values
+      type: Bool
+      default: false
+
+    - name: response
+      title: Show Response
+      type: Bool
+      default: false
+
+
 
 ...

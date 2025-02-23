@@ -3,7 +3,7 @@ name:  crosstable
 title: Cross Tables
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '1.0.0'
+version: '0.0.2'
 jas: '1.2'
 
 description:
@@ -11,8 +11,18 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
-
+            # Example usage:
+            # dat <- as.data.frame(your_data)
+            # ClinicoPathDescriptives::crosstable(
+            #   data = dat,
+            #   vars = vars(YourRowVariable),
+            #   group = "YourGroupingVariable",
+            #   sty = "finalfit",
+            #   excl = TRUE,
+            #   cont = "mean",
+            #   pcat = "chisq",
+            #   exportCSV = TRUE
+            # )
 
 options:
     - name: data
@@ -20,24 +30,18 @@ options:
       description:
           R: >
             The data as a data frame.
-
-
     - name: vars
-      title: Dependent Variable
+      title: Dependent Variable(s)
       type: Variables
       description: >
-                  variable in the rows
-
-
+            The variable(s) that will appear as rows in the cross table.
     - name: group
       title: Grouping Variable
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description: >
-                  variable in the column
-
-
+            The variable that will appear as columns (groups) in the table.
     - name: sty
       title: Table Style
       type: List
@@ -55,13 +59,13 @@ options:
         - title: hmisc
           name: hmisc
       default: nejm
-
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
       default: false
-
-
+      description:
+          R: >
+            Exclude rows with missing values.
     - name: cont
       title: Mean vs Median
       type: List
@@ -71,8 +75,6 @@ options:
         - title: median
           name: median
       default: mean
-
-
     - name: pcat
       title: ChiSq vs Fisher
       type: List
@@ -82,63 +84,5 @@ options:
         - title: fisher
           name: fisher
       default: chisq
-
-    # - name: perform_posthoc
-    #   title: Include Post-hoc Analysis
-    #   type: Bool
-    #   default: false
-    #   description: >
-    #     Performs detailed post-hoc analysis of the contingency table
-
-
-    # - name: primary_var
-    #   title: Primary Variable
-    #   type: Variable
-    #   suggested: [ ordinal, nominal ]
-    #   permitted: [ factor ]
-    #   description: >
-    #     Variable to focus on in post-hoc analysis (typically the row variable)
-
-    # - name: secondary_var
-    #   title: Secondary Variable
-    #   type: Variable
-    #   suggested: [ ordinal, nominal ]
-    #   permitted: [ factor ]
-    #   description: >
-    #     Variable to analyze against (typically the column variable)
-
-
-
-    # - name: posthoc_method
-    #   title: Post-hoc Analysis Method
-    #   type: List
-    #   options:
-    #     - title: Both Methods
-    #       name: both
-    #     - title: Cell Residuals Only
-    #       name: residuals
-    #     - title: Pairwise Only
-    #       name: pairwise
-    #   default: both
-    #   description: >
-    #     Select method for post-hoc analysis of contingency tables.
-    #     'Both Methods' shows cell residuals and pairwise comparisons,
-    #     'Cell Residuals Only' shows standardized residuals analysis,
-    #     'Pairwise Only' shows traditional 2x2 comparisons,
-    #     'None' skips post-hoc analysis.
-
-
-
-
-    # - name: export
-    #   title: Export Html
-    #   type: Bool
-    #   default: false
-
-
-    # - name: excl2
-    #   title: Exclude Missing per Variable (NA)
-    #   type: Bool
-    #   default: true
 
 ...

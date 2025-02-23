@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.70
+version: 0.0.2.72
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -543,6 +543,20 @@ analyses:
     description: >-
       Creates a swimmer plot to visualize individual patient timelines and
       events.
+  - title: Variable Tree 2
+    name: vartree2
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Variable Tree 2
+    description: Function for Generating Tree Summaries of Variables.
+  - title: Variable Tree V3
+    name: vartree3
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Variable Tree V3
+    description: Function for Generating Enhanced Tree Summaries of Variables
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

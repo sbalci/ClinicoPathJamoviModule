@@ -7,31 +7,32 @@
 venn(data, var1, var1true, var2, var2true, var3, var3true, var4, var4true)
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The dataset as a data frame containing the variables for
+analysis.}
 
-\item{var1}{a string naming the variable from \code{data} that contains the
-the first variable used for the report}
+\item{var1}{A string naming the primary variable from \code{data} for the
+diagram.}
 
-\item{var1true}{a string naming the level from \code{var1} that contains
-the the true level}
+\item{var1true}{The level in \code{var1} that represents the positive
+condition.}
 
-\item{var2}{a string naming the variable from \code{data} that contains the
-the second variable used for the report}
+\item{var2}{A string naming the secondary variable from \code{data} used in
+the diagram.}
 
-\item{var2true}{a string naming the level from \code{var2} that contains
-the the true level}
+\item{var2true}{The level in \code{var2} that represents the positive
+condition.}
 
-\item{var3}{a string naming the variable from \code{data} that contains the
-the third variable used for the report}
+\item{var3}{An optional variable from \code{data} to include in the
+diagram.}
 
-\item{var3true}{a string naming the level from \code{var3} that contains
-the the true level}
+\item{var3true}{The level in \code{var3} that represents the positive
+condition.}
 
-\item{var4}{a string naming the variable from \code{data} that contains the
-the fourth variable used for the report}
+\item{var4}{An optional variable from \code{data} for additional overlap
+analysis.}
 
-\item{var4true}{a string naming the level from \code{var4} that contains
-the the true level}
+\item{var4true}{The level in \code{var4} that represents the positive
+condition.}
 }
 \value{
 A results object containing:

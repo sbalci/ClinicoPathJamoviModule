@@ -124,7 +124,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(1,0,0),
+                version = c(0,0,2),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,

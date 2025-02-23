@@ -3,7 +3,7 @@ name: waterfall
 title: Treatment Response Analysis
 menuGroup: Exploration
 menuSubgroup: Patient Follow-Up Plots
-version: '1.0.0'
+version: '0.0.2'
 jas: '1.2'
 
 

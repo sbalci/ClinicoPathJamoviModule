@@ -2,6 +2,8 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+# nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
+
 
 vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeClass",
@@ -339,7 +341,19 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # export as svg ----
             results1 <- DiagrammeRsvg::export_svg(gv = results)
-            self$results$text1$setContent(print(results1))
+
+
+            results1 <- base::sub('width=\"[[:digit:]pt\"]+',
+                                  ifelse(horizontal == TRUE, 'width=400pt ', 'width=1000pt '),
+                                  results1)
+
+            results1 <- paste0('<html><head><style>
+                               #myDIV {width: 610px; height: 850px; overflow: auto;}
+                               </style></head><body><div id="myDIV">',
+                               results1,
+                               '</div></script></body></html>')
+
+            self$results$text1$setContent(results1)
 
 
             # ptable ----

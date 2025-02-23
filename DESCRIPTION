@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.2.70
+Version: 0.0.2.72
 Date: 2024-02-23
 Authors@R: 
     person(given = "Serdar",
@@ -114,7 +114,8 @@ Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
     gastonstat/arcdiagram,
     hrbrmstr/streamgraph,
-    jbengler/tidyplots
+    jbengler/tidyplots,
+    hms-dbmi/UpSetR
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
