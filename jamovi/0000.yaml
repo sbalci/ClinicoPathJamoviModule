@@ -531,9 +531,10 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
-    description: >-
-      Creates a waterfall plot to visualize tumor response data following RECIST
-      criteria.
+    description: >
+      Creates waterfall and spider plots to visualize tumor response data
+      following RECIST criteria. Now includes optional calculations for duration
+      of response, time to response, and subgroup analysis.
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
