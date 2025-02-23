@@ -67,7 +67,8 @@ commit_repo <- function(repo_dir, commit_message) {
 # Copy example files to each module directory
 
 jjstatsplot_example_files <- c(
-    "histopathologyGraphsPlots.omv"
+  "histopathology.rda",
+  "histopathologyGraphsPlots.omv"
 )
 
 fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
@@ -76,7 +77,8 @@ fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
 
 
 meddecide_example_files <- c(
-    "histopathologyMedicalDecision.omv"
+  "histopathology.rda",
+  "histopathologyMedicalDecision.omv"
 )
 
 fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
@@ -85,7 +87,8 @@ fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
 
 
 jsurvival_example_files <- c(
-    "histopathologySurvival.omv"
+  "histopathology.rda",
+  "histopathologySurvival.omv"
 )
 
 fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
@@ -94,15 +97,16 @@ fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
 
 
 ClinicoPathDescriptives_example_files <- c(
-    "histopathologyDescriptives.omv",
-    "swimmer_data_raw.omv",
-"swimmer_data_raw.csv",
-"swimmer_data_raw.rda",
-"swimmer_data_date_formats.omv",
-"swimmer_data_date_formats.csv",
-"swimmer_data_date_formats.rda",
-"swimmer_data.csv",
-"swimmer_data.rda"
+  "histopathology.rda",
+  "histopathologyDescriptives.omv",
+  "swimmer_data_raw.omv",
+  "swimmer_data_raw.csv",
+  "swimmer_data_raw.rda",
+  "swimmer_data_date_formats.omv",
+  "swimmer_data_date_formats.csv",
+  "swimmer_data_date_formats.rda",
+  "swimmer_data.csv",
+  "swimmer_data.rda"
 )
 
 fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_files),
@@ -113,11 +117,9 @@ fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_f
 # tumor_response_examples.rda
 # percent_no_time.rda
 # percent_with_time.rda
-# raw_no_time.rda
 # raw_with_time.rda
 # percent_no_time.csv
 # percent_with_time.csv
-# raw_no_time.csv
 # raw_with_time.csv
 # tumor_response_data.csv
 # oncology_response_data.csv
