@@ -115,11 +115,12 @@ update_modules <- function(new_version, new_date) {
         "benford",
         # Plots
         "agepyramid",
-        # "alluvial",
+        "alluvial",
         # "venn",
         # "vartree",
         # Patient Follow-up
         "waterfall"
+        # "swimmerplot"
         # Comparisons
         # "crosstable"
     )
