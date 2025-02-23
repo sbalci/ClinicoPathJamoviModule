@@ -4,9 +4,10 @@
 \alias{vennClass}
 \title{Venn Diagram}
 \description{
-Venn Diagram
-
-Venn Diagram
+Generates a Venn Diagram and an Upset diagram from selected categorical variables.
+This function converts specified variables to logical values based on a chosen "true" level.
+Two visual outputs are produced: a Venn diagram (via ggvenn) and an Upset plot (via UpSetR).
+Additionally, a summary table of "true" counts for each variable is provided.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::vennBase} -> \code{vennClass}

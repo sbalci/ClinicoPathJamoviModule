@@ -3,7 +3,7 @@ name:  venn
 title: Venn Diagram
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '1.0.0'
+version: '0.0.2'
 jas: '1.2'
 
 options:
@@ -12,22 +12,20 @@ options:
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The dataset as a data frame containing the variables for analysis.
           jamovi: >
             The data as a data frame.
 
     - name: var1
-      title: 'Variable 1'
+      title: 'Variable 1 (Required)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            a string naming the variable from `data` that contains the
-            the first variable used for the report
+            A string naming the primary variable from `data` for the diagram.
           jamovi: >
-            a string naming the variable from `data` that contains the
-            the first variable used for the report
+            A string naming the primary variable from `data`.
 
     - name: var1true
       title: 'Select True Level'
@@ -35,25 +33,20 @@ options:
       variable: (var1)
       description:
           R: >
-            a string naming the level from `var1` that contains the
-            the true level
+            The level in `var1` that represents the positive condition.
           jamovi: >
-            a string naming the level from `var1` that contains the
-            the true level
-
+            The level in `var1` that represents the true condition.
 
     - name: var2
-      title: 'Variable 2'
+      title: 'Variable 2 (Required)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            a string naming the variable from `data` that contains the
-            the second variable used for the report
+            A string naming the secondary variable from `data` used in the diagram.
           jamovi: >
-            a string naming the variable from `data` that contains the
-            the second variable used for the report
+            A string naming the secondary variable from `data`.
 
     - name: var2true
       title: 'Select True Level'
@@ -61,25 +54,20 @@ options:
       variable: (var2)
       description:
           R: >
-            a string naming the level from `var2` that contains the
-            the true level
+            The level in `var2` that represents the positive condition.
           jamovi: >
-            a string naming the level from `var2` that contains the
-            the true level
-
+            The level in `var2` that represents the true condition.
 
     - name: var3
-      title: 'Variable 3'
+      title: 'Variable 3 (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            a string naming the variable from `data` that contains the
-            the third variable used for the report
+            An optional variable from `data` to include in the diagram.
           jamovi: >
-            a string naming the variable from `data` that contains the
-            the third variable used for the report
+            An optional variable from `data`.
 
     - name: var3true
       title: 'Select True Level'
@@ -87,24 +75,20 @@ options:
       variable: (var3)
       description:
           R: >
-            a string naming the level from `var3` that contains the
-            the true level
+            The level in `var3` that represents the positive condition.
           jamovi: >
-            a string naming the level from `var3` that contains the
-            the true level
+            The level in `var3` that represents the true condition.
 
     - name: var4
-      title: 'Variable 4'
+      title: 'Variable 4 (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
           R: >
-            a string naming the variable from `data` that contains the
-            the fourth variable used for the report
+            An optional variable from `data` for additional overlap analysis.
           jamovi: >
-            a string naming the variable from `data` that contains the
-            the fourth variable used for the report
+            An optional variable from `data`.
 
     - name: var4true
       title: 'Select True Level'
@@ -112,11 +96,7 @@ options:
       variable: (var4)
       description:
           R: >
-            a string naming the level from `var4` that contains the
-            the true level
+            The level in `var4` that represents the positive condition.
           jamovi: >
-            a string naming the level from `var4` that contains the
-            the true level
-
-
+            The level in `var4` that represents the true condition.
 ...

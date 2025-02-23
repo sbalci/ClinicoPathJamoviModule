@@ -1,0 +1,23 @@
+---
+name: vartree3
+title: Variable Tree V3
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      
+    - name: text1
+      title: Variable Tree V3
+      type: Html
+      
+    - name: text2
+      title: Pattern Table
+      type: Preformatted
+      visible: (ptable)
+
+refs:
+    - vtree
+    - ClinicoPathJamoviModule
+...

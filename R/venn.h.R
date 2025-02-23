@@ -157,7 +157,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "venn",
-                version = c(1,0,0),
+                version = c(0,0,2),
                 options = options,
                 results = vennResults$new(options=options),
                 data = data,
@@ -173,23 +173,24 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Venn Diagram
 #'
 #' 
-#' @param data The data as a data frame.
-#' @param var1 a string naming the variable from \code{data} that contains the
-#'   the first variable used for the report
-#' @param var1true a string naming the level from \code{var1} that contains
-#'   the the true level
-#' @param var2 a string naming the variable from \code{data} that contains the
-#'   the second variable used for the report
-#' @param var2true a string naming the level from \code{var2} that contains
-#'   the the true level
-#' @param var3 a string naming the variable from \code{data} that contains the
-#'   the third variable used for the report
-#' @param var3true a string naming the level from \code{var3} that contains
-#'   the the true level
-#' @param var4 a string naming the variable from \code{data} that contains the
-#'   the fourth variable used for the report
-#' @param var4true a string naming the level from \code{var4} that contains
-#'   the the true level
+#' @param data The dataset as a data frame containing the variables for
+#'   analysis.
+#' @param var1 A string naming the primary variable from \code{data} for the
+#'   diagram.
+#' @param var1true The level in \code{var1} that represents the positive
+#'   condition.
+#' @param var2 A string naming the secondary variable from \code{data} used in
+#'   the diagram.
+#' @param var2true The level in \code{var2} that represents the positive
+#'   condition.
+#' @param var3 An optional variable from \code{data} to include in the
+#'   diagram.
+#' @param var3true The level in \code{var3} that represents the positive
+#'   condition.
+#' @param var4 An optional variable from \code{data} for additional overlap
+#'   analysis.
+#' @param var4true The level in \code{var4} that represents the positive
+#'   condition.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
