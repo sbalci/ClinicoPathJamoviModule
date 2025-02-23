@@ -149,8 +149,8 @@ update_modules <- function(new_version, new_date) {
     # Descriptives
     "tableone",
     "summarydata",
-    # "reportcat",
-    # "benford",
+    "reportcat",
+    "benford",
     # Plots
     # "agepyramid",
     # "alluvial",
@@ -190,7 +190,7 @@ update_modules <- function(new_version, new_date) {
 
 # Define the new version and date
 new_version <- "0.0.2.69"
-new_date <- "2024-02-22"
+new_date <- "2024-02-23"
 
 # Run the update process
 update_modules(new_version, new_date)

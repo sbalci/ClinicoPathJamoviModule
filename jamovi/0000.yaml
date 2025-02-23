@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-02-22'
+date: '2024-02-23'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -44,7 +44,11 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
-    description: Function for Generating Summaries for Categorical Variables.
+    description: >
+      Generates a detailed summary of categorical variables including counts,
+      percentages, and missing value information. The output is presented in
+      both textual and visual formats, making it easy to interpret the
+      distribution of your data.
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
