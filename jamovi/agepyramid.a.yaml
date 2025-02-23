@@ -14,6 +14,7 @@ options:
             The data as a data frame.
           jamovi: >
             The data as a data frame.
+
     - name: age
       title: Age
       type: Variable
@@ -24,6 +25,7 @@ options:
             A string naming the variable from `data` that contains the continuous age values.
           jamovi: >
             A string naming the variable from `data` that contains the continuous age values.
+
     - name: gender
       title: Gender
       type: Variable
@@ -34,6 +36,7 @@ options:
             A string naming the variable from `data` that contains the categorical gender values.
           jamovi: >
             A string naming the variable from `data` that contains the categorical gender values.
+
     - name: female
       title: Select Female
       type: Level
@@ -43,18 +46,20 @@ options:
             A string naming the level from `gender` that should be considered as 'Female'.
           jamovi: >
             A string naming the level from `gender` that should be considered as 'Female'.
+
     - name: bin_width
       title: Bin Width (Years)
-      type: number
+      type: Number
       default: 5
       description:
           R: >
             The width of the age bins in years. Adjust this to change the granularity of the age groups.
           jamovi: >
             The width of the age bins in years.
+
     - name: plot_title
       title: Plot Title
-      type: string
+      type: String
       default: "Age Pyramid"
       description:
           R: >

@@ -135,13 +135,12 @@ update_modules <- function(new_version, new_date) {
     file.path(jjstatsplot_dir, "jamovi", "0000.yaml"),
     file.path(meddecide_dir, "jamovi", "0000.yaml"),
     file.path(jsurvival_dir, "jamovi", "0000.yaml"),
-    file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml")
+    file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml"),
+    file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml")),
+    file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml")),
+    file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml")),
+    file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
   )
-
-  jjstatsplot_yaml_files <- file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml"))
-  meddecide_yaml_files <- file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml"))
-  jsurvival_yaml_files <- file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml"))
-  ClinicoPathDescriptives_yaml_files <- file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
 
 
   update_yaml_files(paths = yaml_paths,
