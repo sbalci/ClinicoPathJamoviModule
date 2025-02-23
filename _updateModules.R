@@ -57,6 +57,66 @@ commit_repo <- function(repo_dir, commit_message) {
 
 # Main update function that performs all steps
 update_modules <- function(new_version, new_date) {
+
+    # --- Module files ---
+
+    ## jjstatsplot modules
+    jjstatsplot_modules <- c(
+        # ggstatsplot functions
+        "jjhistostats",
+
+        "jjscatterstats",
+        "jjcorrmat",
+
+        "jjbetweenstats",
+        "jjwithinstats",
+        "jjdotplotstats",
+
+        "jjbarstats",
+        "jjpiestats",
+
+        # non-ggstatsplot functions
+        "waffle"
+    )
+
+    ## meddecide modules
+    meddecide_modules <- c(
+        "agreement",
+        "decision",
+        "decisioncalculator",
+        "kappasizeci",
+        "kappasizefixedn",
+        "kappasizepower"
+    )
+
+    ## jsurvival modules
+    jsurvival_modules <- c(
+        "singlearm",
+        "survival",
+        "survivalcont",
+        "multisurvival",
+        "oddsratio"
+    )
+
+    ## ClinicoPathDescriptives modules
+    ClinicoPathDescriptives_modules <- c(
+        # Descriptives
+        "tableone",
+        "summarydata",
+        "reportcat",
+        "benford",
+        # Plots
+        # "agepyramid",
+        # "alluvial",
+        # "venn",
+        # "vartree",
+        # Patient Follow-up
+        "waterfall"
+        # Comparisons
+        # "crosstable"
+    )
+
+
   # --- Update DESCRIPTION files ---
   description_paths <- c(
     file.path(main_repo_dir, "DESCRIPTION"),             # Main repository
@@ -77,29 +137,22 @@ update_modules <- function(new_version, new_date) {
     file.path(jsurvival_dir, "jamovi", "0000.yaml"),
     file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml")
   )
+
+  jjstatsplot_yaml_files <- file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml"))
+  meddecide_yaml_files <- file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml"))
+  jsurvival_yaml_files <- file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml"))
+  ClinicoPathDescriptives_yaml_files <- file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
+
+
   update_yaml_files(paths = yaml_paths,
                     version = new_version,
                     date = new_date)
 
   # --- Copy module files ---
-  ## jjstatsplot modules
-  jjstatsplot_modules <- c(
-    # ggstatsplot functions
-    "jjhistostats",
 
-    "jjscatterstats",
-    "jjcorrmat",
 
-    "jjbetweenstats",
-    "jjwithinstats",
-    "jjdotplotstats",
+  # jjstatsplot_modules
 
-    "jjbarstats",
-    "jjpiestats",
-
-    # non-ggstatsplot functions
-    "waffle"
-  )
   copy_module_files(jjstatsplot_modules,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(jjstatsplot_dir, "R"),
@@ -109,15 +162,7 @@ update_modules <- function(new_version, new_date) {
                     dest_dir = file.path(jjstatsplot_dir, "jamovi"),
                     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"))
 
-  ## meddecide modules
-  meddecide_modules <- c(
-    "agreement",
-    "decision",
-    "decisioncalculator",
-    "kappasizeci",
-    "kappasizefixedn",
-    "kappasizepower"
-  )
+  # meddecide_modules
   copy_module_files(meddecide_modules,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(meddecide_dir, "R"),
@@ -127,14 +172,8 @@ update_modules <- function(new_version, new_date) {
                     dest_dir = file.path(meddecide_dir, "jamovi"),
                     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"))
 
-  ## jsurvival modules
-  jsurvival_modules <- c(
-    "singlearm",
-    "survival",
-    "survivalcont",
-    "multisurvival",
-    "oddsratio"
-  )
+
+  # jsurvival_modules
   copy_module_files(jsurvival_modules,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(jsurvival_dir, "R"),
@@ -144,23 +183,8 @@ update_modules <- function(new_version, new_date) {
                     dest_dir = file.path(jsurvival_dir, "jamovi"),
                     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"))
 
-  ## ClinicoPathDescriptives modules
-  ClinicoPathDescriptives_modules <- c(
-    # Descriptives
-    "tableone",
-    "summarydata",
-    "reportcat",
-    "benford",
-    # Plots
-    # "agepyramid",
-    # "alluvial",
-    # "venn",
-    # "vartree",
-    # Patient Follow-up
-    "waterfall"
-    # Comparisons
-    # "crosstable"
-  )
+
+  # ClinicoPathDescriptives_modules
   copy_module_files(ClinicoPathDescriptives_modules,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(ClinicoPathDescriptives_dir, "R"),
@@ -180,10 +204,10 @@ update_modules <- function(new_version, new_date) {
   # --- Commit changes in each repository ---
   commit_message <- sprintf("Update modules to version %s and date %s", new_version, new_date)
   commit_repo(main_repo_dir, commit_message)
-  commit_repo(jjstatsplot_dir, commit_message)
-  commit_repo(meddecide_dir, commit_message)
-  commit_repo(jsurvival_dir, commit_message)
-  commit_repo(ClinicoPathDescriptives_dir, commit_message)
+  # commit_repo(jjstatsplot_dir, commit_message)
+  # commit_repo(meddecide_dir, commit_message)
+  # commit_repo(jsurvival_dir, commit_message)
+  # commit_repo(ClinicoPathDescriptives_dir, commit_message)
 
   message("Modules updated to version ", new_version, " and date ", new_date)
 }

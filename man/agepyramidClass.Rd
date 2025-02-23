@@ -4,9 +4,9 @@
 \alias{agepyramidClass}
 \title{Age Pyramid}
 \description{
-Age Pyramid
-
-Age Pyramid
+Generates an age pyramid plot from the provided data.
+The function allows customization of bin width (age group granularity) and plot title.
+It creates a visually appealing plot showing the distribution of age by gender.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agepyramidBase} -> \code{agepyramidClass}

@@ -25,3 +25,20 @@ children:
           - type: LevelSelector
             name: female
             enable: (gender)
+  - type: OptionSupplier
+    label: "Additional Options"    # New UI group for extra settings
+    persistentItems: false
+    stretchFactor: 0
+    children:
+      - type: SpinBox
+        name: bin_width
+        label: "Bin Width (Years)"
+        default: 5
+        min: 1
+        max: 20
+        step: 1
+      - type: TextBox
+        name: plot_title
+        label: "Plot Title"
+        default: "Age Pyramid"
+...

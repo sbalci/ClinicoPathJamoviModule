@@ -1,144 +1,136 @@
 #' @title Age Pyramid
+#' @description Generates an age pyramid plot from the provided data.
+#' The function allows customization of bin width (age group granularity) and plot title.
+#' It creates a visually appealing plot showing the distribution of age by gender.
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import ggplot2
+#' @import dplyr
+#' @import tidyr
 #'
-
-# https://stackoverflow.com/questions/14680075/simpler-population-pyramid-in-ggplot2
-
 agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agepyramidClass",
     inherit = agepyramidBase,
     private = list(
         .run = function() {
-
-
-            # Error Message ----
-            if ( (is.null(self$options$age) || is.null(self$options$gender)) )
+            # Check if required options (age and gender) are provided
+            if (is.null(self$options$age) || is.null(self$options$gender))
                 return()
 
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+            if (nrow(self$data) == 0)
+                stop("Data contains no (complete) rows")
 
-
-            # Read data ----
-
+            # Read and prepare data ----
             mydata <- self$data
 
             age <- self$options$age
-
             gender <- self$options$gender
 
+            # Select and clean the required columns
             mydata <- jmvcore::select(mydata, c(age, gender))
-
             mydata <- jmvcore::naOmit(mydata)
 
+            # Convert age to numeric and gender to factor
             mydata[["Age"]] <- jmvcore::toNumeric(mydata[[age]])
-
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
 
+            # Create a standardized gender variable based on the selected 'female' level
             mydata <- mydata %>%
                 dplyr::mutate(
                     Gender2 = dplyr::case_when(
                         Gender == self$options$female ~ "Female",
                         TRUE ~ "Male"
-                        ))
+                    )
+                )
 
+            # Determine bin width (default to 5 years if not provided) ----
+            bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
 
+            max_age <- max(mydata[["Age"]], na.rm = TRUE)
+            # Create age bins using the custom bin width
+            breaks_seq <- seq(from = 0, to = max_age, by = bin_width)
+            if (max_age > tail(breaks_seq, n = 1)) {
+                breaks_seq <- c(breaks_seq, max_age)
+            }
             mydata[["Pop"]] <- cut(mydata[["Age"]],
-                                 include.lowest = TRUE,
-                                 right = TRUE,
-                                 breaks = c(
-                                     seq(from = 0,
-                                         to = max(mydata[["Age"]], na.rm = TRUE),
-                                         by = 5
-                                     ),
-                                     max(mydata[["Age"]], na.rm = TRUE)
-                                 ),
-                                 ordered_result = TRUE
-            )
+                                   include.lowest = TRUE,
+                                   right = TRUE,
+                                   breaks = breaks_seq,
+                                   ordered_result = TRUE)
 
-
+            # Prepare data for plotting and table output ----
             plotData <- mydata %>%
-                dplyr::select(Gender = Gender2,
-                              Pop
-                              ) %>%
+                dplyr::select(Gender = Gender2, Pop) %>%
                 dplyr::group_by(Gender, Pop) %>%
-                dplyr::count()
+                dplyr::count() %>%
+                dplyr::ungroup()
 
+            # Save state for plot rendering
             image <- self$results$plot
             image$setState(plotData)
 
-
-
+            # Pivot data for table output ----
             plotData2 <- plotData %>%
-                tidyr::pivot_wider(data = .,
-                                   names_from = Gender,
-                                   values_from = n) %>%
+                tidyr::pivot_wider(names_from = Gender,
+                                   values_from = n,
+                                   values_fill = list(n = 0)) %>%  # Fill missing counts with 0
                 dplyr::arrange(dplyr::desc(Pop))
 
-
-
             plotData2 <- as.data.frame(plotData2) %>%
-                tibble::rownames_to_column(.data = .) %>%
+                tibble::rownames_to_column(var = "row") %>%
                 dplyr::filter(!is.na(Pop)) %>%
-                dplyr::mutate(
-                    Pop = as.character(Pop)
-                )
+                dplyr::mutate(Pop = as.character(Pop))
 
-
-
+            # Populate the results table ----
             pyramidTable <- self$results$pyramidTable
-
-            data_frame <- plotData2
-            for(i in seq_along(data_frame[,1,drop=T])) {
-                pyramidTable$addRow(rowKey = i, values = c(data_frame[i,]))
+            for(i in seq_len(nrow(plotData2))) {
+                pyramidTable$addRow(rowKey = i, values = plotData2[i,])
             }
+        },
 
-
-
-        }
-
-        ,
         .plot = function(image, ggtheme, theme, ...) {
-
-
-            # Error Message ----
-            if ( (is.null(self$options$age) || is.null(self$options$gender)) )
+            # Check if required options (age and gender) are provided
+            if (is.null(self$options$age) || is.null(self$options$gender))
                 return()
 
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+            if (nrow(self$data) == 0)
+                stop("Data contains no (complete) rows")
 
-
-            # read data ----
-
+            # Retrieve the prepared plot data
             plotData <- image$state
 
+            # Set plot title (using user option if provided)
+            plot_title <- if (!is.null(self$options$plot_title)) self$options$plot_title else "Age Pyramid"
+
+            # Create a visually appealing age pyramid plot ----
             plot <- ggplot2::ggplot(data = plotData,
-                           mapping = ggplot2::aes(
-                               x = Pop,
-                               y = ifelse(
-                                   test = Gender == "Female",
-                                   yes = -n,
-                                   no = n
-                               ),
-                               fill = Gender
-                           )) +
-                ggplot2::geom_col() +
+                                    mapping = ggplot2::aes(
+                                        x = Pop,
+                                        y = ifelse(Gender == "Female", -n, n),
+                                        fill = Gender
+                                    )) +
+                ggplot2::geom_col(width = 0.7, color = "black", show.legend = TRUE) +  # Added border for clarity
                 ggplot2::coord_flip() +
                 ggplot2::scale_y_continuous(labels = abs,
-                                            limits = max(plotData$n) * c(-1, 1)
-                                            ) +
-                ggplot2::labs(x = "Age",
-                              y = "Population"
-                              )
+                                            limits = c(-max(plotData$n, na.rm = TRUE), max(plotData$n, na.rm = TRUE))
+                ) +
+                ggplot2::labs(x = "Age Group",
+                              y = "Population Count",
+                              title = plot_title,
+                              fill = "Gender") +
+                ggplot2::theme_minimal() +  # Clean minimal theme for improved visuals
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                    axis.text = ggplot2::element_text(size = 10),
+                    axis.title = ggplot2::element_text(size = 12),
+                    legend.position = "bottom"
+                )
 
+            # Apply any additional theme modifications passed via ggtheme
+            plot <- plot + ggtheme
 
-         plot <- plot + ggtheme
-
-         print(plot)
-         TRUE
-
+            print(plot)
+            return(TRUE)
         }
-
-
-        )
+    )
 )

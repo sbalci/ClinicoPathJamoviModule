@@ -4,16 +4,13 @@ title: Age Pyramid
 jrs:   '1.1'
 
 items:
-
-
     - name:  pyramidTable
       title: 'Population Data'
       type: Table
       rows: 0
       columns:
-      # columns: &idcols
         - name: Pop
-          title: "Population"
+          title: "Age Group"
           type: text
         - name: Female
           title: "Female"
@@ -25,8 +22,8 @@ items:
           - age
           - gender
           - female
-
-
+          - bin_width
+          - plot_title
 
     - name: plot
       title: 'Age Pyramid'
@@ -39,8 +36,9 @@ items:
           - age
           - gender
           - female
+          - bin_width
+          - plot_title
 
 refs:
     - ClinicoPathJamoviModule
-
 ...
