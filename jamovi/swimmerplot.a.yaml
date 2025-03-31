@@ -3,11 +3,11 @@ name:  swimmerplot
 title: Swimmer Plot
 menuGroup: Exploration
 menuSubgroup: Patient Follow-Up Plots
-version: '1.0.0'
+version: '0.0.2'
 jas: '1.2'
 
 description:
-    main: Creates a swimmer plot to visualize individual patient timelines and events.
+    main: Creates a swimmer plot to visualize individual patient timelines and clinical events.
     R:
         dontrun: true
         usage: |
@@ -16,14 +16,17 @@ description:
                 PatientID = paste0("PT", 1:10),
                 StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                 EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-                Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD")
+                Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
+                Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
             )
             swimmerplot(
                 data = data,
                 patientID = "PatientID",
                 start = "StartTime",
                 end = "EndTime",
-                event = "Event"
+                event = "Event",
+                milestone1Name = "Surgery",
+                milestone1Date = "Surgery"
             )
 
 options:
@@ -42,7 +45,6 @@ options:
           R: >
             Variable containing patient identifiers.
 
-
     - name: start
       title: Start Time
       type: Variable
@@ -57,7 +59,6 @@ options:
           R: >
             Time/date when observation/treatment ended.
 
-
     - name: event
       title: Event Type (optional)
       type: Variable
@@ -67,44 +68,6 @@ options:
       description:
           R: >
             Optional variable for event types (e.g., CR, PR, PD).
-
-# Add to options in swimmerplot.a.yaml:
-    - name: milestoneVariable
-      title: Milestone Events
-      type: Variable
-      suggested: [ordinal, nominal]
-      permitted: [factor]
-      required: false
-      description:
-          R: >
-            Variable containing milestone events to mark on timeline
-
-    - name: milestoneTime
-      title: Milestone Times
-      type: Variable
-      required: false
-      description:
-          R: >
-            Times when milestones occurred
-
-    - name: referenceLines
-      title: Reference Lines
-      type: List
-      options:
-        - title: None
-          name: none
-        - title: Median Duration
-          name: median
-        - title: Protocol Times
-          name: protocol
-        - title: Custom Time
-          name: custom
-      default: none
-
-    - name: customReferenceTime
-      title: Custom Reference Time
-      type: Number
-      default: 12
 
     - name: timetype
       title: Time Input Type
@@ -172,10 +135,10 @@ options:
           R: >
             Choose whether to align all start times to 0 or use absolute start times
 
-
     - name: sortVariable
       title: Sort By Variable
       type: Variable
+      required: false
       description:
           R: >
             Variable to sort the patient timelines.
@@ -186,6 +149,133 @@ options:
       min: 0.1
       max: 10
       default: 3
+      description:
+          R: >
+            Thickness of timeline bars
+
+    - name: referenceLines
+      title: Reference Lines
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Median Duration
+          name: median
+        - title: Protocol Times (6/12/24)
+          name: protocol
+        - title: Custom Time
+          name: custom
+      default: none
+      description:
+          R: >
+            Add reference time lines to the plot
+
+    - name: customReferenceTime
+      title: Custom Reference Time
+      type: Number
+      default: 12
+      description:
+          R: >
+            Custom time point to mark with a reference line
+
+    - name: useggswim
+      title: Use ggswim package
+      type: Bool
+      default: false
+
+    - name: markerSize
+      title: Marker Size
+      type: Number
+      min: 1
+      max: 10
+      default: 5
+      description:
+          R: >
+            Size of event markers on the plot
 
 
+    # - name: milestone1Name
+    #   title: Milestone 1 Name
+    #   type: String
+    #   default: "Surgery"
+    #   description:
+    #       R: >
+    #         Name for the first milestone event (e.g., Surgery)
+            
+    # - name: milestone1Date
+    #   title: Milestone 1 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 1 occurred
+
+    # - name: milestone2Name
+    #   title: Milestone 2 Name
+    #   type: String
+    #   default: "Treatment Start"
+    #   description:
+    #       R: >
+    #         Name for the second milestone event (e.g., Treatment Start)
+            
+    # - name: milestone2Date
+    #   title: Milestone 2 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 2 occurred
+
+    # - name: milestone3Name
+    #   title: Milestone 3 Name
+    #   type: String
+    #   default: "Response Assessment"
+    #   description:
+    #       R: >
+    #         Name for the third milestone event (e.g., Response Assessment)
+            
+    # - name: milestone3Date
+    #   title: Milestone 3 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 3 occurred
+
+    # - name: milestone4Name
+    #   title: Milestone 4 Name
+    #   type: String
+    #   default: "Progression"
+    #   description:
+    #       R: >
+    #         Name for the fourth milestone event (e.g., Progression)
+            
+    # - name: milestone4Date
+    #   title: Milestone 4 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 4 occurred
+
+    # - name: milestone5Name
+    #   title: Milestone 5 Name
+    #   type: String
+    #   default: "Death/Last Follow-up"
+    #   description:
+    #       R: >
+    #         Name for the fifth milestone event (e.g., Death/Last Follow-up)
+            
+    # - name: milestone5Date
+    #   title: Milestone 5 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 5 occurred
 ...

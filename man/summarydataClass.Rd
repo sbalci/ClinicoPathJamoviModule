@@ -2,14 +2,14 @@
 % Please edit documentation in R/summarydata.b.R
 \name{summarydataClass}
 \alias{summarydataClass}
-\title{Summary of Continuous Variables}
+\title{Summary of Continuous Variables with Distribution Diagnostics}
 \value{
-Text and an HTML summary table
+Text and an HTML summary table (with optional distribution diagnostics)
 }
 \description{
-Summary of Continuous Variables
+Summary of Continuous Variables with Distribution Diagnostics
 
-Summary of Continuous Variables
+Summary of Continuous Variables with Distribution Diagnostics
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::summarydataBase} -> \code{summarydataClass}

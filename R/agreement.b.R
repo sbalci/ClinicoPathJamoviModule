@@ -3,6 +3,16 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr
+#' @importFrom irr kappa2 kappam.fleiss agree
+#' @importFrom dplyr select group_by count
+#' @importFrom htmlTable htmlTable
+#' @importFrom glue glue
+#'
+#' @description This function calculates interrater reliability for ordinal or categorical data.
+#'
+#' @details The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
+#'
+#'
 
 
 # See

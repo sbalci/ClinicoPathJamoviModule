@@ -39,9 +39,9 @@ changes}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
 
-\item{showThresholds}{Show +20 percent and -30 percent RECIST thresholds.}
+\item{showThresholds}{.}
 
-\item{labelOutliers}{Label responses exceeding ±50 percent.}
+\item{labelOutliers}{.}
 
 \item{showMedian}{Show median response as a horizontal line.}
 
@@ -80,19 +80,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summaryTable)}
 }
 \description{
-Creates a waterfall plot to visualize tumor response data following RECIST
-criteria.
-}
-\examples{
-\donttest{
-# data <- data.frame(
-#     PatientID = paste0("PT", 1:10),
-#     Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40)
-# )
-# ClinicoPathDescriptives::waterfall(
-#     data = data,
-#     patientID = "PatientID",
-#     responseVar = "Response"
-# )
-}
+Treatment Response Analysis
 }

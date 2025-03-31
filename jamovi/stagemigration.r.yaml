@@ -1,0 +1,190 @@
+---
+name:  stagemigration
+title: Stage Migration Analysis
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Welcome
+      type: Html
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+
+    # Migration Summary Table
+    - name: migrationSummary
+      title: Migration Summary
+      type: Table
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    # Stage Distribution Table
+    - name: stageDistribution
+      title: Stage Distribution Comparison
+      type: Table
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: stage
+            title: "Stage"
+            type: text
+          - name: oldCount
+            title: "Original Count"
+            type: integer
+          - name: oldPct
+            title: "Original %"
+            type: text
+          - name: newCount
+            title: "New Count"
+            type: integer
+          - name: newPct
+            title: "New %"
+            type: text
+          - name: change
+            title: "Change"
+            type: text
+
+    # Migration Table
+    - name: migrationTable
+      title: Stage Migration Matrix
+      type: Table
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns: []  # Columns will be added dynamically based on stage levels
+
+    # Survival Comparison Table
+    - name: survivalComparison
+      title: Prognostic Performance Comparison
+      type: Table
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: oldValue
+            title: "Original System"
+            type: text
+          - name: newValue
+            title: "New System"
+            type: text
+          - name: change
+            title: "Change"
+            type: text
+
+    # Will Rogers Phenomenon Table
+    - name: stagingPerformance
+      title: Will Rogers Phenomenon Analysis
+      type: Table
+      visible: (showWillRogers)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showWillRogers
+      columns:
+          - name: stage
+            title: "Stage"
+            type: text
+          - name: stayedN
+            title: "Unchanged N"
+            type: integer
+          - name: stayedMedian
+            title: "Unchanged Median"
+            type: text
+          - name: migratedN
+            title: "Migrated N"
+            type: integer
+          - name: migratedMedian
+            title: "Migrated Median"
+            type: text
+          - name: pValue
+            title: "p-value"
+            type: text
+            format: pvalue
+
+    # Migration Plot
+    - name: migrationPlot
+      title: Stage Migration Flow
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .migrationPlot
+      visible: (plotMigration)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - plotMigration
+
+    # Survival Comparison Plot
+    - name: survivalPlot
+      title: Survival Comparison
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .survivalPlot
+      visible: (plotMigration)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - plotMigration
+          - survivalPlotType
+          - showCI
+
+    # Concordance Index Plot
+    - name: concordancePlot
+      title: Concordance Index Comparison
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .concordancePlot
+      visible: (plotMigration)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - plotMigration
+
+refs:
+    - survival
+    - survminer
+    - ggalluvial
+    - willrogers
+
+...

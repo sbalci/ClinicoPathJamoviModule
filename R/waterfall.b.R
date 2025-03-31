@@ -1,7 +1,11 @@
 #' @title Treatment Response Analysis
+#' @description Creates waterfall and spider plots to visualize tumor response data following RECIST criteria
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @description Creates waterfall and spider plots to visualize tumor response data following RECIST criteria
+#' @import dplyr
+#' @importFrom magrittr %>%
+#' @import ggplot2
+#' @import scales
 #' @param data Data frame containing response data
 #' @param patientID Column name for patient identifiers
 #' @param response Column name for response values (raw measurements or percent change)
@@ -16,6 +20,9 @@
 #' )
 #' waterfall(data, "PatientID", "Response", "Time")
 
+
+#' @export waterfallClass
+#'
 
 
 waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -34,9 +41,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             validation_messages <- c(validation_messages, paste0(
               "<br>Time Variable Required for Raw Measurements:",
               "<br>When using raw tumor measurements, a time variable is essential to:",
-              "<br>• Identify baseline measurements (time = 0)",
-              "<br>• Calculate accurate percentage changes",
-              "<br>• Track response progression over time",
+              "<br>- Identify baseline measurements (time = 0)",
+              "<br>- Calculate accurate percentage changes",
+              "<br>- Track response progression over time",
               "<br><br>Recommended Data Format:",
               "<br>PatientID  Time  Measurement",
               "<br>PT1        0     50          (baseline)",
@@ -71,9 +78,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   sprintf("<br>The following patients lack baseline (time = 0) measurements: %s",
                           paste(patients_without_baseline, collapse = ", ")),
                   "<br><br>Why this matters:",
-                  "<br>• Baseline measurements are the reference point for calculating changes",
-                  "<br>• Without baseline values, percentage changes cannot be calculated accurately",
-                  "<br>• Please ensure each patient has a measurement at time = 0"
+                  "<br>- Baseline measurements are the reference point for calculating changes",
+                  "<br>- Without baseline values, percentage changes cannot be calculated accurately",
+                  "<br>- Please ensure each patient has a measurement at time = 0"
                 ))
                 data_valid <- FALSE
               }
@@ -113,9 +120,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "<br>The following measurements show >200% growth:",
               paste(capture.output(print(large_growth)), collapse = "<br>"),
               "<br><br>While such large increases are possible, please verify:",
-              "<br>• Measurement accuracy",
-              "<br>• Calculation methods",
-              "<br>• Any additional clinical factors",
+              "<br>- Measurement accuracy",
+              "<br>- Calculation methods",
+              "<br>- Any additional clinical factors",
               "<br><br>These values will be included in the analysis but may affect scaling."
             ))
           }
@@ -774,9 +781,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "\n\n",
             "To Generate the Plot:",
             "\n",
-            "• Add a time variable (such as months from baseline)",
+            "- Add a time variable (such as months from baseline)",
             "\n",
-            "• Enable 'Show Spider Plot' in the options panel",
+            "- Enable 'Show Spider Plot' in the options panel",
             "\n\n",
             "The resulting visualization will help you track response patterns \n",
             "and compare outcomes across different patients over time.\n\n",
@@ -787,9 +794,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "Time Variable Requirement:",
                                 "\n\nA time variable is required to create visualizations when using raw measurements.",
                                 "\n\nWhy is this important?",
-                                "\n• Baseline identification: Marks the starting point (time = 0)",
-                                "\n• Response calculation: Computes changes from baseline",
-                                "\n• Progression tracking: Shows how response changes over time",
+                                "\n- Baseline identification: Marks the starting point (time = 0)",
+                                "\n- Response calculation: Computes changes from baseline",
+                                "\n- Progression tracking: Shows how response changes over time",
                                 "\n\nHow to proceed:",
                                 "\n1. Add a time variable to your data",
                                 "\n2. Time should start at 0 (baseline)",

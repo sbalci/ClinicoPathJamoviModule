@@ -364,6 +364,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 outcome <- private$.definemyoutcome()
                 factor <- private$.definemyfactor()
 
+                private$.checkpoint()
+
                 cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
                     dplyr::left_join(factor, by = "row_names")
 
@@ -487,6 +489,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
+
+                private$.checkpoint()
+
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
@@ -601,6 +606,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Continious Cox Regression ----
             ,
             .cox = function(results) {
+
+                private$.checkpoint()
 
                 ## Cox Regression ----
 
@@ -749,6 +756,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 mydata[[mytime]] <-
                     jmvcore::toNumeric(mydata[[mytime]])
 
+                private$.checkpoint()
+
                 # https://rpkgs.datanovia.com/survminer/reference/surv_cutpoint.html
 
                 res.cut <- survminer::surv_cutpoint(
@@ -798,6 +807,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Median ----
             ,
             .mediancutoff = function(cutoffdata) {
+
+                private$.checkpoint()
 
                 results <- private$.cleandata()
 
@@ -923,6 +934,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Life Table ----
             ,
             .lifetablecutoff = function(cutoffdata) {
+
+                private$.checkpoint()
 
 
                 # survival table 1,3,5-yr survival ----
@@ -1051,6 +1064,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 #     return()
                 # }
 
+                private$.checkpoint()
+
                 res.cut <- plotData$res.cut
 
                 name3contexpl <- plotData$name3contexpl
@@ -1083,7 +1098,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 #     return()
                 # }
 
-
+                private$.checkpoint()
 
                 res.cat <- plotData$cutoffdata
 

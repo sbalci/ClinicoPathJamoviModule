@@ -4,9 +4,7 @@
 \alias{swimmerplotClass}
 \title{Swimmer Plot}
 \description{
-Swimmer Plot
-
-Swimmer Plot
+Creates swimmer plots for visualizing patient timelines, treatments, and clinical events
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::swimmerplotBase} -> \code{swimmerplotClass}

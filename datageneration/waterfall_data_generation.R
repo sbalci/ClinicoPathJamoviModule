@@ -12,6 +12,8 @@ data_percentage <- data.frame(
 cat("=== Percentage Data Test ===\n")
 print(data_percentage)
 
+write.csv(data_percentage, "./data/data_percentage.csv", row.names = FALSE)
+
 # Example usage with the waterfall function:
 # ClinicoPathDescriptives::waterfall(
 #     data = data_percentage,
@@ -39,6 +41,9 @@ data_raw <- data.frame(
 cat("\n=== Raw Measurements Data Test ===\n")
 print(data_raw)
 
+write.csv(data_raw, "./data/data_raw.csv", row.names = FALSE)
+
+
 # Example usage with the waterfall function:
 # ClinicoPathDescriptives::waterfall(
 #     data = data_raw,
@@ -59,6 +64,9 @@ data_subgroup <- data.frame(
 )
 cat("\n=== Subgroup Analysis Data Test ===\n")
 print(data_subgroup)
+
+write.csv(data_subgroup, "./data/data_subgroup.csv", row.names = FALSE)
+
 
 # Example usage with subgroup analysis:
 # ClinicoPathDescriptives::waterfall(
@@ -89,6 +97,9 @@ data_longitudinal <- do.call(rbind, lapply(patientIDs, function(id) {
 }))
 cat("\n=== Simulated Longitudinal Data Test ===\n")
 print(head(data_longitudinal, 10))  # Display first 10 rows for brevity
+
+write.csv(data_longitudinal, "./data/data_longitudinal.csv", row.names = FALSE)
+
 
 # Example usage with additional metrics enabled:
 # ClinicoPathDescriptives::waterfall(

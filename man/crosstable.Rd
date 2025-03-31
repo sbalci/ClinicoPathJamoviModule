@@ -33,6 +33,7 @@ table.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr

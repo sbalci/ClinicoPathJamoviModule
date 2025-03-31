@@ -4,6 +4,12 @@
 #' @importFrom ggalluvial geom_flow geom_stratum
 #' @importFrom dplyr group_by summarise mutate n
 #' @importFrom tidyr separate_rows
+#' @importFrom magrittr %>%
+#'
+#' @title Alluvial Survival Plot
+#' @return Alluvial Survival Plot
+#' @description Generates an alluvial plot to visualize patient treatment pathways over time.
+#'
 
 alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "alluvialSurvivalClass",

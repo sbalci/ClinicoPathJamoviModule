@@ -1,18 +1,19 @@
 #!/usr/bin/env Rscript
-# Load required packages
+
+# Load required packages ----
 library(xfun)
 library(fs)
 library(jmvtools)
 library(devtools)
 
-# Define base directories (adjust these absolute paths as needed)
+# Define base directories (adjust these absolute paths as needed) ----
 main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
 meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
 jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival"
 ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
 
-# Function to update DESCRIPTION files with new version and date
+# Function to update DESCRIPTION files with new version and date ----
 update_description_files <- function(paths, version, date) {
   version_pattern <- "Version:.*$"
   date_pattern <- "Date:.*$"
@@ -23,7 +24,7 @@ update_description_files <- function(paths, version, date) {
   xfun::gsub_files(files = paths, pattern = date_pattern, replacement = date_replacement)
 }
 
-# Function to update YAML files with new version and date
+# Function to update YAML files with new version and date ----
 update_yaml_0000_files <- function(paths, version, date) {
   version_pattern <- "version:.*$"
   date_pattern <- "date:.*$"
@@ -39,11 +40,12 @@ update_yaml_a_files <- function(paths, version) {
     valid_version <- paste(strsplit(version, "\\.")[[1]][1:3], collapse = ".")
     version_replacement <- paste0("version: '", valid_version, "'")
 
-    xfun::gsub_files(files = paths, pattern = version_pattern, replacement = version_replacement)
+  xfun::gsub_files(files = paths, pattern = version_pattern, replacement = version_replacement)
+
 }
 
 
-# Function to copy module files from source to destination directories
+# Function to copy module files from source to destination directories ----
 copy_module_files <- function(module_names, source_dir, dest_dir, file_extensions) {
   for (module_name in module_names) {
     for (ext in file_extensions) {
@@ -55,7 +57,7 @@ copy_module_files <- function(module_names, source_dir, dest_dir, file_extension
   }
 }
 
-# Function to commit changes in a Git repository
+# Function to commit changes in a Git repository ----
 commit_repo <- function(repo_dir, commit_message) {
   old_wd <- getwd()
   setwd(repo_dir)
@@ -64,63 +66,135 @@ commit_repo <- function(repo_dir, commit_message) {
   setwd(old_wd)
 }
 
-# Copy example files to each module directory
+# Copy example files to each module directory ----
+
+## jjstatsplot_example_files ----
 
 jjstatsplot_example_files <- c(
-  "histopathology.rda",
-  "histopathologyGraphsPlots.omv"
+  "histopathology.rda"
+  # "histopathologyGraphsPlots.omv"
 )
+
 
 fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
               file.path(jjstatsplot_dir, "data"),
               overwrite = TRUE)
 
+## jjstatsplot_data_description_files ----
+
+jjstatsplot_data_description_files <- c(
+  "data-histopathology.R"
+)
+
+fs::file_copy(file.path(main_repo_dir, "R", jjstatsplot_data_description_files),
+              file.path(jjstatsplot_dir, "R"),
+              overwrite = TRUE)
+
+
+## meddecide_example_files ----
 
 meddecide_example_files <- c(
-  "histopathology.rda",
-  "histopathologyMedicalDecision.omv"
+  "histopathology.rda"
+  # "histopathologyMedicalDecision.omv"
 )
+
+
 
 fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
               file.path(meddecide_dir, "data"),
               overwrite = TRUE)
 
 
+## meddecide_data_description_files ----
+
+meddecide_data_description_files <- c(
+  "data-histopathology.R"
+)
+
+fs::file_copy(file.path(main_repo_dir, "R", meddecide_data_description_files),
+              file.path(meddecide_dir, "R"),
+              overwrite = TRUE)
+
+
+## jsurvival_example_files ----
+
 jsurvival_example_files <- c(
-  "histopathology.rda",
-  "histopathologySurvival.omv"
+  "histopathology.rda"
+  # "histopathologySurvival.omv"
 )
 
 fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
               file.path(jsurvival_dir, "data"),
               overwrite = TRUE)
 
+## jsurvival_data_description_files ----
+
+jsurvival_data_description_files <- c(
+  "data-histopathology.R"
+)
+
+fs::file_copy(file.path(main_repo_dir, "R", jsurvival_data_description_files),
+              file.path(jsurvival_dir, "R"),
+              overwrite = TRUE)
+
+
+## ClinicoPathDescriptives_example_files ----
 
 ClinicoPathDescriptives_example_files <- c(
   "histopathology.rda",
   "histopathologyDescriptives.omv",
-  "swimmer_data_raw.omv",
-  "swimmer_data_raw.csv",
-  "swimmer_data_raw.rda",
-  "swimmer_data_date_formats.omv",
-  "swimmer_data_date_formats.csv",
-  "swimmer_data_date_formats.rda",
-  "swimmer_data.csv",
-  "swimmer_data.rda"
+  # "treatmentResponse.omv",
+  "treatmentResponse.rda"
+  # "swimmer_data_raw.omv",
+  # "swimmer_data_raw.csv",
+  # "swimmer_data_raw.rda",
+  # "swimmer_data_date_formats.omv",
+  # "swimmer_data_date_formats.csv",
+  # "swimmer_data_date_formats.rda",
+  # "swimmer_data.csv",
+  # "swimmer_data.rda"
+  # "raw_with_time.rda",
+  # "raw_with_time.csv",
+  # "percent_with_time.rda",
+  # "percent_with_time.csv",
+  # "percent_no_time.rda",
+  # "percent_no_time.csv",
+  # "tumor_response_examples.rda"
+  # "swimmer_plot_base_data.csv",
+  # "swimmer_plot_milestone_data.csv"
+# "patientTimelinesDates.rda",
+# "patientTimelines.rda",
+# "patientTimelinesDates.csv",
+# "patientTimelines.csv"
 )
+
+
+
 
 fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_files),
               file.path(ClinicoPathDescriptives_dir, "data"),
               overwrite = TRUE)
 
+
+## ClinicoPathDescriptives_data_description_files ----
+
+ClinicoPathDescriptives_data_description_files <- c(
+  "data-histopathology.R",
+  "data-treatmentResponse.R",
+  # "tumor_response_examples.R"
+# "data-swimmer-plot-documentation.r"
+
+"ClinicoPathDescriptives-package.R"
+)
+
+fs::file_copy(file.path(main_repo_dir, "R", ClinicoPathDescriptives_data_description_files),
+              file.path(ClinicoPathDescriptives_dir, "R"),
+              overwrite = TRUE)
+
+
+
 # ihc_test_data.csv
-# tumor_response_examples.rda
-# percent_no_time.rda
-# percent_with_time.rda
-# raw_with_time.rda
-# percent_no_time.csv
-# percent_with_time.csv
-# raw_with_time.csv
+
 # tumor_response_data.csv
 # oncology_response_data.csv
 #
@@ -154,50 +228,50 @@ fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_f
 
 
 
-# Main update function that performs all steps
+# Main update function that performs all steps ----
 update_modules <- function(new_version, new_date) {
 
     # --- Module files ---
 
-    ## jjstatsplot modules
+    ## jjstatsplot module functions ----
     jjstatsplot_modules <- c(
         # ggstatsplot functions
-        # "jjhistostats",
+        "jjhistostats",
         #
-        # "jjscatterstats",
-        # "jjcorrmat",
+        "jjscatterstats",
+        "jjcorrmat",
         #
-        # "jjbetweenstats",
-        # "jjwithinstats",
-        # "jjdotplotstats",
+        "jjbetweenstats",
+        "jjwithinstats",
+        "jjdotplotstats",
         #
-        # "jjbarstats",
-        # "jjpiestats",
+        "jjbarstats",
+        "jjpiestats",
 
         # non-ggstatsplot functions
         "waffle"
     )
 
-    ## meddecide modules
+    ## meddecide module functions ----
     meddecide_modules <- c(
-        # "agreement",
-        # "decision",
-        # "decisioncalculator",
-        # "kappasizeci",
-        # "kappasizefixedn",
+        "agreement",
+        "decision",
+        "decisioncalculator",
+        "kappasizeci",
+        "kappasizefixedn",
         "kappasizepower"
     )
 
-    ## jsurvival modules
+    ## jsurvival module functions ----
     jsurvival_modules <- c(
-        # "singlearm",
-        # "survival",
-        # "survivalcont",
-        # "multisurvival",
+        "singlearm",
+        "survival",
+        "survivalcont",
+        "multisurvival",
         "oddsratio"
     )
 
-    ## ClinicoPathDescriptives modules
+    ## ClinicoPathDescriptives module functions ----
     ClinicoPathDescriptives_modules <- c(
         # Descriptives
         "tableone",
@@ -213,11 +287,12 @@ update_modules <- function(new_version, new_date) {
         # "vartree3",
         #
         # Patient Follow-up
-        # "waterfall"
-        # "swimmerplot"
+        "waterfall",
+        "swimmerplot",
         # Comparisons
         "crosstable"
     )
+
 
 
   # --- Update DESCRIPTION files ---
@@ -314,32 +389,29 @@ update_yaml_a_files(paths = yaml_a_paths,
 
   # --- Commit changes in each repository ---
   commit_message <- sprintf("Update modules to version %s and date %s", new_version, new_date)
-  commit_repo(main_repo_dir, commit_message)
-  commit_repo(jjstatsplot_dir, commit_message)
-  commit_repo(meddecide_dir, commit_message)
-  commit_repo(jsurvival_dir, commit_message)
-  commit_repo(ClinicoPathDescriptives_dir, commit_message)
+  # commit_repo(main_repo_dir, commit_message)
+  # commit_repo(jjstatsplot_dir, commit_message)
+  # commit_repo(meddecide_dir, commit_message)
+  # commit_repo(jsurvival_dir, commit_message)
+  # commit_repo(ClinicoPathDescriptives_dir, commit_message)
 
   message("Modules updated to version ", new_version, " and date ", new_date)
 }
 
 # Define the new version and date
-new_version <- "0.0.2.72"
-new_date <- "2024-02-23"
+new_version <- "0.0.2.80"
+new_date <- "2024-03-31"
 
 # Run the update process
 update_modules(new_version, new_date)
 
 
-# jmvtools::prepare()
-# devtools::document()
-# jmvtools::prepare()
-# devtools::document()
-# jmvtools::install()
+jmvtools::prepare()
+devtools::document()
+jmvtools::prepare()
+devtools::document()
+jmvtools::install()
 
 
-"This is the waterfall function in ClinicoPathDescriptives module of jamovi. The module is aimed to be used by medical professionals, pathologists, and oncologists. Suggest improvements to be more useful for these users and in clinical settings.
-Suggest improvements for R and yaml files. Improve documentation for R and yaml files, also for DESCRIPTION and data files. Make the function more user friendly and explanatory for the end user.
-Add new features as necessary. When adding new features also consider original library function arguments.
-Improve the interface and output. Make it more visually appealing. Do not add or change color plates. Do not suggest changes for export.
-Give me complete codes with recommended suggestions. Use comments for changes. Do not make breaking changes."
+# "This is the jjhistostats function in jjstatsplot module of jamovi. Suggest improvements to be more useful for end users. Suggest improvements for R and yaml files. Improve documentation for R and yaml files, also for DESCRIPTION and data files. Make the function more user friendly and explanatory for the end user. Add new features as necessary. When adding new features also consider original library function arguments. Improve the interface and output. Make it more visually appealing. Do not add or change color plates. Do not suggest changes for export. Give the new codes separately with explanatory texts. Then give me complete codes with recommended suggestions. Use comments for changes. Do not make breaking changes."
+

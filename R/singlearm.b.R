@@ -529,16 +529,22 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (nrow(self$data) == 0)
           stop('Data contains no (complete) rows')
 
+        private$.checkpoint()
+
         ## Get Clean Data ----
         results <- private$.cleandata()
 
         ## Run Analysis ----
 
         ### Median Survival ----
+        private$.checkpoint()
+
         private$.medianSurv(results)
 
 
         ### Survival Table ----
+        private$.checkpoint()
+
         private$.survTable(results)
 
         ## Add Calculated Time to Data ----
@@ -577,6 +583,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::toNumeric(mydata[[mytime]])
 
         ## Median Survival Table ----
+
+        private$.checkpoint()
 
         formula <-
           paste('survival::Surv(',
@@ -686,6 +694,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Median Survival Table ----
 
+        private$.checkpoint()
+
         formula <-
           paste('survival::Surv(',
                 mytime,
@@ -707,6 +717,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (length(utimes) == 0) {
           utimes <- c(12, 36, 60)
         }
+
+        private$.checkpoint()
 
         km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
@@ -810,6 +822,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
 
 
+        private$.checkpoint()
 
         plot <- plotData %>%
           finalfit::surv_plot(
@@ -878,6 +891,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myformula <-
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
 
+        private$.checkpoint()
 
         plot2 <- plotData %>%
           finalfit::surv_plot(
@@ -942,6 +956,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myformula <-
           paste("survival::Surv(", mytime, ",", myoutcome, ")")
 
+        private$.checkpoint()
 
         plot3 <- plotData %>%
           finalfit::surv_plot(
@@ -1022,6 +1037,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         time_scale <-
           seq(0, self$options$endplot, by = self$options$byplot)
 
+        private$.checkpoint()
 
         plot6 <-
           KMunicate::KMunicate(

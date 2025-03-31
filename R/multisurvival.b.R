@@ -710,6 +710,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ## mydata ----
 
+        private$.checkpoint()
+
         cleaneddata <- private$.cleandata()
 
         name1time <- cleaneddata$name1time
@@ -733,6 +735,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ## run Cox function ----
 
+        private$.checkpoint()
+
         private$.final_fit()
 
 
@@ -741,6 +745,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$ph_cox ||
             self$options$calculateRiskScore ||
             self$options$ac || self$options$showNomogram) {
+          private$.checkpoint()
           cox_model <- private$.cox_model()
         }
 
@@ -754,6 +759,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         ## Calculate Risk Score ----
 
         if (self$options$calculateRiskScore) {
+          private$.checkpoint()
           riskData <- private$.calculateRiskScore(cox_model, mydata)
 
         }
@@ -784,6 +790,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ## stratification ----
         if (self$options$use_stratify) {
+          private$.checkpoint()
           stratify_explanation <- glue::glue("
     <h4>Understanding Stratification in Your Survival Analysis</h4>
 
@@ -820,6 +827,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # specific details ph_cox startify ----
         if (self$options$ph_cox && self$options$use_stratify) {
+          private$.checkpoint()
+
           zph <- survival::cox.zph(cox_model)
 
           # Check if stratification was appropriate
@@ -844,6 +853,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Nomogram ----
 
         if (self$options$showNomogram) {
+          private$.checkpoint()
           private$.nomogram(cox_model)
         }
 
@@ -1112,6 +1122,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #   )
         # )
 
+        # Add checkpoint before the expensive Cox model fitting
+        private$.checkpoint()
 
 
         cox_model <- survival::coxph(coxformula, data = mydata)
@@ -1129,6 +1141,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!self$options$showNomogram) {
           return()
         }
+
+        private$.checkpoint()
 
         # Get cleaned data
         cleaneddata <- private$.cleandata()
@@ -1192,6 +1206,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Get prediction timepoints
         pred_times <- as.numeric(unlist(strsplit(self$options$cutp, ",")))
         if(length(pred_times) == 0) pred_times <- c(12, 36, 60)
+
+        # Add checkpoint before creating nomogram
+        private$.checkpoint()
 
         # Create nomogram
         nom <- try({
@@ -1510,6 +1527,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #
         #
         # cox_model <- private$.cox_model()
+
+        private$.checkpoint()
 
         zph <- survival::cox.zph(cox_model)
 
@@ -2270,6 +2289,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       html$setContent(todo)
       return()
 
+      # Add checkpoint before calculations
+      private$.checkpoint()
 
       # Get baseline Cox model
       cox_model <- private$.cox_model()

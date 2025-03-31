@@ -36,7 +36,7 @@ children:
             isTarget: true
   - type: CollapseBox
     label: Waterfall Plot Options
-    collapsed: false
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -88,8 +88,8 @@ children:
                   - type: Output
                     name: addResponseCategory
   - type: CollapseBox
-    label: Waterfall Plot Options
-    collapsed: false
+    label: Spider Plot Options
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large

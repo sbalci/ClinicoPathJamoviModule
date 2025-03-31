@@ -1,0 +1,165 @@
+---
+name: swimmerplot2
+title: Swimmer Plot 2
+menuGroup: Exploration
+menuSubgroup: Patient Follow-Up Plots
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Creates a swimmer plot to visualize subject response data over time.
+    R:
+        dontrun: true
+        usage: |
+            data <- data.frame(
+                patient_id = c("PT001", "PT001", "PT002", "PT002"),
+                start_time = c(0, 3, 0, 4),
+                end_time = c(3, 7, 4, 8),
+                event_type = c("Treatment Start", "Dose Modification", "Treatment Start", "Follow-up"),
+                response_status = c("PR", "CR", "SD", "PR"),
+                on_study = c(FALSE, TRUE, FALSE, TRUE)
+            )
+            swimmerplot2(
+                data = data,
+                patientID = "patient_id",
+                startTime = "start_time",
+                endTime = "end_time",
+                status = "response_status",
+                markerData = TRUE,
+                markerVar = "event_type"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame in long format where each row represents a time segment.
+
+    - name: patientID
+      title: Subject ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Variable containing subject/patient identifiers.
+
+    - name: startTime
+      title: Start Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Start time variable for each lane segment (also used as marker position by default).
+
+    - name: endTime
+      title: End Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            End time variable for each lane segment.
+
+    - name: status
+      title: Response/Status
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Response or status variable to color lanes.
+
+    - name: markerData
+      title: Show Event Markers
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to include event markers at the start time of each segment.
+
+    - name: markerVar
+      title: Event Type Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable indicating the type of event to be displayed as markers.
+
+    - name: markerTime
+      title: Marker Time (Optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Optional separate time variable for marker positions. If not specified, start time is used.
+
+    - name: showArrows
+      title: Show Ongoing Status Arrows
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show arrows at the end of lanes to indicate ongoing status.
+
+    - name: arrowFilter
+      title: Arrow Filter Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Boolean variable indicating which subjects should have arrows (TRUE = show arrow).
+
+    - name: sortSubjects
+      title: Sort Subjects
+      type: List
+      options:
+        - title: By ID
+          name: id
+        - title: By Duration
+          name: duration
+        - title: By Status
+          name: status
+      default: id
+      description:
+          R: >
+            How to sort subjects in the plot.
+
+    - name: laneWidth
+      title: Lane Width
+      type: Number
+      default: 2
+      min: 0.1
+      max: 10
+
+    - name: markerSize
+      title: Marker Size
+      type: Number
+      default: 5
+      min: 1
+      max: 20
+
+    - name: useDarkTheme
+      title: Use Dark Theme
+      type: Bool
+      default: false
+
+    - name: customTitle
+      title: Custom Title
+      type: String
+      default: 'Swimmer Plot'
+
+    - name: xLabel
+      title: X-Axis Label
+      type: String
+      default: 'Time'
+
+    - name: yLabel
+      title: Y-Axis Label
+      type: String
+      default: 'Subject ID'

@@ -3,6 +3,28 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import waffle
+#' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom glue glue
+#' @import scales
+#'
+#' @description Create Waffle Charts to visualize distributions.
+#'
+#' @param data A data frame.
+#' @param groups A grouping variable to organize the squares.
+#' @param counts Optionally, a numeric variable for specific counts (if not provided, will use number of cases).
+#' @param facet Optionally, a variable to facet the plot.
+#' @param rows Number of rows in the waffle chart.
+#' @param flip Flip the waffle chart.
+#' @param color_palette The color palette to use. Options are 'default', 'colorblind', 'professional',
+#' 'presentation', 'journal', 'pastel', and 'dark'.
+#' @param legendtitle Title for the legend.
+#' @param show_legend Show the legend.
+#' @param mytitle Title for the plot.
+#'
+#' @return The function produces a waffle chart.
+#'
+#'
 
 waffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "waffleClass",

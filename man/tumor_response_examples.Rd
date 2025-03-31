@@ -5,7 +5,7 @@
 \alias{tumor_response_examples}
 \title{Example Tumor Response Datasets}
 \format{
-A list containing 4 data frames:
+A list containing 3 data frames:
 \describe{
 \item{raw_with_time}{Raw tumor measurements with time points (20 obs. of 3 variables)}
 \item{percent_with_time}{Pre-calculated response percentages with time (20 obs. of 3 variables)}
