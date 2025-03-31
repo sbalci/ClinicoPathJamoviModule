@@ -7,11 +7,18 @@ version: '0.0.2'
 jas: '1.2'
 
 description:
-    main: Function for Generating Summaries for Continuous Variables.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+  main: |
+    This module generates descriptive statistics for continuous variables.
+    It provides both a textual summary and a visually appealing summary table.
+    Optionally, you can enable distribution diagnostics to examine normality, skewness, and kurtosis.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame.
+      # 2. Select one or more continuous variables.
+      # 3. (Optional) Enable Distribution Diagnostics to view additional tests.
+      # 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
 
 
 options:
@@ -46,6 +53,17 @@ options:
           R: >
             a string naming the variables from `data` that contains the
             continuous values used for the report
+
+
+    - name: distr
+      title: "Distribution Diagnostics"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, additional distribution diagnostics (Shapiro-Wilk test, skewness, and kurtosis)
+          will be computed and explained.
+
 
 #
 #     - name: grvar

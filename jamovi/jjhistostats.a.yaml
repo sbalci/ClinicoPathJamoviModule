@@ -4,7 +4,7 @@ title: Histogram
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous
 # menuSubtitle: Histogram
-version: '1.0.0'
+version: '0.0.2'
 jas: '1.2'
 
 

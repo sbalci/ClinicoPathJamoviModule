@@ -7,7 +7,21 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom dplyr inner_join
+#' @import ggvenn
+#' @import UpSetR
+#' @importFrom grid grid.text
+#' @importFrom ggplot2 ggtitle theme element_text
+#' @importFrom magrittr %>%
 #'
+#' @return The function produces a Venn diagram and an Upset diagram.
+#' @export vennClass
+#'
+#' @examples
+#' # Load the data
+#' data("iris")
+#'
+#'
+
 vennClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "vennClass",

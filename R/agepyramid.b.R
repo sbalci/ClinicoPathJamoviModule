@@ -7,7 +7,11 @@
 #' @import ggplot2
 #' @import dplyr
 #' @import tidyr
+#' @import tibble
 #'
+#' @param age The name of the column containing age data.
+#'
+
 agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agepyramidClass",
     inherit = agepyramidBase,

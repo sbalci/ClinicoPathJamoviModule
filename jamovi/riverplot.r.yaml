@@ -1,0 +1,39 @@
+---
+name:  riverplot
+title: River Plots
+jrs:   '1.1'
+
+clearWith:
+    - id
+    - time
+    - strata
+    - weight
+    - plotType
+    - fillType
+    - sortStreams
+    - labelNodes
+    - curveType
+    - showCounts
+    - showLegend
+    - originaltheme
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+
+    - name: plot
+      title: River Plot
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - ggalluvial
+    - easyalluvial
+    - ClinicoPathJamoviModule
+
+...

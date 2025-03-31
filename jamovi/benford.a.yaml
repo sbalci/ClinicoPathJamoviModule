@@ -28,10 +28,5 @@ options:
             a string naming the variable from `data` that contains the
             continuous values used for the report
 
-    # - name: li
-    #   title: Load Image
-    #   type: Bool
-    #   default: false
-
 
 ...

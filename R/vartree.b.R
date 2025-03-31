@@ -2,6 +2,14 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import DiagrammeR
+#' @import DiagrammeRsvg
+#' @import vtree
+#' @importFrom stats as.formula
+#' @importFrom grDevices rgb
+#'
+#' @export vartreeClass
+#'
 # nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
 
 

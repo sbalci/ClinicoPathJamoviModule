@@ -541,6 +541,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
+                private$.checkpoint()  # Add checkpoint here
+
+
                 if (is.null(results)) {
                     return()
                 }
@@ -548,10 +551,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Run Analysis ----
                 ## Median Survival ----
                     private$.medianSurv(results)
+                private$.checkpoint()  # Add checkpoint here
+
                 ## Cox ----
                     private$.cox(results)
+                private$.checkpoint()  # Add checkpoint here
+
                 ## Survival Table ----
                     private$.survTable(results)
+                private$.checkpoint()  # Add checkpoint here
+
 
 
                 ## Pairwise ----
@@ -609,6 +618,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                           myfactor)
 
                 formula <- as.formula(formula)
+
+                private$.checkpoint()
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
@@ -720,6 +731,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 myformula <-
                     paste("Surv(", mytime, ",", myoutcome, ")")
+
+                private$.checkpoint()
 
                 finalfit::finalfit(
                     .data = mydata,
@@ -840,6 +853,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 formula <- as.formula(formula)
 
+                private$.checkpoint()  # Add checkpoint here
+
+
                     cox_model <- survival::coxph(formula, data = mydata)
                                                  # , na.action = na.exclude)
 
@@ -881,6 +897,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 formula <- as.formula(formula)
 
+                private$.checkpoint()  # Add checkpoint here
+
                 km_fit <- survival::survfit(formula, data = mydata)
 
                 utimes <- self$options$cutp
@@ -892,6 +910,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (length(utimes) == 0) {
                     utimes <- c(12, 36, 60)
                 }
+
+                private$.checkpoint()  # Add checkpoint here
 
                 km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
@@ -986,6 +1006,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 padjustmethod <-
                     jmvcore::constructFormula(terms = self$options$padjustmethod)
 
+                private$.checkpoint()
 
                 results_pairwise <-
                     survminer::pairwise_survdiff(formula = formula_p,
@@ -1007,6 +1028,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 data_frame <- mypairwise2
                 for (i in seq_along(data_frame[, 1, drop = T])) {
+
+                    if (i %% 10 == 0) {  # Optional: add checkpoints periodically for larger tables
+                        private$.checkpoint()  # Add checkpoint here
+                    }
+
                     pairwiseTable$addRow(rowKey = i, values = c(data_frame[i,]))
                 }
 

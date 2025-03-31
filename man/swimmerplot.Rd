@@ -10,16 +10,16 @@ swimmerplot(
   start,
   end,
   event,
-  milestoneVariable,
-  milestoneTime,
-  referenceLines = "none",
-  customReferenceTime = 12,
   timetype = "raw",
   timetypedata = "ymd",
   timetypeoutput = "months",
   startType = "relative",
   sortVariable,
-  barHeight = 3
+  barHeight = 3,
+  referenceLines = "none",
+  customReferenceTime = 12,
+  useggswim = FALSE,
+  markerSize = 5
 )
 }
 \arguments{
@@ -33,15 +33,6 @@ swimmerplot(
 
 \item{event}{Optional variable for event types (e.g., CR, PR, PD).}
 
-\item{milestoneVariable}{Variable containing milestone events to mark on
-timeline}
-
-\item{milestoneTime}{Times when milestones occurred}
-
-\item{referenceLines}{.}
-
-\item{customReferenceTime}{.}
-
 \item{timetype}{Select whether time values are raw numbers or dates}
 
 \item{timetypedata}{Select the time format in your data}
@@ -53,7 +44,15 @@ absolute start times}
 
 \item{sortVariable}{Variable to sort the patient timelines.}
 
-\item{barHeight}{.}
+\item{barHeight}{Thickness of timeline bars}
+
+\item{referenceLines}{Add reference time lines to the plot}
+
+\item{customReferenceTime}{Custom time point to mark with a reference line}
+
+\item{useggswim}{.}
+
+\item{markerSize}{Size of event markers on the plot}
 }
 \value{
 A results object containing:
@@ -71,7 +70,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Creates a swimmer plot to visualize individual patient timelines and
-events.
+clinical events.
 }
 \examples{
 \donttest{
@@ -80,14 +79,17 @@ data <- data.frame(
     PatientID = paste0("PT", 1:10),
     StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-    Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD")
+    Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
+    Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
 )
 swimmerplot(
     data = data,
     patientID = "PatientID",
     start = "StartTime",
     end = "EndTime",
-    event = "Event"
+    event = "Event",
+    milestone1Name = "Surgery",
+    milestone1Date = "Surgery"
 )
 }
 }

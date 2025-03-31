@@ -1,121 +1,30 @@
-"","patients.PatientID","patients.StartDate","patients.ECOG","patients.EndDate","patients.BestResponse","milestones.PatientID","milestones.MilestoneDate","milestones.MilestoneType","milestones.MilestoneDetail"
-"1","PT001",2020-01-31,0,2020-03-31,"CR","PT001",2020-03-31,"Response Evaluation","PD"
-"2","PT002",2020-03-19,0,2020-07-19,"PD","PT001",2020-05-31,"Response Evaluation","CR"
-"3","PT003",2020-02-20,0,2020-04-20,"PR","PT001",2020-07-31,"Treatment Change","Regimen Change"
-"4","PT004",2020-01-14,0,2020-09-14,"CR","PT001",2020-09-30,"Response Evaluation","SD"
-"5","PT005",2020-03-07,2,2020-05-07,"PD","PT002",2020-05-19,"Treatment Change","Treatment Hold"
-"6","PT006",2020-02-11,0,2020-04-11,"SD","PT002",2020-07-19,"Response Evaluation","PD"
-"7","PT007",2020-02-19,0,2020-10-19,"CR","PT002",2020-09-19,"Adverse Event","Grade 2 Fatigue"
-"8","PT008",2020-02-12,1,2020-10-12,"CR","PT002",2020-11-19,"Disease Progression","PD Confirmed"
-"9","PT009",2020-01-14,0,2020-05-14,"PD","PT003",2020-04-20,"Response Evaluation","PD"
-"10","PT010",2020-01-25,1,2020-09-25,"CR","PT003",2020-06-20,"Treatment Change","Dose Reduction"
-"11","PT011",2020-03-30,0,2020-09-30,"SD","PT003",2020-08-20,"Response Evaluation","PR"
-"12","PT012",2020-03-31,0,2020-11-30,"CR","PT003",2020-10-20,"Treatment Change","Regimen Change"
-"13","PT013",2020-03-09,1,2020-11-09,"CR","PT004",2020-03-14,"Adverse Event","Grade 3 Neutropenia"
-"14","PT014",2020-03-31,2,2020-07-31,"SD","PT004",2020-05-14,"Adverse Event","Grade 2 Fatigue"
-"15","PT015",2020-02-26,0,2020-04-26,"PR","PT004",2020-07-14,"Adverse Event","Grade 3 Anemia"
-"16","PT016",2020-01-09,1,2020-07-09,"PD","PT004",2020-09-14,"Response Evaluation","CR"
-"17","PT017",2020-03-12,0,2020-05-12,"PD","PT005",2020-05-07,"Disease Progression","PD Confirmed"
-"18","PT018",2020-01-26,0,2020-03-26,"PD","PT005",2020-07-07,"Treatment Change","Treatment Discontinuation"
-"19","PT019",2020-01-07,0,2020-03-07,"SD","PT005",2020-09-07,"Adverse Event","Grade 3 Neutropenia"
-"20","PT020",2020-02-11,2,2020-10-11,"CR","PT005",2020-11-07,"Response Evaluation","PD"
-"21","PT021",2020-01-09,0,2020-03-09,"PD","PT006",2020-04-11,"Disease Progression","PD Confirmed"
-"22","PT022",2020-03-23,2,2020-09-23,"PD","PT006",2020-06-11,"Treatment Change","Treatment Discontinuation"
-"23","PT023",2020-02-05,2,2020-04-05,"PR","PT006",2020-08-11,"Response Evaluation","SD"
-"24","PT024",2020-03-18,1,2020-11-18,"PR","PT006",2020-10-11,"Adverse Event","Grade 3 Neutropenia"
-"25","PT025",2020-03-21,0,2020-11-21,"PR","PT007",2020-04-19,"Treatment Change","Treatment Hold"
-"26","PT026",2020-02-12,1,2020-08-12,"PD","PT007",2020-06-19,"Response Evaluation","CR"
-"27","PT027",2020-03-16,1,2020-05-16,"PR","PT007",2020-08-19,"Response Evaluation","CR"
-"28","PT028",2020-01-15,1,2020-03-15,"CR","PT007",2020-10-19,"Response Evaluation","SD"
-"29","PT029",2020-02-01,0,2020-10-01,"SD","PT008",2020-04-12,"Response Evaluation","CR"
-"30","PT030",2020-01-07,0,2020-03-07,"PR","PT008",2020-06-12,"Treatment Change","Regimen Change"
-"31","PT001",2020-01-31,0,2020-03-31,"CR","PT008",2020-08-12,"Treatment Change","Regimen Change"
-"32","PT002",2020-03-19,0,2020-07-19,"PD","PT008",2020-10-12,"Disease Progression","PD Confirmed"
-"33","PT003",2020-02-20,0,2020-04-20,"PR","PT009",2020-03-14,"Treatment Change","Treatment Hold"
-"34","PT004",2020-01-14,0,2020-09-14,"CR","PT009",2020-05-14,"Disease Progression","PD Confirmed"
-"35","PT005",2020-03-07,2,2020-05-07,"PD","PT009",2020-07-14,"Treatment Change","Treatment Discontinuation"
-"36","PT006",2020-02-11,0,2020-04-11,"SD","PT009",2020-09-14,"Disease Progression","PD Confirmed"
-"37","PT007",2020-02-19,0,2020-10-19,"CR","PT010",2020-03-25,"Adverse Event","Grade 3 Neutropenia"
-"38","PT008",2020-02-12,1,2020-10-12,"CR","PT010",2020-05-25,"Response Evaluation","CR"
-"39","PT009",2020-01-14,0,2020-05-14,"PD","PT010",2020-07-25,"Response Evaluation","SD"
-"40","PT010",2020-01-25,1,2020-09-25,"CR","PT010",2020-09-25,"Disease Progression","PD Confirmed"
-"41","PT011",2020-03-30,0,2020-09-30,"SD","PT011",2020-05-30,"Response Evaluation","SD"
-"42","PT012",2020-03-31,0,2020-11-30,"CR","PT011",2020-07-30,"Treatment Change","Treatment Discontinuation"
-"43","PT013",2020-03-09,1,2020-11-09,"CR","PT011",2020-09-30,"Disease Progression","PD Confirmed"
-"44","PT014",2020-03-31,2,2020-07-31,"SD","PT011",2020-11-30,"Adverse Event","Grade 2 Fatigue"
-"45","PT015",2020-02-26,0,2020-04-26,"PR","PT012",2020-05-31,"Response Evaluation","SD"
-"46","PT016",2020-01-09,1,2020-07-09,"PD","PT012",2020-07-31,"Adverse Event","Grade 2 Nausea"
-"47","PT017",2020-03-12,0,2020-05-12,"PD","PT012",2020-09-30,"Response Evaluation","CR"
-"48","PT018",2020-01-26,0,2020-03-26,"PD","PT012",2020-11-30,"Adverse Event","Grade 3 Neutropenia"
-"49","PT019",2020-01-07,0,2020-03-07,"SD","PT013",2020-05-09,"Response Evaluation","SD"
-"50","PT020",2020-02-11,2,2020-10-11,"CR","PT013",2020-07-09,"Response Evaluation","CR"
-"51","PT021",2020-01-09,0,2020-03-09,"PD","PT013",2020-09-09,"Adverse Event","Grade 2 Fatigue"
-"52","PT022",2020-03-23,2,2020-09-23,"PD","PT013",2020-11-09,"Treatment Change","Regimen Change"
-"53","PT023",2020-02-05,2,2020-04-05,"PR","PT014",2020-05-31,"Response Evaluation","SD"
-"54","PT024",2020-03-18,1,2020-11-18,"PR","PT014",2020-07-31,"Disease Progression","PD Confirmed"
-"55","PT025",2020-03-21,0,2020-11-21,"PR","PT014",2020-09-30,"Treatment Change","Treatment Hold"
-"56","PT026",2020-02-12,1,2020-08-12,"PD","PT014",2020-11-30,"Treatment Change","Treatment Discontinuation"
-"57","PT027",2020-03-16,1,2020-05-16,"PR","PT015",2020-04-26,"Disease Progression","PD Confirmed"
-"58","PT028",2020-01-15,1,2020-03-15,"CR","PT015",2020-06-26,"Adverse Event","Grade 2 Nausea"
-"59","PT029",2020-02-01,0,2020-10-01,"SD","PT015",2020-08-26,"Disease Progression","PD Confirmed"
-"60","PT030",2020-01-07,0,2020-03-07,"PR","PT015",2020-10-26,"Response Evaluation","PR"
-"61","PT001",2020-01-31,0,2020-03-31,"CR","PT016",2020-03-09,"Adverse Event","Grade 2 Nausea"
-"62","PT002",2020-03-19,0,2020-07-19,"PD","PT016",2020-05-09,"Adverse Event","Grade 3 Neutropenia"
-"63","PT003",2020-02-20,0,2020-04-20,"PR","PT016",2020-07-09,"Response Evaluation","PD"
-"64","PT004",2020-01-14,0,2020-09-14,"CR","PT016",2020-09-09,"Adverse Event","Grade 2 Fatigue"
-"65","PT005",2020-03-07,2,2020-05-07,"PD","PT017",2020-05-12,"Disease Progression","PD Confirmed"
-"66","PT006",2020-02-11,0,2020-04-11,"SD","PT017",2020-07-12,"Treatment Change","Treatment Hold"
-"67","PT007",2020-02-19,0,2020-10-19,"CR","PT017",2020-09-12,"Disease Progression","PD Confirmed"
-"68","PT008",2020-02-12,1,2020-10-12,"CR","PT017",2020-11-12,"Adverse Event","Grade 3 Anemia"
-"69","PT009",2020-01-14,0,2020-05-14,"PD","PT018",2020-03-26,"Response Evaluation","PD"
-"70","PT010",2020-01-25,1,2020-09-25,"CR","PT018",2020-05-26,"Adverse Event","Grade 2 Fatigue"
-"71","PT011",2020-03-30,0,2020-09-30,"SD","PT018",2020-07-26,"Response Evaluation","PD"
-"72","PT012",2020-03-31,0,2020-11-30,"CR","PT018",2020-09-26,"Disease Progression","PD Confirmed"
-"73","PT013",2020-03-09,1,2020-11-09,"CR","PT019",2020-03-07,"Disease Progression","PD Confirmed"
-"74","PT014",2020-03-31,2,2020-07-31,"SD","PT019",2020-05-07,"Response Evaluation","PD"
-"75","PT015",2020-02-26,0,2020-04-26,"PR","PT019",2020-07-07,"Response Evaluation","PD"
-"76","PT016",2020-01-09,1,2020-07-09,"PD","PT019",2020-09-07,"Response Evaluation","SD"
-"77","PT017",2020-03-12,0,2020-05-12,"PD","PT020",2020-04-11,"Response Evaluation","CR"
-"78","PT018",2020-01-26,0,2020-03-26,"PD","PT020",2020-06-11,"Treatment Change","Dose Reduction"
-"79","PT019",2020-01-07,0,2020-03-07,"SD","PT020",2020-08-11,"Response Evaluation","CR"
-"80","PT020",2020-02-11,2,2020-10-11,"CR","PT020",2020-10-11,"Treatment Change","Treatment Hold"
-"81","PT021",2020-01-09,0,2020-03-09,"PD","PT021",2020-03-09,"Response Evaluation","PD"
-"82","PT022",2020-03-23,2,2020-09-23,"PD","PT021",2020-05-09,"Disease Progression","PD Confirmed"
-"83","PT023",2020-02-05,2,2020-04-05,"PR","PT021",2020-07-09,"Treatment Change","Regimen Change"
-"84","PT024",2020-03-18,1,2020-11-18,"PR","PT021",2020-09-09,"Treatment Change","Dose Reduction"
-"85","PT025",2020-03-21,0,2020-11-21,"PR","PT022",2020-05-23,"Adverse Event","Grade 3 Neutropenia"
-"86","PT026",2020-02-12,1,2020-08-12,"PD","PT022",2020-07-23,"Treatment Change","Regimen Change"
-"87","PT027",2020-03-16,1,2020-05-16,"PR","PT022",2020-09-23,"Disease Progression","PD Confirmed"
-"88","PT028",2020-01-15,1,2020-03-15,"CR","PT022",2020-11-23,"Treatment Change","Dose Reduction"
-"89","PT029",2020-02-01,0,2020-10-01,"SD","PT023",2020-04-05,"Response Evaluation","PD"
-"90","PT030",2020-01-07,0,2020-03-07,"PR","PT023",2020-06-05,"Response Evaluation","PR"
-"91","PT001",2020-01-31,0,2020-03-31,"CR","PT023",2020-08-05,"Response Evaluation","PR"
-"92","PT002",2020-03-19,0,2020-07-19,"PD","PT023",2020-10-05,"Disease Progression","PD Confirmed"
-"93","PT003",2020-02-20,0,2020-04-20,"PR","PT024",2020-05-18,"Treatment Change","Dose Reduction"
-"94","PT004",2020-01-14,0,2020-09-14,"CR","PT024",2020-07-18,"Response Evaluation","PR"
-"95","PT005",2020-03-07,2,2020-05-07,"PD","PT024",2020-09-18,"Treatment Change","Treatment Discontinuation"
-"96","PT006",2020-02-11,0,2020-04-11,"SD","PT024",2020-11-18,"Response Evaluation","PD"
-"97","PT007",2020-02-19,0,2020-10-19,"CR","PT025",2020-05-21,"Treatment Change","Dose Reduction"
-"98","PT008",2020-02-12,1,2020-10-12,"CR","PT025",2020-07-21,"Response Evaluation","PR"
-"99","PT009",2020-01-14,0,2020-05-14,"PD","PT025",2020-09-21,"Response Evaluation","PR"
-"100","PT010",2020-01-25,1,2020-09-25,"CR","PT025",2020-11-21,"Adverse Event","Grade 2 Nausea"
-"101","PT011",2020-03-30,0,2020-09-30,"SD","PT026",2020-04-12,"Adverse Event","Grade 3 Neutropenia"
-"102","PT012",2020-03-31,0,2020-11-30,"CR","PT026",2020-06-12,"Adverse Event","Grade 3 Anemia"
-"103","PT013",2020-03-09,1,2020-11-09,"CR","PT026",2020-08-12,"Disease Progression","PD Confirmed"
-"104","PT014",2020-03-31,2,2020-07-31,"SD","PT026",2020-10-12,"Disease Progression","PD Confirmed"
-"105","PT015",2020-02-26,0,2020-04-26,"PR","PT027",2020-05-16,"Disease Progression","PD Confirmed"
-"106","PT016",2020-01-09,1,2020-07-09,"PD","PT027",2020-07-16,"Adverse Event","Grade 2 Nausea"
-"107","PT017",2020-03-12,0,2020-05-12,"PD","PT027",2020-09-16,"Adverse Event","Grade 2 Fatigue"
-"108","PT018",2020-01-26,0,2020-03-26,"PD","PT027",2020-11-16,"Response Evaluation","PR"
-"109","PT019",2020-01-07,0,2020-03-07,"SD","PT028",2020-03-15,"Disease Progression","PD Confirmed"
-"110","PT020",2020-02-11,2,2020-10-11,"CR","PT028",2020-05-15,"Response Evaluation","PR"
-"111","PT021",2020-01-09,0,2020-03-09,"PD","PT028",2020-07-15,"Response Evaluation","CR"
-"112","PT022",2020-03-23,2,2020-09-23,"PD","PT028",2020-09-15,"Response Evaluation","PR"
-"113","PT023",2020-02-05,2,2020-04-05,"PR","PT029",2020-04-01,"Adverse Event","Grade 3 Neutropenia"
-"114","PT024",2020-03-18,1,2020-11-18,"PR","PT029",2020-06-01,"Response Evaluation","SD"
-"115","PT025",2020-03-21,0,2020-11-21,"PR","PT029",2020-08-01,"Treatment Change","Dose Reduction"
-"116","PT026",2020-02-12,1,2020-08-12,"PD","PT029",2020-10-01,"Treatment Change","Treatment Hold"
-"117","PT027",2020-03-16,1,2020-05-16,"PR","PT030",2020-03-07,"Response Evaluation","PD"
-"118","PT028",2020-01-15,1,2020-03-15,"CR","PT030",2020-05-07,"Response Evaluation","PR"
-"119","PT029",2020-02-01,0,2020-10-01,"SD","PT030",2020-07-07,"Response Evaluation","PR"
-"120","PT030",2020-01-07,0,2020-03-07,"PR","PT030",2020-09-07,"Response Evaluation","PR"
+"patient_id","start_time","event_type","end_time","response_status","on_study","is_marker"
+"PT001",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT001",3,"Dose Reduction",8,"CR",FALSE,TRUE
+"PT001",8,"Treatment Restart",12,"CR",FALSE,TRUE
+"PT001",12,"Follow-up",14,"CR",TRUE,TRUE
+"PT002",0,"Treatment Start",6,"SD",FALSE,TRUE
+"PT002",6,"Dose Reduction",10,"PR",FALSE,TRUE
+"PT002",10,"Follow-up",12,"PR",TRUE,TRUE
+"PT003",0,"Treatment Start",5,"SD",FALSE,TRUE
+"PT003",5,"Adverse Event",9,"PR",FALSE,TRUE
+"PT003",9,"Dose Reduction",14,"CR",FALSE,TRUE
+"PT003",14,"Follow-up",16,"CR",TRUE,TRUE
+"PT004",0,"Treatment Start",7,"PD",FALSE,TRUE
+"PT004",7,"Disease Progression",9,"PD",FALSE,TRUE
+"PT005",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT005",3,"Adverse Event",10,"PR",FALSE,TRUE
+"PT005",10,"Follow-up",12,"CR",TRUE,TRUE
+"PT006",0,"Treatment Start",9,"SD",FALSE,TRUE
+"PT006",9,"Disease Progression",11,"PD",FALSE,TRUE
+"PT007",0,"Treatment Start",3,"SD",FALSE,TRUE
+"PT007",3,"Dose Reduction",6,"PR",FALSE,TRUE
+"PT007",6,"Follow-up",9,"PR",TRUE,TRUE
+"PT008",0,"Treatment Start",4,"PR",FALSE,TRUE
+"PT008",4,"Adverse Event",11,"PR",FALSE,TRUE
+"PT008",11,"Follow-up",14,"CR",TRUE,TRUE
+"PT009",0,"Treatment Start",9,"SD",FALSE,TRUE
+"PT009",9,"Disease Progression",10,"PD",FALSE,TRUE
+"PT010",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT010",3,"Treatment Restart",12,"CR",FALSE,TRUE
+"PT010",12,"Follow-up",15,"CR",TRUE,TRUE

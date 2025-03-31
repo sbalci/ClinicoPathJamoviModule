@@ -4,13 +4,16 @@
 \alias{summarydata}
 \title{Summary of Continuous Variables}
 \usage{
-summarydata(data, vars)
+summarydata(data, vars, distr = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{vars}{a string naming the variables from \code{data} that contains
 the continuous values used for the report}
+
+\item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
+test, skewness, and kurtosis) will be computed and explained.}
 }
 \value{
 A results object containing:
@@ -21,10 +24,17 @@ A results object containing:
 }
 }
 \description{
-Function for Generating Summaries for Continuous Variables.
+This module generates descriptive statistics for continuous variables.
+It provides both a textual summary and a visually appealing summary table.
+Optionally, you can enable distribution diagnostics to examine normality,
+skewness, and kurtosis.
 }
 \examples{
 \donttest{
-# example will be added
+# Example:
+# 1. Load your data frame.
+# 2. Select one or more continuous variables.
+# 3. (Optional) Enable Distribution Diagnostics to view additional tests.
+# 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
 }
 }

@@ -1,14 +1,23 @@
 #' @title Table One
 #'
-#' @description
-#' This function creates a “Table One” – a descriptive summary table commonly used in clinicopathological research.
+#' @description This function creates a “Table One” – a descriptive summary table commonly used in clinicopathological research.
 #' It offers several output styles using different packages (tableone, gtsummary, arsenal, and janitor).
 #'
 #' @return A formatted table according to the chosen style.
 #'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric select naOmit constructFormula
-#' @export
+#' @importFrom tableone CreateTableOne
+#' @importFrom gtsummary tbl_summary as_kable_extra
+#' @importFrom arsenal tableby
+#' @importFrom janitor tabyl adorn_totals adorn_pct_formatting
+#' @importFrom dplyr rename
+#' @importFrom kableExtra kable kable_styling
+#' @importFrom rlang sym
+#' @importFrom stats as.formula
+#' @importFrom grDevices rgb
+#'
+#' @export tableoneClass
 #'
 tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "tableoneClass",

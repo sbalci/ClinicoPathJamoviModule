@@ -3,10 +3,11 @@
 \name{waffleClass}
 \alias{waffleClass}
 \title{Waffle Charts}
+\value{
+The function produces a waffle chart.
+}
 \description{
-Waffle Charts
-
-Waffle Charts
+Create Waffle Charts to visualize distributions.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::waffleBase} -> \code{waffleClass}

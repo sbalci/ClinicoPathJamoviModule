@@ -1,0 +1,55 @@
+"patient_id","data_type","start_time","end_time","response_status","on_study","event_time","event_type"
+"PT001","lane",0,3,"PR",FALSE,NA,NA
+"PT001","lane",3,8,"CR",FALSE,NA,NA
+"PT001","lane",8,12,"CR",TRUE,NA,NA
+"PT002","lane",0,6,"SD",FALSE,NA,NA
+"PT002","lane",6,10,"PR",TRUE,NA,NA
+"PT003","lane",0,2,"SD",FALSE,NA,NA
+"PT003","lane",2,5,"SD",FALSE,NA,NA
+"PT003","lane",5,9,"PR",FALSE,NA,NA
+"PT003","lane",9,14,"CR",TRUE,NA,NA
+"PT004","lane",0,4,"PD",FALSE,NA,NA
+"PT004","lane",4,7,"PD",FALSE,NA,NA
+"PT005","lane",0,3,"PR",FALSE,NA,NA
+"PT005","lane",3,7,"PR",FALSE,NA,NA
+"PT005","lane",7,10,"CR",TRUE,NA,NA
+"PT006","lane",0,4,"SD",FALSE,NA,NA
+"PT006","lane",4,9,"PD",FALSE,NA,NA
+"PT007","lane",0,3,"SD",FALSE,NA,NA
+"PT007","lane",3,6,"PR",FALSE,NA,NA
+"PT007","lane",6,9,"PR",TRUE,NA,NA
+"PT008","lane",0,4,"PR",FALSE,NA,NA
+"PT008","lane",4,8,"PR",FALSE,NA,NA
+"PT008","lane",8,11,"CR",TRUE,NA,NA
+"PT009","lane",0,5,"SD",FALSE,NA,NA
+"PT009","lane",5,9,"PD",FALSE,NA,NA
+"PT010","lane",0,3,"PR",FALSE,NA,NA
+"PT010","lane",3,7,"CR",FALSE,NA,NA
+"PT010","lane",7,12,"CR",TRUE,NA,NA
+"PT001","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT001","event",NA,NA,NA,NA,3,"Dose Reduction"
+"PT001","event",NA,NA,NA,NA,8,"Treatment Restart"
+"PT001","event",NA,NA,NA,NA,12,"Follow-up"
+"PT002","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT002","event",NA,NA,NA,NA,6,"Dose Reduction"
+"PT002","event",NA,NA,NA,NA,10,"Follow-up"
+"PT003","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT003","event",NA,NA,NA,NA,5,"Adverse Event"
+"PT003","event",NA,NA,NA,NA,9,"Dose Reduction"
+"PT004","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT004","event",NA,NA,NA,NA,7,"Disease Progression"
+"PT005","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT005","event",NA,NA,NA,NA,3,"Adverse Event"
+"PT005","event",NA,NA,NA,NA,10,"Follow-up"
+"PT006","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT006","event",NA,NA,NA,NA,9,"Disease Progression"
+"PT007","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT007","event",NA,NA,NA,NA,6,"Dose Reduction"
+"PT008","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT008","event",NA,NA,NA,NA,4,"Adverse Event"
+"PT008","event",NA,NA,NA,NA,11,"Follow-up"
+"PT009","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT009","event",NA,NA,NA,NA,9,"Disease Progression"
+"PT010","event",NA,NA,NA,NA,0,"Treatment Start"
+"PT010","event",NA,NA,NA,NA,3,"Treatment Restart"
+"PT010","event",NA,NA,NA,NA,12,"Follow-up"

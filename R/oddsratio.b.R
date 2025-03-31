@@ -94,6 +94,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
+                # CHECKPOINT: Before data preprocessing - which can be time-consuming
+                private$.checkpoint()
+
                 mydata <- self$data
 
                 mydata <- jmvcore::naOmit(mydata)
@@ -148,6 +151,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # myformula <- as.formula(myformula)
 
+                # CHECKPOINT: Before running finalfit - which can be computationally intensive
+                private$.checkpoint()
 
                 finalfit::finalfit(.data = mydata,
                                    dependent = formulaDependent,
@@ -301,6 +306,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 if (self$options$showNomogram) {
+                    private$.checkpoint()
+
+
                     # Calculate likelihood ratios
                     lr_results <- private$.calculateLikelihoodRatios(
                         mydata,
@@ -318,6 +326,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     Negative LR: {format(lr_results$negative_lr, digits=2)}<br>
                     <br>
                 ")
+
+                    private$.checkpoint()
 
                     # Prepare data for nomogram
                     nom_results <- private$.prepareRmsNomogram(
@@ -398,6 +408,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 formula_str <- paste(dependent, "~", paste(explanatory, collapse = " + "))
 
                 # Fit logistic regression model
+                private$.checkpoint()
+
                 fit <- rms::lrm(
                     formula = as.formula(formula_str),
                     data = data,
@@ -414,6 +426,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .createNomogram = function(fit, dd) {
             if (is.null(fit)) return(NULL)
+
+            private$.checkpoint()
 
             # Create nomogram
             nom <- try({
@@ -663,6 +677,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            private$.checkpoint()
+
+
             par(mar = c(4, 4, 2, 2))
             plot(private$.nom_object)
             return(TRUE)
@@ -705,6 +722,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata <- plotList$plotData
                     formulaDependent <- plotList$formulaDependent
                     formulaExplanatory <- plotList$formulaExplanatory
+
+                    private$.checkpoint()
 
                     plot <-
                         # finalfit::or_plot(

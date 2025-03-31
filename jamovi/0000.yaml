@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.72
+version: 0.0.2.80
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-02-23'
+date: '2024-03-31'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -55,7 +55,13 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
-    description: Function for Generating Summaries for Continuous Variables.
+    description: >
+      This module generates descriptive statistics for continuous variables.
+
+      It provides both a textual summary and a visually appealing summary table.
+
+      Optionally, you can enable distribution diagnostics to examine normality,
+      skewness, and kurtosis.
   - title: Table One
     name: tableone
     ns: ClinicoPath
@@ -79,6 +85,7 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
+    menuSubtitle: Venn Diagram, UpSet Plot
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
@@ -531,10 +538,10 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
-    description: >
-      Creates waterfall and spider plots to visualize tumor response data
-      following RECIST criteria. Now includes optional calculations for duration
-      of response, time to response, and subgroup analysis.
+    description: >-
+      Creates a waterfall plot to visualize tumor response data following RECIST
+      criteria.
+    menuSubtitle: Waterfall Plot, Spider Plot
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
@@ -543,7 +550,7 @@ analyses:
     menuTitle: Swimmer Plot
     description: >-
       Creates a swimmer plot to visualize individual patient timelines and
-      events.
+      clinical events.
   - title: Variable Tree 2
     name: vartree2
     ns: ClinicoPath
@@ -558,6 +565,35 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree V3
     description: Function for Generating Enhanced Tree Summaries of Variables
+  - title: Swimmer Plot 2
+    name: swimmerplot2
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuTitle: Swimmer Plot 2
+    menuSubgroup: Patient Follow-Up Plots
+    description: Creates a swimmer plot to visualize subject response data over time.
+  - title: Stage Migration Analysis
+    name: stagemigration
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Stage Migration Analysis
+    menuSubtitle: Will Rogers Phenomenon Analysis
+    description: >-
+      Analyzes staging system changes and the "Will Rogers Phenomenon" in
+      disease staging.  This analysis compares staging distributions before and
+      after a staging system change, quantifies stage migration, and evaluates
+      changes in prognostic performance.
+  - title: River Plots
+    name: riverplot
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuTitle: River Plots
+    menuSubgroup: Categorical Over Time
+    menuSubtitle: Flow and Transition Visualization
+    description: |
+      'Function for generating river plots (alluvial diagrams) to visualize
+      flows and transitions over time or between categories.'
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

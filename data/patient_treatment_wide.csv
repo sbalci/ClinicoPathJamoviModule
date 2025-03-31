@@ -1,0 +1,501 @@
+"PatientID","Age","Gender","Diagnosis","Initial","Month3","Month6","Month12","TotalCost"
+"P1",60,"Male","Mild","Medication A","Stable","Stable","Stable",407.011791151948
+"P2",44,"Male","Severe","Combination","Stable","Stable","Improved",3182.61610552017
+"P3",80,"Male","Moderate","Medication A","Worsened","Stable","Stable",1400.82559571089
+"P4",43,"Female","Mild","Medication A","Worsened","Discontinued","Discontinued",350.145634678658
+"P5",32,"Male","Moderate","Medication A","Improved","Improved","Improved",1131.97768802941
+"P6",71,"Male","Moderate","Combination","Stable","Stable","Stable",1490.61932528391
+"P7",79,"Male","Mild","Watchful Waiting","Stable","Worsened","Stable",402.414143974893
+"P8",72,"Female","Moderate","Combination","Improved","Stable","Improved",1444.84238464851
+"P9",66,"Female","Moderate","Combination","Stable","Stable","Stable",1543.89214260969
+"P10",43,"Female","Moderate","Medication A","Stable","Stable","Stable",1286.2474945765
+"P11",54,"Female","Severe","Surgery","Improved","Stable","Stable",5623.44028752856
+"P12",55,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",287.405882470775
+"P13",56,"Female","Moderate","Medication A","Worsened","Stable","Worsened",1581.52134393202
+"P14",34,"Female","Mild","Medication A","Improved","Improved","Improved",382.289600009099
+"P15",80,"Male","Mild","Medication A","Stable","Improved","Improved",400.958050263114
+"P16",56,"Male","Severe","Surgery","Stable","Improved","Improved",5412.45687408652
+"P17",57,"Female","Mild","Medication A","Stable","Improved","Stable",390.016941620968
+"P18",38,"Male","Mild","Medication A","Stable","Stable","Stable",425.582221739925
+"P19",58,"Female","Mild","Medication A","Worsened","Improved","Improved",431.33380602207
+"P20",64,"Female","Mild","Medication A","Stable","Worsened","Discontinued",400.039377594367
+"P21",37,"Male","Moderate","Combination","Discontinued","Discontinued","Discontinued",923.622903723735
+"P22",55,"Male","Moderate","Medication A","Improved","Improved","Improved",1059.26740486175
+"P23",36,"Male","Mild","Medication A","Improved","Stable","Improved",392.075762181543
+"P24",71,"Female","Moderate","Medication A","Stable","Improved","Stable",1229.69000862725
+"P25",38,"Male","Severe","Surgery","Improved","Improved","Improved",5240.30422051344
+"P26",48,"Male","Mild","Watchful Waiting","Stable","Worsened","Worsened",437.02594560571
+"P27",65,"Male","Moderate","Medication A","Discontinued","Discontinued","Discontinued",647.94070710009
+"P28",43,"Female","Severe","Combination","Worsened","Worsened","Worsened",4606.6878055199
+"P29",46,"Female","Moderate","Medication B","Stable","Improved","Improved",1183.1976662823
+"P30",72,"Male","Mild","Medication A","Improved","Improved","Stable",383.792140820064
+"P31",68,"Male","Mild","Medication A","Stable","Worsened","Discontinued",401.873037811369
+"P32",41,"Female","Mild","Medication A","Stable","Worsened","Improved",441.946317673195
+"P33",44,"Female","Moderate","Combination","Stable","Worsened","Worsened",1808.11848760117
+"P34",61,"Male","Moderate","Medication B","Stable","Stable","Improved",1307.27507890994
+"P35",71,"Male","Severe","Medication B","Discontinued","Discontinued","Discontinued",1620.02495777048
+"P36",74,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",215.664815504104
+"P37",36,"Female","Mild","Watchful Waiting","Worsened","Stable","Worsened",452.3987259157
+"P38",38,"Male","Severe","Surgery","Worsened","Stable","Stable",6086.68307696236
+"P39",70,"Male","Mild","Watchful Waiting","Worsened","Worsened","Worsened",514.475009276066
+"P40",39,"Male","Moderate","Medication A","Improved","Stable","Improved",1157.66737911198
+"P41",52,"Male","Moderate","Medication B","Worsened","Improved","Improved",1415.93871548027
+"P42",56,"Female","Severe","Surgery","Improved","Improved","Improved",4958.44511050172
+"P43",36,"Female","Mild","Medication A","Stable","Stable","Improved",404.348865273409
+"P44",56,"Female","Moderate","Medication A","Stable","Stable","Improved",1225.290298515
+"P45",61,"Male","Moderate","Medication A","Stable","Stable","Worsened",1332.74055755837
+"P46",67,"Male","Moderate","Medication B","Improved","Stable","Stable",1250.38154894533
+"P47",54,"Female","Mild","Medication A","Improved","Stable","Stable",383.519923664629
+"P48",63,"Male","Moderate","Medication B","Improved","Stable","Stable",1284.74363813968
+"P49",58,"Female","Moderate","Medication A","Stable","Worsened","Worsened",1563.82915937109
+"P50",34,"Female","Moderate","Medication A","Improved","Improved","Stable",1164.94724489283
+"P51",37,"Male","Mild","Medication A","Worsened","Stable","Stable",466.988923137076
+"P52",41,"Female","Moderate","Medication A","Worsened","Stable","Stable",1421.61021063197
+"P53",42,"Male","Moderate","Medication A","Improved","Improved","Improved",1086.61315739527
+"P54",47,"Female","Severe","Combination","Discontinued","Discontinued","Discontinued",1933.17973995209
+"P55",62,"Female","Mild","Medication A","Stable","Worsened","Worsened",499.175497502554
+"P56",56,"Male","Mild","Watchful Waiting","Stable","Worsened","Stable",411.780493448023
+"P57",54,"Female","Mild","Watchful Waiting","Improved","Improved","Stable",313.681524489541
+"P58",67,"Female","Severe","Combination","Stable","Stable","Improved",3281.13084279466
+"P59",50,"Female","Moderate","Medication B","Discontinued","Discontinued","Discontinued",684.209964935202
+"P60",44,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",341.611691312864
+"P61",70,"Male","Mild","Watchful Waiting","Stable","Stable","Improved",326.891468792222
+"P62",76,"Female","Moderate","Medication B","Worsened","Worsened","Improved",1565.58308755886
+"P63",55,"Female","Moderate","Combination","Improved","Improved","Improved",1390.77222528867
+"P64",60,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",223.658937661909
+"P65",45,"Male","Moderate","Medication B","Improved","Stable","Stable",1301.75676157745
+"P66",59,"Male","Moderate","Medication A","Stable","Worsened","Worsened",1538.82042623218
+"P67",35,"Male","Mild","Medication A","Improved","Stable","Stable",396.925199412741
+"P68",72,"Male","Severe","Surgery","Improved","Stable","Stable",5119.69174157549
+"P69",37,"Male","Mild","Medication A","Stable","Worsened","Worsened",512.176757426932
+"P70",51,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",718.83491679607
+"P71",51,"Male","Moderate","Medication B","Worsened","Worsened","Worsened",1880.53847134346
+"P72",68,"Female","Mild","Medication A","Stable","Improved","Improved",382.18938113749
+"P73",60,"Female","Mild","Medication A","Stable","Improved","Improved",391.015153054148
+"P74",77,"Female","Mild","Watchful Waiting","Stable","Improved","Stable",312.831606567372
+"P75",46,"Female","Moderate","Medication A","Stable","Worsened","Worsened",1515.0755782295
+"P76",79,"Male","Mild","Medication A","Improved","Improved","Improved",358.121843362227
+"P77",78,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",316.486515431199
+"P78",63,"Female","Mild","Watchful Waiting","Worsened","Stable","Stable",415.310891235713
+"P79",33,"Female","Moderate","Medication A","Improved","Improved","Improved",1087.82404209115
+"P80",42,"Male","Moderate","Medication B","Stable","Improved","Improved",1188.52510222094
+"P81",34,"Female","Severe","Combination","Worsened","Stable","Worsened",4285.49995585345
+"P82",80,"Female","Moderate","Medication A","Improved","Improved","Improved",1069.15606531687
+"P83",54,"Female","Severe","Combination","Improved","Stable","Stable",3266.32978285011
+"P84",51,"Female","Moderate","Medication A","Stable","Stable","Stable",1297.58535848837
+"P85",54,"Male","Severe","Combination","Improved","Stable","Stable",3230.82155900542
+"P86",61,"Female","Severe","Medication B","Improved","Improved","Improved",2600.83777129836
+"P87",75,"Female","Mild","Medication A","Stable","Worsened","Worsened",537.695969369262
+"P88",54,"Male","Mild","Medication A","Worsened","Worsened","Worsened",574.102663183585
+"P89",52,"Female","Mild","Watchful Waiting","Stable","Stable","Stable",357.37001943402
+"P90",64,"Male","Severe","Surgery","Improved","Improved","Improved",5410.19050197769
+"P91",69,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",678.812123647425
+"P92",77,"Female","Moderate","Medication B","Stable","Stable","Stable",1365.67655431107
+"P93",59,"Female","Mild","Medication A","Stable","Stable","Worsened",477.834506029729
+"P94",41,"Female","Mild","Medication A","Stable","Worsened","Worsened",523.782569216099
+"P95",60,"Male","Mild","Medication A","Worsened","Stable","Stable",446.599096948281
+"P96",75,"Male","Severe","Combination","Discontinued","Discontinued","Discontinued",2058.35977654858
+"P97",59,"Male","Moderate","Medication B","Worsened","Stable","Stable",1472.42728004465
+"P98",64,"Male","Mild","Medication A","Improved","Improved","Improved",353.324379183352
+"P99",43,"Female","Moderate","Medication A","Improved","Improved","Improved",1129.72384712845
+"P100",58,"Female","Severe","Combination","Worsened","Worsened","Worsened",4535.20379536087
+"P101",61,"Female","Moderate","Combination","Stable","Improved","Improved",1384.79842768516
+"P102",36,"Female","Severe","Surgery","Improved","Improved","Improved",5534.23867141455
+"P103",32,"Male","Moderate","Medication A","Improved","Improved","Improved",1065.09753679298
+"P104",52,"Female","Severe","Combination","Stable","Stable","Improved",3400.11465685908
+"P105",44,"Female","Moderate","Medication B","Improved","Improved","Stable",1231.00718090823
+"P106",50,"Male","Mild","Medication A","Worsened","Worsened","Worsened",557.884514879901
+"P107",66,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",736.924628414679
+"P108",37,"Male","Severe","Surgery","Discontinued","Discontinued","Discontinued",4087.98971475242
+"P109",80,"Male","Severe","Combination","Stable","Stable","Improved",3449.96067953296
+"P110",39,"Male","Moderate","Medication A","Improved","Improved","Improved",1085.85029311851
+"P111",79,"Male","Mild","Medication A","Improved","Improved","Improved",352.693531228229
+"P112",71,"Male","Moderate","Medication A","Improved","Stable","Worsened",1380.79039032524
+"P113",73,"Male","Severe","Medication B","Improved","Improved","Improved",2638.61100482149
+"P114",63,"Female","Mild","Watchful Waiting","Improved","Stable","Improved",299.581700333394
+"P115",39,"Female","Moderate","Medication B","Stable","Stable","Stable",1433.5993156652
+"P116",51,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",751.68487222027
+"P117",41,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",723.187572937924
+"P118",49,"Male","Mild","Medication A","Improved","Improved","Improved",356.247375013307
+"P119",75,"Female","Moderate","Medication A","Stable","Worsened","Stable",1361.96574369818
+"P120",46,"Female","Moderate","Combination","Stable","Stable","Stable",1519.51922960579
+"P121",75,"Male","Moderate","Medication B","Worsened","Improved","Improved",1366.58952060621
+"P122",64,"Male","Mild","Watchful Waiting","Worsened","Stable","Improved",381.521817731205
+"P123",69,"Female","Severe","Medication B","Improved","Improved","Stable",2925.65348097868
+"P124",75,"Female","Moderate","Medication B","Stable","Improved","Improved",1201.25635931175
+"P125",80,"Male","Moderate","Medication B","Improved","Improved","Improved",1168.11274425499
+"P126",59,"Female","Moderate","Combination","Improved","Improved","Improved",1397.85401174985
+"P127",44,"Female","Mild","Medication A","Stable","Stable","Stable",422.040397781879
+"P128",53,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",301.133818736766
+"P129",78,"Female","Severe","Combination","Improved","Improved","Improved",3157.69489047676
+"P130",52,"Male","Moderate","Combination","Improved","Improved","Improved",1298.92539061233
+"P131",72,"Male","Mild","Medication A","Worsened","Discontinued","Discontinued",335.564431490377
+"P132",36,"Female","Moderate","Medication A","Stable","Stable","Stable",1303.66778918914
+"P133",58,"Male","Moderate","Medication A","Stable","Improved","Improved",1150.49284440558
+"P134",44,"Male","Mild","Watchful Waiting","Improved","Stable","Improved",305.738851014525
+"P135",52,"Female","Severe","Combination","Stable","Worsened","Worsened",4161.9816316315
+"P136",55,"Female","Mild","Watchful Waiting","Stable","Stable","Worsened",393.976614477579
+"P137",67,"Female","Mild","Medication A","Stable","Stable","Stable",405.549316947348
+"P138",75,"Female","Moderate","Medication A","Improved","Improved","Improved",1097.28660542518
+"P139",61,"Male","Moderate","Combination","Improved","Improved","Improved",1278.30144492164
+"P140",36,"Female","Severe","Combination","Stable","Stable","Stable",3533.90192867722
+"P141",56,"Female","Moderate","Medication B","Stable","Improved","Improved",1306.96042726748
+"P142",71,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",726.906357652042
+"P143",34,"Female","Severe","Surgery","Improved","Improved","Improved",5399.60513448436
+"P144",35,"Female","Mild","Medication A","Worsened","Worsened","Worsened",580.700823195744
+"P145",45,"Female","Moderate","Combination","Stable","Improved","Improved",1332.80631642044
+"P146",53,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",211.282626799308
+"P147",61,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",716.106546850875
+"P148",50,"Female","Moderate","Medication A","Improved","Improved","Improved",1143.9745967444
+"P149",40,"Male","Mild","Medication A","Improved","Stable","Stable",414.384195525199
+"P150",65,"Female","Moderate","Medication B","Worsened","Worsened","Stable",1657.3651523469
+"P151",73,"Female","Mild","Watchful Waiting","Worsened","Worsened","Worsened",504.457899127156
+"P152",75,"Female","Severe","Medication B","Stable","Worsened","Stable",3655.12729379581
+"P153",48,"Male","Moderate","Medication B","Worsened","Stable","Stable",1556.87351758825
+"P154",54,"Male","Severe","Surgery","Discontinued","Discontinued","Discontinued",4309.78561769938
+"P155",68,"Male","Moderate","Combination","Worsened","Stable","Stable",1676.5322566987
+"P156",55,"Male","Mild","Medication A","Stable","Worsened","Stable",437.794504381251
+"P157",38,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",359.010917472187
+"P158",36,"Male","Mild","Medication A","Worsened","Stable","Stable",453.121239963453
+"P159",63,"Female","Severe","Combination","Improved","Improved","Improved",2924.03671840578
+"P160",77,"Female","Mild","Medication A","Stable","Stable","Improved",392.788942489773
+"P161",42,"Female","Mild","Medication A","Stable","Stable","Improved",396.00594679825
+"P162",48,"Female","Mild","Watchful Waiting","Stable","Worsened","Worsened",424.397659569513
+"P163",76,"Male","Moderate","Medication B","Stable","Worsened","Worsened",1606.80406084517
+"P164",68,"Male","Moderate","Medication A","Worsened","Stable","Improved",1341.70401097275
+"P165",33,"Female","Moderate","Medication B","Improved","Stable","Stable",1281.13486110885
+"P166",30,"Male","Severe","Combination","Discontinued","Discontinued","Discontinued",2053.91200541565
+"P167",69,"Female","Mild","Medication A","Improved","Improved","Stable",382.932118752971
+"P168",59,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",283.079429562204
+"P169",59,"Male","Mild","Medication A","Stable","Worsened","Improved",438.729258794803
+"P170",54,"Female","Moderate","Medication A","Worsened","Worsened","Worsened",1713.38084071968
+"P171",45,"Female","Mild","Medication A","Stable","Stable","Worsened",475.095283018425
+"P172",53,"Female","Mild","Medication A","Worsened","Stable","Stable",464.243711899966
+"P173",40,"Female","Moderate","Medication A","Stable","Stable","Improved",1217.45902593713
+"P174",77,"Male","Mild","Medication A","Stable","Stable","Stable",415.174793936312
+"P175",49,"Male","Severe","Combination","Stable","Worsened","Improved",3770.40956251137
+"P176",69,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",350.026107986923
+"P177",32,"Female","Moderate","Medication B","Worsened","Worsened","Worsened",1748.70180304628
+"P178",58,"Female","Severe","Surgery","Improved","Improved","Improved",4971.9576319661
+"P179",65,"Male","Moderate","Medication A","Improved","Improved","Stable",1125.68236690108
+"P180",73,"Female","Moderate","Medication B","Improved","Stable","Stable",1321.58330386179
+"P181",51,"Female","Mild","Medication A","Worsened","Stable","Improved",433.682187812869
+"P182",78,"Female","Mild","Medication A","Worsened","Worsened","Stable",518.774760130327
+"P183",71,"Female","Severe","Medication B","Stable","Improved","Improved",2822.64857218089
+"P184",49,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",323.819562326651
+"P185",40,"Female","Moderate","Medication B","Improved","Improved","Improved",1160.9147194773
+"P186",37,"Female","Mild","Medication A","Improved","Improved","Improved",376.925723122433
+"P187",75,"Female","Mild","Medication A","Improved","Improved","Improved",351.74112486653
+"P188",50,"Female","Severe","Surgery","Improved","Improved","Improved",5380.546050773
+"P189",74,"Female","Mild","Medication A","Improved","Improved","Improved",357.237992491573
+"P190",31,"Male","Mild","Medication A","Worsened","Discontinued","Discontinued",336.202256738674
+"P191",72,"Female","Moderate","Medication B","Stable","Worsened","Improved",1375.01745585166
+"P192",42,"Female","Moderate","Combination","Improved","Improved","Stable",1328.96310781036
+"P193",75,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",339.197298679501
+"P194",35,"Male","Moderate","Medication B","Improved","Improved","Improved",1172.64526685793
+"P195",37,"Female","Moderate","Combination","Stable","Improved","Improved",1341.73299659695
+"P196",73,"Male","Moderate","Medication B","Stable","Stable","Stable",1283.16845193738
+"P197",61,"Female","Severe","Surgery","Stable","Improved","Improved",5467.7007381795
+"P198",65,"Male","Moderate","Combination","Improved","Improved","Improved",1416.39684610069
+"P199",74,"Male","Mild","Medication A","Worsened","Stable","Improved",440.150679305196
+"P200",43,"Female","Moderate","Medication A","Stable","Stable","Stable",1205.51445197314
+"P201",45,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",218.87596860202
+"P202",52,"Female","Moderate","Medication A","Stable","Worsened","Worsened",1538.46455403976
+"P203",62,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",207.714052896481
+"P204",69,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",717.581566523295
+"P205",69,"Male","Severe","Combination","Improved","Improved","Improved",3187.34141579643
+"P206",39,"Female","Moderate","Medication A","Improved","Improved","Improved",1070.97802812606
+"P207",54,"Male","Severe","Surgery","Discontinued","Discontinued","Discontinued",3901.3287238148
+"P208",37,"Male","Moderate","Combination","Stable","Improved","Improved",1333.99640519824
+"P209",47,"Male","Severe","Medication B","Worsened","Stable","Stable",3382.19798529521
+"P210",38,"Female","Moderate","Combination","Worsened","Worsened","Worsened",1991.59836539766
+"P211",36,"Female","Mild","Medication A","Worsened","Stable","Improved",455.932568408549
+"P212",36,"Female","Mild","Medication A","Stable","Stable","Improved",405.054687644355
+"P213",39,"Female","Moderate","Medication B","Stable","Stable","Improved",1323.57101402292
+"P214",53,"Male","Mild","Medication A","Improved","Stable","Stable",401.307903702371
+"P215",52,"Female","Mild","Medication A","Improved","Improved","Improved",360.009783644229
+"P216",55,"Male","Moderate","Combination","Improved","Improved","Improved",1332.13425906748
+"P217",72,"Female","Mild","Medication A","Stable","Improved","Improved",380.85808718577
+"P218",62,"Male","Mild","Medication A","Stable","Improved","Improved",376.944260419346
+"P219",58,"Male","Mild","Watchful Waiting","Worsened","Worsened","Worsened",519.143078131601
+"P220",80,"Male","Moderate","Medication B","Stable","Worsened","Worsened",1668.87476594886
+"P221",39,"Male","Mild","Medication A","Stable","Improved","Improved",380.472278843634
+"P222",42,"Male","Mild","Medication A","Stable","Improved","Improved",396.5646051066
+"P223",72,"Female","Severe","Medication B","Improved","Improved","Improved",2686.01825773809
+"P224",40,"Female","Mild","Medication A","Stable","Improved","Stable",411.440639118664
+"P225",54,"Male","Moderate","Medication B","Improved","Improved","Improved",1140.20766070532
+"P226",55,"Male","Mild","Medication A","Improved","Improved","Improved",362.293746327981
+"P227",36,"Male","Moderate","Medication B","Stable","Improved","Improved",1253.42211618461
+"P228",54,"Female","Moderate","Medication A","Worsened","Worsened","Discontinued",1400.9920664602
+"P229",52,"Male","Mild","Medication A","Stable","Stable","Improved",388.615875842981
+"P230",55,"Female","Severe","Combination","Discontinued","Discontinued","Discontinued",1875.64016833762
+"P231",61,"Male","Moderate","Medication B","Stable","Improved","Improved",1243.35888574971
+"P232",49,"Female","Mild","Watchful Waiting","Worsened","Worsened","Worsened",499.038282225374
+"P233",53,"Female","Mild","Watchful Waiting","Worsened","Discontinued","Discontinued",254.647837451659
+"P234",38,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",304.604019833729
+"P235",70,"Female","Moderate","Combination","Improved","Improved","Improved",1313.32113722898
+"P236",66,"Male","Moderate","Medication A","Improved","Improved","Improved",1080.33706997149
+"P237",52,"Male","Moderate","Combination","Improved","Improved","Improved",1237.00473771617
+"P238",43,"Male","Moderate","Medication B","Stable","Improved","Improved",1247.30333093181
+"P239",75,"Female","Moderate","Medication A","Improved","Improved","Improved",1130.52938958071
+"P240",35,"Female","Mild","Watchful Waiting","Worsened","Discontinued","Discontinued",258.715556396637
+"P241",56,"Male","Moderate","Medication B","Stable","Worsened","Worsened",1597.99135539215
+"P242",30,"Female","Severe","Combination","Improved","Stable","Improved",3087.65051091462
+"P243",55,"Female","Moderate","Medication A","Improved","Improved","Stable",1155.18514320999
+"P244",71,"Male","Mild","Medication A","Improved","Improved","Improved",351.102165389806
+"P245",78,"Female","Mild","Watchful Waiting","Improved","Improved","Improved",281.189872590825
+"P246",46,"Female","Moderate","Medication A","Improved","Stable","Stable",1166.04375282582
+"P247",58,"Male","Severe","Medication B","Improved","Improved","Improved",2650.19471871387
+"P248",55,"Female","Mild","Medication A","Improved","Improved","Improved",346.103874640539
+"P249",56,"Male","Moderate","Medication A","Improved","Improved","Improved",1108.94482665136
+"P250",50,"Female","Moderate","Medication B","Stable","Worsened","Worsened",1593.22205541423
+"P251",36,"Female","Moderate","Medication A","Improved","Stable","Stable",1144.57847576123
+"P252",55,"Female","Mild","Medication A","Stable","Worsened","Worsened",521.76472329488
+"P253",70,"Female","Moderate","Medication A","Stable","Stable","Stable",1219.90780539159
+"P254",49,"Male","Moderate","Medication B","Stable","Stable","Stable",1405.26323733386
+"P255",35,"Female","Moderate","Medication A","Worsened","Worsened","Improved",1551.14046724001
+"P256",79,"Female","Moderate","Medication B","Improved","Improved","Stable",1197.61794453487
+"P257",59,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",347.699860308785
+"P258",60,"Male","Mild","Watchful Waiting","Worsened","Worsened","Worsened",500.859011611901
+"P259",58,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",311.055409615394
+"P260",46,"Male","Severe","Combination","Stable","Improved","Improved",3204.06156749651
+"P261",66,"Female","Moderate","Combination","Stable","Stable","Improved",1416.39984610677
+"P262",49,"Male","Severe","Combination","Improved","Improved","Improved",2925.45337471366
+"P263",64,"Male","Moderate","Medication B","Stable","Stable","Stable",1291.79626178462
+"P264",54,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",322.734127224423
+"P265",75,"Female","Mild","Watchful Waiting","Improved","Improved","Improved",297.742856194731
+"P266",62,"Male","Moderate","Medication A","Worsened","Stable","Stable",1487.00064203516
+"P267",31,"Male","Severe","Combination","Stable","Stable","Improved",3169.91003489215
+"P268",33,"Female","Moderate","Medication A","Stable","Stable","Stable",1316.93861469626
+"P269",39,"Male","Severe","Combination","Worsened","Stable","Improved",3812.13270745985
+"P270",62,"Male","Moderate","Medication A","Stable","Worsened","Worsened",1563.99262931384
+"P271",34,"Female","Moderate","Medication B","Discontinued","Discontinued","Discontinued",680.36149279587
+"P272",54,"Female","Severe","Medication B","Discontinued","Discontinued","Discontinued",1716.10543773556
+"P273",37,"Female","Moderate","Medication B","Improved","Improved","Improved",1133.83724647388
+"P274",54,"Female","Moderate","Combination","Worsened","Worsened","Worsened",1958.48256191472
+"P275",50,"Male","Severe","Surgery","Improved","Improved","Improved",5162.59821760934
+"P276",74,"Male","Mild","Medication A","Stable","Stable","Improved",392.592225472443
+"P277",47,"Male","Mild","Medication A","Stable","Improved","Improved",392.395226922818
+"P278",71,"Male","Moderate","Medication A","Improved","Improved","Improved",1097.32405498624
+"P279",60,"Male","Mild","Medication A","Worsened","Worsened","Worsened",579.793988285121
+"P280",35,"Male","Severe","Combination","Improved","Stable","Stable",3429.88008646946
+"P281",36,"Female","Mild","Medication A","Improved","Improved","Stable",385.13860238716
+"P282",70,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",289.404875522479
+"P283",77,"Female","Moderate","Combination","Stable","Worsened","Worsened",1828.18293510703
+"P284",46,"Male","Moderate","Medication B","Stable","Improved","Improved",1268.8674333198
+"P285",74,"Male","Moderate","Combination","Stable","Worsened","Stable",1646.36291581672
+"P286",57,"Male","Moderate","Combination","Improved","Improved","Improved",1321.06965909339
+"P287",69,"Male","Moderate","Medication A","Stable","Worsened","Discontinued",1250.1510426281
+"P288",36,"Male","Mild","Watchful Waiting","Improved","Improved","Stable",298.218374289572
+"P289",49,"Male","Moderate","Medication A","Improved","Improved","Improved",1099.44253458828
+"P290",47,"Female","Mild","Watchful Waiting","Stable","Stable","Improved",324.790837298147
+"P291",58,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",202.93242708547
+"P292",46,"Male","Severe","Combination","Improved","Stable","Improved",3040.975408867
+"P293",62,"Male","Moderate","Combination","Worsened","Worsened","Worsened",2005.83790472941
+"P294",31,"Female","Severe","Combination","Improved","Improved","Stable",3309.37344036438
+"P295",78,"Female","Mild","Medication A","Worsened","Stable","Improved",428.420486351475
+"P296",31,"Female","Severe","Medication B","Improved","Stable","Stable",2949.96470000129
+"P297",42,"Male","Mild","Medication A","Stable","Stable","Worsened",478.023681448307
+"P298",53,"Male","Moderate","Medication A","Stable","Stable","Stable",1226.20958798099
+"P299",78,"Female","Moderate","Medication A","Worsened","Worsened","Worsened",1819.78740099957
+"P300",32,"Male","Mild","Medication A","Stable","Stable","Stable",408.560384776443
+"P301",47,"Male","Mild","Watchful Waiting","Worsened","Stable","Improved",365.979991333093
+"P302",31,"Male","Moderate","Medication B","Improved","Improved","Improved",1214.24971100595
+"P303",66,"Female","Mild","Medication A","Worsened","Worsened","Stable",534.741597590502
+"P304",41,"Female","Moderate","Medication A","Stable","Stable","Stable",1246.34338794183
+"P305",42,"Male","Severe","Surgery","Stable","Worsened","Stable",6292.72642197087
+"P306",71,"Female","Mild","Medication A","Stable","Stable","Stable",439.167445634492
+"P307",35,"Female","Mild","Watchful Waiting","Stable","Worsened","Discontinued",325.797791045625
+"P308",71,"Male","Severe","Surgery","Worsened","Worsened","Stable",6519.88623471698
+"P309",71,"Male","Mild","Watchful Waiting","Stable","Stable","Improved",335.806620504241
+"P310",67,"Male","Moderate","Medication A","Worsened","Stable","Stable",1515.69398679771
+"P311",77,"Female","Mild","Medication A","Stable","Worsened","Worsened",516.47414993355
+"P312",45,"Male","Severe","Surgery","Improved","Improved","Improved",5075.60381240677
+"P313",64,"Female","Severe","Surgery","Improved","Stable","Stable",5568.27334894612
+"P314",65,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",296.442574286368
+"P315",56,"Male","Severe","Medication B","Discontinued","Discontinued","Discontinued",1723.20168568147
+"P316",56,"Female","Moderate","Medication B","Stable","Worsened","Worsened",1612.30530099012
+"P317",64,"Male","Mild","Watchful Waiting","Stable","Stable","Improved",329.001100322697
+"P318",52,"Male","Severe","Medication B","Stable","Stable","Improved",3027.06411334034
+"P319",32,"Male","Moderate","Medication B","Improved","Improved","Improved",1161.76580428937
+"P320",60,"Female","Moderate","Medication A","Improved","Stable","Stable",1236.37617149111
+"P321",77,"Male","Mild","Medication A","Worsened","Stable","Improved",457.364889887162
+"P322",31,"Male","Severe","Medication B","Improved","Improved","Improved",2662.38981566764
+"P323",76,"Male","Mild","Watchful Waiting","Worsened","Discontinued","Discontinued",247.247648236342
+"P324",52,"Female","Mild","Watchful Waiting","Stable","Stable","Stable",351.368173849769
+"P325",32,"Male","Moderate","Combination","Stable","Stable","Stable",1377.45097978972
+"P326",38,"Female","Mild","Watchful Waiting","Stable","Stable","Worsened",412.043469520286
+"P327",68,"Female","Moderate","Medication B","Worsened","Discontinued","Discontinued",994.343485899735
+"P328",59,"Female","Mild","Medication A","Stable","Stable","Improved",415.19416864682
+"P329",60,"Female","Mild","Watchful Waiting","Worsened","Improved","Improved",336.023362750653
+"P330",59,"Female","Mild","Medication A","Improved","Improved","Improved",344.115732301027
+"P331",38,"Female","Moderate","Medication B","Worsened","Discontinued","Discontinued",1053.9189859922
+"P332",65,"Female","Mild","Medication A","Stable","Stable","Worsened",460.5944183385
+"P333",63,"Female","Mild","Medication A","Improved","Stable","Improved",369.7142193662
+"P334",51,"Female","Moderate","Medication B","Discontinued","Discontinued","Discontinued",736.25842221966
+"P335",73,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",303.064243532717
+"P336",70,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",200.813239187468
+"P337",57,"Male","Mild","Medication A","Stable","Stable","Stable",428.415205546655
+"P338",58,"Female","Moderate","Medication A","Improved","Improved","Improved",1062.55039410107
+"P339",72,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",311.08838158939
+"P340",68,"Male","Mild","Watchful Waiting","Worsened","Improved","Improved",360.022577371914
+"P341",74,"Male","Moderate","Medication B","Worsened","Stable","Stable",1426.20723851491
+"P342",66,"Female","Mild","Watchful Waiting","Stable","Worsened","Stable",401.931261315476
+"P343",72,"Female","Severe","Medication B","Worsened","Stable","Improved",3288.22829733463
+"P344",62,"Female","Moderate","Medication B","Improved","Improved","Improved",1185.21199932648
+"P345",48,"Female","Severe","Surgery","Improved","Improved","Stable",5100.04298907239
+"P346",41,"Female","Mild","Medication A","Improved","Improved","Improved",358.609979450703
+"P347",63,"Male","Severe","Surgery","Improved","Improved","Improved",4983.03866733052
+"P348",50,"Female","Moderate","Medication A","Stable","Stable","Stable",1273.62326416187
+"P349",46,"Male","Moderate","Medication B","Worsened","Worsened","Worsened",1847.19356451184
+"P350",41,"Male","Severe","Combination","Discontinued","Discontinued","Discontinued",2104.11864195531
+"P351",59,"Male","Severe","Surgery","Stable","Stable","Stable",5520.39415656589
+"P352",64,"Female","Moderate","Medication B","Improved","Stable","Stable",1254.28560975753
+"P353",59,"Male","Mild","Medication A","Worsened","Worsened","Stable",508.647623723373
+"P354",54,"Female","Mild","Medication A","Stable","Worsened","Worsened",521.39801513683
+"P355",79,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",326.546711260453
+"P356",76,"Female","Moderate","Combination","Stable","Stable","Stable",1491.82320268359
+"P357",32,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",328.745641792193
+"P358",80,"Female","Moderate","Medication A","Improved","Stable","Stable",1196.13230351172
+"P359",47,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",308.412075886503
+"P360",61,"Male","Mild","Medication A","Stable","Stable","Worsened",461.614132433198
+"P361",46,"Male","Mild","Watchful Waiting","Stable","Stable","Improved",335.432456796058
+"P362",67,"Female","Severe","Surgery","Improved","Stable","Stable",5207.1911520781
+"P363",71,"Female","Severe","Medication B","Stable","Worsened","Worsened",3754.54560117098
+"P364",69,"Female","Severe","Surgery","Stable","Stable","Worsened",5830.1124479901
+"P365",71,"Female","Mild","Medication A","Improved","Improved","Improved",366.6521506235
+"P366",61,"Male","Moderate","Medication A","Improved","Stable","Improved",1145.9769986188
+"P367",55,"Male","Severe","Medication B","Improved","Improved","Improved",2677.80705257412
+"P368",42,"Male","Severe","Combination","Stable","Worsened","Worsened",4291.35127299465
+"P369",49,"Male","Severe","Medication B","Stable","Stable","Improved",2960.03488104977
+"P370",67,"Male","Moderate","Medication B","Stable","Improved","Improved",1219.36230045045
+"P371",49,"Female","Mild","Watchful Waiting","Improved","Improved","Stable",313.673766864929
+"P372",58,"Female","Mild","Watchful Waiting","Stable","Stable","Stable",354.185334953945
+"P373",49,"Female","Mild","Watchful Waiting","Stable","Stable","Stable",333.997787730768
+"P374",59,"Female","Severe","Combination","Worsened","Stable","Stable",3863.17731319927
+"P375",70,"Female","Moderate","Medication B","Stable","Stable","Improved",1374.68504090421
+"P376",77,"Female","Moderate","Medication B","Improved","Improved","Improved",1207.0574880098
+"P377",37,"Male","Severe","Surgery","Improved","Stable","Stable",5711.13555267733
+"P378",68,"Female","Mild","Medication A","Worsened","Stable","Improved",444.409521259367
+"P379",39,"Male","Moderate","Medication A","Discontinued","Discontinued","Discontinued",659.391674607061
+"P380",46,"Male","Severe","Medication B","Stable","Improved","Improved",2856.54699099716
+"P381",47,"Male","Severe","Surgery","Stable","Stable","Worsened",6241.51088124374
+"P382",69,"Female","Moderate","Medication A","Improved","Stable","Improved",1187.52991483267
+"P383",80,"Male","Mild","Medication A","Stable","Improved","Improved",396.573013059795
+"P384",71,"Female","Mild","Medication A","Improved","Improved","Improved",354.807918896899
+"P385",40,"Female","Severe","Medication B","Stable","Improved","Improved",2884.46007931
+"P386",78,"Male","Severe","Surgery","Improved","Stable","Stable",5192.98077407666
+"P387",73,"Female","Mild","Medication A","Stable","Worsened","Stable",476.652062809095
+"P388",31,"Male","Moderate","Medication A","Stable","Improved","Improved",1099.65136498958
+"P389",48,"Male","Mild","Medication A","Stable","Stable","Stable",423.88911563158
+"P390",42,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",211.436242146883
+"P391",42,"Male","Mild","Medication A","Worsened","Worsened","Worsened",587.481265126728
+"P392",60,"Female","Mild","Watchful Waiting","Stable","Worsened","Worsened",449.672203613445
+"P393",59,"Female","Mild","Medication A","Stable","Improved","Improved",365.870614062995
+"P394",80,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",205.702716157772
+"P395",51,"Female","Mild","Medication A","Discontinued","Discontinued","Discontinued",213.421782748774
+"P396",59,"Female","Severe","Medication B","Improved","Improved","Improved",2637.94076312473
+"P397",39,"Female","Severe","Medication B","Discontinued","Discontinued","Discontinued",1608.06206332846
+"P398",45,"Female","Moderate","Medication A","Worsened","Discontinued","Discontinued",993.440359235276
+"P399",34,"Female","Mild","Medication A","Stable","Worsened","Worsened",524.885183591861
+"P400",65,"Male","Mild","Medication A","Worsened","Worsened","Worsened",552.543321652338
+"P401",79,"Male","Moderate","Medication B","Improved","Improved","Improved",1200.72048425116
+"P402",62,"Male","Moderate","Medication A","Discontinued","Discontinued","Discontinued",629.123995937873
+"P403",45,"Female","Mild","Medication A","Stable","Stable","Stable",422.140692495741
+"P404",57,"Female","Moderate","Medication B","Stable","Worsened","Worsened",1749.62171423016
+"P405",78,"Female","Mild","Medication A","Worsened","Discontinued","Discontinued",325.994328859728
+"P406",41,"Male","Moderate","Medication A","Stable","Improved","Improved",1180.60914179496
+"P407",57,"Male","Mild","Medication A","Stable","Stable","Improved",398.338496115059
+"P408",31,"Female","Mild","Medication A","Stable","Worsened","Worsened",500.355340254493
+"P409",79,"Male","Mild","Medication A","Worsened","Stable","Stable",453.49348044116
+"P410",41,"Female","Moderate","Medication B","Stable","Improved","Improved",1200.37559161009
+"P411",76,"Male","Moderate","Medication B","Worsened","Worsened","Worsened",1775.61277592322
+"P412",80,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",315.222323203459
+"P413",35,"Female","Mild","Medication A","Worsened","Stable","Stable",470.013096319046
+"P414",45,"Male","Moderate","Medication B","Improved","Improved","Improved",1181.78978489293
+"P415",44,"Female","Severe","Surgery","Stable","Improved","Improved",5097.74489607941
+"P416",48,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",207.990834731609
+"P417",32,"Female","Severe","Medication B","Worsened","Worsened","Worsened",4088.11862452654
+"P418",75,"Female","Mild","Watchful Waiting","Stable","Stable","Stable",370.745819059666
+"P419",62,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",367.739037054125
+"P420",62,"Male","Moderate","Medication B","Improved","Improved","Improved",1131.43631978938
+"P421",77,"Female","Moderate","Medication A","Stable","Worsened","Stable",1454.3782539675
+"P422",40,"Male","Moderate","Combination","Stable","Worsened","Worsened",1828.03018527338
+"P423",65,"Female","Severe","Medication B","Stable","Worsened","Worsened",3781.85898262542
+"P424",73,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",316.23547336366
+"P425",74,"Male","Moderate","Medication B","Improved","Improved","Improved",1146.02946483018
+"P426",39,"Male","Mild","Medication A","Stable","Stable","Stable",428.403968183324
+"P427",71,"Female","Moderate","Combination","Improved","Stable","Stable",1457.95191648602
+"P428",53,"Male","Mild","Medication A","Improved","Improved","Improved",359.942867031321
+"P429",57,"Female","Mild","Watchful Waiting","Improved","Improved","Improved",295.781015687156
+"P430",68,"Female","Moderate","Combination","Improved","Improved","Improved",1315.34547512792
+"P431",47,"Female","Moderate","Medication A","Stable","Improved","Improved",1134.74563786481
+"P432",46,"Female","Mild","Watchful Waiting","Stable","Stable","Improved",328.494869947433
+"P433",49,"Male","Mild","Watchful Waiting","Stable","Stable","Stable",351.59705194179
+"P434",38,"Male","Severe","Combination","Improved","Improved","Stable",3260.49648781959
+"P435",40,"Male","Severe","Medication B","Stable","Stable","Stable",3149.66232531704
+"P436",73,"Male","Moderate","Medication B","Stable","Worsened","Worsened",1687.42326735752
+"P437",37,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",282.822806010023
+"P438",79,"Male","Moderate","Medication A","Improved","Improved","Improved",1005.26901457272
+"P439",34,"Male","Moderate","Medication B","Improved","Stable","Stable",1312.84289001161
+"P440",58,"Female","Moderate","Combination","Stable","Worsened","Worsened",1788.7138056499
+"P441",79,"Male","Mild","Medication A","Stable","Stable","Stable",408.825204016641
+"P442",35,"Female","Moderate","Medication B","Stable","Worsened","Worsened",1592.76092209853
+"P443",39,"Female","Moderate","Medication B","Discontinued","Discontinued","Discontinued",723.894962566439
+"P444",55,"Male","Severe","Combination","Stable","Stable","Stable",3416.30311653949
+"P445",38,"Male","Mild","Watchful Waiting","Stable","Improved","Improved",301.179412245285
+"P446",40,"Female","Moderate","Medication B","Improved","Improved","Improved",1223.39140337147
+"P447",35,"Female","Severe","Combination","Worsened","Stable","Stable",3973.93600628711
+"P448",61,"Female","Moderate","Combination","Stable","Stable","Stable",1512.74942799937
+"P449",41,"Female","Mild","Watchful Waiting","Stable","Improved","Improved",312.521647280082
+"P450",48,"Male","Moderate","Medication A","Improved","Improved","Improved",1080.66251246072
+"P451",56,"Male","Moderate","Medication B","Improved","Improved","Improved",1166.31040316541
+"P452",61,"Female","Severe","Medication B","Improved","Stable","Stable",3027.16394311655
+"P453",56,"Male","Moderate","Medication A","Improved","Stable","Stable",1207.18855121545
+"P454",59,"Male","Severe","Combination","Discontinued","Discontinued","Discontinued",2005.63511475828
+"P455",33,"Male","Moderate","Combination","Improved","Improved","Improved",1362.61579830945
+"P456",53,"Male","Moderate","Medication B","Worsened","Discontinued","Discontinued",1085.17372349231
+"P457",57,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",198.88944222685
+"P458",32,"Male","Moderate","Medication B","Worsened","Stable","Stable",1413.77338840161
+"P459",75,"Male","Moderate","Medication A","Stable","Improved","Stable",1179.68540275656
+"P460",69,"Male","Mild","Medication A","Improved","Improved","Improved",342.735449763015
+"P461",35,"Female","Moderate","Combination","Stable","Stable","Improved",1471.46001648344
+"P462",65,"Female","Mild","Medication A","Stable","Improved","Improved",384.469176854938
+"P463",71,"Female","Moderate","Medication A","Stable","Worsened","Worsened",1561.68010602985
+"P464",77,"Female","Mild","Watchful Waiting","Stable","Worsened","Worsened",455.924344032537
+"P465",59,"Female","Mild","Medication A","Worsened","Worsened","Worsened",534.919814122841
+"P466",77,"Female","Moderate","Medication B","Stable","Stable","Worsened",1510.71103443392
+"P467",39,"Female","Moderate","Medication B","Stable","Improved","Improved",1303.84710085066
+"P468",54,"Female","Moderate","Medication B","Stable","Stable","Stable",1333.41039102757
+"P469",67,"Male","Severe","Medication B","Improved","Improved","Improved",2821.3002157989
+"P470",80,"Female","Mild","Medication A","Improved","Improved","Improved",346.971526579931
+"P471",65,"Female","Mild","Medication A","Stable","Stable","Worsened",457.649453335907
+"P472",70,"Female","Moderate","Medication A","Discontinued","Discontinued","Discontinued",605.284765888005
+"P473",54,"Male","Mild","Medication A","Stable","Improved","Improved",384.504823423922
+"P474",33,"Female","Moderate","Combination","Discontinued","Discontinued","Discontinued",807.651324709877
+"P475",44,"Male","Mild","Medication A","Worsened","Worsened","Discontinued",463.984742893372
+"P476",51,"Female","Severe","Combination","Stable","Improved","Stable",3237.11865810771
+"P477",78,"Female","Mild","Medication A","Stable","Stable","Improved",403.529711118899
+"P478",53,"Female","Mild","Medication A","Improved","Improved","Improved",357.216473491862
+"P479",68,"Male","Moderate","Medication B","Stable","Improved","Improved",1198.35496402485
+"P480",76,"Male","Moderate","Medication B","Discontinued","Discontinued","Discontinued",755.813147236593
+"P481",66,"Male","Mild","Watchful Waiting","Stable","Stable","Improved",346.201820399147
+"P482",75,"Male","Moderate","Medication A","Improved","Improved","Improved",1089.34643628448
+"P483",76,"Female","Mild","Medication A","Stable","Stable","Improved",409.883532171138
+"P484",44,"Female","Moderate","Medication B","Stable","Stable","Stable",1297.6345530292
+"P485",45,"Male","Mild","Medication A","Stable","Stable","Stable",418.209021314979
+"P486",48,"Male","Moderate","Medication A","Improved","Improved","Stable",1097.0624433076
+"P487",37,"Female","Moderate","Medication A","Stable","Stable","Improved",1240.99341944139
+"P488",60,"Male","Severe","Medication B","Worsened","Stable","Stable",3435.64302376704
+"P489",66,"Male","Severe","Combination","Improved","Improved","Improved",3056.29685043357
+"P490",68,"Male","Moderate","Medication A","Stable","Improved","Improved",1136.83115621377
+"P491",77,"Male","Severe","Combination","Improved","Stable","Stable",3422.38778056018
+"P492",45,"Male","Moderate","Medication A","Stable","Stable","Stable",1256.23272226565
+"P493",38,"Male","Mild","Medication A","Discontinued","Discontinued","Discontinued",220.433862296864
+"P494",40,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",282.03111775266
+"P495",72,"Female","Mild","Medication A","Stable","Worsened","Worsened",523.16600393597
+"P496",80,"Male","Mild","Watchful Waiting","Improved","Improved","Improved",293.832562946714
+"P497",59,"Female","Mild","Medication A","Stable","Stable","Improved",389.495536632836
+"P498",39,"Female","Severe","Combination","Improved","Improved","Improved",3114.43909242749
+"P499",63,"Female","Severe","Combination","Improved","Stable","Worsened",3610.71504407376
+"P500",67,"Female","Moderate","Medication B","Improved","Improved","Improved",1180.09991721483

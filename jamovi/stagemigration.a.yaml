@@ -1,0 +1,119 @@
+---
+name:  stagemigration
+title: Stage Migration Analysis
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Will Rogers Phenomenon Analysis'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >-
+      Analyzes staging system changes and the "Will Rogers Phenomenon" in disease staging. 
+      This analysis compares staging distributions before and after a staging system change,
+      quantifies stage migration, and evaluates changes in prognostic performance.
+    R:
+        dontrun: true
+        usage: |
+            # Example analyzing migration between TNM staging editions:
+            # stagemigration(
+            #   data = patient_data,
+            #   oldStage = "tnm7_stage", 
+            #   newStage = "tnm8_stage",
+            #   survivalTime = "follow_up_months",
+            #   event = "death_status",
+            #   eventLevel = "Dead"
+            # )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset containing staging and survival information.
+
+    # Stage Migration Variables
+    - name: oldStage
+      title: 'Original Stage'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >-
+        The original staging variable. This represents the staging system used before
+        the revision or change (e.g., TNM 7th edition).
+
+    - name: newStage
+      title: 'New Stage'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >-
+        The new staging variable. This represents the revised or changed staging system
+        (e.g., TNM 8th edition).
+
+    # Survival Variables
+    - name: survivalTime
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        The survival or follow-up time variable. This should be a numeric variable
+        representing time in consistent units (e.g., months).
+
+    - name: event
+      title: 'Event'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description: >-
+        The event indicator variable. This can be a factor or numeric variable indicating
+        whether the event of interest (e.g., death) occurred.
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (event)
+      description: >-
+        The level of the event variable that indicates the event occurred. This is required
+        if the event variable is a factor.
+
+    # Plot Options
+    - name: plotMigration
+      title: "Show Migration Plot"
+      type: Bool
+      default: true
+      description: >-
+        Enable to display an alluvial/Sankey plot visualizing stage migration patterns.
+        This plot shows how patients move between stages in the old and new systems.
+
+    - name: survivalPlotType
+      title: "Survival Plot Type"
+      type: List
+      options:
+        - title: "Separate plots for each staging system"
+          name: separate
+        - title: "Side by side comparison of staging systems"
+          name: sidebyside
+      default: separate
+      description: >-
+        Controls how survival curves are displayed for comparing staging systems.
+        "Separate" shows full KM plots for each system, while "Side by side" 
+        focuses on direct stage comparisons.
+
+    - name: showCI
+      title: "Show Confidence Intervals"
+      type: Bool
+      default: false
+      description: >-
+        Enable to display 95% confidence intervals around survival curves.
+
+    # Output Options
+    - name: showWillRogers
+      title: "Analyze Will Rogers Phenomenon"
+      type: Bool
+      default: true
+      description: >-
+        Enable to perform detailed analysis of the Will Rogers phenomenon. This will
+        compare survival within stages between patients who migrated and those who didn't.
+...

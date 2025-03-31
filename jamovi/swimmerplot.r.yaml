@@ -3,6 +3,33 @@ name:  swimmerplot
 title: Patient Timeline Analysis
 jrs:   '1.1'
 
+clearWith:
+    - patientID
+    - start 
+    - end
+    - event
+    - sortVariable
+    - timetype
+    - timetypedata
+    - timetypeoutput
+    - barHeight
+    - startType
+    - milestone1Name
+    - milestone1Date
+    - milestone2Name
+    - milestone2Date
+    - milestone3Name
+    - milestone3Date
+    - milestone4Name
+    - milestone4Date
+    - milestone5Name
+    - milestone5Date
+    - referenceLines
+    - customReferenceTime
+    - useggswim
+    - markerSize
+
+
 items:
     - name: todo
       title: To Do
@@ -20,18 +47,6 @@ items:
           title: "Value"
           type: number
           format: ".1f"
-      clearWith:
-        - patientID
-        - start 
-        - end
-        - event
-        - sortVariable
-        - timetype
-        - timetypedata
-        - timetypeoutput
-        - barHeight
-        - startType
-
 
     - name: plot
       title: 'Swimmer Plot'
@@ -40,19 +55,9 @@ items:
       height: 600
       renderFun: .plot
       requiresData: true
-      clearWith:
-        - patientID
-        - start 
-        - end
-        - event
-        - sortVariable
-        - timetype
-        - timetypedata
-        - timetypeoutput
-        - barHeight
-        - startType
 
 refs:
     - ClinicoPathJamoviModule
+    - ggswim
 
 ...

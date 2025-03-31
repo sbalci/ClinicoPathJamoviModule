@@ -87,6 +87,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableResults",
     inherit = jmvcore::Group,
     active = list(
+        subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
@@ -99,9 +100,13 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="`Cross Table - ${group}`",
+                title="Cross Table",
                 refs=list(
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="subtitle",
+                title="`Cross Table - ${group}`"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -211,6 +216,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pcat .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr

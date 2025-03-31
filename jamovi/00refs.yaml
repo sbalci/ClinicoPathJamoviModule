@@ -668,10 +668,10 @@ refs:
     survivaltutorial:
         type: 'article'
         author: Emily C. Zabor
-        year: 2022
+        year: 2025
         title: "Survival analysis in R: A detailed tutorial on conducting survival analyses in R, including an introduction to the basics of survival analysis, landmark analyses and time-dependent covariates, competing risks, and a selection of advanced topics."
         publisher: '[GitHub Repository]. Retrieved from https://github.com/zabore/tutorials'
-        url: https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html
+        url: https://www.emilyzabor.com/survival-analysis-in-r.html
 
     survivalrviews:
         type: 'article'
@@ -681,6 +681,12 @@ refs:
         publisher: 'R Views, An R community blog edited by RStudio'
         url: https://rviews.rstudio.com/2017/09/25/survival-analysis-with-r/
 
-
+    ggswim:
+        type: 'software'
+        author: 
+        year: 2025
+        title: "ggswim: Create Swimmer Plots with ggplot2"
+        publisher: '[R package]. Retrieved from https://github.com/CHOP-CGTInformatics/ggswim'
+        url: https://github.com/CHOP-CGTInformatics/ggswim   
 
 ...

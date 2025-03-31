@@ -1,5 +1,5 @@
-#' @title Summary of Continuous Variables
-#' @return Text and an HTML summary table
+#' @title Summary of Continuous Variables with Distribution Diagnostics
+#' @return Text and an HTML summary table (with optional distribution diagnostics)
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -7,7 +7,7 @@
 #' @importFrom gt gt
 #' @importFrom htmltools HTML
 #' @importFrom gtExtras gt_plt_summary
-
+#' @import moments
 
 summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataClass",
     inherit = summarydataBase, private = list(.run = function() {
@@ -17,10 +17,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         if (length(self$options$vars) == 0) {
             intro_msg <- "
           <h3>Welcome to ClinicoPath Descriptives!</h3>
-          <p>This tool helps you generate descriptive statistics for your numeric variables.</p>
-          <p>Please select one or more continuous variables from the options panel to get started.
-          Remember to cite the used packages and jamovi in your reports.</p>
-        "
+          <p>This tool helps you generate descriptive statistics for your numeric variables.
+          Please select one or more continuous variables from the options panel.</p>
+          <p>If you want to inspect distribution characteristics, enable the 'Distribution Diagnostics' option.</p>"
             self$results$todo$setContent(intro_msg)
             return()
         } else {
@@ -55,9 +54,47 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 max_x <- round(max(jmvcore::toNumeric(dataset[[myvar]]), na.rm = TRUE),
                   digits = 1)
 
-                print(paste0("Mean of <strong>", myvar, "</strong> is: ", mean_x, " \U00B1 ", sd_x,
-                  ". (Median: ", median_x, " [Min: ", min_x, " - ", "Max: ",
-                  max_x, "]) <br>", collapse = " "))
+
+
+                dist_text <- ""
+
+                # If the distribution diagnostics option is enabled, add additional tests.
+                if (self$options$distr) {
+                    # Shapiro-Wilk test (only valid if 3 <= sample size <= 5000)
+
+                    numeric_data <- jmvcore::toNumeric(dataset[[myvar]])
+
+                    valid_data <- na.omit(numeric_data)
+                    if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
+                        sw_test <- shapiro.test(valid_data)
+                        p_val <- round(sw_test$p.value, 3)
+                    } else {
+                        p_val <- NA
+                    }
+
+                    # Calculate skewness and kurtosis using the moments package.
+                    skew_val <- round(moments::skewness(numeric_data, na.rm = TRUE), 2)
+                    kurt_val <- round(moments::kurtosis(numeric_data, na.rm = TRUE), 2)
+
+                    # Interpret normality based on the Shapiro-Wilk p-value.
+                    norm_status <- if (!is.na(p_val)) {
+                        if (p_val > 0.05) "appears to be normally distributed" else "does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution."
+                    } else {
+                        "Normality test not applicable due to sample size"
+                    }
+
+                    dist_text <- paste0(
+                        "<br><em>Distribution Diagnostics for ", myvar ,":</em> Shapiro-Wilk p-value = ", p_val,
+                        "; Skewness = ", skew_val, "; Kurtosis = ", kurt_val,
+                        " (Data ", norm_status, ")."
+                    )
+                }
+
+                    # Append the distribution diagnostics to the summary text.
+                    print(paste0("Mean of <strong>", myvar, "</strong> is: ", mean_x, " \U00B1 ", sd_x,
+                                 ". (Median: ", median_x, " [Min: ", min_x, " - ", "Max: ",
+                                 max_x, "]) <br>", dist_text, "<br><br>", collapse = " "))
+
             }
 
             results <- purrr::map(.x = var_list, .f = mysummary)

@@ -1,9 +1,13 @@
 ---
 name:  crosstable
-title: '`Cross Table - ${group}`'
+title: Cross Table
 jrs:   '1.1'
 
 items:
+
+    - name: subtitle
+      title: '`Cross Table - ${group}`'
+      type:  Preformatted
 
     - name: todo
       title: To Do

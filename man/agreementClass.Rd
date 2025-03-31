@@ -7,9 +7,10 @@
 Table
 }
 \description{
-Interrater Reliability Analysis
-
-Interrater Reliability Analysis
+This function calculates interrater reliability for ordinal or categorical data.
+}
+\details{
+The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agreementBase} -> \code{agreementClass}

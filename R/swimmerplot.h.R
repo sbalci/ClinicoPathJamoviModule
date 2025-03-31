@@ -10,16 +10,16 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             start = NULL,
             end = NULL,
             event = NULL,
-            milestoneVariable = NULL,
-            milestoneTime = NULL,
-            referenceLines = "none",
-            customReferenceTime = 12,
             timetype = "raw",
             timetypedata = "ymd",
             timetypeoutput = "months",
             startType = "relative",
             sortVariable = NULL,
-            barHeight = 3, ...) {
+            barHeight = 3,
+            referenceLines = "none",
+            customReferenceTime = 12,
+            useggswim = FALSE,
+            markerSize = 5, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -51,32 +51,6 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "factor"),
                 required=FALSE)
-            private$..milestoneVariable <- jmvcore::OptionVariable$new(
-                "milestoneVariable",
-                milestoneVariable,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                required=FALSE)
-            private$..milestoneTime <- jmvcore::OptionVariable$new(
-                "milestoneTime",
-                milestoneTime,
-                required=FALSE)
-            private$..referenceLines <- jmvcore::OptionList$new(
-                "referenceLines",
-                referenceLines,
-                options=list(
-                    "none",
-                    "median",
-                    "protocol",
-                    "custom"),
-                default="none")
-            private$..customReferenceTime <- jmvcore::OptionNumber$new(
-                "customReferenceTime",
-                customReferenceTime,
-                default=12)
             private$..timetype <- jmvcore::OptionList$new(
                 "timetype",
                 timetype,
@@ -114,59 +88,83 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default="relative")
             private$..sortVariable <- jmvcore::OptionVariable$new(
                 "sortVariable",
-                sortVariable)
+                sortVariable,
+                required=FALSE)
             private$..barHeight <- jmvcore::OptionNumber$new(
                 "barHeight",
                 barHeight,
                 min=0.1,
                 max=10,
                 default=3)
+            private$..referenceLines <- jmvcore::OptionList$new(
+                "referenceLines",
+                referenceLines,
+                options=list(
+                    "none",
+                    "median",
+                    "protocol",
+                    "custom"),
+                default="none")
+            private$..customReferenceTime <- jmvcore::OptionNumber$new(
+                "customReferenceTime",
+                customReferenceTime,
+                default=12)
+            private$..useggswim <- jmvcore::OptionBool$new(
+                "useggswim",
+                useggswim,
+                default=FALSE)
+            private$..markerSize <- jmvcore::OptionNumber$new(
+                "markerSize",
+                markerSize,
+                min=1,
+                max=10,
+                default=5)
 
             self$.addOption(private$..patientID)
             self$.addOption(private$..start)
             self$.addOption(private$..end)
             self$.addOption(private$..event)
-            self$.addOption(private$..milestoneVariable)
-            self$.addOption(private$..milestoneTime)
-            self$.addOption(private$..referenceLines)
-            self$.addOption(private$..customReferenceTime)
             self$.addOption(private$..timetype)
             self$.addOption(private$..timetypedata)
             self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..startType)
             self$.addOption(private$..sortVariable)
             self$.addOption(private$..barHeight)
+            self$.addOption(private$..referenceLines)
+            self$.addOption(private$..customReferenceTime)
+            self$.addOption(private$..useggswim)
+            self$.addOption(private$..markerSize)
         }),
     active = list(
         patientID = function() private$..patientID$value,
         start = function() private$..start$value,
         end = function() private$..end$value,
         event = function() private$..event$value,
-        milestoneVariable = function() private$..milestoneVariable$value,
-        milestoneTime = function() private$..milestoneTime$value,
-        referenceLines = function() private$..referenceLines$value,
-        customReferenceTime = function() private$..customReferenceTime$value,
         timetype = function() private$..timetype$value,
         timetypedata = function() private$..timetypedata$value,
         timetypeoutput = function() private$..timetypeoutput$value,
         startType = function() private$..startType$value,
         sortVariable = function() private$..sortVariable$value,
-        barHeight = function() private$..barHeight$value),
+        barHeight = function() private$..barHeight$value,
+        referenceLines = function() private$..referenceLines$value,
+        customReferenceTime = function() private$..customReferenceTime$value,
+        useggswim = function() private$..useggswim$value,
+        markerSize = function() private$..markerSize$value),
     private = list(
         ..patientID = NA,
         ..start = NA,
         ..end = NA,
         ..event = NA,
-        ..milestoneVariable = NA,
-        ..milestoneTime = NA,
-        ..referenceLines = NA,
-        ..customReferenceTime = NA,
         ..timetype = NA,
         ..timetypedata = NA,
         ..timetypeoutput = NA,
         ..startType = NA,
         ..sortVariable = NA,
-        ..barHeight = NA)
+        ..barHeight = NA,
+        ..referenceLines = NA,
+        ..customReferenceTime = NA,
+        ..useggswim = NA,
+        ..markerSize = NA)
 )
 
 swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -184,7 +182,33 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Patient Timeline Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggswim"),
+                clearWith=list(
+                    "patientID",
+                    "start",
+                    "end",
+                    "event",
+                    "sortVariable",
+                    "timetype",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "barHeight",
+                    "startType",
+                    "milestone1Name",
+                    "milestone1Date",
+                    "milestone2Name",
+                    "milestone2Date",
+                    "milestone3Name",
+                    "milestone3Date",
+                    "milestone4Name",
+                    "milestone4Date",
+                    "milestone5Name",
+                    "milestone5Date",
+                    "referenceLines",
+                    "customReferenceTime",
+                    "useggswim",
+                    "markerSize"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -203,18 +227,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="value", 
                         `title`="Value", 
                         `type`="number", 
-                        `format`=".1f")),
-                clearWith=list(
-                    "patientID",
-                    "start",
-                    "end",
-                    "event",
-                    "sortVariable",
-                    "timetype",
-                    "timetypedata",
-                    "timetypeoutput",
-                    "barHeight",
-                    "startType")))
+                        `format`=".1f"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -222,18 +235,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "patientID",
-                    "start",
-                    "end",
-                    "event",
-                    "sortVariable",
-                    "timetype",
-                    "timetypedata",
-                    "timetypeoutput",
-                    "barHeight",
-                    "startType")))}))
+                requiresData=TRUE))}))
 
 swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "swimmerplotBase",
@@ -243,7 +245,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "swimmerplot",
-                version = c(1,0,0),
+                version = c(0,0,2),
                 options = options,
                 results = swimmerplotResults$new(options=options),
                 data = data,
@@ -259,7 +261,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Swimmer Plot
 #'
 #' Creates a swimmer plot to visualize individual patient timelines and 
-#' events.
+#' clinical events.
 #'
 #' @examples
 #' \donttest{
@@ -268,14 +270,17 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     PatientID = paste0("PT", 1:10),
 #'     StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 #'     EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-#'     Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD")
+#'     Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
+#'     Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
 #' )
 #' swimmerplot(
 #'     data = data,
 #'     patientID = "PatientID",
 #'     start = "StartTime",
 #'     end = "EndTime",
-#'     event = "Event"
+#'     event = "Event",
+#'     milestone1Name = "Surgery",
+#'     milestone1Date = "Surgery"
 #' )
 #'}
 #' @param data The data as a data frame.
@@ -283,18 +288,17 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param start Time/date when observation/treatment started.
 #' @param end Time/date when observation/treatment ended.
 #' @param event Optional variable for event types (e.g., CR, PR, PD).
-#' @param milestoneVariable Variable containing milestone events to mark on
-#'   timeline
-#' @param milestoneTime Times when milestones occurred
-#' @param referenceLines .
-#' @param customReferenceTime .
 #' @param timetype Select whether time values are raw numbers or dates
 #' @param timetypedata Select the time format in your data
 #' @param timetypeoutput Select the time unit for display
 #' @param startType Choose whether to align all start times to 0 or use
 #'   absolute start times
 #' @param sortVariable Variable to sort the patient timelines.
-#' @param barHeight .
+#' @param barHeight Thickness of timeline bars
+#' @param referenceLines Add reference time lines to the plot
+#' @param customReferenceTime Custom time point to mark with a reference line
+#' @param useggswim .
+#' @param markerSize Size of event markers on the plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -315,16 +319,16 @@ swimmerplot <- function(
     start,
     end,
     event,
-    milestoneVariable,
-    milestoneTime,
-    referenceLines = "none",
-    customReferenceTime = 12,
     timetype = "raw",
     timetypedata = "ymd",
     timetypeoutput = "months",
     startType = "relative",
     sortVariable,
-    barHeight = 3) {
+    barHeight = 3,
+    referenceLines = "none",
+    customReferenceTime = 12,
+    useggswim = FALSE,
+    markerSize = 5) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("swimmerplot requires jmvcore to be installed (restart may be required)")
@@ -333,8 +337,6 @@ swimmerplot <- function(
     if ( ! missing(start)) start <- jmvcore::resolveQuo(jmvcore::enquo(start))
     if ( ! missing(end)) end <- jmvcore::resolveQuo(jmvcore::enquo(end))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
-    if ( ! missing(milestoneVariable)) milestoneVariable <- jmvcore::resolveQuo(jmvcore::enquo(milestoneVariable))
-    if ( ! missing(milestoneTime)) milestoneTime <- jmvcore::resolveQuo(jmvcore::enquo(milestoneTime))
     if ( ! missing(sortVariable)) sortVariable <- jmvcore::resolveQuo(jmvcore::enquo(sortVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -343,28 +345,25 @@ swimmerplot <- function(
             `if`( ! missing(start), start, NULL),
             `if`( ! missing(end), end, NULL),
             `if`( ! missing(event), event, NULL),
-            `if`( ! missing(milestoneVariable), milestoneVariable, NULL),
-            `if`( ! missing(milestoneTime), milestoneTime, NULL),
             `if`( ! missing(sortVariable), sortVariable, NULL))
 
     for (v in event) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in milestoneVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
         patientID = patientID,
         start = start,
         end = end,
         event = event,
-        milestoneVariable = milestoneVariable,
-        milestoneTime = milestoneTime,
-        referenceLines = referenceLines,
-        customReferenceTime = customReferenceTime,
         timetype = timetype,
         timetypedata = timetypedata,
         timetypeoutput = timetypeoutput,
         startType = startType,
         sortVariable = sortVariable,
-        barHeight = barHeight)
+        barHeight = barHeight,
+        referenceLines = referenceLines,
+        customReferenceTime = customReferenceTime,
+        useggswim = useggswim,
+        markerSize = markerSize)
 
     analysis <- swimmerplotClass$new(
         options = options,

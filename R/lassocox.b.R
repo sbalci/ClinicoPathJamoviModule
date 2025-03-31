@@ -146,7 +146,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         #
         #     # Create survival object
         #     y <- survival::Surv(data$time, data$status)
-        #
+
+        # # Add checkpoint before cross-validation
+        # private$.checkpoint()
+
+
         #     # Fit cross-validated model
         #     set.seed(1234)
         #     cv_fit <- glmnet::cv.glmnet(
