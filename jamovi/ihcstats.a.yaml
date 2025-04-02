@@ -70,3 +70,158 @@ options:
       default: false
 
 ...
+
+
+# ---
+# name: ihcstats
+# title: IHC Expression Analysis
+# menuGroup: Pathology
+# menuSubgroup: IHC Analysis
+# version: '1.0.0'
+# jas: '1.2'
+
+# options:
+#     - name: data
+#       type: Data
+#       description:
+#           R: >
+#             The data as a data frame.
+
+#     - name: markers
+#       title: IHC Markers
+#       type: Variables
+#       suggested: [ ordinal, nominal ]
+#       permitted: [ factor ]
+#       description:
+#           R: >
+#             IHC marker variables with categorical expression scores
+
+#     - name: id
+#       title: Sample ID (Optional)
+#       type: Variable
+#       suggested: [ nominal, id ]
+#       permitted: [ factor, string, integer ]
+#       default: NULL
+#       description:
+#           R: >
+#             Optional sample identifiers for labeling
+
+#     - name: group
+#       title: Grouping Variable (Optional)
+#       type: Variable
+#       suggested: [ nominal ]
+#       permitted: [ factor ]
+#       default: NULL
+#       description:
+#           R: >
+#             Optional grouping variable for annotation (e.g., diagnosis, gender)
+
+#     - name: computeHScore
+#       title: Compute H-Score
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Calculate H-Score for categorical IHC markers
+
+#     # Clustering options
+#     - name: clusterMethod
+#       title: Clustering Method
+#       type: List
+#       options:
+#         - title: Hierarchical
+#           name: hierarchical
+#         - title: PAM (Medoids)
+#           name: pam
+#       default: hierarchical
+#       description:
+#           R: >
+#             Method used for clustering
+
+#     - name: distanceMetric
+#       title: Distance Metric
+#       type: List
+#       options:
+#         - title: Gower
+#           name: gower
+#         - title: Jaccard (optimized for IHC)
+#           name: jaccard
+#       default: jaccard
+#       description:
+#           R: >
+#             Distance metric for categorical IHC data
+
+#     - name: linkageMethod
+#       title: Linkage Method
+#       type: List
+#       options:
+#         - title: Complete
+#           name: complete
+#         - title: Average
+#           name: average
+#         - title: Ward's
+#           name: ward.D2
+#       default: complete
+#       description:
+#           R: >
+#             Hierarchical clustering linkage method
+
+#     - name: nClusters
+#       title: Number of Clusters
+#       type: Integer
+#       min: 2
+#       max: 10
+#       default: 4
+#       description:
+#           R: >
+#             Number of clusters to identify
+
+#     - name: silhouetteAnalysis
+#       title: Perform Silhouette Analysis
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Calculate silhouette widths to evaluate clustering quality
+
+#     # Visualization options
+#     - name: showDendrogram
+#       title: Show Dendrogram
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Display hierarchical clustering dendrogram
+
+#     - name: showHeatmap
+#       title: Show IHC Heatmap
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Display heatmap of IHC expression patterns
+
+#     - name: showClusterBoxes
+#       title: Show Cluster Boxes
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Highlight clusters with rectangles in dendrogram
+
+#     - name: showSampleLabels
+#       title: Show Sample Labels
+#       type: Bool
+#       default: false
+#       description:
+#           R: >
+#             Display sample IDs in visualizations
+
+#     - name: annotateMarkers
+#       title: Annotate Marker Types
+#       type: Bool
+#       default: true
+#       description:
+#           R: >
+#             Add marker type annotations to heatmap
+

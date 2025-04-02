@@ -39,7 +39,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             risktable = FALSE,
             censored = FALSE,
             pplot = TRUE,
-            medianline = "none", ...) {
+            medianline = "none",
+            person_time = FALSE,
+            time_intervals = "12, 36, 60",
+            rate_multiplier = 100, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -233,6 +236,18 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "v",
                     "hv"),
                 default="none")
+            private$..person_time <- jmvcore::OptionBool$new(
+                "person_time",
+                person_time,
+                default=FALSE)
+            private$..time_intervals <- jmvcore::OptionString$new(
+                "time_intervals",
+                time_intervals,
+                default="12, 36, 60")
+            private$..rate_multiplier <- jmvcore::OptionInteger$new(
+                "rate_multiplier",
+                rate_multiplier,
+                default=100)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -270,6 +285,9 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..censored)
             self$.addOption(private$..pplot)
             self$.addOption(private$..medianline)
+            self$.addOption(private$..person_time)
+            self$.addOption(private$..time_intervals)
+            self$.addOption(private$..rate_multiplier)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -307,7 +325,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         risktable = function() private$..risktable$value,
         censored = function() private$..censored$value,
         pplot = function() private$..pplot$value,
-        medianline = function() private$..medianline$value),
+        medianline = function() private$..medianline$value,
+        person_time = function() private$..person_time$value,
+        time_intervals = function() private$..time_intervals$value,
+        rate_multiplier = function() private$..rate_multiplier$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -344,7 +365,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..risktable = NA,
         ..censored = NA,
         ..pplot = NA,
-        ..medianline = NA)
+        ..medianline = NA,
+        ..person_time = NA,
+        ..time_intervals = NA,
+        ..rate_multiplier = NA)
 )
 
 survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -362,6 +386,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot8 = function() private$.items[["plot8"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
         survTable = function() private$.items[["survTable"]],
+        personTimeTable = function() private$.items[["personTimeTable"]],
+        personTimeSummary = function() private$.items[["personTimeSummary"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
         plot = function() private$.items[["plot"]],
@@ -614,6 +640,76 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc")),
                 clearWith=list(
                     "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="personTimeTable",
+                title="Person-Time Analysis",
+                visible="(person_time)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="interval", 
+                        `title`="Time Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="person_time", 
+                        `title`="Person-Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate", 
+                        `title`="Incidence Rate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeSummary",
+                title="Person-Time Summary",
+                visible="(person_time)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
                     "outcome",
                     "outcomeLevel",
                     "overalltime",
@@ -875,6 +971,15 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pplot .
 #' @param medianline If true, displays a line indicating the median survival
 #'   time on the survival plot.
+#' @param person_time Enable this option to calculate and display person-time
+#'   metrics, including total follow-up time and incidence rates. These metrics
+#'   help quantify the rate of events per unit of time in your study population.
+#' @param time_intervals Specify time intervals for stratified person-time
+#'   analysis. Enter a  comma-separated list of time points to create intervals.
+#'   For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+#'   60+.
+#' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
+#'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -888,6 +993,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -940,7 +1047,10 @@ survival <- function(
     risktable = FALSE,
     censored = FALSE,
     pplot = TRUE,
-    medianline = "none") {
+    medianline = "none",
+    person_time = FALSE,
+    time_intervals = "12, 36, 60",
+    rate_multiplier = 100) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survival requires jmvcore to be installed (restart may be required)")
@@ -995,7 +1105,10 @@ survival <- function(
         risktable = risktable,
         censored = censored,
         pplot = pplot,
-        medianline = medianline)
+        medianline = medianline,
+        person_time = person_time,
+        time_intervals = time_intervals,
+        rate_multiplier = rate_multiplier)
 
     analysis <- survivalClass$new(
         options = options,

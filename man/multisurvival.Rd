@@ -44,7 +44,10 @@ multisurvival(
   ac_method = "average",
   showNomogram = FALSE,
   use_stratify = FALSE,
-  stratvar
+  stratvar,
+  person_time = FALSE,
+  time_intervals = "12, 36, 60",
+  rate_multiplier = 100
 )
 }
 \arguments{
@@ -175,6 +178,18 @@ separate baseline hazard functions for different groups.}
 \item{stratvar}{Variables used for stratification. When proportional
 hazards are not met, stratification can adjust the model to better fit the
 data by allowing different baseline hazards.}
+
+\item{person_time}{Enable this option to calculate and display person-time
+metrics, including total follow-up time and incidence rates. These metrics
+help quantify the rate of events per unit of time in your study population.}
+
+\item{time_intervals}{Specify time intervals for stratified person-time
+analysis. Enter a  comma-separated list of time points to create intervals.
+For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+60+.}
+
+\item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
+100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
 }
 \value{
 A results object containing:
@@ -182,6 +197,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
@@ -204,9 +221,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$riskScoreTable$asDF}
+\code{results$personTimeTable$asDF}
 
-\code{as.data.frame(results$riskScoreTable)}
+\code{as.data.frame(results$personTimeTable)}
 }
 \description{
 Function for Multivariable Survival Analysis using Cox-regression.

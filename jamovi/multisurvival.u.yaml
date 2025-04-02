@@ -228,6 +228,15 @@ children:
               - type: ComboBox
                 name: medianline
                 enable: (ac || km || plotRiskGroups)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: cutp
+                format: string
+
+
+
   - type: CollapseBox
     label: Risk Score Grouping
     collapsed: true
@@ -259,12 +268,7 @@ children:
                       - type: Output
                         name: addRiskGroup
                         enable: (calculateRiskScore)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: cutp
-        format: string
+
   - type: CollapseBox
     label: Adjusted Survival Analysis
     collapsed: true
@@ -334,9 +338,33 @@ children:
                         isTarget: true
                         fitToGrid: true
                         stretchFactor: 1
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Nomogram
+    collapsed: true
     children:
-      - type: CheckBox
-        name: showNomogram
-        # enable: ()
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showNomogram
+            # enable: ()
+
+
+  - type: CollapseBox
+    label: Person-Time Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: person_time
+          - type: TextBox
+            name: time_intervals
+            format: string
+            enable: (person_time)
+            width: large
+          - type: TextBox
+            name: rate_multiplier
+            format: number

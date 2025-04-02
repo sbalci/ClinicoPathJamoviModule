@@ -136,6 +136,70 @@ items:
           - multievent
 
 
+    - name: personTimeTable
+      title: 'Person-Time Analysis'
+      type: Table
+      visible: (person_time)
+      rows: 0
+      columns:
+        - name: interval
+          title: "Time Interval"
+          type: text
+        - name: events
+          title: "Events"
+          type: integer
+        - name: person_time
+          title: "Person-Time"
+          type: number
+          format: zto
+        - name: rate
+          title: "Incidence Rate"
+          type: number
+          format: zto
+        - name: rate_ci_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: rate_ci_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - rate_multiplier
+        - time_intervals
+        - person_time
+        - outcome
+        - outcomeLevel
+        - overalltime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+
+    - name: personTimeSummary
+      title: 'Person-Time Summary'
+      type: Html
+      visible: (person_time)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - rate_multiplier
+        - time_intervals
+        - person_time
+        - outcome
+        - outcomeLevel
+        - overalltime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+
 
 
     - name: plot

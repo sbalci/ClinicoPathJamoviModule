@@ -39,7 +39,10 @@ survival(
   risktable = FALSE,
   censored = FALSE,
   pplot = TRUE,
-  medianline = "none"
+  medianline = "none",
+  person_time = FALSE,
+  time_intervals = "12, 36, 60",
+  rate_multiplier = 100
 )
 }
 \arguments{
@@ -125,6 +128,18 @@ the event level.}
 
 \item{medianline}{If true, displays a line indicating the median survival
 time on the survival plot.}
+
+\item{person_time}{Enable this option to calculate and display person-time
+metrics, including total follow-up time and incidence rates. These metrics
+help quantify the rate of events per unit of time in your study population.}
+
+\item{time_intervals}{Specify time intervals for stratified person-time
+analysis. Enter a  comma-separated list of time points to create intervals.
+For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+60+.}
+
+\item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
+100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
 }
 \value{
 A results object containing:
@@ -140,6 +155,8 @@ A results object containing:
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
