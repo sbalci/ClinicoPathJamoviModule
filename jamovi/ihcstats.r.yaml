@@ -60,3 +60,75 @@ items:
       width: 600
       height: 400
 ...
+
+# ---
+# name: ihcstats
+# title: IHC Expression Analysis
+# jrs: '1.1'
+
+# items:
+#     - name: todo
+#       title: Getting Started
+#       type: Html
+
+#     - name: hscoreTable
+#       title: H-Score Analysis
+#       type: Table
+#       visible: (computeHScore)
+#       columns:
+#         - name: marker
+#           title: "Marker"
+#           type: text
+#         - name: hscore
+#           title: "H-Score (0-300)"
+#           type: number
+#           format: zto
+#         - name: dist
+#           title: "Score Distribution"
+#           type: text
+
+#     - name: clusterSummary
+#       title: Cluster Analysis Results
+#       type: Table
+#       columns:
+#         - name: cluster
+#           title: "Cluster"
+#           type: integer
+#         - name: size
+#           title: "Size"
+#           type: integer
+#         - name: pattern
+#           title: "Characteristic Expression Pattern"
+#           type: text
+
+#     - name: silhouetteTable
+#       title: Clustering Quality Assessment
+#       type: Table
+#       visible: (silhouetteAnalysis)
+#       columns:
+#         - name: method
+#           title: "Method"
+#           type: text
+#         - name: clusters
+#           title: "Clusters"
+#           type: integer
+#         - name: avg_silhouette
+#           title: "Avg Silhouette Width"
+#           type: number
+#           format: zto
+
+#     - name: dendrogramPlot
+#       title: Expression Pattern Dendrogram
+#       type: Image
+#       visible: (showDendrogram)
+#       renderFun: .visualizeDendrogram
+#       width: 800
+#       height: 600
+
+#     - name: heatmapPlot
+#       title: IHC Expression Heatmap
+#       type: Image
+#       visible: (showHeatmap)
+#       renderFun: .visualizeClusterHeatmap
+#       width: 800
+#       height: 600

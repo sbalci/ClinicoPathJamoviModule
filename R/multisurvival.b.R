@@ -825,7 +825,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
 
-        # specific details ph_cox startify ----
+        ## specific details ph_cox startify ----
         if (self$options$ph_cox && self$options$use_stratify) {
           private$.checkpoint()
 
@@ -850,7 +850,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-        # Nomogram ----
+
+        ## Add the person-time analysis ----
+        private$.checkpoint()  # Add checkpoint here
+
+        # Run person-time analysis if enabled
+        if (self$options$person_time) {
+          private$.personTimeAnalysis()
+
+        }
+
+
+
+        ## Nomogram ----
 
         if (self$options$showNomogram) {
           private$.checkpoint()
@@ -892,7 +904,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         }
 
-        # View plot data ----
+        # View plot data
         #         if (self$options$ac) {
         # self$results$mydataview_plot_adj$setContent(
         #   list(
@@ -1131,9 +1143,172 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         return(cox_model)
 
-      },
+      }
 
 
+
+      ,
+      # Person-Time Analysis Function ----
+      .personTimeAnalysis = function() {
+        # Check if person_time option is enabled
+        if (!self$options$person_time) {
+          return()
+        }
+
+        cleaneddata <- private$.cleandata()
+
+
+        # Extract data
+        # mytime <- cleaneddata$mytime_labelled
+        # myoutcome <- cleaneddata$myoutcome_labelled
+        mydata <- cleaneddata$cleanData
+
+
+        # Ensure time is numeric
+        mydata[["mytime"]] <- jmvcore::toNumeric(mydata[["mytime"]])
+
+        # Get total observed time
+        total_time <- sum(mydata[["mytime"]])
+
+        # Get total events
+        total_events <- sum(mydata[["myoutcome"]])
+
+        # Get time unit
+        time_unit <- self$options$timetypeoutput
+
+        # Get rate multiplier
+        rate_multiplier <- self$options$rate_multiplier
+
+        # Calculate overall incidence rate
+        overall_rate <- (total_events / total_time) * rate_multiplier
+
+        # Calculate confidence intervals using Poisson exact method
+        ci_lower <- (stats::qchisq(0.025, 2*total_events) / 2) / total_time * rate_multiplier
+        ci_upper <- (stats::qchisq(0.975, 2*(total_events + 1)) / 2) / total_time * rate_multiplier
+
+
+
+        # self$results$mydataview_personTimeAnalysis$setContent(
+        #   list(
+        #     mydata = head(mydata, n = 10),
+        #     # mytime = mytime,
+        #     # myoutcome = myoutcome,
+        #     total_time = total_time,
+        #     total_events = total_events,
+        #     overall_rate = overall_rate,
+        #     ci_lower = ci_lower,
+        #     ci_upper = ci_upper
+        #   )
+        # )
+
+
+
+
+        # Add to personTimeTable - first the overall row
+        self$results$personTimeTable$addRow(rowKey=1, values=list(
+          interval=paste0("Overall (0-max)"),
+          events=total_events,
+          person_time=round(total_time, 2),
+          rate=round(overall_rate, 2),
+          rate_ci_lower=round(ci_lower, 2),
+          rate_ci_upper=round(ci_upper, 2)
+        ))
+
+        # Parse time intervals for stratified analysis
+        time_intervals <- as.numeric(unlist(strsplit(self$options$time_intervals, ",")))
+        time_intervals <- sort(unique(time_intervals))
+
+        if (length(time_intervals) > 0) {
+          # Create time intervals
+          breaks <- c(0, time_intervals, max(mydata[["mytime"]]) * 1.1)
+
+          # Loop through intervals
+          for (i in 1:(length(breaks)-1)) {
+            start_time <- breaks[i]
+            end_time <- breaks[i+1]
+
+            # Add checkpoint for responsiveness
+            if (i %% 5 == 0) {
+              private$.checkpoint(FALSE)
+            }
+
+            # Filter data for this interval
+            if (i == 1) {
+              # For first interval, include patients from the beginning
+              interval_data <- mydata
+              # But truncate follow-up time to the interval end
+              follow_up_times <- pmin(mydata[["mytime"]], end_time)
+              # Count only events that occurred within this interval
+              events_in_interval <- sum(mydata[["myoutcome"]] == 1 & mydata[["mytime"]] <= end_time)
+            } else {
+              # For later intervals, include only patients who survived past the previous cutpoint
+              survivors <- mydata[["mytime"]] > start_time
+              interval_data <- mydata[survivors, ]
+
+              if (nrow(interval_data) == 0) {
+                # Skip if no patients in this interval
+                next
+              }
+
+              # Adjust entry time and follow-up time
+              adjusted_entry_time <- rep(start_time, nrow(interval_data))
+              adjusted_exit_time <- pmin(interval_data[["mytime"]], end_time)
+              follow_up_times <- adjusted_exit_time - adjusted_entry_time
+
+              # Count only events that occurred within this interval
+              events_in_interval <- sum(interval_data[["myoutcome"]] == 1 &
+                                          interval_data[["mytime"]] <= end_time &
+                                          interval_data[["mytime"]] > start_time)
+            }
+
+            # Sum person-time in this interval
+            person_time_in_interval <- sum(follow_up_times)
+
+            # Calculate interval incidence rate
+            if (person_time_in_interval > 0) {
+              interval_rate <- (events_in_interval / person_time_in_interval) * rate_multiplier
+
+              # Calculate confidence intervals
+              if (events_in_interval > 0) {
+                interval_ci_lower <- (stats::qchisq(0.025, 2*events_in_interval) / 2) / person_time_in_interval * rate_multiplier
+                interval_ci_upper <- (stats::qchisq(0.975, 2*(events_in_interval + 1)) / 2) / person_time_in_interval * rate_multiplier
+              } else {
+                interval_ci_lower <- 0
+                interval_ci_upper <- (stats::qchisq(0.975, 2) / 2) / person_time_in_interval * rate_multiplier
+              }
+
+              # Add to personTimeTable
+              self$results$personTimeTable$addRow(rowKey=i+1, values=list(
+                interval=paste0(start_time, "-", end_time),
+                events=events_in_interval,
+                person_time=round(person_time_in_interval, 2),
+                rate=round(interval_rate, 2),
+                rate_ci_lower=round(interval_ci_lower, 2),
+                rate_ci_upper=round(interval_ci_upper, 2)
+              ))
+            }
+          }
+        }
+
+        # Create summary text with interpretation
+        summary_html <- glue::glue("
+<h4>Person-Time Analysis Summary</h4>
+<p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
+<p>Number of events: <b>{total_events}</b></p>
+<p>Overall incidence rate: <b>{round(overall_rate, 2)}</b> per {rate_multiplier} {time_unit} [95% CI: {round(ci_lower, 2)}-{round(ci_upper, 2)}]</p>
+<p>This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.</p>
+")
+
+        self$results$personTimeSummary$setContent(summary_html)
+      }
+
+
+
+
+
+
+
+      ,
       # Nomogram ----
 
       .nomogram = function(cox_model) {

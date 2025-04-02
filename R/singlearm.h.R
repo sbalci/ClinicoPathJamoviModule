@@ -34,7 +34,10 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ci95 = FALSE,
             risktable = FALSE,
             censored = FALSE,
-            medianline = "none", ...) {
+            medianline = "none",
+            person_time = FALSE,
+            time_intervals = "12, 36, 60",
+            rate_multiplier = 100, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -195,6 +198,18 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "v",
                     "hv"),
                 default="none")
+            private$..person_time <- jmvcore::OptionBool$new(
+                "person_time",
+                person_time,
+                default=FALSE)
+            private$..time_intervals <- jmvcore::OptionString$new(
+                "time_intervals",
+                time_intervals,
+                default="12, 36, 60")
+            private$..rate_multiplier <- jmvcore::OptionInteger$new(
+                "rate_multiplier",
+                rate_multiplier,
+                default=100)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -227,6 +242,9 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..risktable)
             self$.addOption(private$..censored)
             self$.addOption(private$..medianline)
+            self$.addOption(private$..person_time)
+            self$.addOption(private$..time_intervals)
+            self$.addOption(private$..rate_multiplier)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -259,7 +277,10 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
         censored = function() private$..censored$value,
-        medianline = function() private$..medianline$value),
+        medianline = function() private$..medianline$value,
+        person_time = function() private$..person_time$value,
+        time_intervals = function() private$..time_intervals$value,
+        rate_multiplier = function() private$..rate_multiplier$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -291,7 +312,10 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ci95 = NA,
         ..risktable = NA,
         ..censored = NA,
-        ..medianline = NA)
+        ..medianline = NA,
+        ..person_time = NA,
+        ..time_intervals = NA,
+        ..rate_multiplier = NA)
 )
 
 singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -303,6 +327,8 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         medianTable = function() private$.items[["medianTable"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
         survTable = function() private$.items[["survTable"]],
+        personTimeTable = function() private$.items[["personTimeTable"]],
+        personTimeSummary = function() private$.items[["personTimeSummary"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
@@ -439,6 +465,76 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="personTimeTable",
+                title="Person-Time Analysis",
+                visible="(person_time)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="interval", 
+                        `title`="Time Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="person_time", 
+                        `title`="Person-Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate", 
+                        `title`="Incidence Rate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeSummary",
+                title="Person-Time Summary",
+                visible="(person_time)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
                     "outcome",
                     "outcomeLevel",
                     "overalltime",
@@ -701,6 +797,15 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   ticks on the survival curves.
 #' @param medianline If true, displays a line indicating the median survival
 #'   time on the survival plot.
+#' @param person_time Enable this option to calculate and display person-time
+#'   metrics, including total follow-up time and incidence rates. These metrics
+#'   help quantify the rate of events per unit of time in your study population.
+#' @param time_intervals Specify time intervals for stratified person-time
+#'   analysis. Enter a  comma-separated list of time points to create intervals.
+#'   For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+#'   60+.
+#' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
+#'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -708,6 +813,8 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -753,7 +860,10 @@ singlearm <- function(
     ci95 = FALSE,
     risktable = FALSE,
     censored = FALSE,
-    medianline = "none") {
+    medianline = "none",
+    person_time = FALSE,
+    time_intervals = "12, 36, 60",
+    rate_multiplier = 100) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("singlearm requires jmvcore to be installed (restart may be required)")
@@ -800,7 +910,10 @@ singlearm <- function(
         ci95 = ci95,
         risktable = risktable,
         censored = censored,
-        medianline = medianline)
+        medianline = medianline,
+        person_time = person_time,
+        time_intervals = time_intervals,
+        rate_multiplier = rate_multiplier)
 
     analysis <- singlearmClass$new(
         options = options,

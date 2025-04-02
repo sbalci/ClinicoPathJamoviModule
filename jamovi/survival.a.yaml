@@ -326,4 +326,35 @@ options:
         R: >
           If true, displays a line indicating the median survival time on the survival plot.
 
+
+
+    - name: person_time
+      title: "Calculate Person-Time Metrics"
+      type: Bool
+      default: false
+      description: >-
+        Enable this option to calculate and display person-time metrics, including
+        total follow-up time and incidence rates. These metrics help quantify the
+        rate of events per unit of time in your study population.
+
+    - name: time_intervals
+      title: "Time Interval Stratification"
+      type: String
+      default: '12, 36, 60'
+      description: >-
+        Specify time intervals for stratified person-time analysis. Enter a 
+        comma-separated list of time points to create intervals. For example, 
+        "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and 60+.
+
+    - name: rate_multiplier
+      title: "Rate Multiplier"
+      type: Integer
+      default: 100
+      description: >-
+        Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
+        1000 for rates per 1000 person-years).
+
+
+
+
 ...

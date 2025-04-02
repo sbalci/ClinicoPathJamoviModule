@@ -234,3 +234,22 @@ children:
             name: cutp
             format: string
             width: large
+
+  - type: CollapseBox
+    label: Person-Time Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: person_time
+          - type: TextBox
+            name: time_intervals
+            format: string
+            enable: (person_time)
+            width: large
+          - type: TextBox
+            name: rate_multiplier
+            format: number
+

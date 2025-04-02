@@ -98,7 +98,7 @@ children:
                     format: number
                     enable: (uselandmark)
       - type: Label
-        label: Calculated Time to Data 
+        label: Calculated Time to Data
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -140,7 +140,7 @@ children:
             name: analysistype
             enable: (outcome && multievent)
       - type: Label
-        label: Calculated Outcome to Data 
+        label: Calculated Outcome to Data
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -149,7 +149,6 @@ children:
               - type: Output
                 name: outcomeredefined
                 enable: (outcome && multievent)
-                
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -206,4 +205,20 @@ children:
             name: cutp
             format: string
             width: large
-
+  - type: CollapseBox
+    label: Person-Time Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: person_time
+          - type: TextBox
+            name: time_intervals
+            format: string
+            enable: (person_time)
+            width: large
+          - type: TextBox
+            name: rate_multiplier
+            format: number

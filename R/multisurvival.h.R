@@ -44,7 +44,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ac_method = "average",
             showNomogram = FALSE,
             use_stratify = FALSE,
-            stratvar = NULL, ...) {
+            stratvar = NULL,
+            person_time = FALSE,
+            time_intervals = "12, 36, 60",
+            rate_multiplier = 100, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -276,6 +279,18 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..person_time <- jmvcore::OptionBool$new(
+                "person_time",
+                person_time,
+                default=FALSE)
+            private$..time_intervals <- jmvcore::OptionString$new(
+                "time_intervals",
+                time_intervals,
+                default="12, 36, 60")
+            private$..rate_multiplier <- jmvcore::OptionInteger$new(
+                "rate_multiplier",
+                rate_multiplier,
+                default=100)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -320,6 +335,9 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showNomogram)
             self$.addOption(private$..use_stratify)
             self$.addOption(private$..stratvar)
+            self$.addOption(private$..person_time)
+            self$.addOption(private$..time_intervals)
+            self$.addOption(private$..rate_multiplier)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -364,7 +382,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ac_method = function() private$..ac_method$value,
         showNomogram = function() private$..showNomogram$value,
         use_stratify = function() private$..use_stratify$value,
-        stratvar = function() private$..stratvar$value),
+        stratvar = function() private$..stratvar$value,
+        person_time = function() private$..person_time$value,
+        time_intervals = function() private$..time_intervals$value,
+        rate_multiplier = function() private$..rate_multiplier$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -408,7 +429,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ac_method = NA,
         ..showNomogram = NA,
         ..use_stratify = NA,
-        ..stratvar = NA)
+        ..stratvar = NA,
+        ..person_time = NA,
+        ..time_intervals = NA,
+        ..rate_multiplier = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -418,6 +442,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        personTimeTable = function() private$.items[["personTimeTable"]],
+        personTimeSummary = function() private$.items[["personTimeSummary"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
         cox_ph = function() private$.items[["cox_ph"]],
@@ -488,6 +514,76 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "overalltime",
                     "explanatory",
                     "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="personTimeTable",
+                title="Person-Time Analysis",
+                visible="(person_time)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="interval", 
+                        `title`="Time Interval", 
+                        `type`="text"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="person_time", 
+                        `title`="Person-Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate", 
+                        `title`="Incidence Rate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="rate_ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeSummary",
+                title="Person-Time Summary",
+                visible="(person_time)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "person_time",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -913,11 +1009,22 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param stratvar Variables used for stratification. When proportional
 #'   hazards are not met, stratification can adjust the model to better fit the
 #'   data by allowing different baseline hazards.
+#' @param person_time Enable this option to calculate and display person-time
+#'   metrics, including total follow-up time and incidence rates. These metrics
+#'   help quantify the rate of events per unit of time in your study population.
+#' @param time_intervals Specify time intervals for stratified person-time
+#'   analysis. Enter a  comma-separated list of time points to create intervals.
+#'   For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+#'   60+.
+#' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
+#'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
@@ -940,9 +1047,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$riskScoreTable$asDF}
+#' \code{results$personTimeTable$asDF}
 #'
-#' \code{as.data.frame(results$riskScoreTable)}
+#' \code{as.data.frame(results$personTimeTable)}
 #'
 #' @export
 multisurvival <- function(
@@ -985,7 +1092,10 @@ multisurvival <- function(
     ac_method = "average",
     showNomogram = FALSE,
     use_stratify = FALSE,
-    stratvar) {
+    stratvar,
+    person_time = FALSE,
+    time_intervals = "12, 36, 60",
+    rate_multiplier = 100) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1053,7 +1163,10 @@ multisurvival <- function(
         ac_method = ac_method,
         showNomogram = showNomogram,
         use_stratify = use_stratify,
-        stratvar = stratvar)
+        stratvar = stratvar,
+        person_time = person_time,
+        time_intervals = time_intervals,
+        rate_multiplier = rate_multiplier)
 
     analysis <- multisurvivalClass$new(
         options = options,
