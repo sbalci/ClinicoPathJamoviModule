@@ -1,0 +1,58 @@
+---
+name: screeningcalculator
+title: Screening Test Calculator
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Calculate disease probability based on test characteristics
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Function for Screening Test Probability Calculator.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: sens
+      title: 'Sensitivity ='
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 0.99
+
+    - name: spec
+      title: 'Specificity ='
+      type: Number
+      default: 0.80
+      min: 0.01
+      max: 0.99
+
+    - name: prev
+      title: 'Disease Prevalence ='
+      type: Number
+      default: 0.10
+      min: 0.001
+      max: 0.999
+
+    - name: repeat2
+      title: Show 2x Test Repetition
+      type: Bool
+      default: true
+
+    - name: repeat3
+      title: Show 3x Test Repetition
+      type: Bool
+      default: true
+
+    - name: fnote
+      title: Show Footnotes
+      type: Bool
+      default: false
+
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+...

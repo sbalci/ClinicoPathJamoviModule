@@ -1,0 +1,96 @@
+---
+name: sequentialtests
+title: Sequential Testing Analysis
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Sequential Test Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Function for Sequential Testing Analysis. Analyzes how diagnostic accuracy changes
+        when applying two tests in sequence (screening followed by confirmation).
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    # First Test (Screening Test) Parameters
+    - name: test1_name
+      title: Screening Test Name
+      type: String
+      default: 'Screening Test'
+      
+    - name: test1_sens
+      title: Sensitivity
+      type: Number
+      default: 0.95
+      min: 0.01
+      max: 0.99
+      
+    - name: test1_spec
+      title: Specificity 
+      type: Number
+      default: 0.70
+      min: 0.01
+      max: 0.99
+    
+    # Second Test (Confirmatory Test) Parameters  
+    - name: test2_name
+      title: Confirmatory Test Name
+      type: String
+      default: 'Confirmatory Test'
+      
+    - name: test2_sens
+      title: Sensitivity
+      type: Number
+      default: 0.80
+      min: 0.01
+      max: 0.99
+      
+    - name: test2_spec
+      title: Specificity
+      type: Number
+      default: 0.98
+      min: 0.01
+      max: 0.99
+    
+    # Testing Strategy
+    - name: strategy
+      title: Testing Strategy
+      type: List
+      options:
+        - title: Test all positives from first test
+          name: serial_positive
+        - title: Test all negatives from first test
+          name: serial_negative 
+        - title: Test all subjects with both tests (parallel)
+          name: parallel
+      default: serial_positive
+      
+    # Disease Prevalence
+    - name: prevalence
+      title: Disease Prevalence
+      type: Number
+      default: 0.10
+      min: 0.001
+      max: 0.999
+    
+    # Display Options
+    - name: show_explanation
+      title: Show Explanations
+      type: Bool
+      default: true
+      
+    - name: show_formulas
+      title: Show Calculation Formulas
+      type: Bool
+      default: false
+      
+    - name: show_nomogram
+      title: Show Fagan Nomogram
+      type: Bool
+      default: false
+...

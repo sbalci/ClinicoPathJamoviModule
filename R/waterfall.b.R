@@ -291,6 +291,86 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
       ,
+      .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar) {
+        # Requires time variable to calculate person-time
+        if (is.null(timeVar)) {
+          return(NULL)
+        }
+
+        # Ensure required columns exist and are properly formatted
+        if (!all(c(patientID, timeVar) %in% names(df))) {
+          warning("Required variables missing for person-time analysis")
+          return(NULL)
+        }
+
+        # Convert time variable to numeric if needed
+        df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
+
+        # Calculate person-time metrics by patient
+        pt_by_patient <- df %>%
+          dplyr::group_by(!!rlang::sym(patientID)) %>%
+          dplyr::summarise(
+            # Calculate total follow-up time (max time - baseline)
+            follow_up_time = max(!!rlang::sym(timeVar), na.rm = TRUE),
+            # Calculate best response
+            best_response = min(response, na.rm = TRUE),
+            # Determine response category
+            response_cat = factor(
+              cut(best_response,
+                  breaks = c(-Inf, -100, -30, 20, Inf),
+                  labels = c("CR", "PR", "SD", "PD"),
+                  right = TRUE),
+              levels = c("CR", "PR", "SD", "PD")
+            ),
+            # Calculate time to best response
+            time_to_best = !!rlang::sym(timeVar)[which.min(response)],
+            # Calculate time in response (for responders - PR or CR)
+            time_in_response = ifelse(
+              best_response <= -30,
+              # For responders, calculate time from first response to last follow-up
+              max(!!rlang::sym(timeVar)[response <= -30], na.rm = TRUE) -
+                min(!!rlang::sym(timeVar)[response <= -30], na.rm = TRUE),
+              0
+            ),
+            .groups = "drop"
+          )
+
+        # Calculate overall person-time metrics
+        total_patients <- nrow(pt_by_patient)
+        total_person_time <- sum(pt_by_patient$follow_up_time, na.rm = TRUE)
+        total_response_time <- sum(pt_by_patient$time_in_response, na.rm = TRUE)
+
+        # Calculate person-time by response category
+        pt_by_category <- pt_by_patient %>%
+          dplyr::group_by(response_cat) %>%
+          dplyr::summarise(
+            patients = n(),
+            person_time = sum(follow_up_time, na.rm = TRUE),
+            pct_patients = patients / total_patients * 100,
+            pct_time = person_time / total_person_time * 100,
+            median_time_to_response = median(time_to_best[!is.infinite(time_to_best)], na.rm = TRUE),
+            median_duration = median(time_in_response[time_in_response > 0], na.rm = TRUE),
+            .groups = "drop"
+          )
+
+        # Calculate response rates per 100 person-time units
+        response_rate <- sum(pt_by_patient$response_cat %in% c("CR", "PR")) / total_person_time * 100
+
+        # Return comprehensive results
+        return(list(
+          by_patient = pt_by_patient,
+          by_category = pt_by_category,
+          summary = list(
+            total_patients = total_patients,
+            total_person_time = total_person_time,
+            total_response_time = total_response_time,
+            response_rate_per_100 = response_rate,
+            pct_time_in_response = total_response_time / total_person_time * 100
+          )
+        ))
+      }
+
+      ,
       # run ----
       .run = function() {
 
@@ -313,6 +393,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         <br>- Shows response trajectories over time
         <br>- Requires multiple measurements per patient (one for each timepoint)
         <br>- Shows change over time
+        <br><br>
+        <b>3. Person-Time Analysis</b>
+        <br>- Evaluates response duration and rates over time
+        <br>- Requires time variable and multiple measurements
+        <br>- Calculates metrics like response per 100 person-months
         <br><br>
         <b>Data Input Options:</b>
         <br>1. <b>Percentage Changes:</b>
@@ -432,6 +517,72 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ## Calculate metrics ----
         metrics <- private$.calculateMetrics(processed_data$waterfall)
+
+
+        ## Calculate person-time metrics (if time variable available) ----
+        if (!is.null(self$options$timeVar)) {
+          person_time_metrics <- private$.calculatePersonTimeMetrics(
+            processed_data$spider,
+            self$options$patientID,
+            self$options$timeVar,
+            self$options$responseVar
+          )
+
+          # Add person-time metrics to the results if available
+          if (!is.null(person_time_metrics)) {
+            # Add response duration metrics to clinical metrics table
+            self$results$clinicalMetrics$addRow(rowKey = 3, values = list(
+              metric = "Median Time to Response",
+              value = sprintf("%.1f %s",
+                              person_time_metrics$by_category$median_time_to_response[
+                                person_time_metrics$by_category$response_cat %in% c("CR", "PR")
+                              ][1],
+                              "time units")
+            ))
+
+            self$results$clinicalMetrics$addRow(rowKey = 4, values = list(
+              metric = "Median Duration of Response",
+              value = sprintf("%.1f %s",
+                              median(person_time_metrics$by_patient$time_in_response[
+                                person_time_metrics$by_patient$time_in_response > 0
+                              ], na.rm = TRUE),
+                              "time units")
+            ))
+
+            self$results$clinicalMetrics$addRow(rowKey = 5, values = list(
+              metric = "Response Rate per 100 Person-Time Units",
+              value = sprintf("%.2f", person_time_metrics$summary$response_rate_per_100)
+            ))
+
+            # Add person-time table if it exists
+            if (!is.null(self$results$personTimeTable)) {
+              for (i in seq_len(nrow(person_time_metrics$by_category))) {
+                self$results$personTimeTable$addRow(rowKey = i, values = list(
+                  category = person_time_metrics$by_category$response_cat[i],
+                  patients = person_time_metrics$by_category$patients[i],
+                  patient_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_patients[i]),
+                  person_time = sprintf("%.1f", person_time_metrics$by_category$person_time[i]),
+                  time_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_time[i]),
+                  median_time = sprintf("%.1f", person_time_metrics$by_category$median_time_to_response[i]),
+                  median_duration = sprintf("%.1f", person_time_metrics$by_category$median_duration[i])
+                ))
+              }
+
+              # Add total row
+              self$results$personTimeTable$addRow(rowKey = nrow(person_time_metrics$by_category) + 1, values = list(
+                category = "Total",
+                patients = person_time_metrics$summary$total_patients,
+                patient_pct = "100.0%",
+                person_time = sprintf("%.1f", person_time_metrics$summary$total_person_time),
+                time_pct = "100.0%",
+                median_time = "",
+                median_duration = ""
+              ))
+            }
+          }
+        }
+
+
 
         ## Update results tables ----
         for(i in seq_len(nrow(metrics$summary))) {
@@ -562,6 +713,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ),
           "metrics" = metrics
         )
+
+        # Add person-time metrics to plot data if available
+        if (exists("person_time_metrics") && !is.null(person_time_metrics)) {
+          plotData$person_time_metrics <- person_time_metrics
+        }
 
         ### Update plots ----
 

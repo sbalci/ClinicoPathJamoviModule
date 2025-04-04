@@ -1,0 +1,82 @@
+title: Co-Testing Analysis
+name: cotest
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: Test 1 Parameters
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: test1_sens
+            label: 'Sensitivity'
+            format: number
+          - type: TextBox
+            name: test1_spec
+            label: 'Specificity'
+            format: number
+
+  - type: Label
+    label: Test 2 Parameters
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: test2_sens
+            label: 'Sensitivity'
+            format: number
+          - type: TextBox
+            name: test2_spec
+            label: 'Specificity'
+            format: number
+
+  - type: Label
+    label: Test Independence
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: indep
+            label: 'Assume tests are conditionally independent'
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: cond_dep_pos
+                label: 'Conditional Dependence (Positive)'
+                format: number
+                enable: (!indep)
+              - type: TextBox
+                name: cond_dep_neg
+                label: 'Conditional Dependence (Negative)'
+                format: number
+                enable: (!indep)
+
+  - type: Label
+    label: Disease Prevalence
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: prevalence
+            label: 'Prevalence'
+            format: number
+
+  - type: Label
+    label: Display Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: fnote
+            label: 'Show footnotes'
+          - type: CheckBox
+            name: fagan
+            label: 'Show Fagan nomogram'

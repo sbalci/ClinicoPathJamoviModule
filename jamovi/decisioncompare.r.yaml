@@ -1,0 +1,205 @@
+---
+name: decisioncompare
+title: Compare Medical Decision Tests
+jrs: '1.1'
+
+items:
+    - name: text1
+      title: Original Data
+      type: Preformatted
+      visible: (od)
+
+    - name: text2
+      title: Original Data
+      type: Html
+      visible: (od)
+
+    # Tables for Test 1
+    - name: cTable1
+      title: 'Test 1 - Recoded Data'
+      type: Table
+      visible: (test1)
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: epirTable1
+      title: 'Test 1 - Confidence Intervals'
+      type: Table
+      visible: (ci && test1)
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+
+    # Tables for Test 2
+    - name: cTable2
+      title: 'Test 2 - Recoded Data'
+      type: Table
+      visible: (test2)
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: epirTable2
+      title: 'Test 2 - Confidence Intervals'
+      type: Table
+      visible: (ci && test2)
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+
+    # Tables for Test 3
+    - name: cTable3
+      title: 'Test 3 - Recoded Data'
+      type: Table
+      visible: (test3)
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: epirTable3
+      title: 'Test 3 - Confidence Intervals'
+      type: Table
+      visible: (ci && test3)
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+
+    # Comparison table
+    - name: comparisonTable
+      title: 'Decision Test Comparison'
+      type: Table
+      rows: 0
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: Sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: AccurT
+          title: 'Accuracy'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'Negative Predictive Value'
+          type: number
+          format: pc
+        - name: LRP
+          title: 'Positive Likelihood Ratio'
+          type: number
+        - name: LRN
+          title: 'Negative Likelihood Ratio'
+          type: number
+      clearWith:
+          - pp
+          - pprob
+
+    # Plot
+    - name: plot1
+      title: 'Test Comparison'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (plot)
+      clearWith:
+          - plot
+      refs:
+          - ggplot2
+
+refs:
+    - DiagnosticTests
+    - ClinicoPathJamoviModule
+...

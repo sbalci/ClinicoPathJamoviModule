@@ -1,0 +1,71 @@
+title: Sequential Testing Analysis
+name: sequentialtests
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: First Test (Screening)
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: test1_name
+            format: string
+          - type: TextBox
+            name: test1_sens
+            format: number
+            label: 'Sensitivity'
+          - type: TextBox
+            name: test1_spec
+            format: number
+            label: 'Specificity'
+  
+  - type: Label
+    label: Second Test (Confirmatory)
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: test2_name
+            format: string
+          - type: TextBox
+            name: test2_sens
+            format: number
+            label: 'Sensitivity'
+          - type: TextBox
+            name: test2_spec
+            format: number
+            label: 'Specificity'
+  
+  - type: Label
+    label: Testing Strategy
+    children:
+      - type: ComboBox
+        name: strategy
+  
+  - type: Label
+    label: Disease Parameters
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: prevalence
+            format: number
+            label: 'Prevalence'
+  
+  - type: Label
+    label: Display Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_explanation
+          - type: CheckBox
+            name: show_formulas
+          - type: CheckBox
+            name: show_nomogram

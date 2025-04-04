@@ -143,7 +143,7 @@ fs::file_copy(file.path(main_repo_dir, "R", jsurvival_data_description_files),
 ClinicoPathDescriptives_example_files <- c(
   "histopathology.rda",
   "histopathologyDescriptives.omv",
-  # "treatmentResponse.omv",
+  "treatmentResponse.omv",
   "treatmentResponse.rda"
   # "swimmer_data_raw.omv",
   # "swimmer_data_raw.csv",
@@ -389,7 +389,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 
   # --- Commit changes in each repository ---
   commit_message <- sprintf("Update modules to version %s and date %s", new_version, new_date)
-  # commit_repo(main_repo_dir, commit_message)
+  commit_repo(main_repo_dir, commit_message)
   # commit_repo(jjstatsplot_dir, commit_message)
   # commit_repo(meddecide_dir, commit_message)
   # commit_repo(jsurvival_dir, commit_message)
@@ -399,8 +399,8 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.2.82"
-new_date <- "2024-04-02"
+new_version <- "0.0.2.83"
+new_date <- "2024-04-04"
 
 # Run the update process
 update_modules(new_version, new_date)

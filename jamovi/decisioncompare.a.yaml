@@ -1,0 +1,114 @@
+---
+name: decisioncompare
+title: Compare Medical Decision Tests
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value,
+        negative predictive value, and other metrics between different tests against the same golden standard.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: gold
+      title: Golden Standard
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: goldPositive
+      title: Positive Level
+      type: Level
+      variable: (gold)
+
+    # For the first test
+    - name: test1
+      title: Test 1
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test1Positive
+      title: Positive Level
+      type: Level
+      variable: (test1)
+
+    # For the second test
+    - name: test2
+      title: Test 2
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test2Positive
+      title: Positive Level
+      type: Level
+      variable: (test2)
+
+    # For the third test
+    - name: test3
+      title: Test 3
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test3Positive
+      title: Positive Level
+      type: Level
+      variable: (test3)
+
+    # Options
+    - name: pp
+      title: Prior Probability (prevalence)
+      type: Bool
+      default: false
+
+    - name: pprob
+      title: Prior Probability (prevalence)
+      type: Number
+      default: 0.300
+      min: 0.001
+      max: 0.999
+      description:
+          ui: >
+            Prior probability (disease prevalence in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+          R: >
+            Prior probability (disease prevalence in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+
+    - name: od
+      title: Original Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show frequency tables. Default is 'false'.
+
+    - name: fnote
+      title: Footnotes
+      type: Bool
+      default: false
+
+    - name: ci
+      title: '95% CI'
+      type: Bool
+      default: false
+
+    - name: plot
+      title: 'Comparison Plot'
+      type: Bool
+      default: false
+...
