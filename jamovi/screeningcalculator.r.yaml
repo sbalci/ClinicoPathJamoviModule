@@ -1,0 +1,162 @@
+---
+name: screeningcalculator
+title: Screening Test Calculator
+jrs: '1.1'
+
+items:
+    - name: explanatoryText
+      title: 'How Sequential Testing Works'
+      type: Html
+      
+    - name: mathText
+      title: 'Math Behind the Calculations'
+      type: Html
+
+    - name: singleTestTable
+      title: 'Single Test Results'
+      type: Table
+      swapRowsColumns: true
+      rows: 1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: Sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Specificity
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: Prevalence
+          title: 'Prevalence'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'Negative Predictive Value'
+          type: number
+          format: pc
+        - name: LRP
+          title: Positive Likelihood Ratio
+          type: number
+        - name: LRN
+          title: Negative Likelihood Ratio
+          type: number
+
+    - name: repeatTest2Table
+      title: 'Two Consecutive Tests'
+      type: Table
+      visible: (repeat2)
+      rows: 0
+      columns:
+        - name: testResult
+          title: "Test Result Pattern"
+          type: text
+        - name: probDisease
+          title: "Probability of Disease"
+          type: number
+          format: pc
+        - name: explanation
+          title: "Interpretation"
+          type: text
+
+    - name: repeatTest3Table
+      title: 'Three Consecutive Tests'
+      type: Table
+      visible: (repeat3)
+      rows: 0
+      columns:
+        - name: testResult
+          title: "Test Result Pattern"
+          type: text
+        - name: probDisease
+          title: "Probability of Disease"
+          type: number
+          format: pc
+        - name: explanation
+          title: "Interpretation"
+          type: text
+
+    - name: plot1
+      title: 'Fagan Nomogram (Single Test)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      clearWith:
+          - sens
+          - spec
+          - prev
+          - fagan
+          
+    - name: plot2PP
+      title: 'Fagan Nomogram (Second Test after Positive)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot2PP
+      requiresData: true
+      visible: (fagan && repeat2)
+      clearWith:
+          - sens
+          - spec
+          - prev
+          - fagan
+          - repeat2
+          
+    - name: plot2NN
+      title: 'Fagan Nomogram (Second Test after Negative)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot2NN
+      requiresData: true
+      visible: (fagan && repeat2)
+      clearWith:
+          - sens
+          - spec
+          - prev
+          - fagan
+          - repeat2
+          
+    - name: plot3PPP
+      title: 'Fagan Nomogram (Third Test after Two Positives)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot3PPP
+      requiresData: true
+      visible: (fagan && repeat3)
+      clearWith:
+          - sens
+          - spec
+          - prev
+          - fagan
+          - repeat3
+          
+    - name: plot3NNN
+      title: 'Fagan Nomogram (Third Test after Two Negatives)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot3NNN
+      requiresData: true
+      visible: (fagan && repeat3)
+      clearWith:
+          - sens
+          - spec
+          - prev
+          - fagan
+          - repeat3
+
+refs:
+    - DiagnosticTests
+    - sensspecwiki
+...

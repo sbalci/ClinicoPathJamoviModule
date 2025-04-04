@@ -1,0 +1,91 @@
+---
+name:  chisqposttest
+title: Chi-Square Post-Hoc Tests
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+
+    - name:  chisqTable
+      title: Chi-Square Test Results
+      type:  Table
+      rows:  1
+      columns:
+        - name: stat
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: p
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - rows
+          - cols
+          - excl
+
+    - name:  contingencyTable
+      title: 'Contingency Table'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+          - excl
+          - exp
+
+    - name:  posthocTable
+      title: 'Post-Hoc Test Results'
+      type:  Table
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: chi
+          title: "Chi-Square"
+          type: number
+        - name: p
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: padj
+          title: "Adj. p-value"
+          type: number
+          format: zto,pvalue
+        - name: sig
+          title: "Significant"
+          type: text
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+          - sig
+          - excl
+
+    - name:  plotOutput
+      title: 'Standardized Residuals'
+      type:  Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      visible: (plot)
+      clearWith:
+          - rows
+          - cols
+          - excl
+
+refs:
+    - chisq.posthoc.test
+    - vcd
+    - ClinicoPathJamoviModule
+
+...

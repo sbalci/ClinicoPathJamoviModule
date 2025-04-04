@@ -1,0 +1,81 @@
+---
+name:  cotest
+title: Co-Testing Analysis
+jrs:   '1.1'
+
+items:
+    - name:  testParamsTable
+      title: 'Test Parameters'
+      type: Table
+      rows: 0
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: plr
+          title: 'Positive LR'
+          type: number
+        - name: nlr
+          title: 'Negative LR'
+          type: number
+
+    - name:  cotestResultsTable
+      title: 'Co-Testing Results'
+      type: Table
+      rows: 0
+      columns:
+        - name: scenario
+          title: 'Scenario'
+          type: text
+        - name: postProb
+          title: 'Post-test Probability'
+          type: number
+          format: pc
+        - name: relativeProbability
+          title: 'Relative to Prevalence'
+          type: number
+        - name: orValue
+          title: 'Odds Ratio'
+          type: number
+
+    - name:  dependenceInfo
+      title: 'Test Dependence Information'
+      type: Html
+      visible: (!indep)
+      
+    - name:  dependenceExplanation
+      title: 'Understanding Test Dependence'
+      type: Html
+
+    - name:  explanation
+      title: 'Explanation'
+      type: Html
+
+    - name: plot1
+      title: 'Fagan nomogram'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      clearWith:
+          - test1_sens
+          - test1_spec
+          - test2_sens
+          - test2_spec
+          - prevalence
+          - fagan
+
+refs:
+    - DiagnosticTests
+    - MultipleDiagnosticTests
+...

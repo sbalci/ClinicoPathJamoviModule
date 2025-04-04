@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.82
+version: 0.0.2.83
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-04-02'
+date: '2024-04-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -594,6 +594,67 @@ analyses:
     description: |
       'Function for generating river plots (alluvial diagrams) to visualize
       flows and transitions over time or between categories.'
+  - title: Compare Medical Decision Tests
+    name: decisioncompare
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Compare Medical Decision Tests
+    menuSubgroup: Decision
+    menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
+    description: >
+      Function for comparing multiple Medical Decision Tests. Compares
+      sensitivity, specificity, positive predictive value, negative predictive
+      value, and other metrics between different tests against the same golden
+      standard.
+  - title: Combine Medical Decision Tests
+    name: decisioncombine
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Decision
+    menuTitle: Combine Medical Decision Tests
+    menuSubtitle: Combine tests and evaluate performance
+    description: >
+      Function for combining multiple Medical Decision Tests and evaluating
+      their performance. Calculate sensitivity, specificity, positive predictive
+      value, negative predictive value for combined tests using different
+      combination rules.
+  - title: Screening Test Calculator
+    name: screeningcalculator
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Screening Test Calculator
+    menuSubgroup: Decision
+    menuSubtitle: Calculate disease probability based on test characteristics
+    description: Function for Screening Test Probability Calculator.
+  - title: Co-Testing Analysis
+    name: cotest
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Co-Testing Analysis
+    menuSubgroup: Decision
+    menuSubtitle: Analyze combined test results
+    description: >
+      Function for analyzing combined results of two concurrent diagnostic
+      tests. Calculates post-test probabilities based on various scenarios
+      (either test positive, both positive, both negative).
+  - title: Chi-Square Post-Hoc Tests
+    name: chisqposttest
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuTitle: Chi-Square Post-Hoc Tests
+    menuSubgroup: ClinicoPath Comparisons
+    description: Performs Chi-Square test and post-hoc pairwise comparisons.
+  - title: Sequential Testing Analysis
+    name: sequentialtests
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Sequential Testing Analysis
+    menuSubgroup: Decision
+    menuSubtitle: Sequential Test Analysis
+    description: >
+      Function for Sequential Testing Analysis. Analyzes how diagnostic accuracy
+      changes when applying two tests in sequence (screening followed by
+      confirmation).
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

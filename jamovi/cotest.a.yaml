@@ -1,0 +1,118 @@
+---
+name:  cotest
+title: Co-Testing Analysis
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Analyze combined test results
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Function for analyzing combined results of two concurrent diagnostic tests.
+        Calculates post-test probabilities based on various scenarios (either test positive, both positive, both negative).
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+
+options:
+    # Test 1 parameters
+    - name: test1_sens
+      title: Test 1 Sensitivity
+      type: Number
+      default: 0.80
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Sensitivity (true positive rate) of Test 1.
+
+    - name: test1_spec
+      title: Test 1 Specificity
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Specificity (true negative rate) of Test 1.
+
+    # Test 2 parameters
+    - name: test2_sens
+      title: Test 2 Sensitivity
+      type: Number
+      default: 0.75
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Sensitivity (true positive rate) of Test 2.
+
+    - name: test2_spec
+      title: Test 2 Specificity
+      type: Number
+      default: 0.95
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Specificity (true negative rate) of Test 2.
+
+    # Test independence assumption
+    - name: indep
+      title: Independent Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Assume tests are conditionally independent (default is true).
+
+    # Conditional dependence parameters (visible only when indep = false)
+    - name: cond_dep_pos
+      title: Conditional Dependence Positive
+      type: Number
+      default: 0.05
+      min: 0.00
+      max: 1.00
+      description:
+          R: >
+            Conditional dependence between tests for subjects with disease.
+            Value between 0 (independence) and 1 (complete dependence).
+
+    - name: cond_dep_neg
+      title: Conditional Dependence Negative
+      type: Number
+      default: 0.05
+      min: 0.00
+      max: 1.00
+      description:
+          R: >
+            Conditional dependence between tests for subjects without disease.
+            Value between 0 (independence) and 1 (complete dependence).
+
+    # Prior probability (prevalence)
+    - name: prevalence
+      title: Disease Prevalence
+      type: Number
+      default: 0.10
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Prior probability (disease prevalence in the population).
+            Requires a value between 0.001 and 0.999.
+
+    # Display options
+    - name: fnote
+      title: Show Footnotes
+      type: Bool
+      default: false
+
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+
+...

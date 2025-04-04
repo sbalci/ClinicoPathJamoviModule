@@ -1,0 +1,250 @@
+---
+name: decisioncombine
+title: Combine Medical Decision Tests
+jrs: '1.1'
+
+items:
+    - name: text1
+      title: Original Data
+      type: Preformatted
+      visible: (od)
+
+    - name: text2
+      title: Original Data
+      type: Html
+      visible: (od)
+
+    - name: cTable
+      title: 'Recoded Data for Combined Test'
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    # Individual test tables
+    - name: indTable1
+      title: 'Test 1 Results'
+      visible: (showIndividual && test1)
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: indTable2
+      title: 'Test 2 Results'
+      visible: (showIndividual && test2)
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: indTable3
+      title: 'Test 3 Results'
+      visible: (showIndividual && test3)
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+        - name: Total
+          title: 'Total'
+          type: number
+
+    - name: nTable
+      title: ''
+      type: Table
+      swapRowsColumns: true
+      rows: 1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: TotalPop
+          title: 'Total'
+          type: number
+        - name: DiseaseP
+          title: 'Diseased'
+          type: number
+        - name: DiseaseN
+          title: 'Healthy'
+          type: number
+        - name: TestP
+          title: 'Positive Tests'
+          type: number
+        - name: TestN
+          title: 'Negative Tests'
+          type: number
+        - name: TestT
+          title: 'True Test'
+          type: number
+        - name: TestW
+          title: 'Wrong Test'
+          type: number
+      clearWith:
+          - pp
+          - pprob
+
+    - name: ratioTable
+      title: ''
+      type: Table
+      swapRowsColumns: true
+      rows: 1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: Sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: AccurT
+          title: 'Accuracy'
+          type: number
+          format: pc
+        - name: PrevalenceD
+          title: 'Prevalence'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'Negative Predictive Value'
+          type: number
+          format: pc
+        - name: PostTestProbDisease
+          title: 'Post-test Disease Probability'
+          type: number
+          format: pc
+        - name: PostTestProbHealthy
+          title: 'Post-test Health Probability'
+          type: number
+          format: pc
+        - name: LRP
+          title: Positive Likelihood Ratio
+          type: number
+        - name: LRN
+          title: Negative Likelihood Ratio
+          type: number
+      clearWith:
+          - pp
+          - pprob
+
+    - name: epirTable_ratio
+      title: ''
+      type: Table
+      visible: (ci)
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+      clearWith:
+          - pp
+          - pprob
+      refs: epiR
+
+    - name: epirTable_number
+      title: ''
+      type: Table
+      visible: (ci)
+      rows: 0
+      columns:
+        - name: statsnames
+          title: "Decision Statistics"
+          type: text
+        - name: est
+          title: "Estimate"
+          type: number
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+      clearWith:
+          - pp
+          - pprob
+      refs: epiR
+
+    - name: plot1
+      title: 'Fagan nomogram'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      clearWith:
+          - pp
+          - pprob
+          - fagan
+      refs:
+          - Fagan
+          - Fagan2
+
+refs:
+    - DiagnosticTests
+    - ClinicoPathJamoviModule
+...

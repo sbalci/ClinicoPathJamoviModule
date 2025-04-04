@@ -1,0 +1,84 @@
+---
+name:  chisqposttest
+title: Chi-Square Post-Hoc Tests
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Comparisons
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Performs Chi-Square test and post-hoc pairwise comparisons.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: rows
+      title: Rows
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  variable in the rows
+
+    - name: cols 
+      title: Columns
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+                  variable in the columns
+
+    - name: posthoc
+      title: Post-Hoc Method
+      type: List
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: FDR
+          name: fdr
+        - title: None
+          name: none
+      default: bonferroni
+      description: >
+                  Method for p-value adjustment in post-hoc tests
+
+    - name: sig
+      title: Significance Level
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.05
+      description: >
+                  alpha level for significance testing
+
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: false
+      description: >
+                  exclude missing values from analysis
+
+    - name: exp
+      title: Show Expected Values
+      type: Bool
+      default: false
+      description: >
+                  show expected values in the table
+
+    - name: plot
+      title: Show Residual Plot
+      type: Bool
+      default: false
+      description: >
+                  display plot of standardized residuals
+...

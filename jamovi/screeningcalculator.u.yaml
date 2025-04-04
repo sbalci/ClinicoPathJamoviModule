@@ -1,0 +1,36 @@
+title: Screening Test Calculator
+name: screeningcalculator
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: Test Characteristics
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: sens
+            format: number
+          - type: TextBox
+            name: spec
+            format: number
+          - type: TextBox
+            name: prev
+            format: number
+
+  - type: Label
+    label: Display Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: repeat2
+          - type: CheckBox
+            name: repeat3
+          - type: CheckBox
+            name: fnote
+          - type: CheckBox
+            name: fagan

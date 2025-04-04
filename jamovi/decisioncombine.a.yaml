@@ -1,0 +1,136 @@
+---
+name: decisioncombine
+title: Combine Medical Decision Tests
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Combine tests and evaluate performance
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Function for combining multiple Medical Decision Tests and evaluating their performance.
+        Calculate sensitivity, specificity, positive predictive value, negative predictive value
+        for combined tests using different combination rules.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: gold
+      title: Golden Standard
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: goldPositive
+      title: Positive Level
+      type: Level
+      variable: (gold)
+
+    # For the first test
+    - name: test1
+      title: Test 1
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test1Positive
+      title: Positive Level
+      type: Level
+      variable: (test1)
+
+    # For the second test
+    - name: test2
+      title: Test 2
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test2Positive
+      title: Positive Level
+      type: Level
+      variable: (test2)
+
+    # For the third test
+    - name: test3
+      title: Test 3
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+
+    - name: test3Positive
+      title: Positive Level
+      type: Level
+      variable: (test3)
+
+    - name: combRule
+      title: Combination Rule
+      type: List
+      options:
+        - title: Any Positive (OR)
+          name: any
+        - title: All Positive (AND)
+          name: all
+        - title: Majority Positive
+          name: majority
+      default: any
+      description:
+          R: >
+            Rule for combining test results. "any" means positive if any test is positive (OR),
+            "all" means positive only if all tests are positive (AND), and "majority" means
+            positive if more than half of tests are positive.
+
+    - name: pp
+      title: Prior Probability (prevalence)
+      type: Bool
+      default: false
+
+    - name: pprob
+      title: Prior Probability (prevalence)
+      type: Number
+      default: 0.300
+      min: 0.001
+      max: 0.999
+      description:
+          ui: >
+            Prior probability (disease prevalence in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+          R: >
+            Prior probability (disease prevalence in the community).
+            Requires a value between 0.001 and 0.999, default 0.300.
+
+    - name: od
+      title: Original Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show frequency tables. Default is 'false'.
+
+    - name: fnote
+      title: Footnotes
+      type: Bool
+      default: false
+
+    - name: ci
+      title: '95% CI'
+      type: Bool
+      default: false
+
+    - name: fagan
+      title: 'Fagan Nomogram'
+      type: Bool
+      default: false
+
+    - name: showIndividual
+      title: 'Show Individual Test Results'
+      type: Bool
+      default: true
+...
