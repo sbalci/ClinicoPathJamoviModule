@@ -605,7 +605,8 @@ analyses:
       Function for comparing multiple Medical Decision Tests. Compares
       sensitivity, specificity, positive predictive value, negative predictive
       value, and other metrics between different tests against the same golden
-      standard.
+      standard. Includes statistical comparison using McNemar's test and
+      confidence intervals for differences.
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath

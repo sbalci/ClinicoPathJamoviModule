@@ -18,7 +18,6 @@ items:
     - name: cTable1
       title: 'Test 1 - Recoded Data'
       type: Table
-      visible: (test1)
       rows: 0
       columns:
         - name: newtest
@@ -37,7 +36,6 @@ items:
     - name: epirTable1
       title: 'Test 1 - Confidence Intervals'
       type: Table
-      visible: (ci && test1)
       rows: 0
       columns:
         - name: statsnames
@@ -62,7 +60,6 @@ items:
     - name: cTable2
       title: 'Test 2 - Recoded Data'
       type: Table
-      visible: (test2)
       rows: 0
       columns:
         - name: newtest
@@ -81,7 +78,6 @@ items:
     - name: epirTable2
       title: 'Test 2 - Confidence Intervals'
       type: Table
-      visible: (ci && test2)
       rows: 0
       columns:
         - name: statsnames
@@ -106,7 +102,6 @@ items:
     - name: cTable3
       title: 'Test 3 - Recoded Data'
       type: Table
-      visible: (test3)
       rows: 0
       columns:
         - name: newtest
@@ -125,7 +120,6 @@ items:
     - name: epirTable3
       title: 'Test 3 - Confidence Intervals'
       type: Table
-      visible: (ci && test3)
       rows: 0
       columns:
         - name: statsnames
@@ -185,6 +179,54 @@ items:
           - pp
           - pprob
 
+    # Statistical Comparison Tables
+    - name: mcnemarTable
+      title: "McNemar's Test for Test Comparison"
+      type: Table
+      visible: (statComp)
+      rows: 0
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: stat
+          title: "McNemar's Chi-squared"
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+
+    - name: diffTable
+      title: 'Differences with 95% Confidence Intervals'
+      type: Table
+      visible: (statComp)
+      rows: 0
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: diff
+          title: 'Difference'
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
+          type: number
+          format: pc
+
     # Plot
     - name: plot1
       title: 'Test Comparison'
@@ -202,4 +244,5 @@ items:
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule
+    - stats
 ...

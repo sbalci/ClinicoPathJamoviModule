@@ -8,6 +8,20 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
         "decisioncompareClass",
         inherit = decisioncompareBase,
         private = list(
+
+            # init ----
+            .init = function() {
+                self$results$epirTable1$setVisible(FALSE)
+                self$results$epirTable2$setVisible(FALSE)
+                self$results$epirTable3$setVisible(FALSE)
+
+                self$results$cTable1$setVisible(FALSE)
+                self$results$cTable2$setVisible(FALSE)
+                self$results$cTable3$setVisible(FALSE)
+
+            }
+
+            ,
             .run = function() {
                 if (length(self$options$gold) == 0)
                     return()
@@ -29,11 +43,49 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
                 mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
 
+                # Handle original data display
+                if (self$options$od) {
+                    # Create frequency tables for original data
+                    freq_table <- table(mydata[[goldVariable]])
+                    self$results$text1$setContent(freq_table)
+
+                    # Create a cross-tabulation of all tests with gold standard
+                    test_vars <- c(self$options$test1,
+                                   self$options$test2,
+                                   self$options$test3)
+                    test_vars <- test_vars[!is.null(test_vars) &
+                                               test_vars != ""]
+
+                    if (length(test_vars) > 0) {
+                        html_tables <- ""
+                        for (test_var in test_vars) {
+                            # Create cross-tabulation
+                            cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]])
+                            html_table <- knitr::kable(
+                                cross_tab,
+                                format = "html",
+                                caption = paste(
+                                    "Cross-tabulation of",
+                                    test_var,
+                                    "and",
+                                    goldVariable
+                                )
+                            )
+                            html_tables <- paste(html_tables, html_table, "<br><br>")
+                        }
+                        self$results$text2$setContent(html_tables)
+                    }
+                }
+
                 # Create comparison results table
                 comparisonTable <- self$results$comparisonTable
 
                 # Store metrics for plotting
                 plotData <- list()
+
+                # Create variable to store test results for statistical comparison
+                all_test_results <- list()
+                test_metrics <- list()
 
                 # Get test variables and positive levels
                 testVariables <- c(self$options$test1,
@@ -73,14 +125,38 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     epirTable <- NULL
 
                     if (testVariable == self$options$test1) {
+
+                        if (self$options$ci) {
+                        self$results$epirTable1$setVisible(TRUE)
+                        }
+
+                        self$results$cTable1$setVisible(TRUE)
+
                         cTable <- self$results$cTable1
                         epirTable <- self$results$epirTable1
+
                     } else if (testVariable == self$options$test2) {
+
+                        if (self$options$ci) {
+                        self$results$epirTable2$setVisible(TRUE)
+                        }
+
+                        self$results$cTable2$setVisible(TRUE)
+
                         cTable <- self$results$cTable2
                         epirTable <- self$results$epirTable2
+
                     } else if (testVariable == self$options$test3) {
+
+                        if (self$options$ci) {
+                        self$results$epirTable3$setVisible(TRUE)
+                        }
+
+                        self$results$cTable2$setVisible(TRUE)
+
                         cTable <- self$results$cTable3
                         epirTable <- self$results$epirTable3
+
                     }
 
                     # Process test data
@@ -117,6 +193,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     FN <- conf_table[2, 1]
                     TN <- conf_table[2, 2]
 
+                    # Store test results for statistical comparison
+                    all_test_results[[testVariable]] <- mydata2[["testVariable2"]]
+
                     # Populate contingency table
                     cTable$addRow(
                         rowKey = "Test Positive",
@@ -148,6 +227,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         )
                     )
 
+                    # Add footnotes if requested
+                    if (self$options$fnote) {
+                        cTable$addFootnote(rowKey = "Test Positive",
+                                           col = "GP",
+                                           "True Positive (TP)")
+                        cTable$addFootnote(rowKey = "Test Positive",
+                                           col = "GN",
+                                           "False Positive (FP)")
+                        cTable$addFootnote(rowKey = "Test Negative",
+                                           col = "GP",
+                                           "False Negative (FN)")
+                        cTable$addFootnote(rowKey = "Test Negative",
+                                           col = "GN",
+                                           "True Negative (TN)")
+                    }
+
                     # Calculate metrics
                     TotalPop <- TP + TN + FP + FN
                     DiseaseP <- TP + FN
@@ -168,6 +263,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     LRP <- Sens / (1 - Spec)
                     LRN <- (1 - Sens) / Spec
 
+                    # Store metrics for statistical comparison
+                    test_metrics[[testVariable]] <- list(
+                        Sens = Sens,
+                        Spec = Spec,
+                        PPV = PPV,
+                        NPV = NPV,
+                        conf_table = conf_table
+                    )
+
                     # Add to comparison table
                     comparisonTable$addRow(
                         rowKey = testVariable,
@@ -182,6 +286,30 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                             LRN = LRN
                         )
                     )
+
+                    # Add footnotes to comparison table if requested
+                    if (self$options$fnote) {
+                        comparisonTable$addFootnote(
+                            rowKey = testVariable,
+                            col = "Sens",
+                            "Sensitivity = TP/(TP+FN) = Probability of positive test among diseased"
+                        )
+                        comparisonTable$addFootnote(
+                            rowKey = testVariable,
+                            col = "Spec",
+                            "Specificity = TN/(TN+FP) = Probability of negative test among healthy"
+                        )
+                        comparisonTable$addFootnote(
+                            rowKey = testVariable,
+                            col = "PPV",
+                            "Positive Predictive Value = TP/(TP+FP) = Probability of disease when test is positive"
+                        )
+                        comparisonTable$addFootnote(
+                            rowKey = testVariable,
+                            col = "NPV",
+                            "Negative Predictive Value = TN/(TN+FN) = Probability of being healthy when test is negative"
+                        )
+                    }
 
                     # Add to plot data
                     plotData[[testVariable]] <- list(
@@ -244,6 +372,82 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                                                        T])) {
                             epirTable$addRow(rowKey = i,
                                              values = c(data_frame[i, ]))
+                        }
+                    }
+                }
+
+                # Perform statistical comparisons if requested
+                if (self$options$statComp &&
+                    length(testVariables) >= 2) {
+                    # Get the tables
+                    mcnemarTable <- self$results$mcnemarTable
+                    diffTable <- self$results$diffTable
+
+                    # Generate all pairwise combinations of tests
+                    test_pairs <- combn(testVariables, 2, simplify = FALSE)
+
+                    # For each pair, perform McNemar's test and calculate CIs for differences
+                    for (pair in test_pairs) {
+                        test1 <- pair[1]
+                        test2 <- pair[2]
+                        comparison_name <- paste(test1, "vs", test2)
+
+                        # Create contingency table for McNemar's test
+                        # We need to count discordant pairs (where test results differ)
+                        test1_results <- all_test_results[[test1]]
+                        test2_results <- all_test_results[[test2]]
+
+                        # Create a 2x2 contingency table for McNemar's test
+                        mcnemar_table <- table(test1_results, test2_results)
+
+                        # Perform McNemar's test
+                        mcnemar_result <- stats::mcnemar.test(mcnemar_table)
+
+                        # Add to McNemar's test table
+                        mcnemarTable$addRow(
+                            rowKey = comparison_name,
+                            values = list(
+                                comparison = comparison_name,
+                                stat = mcnemar_result$statistic,
+                                df = mcnemar_result$parameter,
+                                p = mcnemar_result$p.value
+                            )
+                        )
+
+                        # Calculate confidence intervals for differences in metrics
+                        metrics <- c("Sens", "Spec", "PPV", "NPV")
+
+                        for (metric in metrics) {
+                            # Extract values for each test
+                            value1 <- test_metrics[[test1]][[metric]]
+                            value2 <- test_metrics[[test2]][[metric]]
+
+                            # Calculate difference
+                            diff <- value1 - value2
+
+                            # Get total sample size from confusion tables
+                            n1 <- sum(test_metrics[[test1]][["conf_table"]])
+                            n2 <- sum(test_metrics[[test2]][["conf_table"]])
+
+                            # Calculate standard error for the difference
+                            se_diff <- sqrt((value1 * (1 - value1) / n1) + (value2 * (1 - value2) / n2))
+
+                            # Calculate 95% CI
+                            z <- 1.96  # Z-score for 95% CI
+                            lower <- diff - z * se_diff
+                            upper <- diff + z * se_diff
+
+                            # Add to difference table
+                            diffTable$addRow(
+                                rowKey = paste(comparison_name, metric, sep = "_"),
+                                values = list(
+                                    comparison = comparison_name,
+                                    metric = metric,
+                                    diff = diff,
+                                    lower = lower,
+                                    upper = upper
+                                )
+                            )
                         }
                     }
                 }

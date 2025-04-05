@@ -228,6 +228,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ,
       # calculate clinical metrics ----
       .calculateMetrics = function(df) {
+
+        private$.checkpoint()
+
         ## Calculate response rates ----
         cats <- c("CR", "PR", "SD", "PD")
 

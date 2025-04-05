@@ -86,6 +86,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # easyalluvial ----
             # https://erblast.github.io/easyalluvial/
 
+
+            private$.checkpoint()
+
             plot <-
                 easyalluvial::alluvial_wide( data = mydata,
                                              max_variables = 8,

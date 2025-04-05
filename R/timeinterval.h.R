@@ -122,7 +122,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeinterval",
-                version = c(1,0,0),
+                version = c(0,0,2),
                 options = options,
                 results = timeintervalResults$new(options=options),
                 data = data,

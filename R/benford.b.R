@@ -49,6 +49,8 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             var <- jmvcore::toNumeric(mydata[[self$options$var]])
 
+            private$.checkpoint()
+
             bfd.cp <- benford.analysis::benford(data = var)
 
             self$results$text$setContent(bfd.cp)
