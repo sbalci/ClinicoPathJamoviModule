@@ -49,7 +49,7 @@ children:
             name: test3Positive
             enable: (test3)
   - type: Label
-    label: Table
+    label: Table Options
     children:
       - type: LayoutBox
         margin: large
@@ -61,21 +61,23 @@ children:
           - type: CheckBox
             name: ci
             enable: (!pp)
+          - type: CheckBox
+            name: plot
 
   - type: Label
     label: Prior Probability
     children:
-          - type: CheckBox
-            name: pp
-            enable: (!ci)
-          - type: TextBox
-            name: pprob
-            label: ''
-            format: number
-            enable: (!ci && pp)
+      - type: CheckBox
+        name: pp
+        enable: (!ci)
+      - type: TextBox
+        name: pprob
+        label: ''
+        format: number
+        enable: (pp)
 
   - type: Label
-    label: Plots
+    label: Statistical Comparison
     children:
       - type: CheckBox
-        name: plot
+        name: statComp

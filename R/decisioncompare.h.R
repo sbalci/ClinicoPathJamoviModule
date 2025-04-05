@@ -19,7 +19,8 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             od = FALSE,
             fnote = FALSE,
             ci = FALSE,
-            plot = FALSE, ...) {
+            plot = FALSE,
+            statComp = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -97,6 +98,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "plot",
                 plot,
                 default=FALSE)
+            private$..statComp <- jmvcore::OptionBool$new(
+                "statComp",
+                statComp,
+                default=FALSE)
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -112,6 +117,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..plot)
+            self$.addOption(private$..statComp)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -127,7 +133,8 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         od = function() private$..od$value,
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
-        plot = function() private$..plot$value),
+        plot = function() private$..plot$value,
+        statComp = function() private$..statComp$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -142,7 +149,8 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..od = NA,
         ..fnote = NA,
         ..ci = NA,
-        ..plot = NA)
+        ..plot = NA,
+        ..statComp = NA)
 )
 
 decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -158,6 +166,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         cTable3 = function() private$.items[["cTable3"]],
         epirTable3 = function() private$.items[["epirTable3"]],
         comparisonTable = function() private$.items[["comparisonTable"]],
+        mcnemarTable = function() private$.items[["mcnemarTable"]],
+        diffTable = function() private$.items[["diffTable"]],
         plot1 = function() private$.items[["plot1"]]),
     private = list(),
     public=list(
@@ -168,7 +178,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Compare Medical Decision Tests",
                 refs=list(
                     "DiagnosticTests",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "stats"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -183,7 +194,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable1",
                 title="Test 1 - Recoded Data",
-                visible="(test1)",
                 rows=0,
                 columns=list(
                     list(
@@ -206,7 +216,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable1",
                 title="Test 1 - Confidence Intervals",
-                visible="(ci && test1)",
                 rows=0,
                 columns=list(
                     list(
@@ -234,7 +243,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable2",
                 title="Test 2 - Recoded Data",
-                visible="(test2)",
                 rows=0,
                 columns=list(
                     list(
@@ -257,7 +265,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable2",
                 title="Test 2 - Confidence Intervals",
-                visible="(ci && test2)",
                 rows=0,
                 columns=list(
                     list(
@@ -285,7 +292,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable3",
                 title="Test 3 - Recoded Data",
-                visible="(test3)",
                 rows=0,
                 columns=list(
                     list(
@@ -308,7 +314,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable3",
                 title="Test 3 - Confidence Intervals",
-                visible="(ci && test3)",
                 rows=0,
                 columns=list(
                     list(
@@ -378,6 +383,62 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 clearWith=list(
                     "pp",
                     "pprob")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="mcnemarTable",
+                title="McNemar's Test for Test Comparison",
+                visible="(statComp)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="stat", 
+                        `title`="McNemar's Chi-squared", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diffTable",
+                title="Differences with 95% Confidence Intervals",
+                visible="(statComp)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="diff", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number", 
+                        `format`="pc"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -418,7 +479,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Function for comparing multiple Medical Decision Tests. Compares 
 #' sensitivity, specificity, positive predictive value, negative predictive 
 #' value, and other metrics between different tests against the same golden 
-#' standard.
+#' standard. Includes statistical comparison using McNemar's test and 
+#' confidence intervals for differences.
 #' 
 #'
 #' @examples
@@ -442,6 +504,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param fnote .
 #' @param ci .
 #' @param plot .
+#' @param statComp Perform statistical comparison between tests (McNemar's
+#'   test and confidence intervals for differences).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
@@ -453,6 +517,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$cTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -478,7 +544,8 @@ decisioncompare <- function(
     od = FALSE,
     fnote = FALSE,
     ci = FALSE,
-    plot = FALSE) {
+    plot = FALSE,
+    statComp = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncompare requires jmvcore to be installed (restart may be required)")
@@ -514,7 +581,8 @@ decisioncompare <- function(
         od = od,
         fnote = fnote,
         ci = ci,
-        plot = plot)
+        plot = plot,
+        statComp = statComp)
 
     analysis <- decisioncompareClass$new(
         options = options,

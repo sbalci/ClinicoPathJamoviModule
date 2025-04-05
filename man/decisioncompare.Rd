@@ -19,7 +19,8 @@ decisioncompare(
   od = FALSE,
   fnote = FALSE,
   ci = FALSE,
-  plot = FALSE
+  plot = FALSE,
+  statComp = FALSE
 )
 }
 \arguments{
@@ -54,6 +55,9 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{ci}{.}
 
 \item{plot}{.}
+
+\item{statComp}{Perform statistical comparison between tests (McNemar's
+test and confidence intervals for differences).}
 }
 \value{
 A results object containing:
@@ -67,6 +71,8 @@ A results object containing:
 \code{results$cTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 }
 
@@ -80,7 +86,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for comparing multiple Medical Decision Tests. Compares
 sensitivity, specificity, positive predictive value, negative predictive
 value, and other metrics between different tests against the same golden
-standard.
+standard. Includes statistical comparison using McNemar's test and
+confidence intervals for differences.
 }
 \examples{
 \donttest{

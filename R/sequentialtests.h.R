@@ -284,9 +284,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_nomogram",
-                title="Fagan Nomogram",
-                width=600,
-                height=450,
+                title="Sequential Testing Nomogram",
+                width=900,
+                height=600,
                 renderFun=".plot_nomogram",
                 visible="(show_nomogram)"))}))
 

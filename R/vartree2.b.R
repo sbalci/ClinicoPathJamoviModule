@@ -73,6 +73,10 @@ vartree2Class <- if (requireNamespace("jmvcore")) R6::R6Class(
             xprunesmaller <- if (self$options$useprunesmaller) self$options$prunesmaller else NULL
 
             # Call the updated vtree function.
+
+            private$.checkpoint()
+
+
             results <- vtree::vtree(
                 data              = mydata,
                 vars              = myvars1,

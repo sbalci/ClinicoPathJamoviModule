@@ -176,6 +176,10 @@ vartree3Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Run vtree function
+
+            private$.checkpoint()
+
+
             results <- vtree::vtree(
                 z = mydata,
                 vars = myvars1,

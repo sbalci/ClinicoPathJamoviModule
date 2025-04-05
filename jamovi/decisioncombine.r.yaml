@@ -35,7 +35,6 @@ items:
     # Individual test tables
     - name: indTable1
       title: 'Test 1 Results'
-      visible: (showIndividual && test1)
       type: Table
       rows: 0
       columns:
@@ -54,7 +53,6 @@ items:
 
     - name: indTable2
       title: 'Test 2 Results'
-      visible: (showIndividual && test2)
       type: Table
       rows: 0
       columns:
@@ -73,7 +71,6 @@ items:
 
     - name: indTable3
       title: 'Test 3 Results'
-      visible: (showIndividual && test3)
       type: Table
       rows: 0
       columns:

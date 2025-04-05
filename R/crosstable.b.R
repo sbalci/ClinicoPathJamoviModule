@@ -123,6 +123,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)
                     myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
+
+                    private$.checkpoint()
+
                     tablefinalfit <- mydata %>%
                         finalfit::summary_factorlist(
                             .data = .,

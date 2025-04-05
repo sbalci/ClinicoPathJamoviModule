@@ -478,219 +478,493 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (self$options$show_formulas) {
                     formulas <- ""
 
-                    formulas <- paste0(formulas, "<h3>Formulas for Sequential Testing</h3>")
+                    formulas <- paste0(formulas, "<h3>Mathematical Framework for Sequential Testing</h3>")
 
+                    # Basic probability definitions
+                    formulas <- paste0(formulas, "<h4>Key Definitions</h4>")
+                    formulas <- paste0(formulas, "<ul>")
+                    formulas <- paste0(formulas, "<li><strong>Prevalence (P)</strong>: The pre-test probability of disease</li>")
+                    formulas <- paste0(formulas, "<li><strong>Sensitivity (Se)</strong>: Probability of a positive test in diseased subjects</li>")
+                    formulas <- paste0(formulas, "<li><strong>Specificity (Sp)</strong>: Probability of a negative test in non-diseased subjects</li>")
+                    formulas <- paste0(formulas, "<li><strong>Positive Likelihood Ratio (LR+)</strong>: Se/(1-Sp)</li>")
+                    formulas <- paste0(formulas, "<li><strong>Negative Likelihood Ratio (LR-)</strong>: (1-Se)/Sp</li>")
+                    formulas <- paste0(formulas, "</ul>")
+
+                    # Pre-test to post-test probability conversion
+                    formulas <- paste0(formulas, "<h4>Probability Conversions</h4>")
+                    formulas <- paste0(formulas, "<p>To calculate how a test changes probability:</p>")
+
+                    formulas <- paste0(formulas, "<ol>")
+                    formulas <- paste0(formulas, "<li><strong>Convert pre-test probability to odds</strong>: Odds = P/(1-P)</li>")
+                    formulas <- paste0(formulas, "<li><strong>Multiply odds by likelihood ratio</strong>: Post-test odds = Pre-test odds × LR</li>")
+                    formulas <- paste0(formulas, "<li><strong>Convert post-test odds back to probability</strong>: Post-test P = Odds/(1+Odds)</li>")
+                    formulas <- paste0(formulas, "</ol>")
+
+                    # Strategy-specific formulas
                     if (strategy == "serial_positive") {
-                        formulas <- paste0(formulas,
-                                           "<h4>Serial Testing (Testing Positives)</h4>")
-                        formulas <- paste0(
-                            formulas,
-                            "<p>In this strategy, only those who test positive on the first test receive the second test, and a subject is considered positive only if positive on both tests.</p>"
-                        )
+                        formulas <- paste0(formulas, "<h4>Serial Testing Strategy (Testing Positives)</h4>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Sensitivity</strong> = Sensitivity of Test 1 × Sensitivity of Test 2</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_sens, digits = 3),
-                            " × ",
-                            format(test2_sens, digits = 3),
-                            " = ",
-                            format(combined_sens, digits = 3),
-                            "</p>"
-                        )
+                        # Explain the approach
+                        formulas <- paste0(formulas, "<p>In this strategy, the second test is only performed if the first test is positive. A subject is considered positive only if both tests are positive.</p>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Specificity</strong> = Specificity of Test 1 + (1 - Specificity of Test 1) × Specificity of Test 2</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_spec, digits = 3),
-                            " + (1 - ",
-                            format(test1_spec, digits = 3),
-                            ") × ",
-                            format(test2_spec, digits = 3),
-                            " = ",
-                            format(combined_spec, digits = 3),
-                            "</p>"
-                        )
+                        # Sensitivity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Sensitivity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test positive in this strategy, they must test positive on both tests:</p>")
+                        formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> × Se<sub>2</sub></p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Given positive on Test 1, probability of testing positive on Test 2: ", format(test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " × ", format(test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
+
+                        # Specificity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Specificity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test negative in this strategy, they must either:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Test negative on Test 1, OR</li>")
+                        formulas <- paste0(formulas, "<li>Test positive on Test 1 but negative on Test 2</li>")
+                        formulas <- paste0(formulas, "</ul>")
+                        formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> + (1-Sp<sub>1</sub>) × Sp<sub>2</sub></p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1 but negative on Test 2: (1-", format(test1_spec, digits=4), ") × ", format(test2_spec, digits=4), " = ", format((1-test1_spec)*test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " + ", format((1-test1_spec)*test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
 
                     } else if (strategy == "serial_negative") {
-                        formulas <- paste0(formulas,
-                                           "<h4>Serial Testing (Testing Negatives)</h4>")
-                        formulas <- paste0(
-                            formulas,
-                            "<p>In this strategy, only those who test negative on the first test receive the second test, and a subject is considered positive if they test positive on either test.</p>"
-                        )
+                        formulas <- paste0(formulas, "<h4>Serial Testing Strategy (Testing Negatives)</h4>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Sensitivity</strong> = Sensitivity of Test 1 + (1 - Sensitivity of Test 1) × Sensitivity of Test 2</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_sens, digits = 3),
-                            " + (1 - ",
-                            format(test1_sens, digits = 3),
-                            ") × ",
-                            format(test2_sens, digits = 3),
-                            " = ",
-                            format(combined_sens, digits = 3),
-                            "</p>"
-                        )
+                        # Explain the approach
+                        formulas <- paste0(formulas, "<p>In this strategy, the second test is only performed if the first test is negative. A subject is considered positive if either test is positive.</p>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Specificity</strong> = Specificity of Test 1 × Specificity of Test 2</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_spec, digits = 3),
-                            " × ",
-                            format(test2_spec, digits = 3),
-                            " = ",
-                            format(combined_spec, digits = 3),
-                            "</p>"
-                        )
+                        # Sensitivity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Sensitivity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test positive in this strategy, they must either:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Test positive on Test 1, OR</li>")
+                        formulas <- paste0(formulas, "<li>Test negative on Test 1 but positive on Test 2</li>")
+                        formulas <- paste0(formulas, "</ul>")
+                        formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> + (1-Se<sub>1</sub>) × Se<sub>2</sub></p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1 but positive on Test 2: (1-", format(test1_sens, digits=4), ") × ", format(test2_sens, digits=4), " = ", format((1-test1_sens)*test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " + ", format((1-test1_sens)*test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
+
+                        # Specificity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Specificity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test negative in this strategy, they must test negative on both tests:</p>")
+                        formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> × Sp<sub>2</sub></p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Given negative on Test 1, probability of testing negative on Test 2: ", format(test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " × ", format(test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
 
                     } else if (strategy == "parallel") {
-                        formulas <- paste0(formulas, "<h4>Parallel Testing</h4>")
-                        formulas <- paste0(
-                            formulas,
-                            "<p>In this strategy, all subjects receive both tests, and a subject is considered positive if they test positive on either test.</p>"
-                        )
+                        formulas <- paste0(formulas, "<h4>Parallel Testing Strategy</h4>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Sensitivity</strong> = Sensitivity of Test 1 + Sensitivity of Test 2 - (Sensitivity of Test 1 × Sensitivity of Test 2)</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_sens, digits = 3),
-                            " + ",
-                            format(test2_sens, digits = 3),
-                            " - (",
-                            format(test1_sens, digits = 3),
-                            " × ",
-                            format(test2_sens, digits = 3),
-                            ") = ",
-                            format(combined_sens, digits = 3),
-                            "</p>"
-                        )
+                        # Explain the approach
+                        formulas <- paste0(formulas, "<p>In this strategy, both tests are performed on all subjects. A subject is considered positive if either test is positive.</p>")
 
-                        formulas <- paste0(
-                            formulas,
-                            "<p><strong>Combined Specificity</strong> = Specificity of Test 1 × Specificity of Test 2</p>"
-                        )
-                        formulas <- paste0(
-                            formulas,
-                            "<p>= ",
-                            format(test1_spec, digits = 3),
-                            " × ",
-                            format(test2_spec, digits = 3),
-                            " = ",
-                            format(combined_spec, digits = 3),
-                            "</p>"
-                        )
+                        # Sensitivity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Sensitivity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test positive in this strategy, they must test positive on at least one test. This is calculated using the complement of the probability of testing negative on both tests:</p>")
+                        formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = 1 - (1-Se<sub>1</sub>) × (1-Se<sub>2</sub>)</p>")
+                        formulas <- paste0(formulas, "<p>This can be rewritten as:</p>")
+                        formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> + Se<sub>2</sub> - (Se<sub>1</sub> × Se<sub>2</sub>)</p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 2: ", format(test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on both: ", format(test1_sens, digits=4), " × ", format(test2_sens, digits=4), " = ", format(test1_sens*test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " + ", format(test2_sens, digits=4), " - ", format(test1_sens*test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
+
+                        # Specificity calculation
+                        formulas <- paste0(formulas, "<h5>Combined Specificity</h5>")
+                        formulas <- paste0(formulas, "<p>For a subject to test negative in this strategy, they must test negative on both tests:</p>")
+                        formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> × Sp<sub>2</sub></p>")
+                        formulas <- paste0(formulas, "<p>Probability calculation:</p>")
+                        formulas <- paste0(formulas, "<ul>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 2: ", format(test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " × ", format(test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "</ul>")
                     }
 
-                    # Add general formulas for PPV and NPV
-                    formulas <- paste0(formulas, "<h4>Predictive Values</h4>")
+                    # Predictive values calculation
+                    formulas <- paste0(formulas, "<h4>Predictive Values Calculations</h4>")
 
-                    formulas <- paste0(
-                        formulas,
-                        "<p><strong>Positive Predictive Value (PPV)</strong> = (Prevalence × Sensitivity) / (Prevalence × Sensitivity + (1 - Prevalence) × (1 - Specificity))</p>"
-                    )
-                    formulas <- paste0(
-                        formulas,
-                        "<p>= (",
-                        format(prevalence, digits = 3),
-                        " × ",
-                        format(combined_sens, digits = 3),
-                        ") / (",
-                        format(prevalence, digits = 3),
-                        " × ",
-                        format(combined_sens, digits = 3),
-                        " + (1 - ",
-                        format(prevalence, digits = 3),
-                        ") × (1 - ",
-                        format(combined_spec, digits = 3),
-                        "))</p>"
-                    )
-                    formulas <- paste0(formulas,
-                                       "<p>= ",
-                                       format(combined_ppv, digits = 3),
-                                       "</p>")
+                    # Positive Predictive Value
+                    formulas <- paste0(formulas, "<h5>Positive Predictive Value (PPV)</h5>")
+                    formulas <- paste0(formulas, "<p>The probability that a positive test result is a true positive:</p>")
+                    formulas <- paste0(formulas, "<p>PPV = (P × Se) / (P × Se + (1-P) × (1-Sp))</p>")
 
-                    formulas <- paste0(
-                        formulas,
-                        "<p><strong>Negative Predictive Value (NPV)</strong> = ((1 - Prevalence) × Specificity) / ((1 - Prevalence) × Specificity + Prevalence × (1 - Sensitivity))</p>"
-                    )
-                    formulas <- paste0(
-                        formulas,
-                        "<p>= ((1 - ",
-                        format(prevalence, digits = 3),
-                        ") × ",
-                        format(combined_spec, digits = 3),
-                        ") / ((1 - ",
-                        format(prevalence, digits = 3),
-                        ") × ",
-                        format(combined_spec, digits = 3),
-                        " + ",
-                        format(prevalence, digits = 3),
-                        " × (1 - ",
-                        format(combined_sens, digits = 3),
-                        "))</p>"
-                    )
-                    formulas <- paste0(formulas,
-                                       "<p>= ",
-                                       format(combined_npv, digits = 3),
-                                       "</p>")
+                    # Calculate intermediate values for clarity
+                    ppv_numerator = prevalence * combined_sens
+                    ppv_denominator = prevalence * combined_sens + (1-prevalence) * (1-combined_spec)
+
+                    formulas <- paste0(formulas, "<p>Calculation steps:</p>")
+                    formulas <- paste0(formulas, "<ul>")
+                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", format(prevalence, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", format(combined_sens, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", format(combined_spec, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Numerator = P × Se = ", format(prevalence, digits=4), " × ", format(combined_sens, digits=4), " = ", format(ppv_numerator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Denominator = P × Se + (1-P) × (1-Sp) = ", format(ppv_numerator, digits=4), " + ", format((1-prevalence), digits=4), " × ", format((1-combined_spec), digits=4), " = ", format(ppv_denominator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>PPV = Numerator/Denominator = ", format(ppv_numerator, digits=4), "/", format(ppv_denominator, digits=4), " = ", format(combined_ppv, digits=4), "</li>")
+                    formulas <- paste0(formulas, "</ul>")
+
+                    # Negative Predictive Value
+                    formulas <- paste0(formulas, "<h5>Negative Predictive Value (NPV)</h5>")
+                    formulas <- paste0(formulas, "<p>The probability that a negative test result is a true negative:</p>")
+                    formulas <- paste0(formulas, "<p>NPV = ((1-P) × Sp) / ((1-P) × Sp + P × (1-Se))</p>")
+
+                    # Calculate intermediate values for clarity
+                    npv_numerator = (1-prevalence) * combined_spec
+                    npv_denominator = (1-prevalence) * combined_spec + prevalence * (1-combined_sens)
+
+                    formulas <- paste0(formulas, "<p>Calculation steps:</p>")
+                    formulas <- paste0(formulas, "<ul>")
+                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", format(prevalence, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", format(combined_sens, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", format(combined_spec, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Numerator = (1-P) × Sp = ", format((1-prevalence), digits=4), " × ", format(combined_spec, digits=4), " = ", format(npv_numerator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Denominator = (1-P) × Sp + P × (1-Se) = ", format(npv_numerator, digits=4), " + ", format(prevalence, digits=4), " × ", format((1-combined_sens), digits=4), " = ", format(npv_denominator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>NPV = Numerator/Denominator = ", format(npv_numerator, digits=4), "/", format(npv_denominator, digits=4), " = ", format(combined_npv, digits=4), "</li>")
+                    formulas <- paste0(formulas, "</ul>")
+
+                    # Likelihood ratios
+                    formulas <- paste0(formulas, "<h4>Likelihood Ratios</h4>")
+
+                    # Positive likelihood ratio
+                    formulas <- paste0(formulas, "<h5>Positive Likelihood Ratio (LR+)</h5>")
+                    formulas <- paste0(formulas, "<p>How much more likely a positive test result is to occur in patients with disease compared to those without:</p>")
+                    formulas <- paste0(formulas, "<p>LR+ = Sensitivity / (1 - Specificity)</p>")
+                    formulas <- paste0(formulas, "<p>LR+ = ", format(combined_sens, digits=4), " / (1 - ", format(combined_spec, digits=4), ") = ", format(combined_sens/(1-combined_spec), digits=4), "</p>")
+
+                    # Negative likelihood ratio
+                    formulas <- paste0(formulas, "<h5>Negative Likelihood Ratio (LR-)</h5>")
+                    formulas <- paste0(formulas, "<p>How much more likely a negative test result is to occur in patients with disease compared to those without:</p>")
+                    formulas <- paste0(formulas, "<p>LR- = (1 - Sensitivity) / Specificity</p>")
+                    formulas <- paste0(formulas, "<p>LR- = (1 - ", format(combined_sens, digits=4), ") / ", format(combined_spec, digits=4), " = ", format((1-combined_sens)/combined_spec, digits=4), "</p>")
 
                     self$results$formulas_text$setContent(formulas)
                 }
 
                 # Store data for Fagan nomogram
+                # In the .run function, when setting up the nomogram data:
                 if (self$options$show_nomogram) {
                     plotData <- list(
                         "Prevalence" = prevalence,
-                        "Sens" = combined_sens,
-                        "Spec" = combined_spec,
-                        "Plr" = combined_plr,
-                        "Nlr" = combined_nlr
+                        "Test1_Name" = test1_name,
+                        "Test1_Sens" = test1_sens,
+                        "Test1_Spec" = test1_spec,
+                        "Test2_Name" = test2_name,
+                        "Test2_Sens" = test2_sens,
+                        "Test2_Spec" = test2_spec,
+                        "Strategy" = strategy,
+                        "Combined_Sens" = combined_sens,
+                        "Combined_Spec" = combined_spec,
+                        "Combined_PPV" = combined_ppv,
+                        "Combined_NPV" = combined_npv
                     )
 
                     image <- self$results$plot_nomogram
                     image$setState(plotData)
                 }
-            },
+
+
+                },
+
 
             .plot_nomogram = function(image, ggtheme, ...) {
                 plotData <- image$state
 
-                plot <- nomogrammer(
-                    Prevalence = plotData$Prevalence,
-                    Sens = plotData$Sens,
-                    Spec = plotData$Spec,
-                    Plr = plotData$Plr,
-                    Nlr = plotData$Nlr,
-                    Detail = TRUE,
-                    NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
-                    Verbose = TRUE
-                )
+                # Extract values
+                prevalence <- plotData$Prevalence
+                test1_sens <- plotData$Test1_Sens
+                test1_spec <- plotData$Test1_Spec
+                test2_sens <- plotData$Test2_Sens
+                test2_spec <- plotData$Test2_Spec
+                strategy <- plotData$Strategy
 
-                print(plot)
-                TRUE
+                # Calculate LRs for first test
+                test1_plr <- test1_sens / (1 - test1_spec)
+                test1_nlr <- (1 - test1_sens) / test1_spec
+
+                # Calculate post-test probability after first test
+                test1_pos_odds <- (prevalence / (1 - prevalence)) * test1_plr
+                test1_neg_odds <- (prevalence / (1 - prevalence)) * test1_nlr
+
+                test1_pos_post_prob <- test1_pos_odds / (1 + test1_pos_odds)
+                test1_neg_post_prob <- test1_neg_odds / (1 + test1_neg_odds)
+
+                # Calculate LRs for second test
+                test2_plr <- test2_sens / (1 - test2_spec)
+                test2_nlr <- (1 - test2_sens) / test2_spec
+
+                # Set up graphics device
+                grDevices::dev.new(width=12, height=8, noRStudioGD = TRUE)
+
+                # Use layout to create a 2x2 grid with appropriate spacing
+                layout_matrix <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
+                layout(layout_matrix, widths=c(1, 1), heights=c(1, 1))
+
+                # Create a custom Fagan nomogram function
+                create_nomogram <- function(title, pretest_prob, plr, nlr, ylim_pre=c(0.001, 0.999),
+                                            ylim_post=c(0.001, 0.999), highlight_pretest=TRUE, highlight_posttest=TRUE) {
+                    # Convert probabilities to percentages for display
+                    pretest_prob_pct <- pretest_prob * 100
+
+                    # Calculate post-test probabilities
+                    pos_post_odds <- (pretest_prob / (1 - pretest_prob)) * plr
+                    neg_post_odds <- (pretest_prob / (1 - pretest_prob)) * nlr
+
+                    pos_post_prob <- pos_post_odds / (1 + pos_post_odds)
+                    neg_post_prob <- neg_post_odds / (1 + neg_post_odds)
+
+                    pos_post_prob_pct <- pos_post_prob * 100
+                    neg_post_prob_pct <- neg_post_prob * 100
+
+                    # Create the nomogram plot
+                    par(mar=c(4, 4, 4, 4))
+
+                    # Set up the plot area
+                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100),
+                         xlab="", ylab="", main=title, axes=FALSE)
+
+                    # Draw the three vertical axes
+                    axis(2, at=seq(1, 99, by=5), labels=seq(1, 99, by=5), las=1, pos=10)
+                    axis(4, at=seq(1, 99, by=5), labels=seq(1, 99, by=5), las=1, pos=90)
+
+                    # Custom labels for LR axis
+                    lr_values <- c(1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
+                    lr_positions <- rep(NA, length(lr_values))
+
+                    for (i in 1:length(lr_values)) {
+                        lr <- lr_values[i]
+                        p <- 0.5  # Use a fixed pre-test probability for mapping
+                        post_odds <- (p / (1 - p)) * lr
+                        post_p <- post_odds / (1 + post_odds)
+
+                        y_pos <- (post_p * 99) + 0.5  # Scale to plot coordinates
+                        lr_positions[i] <- y_pos
+                    }
+
+                    # Add LR axis
+                    axis(3, at=50, labels="Likelihood Ratio", pos=50, tick=FALSE)
+                    text(50, lr_positions, labels=lr_values, cex=0.7)
+
+                    # Add axis labels
+                    mtext("Pre-test Probability (%)", side=2, line=2.5)
+                    mtext("Post-test Probability (%)", side=4, line=2.5)
+
+                    # Draw the nomogram lines
+                    pretest_y <- (pretest_prob * 99) + 0.5
+                    pos_post_y <- (pos_post_prob * 99) + 0.5
+                    neg_post_y <- (neg_post_prob * 99) + 0.5
+
+                    # Draw the positive LR line
+                    lines(c(10, 50, 90), c(pretest_y, 50, pos_post_y), col="red", lwd=2)
+
+                    # Draw the negative LR line
+                    lines(c(10, 50, 90), c(pretest_y, 50, neg_post_y), col="blue", lwd=2)
+
+                    # Highlight the pre-test probability
+                    if (highlight_pretest) {
+                        points(10, pretest_y, pch=19, col="black", cex=1.5)
+                        text(5, pretest_y, paste0(round(pretest_prob_pct, 1), "%"), cex=0.8)
+                    }
+
+                    # Highlight the post-test probabilities
+                    if (highlight_posttest) {
+                        points(90, pos_post_y, pch=19, col="red", cex=1.5)
+                        text(95, pos_post_y, paste0(round(pos_post_prob_pct, 1), "%"), cex=0.8)
+
+                        points(90, neg_post_y, pch=19, col="blue", cex=1.5)
+                        text(95, neg_post_y, paste0(round(neg_post_prob_pct, 1), "%"), cex=0.8)
+                    }
+
+                    # Return the post-test probabilities
+                    return(list(positive=pos_post_prob, negative=neg_post_prob))
+                }
+
+                # Now create the sequence of nomograms based on strategy
+                if (strategy == "serial_positive") {
+                    # For serial testing of positives:
+                    # 1. First test with prevalence as pre-test probability
+                    test1_results <- create_nomogram(
+                        paste0("Step 1: ", plotData$Test1_Name, " (Screening Test)"),
+                        prevalence, test1_plr, test1_nlr
+                    )
+
+                    # 2. Second test with positive post-test probability from first test as pre-test
+                    create_nomogram(
+                        paste0("Step 2: ", plotData$Test2_Name, " (For Test 1 Positives Only)"),
+                        test1_results$positive, test2_plr, test2_nlr
+                    )
+
+                    # 3. Overall result showing combined effect (empty plot for text)
+                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
+                         main="Serial Testing Strategy (Testing Positives)")
+                    text(0.5, 0.8, "Combined Effect:", pos=4)
+                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
+                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
+                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.2, "A patient tests positive only if", pos=4)
+                    text(0.5, 0.1, "positive on both tests", pos=4)
+
+                    # 4. Sequential flow diagram
+                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
+                         main="Sequential Testing Flow")
+
+                    # Draw the flow diagram
+                    arrows(20, 80, 45, 80, lwd=2, length=0.1)
+                    arrows(55, 80, 80, 80, lwd=2, length=0.1)
+                    arrows(50, 70, 50, 50, lwd=2, length=0.1)
+
+                    # Add labels for the flow
+                    text(10, 80, "Start", cex=1.2)
+                    text(50, 85, paste0(plotData$Test1_Name), cex=1.2)
+                    text(90, 80, "Final Diagnosis", cex=1.2)
+
+                    # Add branches
+                    text(60, 70, "Test 1 (+)", cex=1)
+                    text(60, 50, paste0(plotData$Test2_Name), cex=1.2)
+                    text(40, 70, "Test 1 (-)", cex=1)
+                    text(30, 60, "Negative", cex=1, col="blue")
+
+                    # Add final outcomes
+                    arrows(50, 40, 40, 30, lwd=2, length=0.1)
+                    arrows(50, 40, 60, 30, lwd=2, length=0.1)
+                    text(40, 25, "Test 2 (-)\nNegative", cex=1, col="blue")
+                    text(60, 25, "Test 2 (+)\nPositive", cex=1, col="red")
+
+                } else if (strategy == "serial_negative") {
+                    # For serial testing of negatives:
+                    # 1. First test with prevalence as pre-test probability
+                    test1_results <- create_nomogram(
+                        paste0("Step 1: ", plotData$Test1_Name, " (Initial Test)"),
+                        prevalence, test1_plr, test1_nlr
+                    )
+
+                    # 2. Second test with negative post-test probability from first test as pre-test
+                    create_nomogram(
+                        paste0("Step 2: ", plotData$Test2_Name, " (For Test 1 Negatives Only)"),
+                        test1_results$negative, test2_plr, test2_nlr
+                    )
+
+                    # 3. Overall result showing combined effect (empty plot for text)
+                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
+                         main="Serial Testing Strategy (Testing Negatives)")
+                    text(0.5, 0.8, "Combined Effect:", pos=4)
+                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
+                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
+                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.2, "A patient tests positive if", pos=4)
+                    text(0.5, 0.1, "positive on either test", pos=4)
+
+                    # 4. Sequential flow diagram
+                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
+                         main="Sequential Testing Flow")
+
+                    # Draw the flow diagram
+                    arrows(20, 80, 45, 80, lwd=2, length=0.1)
+                    arrows(55, 80, 80, 80, lwd=2, length=0.1)
+                    arrows(50, 70, 50, 50, lwd=2, length=0.1)
+
+                    # Add labels for the flow
+                    text(10, 80, "Start", cex=1.2)
+                    text(50, 85, paste0(plotData$Test1_Name), cex=1.2)
+                    text(90, 80, "Final Diagnosis", cex=1.2)
+
+                    # Add branches
+                    text(60, 70, "Test 1 (+)", cex=1)
+                    text(60, 60, "Positive", cex=1, col="red")
+                    text(40, 70, "Test 1 (-)", cex=1)
+                    text(50, 50, paste0(plotData$Test2_Name), cex=1.2)
+
+                    # Add final outcomes
+                    arrows(50, 40, 40, 30, lwd=2, length=0.1)
+                    arrows(50, 40, 60, 30, lwd=2, length=0.1)
+                    text(40, 25, "Test 2 (-)\nNegative", cex=1, col="blue")
+                    text(60, 25, "Test 2 (+)\nPositive", cex=1, col="red")
+
+                } else if (strategy == "parallel") {
+                    # For parallel testing:
+                    # 1. First test with prevalence as pre-test probability
+                    test1_results <- create_nomogram(
+                        paste0("Step 1: ", plotData$Test1_Name),
+                        prevalence, test1_plr, test1_nlr
+                    )
+
+                    # 2. Second test also with prevalence as pre-test probability
+                    test2_results <- create_nomogram(
+                        paste0("Step 2: ", plotData$Test2_Name, " (Parallel Test)"),
+                        prevalence, test2_plr, test2_nlr
+                    )
+
+                    # 3. Overall result showing combined effect (empty plot for text)
+                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
+                         main="Parallel Testing Strategy")
+                    text(0.5, 0.8, "Combined Effect:", pos=4)
+                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
+                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
+                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
+                    text(0.5, 0.2, "A patient tests positive if", pos=4)
+                    text(0.5, 0.1, "positive on either test", pos=4)
+
+                    # 4. Parallel flow diagram
+                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
+                         main="Parallel Testing Flow")
+
+                    # Draw the flow diagram
+                    arrows(10, 80, 30, 80, lwd=2, length=0.1)
+
+                    # Split to parallel tests
+                    arrows(30, 80, 50, 90, lwd=2, length=0.1)
+                    arrows(30, 80, 50, 70, lwd=2, length=0.1)
+
+                    # From tests to interpretation
+                    arrows(50, 90, 70, 80, lwd=2, length=0.1)
+                    arrows(50, 70, 70, 80, lwd=2, length=0.1)
+
+                    # To final result
+                    arrows(70, 80, 90, 80, lwd=2, length=0.1)
+
+                    # Add labels
+                    text(10, 85, "Start", cex=1.2)
+                    text(50, 95, paste0(plotData$Test1_Name), cex=1.2)
+                    text(50, 65, paste0(plotData$Test2_Name), cex=1.2)
+                    text(70, 85, "Interpretation\n(OR logic)", cex=1.2)
+                    text(90, 85, "Result", cex=1.2)
+
+                    # Add outcomes
+                    text(90, 75, "Positive if either\ntest is positive", cex=1, col="red")
+                    text(90, 65, "Negative only if\nboth tests negative", cex=1, col="blue")
+                }
+
+                # Capture the plot
+                result <- grDevices::recordPlot()
+
+                # Close the device
+                grDevices::dev.off()
+
+                # Return the plot
+                return(result)
             }
+
+
+
+
+
         )
     )

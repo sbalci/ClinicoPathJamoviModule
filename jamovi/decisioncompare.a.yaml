@@ -11,6 +11,7 @@ description:
     main: >
         Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value,
         negative predictive value, and other metrics between different tests against the same golden standard.
+        Includes statistical comparison using McNemar's test and confidence intervals for differences.
     R:
         dontrun: true
         usage: |
@@ -111,4 +112,12 @@ options:
       title: 'Comparison Plot'
       type: Bool
       default: false
+
+    - name: statComp
+      title: 'Statistical Comparison'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
 ...

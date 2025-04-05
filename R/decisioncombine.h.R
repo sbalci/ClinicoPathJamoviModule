@@ -226,7 +226,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="indTable1",
                 title="Test 1 Results",
-                visible="(showIndividual && test1)",
                 rows=0,
                 columns=list(
                     list(
@@ -249,7 +248,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="indTable2",
                 title="Test 2 Results",
-                visible="(showIndividual && test2)",
                 rows=0,
                 columns=list(
                     list(
@@ -272,7 +270,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="indTable3",
                 title="Test 3 Results",
-                visible="(showIndividual && test3)",
                 rows=0,
                 columns=list(
                     list(

@@ -41,6 +41,40 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
 
+                # Handle original data display
+                if (self$options$od) {
+                    # Create frequency tables for original data
+                    freq_table <- table(mydata[[goldVariable]])
+                    self$results$text1$setContent(freq_table)
+
+                    # Create a cross-tabulation of all tests with gold standard
+                    test_vars <- c(self$options$test1,
+                                   self$options$test2,
+                                   self$options$test3)
+                    test_vars <- test_vars[!is.null(test_vars) &
+                                               test_vars != ""]
+
+                    if (length(test_vars) > 0) {
+                        html_tables <- ""
+                        for (test_var in test_vars) {
+                            # Create cross-tabulation
+                            cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]])
+                            html_table <- knitr::kable(
+                                cross_tab,
+                                format = "html",
+                                caption = paste(
+                                    "Cross-tabulation of",
+                                    test_var,
+                                    "and",
+                                    goldVariable
+                                )
+                            )
+                            html_tables <- paste(html_tables, html_table, "<br><br>")
+                        }
+                        self$results$text2$setContent(html_tables)
+                    }
+                }
+
                 # Get test variables and positive levels
                 testVariables <- c(self$options$test1,
                                    self$options$test2,
@@ -161,6 +195,22 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                                     Total = TP + FP + FN + TN
                                 )
                             )
+
+                            # Add footnotes if requested
+                            if (self$options$fnote) {
+                                indTable$addFootnote(rowKey = "Test Positive",
+                                                     col = "GP",
+                                                     "True Positive (TP)")
+                                indTable$addFootnote(rowKey = "Test Positive",
+                                                     col = "GN",
+                                                     "False Positive (FP)")
+                                indTable$addFootnote(rowKey = "Test Negative",
+                                                     col = "GP",
+                                                     "False Negative (FN)")
+                                indTable$addFootnote(rowKey = "Test Negative",
+                                                     col = "GN",
+                                                     "True Negative (TN)")
+                            }
                         }
                     }
                 }
@@ -246,6 +296,22 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         Total = TP + FP + FN + TN
                     )
                 )
+
+                # Add footnotes to main contingency table if requested
+                if (self$options$fnote) {
+                    cTable$addFootnote(rowKey = "Test Positive",
+                                       col = "GP",
+                                       "True Positive (TP)")
+                    cTable$addFootnote(rowKey = "Test Positive",
+                                       col = "GN",
+                                       "False Positive (FP)")
+                    cTable$addFootnote(rowKey = "Test Negative",
+                                       col = "GP",
+                                       "False Negative (FN)")
+                    cTable$addFootnote(rowKey = "Test Negative",
+                                       col = "GN",
+                                       "True Negative (TN)")
+                }
 
                 # Calculate metrics
                 TotalPop <- TP + TN + FP + FN
