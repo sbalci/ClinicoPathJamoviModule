@@ -264,7 +264,7 @@ update_modules <- function(new_version, new_date) {
 
     ## jsurvival module functions ----
     jsurvival_modules <- c(
-        # "timeinterval",
+        "timeinterval",
         "singlearm",
         "survival",
         "survivalcont",
