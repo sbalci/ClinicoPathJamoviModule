@@ -289,7 +289,7 @@ update_modules <- function(new_version, new_date) {
         # "vartree3",
         #
         # Patient Follow-up
-        # "waterfall",
+        "waterfall",
         # "swimmerplot",
         # Comparisons
         "crosstable"
