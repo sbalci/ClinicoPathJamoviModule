@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.86
+version: 0.0.2.87
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -654,14 +654,14 @@ analyses:
     ns: ClinicoPath
     menuGroup: Survival
     menuTitle: Time Interval Calculator
-    menuSubgroup: Time Analysis
+    menuSubgroup: Data Preparation
     menuSubtitle: Calculate time intervals from dates or values
   - title: Enhanced Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
     menuGroup: Survival
     menuTitle: Enhanced Outcome Organizer for Survival Analysis
-    menuSubgroup: ClinicoPath Survival
+    menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
     description: >-
       Advanced tool for preparing outcome variables for various types of
