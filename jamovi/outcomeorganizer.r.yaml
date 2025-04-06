@@ -1,0 +1,149 @@
+---
+name:  outcomeorganizer
+title: Enhanced Outcome Organizer for Survival Analysis
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+
+    - name:  summary
+      title: Summary of Outcome Recoding
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - intervalCensoring
+          - adminCensoring
+
+    - name: outputTable
+      title: 'Recoded Outcome Summary'
+      type: Table
+      visible: (outputTable)
+      rows: 0
+      columns:
+        - name: outcome
+          title: "Value"
+          type: text
+        - name: label
+          title: "Meaning"
+          type: text
+        - name: count
+          title: "Count"
+          type: integer
+        - name: percentage
+          title: "Percentage"
+          type: number
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+
+    - name: diagnosticsTable
+      title: 'Diagnostic Information'
+      type: Table
+      visible: (diagnostics)
+      rows: 0
+      columns:
+        - name: check
+          title: "Check"
+          type: text
+        - name: result
+          title: "Result"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - intervalCensoring
+          - adminCensoring
+
+    - name: outcomeViz
+      title: 'Outcome Distribution'
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotOutcome
+      visible: (visualization)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+
+    - name: addOutcome
+      title: Add Recoded Outcome to Data
+      type: Output
+      varTitle: '`Recoded Outcome for {analysistype} Survival Analysis`'
+      varDescription: 'Outcome variable recoded for survival analysis based on selected analysis type'
+      measureType: nominal
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - intervalCensoring
+          - adminCensoring
+
+refs:
+    - survival
+    - survminer
+    - finalfit
+    - cmprsk
+    - mstate
+    - survivaltutorial
+    - ClinicoPathJamoviModule
+
+...

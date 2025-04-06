@@ -23,34 +23,34 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create a copy of input data
             result_data <- data
 
-                # Validate date columns exist
-                if (!dx_date %in% names(data) || !fu_date %in% names(data)) {
-                    stop("Specified date columns not found in data")
-                }
+            # Validate date columns exist
+            if (!dx_date %in% names(data) || !fu_date %in% names(data)) {
+                stop("Specified date columns not found in data")
+            }
 
-                # Parse dates based on format
-                date_parser <- switch(time_format,
-                                      "ymdhms" = lubridate::ymd_hms,
-                                      "ymd" = lubridate::ymd,
-                                      "ydm" = lubridate::ydm,
-                                      "mdy" = lubridate::mdy,
-                                      "myd" = lubridate::myd,
-                                      "dmy" = lubridate::dmy,
-                                      "dym" = lubridate::dym,
-                                      stop("Unsupported date format"))
+            # Parse dates based on format
+            date_parser <- switch(time_format,
+                                  "ymdhms" = lubridate::ymd_hms,
+                                  "ymd" = lubridate::ymd,
+                                  "ydm" = lubridate::ydm,
+                                  "mdy" = lubridate::mdy,
+                                  "myd" = lubridate::myd,
+                                  "dmy" = lubridate::dmy,
+                                  "dym" = lubridate::dym,
+                                  stop("Unsupported date format"))
 
-                tryCatch({
-                    start_dates <- date_parser(data[[dx_date]])
-                    end_dates <- date_parser(data[[fu_date]])
-                }, error = function(e) {
-                    stop(paste("Error parsing dates:", e$message))
-                })
+            tryCatch({
+                start_dates <- date_parser(data[[dx_date]])
+                end_dates <- date_parser(data[[fu_date]])
+            }, error = function(e) {
+                stop(paste("Error parsing dates:", e$message))
+            })
 
-                # Calculate intervals
-                intervals <- lubridate::interval(start_dates, end_dates)
+            # Calculate intervals
+            intervals <- lubridate::interval(start_dates, end_dates)
 
-                # Convert to specified time unit
-                calculated_time <- lubridate::time_length(intervals, output_unit)
+            # Convert to specified time unit
+            calculated_time <- lubridate::time_length(intervals, output_unit)
 
 
 

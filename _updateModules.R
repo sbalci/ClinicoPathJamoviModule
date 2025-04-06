@@ -265,6 +265,7 @@ update_modules <- function(new_version, new_date) {
     ## jsurvival module functions ----
     jsurvival_modules <- c(
         "timeinterval",
+        # "outcomeorganizer",
         "singlearm",
         "survival",
         "survivalcont",
@@ -327,7 +328,11 @@ update_modules <- function(new_version, new_date) {
       file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml"))
   )
 
+yaml_0000_paths <- yaml_0000_paths[file.exists(yaml_0000_paths)]
+yaml_a_paths <- yaml_a_paths[file.exists(yaml_a_paths)]
 
+
+  # Update YAML files with new version
 update_yaml_0000_files(paths = yaml_0000_paths,
                     version = new_version,
                     date = new_date)
@@ -400,8 +405,8 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.2.83"
-new_date <- "2024-04-04"
+new_version <- "0.0.2.86"
+new_date <- "2024-04-06"
 
 # Run the update process
 update_modules(new_version, new_date)

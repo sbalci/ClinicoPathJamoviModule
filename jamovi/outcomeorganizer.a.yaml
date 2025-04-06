@@ -1,0 +1,217 @@
+---
+name:  outcomeorganizer
+title: Enhanced Outcome Organizer for Survival Analysis
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Advanced tool for preparing outcome variables for various types of survival analysis including overall survival, cause-specific, competing risks, progression-free survival, and multistate models.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            The primary outcome variable to be recoded for survival analysis (e.g., vital status).
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            The level of the outcome variable that represents the event of interest (e.g., "Death", "Relapse").
+
+    - name: recurrence
+      title: 'Recurrence/Progression Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Variable indicating disease recurrence or progression (for RFS/PFS/DFS analyses).
+
+    - name: recurrenceLevel
+      title: Recurrence Event Level
+      type: Level
+      variable: (recurrence)
+      description:
+          R: >
+            The level indicating recurrence or progression has occurred.
+
+    - name: patientID
+      title: 'Patient ID'
+      type: Variable
+      description:
+          R: >
+            Patient identifier for handling multiple records or applying event hierarchies.
+
+    - name: analysistype
+      title: 'Survival Analysis Type'
+      type: List
+      options:
+        - title: Overall Survival (OS)
+          name: os
+        - title: Cause-Specific Survival
+          name: cause
+        - title: Competing Risks
+          name: compete
+        - title: Recurrence-Free Survival (RFS)
+          name: rfs
+        - title: Progression-Free Survival (PFS)
+          name: pfs
+        - title: Disease-Free Survival (DFS)
+          name: dfs
+        - title: Time to Progression (TTP)
+          name: ttp
+        - title: Multistate Model
+          name: multistate
+      default: os
+      description:
+          R: >
+            The type of survival analysis to prepare the outcome for.
+
+    - name: multievent
+      title: Multiple Event Levels
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, allows for multiple event types (e.g., death from disease vs death from other causes).
+
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+          R: >
+            The level representing death from the disease of interest.
+
+    - name: dooc
+      title: Dead of Other Causes
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+          R: >
+            The level representing death from causes other than the disease of interest.
+
+    - name: awd
+      title: Alive with Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+          R: >
+            The level representing patients who are alive but have the disease.
+
+    - name: awod
+      title: Alive without Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+          R: >
+            The level representing patients who are alive and disease-free.
+
+    - name: useHierarchy
+      title: "Use Event Hierarchy"
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, applies a hierarchy when multiple events occur for the same patient.
+
+    - name: eventPriority
+      title: "Priority Event Type"
+      type: Integer
+      default: 1
+      description:
+          R: >
+            The event code (e.g., 1, 2) that takes precedence when multiple events occur.
+
+    - name: intervalCensoring
+      title: "Use Interval Censoring"
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, prepares data for interval-censored analysis where exact event times are unknown.
+
+    - name: intervalStart
+      title: "Interval Start Variable"
+      type: Variable
+      description:
+          R: >
+            Variable containing the start of the interval when the event might have occurred.
+
+    - name: intervalEnd
+      title: "Interval End Variable"
+      type: Variable
+      description:
+          R: >
+            Variable containing the end of the interval when the event might have occurred.
+
+    - name: adminCensoring
+      title: "Use Administrative Censoring"
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, applies administrative censoring at a specified date.
+
+    - name: adminDate
+      title: "Administrative Censoring Date"
+      type: Variable
+      description:
+          R: >
+            Variable containing the administrative censoring date.
+
+    - name: outputTable
+      title: "Show Output Table"
+      type: Bool
+      default: true
+      description:
+          R: >
+            If true, displays a table showing the frequency of each recoded outcome value.
+
+    - name: diagnostics
+      title: "Show Diagnostic Information"
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, displays diagnostic information about the recoding process.
+
+    - name: visualization
+      title: "Show Outcome Distribution"
+      type: Bool
+      default: false
+      description:
+          R: >
+            If true, displays a visualization of the distribution of recoded outcomes.
+
+    - name: addOutcome
+      title: Add Recoded Outcome to Data
+      type: Output
+      description:
+          R: >
+            Adds the recoded outcome variable to the dataset, which can be used in subsequent analyses.
+...
