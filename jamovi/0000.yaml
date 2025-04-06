@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.83
+version: 0.0.2.86
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-04-04'
+date: '2024-04-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -382,13 +382,6 @@ analyses:
     menuSubgroup: Variable Type Based Graphs and Plots
     menuTitle: Graphs and Plots
     description: Function for Generating Plots and Graphs Based on Variable Types.
-  - title: Time Interval Calculator
-    name: timeinterval
-    ns: ClinicoPath
-    menuGroup: Survival
-    menuSubgroup: Time Analysis
-    menuTitle: Time Interval Calculator
-    menuSubtitle: Calculate time intervals from dates or values
   - title: Tools for data summary
     name: toolssummary
     ns: ClinicoPath
@@ -656,6 +649,24 @@ analyses:
       Function for Sequential Testing Analysis. Analyzes how diagnostic accuracy
       changes when applying two tests in sequence (screening followed by
       confirmation).
+  - title: Time Interval Calculator
+    name: timeinterval
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuTitle: Time Interval Calculator
+    menuSubgroup: Time Analysis
+    menuSubtitle: Calculate time intervals from dates or values
+  - title: Enhanced Outcome Organizer for Survival Analysis
+    name: outcomeorganizer
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuTitle: Enhanced Outcome Organizer for Survival Analysis
+    menuSubgroup: ClinicoPath Survival
+    menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
+    description: >-
+      Advanced tool for preparing outcome variables for various types of
+      survival analysis including overall survival, cause-specific, competing
+      risks, progression-free survival, and multistate models.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
