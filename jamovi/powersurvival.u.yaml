@@ -1,0 +1,92 @@
+title: Power Analysis for Survival Studies
+name: powersurvival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: calc_type
+        label: 'Calculate:'
+        # enable: true
+  
+  - type: CollapseBox
+    label: Basic Parameters
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: hazard_ratio
+            format: number
+            label: 'Hazard Ratio:'
+            suffix: ""
+            # enable: (calc_type != "hazard_ratio")
+          - type: TextBox
+            name: power
+            format: number
+            label: 'Power (1-β):'
+            suffix: ""
+            # enable: (calc_type != "power")
+          - type: TextBox
+            name: alpha
+            format: number
+            label: 'Significance Level (α):'
+            suffix: ""
+          - type: TextBox
+            name: sample_size
+            format: number
+            label: 'Total Sample Size:'
+            suffix: ""
+            # enable: (calc_type != "sample_size")
+          - type: TextBox
+            name: allocation_ratio
+            format: number
+            label: 'Allocation Ratio (Control:Treatment):'
+            suffix: ""
+          - type: TextBox
+            name: prob_event
+            format: number
+            label: 'Event Probability:'
+            suffix: ""
+  
+  - type: CollapseBox
+    label: Study Design Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: study_design
+            label: 'Study Design:'
+      - type: Label
+        label: Complex Design Parameters
+        # enable: (study_design:complex)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: accrual_time
+                format: number
+                label: 'Accrual Time (years):'
+                # enable: (study_design:complex)
+              - type: TextBox
+                name: follow_up_time
+                format: number
+                label: 'Follow-up Time (years):'
+                # enable: (study_design:complex)
+              - type: TextBox
+                name: median_survival
+                format: number
+                label: 'Median Survival (Control Group, years):'
+                # enable: (study_design:complex)
+              - type: TextBox
+                name: loss_followup
+                format: number
+                label: 'Loss to Follow-up Rate (per year):'
+                # enable: (study_design:complex)

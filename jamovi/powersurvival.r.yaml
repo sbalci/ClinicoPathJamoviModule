@@ -1,0 +1,42 @@
+---
+name: powersurvival
+title: Power Analysis for Survival Studies
+jrs: '1.1'
+
+items:
+    - name: message
+      title: 'Package Installation Required'
+      type: Html
+      
+    - name: power_result
+      title: 'Power Calculation Results'
+      type: Html
+      visible: (calc_type:power)
+      
+    - name: sample_size_result
+      title: 'Sample Size Calculation Results'
+      type: Html
+      visible: (calc_type:sample_size)
+      
+    - name: hazard_ratio_result
+      title: 'Hazard Ratio Calculation Results'
+      type: Html
+      visible: (calc_type:hazard_ratio)
+      
+    - name: power_plot
+      title: 'Power Analysis Plot'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .power_plot
+      visible: true
+
+refs:
+    - powerSurvEpi
+    - powerSurvival
+    - survivalStats
+    - Schoenfeld1983
+    - FreedmanAndSchoenfeld1982
+    - LachinAndFoulkes1986
+    
+...
