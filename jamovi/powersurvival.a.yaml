@@ -1,0 +1,169 @@
+---
+name: powersurvival
+title: Power Analysis for Survival Studies
+menuGroup: Survival
+menuSubgroup: Design and Analysis
+menuSubtitle: 'Power analysis for survival studies'
+version: '0.1.0'
+jas: '1.2'
+
+description:
+    main: >-
+      Calculates power, sample size, or minimum detectable hazard ratio for survival studies.
+      This helps researchers design adequately powered studies to detect meaningful differences
+      in survival between groups.
+    R:
+        dontrun: true
+        usage: |
+            # Example power calculation for a survival study
+            # powersurvival(
+            #   calc_type = "sample_size",
+            #   hazard_ratio = 0.7,
+            #   power = 0.8,
+            #   alpha = 0.05,
+            #   prob_event = 0.5,
+            #   allocation_ratio = 1
+            # )
+
+options:
+    # Data input (not required for this analysis)
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame. Note that power analysis typically doesn't
+            require actual data - it's used for study planning.
+
+    # Analysis type
+    - name: calc_type
+      title: 'Calculate'
+      type: List
+      options:
+        - title: Power
+          name: power
+        - title: Sample Size
+          name: sample_size
+        - title: Hazard Ratio
+          name: hazard_ratio
+      default: sample_size
+      description: >-
+        Select what to calculate. 'Power' calculates statistical power given sample size
+        and hazard ratio. 'Sample Size' determines required sample size for desired power
+        and hazard ratio. 'Hazard Ratio' calculates the minimum detectable effect size
+        given sample size and power.
+
+    # Design complexity
+    - name: study_design
+      title: 'Study Design'
+      type: List
+      options:
+        - title: Simple (Fixed Follow-up)
+          name: simple
+        - title: Complex (Accrual and Variable Follow-up)
+          name: complex
+      default: simple
+      description: >-
+        Select the study design complexity. 'Simple' assumes a fixed follow-up period
+        for all subjects. 'Complex' allows for accrual period and variable follow-up times.
+
+    # Basic parameters
+    - name: hazard_ratio
+      title: 'Hazard Ratio'
+      type: Number
+      min: 0.01
+      max: 10
+      default: 0.7
+      description: >-
+        The hazard ratio to detect. Values < 1 indicate protective effects
+        (treatment better than control); values > 1 indicate harmful effects
+        (control better than treatment).
+
+    - name: power
+      title: 'Power (1-β)'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.8
+      description: >-
+        The probability of detecting an effect if one exists (1 minus the Type II error rate).
+        Conventional values are 0.8 or 0.9.
+
+    - name: alpha
+      title: 'Significance Level (α)'
+      type: Number
+      min: 0.001
+      max: 0.5
+      default: 0.05
+      description: >-
+        The Type I error rate (probability of falsely rejecting the null hypothesis).
+        Conventional value is 0.05.
+
+    - name: sample_size
+      title: 'Total Sample Size'
+      type: Integer
+      min: 10
+      default: 200
+      description: >-
+        The total number of subjects across all groups. For sample size calculation,
+        this is a starting value for the search algorithm.
+
+    - name: allocation_ratio
+      title: 'Allocation Ratio (Control:Treatment)'
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+      description: >-
+        The ratio of control group size to treatment group size. 1 indicates equal allocation.
+        Values > 1 mean more subjects in the control group; values < 1 mean more in the treatment group.
+
+    - name: prob_event
+      title: 'Event Probability'
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.5
+      description: >-
+        The overall probability of observing the event (e.g., death) during the study period.
+        This affects the number of events observed, which is crucial for power.
+
+    # Advanced parameters (for complex designs)
+    - name: accrual_time
+      title: 'Accrual Time'
+      type: Number
+      min: 0
+      default: 1
+      description: >-
+        The period over which participants are recruited, in years.
+        Only used for complex designs.
+
+    - name: follow_up_time
+      title: 'Follow-up Time'
+      type: Number
+      min: 0
+      default: 3
+      description: >-
+        The additional follow-up period after accrual ends, in years.
+        Only used for complex designs.
+
+    - name: median_survival
+      title: 'Median Survival Time (Control Group)'
+      type: Number
+      min: 0.1
+      default: 5
+      description: >-
+        The median survival time in the control group, in years.
+        Used to estimate the baseline hazard rate.
+        Only used for complex designs.
+
+    - name: loss_followup
+      title: 'Loss to Follow-up Rate (per Year)'
+      type: Number
+      min: 0
+      max: 0.5
+      default: 0.05
+      description: >-
+        The annual rate of loss to follow-up (attrition).
+        Only used for complex designs.
+
+...

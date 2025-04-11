@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.87
+version: 0.0.2.88
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-04-06'
+date: '2024-04-11'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -667,6 +667,17 @@ analyses:
       Advanced tool for preparing outcome variables for various types of
       survival analysis including overall survival, cause-specific, competing
       risks, progression-free survival, and multistate models.
+  - title: Power Analysis for Survival Studies
+    name: powersurvival
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuTitle: Power Analysis for Survival Studies
+    menuSubgroup: Design and Analysis
+    menuSubtitle: Power analysis for survival studies
+    description: >-
+      Calculates power, sample size, or minimum detectable hazard ratio for
+      survival studies. This helps researchers design adequately powered studies
+      to detect meaningful differences in survival between groups.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
