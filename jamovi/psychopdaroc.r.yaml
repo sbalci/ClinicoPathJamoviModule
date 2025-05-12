@@ -1,0 +1,119 @@
+---
+name: psychopdaroc
+title: ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      type: Html
+      visible: true
+
+    - name: procedureNotes
+      type: Html
+
+    - name: resultsTable
+      refs: 
+        - cutpointr
+        - pROC
+      title: Results Table
+      type: Array
+      visible: true
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+      template:
+        type: Table
+        rows: 0
+        columns:
+          - name: cutpoint
+            title: Cutpoint
+            type: number
+          - name: sensitivity
+            title: 'Sensitivity (%)'
+            type: number
+            format: pc
+          - name: specificity
+            title: 'Specificity (%)'
+            type: number
+            format: pc
+          - name: ppv
+            title: 'PPV (%)'
+            type: number
+            format: pc
+          - name: npv
+            title: 'NPV (%)'
+            type: number
+            format: pc
+          - name: youden
+            title: Youden's index
+            type: number
+          - name: AUC
+            title: AUC
+            type: number
+          - name: metricValue
+            title: Metric Score
+            type: number
+
+    - name: delongTest
+      title: DeLong Test of Difference between AUCs
+      type: Preformatted
+      visible: (delongTest)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+
+    - name: plotROC
+      type: Array
+      title: ROC Curves
+      template:
+        type: Image
+        width: 550
+        height: 450
+        renderFun: .plotROC
+        visible: (plotROC)
+
+    - name: sensSpecTable
+      title: Sensitivity & Specificity
+      type: Array
+      visible: (sensSpecTable)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+      template:
+        type: Html
+
+refs:
+    - cutpointr
+    - pROC
+    - MASS
+...

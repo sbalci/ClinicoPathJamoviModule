@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.88
+version: 0.0.2.89
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-04-11'
+date: '2024-05-12'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -367,14 +367,16 @@ analyses:
     menuGroup: meddecide
     menuTitle: Positive Predictive Value
     menuSubgroup: Drafts
-  - title: ROC
+  - title: ROC Curve Analysis
     name: roc
     ns: ClinicoPath
     menuGroup: meddecide
-    menuSubgroup: Drafts
-    menuTitle: ROC
-    description: Function for ROC Analysis.
-    menuSubtitle: Decision
+    menuSubgroup: ROC Analysis
+    menuTitle: ROC Curve Analysis
+    description: >
+      Function for ROC (Receiver Operating Characteristic) Curve Analysis.
+      Calculates sensitivity, specificity, AUC, Youden index, and more.
+    menuSubtitle: Sensitivity, Specificity, AUC, ...
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
@@ -678,6 +680,24 @@ analyses:
       Calculates power, sample size, or minimum detectable hazard ratio for
       survival studies. This helps researchers design adequately powered studies
       to detect meaningful differences in survival between groups.
+  - title: ROC
+    name: roc2
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Drafts
+    menuTitle: ROC
+    menuSubtitle: Decision
+    description: Function for ROC Analysis.
+  - title: ROC Analysis
+    name: psychopdaroc
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: ROC Analysis
+    menuSubgroup: Decision
+    menuSubtitle: ROC Analysis, AUC, Cutpoints
+    description: >
+      Receiver Operating Characteristic (ROC) curve analysis with optimal
+      cutpoint determination.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

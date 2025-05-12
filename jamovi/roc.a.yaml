@@ -1,64 +1,195 @@
 ---
 name:  roc
-title: ROC
+title: ROC Curve Analysis
 menuGroup: meddecide
-menuSubgroup: Drafts
-menuSubtitle: Decision
+menuSubgroup: ROC Analysis
+menuSubtitle: Sensitivity, Specificity, AUC, ...
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for ROC Analysis.
+    main: >
+        Function for ROC (Receiver Operating Characteristic) Curve Analysis.
+        Calculates sensitivity, specificity, AUC, Youden index, and more.
     R:
         dontrun: true
         usage: |
             # example will be added
 
-
 options:
     - name: data
       type: Data
       description:
+          R: The data as a data frame.
+
+    - name: classvar
+      title: Classification Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
           R: >
-            The data as a data frame.
+            A string naming the variable from `data` that contains the 
+            actual status (gold standard / diagnosis), must be a factor with two levels.
 
+    - name: classpos
+      title: Positive Level
+      type: Level
+      variable: (classvar)
+      description:
+          R: >
+            The level of the classification variable that represents the positive status.
 
-    - name: measurement
-      title: Measurement
+    - name: testvar
+      title: Test Variable
       type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            A string naming the variable from `data` that contains the 
+            test result or measurement, must be numeric.
 
-    - name: status
-      title: Disease Status
-      type: Variable
+    - name: direction
+      title: Test Direction
+      type: List
+      options:
+        - title: Greater values indicate positive test
+          name: greatpos
+        - title: Lower values indicate positive test
+          name: lesspos
+      default: greatpos
+      description:
+          R: >
+            Specify whether greater values of the test variable indicate a
+            positive test (default) or if lower values indicate a positive test.
+            Note: AUC will always be greater than 0.5, even if it means
+            inverting the predictor internally.
 
+    - name: ci
+      title: '95% Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Boolean selection whether to show 95% confidence intervals. Default is 'true'.
 
-    - name: excl
-      title: Exclude Missing (NA)
+    - name: cimethod
+      title: 'CI Method'
+      type: List
+      options:
+        - title: DeLong et al. (1988)
+          name: delong
+        - title: Hanley & McNeil (1982)
+          name: hanley
+        - title: Binomial exact
+          name: binomial
+      default: delong
+      description:
+          R: >
+            Method for calculating confidence intervals for the AUC.
+            Default is 'delong'.
+
+    - name: youden
+      title: 'Calculate Youden Index'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Boolean selection whether to calculate Youden index (J = sensitivity + specificity - 1).
+            Default is 'true'.
+
+    - name: optimcrit
+      title: 'Calculate Optimal Criterion Value'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Boolean selection whether to calculate the optimal criterion value.
+            Default is 'true'.
+
+    - name: pp
+      title: 'Use Prior Probability (prevalence)'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to use a specified disease prevalence 
+            for predictive values. Default is 'false'.
 
+    - name: pprob
+      title: 'Prior Probability (prevalence)'
+      type: Number
+      default: 0.500
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Prior probability (disease prevalence in the population).
+            Requires a value between 0.001 and 0.999, default 0.500.
 
-    - name: sty
-      title: Style
+    - name: costratioFP
+      title: 'Cost Ratio (FP / FN)'
+      type: Number
+      default: 1.000
+      min: 0.000
+      max: 1000.000
+      description:
+          R: >
+            Cost ratio of false positive to false negative decisions.
+            Default is 1.000 (equal costs).
+
+    - name: coords
+      title: 'Show Coordinates of the ROC Curve'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Boolean selection whether to show the full list of coordinates of the ROC curve.
+            This includes all possible thresholds with sensitivity, specificity, 
+            predictive values, and likelihood ratios. Default is 'true'.
+
+    - name: plotroc
+      title: 'ROC Curve Plot'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Boolean selection whether to create a ROC curve plot. Default is 'true'.
+
+    - name: plotci
+      title: 'Show 95% CI on ROC Curve'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to show 95% confidence bands on the ROC curve.
+            Default is 'false'.
 
-
-    - name: quant
-      title: Quantiles
+    - name: plotbars
+      title: 'Plot Sensitivity/Specificity vs. Criterion Values'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to create a plot of sensitivity and specificity
+            versus criterion values. Default is 'false'.
 
-
-    - name: label
-      title: Label
+    - name: plotprev
+      title: 'Plot Predictive Values vs. Prevalence'
       type: Bool
       default: false
+      description:
+          R: >
+            Boolean selection whether to create a plot of positive and negative
+            predictive values versus disease prevalence. Default is 'false'.
 
-
-    - name: inter
-      title: Interactive
+    - name: plotidr
+      title: 'Interactive Dot Diagram'
       type: Bool
-      default: false
-
+      default: true
+      description:
+          R: >
+            Boolean selection whether to create an interactive dot diagram
+            Default is 'true'.
 ...

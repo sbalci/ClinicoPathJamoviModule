@@ -782,9 +782,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ## run Cox function .fitModelWithSelection ----
 
-        # if (self$options$use_modelSelection) {
-        #   private$.final_fit2()
-        # }
+        if (self$options$use_modelSelection) {
+          private$.checkpoint()
+          private$.final_fit2()
+        }
 
 
 
@@ -3472,7 +3473,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       #   # class(curve_data) <- "adjusted_curves"
       #
       #
-      #   # View curve_data ----
+      #   # View curve_data
       #   self$results$mydataview_curve_data$setContent(
       #     list(
       #       # curves = adj_curves,
@@ -3655,220 +3656,514 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
       ,
-      # fitModelWithSelection ----
-      .fitModelWithSelection = function(formula, data) {
-        modelSelection <- self$options$modelSelection
-        selectionCriteria <- self$options$selectionCriteria
-        pEntry <- self$options$pEntry
-        pRemoval <- self$options$pRemoval
+    ## Fit Cox Model with Selection ----
+.fitModelWithSelection = function(formula, data) {
+  # Get the selection method and criteria from options
+  modelSelection <- self$options$modelSelection
+  selectionCriteria <- self$options$selectionCriteria
+  pEntry <- self$options$pEntry
+  pRemoval <- self$options$pRemoval
+
+  # Validation checks
+  if (self$options$pEntry >= self$options$pRemoval) {
+    stop("Entry significance must be less than removal significance")
+  }
+
+  if (self$options$modelSelection != "enter" &&
+      length(c(self$options$explanatory, self$options$contexpl)) < 2) {
+    stop("Variable selection requires at least 2 predictor variables")
+  }
 
 
-        if (self$options$pEntry >= self$options$pRemoval) {
-          stop("Entry significance must be less than removal significance")
+  private$.checkpoint()
+
+
+  # If no selection requested, return full model
+  if (modelSelection == "enter") {
+    # Just fit and return the full model with all variables
+    full_model <- survival::coxph(formula, data = data)
+    return(full_model)
+  }
+
+  # For Cox models we need to preserve the exact Surv() object on the left side
+  surv_part <- formula[[2]]  # Gets the Surv() expression itself
+  pred_part <- attr(terms(formula), "term.labels")  # All predictor variables
+
+  # Create full and null models
+  full_model <- survival::coxph(formula, data = data)
+  null_formula <- as.formula(paste(deparse(surv_part), "~ 1"))
+  null_model <- survival::coxph(null_formula, data = data)
+
+  # For backward selection
+
+  if (modelSelection == "backward") {
+    # Start with all variables
+    current_vars <- pred_part
+    current_model <- full_model
+
+    # Set status to indicate backward selection is starting
+    self$results$text_model_selection$setStatus('running')
+    self$results$text2_model_selection$setStatus('running')
+
+    # Initial checkpoint to push status to UI
+    private$.checkpoint()
+
+    # Track variables removed for reporting
+    removed_vars <- character(0)
+
+    # Remove variables one-by-one if they don't contribute significantly
+    changed <- TRUE
+    iteration <- 0
+    while(changed && length(current_vars) > 0) {
+      iteration <- iteration + 1
+      changed <- FALSE
+
+      # Add checkpoint at beginning of each iteration
+      private$.checkpoint(flush=FALSE)
+
+      # Only try to examine p-values if we have variables
+      if (length(current_vars) > 0) {
+        # Get model summary
+        model_summary <- summary(current_model)
+
+        # Check if we have coefficients
+        if (!is.null(model_summary$coefficients)) {
+          # Store p-values for each variable
+          coef_summary <- model_summary$coefficients
+          var_p_values <- coef_summary[, "Pr(>|z|)"]
+
+          # Find least significant variable
+          max_p <- max(var_p_values)
+          if (max_p > pRemoval) {
+            # Which variable has highest p-value
+            drop_var_idx <- which.max(var_p_values)
+            drop_var <- names(var_p_values)[drop_var_idx]
+
+            # Remove this variable
+            current_vars <- setdiff(current_vars, drop_var)
+            removed_vars <- c(removed_vars, drop_var)
+
+            # Update status with progress information
+            status_msg <- paste0("Removing variable: ", drop_var,
+                                 " (p=", format.pval(max_p, digits=3), ")")
+            self$results$text2_model_selection$setContent(status_msg)
+
+            # Critical checkpoint before expensive operation - always flush here
+            private$.checkpoint()
+
+            if (length(current_vars) > 0) {
+              # Create new formula without this variable
+              new_formula <- as.formula(paste(deparse(surv_part), "~",
+                                              paste(current_vars, collapse = " + ")))
+
+              # This is the most computationally expensive step
+              current_model <- survival::coxph(new_formula, data = data)
+            } else {
+              # If no variables left, use null model
+              current_model <- null_model
+            }
+
+            changed <- TRUE
+          }
         }
-
-        if (self$options$modelSelection != "enter" &&
-            length(c(self$options$explanatory, self$options$contexpl)) < 2) {
-          stop("Variable selection requires at least 2 predictor variables")
-        }
-
-
-        # Create full and null models
-        full_model <- survival::coxph(formula, data = data)
-        null_model <- survival::coxph(update(formula, . ~ 1), data = data)
-
-        # If no selection requested, return full model
-        if (modelSelection == "enter") {
-          return(full_model)
-        }
-
-        # Set up step parameters
-        step_params <- list(
-          scope = list(
-            lower = formula(null_model),
-            upper = formula(full_model)
-          ),
-          direction = modelSelection,
-          k = if (selectionCriteria == "aic")
-            2
-          else
-            0,
-          # k=2 for AIC
-          test = if (selectionCriteria == "lrt")
-            "LRT"
-          else
-            "Chisq"
-        )
-
-        # Add custom test function for likelihood ratio
-        if (selectionCriteria == "lrt") {
-          step_params$test.statistic <- "LRT"
-          step_params$alpha.to.enter <- pEntry
-          step_params$alpha.to.remove <- pRemoval
-        }
-
-        # Perform stepwise selection
-        if (modelSelection == "forward") {
-          final_model <- do.call("step", c(list(object = null_model), step_params))
-        } else if (modelSelection == "backward") {
-          final_model <- do.call("step", c(list(object = full_model), step_params))
-        } else {
-          # both
-          final_model <- do.call("step", c(list(object = null_model), step_params))
-        }
-
-        return(final_model)
       }
 
-
-      # finalfit 2 ----
-      ,
-      .final_fit2 = function() {
-        cleaneddata <- private$.cleandata()
-
-        name1time <- cleaneddata$name1time
-        name2outcome <- cleaneddata$name2outcome
-        name3contexpl <- cleaneddata$name3contexpl
-        name3expl <- cleaneddata$name3expl
-        adjexplanatory_name <- cleaneddata$adjexplanatory_name
-
-        mydata <- cleanData <- cleaneddata$cleanData
-
-        mytime_labelled <- cleaneddata$mytime_labelled
-        myoutcome_labelled <- cleaneddata$myoutcome_labelled
-        mydxdate_labelled <- cleaneddata$mydxdate_labelled
-        myfudate_labelled <- cleaneddata$myfudate_labelled
-        myexplanatory_labelled <- cleaneddata$myexplanatory_labelled
-        mycontexpl_labelled <- cleaneddata$mycontexpl_labelled
-        adjexplanatory_labelled <- cleaneddata$adjexplanatory_labelled
-
-
-        ## prepare formula ----
-
-        myexplanatory <- NULL
-
-        if (!is.null(self$options$explanatory)) {
-          myexplanatory <- as.vector(myexplanatory_labelled)
-        }
-
-        mycontexpl <- NULL
-        if (!is.null(self$options$contexpl)) {
-          mycontexpl <- as.vector(mycontexpl_labelled)
-        }
-
-
-        formula2 <- c(myexplanatory, mycontexpl)
-
-        myformula <-
-          paste("survival::Surv( mytime, myoutcome ) ~ ", paste(formula2, collapse = " + "))
-
-        myformula <- as.formula(myformula)
-
-        # self$results$mydataview$setContent(
-        #     list(
-        #         mydata = head(mydata, n = 30),
-        #         myformula = myformula,
-        #         myexplanatory = myexplanatory,
-        #         mycontexpl = mycontexpl,
-        #         formula2 = formula2
-        #     )
-        # )
-
-
-
-
-        ## finalfit Multivariable table ----
-
-
-        model <- private$.fitModelWithSelection(myformula, mydata)
-
-
-        # finalfit::finalfit(.data = mydata,
-        #                    formula = myformula,
-        #                    # dependent = myformula,
-        #                    # explanatory = formula2,
-        #
-        #                    metrics = TRUE) -> tMultivariable
-
-
-        text2_model_selection <- glue::glue("
-                                    <br>
-                                    <b>Model Metrics:</b>
-                                    ",
-                                            unlist(model[[2]]),
-                                            "
-                                    <br>
-                                    ")
-
-        # Add selection results to the output
-        if (self$options$modelSelection != "enter") {
-          text2_model_selection <- paste0(
-            text2_model_selection,
-            "\n<br><b>Model Selection Results:</b><br>",
-            "Selection method: ",
-            self$options$modelSelection,
-            "<br>Selection criteria: ",
-            self$options$selectionCriteria,
-            "<br>Variables in final model: ",
-            paste(names(model$coefficients), collapse = ", ")
-          )
-        }
-
-
-
-
-        if (self$options$uselandmark) {
-          landmark <- jmvcore::toNumeric(self$options$landmark)
-
-          text2_model_selection <- glue::glue(
-            text2_model_selection,
-            "Landmark time used as: ",
-            landmark,
-            " ",
-            self$options$timetypeoutput,
-            "."
-          )
-        }
-
-        if (self$options$modelSelection != "enter") {
-          text2_model_selection <- glue::glue(
-            text2_model_selection,
-            "Note: Stepwise selection methods should be used with caution. They may not always select the most theoretically meaningful model and can lead to overfitting."
-          )
-
-        }
-
-
-
-        self$results$text2_model_selection$setContent(text2_model_selection)
-
-
-
-        text_model_selection <- knitr::kable(
-          model[[1]],
-          row.names = FALSE,
-          align = c('l', 'l', 'r', 'r', 'r', 'r'),
-          format = "html"
-        )
-
-        self$results$text_model_selection$setContent(text_model_selection)
-
+      # Add checkpoint after expensive operation to show progress
+      # Only flush every 2nd iteration to balance responsiveness with performance
+      if (iteration %% 2 == 0) {
+        private$.checkpoint()
       }
+    }
 
+    # Final model is ready - set status to complete
+    self$results$text_model_selection$setStatus('complete')
+    self$results$text2_model_selection$setStatus('complete')
 
+    # Final checkpoint to push complete results
+    private$.checkpoint()
 
+    # Store selection steps for reporting
+    attr(current_model, "selection_steps") <- list(
+      removed = removed_vars,
+      remaining = current_vars
     )
+
+    return(current_model)
+
+      }
+
+  # For forward selection or stepwise (both)
+  else if (modelSelection == "forward" || modelSelection == "both") {
+    # Start with no variables
+    selected_vars <- character(0)
+    current_model <- null_model
+
+    # Add variables one by one
+    while (length(selected_vars) < length(pred_part)) {
+
+      private$.checkpoint()
+
+
+      best_var <- NULL
+      best_p <- pEntry
+      best_improvement <- 0
+
+      # Try adding each variable not already selected
+      for (var in setdiff(pred_part, selected_vars)) {
+        # Create formula with this variable added
+        if (length(selected_vars) == 0) {
+          test_formula <- as.formula(paste(deparse(surv_part), "~", var))
+        } else {
+          test_formula <- as.formula(paste(deparse(surv_part), "~",
+                                           paste(c(selected_vars, var), collapse = " + ")))
+        }
+
+        # Fit model and check improvement
+        test_model <- survival::coxph(test_formula, data = data)
+
+        # Compare models
+        if (selectionCriteria == "aic") {
+          # Use AIC for comparison
+          current_aic <- AIC(current_model)
+          test_aic <- AIC(test_model)
+          improvement <- current_aic - test_aic
+
+          if (improvement > best_improvement) {
+            best_improvement <- improvement
+            best_var <- var
+          }
+        } else {
+          # Use likelihood ratio test
+          lr_test <- anova(current_model, test_model)
+          if (nrow(lr_test) >= 2) {
+            p_value <- lr_test$P[2]  # Second row has the p-value for comparison
+
+            if (!is.na(p_value) && p_value < best_p) {
+              best_p <- p_value
+              best_var <- var
+              best_improvement <- 1  # Just a flag
+            }
+          }
+        }
+      }
+
+      # If we found a variable to add
+      if (!is.null(best_var) && (
+        (selectionCriteria == "aic" && best_improvement > 0) ||
+        (selectionCriteria == "lrt" && best_p < pEntry)
+      )) {
+        # Add best variable
+        selected_vars <- c(selected_vars, best_var)
+
+        # Update current model
+        if (length(selected_vars) > 0) {
+          current_formula <- as.formula(paste(deparse(surv_part), "~",
+                                              paste(selected_vars, collapse = " + ")))
+          current_model <- survival::coxph(current_formula, data = data)
+        }
+
+        # For stepwise, check if we should remove any variables
+        if (modelSelection == "both" && length(selected_vars) > 1) {
+
+          private$.checkpoint()
+
+          # Get model summary
+          model_summary <- summary(current_model)
+
+          # Only check for removal if we have coefficients
+          if (!is.null(model_summary$coefficients)) {
+            # Check p-values of current variables
+            coef_summary <- model_summary$coefficients
+            var_p_values <- coef_summary[, "Pr(>|z|)"]
+
+            # Find variables that are no longer significant
+            remove_vars <- character(0)
+            for (i in seq_along(var_p_values)) {
+              if (var_p_values[i] > pRemoval) {
+                remove_vars <- c(remove_vars, names(var_p_values)[i])
+              }
+            }
+
+            if (length(remove_vars) > 0) {
+              # Remove these variables
+              selected_vars <- setdiff(selected_vars, remove_vars)
+
+              # Update model
+              if (length(selected_vars) > 0) {
+                current_formula <- as.formula(paste(deparse(surv_part), "~",
+                                                    paste(selected_vars, collapse = " + ")))
+                current_model <- survival::coxph(current_formula, data = data)
+              } else {
+                current_model <- null_model
+              }
+            }
+          }
+        }
+      } else {
+        # No more variables to add
+        break
+      }
+    }
+
+    return(current_model)
+  }
+}
+
+,
+    ## Final Fit ----
+.final_fit2 = function() {
+  # Retrieve cleaned data and variable information
+  cleaneddata <- private$.cleandata()
+
+  # Extract necessary data components
+  mydata <- cleaneddata$cleanData
+
+  # Extract variable names
+  myexplanatory <- NULL
+  if (!is.null(self$options$explanatory)) {
+    myexplanatory <- as.vector(cleaneddata$myexplanatory_labelled)
+  }
+
+  mycontexpl <- NULL
+  if (!is.null(self$options$contexpl)) {
+    mycontexpl <- as.vector(cleaneddata$mycontexpl_labelled)
+  }
+
+  # Prepare the formula for model fitting
+  formula2 <- c(myexplanatory, mycontexpl)
+  myformula <- paste("survival::Surv(mytime, myoutcome) ~ ", paste(formula2, collapse = " + "))
+  myformula <- as.formula(myformula)
+
+
+  private$.checkpoint()
+
+
+  # Perform model selection
+  model <- private$.fitModelWithSelection(myformula, mydata)
+
+  private$.checkpoint()
+
+
+  # Get model summary for statistics
+  model_summary <- summary(model)
+
+
+  self$results$mydataview_modelselection$setContent(
+    list(
+      mydata = head(mydata),
+      mytime = cleaneddata$name1time,
+      myexplanatory = myexplanatory,
+      mycontexpl = mycontexpl,
+      myformula = myformula,
+      model = model,
+      use_modelSelection = self$options$use_modelSelection,
+      modelSelection = self$options$modelSelection,
+      selectionCriteria = self$options$selectionCriteria,
+      pEntry = self$options$pEntry,
+      pRemoval = self$options$pRemoval
+    )
+    )
+
+
+
+
+  # Create metrics text with comprehensive error handling
+  metrics_text <- tryCatch({
+    # Calculate statistics safely
+    logtest_value <- if(is.null(model_summary$logtest) || length(model_summary$logtest) < 1 ||
+                        !is.numeric(model_summary$logtest[1])) {
+      NA  # Use NA if logtest is missing or invalid
+    } else {
+      model_summary$logtest[1]
+    }
+
+    loglik_value <- if(is.null(model$loglik) || length(model$loglik) < 1 ||
+                       !is.numeric(model$loglik[1])) {
+      NA  # Use NA if loglik is missing or invalid
+    } else {
+      model$loglik[1]
+    }
+
+    # Calculate R-squared safely
+    r_squared <- if(is.na(logtest_value) || is.na(model$n) || model$n == 0) {
+      NA  # Use NA if we can't calculate
+    } else {
+      round(1 - exp(-logtest_value/model$n), 3)
+    }
+
+    # Calculate max possible R-squared safely
+    max_r_squared <- if(is.na(loglik_value) || is.na(model$n) || model$n == 0) {
+      NA  # Use NA if we can't calculate
+    } else {
+      round(1 - exp(-2 * loglik_value/model$n), 3)
+    }
+
+    # Format metrics text with safe fallbacks
+    paste0(
+      "Number in dataframe = ", nrow(mydata),
+      ", Number in model = ", ifelse(is.null(model$n), "Unknown", model$n),
+      ", Missing = 0",  # You might want to calculate this if needed
+      ", Number of events = ", ifelse(is.null(model$nevent), "Unknown", model$nevent),
+      ", Concordance = ", ifelse(is.null(model_summary$concordance) || length(model_summary$concordance) < 1,
+                                 "Unknown", round(model_summary$concordance[1], 3)),
+      " (SE = ", ifelse(is.null(model_summary$concordance) || length(model_summary$concordance) < 2,
+                        "Unknown", round(model_summary$concordance[2], 3)), ")",
+      ", R-squared = ", ifelse(is.na(r_squared), "Unknown", r_squared),
+      "( Max possible = ", ifelse(is.na(max_r_squared), "Unknown", max_r_squared), ")",
+      ", Likelihood ratio test = ", ifelse(is.na(logtest_value), "Unknown", round(logtest_value, 3)),
+      " (df = ", ifelse(is.null(model_summary$logtest) || length(model_summary$logtest) < 2,
+                        "Unknown", model_summary$logtest[2]),
+      ", p = ", ifelse(is.null(model_summary$logtest) || length(model_summary$logtest) < 3,
+                       "Unknown", format.pval(model_summary$logtest[3], digits=3)), ")"
+    )
+  }, error = function(e) {
+    # Fallback metrics if calculation fails
+    paste0(
+      "Number in dataframe = ", nrow(mydata),
+      ", Number in model = ", ifelse(is.null(model$n), "Unknown", model$n),
+      ", Number of events = ", ifelse(is.null(model$nevent), "Unknown", model$nevent),
+      ", Note: Some model metrics could not be calculated."
+    )
+  })
+
+  # Create the base model metrics text
+  text2_model_selection <- glue::glue("
+    <br>
+    <b>Model Metrics:</b><br>
+    {metrics_text}
+    <br>
+  ")
+
+  # Add landmark information if used
+  if (self$options$uselandmark) {
+    landmark <- jmvcore::toNumeric(self$options$landmark)
+
+    text2_model_selection <- glue::glue(
+      text2_model_selection,
+      "Landmark time used as: ",
+      landmark,
+      " ",
+      self$options$timetypeoutput,
+      "."
+    )
+  }
+
+  # Add selection results to the output - only once
+  if (self$options$modelSelection != "enter") {
+    # Safely extract coefficient names
+    coef_names <- tryCatch({
+      if (!is.null(model$coefficients) && length(model$coefficients) > 0) {
+        paste(names(model$coefficients), collapse = ", ")
+      } else {
+        "None"
+      }
+    }, error = function(e) {
+      "Unknown (error extracting coefficients)"
+    })
+
+    # Use the selection method directly from options
+    selection_method <- self$options$modelSelection
+
+    text2_model_selection <- paste0(
+      text2_model_selection,
+      "\n<br><b>Model Selection Results:</b><br>",
+      "Selection method: ", selection_method,  # Use the actual selection method
+      "<br>Selection criteria: ", self$options$selectionCriteria,
+      "<br>Variables in final model: ", coef_names
+    )
+
+    # Add note about stepwise selection
+    text2_model_selection <- paste0(
+      text2_model_selection,
+      "<br><br>Note: Stepwise selection methods should be used with caution. They may not always select the most theoretically meaningful model and can lead to overfitting."
+    )
+  }
+
+  # Set the content for the model metrics
+  self$results$text2_model_selection$setContent(text2_model_selection)
+
+  # Create a formatted table of hazard ratios with error handling
+  hr_table <- tryCatch({
+    private$.createHRTable(model)
+  }, error = function(e) {
+    # Create a simple fallback table if the main function fails
+    data.frame(
+      Variable = "Error creating hazard ratio table",
+      "HR (multivariable)" = paste("Error:", e$message)
+    )
+  })
+
+  # Convert to HTML table and set content
+  text_model_selection <- knitr::kable(
+    hr_table,
+    row.names = FALSE,
+    align = c('l', 'l'),
+    format = "html"
+  )
+
+  # Set the content for the HR table
+  self$results$text_model_selection$setContent(text_model_selection)
+}
+
+,
+# Helper function to create HR table with error handling
+.createHRTable = function(model) {
+  # If model has no coefficients, return empty table
+  if (is.null(model$coefficients) || length(model$coefficients) == 0) {
+    return(data.frame(
+      Variable = "No variables in model",
+      "HR (multivariable)" = "N/A"
+    ))
+  }
+
+  # Get model summary
+  summary_model <- summary(model)
+
+  # Extract coefficients, hazard ratios, and CIs safely
+  tryCatch({
+    coefs <- summary_model$coefficients
+    confint <- summary_model$conf.int
+
+    # Create data frame with variable names and hazard ratios
+    hr_table <- data.frame(
+      Variable = row.names(coefs),
+      HR = round(confint[, 1], 2),
+      Lower_CI = round(confint[, 3], 2),
+      Upper_CI = round(confint[, 4], 2),
+      P_value = format.pval(coefs[, 5], digits = 3)
+    )
+
+    # Format the HR with CI
+    hr_table$HR_with_CI <- paste0(
+      hr_table$HR, " (",
+      hr_table$Lower_CI, "-",
+      hr_table$Upper_CI, ", p=",
+      hr_table$P_value, ")"
+    )
+
+    # Return simplified table
+    final_table <- data.frame(
+      Variable = hr_table$Variable,
+      "HR (multivariable)" = hr_table$HR_with_CI
+    )
+
+    return(final_table)
+  }, error = function(e) {
+    # If something goes wrong, return a basic table with the error
+    return(data.frame(
+      Variable = names(model$coefficients),
+      "HR (multivariable)" = "Error calculating hazard ratios"
+    ))
+  })
+}
+
+
+
+
+
+
+
+
+)
   )

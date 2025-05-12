@@ -6,13 +6,23 @@ rocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            measurement = NULL,
-            status = NULL,
-            excl = FALSE,
-            sty = FALSE,
-            quant = FALSE,
-            label = FALSE,
-            inter = FALSE, ...) {
+            classvar = NULL,
+            classpos = NULL,
+            testvar = NULL,
+            direction = "greatpos",
+            ci = TRUE,
+            cimethod = "delong",
+            youden = TRUE,
+            optimcrit = TRUE,
+            pp = FALSE,
+            pprob = 0.5,
+            costratioFP = 1,
+            coords = TRUE,
+            plotroc = TRUE,
+            plotci = FALSE,
+            plotbars = FALSE,
+            plotprev = FALSE,
+            plotidr = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -20,143 +30,338 @@ rocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..measurement <- jmvcore::OptionVariable$new(
-                "measurement",
-                measurement)
-            private$..status <- jmvcore::OptionVariable$new(
-                "status",
-                status)
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
+            private$..classvar <- jmvcore::OptionVariable$new(
+                "classvar",
+                classvar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..classpos <- jmvcore::OptionLevel$new(
+                "classpos",
+                classpos,
+                variable="(classvar)")
+            private$..testvar <- jmvcore::OptionVariable$new(
+                "testvar",
+                testvar,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..direction <- jmvcore::OptionList$new(
+                "direction",
+                direction,
+                options=list(
+                    "greatpos",
+                    "lesspos"),
+                default="greatpos")
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
+                default=TRUE)
+            private$..cimethod <- jmvcore::OptionList$new(
+                "cimethod",
+                cimethod,
+                options=list(
+                    "delong",
+                    "hanley",
+                    "binomial"),
+                default="delong")
+            private$..youden <- jmvcore::OptionBool$new(
+                "youden",
+                youden,
+                default=TRUE)
+            private$..optimcrit <- jmvcore::OptionBool$new(
+                "optimcrit",
+                optimcrit,
+                default=TRUE)
+            private$..pp <- jmvcore::OptionBool$new(
+                "pp",
+                pp,
                 default=FALSE)
-            private$..sty <- jmvcore::OptionBool$new(
-                "sty",
-                sty,
+            private$..pprob <- jmvcore::OptionNumber$new(
+                "pprob",
+                pprob,
+                default=0.5,
+                min=0.001,
+                max=0.999)
+            private$..costratioFP <- jmvcore::OptionNumber$new(
+                "costratioFP",
+                costratioFP,
+                default=1,
+                min=0,
+                max=1000)
+            private$..coords <- jmvcore::OptionBool$new(
+                "coords",
+                coords,
+                default=TRUE)
+            private$..plotroc <- jmvcore::OptionBool$new(
+                "plotroc",
+                plotroc,
+                default=TRUE)
+            private$..plotci <- jmvcore::OptionBool$new(
+                "plotci",
+                plotci,
                 default=FALSE)
-            private$..quant <- jmvcore::OptionBool$new(
-                "quant",
-                quant,
+            private$..plotbars <- jmvcore::OptionBool$new(
+                "plotbars",
+                plotbars,
                 default=FALSE)
-            private$..label <- jmvcore::OptionBool$new(
-                "label",
-                label,
+            private$..plotprev <- jmvcore::OptionBool$new(
+                "plotprev",
+                plotprev,
                 default=FALSE)
-            private$..inter <- jmvcore::OptionBool$new(
-                "inter",
-                inter,
-                default=FALSE)
+            private$..plotidr <- jmvcore::OptionBool$new(
+                "plotidr",
+                plotidr,
+                default=TRUE)
 
-            self$.addOption(private$..measurement)
-            self$.addOption(private$..status)
-            self$.addOption(private$..excl)
-            self$.addOption(private$..sty)
-            self$.addOption(private$..quant)
-            self$.addOption(private$..label)
-            self$.addOption(private$..inter)
+            self$.addOption(private$..classvar)
+            self$.addOption(private$..classpos)
+            self$.addOption(private$..testvar)
+            self$.addOption(private$..direction)
+            self$.addOption(private$..ci)
+            self$.addOption(private$..cimethod)
+            self$.addOption(private$..youden)
+            self$.addOption(private$..optimcrit)
+            self$.addOption(private$..pp)
+            self$.addOption(private$..pprob)
+            self$.addOption(private$..costratioFP)
+            self$.addOption(private$..coords)
+            self$.addOption(private$..plotroc)
+            self$.addOption(private$..plotci)
+            self$.addOption(private$..plotbars)
+            self$.addOption(private$..plotprev)
+            self$.addOption(private$..plotidr)
         }),
     active = list(
-        measurement = function() private$..measurement$value,
-        status = function() private$..status$value,
-        excl = function() private$..excl$value,
-        sty = function() private$..sty$value,
-        quant = function() private$..quant$value,
-        label = function() private$..label$value,
-        inter = function() private$..inter$value),
+        classvar = function() private$..classvar$value,
+        classpos = function() private$..classpos$value,
+        testvar = function() private$..testvar$value,
+        direction = function() private$..direction$value,
+        ci = function() private$..ci$value,
+        cimethod = function() private$..cimethod$value,
+        youden = function() private$..youden$value,
+        optimcrit = function() private$..optimcrit$value,
+        pp = function() private$..pp$value,
+        pprob = function() private$..pprob$value,
+        costratioFP = function() private$..costratioFP$value,
+        coords = function() private$..coords$value,
+        plotroc = function() private$..plotroc$value,
+        plotci = function() private$..plotci$value,
+        plotbars = function() private$..plotbars$value,
+        plotprev = function() private$..plotprev$value,
+        plotidr = function() private$..plotidr$value),
     private = list(
-        ..measurement = NA,
-        ..status = NA,
-        ..excl = NA,
-        ..sty = NA,
-        ..quant = NA,
-        ..label = NA,
-        ..inter = NA)
+        ..classvar = NA,
+        ..classpos = NA,
+        ..testvar = NA,
+        ..direction = NA,
+        ..ci = NA,
+        ..cimethod = NA,
+        ..youden = NA,
+        ..optimcrit = NA,
+        ..pp = NA,
+        ..pprob = NA,
+        ..costratioFP = NA,
+        ..coords = NA,
+        ..plotroc = NA,
+        ..plotci = NA,
+        ..plotbars = NA,
+        ..plotprev = NA,
+        ..plotidr = NA)
 )
 
 rocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "rocResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
-        text = function() private$.items[["text"]],
-        textplot = function() private$.items[["textplot"]],
-        plot = function() private$.items[["plot"]],
-        plot2 = function() private$.items[["plot2"]]),
+        summary = function() private$.items[["summary"]],
+        optimal = function() private$.items[["optimal"]],
+        coords = function() private$.items[["coords"]],
+        plotroc = function() private$.items[["plotroc"]],
+        plotbars = function() private$.items[["plotbars"]],
+        plotprev = function() private$.items[["plotprev"]],
+        plotidr = function() private$.items[["plotidr"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="ROC",
+                title="ROC Curve Analysis",
                 refs=list(
-                    "plotROC",
-                    "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Html$new(
+                    "pROC",
+                    "ROCR",
+                    "cutpointr",
+                    "DiagnosticTests",
+                    "sensspecwiki"))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="todo",
-                title="To Do",
-                clearWith=list(
-                    "measurement",
-                    "status",
-                    "excl",
-                    "sty",
-                    "quant",
-                    "label",
-                    "inter")))
-            self$add(jmvcore::Preformatted$new(
+                name="summary",
+                title="ROC Analysis Summary",
+                rows=1,
+                swapRowsColumns=TRUE,
+                columns=list(
+                    list(
+                        `name`="nobs", 
+                        `title`="Number of observations", 
+                        `type`="integer"),
+                    list(
+                        `name`="npos", 
+                        `title`="Positive class", 
+                        `type`="integer"),
+                    list(
+                        `name`="nneg", 
+                        `title`="Negative class", 
+                        `type`="integer"),
+                    list(
+                        `name`="auc", 
+                        `title`="Area Under Curve (AUC)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_se", 
+                        `title`="Standard Error", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_lci", 
+                        `title`="Lower 95% CI", 
+                        `visible`="(ci)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_uci", 
+                        `title`="Upper 95% CI", 
+                        `visible`="(ci)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="z", 
+                        `title`="z statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text",
-                title="ROC text",
-                clearWith=list(
-                    "measurement",
-                    "status",
-                    "excl",
-                    "sty",
-                    "quant",
-                    "label",
-                    "inter")))
-            self$add(jmvcore::Preformatted$new(
+                name="optimal",
+                title="Optimal Criterion Values",
+                visible="(optimcrit)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="type", 
+                        `title`="Criterion", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="j", 
+                        `title`="Youden Index", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(youden)"))))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="textplot",
-                title="ROC textplot",
-                clearWith=list(
-                    "measurement",
-                    "status",
-                    "excl",
-                    "sty",
-                    "quant",
-                    "label",
-                    "inter")))
+                name="coords",
+                title="Coordinates of the ROC Curve",
+                visible="(coords)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="threshold", 
+                        `title`="Criterion (Threshold)", 
+                        `type`="number"),
+                    list(
+                        `name`="sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lrp", 
+                        `title`="LR+", 
+                        `type`="number"),
+                    list(
+                        `name`="lrn", 
+                        `title`="LR-", 
+                        `type`="number"))))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="ROC",
-                name="plot",
-                width=600,
-                height=450,
-                renderFun=".plot",
-                requiresData=TRUE,
-                clearWith=list(
-                    "measurement",
-                    "status",
-                    "excl",
-                    "sty",
-                    "quant",
-                    "label",
-                    "inter")))
+                name="plotroc",
+                title="ROC Curve",
+                width=500,
+                height=500,
+                renderFun=".plotRoc",
+                visible="(plotroc)",
+                requiresData=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="ROC Interactive",
-                name="plot2",
-                width=600,
-                height=450,
-                renderFun=".plot2",
-                requiresData=TRUE,
-                clearWith=list(
-                    "measurement",
-                    "status",
-                    "excl"),
-                visible="(inter)"))}))
+                name="plotbars",
+                title="Sensitivity/Specificity vs. Criterion Values",
+                width=500,
+                height=500,
+                renderFun=".plotBars",
+                visible="(plotbars)",
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotprev",
+                title="Predictive Values vs. Disease Prevalence",
+                width=500,
+                height=500,
+                renderFun=".plotPrev",
+                visible="(plotprev)",
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotidr",
+                title="Interactive Dot Diagram",
+                width=500,
+                height=500,
+                renderFun=".plotIDR",
+                visible="(plotidr)",
+                requiresData=TRUE))}))
 
 rocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "rocBase",
@@ -179,62 +384,125 @@ rocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' ROC
+#' ROC Curve Analysis
 #'
-#' Function for ROC Analysis.
+#' Function for ROC (Receiver Operating Characteristic) Curve Analysis. 
+#' Calculates sensitivity, specificity, AUC, Youden index, and more.
+#' 
 #'
 #' @examples
 #' \donttest{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.
-#' @param measurement .
-#' @param status .
-#' @param excl .
-#' @param sty .
-#' @param quant .
-#' @param label .
-#' @param inter .
+#' @param classvar A string naming the variable from \code{data} that contains
+#'   the  actual status (gold standard / diagnosis), must be a factor with two
+#'   levels.
+#' @param classpos The level of the classification variable that represents
+#'   the positive status.
+#' @param testvar A string naming the variable from \code{data} that contains
+#'   the  test result or measurement, must be numeric.
+#' @param direction Specify whether greater values of the test variable
+#'   indicate a positive test (default) or if lower values indicate a positive
+#'   test. Note: AUC will always be greater than 0.5, even if it means inverting
+#'   the predictor internally.
+#' @param ci Boolean selection whether to show 95\% confidence intervals.
+#'   Default is 'true'.
+#' @param cimethod Method for calculating confidence intervals for the AUC.
+#'   Default is 'delong'.
+#' @param youden Boolean selection whether to calculate Youden index (J =
+#'   sensitivity + specificity - 1). Default is 'true'.
+#' @param optimcrit Boolean selection whether to calculate the optimal
+#'   criterion value. Default is 'true'.
+#' @param pp Boolean selection whether to use a specified disease prevalence
+#'   for predictive values. Default is 'false'.
+#' @param pprob Prior probability (disease prevalence in the population).
+#'   Requires a value between 0.001 and 0.999, default 0.500.
+#' @param costratioFP Cost ratio of false positive to false negative
+#'   decisions. Default is 1.000 (equal costs).
+#' @param coords Boolean selection whether to show the full list of
+#'   coordinates of the ROC curve. This includes all possible thresholds with
+#'   sensitivity, specificity,  predictive values, and likelihood ratios.
+#'   Default is 'true'.
+#' @param plotroc Boolean selection whether to create a ROC curve plot.
+#'   Default is 'true'.
+#' @param plotci Boolean selection whether to show 95\% confidence bands on
+#'   the ROC curve. Default is 'false'.
+#' @param plotbars Boolean selection whether to create a plot of sensitivity
+#'   and specificity versus criterion values. Default is 'false'.
+#' @param plotprev Boolean selection whether to create a plot of positive and
+#'   negative predictive values versus disease prevalence. Default is 'false'.
+#' @param plotidr Boolean selection whether to create an interactive dot
+#'   diagram Default is 'true'.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$textplot} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$optimal} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$coords} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plotroc} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotbars} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotprev} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotidr} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 roc <- function(
     data,
-    measurement,
-    status,
-    excl = FALSE,
-    sty = FALSE,
-    quant = FALSE,
-    label = FALSE,
-    inter = FALSE) {
+    classvar,
+    classpos,
+    testvar,
+    direction = "greatpos",
+    ci = TRUE,
+    cimethod = "delong",
+    youden = TRUE,
+    optimcrit = TRUE,
+    pp = FALSE,
+    pprob = 0.5,
+    costratioFP = 1,
+    coords = TRUE,
+    plotroc = TRUE,
+    plotci = FALSE,
+    plotbars = FALSE,
+    plotprev = FALSE,
+    plotidr = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("roc requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(measurement)) measurement <- jmvcore::resolveQuo(jmvcore::enquo(measurement))
-    if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
+    if ( ! missing(classvar)) classvar <- jmvcore::resolveQuo(jmvcore::enquo(classvar))
+    if ( ! missing(testvar)) testvar <- jmvcore::resolveQuo(jmvcore::enquo(testvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(measurement), measurement, NULL),
-            `if`( ! missing(status), status, NULL))
+            `if`( ! missing(classvar), classvar, NULL),
+            `if`( ! missing(testvar), testvar, NULL))
 
+    for (v in classvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- rocOptions$new(
-        measurement = measurement,
-        status = status,
-        excl = excl,
-        sty = sty,
-        quant = quant,
-        label = label,
-        inter = inter)
+        classvar = classvar,
+        classpos = classpos,
+        testvar = testvar,
+        direction = direction,
+        ci = ci,
+        cimethod = cimethod,
+        youden = youden,
+        optimcrit = optimcrit,
+        pp = pp,
+        pprob = pprob,
+        costratioFP = costratioFP,
+        coords = coords,
+        plotroc = plotroc,
+        plotci = plotci,
+        plotbars = plotbars,
+        plotprev = plotprev,
+        plotidr = plotidr)
 
     analysis <- rocClass$new(
         options = options,
