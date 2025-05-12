@@ -2,48 +2,109 @@
 % Please edit documentation in R/roc.h.R
 \name{roc}
 \alias{roc}
-\title{ROC}
+\title{ROC Curve Analysis}
 \usage{
 roc(
   data,
-  measurement,
-  status,
-  excl = FALSE,
-  sty = FALSE,
-  quant = FALSE,
-  label = FALSE,
-  inter = FALSE
+  classvar,
+  classpos,
+  testvar,
+  direction = "greatpos",
+  ci = TRUE,
+  cimethod = "delong",
+  youden = TRUE,
+  optimcrit = TRUE,
+  pp = FALSE,
+  pprob = 0.5,
+  costratioFP = 1,
+  coords = TRUE,
+  plotroc = TRUE,
+  plotci = FALSE,
+  plotbars = FALSE,
+  plotprev = FALSE,
+  plotidr = TRUE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{measurement}{.}
+\item{classvar}{A string naming the variable from \code{data} that contains
+the  actual status (gold standard / diagnosis), must be a factor with two
+levels.}
 
-\item{status}{.}
+\item{classpos}{The level of the classification variable that represents
+the positive status.}
 
-\item{excl}{.}
+\item{testvar}{A string naming the variable from \code{data} that contains
+the  test result or measurement, must be numeric.}
 
-\item{sty}{.}
+\item{direction}{Specify whether greater values of the test variable
+indicate a positive test (default) or if lower values indicate a positive
+test. Note: AUC will always be greater than 0.5, even if it means inverting
+the predictor internally.}
 
-\item{quant}{.}
+\item{ci}{Boolean selection whether to show 95\\% confidence intervals.
+Default is 'true'.}
 
-\item{label}{.}
+\item{cimethod}{Method for calculating confidence intervals for the AUC.
+Default is 'delong'.}
 
-\item{inter}{.}
+\item{youden}{Boolean selection whether to calculate Youden index (J =
+sensitivity + specificity - 1). Default is 'true'.}
+
+\item{optimcrit}{Boolean selection whether to calculate the optimal
+criterion value. Default is 'true'.}
+
+\item{pp}{Boolean selection whether to use a specified disease prevalence
+for predictive values. Default is 'false'.}
+
+\item{pprob}{Prior probability (disease prevalence in the population).
+Requires a value between 0.001 and 0.999, default 0.500.}
+
+\item{costratioFP}{Cost ratio of false positive to false negative
+decisions. Default is 1.000 (equal costs).}
+
+\item{coords}{Boolean selection whether to show the full list of
+coordinates of the ROC curve. This includes all possible thresholds with
+sensitivity, specificity,  predictive values, and likelihood ratios.
+Default is 'true'.}
+
+\item{plotroc}{Boolean selection whether to create a ROC curve plot.
+Default is 'true'.}
+
+\item{plotci}{Boolean selection whether to show 95\\% confidence bands on
+the ROC curve. Default is 'false'.}
+
+\item{plotbars}{Boolean selection whether to create a plot of sensitivity
+and specificity versus criterion values. Default is 'false'.}
+
+\item{plotprev}{Boolean selection whether to create a plot of positive and
+negative predictive values versus disease prevalence. Default is 'false'.}
+
+\item{plotidr}{Boolean selection whether to create an interactive dot
+diagram Default is 'true'.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$textplot} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimal} \tab \tab \tab \tab \tab a table \cr
+\code{results$coords} \tab \tab \tab \tab \tab a table \cr
+\code{results$plotroc} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotbars} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotprev} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotidr} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
-Function for ROC Analysis.
+Function for ROC (Receiver Operating Characteristic) Curve Analysis.
+Calculates sensitivity, specificity, AUC, Youden index, and more.
 }
 \examples{
 \donttest{

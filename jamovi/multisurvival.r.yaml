@@ -19,6 +19,7 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_modelSelection
 
     # - name:  mydataview
     #   title: mydataview
@@ -42,6 +43,8 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_modelSelection
+      
 
     - name:  text2
       title: ''
@@ -57,6 +60,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_modelSelection
+      
+
+
+
 
     # - name:  mydataview_personTimeAnalysis
     #   title: mydataview_personTimeAnalysis
@@ -106,6 +114,8 @@ items:
         - dxdate
         - tint
         - multievent
+        - use_modelSelection
+        - person_time
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -125,6 +135,9 @@ items:
         - dxdate
         - tint
         - multievent
+        - use_modelSelection
+        - person_time
+
 
 
 
@@ -151,6 +164,9 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_modelSelection
+
+
 
     # - name: plot2
     #   title: Hazards Regression Plot
@@ -191,6 +207,7 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_modelSelection
 
 
     - name: cox_ph
@@ -207,6 +224,7 @@ items:
           - tint
           - multievent
           - contexpl
+          - use_modelSelection
 
 
     - name: plot8
@@ -230,6 +248,7 @@ items:
           - tint
           - multievent
           - contexpl
+          - use_modelSelection
 
 
 
@@ -284,6 +303,7 @@ items:
           - pplot
           - censored
           - medianline
+          - use_modelSelection
 
 
 
@@ -328,6 +348,8 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - use_modelSelection
+
 
     - name: risk_score_analysis2
       title: 'Risk Score Analysis'
@@ -340,6 +362,8 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - use_modelSelection
+
 
     - name: riskScoreTable
       title: Risk Score Summary
@@ -369,6 +393,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - use_modelSelection
 
 
     - name: riskScoreMetrics
@@ -382,6 +407,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - use_modelSelection
 
 
 
@@ -400,6 +426,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - use_modelSelection
 
 
 # Startification
@@ -408,6 +435,14 @@ items:
       title: Stratification Notes
       type: Html
       visible: (use_stratify)
+      clearWith:
+          - calculateRiskScore
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - contexpl
+          - numRiskGroups
+          - use_modelSelection
 
 
 # Outputs
@@ -516,6 +551,7 @@ items:
           - pplot
           - censored
           - medianline
+          - use_modelSelection
 
 
 # Nomogram
@@ -542,6 +578,103 @@ items:
       title: "Nomogram Scoring Guide"
       type: Html
       visible: (showNomogram)
+
+
+
+    - name:  mydataview_modelselection
+      title: mydataview_modelselection
+      type:  Preformatted
+
+
+    - name:  text_model_selection
+      title: Multivariable Survival with Model Selection
+      type:  Html
+      refs: finalfit
+      visible: (use_modelSelection)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - use_modelSelection
+          - modelSelection
+          - selectionCriteria
+          - pEntry
+          - pRemoval
+
+    - name:  selection_method
+      title: ''
+      type:  Html
+      refs: finalfit
+      visible: (use_modelSelection)          
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - use_modelSelection
+          - modelSelection
+          - selectionCriteria
+          - pEntry
+          - pRemoval
+
+
+    - name:  text2_model_selection
+      title: ''
+      type:  Html
+      refs: finalfit
+      visible: (use_modelSelection)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - use_modelSelection
+          - modelSelection
+          - selectionCriteria
+          - pEntry
+          - pRemoval
+
+
+
+    # - name:  text3_model_selection
+    #   title: ''
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       - use_modelSelection
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
+
+
+
 
 
     # - name: adjustedSummaryTable2

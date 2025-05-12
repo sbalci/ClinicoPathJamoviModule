@@ -368,3 +368,32 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
+
+  - type: CollapseBox
+    label: Model Selection
+    collapsed: true
+    children:
+      - type: Label
+        label: Variable Selection Method
+        children:
+          - type: CheckBox
+            name: use_modelSelection
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: modelSelection
+                enable: (use_modelSelection)
+              - type: ComboBox
+                name: selectionCriteria
+                enable: (use_modelSelection)
+              - type: TextBox
+                name: pEntry
+                format: number
+                label: Entry Significance (p-value)
+                enable: (use_modelSelection)
+              - type: TextBox
+                name: pRemoval
+                format: number
+                label: Removal Significance (p-value)
+                enable: (use_modelSelection)

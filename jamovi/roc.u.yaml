@@ -1,37 +1,123 @@
-title: ROC
+title: ROC Curve Analysis
 name: roc
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Measurement
+        label: Classification Variable (Gold Standard)
         children:
           - type: VariablesListBox
-            name: measurement
+            name: classvar
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: classpos
+            enable: (classvar)
       - type: TargetLayoutBox
-        label: Disease Status
+        label: Test Variable
         children:
           - type: VariablesListBox
-            name: status
+            name: testvar
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: CheckBox
-        name: excl
-      - type: CheckBox
-        name: sty
-      - type: CheckBox
-        name: quant
-      - type: CheckBox
-        name: label
-      - type: CheckBox
-        name: inter
+      - type: Label
+        label: Test Direction
+        children:
+          - type: RadioButton
+            name: direction_greatpos
+            optionName: direction
+            optionPart: greatpos
+            label: Greater values indicate positive test
+          - type: RadioButton
+            name: direction_lesspos
+            optionName: direction
+            optionPart: lesspos
+            label: Lower values indicate positive test
+      
+      - type: Label
+        label: Confidence Intervals
+        children:
+          - type: CheckBox
+            name: ci
+          - type: RadioButton
+            name: cimethod_delong
+            optionName: cimethod
+            optionPart: delong
+            label: DeLong et al. (1988)
+            enable: (ci)
+          - type: RadioButton
+            name: cimethod_hanley
+            optionName: cimethod
+            optionPart: hanley
+            label: Hanley & McNeil (1982)
+            enable: (ci)
+          - type: RadioButton
+            name: cimethod_binomial
+            optionName: cimethod
+            optionPart: binomial
+            label: Binomial exact
+            enable: (ci)
+      
+      - type: Label
+        label: Calculations
+        children:
+          - type: CheckBox
+            name: youden
+            label: Calculate Youden Index
+          - type: CheckBox
+            name: optimcrit
+            label: Calculate Optimal Criterion Value
+          - type: CheckBox
+            name: coords
+            label: Show Coordinates of the ROC Curve
+      
+      - type: Label
+        label: Prior Probability
+        children:
+          - type: CheckBox
+            name: pp
+            label: Use Prior Probability (prevalence)
+          - type: TextBox
+            name: pprob
+            label: 'Prior Probability Value:'
+            format: number
+            enable: (pp)
+          - type: TextBox
+            name: costratioFP
+            label: 'Cost Ratio (FP/FN):'
+            format: number
+            enable: (optimcrit)
+  
+  - type: CollapseBox
+    label: Plots
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plotroc
+            label: ROC Curve Plot
+          - type: CheckBox
+            name: plotci
+            label: Show 95% CI on ROC Curve
+            enable: (plotroc && ci)
+          - type: CheckBox
+            name: plotbars
+            label: Plot Sensitivity/Specificity vs. Criterion
+          - type: CheckBox
+            name: plotprev
+            label: Plot Predictive Values vs. Prevalence
+          - type: CheckBox
+            name: plotidr
+            label: Interactive Dot Diagram

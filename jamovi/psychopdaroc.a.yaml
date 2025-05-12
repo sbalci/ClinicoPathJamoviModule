@@ -1,0 +1,241 @@
+---
+name: psychopdaroc
+title: ROC Analysis
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: ROC Analysis, AUC, Cutpoints
+version: '0.0.2'
+jas: '1.2'
+
+description:
+    main: >
+        Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: dependentVars
+      title: Dependent Variable
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Variable(s) to be tested for classification performance.
+
+    - name: classVar
+      title: Class Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Binary classification variable (gold standard).
+
+    - name: subGroup
+      title: Group Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional variable for subgroup analysis.
+
+    - name: method
+      title: Method
+      type: List
+      options:
+        - name: oc_manual
+          title: "Custom cut score"
+        - name: maximize_metric
+          title: Maximize metric
+        - name: minimize_metric
+          title: Minimize metric
+        - name: maximize_loess_metric
+          title: Maximize metric (LOESS)
+        - name: minimize_loess_metric
+          title: Minimize metric (LOESS)
+        - name: maximize_spline_metric
+          title: Maximize metric (spline)
+        - name: minimize_spline_metric
+          title: Minimize metric (spline)
+        - name: maximize_boot_metric
+          title: Maximize metric (bootstrap)
+        - name: minimize_boot_metric
+          title: Minimize metric (bootstrap)
+        - name: oc_youden_kernel
+          title: "Maximize Youden-Index (Kernel smoothed)"
+        - name: oc_youden_normal
+          title: "Maximize Youden-Index (Parametric normal)"
+      default: maximize_metric
+      description:
+          R: >
+            Method to determine optimal cut point.
+
+    - name: allObserved
+      title: All observed scores
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show all observed scores in results table.
+
+    - name: specifyCutScore
+      title: Specify cut score
+      type: String
+      default: ""
+      description:
+          R: >
+            Specify custom cut score when using manual method.
+
+    - name: metric
+      title: Metric
+      type: List
+      options:
+        - name: youden
+          title: Youden-Index
+        - name: sum_sens_spec
+          title: 'Sum: Sens/Spec'
+        - name: accuracy
+          title: Accuracy
+        - name: sum_ppv_npv
+          title: 'Sum: PPV/NPV'
+        - name: prod_sens_spec
+          title: 'Prod: Sens/Spec'
+        - name: prod_ppv_npv
+          title: 'Prod: PPV/NPV'
+        - name: cohens_kappa
+          title: "Cohen's Kappa"
+        - name: abs_d_sens_spec
+          title: 'Abs. d: Sens/Spec'
+        - name: roc01
+          title: 'ROC'
+        - name: abs_d_ppv_npv
+          title: 'Abs. d: PPV/NPV'
+        - name: p_chisquared
+          title: 'Chi-squared'
+        - name: odds_ratio
+          title: Odds Ratio
+        - name: risk_ratio
+          title: Risk Ratio
+        - name: misclassification_cost
+          title: Misclassification Cost
+        - name: total_utility
+          title: Total Utility
+        - name: F1_score
+          title: F1 score
+      default: youden
+      description:
+          R: >
+            Metric to optimize when determining cutpoint.
+
+    - name: boot_runs
+      title: Bootstrap runs
+      type: Number
+      default: 0
+      description:
+          R: >
+            Number of bootstrap runs for methods using bootstrapping.
+
+    - name: break_ties
+      title: Ties
+      type: List
+      options:
+        - name: c
+          title: All optimal cutpoints
+        - name: mean
+          title: Mean optimal cutpoint
+        - name: median
+          title: Median optimal cutpoint
+      default: mean
+      description:
+          R: >
+            Method for breaking ties when multiple optimal cutpoints exist.
+
+    - name: tol_metric
+      title: Tolerance metric
+      type: Number
+      default: 0.05
+      description:
+          R: >
+            Tolerance for the metric when determining optimal cutpoint.
+
+    - name: direction
+      title: Direction
+      type: List
+      options:
+        - name: ">="
+          title: ">="
+        - name: "<="
+          title: "<="
+      default: ">="
+      description:
+          R: >
+            Direction of classification relative to cutpoint.
+
+    - name: plotROC
+      title: ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display ROC curves.
+
+    - name: combinePlots
+      title: Combine plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Combine ROC curves in a single plot.
+
+    - name: displaySE
+      title: Standard error bars
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display standard error bars on ROC curves.
+
+    - name: smoothing
+      title: LOESS smoothing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply LOESS smoothing to ROC curves.
+
+    - name: sensSpecTable
+      title: Sensitivity-specificity tables
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed sensitivity/specificity tables.
+
+    - name: delongTest
+      title: DeLong's test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform DeLong's test for comparing AUCs.
+
+    - name: positiveClass
+      title: Positive class
+      type: String
+      default: ""
+      description:
+          R: >
+            Specify the positive class level. Leave blank to use the first level.
+...
