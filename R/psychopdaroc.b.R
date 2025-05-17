@@ -5,7 +5,6 @@
 #' @import ggplot2
 #' @import cutpointr
 #' @importFrom MASS ginv
-#'
 
 
 # ============================================================================
@@ -1309,16 +1308,22 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           # Get values from the simpleTable
           row <- simpleTable$getRow(rowKey = var)
 
+          # Extract values and ensure they are atomic
+          var_value <- as.character(var)
+          auc_value <- as.numeric(row$auc)
+          ci_lower_value <- as.numeric(row$ci_lower)
+          ci_upper_value <- as.numeric(row$ci_upper)
+          p_value <- as.numeric(row$p)
+
           # Add to AUC summary table
           aucSummaryTable$addRow(rowKey = var, values = list(
-            variable = var,
-            auc = row$auc,
-            ci_lower = row$ci_lower,
-            ci_upper = row$ci_upper,
-            p = row$p
+            variable = var_value,
+            auc = auc_value,
+            ci_lower = ci_lower_value,
+            ci_upper = ci_upper_value,
+            p = p_value
           ))
         }
-
         # -----------------------------------------------------------------------
         # 16. CREATE THRESHOLD TABLE IF REQUESTED
         # -----------------------------------------------------------------------
