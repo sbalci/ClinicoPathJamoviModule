@@ -23,7 +23,23 @@ psychopdaroc(
   smoothing = FALSE,
   sensSpecTable = FALSE,
   delongTest = FALSE,
-  positiveClass = ""
+  positiveClass = "",
+  showCriterionPlot = FALSE,
+  showPrevalencePlot = FALSE,
+  showDotPlot = FALSE,
+  showOptimalPoint = TRUE,
+  showConfidenceBands = FALSE,
+  cleanPlot = FALSE,
+  legendPosition = "right",
+  showThresholdTable = FALSE,
+  maxThresholds = 20,
+  costratioFP = 1,
+  interactiveROC = FALSE,
+  directLabel = FALSE,
+  quantileCIs = FALSE,
+  quantiles = "0.1,0.25,0.5,0.75,0.9",
+  usePriorPrev = FALSE,
+  priorPrev = 0.5
 )
 }
 \arguments{
@@ -68,6 +84,49 @@ cutpoint.}
 
 \item{positiveClass}{Specify the positive class level. Leave blank to use
 the first level.}
+
+\item{showCriterionPlot}{Boolean option to display the
+Sensitivity/Specificity vs. Threshold plot.}
+
+\item{showPrevalencePlot}{Boolean option to display the Predictive Values
+vs. Prevalence plot.}
+
+\item{showDotPlot}{Boolean option to display the Dot Plot showing
+distribution of values by class.}
+
+\item{showOptimalPoint}{Display the optimal point on the ROC curve.}
+
+\item{showConfidenceBands}{Display confidence bands around the ROC curve.}
+
+\item{cleanPlot}{Produce a clean ROC curve without annotations, suitable
+for publications.}
+
+\item{legendPosition}{Position of the legend in multiple ROC curve plots.}
+
+\item{showThresholdTable}{Display detailed table with different threshold
+values and corresponding  performance metrics (sensitivity, specificity,
+etc.)}
+
+\item{maxThresholds}{Maximum number of threshold values to display in the
+table.}
+
+\item{costratioFP}{Cost ratio of false positives to false negatives. Higher
+values penalize false positives more.}
+
+\item{interactiveROC}{Create an interactive HTML ROC plot.}
+
+\item{directLabel}{Directly label ROC curves instead of using a legend.}
+
+\item{quantileCIs}{Show confidence intervals at specific quantiles.}
+
+\item{quantiles}{Comma-separated list of quantiles at which to display
+confidence intervals.}
+
+\item{usePriorPrev}{Use a specified prior prevalence instead of calculating
+from data.}
+
+\item{priorPrev}{Prior probability (disease prevalence) to use for
+calculations.}
 }
 \value{
 A results object containing:
@@ -78,7 +137,22 @@ A results object containing:
 \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+\code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$simpleResultsTable$asDF}
+
+\code{as.data.frame(results$simpleResultsTable)}
 }
 \description{
 Receiver Operating Characteristic (ROC) curve analysis with optimal

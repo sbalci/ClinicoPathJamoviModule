@@ -3,7 +3,7 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecide
 menuSubgroup: Agreement
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 description:

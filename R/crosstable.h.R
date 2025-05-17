@@ -174,7 +174,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "crosstable",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = crosstableResults$new(options=options),
                 data = data,
