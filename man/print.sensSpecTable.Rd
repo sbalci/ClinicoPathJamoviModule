@@ -22,6 +22,8 @@
 \value{
 Table
 
+HTML string containing the formatted table
+
 HTML table
 }
 \description{
