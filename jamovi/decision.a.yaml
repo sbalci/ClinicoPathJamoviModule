@@ -4,7 +4,7 @@ title: Medical Decision
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 description:

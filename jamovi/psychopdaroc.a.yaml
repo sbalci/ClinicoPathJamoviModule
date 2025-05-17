@@ -2,9 +2,9 @@
 name: psychopdaroc
 title: ROC Analysis
 menuGroup: meddecide
-menuSubgroup: Decision
+menuSubgroup: ROC Analysis
 menuSubtitle: ROC Analysis, AUC, Cutpoints
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 description:
@@ -77,6 +77,14 @@ options:
           title: "Maximize Youden-Index (Kernel smoothed)"
         - name: oc_youden_normal
           title: "Maximize Youden-Index (Parametric normal)"
+
+        - name: oc_cost_ratio
+          title: "Cost-ratio optimized"
+        - name: oc_equal_sens_spec
+          title: "Equal sensitivity and specificity"
+        - name: oc_closest_01
+          title: "Closest to (0,1) point"
+
       default: maximize_metric
       description:
           R: >
@@ -238,4 +246,162 @@ options:
       description:
           R: >
             Specify the positive class level. Leave blank to use the first level.
+
+
+    - name: showCriterionPlot
+      title: Show Sensitivity/Specificity vs. Threshold Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean option to display the Sensitivity/Specificity vs. Threshold plot.
+
+    - name: showPrevalencePlot
+      title: Show Predictive Values vs. Prevalence Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean option to display the Predictive Values vs. Prevalence plot.
+
+    - name: showDotPlot
+      title: Show Dot Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean option to display the Dot Plot showing distribution of values by class.
+
+
+    - name: showOptimalPoint
+      title: Show optimal point
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display the optimal point on the ROC curve.
+
+    - name: showConfidenceBands
+      title: Show confidence bands
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display confidence bands around the ROC curve.
+
+
+    - name: cleanPlot
+      title: Publication-quality plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Produce a clean ROC curve without annotations, suitable for publications.
+
+            
+    - name: legendPosition
+      title: Legend position
+      type: List
+      options:
+        - name: "none"
+          title: "None"
+        - name: "right"
+          title: "Right"
+        - name: "bottom"
+          title: "Bottom"
+        - name: "topleft"
+          title: "Top left"
+        - name: "topright" 
+          title: "Top right"
+      default: "right"
+      description:
+          R: >
+            Position of the legend in multiple ROC curve plots.
+
+
+    - name: showThresholdTable
+      title: Show threshold table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display detailed table with different threshold values and corresponding 
+            performance metrics (sensitivity, specificity, etc.)
+
+    - name: maxThresholds
+      title: Maximum thresholds to display
+      type: Number
+      default: 20
+      min: 5
+      max: 100
+      description:
+          R: >
+            Maximum number of threshold values to display in the table.
+
+
+    - name: costratioFP
+      title: Cost ratio (FP/FN)
+      type: Number
+      default: 1.0
+      min: 0.01
+      max: 100.0
+      description:
+          R: >
+              Cost ratio of false positives to false negatives. Higher values penalize false positives more.
+
+
+    - name: interactiveROC
+      title: Interactive ROC Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+              Create an interactive HTML ROC plot.
+
+
+    - name: directLabel
+      title: Direct Label Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+              Directly label ROC curves instead of using a legend.
+
+
+
+    - name: quantileCIs 
+      title: Show CIs at Quantiles
+      type: Bool
+      default: false
+      description:
+          R: >
+              Show confidence intervals at specific quantiles.
+
+    - name: quantiles
+      title: Quantile Positions
+      type: String
+      default: "0.1,0.25,0.5,0.75,0.9"
+      description:
+          R: >
+              Comma-separated list of quantiles at which to display confidence intervals. 
+
+    - name: usePriorPrev
+      title: Use prior prevalence
+      type: Bool
+      default: false
+      description:
+          R: >
+              Use a specified prior prevalence instead of calculating from data.
+
+    - name: priorPrev
+      title: Prior prevalence
+      type: Number
+      default: 0.5
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+              Prior probability (disease prevalence) to use for calculations.
+
+
 ...

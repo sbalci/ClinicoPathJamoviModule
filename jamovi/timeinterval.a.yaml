@@ -4,7 +4,7 @@ title: Time Interval Calculator
 menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Calculate time intervals from dates or values
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 options:

@@ -159,7 +159,7 @@ waffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waffle",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = waffleResults$new(options=options),
                 data = data,

@@ -23,7 +23,23 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             smoothing = FALSE,
             sensSpecTable = FALSE,
             delongTest = FALSE,
-            positiveClass = "", ...) {
+            positiveClass = "",
+            showCriterionPlot = FALSE,
+            showPrevalencePlot = FALSE,
+            showDotPlot = FALSE,
+            showOptimalPoint = TRUE,
+            showConfidenceBands = FALSE,
+            cleanPlot = FALSE,
+            legendPosition = "right",
+            showThresholdTable = FALSE,
+            maxThresholds = 20,
+            costratioFP = 1,
+            interactiveROC = FALSE,
+            directLabel = FALSE,
+            quantileCIs = FALSE,
+            quantiles = "0.1,0.25,0.5,0.75,0.9",
+            usePriorPrev = FALSE,
+            priorPrev = 0.5, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -66,7 +82,10 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "maximize_boot_metric",
                     "minimize_boot_metric",
                     "oc_youden_kernel",
-                    "oc_youden_normal"),
+                    "oc_youden_normal",
+                    "oc_cost_ratio",
+                    "oc_equal_sens_spec",
+                    "oc_closest_01"),
                 default="maximize_metric")
             private$..allObserved <- jmvcore::OptionBool$new(
                 "allObserved",
@@ -148,6 +167,82 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "positiveClass",
                 positiveClass,
                 default="")
+            private$..showCriterionPlot <- jmvcore::OptionBool$new(
+                "showCriterionPlot",
+                showCriterionPlot,
+                default=FALSE)
+            private$..showPrevalencePlot <- jmvcore::OptionBool$new(
+                "showPrevalencePlot",
+                showPrevalencePlot,
+                default=FALSE)
+            private$..showDotPlot <- jmvcore::OptionBool$new(
+                "showDotPlot",
+                showDotPlot,
+                default=FALSE)
+            private$..showOptimalPoint <- jmvcore::OptionBool$new(
+                "showOptimalPoint",
+                showOptimalPoint,
+                default=TRUE)
+            private$..showConfidenceBands <- jmvcore::OptionBool$new(
+                "showConfidenceBands",
+                showConfidenceBands,
+                default=FALSE)
+            private$..cleanPlot <- jmvcore::OptionBool$new(
+                "cleanPlot",
+                cleanPlot,
+                default=FALSE)
+            private$..legendPosition <- jmvcore::OptionList$new(
+                "legendPosition",
+                legendPosition,
+                options=list(
+                    "none",
+                    "right",
+                    "bottom",
+                    "topleft",
+                    "topright"),
+                default="right")
+            private$..showThresholdTable <- jmvcore::OptionBool$new(
+                "showThresholdTable",
+                showThresholdTable,
+                default=FALSE)
+            private$..maxThresholds <- jmvcore::OptionNumber$new(
+                "maxThresholds",
+                maxThresholds,
+                default=20,
+                min=5,
+                max=100)
+            private$..costratioFP <- jmvcore::OptionNumber$new(
+                "costratioFP",
+                costratioFP,
+                default=1,
+                min=0.01,
+                max=100)
+            private$..interactiveROC <- jmvcore::OptionBool$new(
+                "interactiveROC",
+                interactiveROC,
+                default=FALSE)
+            private$..directLabel <- jmvcore::OptionBool$new(
+                "directLabel",
+                directLabel,
+                default=FALSE)
+            private$..quantileCIs <- jmvcore::OptionBool$new(
+                "quantileCIs",
+                quantileCIs,
+                default=FALSE)
+            private$..quantiles <- jmvcore::OptionString$new(
+                "quantiles",
+                quantiles,
+                default="0.1,0.25,0.5,0.75,0.9")
+            private$..usePriorPrev <- jmvcore::OptionBool$new(
+                "usePriorPrev",
+                usePriorPrev,
+                default=FALSE)
+            private$..priorPrev <- jmvcore::OptionNumber$new(
+                "priorPrev",
+                priorPrev,
+                default=0.5,
+                min=0.001,
+                max=0.999)
 
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
@@ -167,6 +262,22 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..sensSpecTable)
             self$.addOption(private$..delongTest)
             self$.addOption(private$..positiveClass)
+            self$.addOption(private$..showCriterionPlot)
+            self$.addOption(private$..showPrevalencePlot)
+            self$.addOption(private$..showDotPlot)
+            self$.addOption(private$..showOptimalPoint)
+            self$.addOption(private$..showConfidenceBands)
+            self$.addOption(private$..cleanPlot)
+            self$.addOption(private$..legendPosition)
+            self$.addOption(private$..showThresholdTable)
+            self$.addOption(private$..maxThresholds)
+            self$.addOption(private$..costratioFP)
+            self$.addOption(private$..interactiveROC)
+            self$.addOption(private$..directLabel)
+            self$.addOption(private$..quantileCIs)
+            self$.addOption(private$..quantiles)
+            self$.addOption(private$..usePriorPrev)
+            self$.addOption(private$..priorPrev)
         }),
     active = list(
         dependentVars = function() private$..dependentVars$value,
@@ -186,7 +297,23 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         smoothing = function() private$..smoothing$value,
         sensSpecTable = function() private$..sensSpecTable$value,
         delongTest = function() private$..delongTest$value,
-        positiveClass = function() private$..positiveClass$value),
+        positiveClass = function() private$..positiveClass$value,
+        showCriterionPlot = function() private$..showCriterionPlot$value,
+        showPrevalencePlot = function() private$..showPrevalencePlot$value,
+        showDotPlot = function() private$..showDotPlot$value,
+        showOptimalPoint = function() private$..showOptimalPoint$value,
+        showConfidenceBands = function() private$..showConfidenceBands$value,
+        cleanPlot = function() private$..cleanPlot$value,
+        legendPosition = function() private$..legendPosition$value,
+        showThresholdTable = function() private$..showThresholdTable$value,
+        maxThresholds = function() private$..maxThresholds$value,
+        costratioFP = function() private$..costratioFP$value,
+        interactiveROC = function() private$..interactiveROC$value,
+        directLabel = function() private$..directLabel$value,
+        quantileCIs = function() private$..quantileCIs$value,
+        quantiles = function() private$..quantiles$value,
+        usePriorPrev = function() private$..usePriorPrev$value,
+        priorPrev = function() private$..priorPrev$value),
     private = list(
         ..dependentVars = NA,
         ..classVar = NA,
@@ -205,7 +332,23 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..smoothing = NA,
         ..sensSpecTable = NA,
         ..delongTest = NA,
-        ..positiveClass = NA)
+        ..positiveClass = NA,
+        ..showCriterionPlot = NA,
+        ..showPrevalencePlot = NA,
+        ..showDotPlot = NA,
+        ..showOptimalPoint = NA,
+        ..showConfidenceBands = NA,
+        ..cleanPlot = NA,
+        ..legendPosition = NA,
+        ..showThresholdTable = NA,
+        ..maxThresholds = NA,
+        ..costratioFP = NA,
+        ..interactiveROC = NA,
+        ..directLabel = NA,
+        ..quantileCIs = NA,
+        ..quantiles = NA,
+        ..usePriorPrev = NA,
+        ..priorPrev = NA)
 )
 
 psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -217,7 +360,16 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         resultsTable = function() private$.items[["resultsTable"]],
         delongTest = function() private$.items[["delongTest"]],
         plotROC = function() private$.items[["plotROC"]],
-        sensSpecTable = function() private$.items[["sensSpecTable"]]),
+        sensSpecTable = function() private$.items[["sensSpecTable"]],
+        criterionPlot = function() private$.items[["criterionPlot"]],
+        prevalencePlot = function() private$.items[["prevalencePlot"]],
+        dotPlot = function() private$.items[["dotPlot"]],
+        dotPlotMessage = function() private$.items[["dotPlotMessage"]],
+        simpleResultsTable = function() private$.items[["simpleResultsTable"]],
+        aucSummaryTable = function() private$.items[["aucSummaryTable"]],
+        delongComparisonTable = function() private$.items[["delongComparisonTable"]],
+        thresholdTable = function() private$.items[["thresholdTable"]],
+        interactivePlot = function() private$.items[["interactivePlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -344,7 +496,226 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "direction",
                     "positiveClass"),
                 template=jmvcore::Html$new(
-                    options=options)))}))
+                    options=options)))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="criterionPlot",
+                title="Sensitivity/Specificity vs. Threshold",
+                template=jmvcore::Image$new(
+                    options=options,
+                    title="$key",
+                    width=600,
+                    height=400,
+                    renderFun=".plotCriterion",
+                    requiresData=TRUE),
+                visible="(showCriterionPlot)",
+                clearWith=list(
+                    "method",
+                    "metric",
+                    "direction",
+                    "allObserved",
+                    "break_ties",
+                    "tol_metric",
+                    "boot_runs")))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="prevalencePlot",
+                title="Predictive Values vs. Prevalence",
+                template=jmvcore::Image$new(
+                    options=options,
+                    title="$key",
+                    width=600,
+                    height=400,
+                    renderFun=".plotPrevalence",
+                    requiresData=TRUE),
+                visible="(showPrevalencePlot)",
+                clearWith=list(
+                    "method",
+                    "metric",
+                    "direction",
+                    "allObserved",
+                    "break_ties",
+                    "tol_metric",
+                    "boot_runs")))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="dotPlot",
+                title="Test Values Distribution",
+                template=jmvcore::Image$new(
+                    options=options,
+                    title="$key",
+                    width=600,
+                    height=400,
+                    renderFun=".plotDot",
+                    requiresData=TRUE),
+                visible="(showDotPlot)",
+                clearWith=list(
+                    "method",
+                    "metric",
+                    "direction",
+                    "allObserved",
+                    "break_ties",
+                    "tol_metric",
+                    "boot_runs")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dotPlotMessage",
+                title="Dot Plot Note",
+                visible="(showDotPlot && combinePlots)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="simpleResultsTable",
+                title="ROC Analysis Summary",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="aucSummaryTable",
+                title="Area Under the ROC Curve",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="delongComparisonTable",
+                title="DeLong Test Results",
+                visible="(delongTest)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "positiveClass"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="auc_diff", 
+                        `title`="AUC Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `title`="Z-statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="thresholdTable",
+                title="Cut-off Values Table",
+                visible="(showThresholdTable)",
+                columns=list(
+                    list(
+                        `name`="threshold", 
+                        `title`="Cut-off", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="plr", 
+                        `title`="+LR", 
+                        `type`="number"),
+                    list(
+                        `name`="nlr", 
+                        `title`="-LR", 
+                        `type`="number"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="interactivePlot",
+                title="Interactive ROC Plot",
+                width=650,
+                height=500,
+                renderFun=".plotInteractiveROC",
+                visible="(interactiveROC)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "subGroup",
+                    "method",
+                    "metric",
+                    "direction",
+                    "positiveClass"),
+                refs=list(
+                    "plotROC")))}))
 
 psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "psychopdarocBase",
@@ -354,7 +725,7 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaroc",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = psychopdarocResults$new(options=options),
                 data = data,
@@ -395,6 +766,33 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param delongTest Perform DeLong's test for comparing AUCs.
 #' @param positiveClass Specify the positive class level. Leave blank to use
 #'   the first level.
+#' @param showCriterionPlot Boolean option to display the
+#'   Sensitivity/Specificity vs. Threshold plot.
+#' @param showPrevalencePlot Boolean option to display the Predictive Values
+#'   vs. Prevalence plot.
+#' @param showDotPlot Boolean option to display the Dot Plot showing
+#'   distribution of values by class.
+#' @param showOptimalPoint Display the optimal point on the ROC curve.
+#' @param showConfidenceBands Display confidence bands around the ROC curve.
+#' @param cleanPlot Produce a clean ROC curve without annotations, suitable
+#'   for publications.
+#' @param legendPosition Position of the legend in multiple ROC curve plots.
+#' @param showThresholdTable Display detailed table with different threshold
+#'   values and corresponding  performance metrics (sensitivity, specificity,
+#'   etc.)
+#' @param maxThresholds Maximum number of threshold values to display in the
+#'   table.
+#' @param costratioFP Cost ratio of false positives to false negatives. Higher
+#'   values penalize false positives more.
+#' @param interactiveROC Create an interactive HTML ROC plot.
+#' @param directLabel Directly label ROC curves instead of using a legend.
+#' @param quantileCIs Show confidence intervals at specific quantiles.
+#' @param quantiles Comma-separated list of quantiles at which to display
+#'   confidence intervals.
+#' @param usePriorPrev Use a specified prior prevalence instead of calculating
+#'   from data.
+#' @param priorPrev Prior probability (disease prevalence) to use for
+#'   calculations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -403,7 +801,22 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+#'   \code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
+#'   \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
+#'   \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
+#'   \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$simpleResultsTable$asDF}
+#'
+#' \code{as.data.frame(results$simpleResultsTable)}
 #'
 #' @export
 psychopdaroc <- function(
@@ -425,7 +838,23 @@ psychopdaroc <- function(
     smoothing = FALSE,
     sensSpecTable = FALSE,
     delongTest = FALSE,
-    positiveClass = "") {
+    positiveClass = "",
+    showCriterionPlot = FALSE,
+    showPrevalencePlot = FALSE,
+    showDotPlot = FALSE,
+    showOptimalPoint = TRUE,
+    showConfidenceBands = FALSE,
+    cleanPlot = FALSE,
+    legendPosition = "right",
+    showThresholdTable = FALSE,
+    maxThresholds = 20,
+    costratioFP = 1,
+    interactiveROC = FALSE,
+    directLabel = FALSE,
+    quantileCIs = FALSE,
+    quantiles = "0.1,0.25,0.5,0.75,0.9",
+    usePriorPrev = FALSE,
+    priorPrev = 0.5) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("psychopdaroc requires jmvcore to be installed (restart may be required)")
@@ -461,7 +890,23 @@ psychopdaroc <- function(
         smoothing = smoothing,
         sensSpecTable = sensSpecTable,
         delongTest = delongTest,
-        positiveClass = positiveClass)
+        positiveClass = positiveClass,
+        showCriterionPlot = showCriterionPlot,
+        showPrevalencePlot = showPrevalencePlot,
+        showDotPlot = showDotPlot,
+        showOptimalPoint = showOptimalPoint,
+        showConfidenceBands = showConfidenceBands,
+        cleanPlot = cleanPlot,
+        legendPosition = legendPosition,
+        showThresholdTable = showThresholdTable,
+        maxThresholds = maxThresholds,
+        costratioFP = costratioFP,
+        interactiveROC = interactiveROC,
+        directLabel = directLabel,
+        quantileCIs = quantileCIs,
+        quantiles = quantiles,
+        usePriorPrev = usePriorPrev,
+        priorPrev = priorPrev)
 
     analysis <- psychopdarocClass$new(
         options = options,

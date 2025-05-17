@@ -4,7 +4,7 @@ title: Odds Ratio Table and Plot
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 description:

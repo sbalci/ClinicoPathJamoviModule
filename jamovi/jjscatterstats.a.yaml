@@ -4,7 +4,7 @@ title: Scatter Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 

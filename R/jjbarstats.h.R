@@ -171,7 +171,7 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjbarstats",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = jjbarstatsResults$new(options=options),
                 data = data,

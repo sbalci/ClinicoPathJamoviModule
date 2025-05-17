@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.2.89
+version: 0.0.3.01
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-05-12'
+date: '2024-05-17'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -693,7 +693,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: meddecide
     menuTitle: ROC Analysis
-    menuSubgroup: Decision
+    menuSubgroup: ROC Analysis
     menuSubtitle: ROC Analysis, AUC, Cutpoints
     description: >
       Receiver Operating Characteristic (ROC) curve analysis with optimal

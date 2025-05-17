@@ -28,7 +28,6 @@ children:
             name: subGroup
             maxItemCount: 1
             isTarget: true
-  
   - type: Label
     label: Analysis Settings
     children:
@@ -43,7 +42,6 @@ children:
             name: positiveClass
             format: string
             label: Positive class (leave blank for first level)
-
   - type: CollapseBox
     label: Visualization
     margin: normal
@@ -53,7 +51,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Plots
+            label: Plot Settings
             fitToGrid: true
             cell:
               column: 0
@@ -64,19 +62,58 @@ children:
               - type: CheckBox
                 name: combinePlots
               - type: CheckBox
-                name: smoothing
+                name: cleanPlot
               - type: CheckBox
-                name: displaySE
+                name: showOptimalPoint
+                enable: (!cleanPlot)
+              - type: ComboBox
+                name: legendPosition
           - type: Label
-            label: Tables
+            label: Plot Options
             fitToGrid: true
             cell:
               column: 1
               row: 0
             children:
               - type: CheckBox
+                name: smoothing
+              - type: CheckBox
+                name: displaySE
+                enable: (!cleanPlot)
+              - type: CheckBox
+                name: showConfidenceBands
+                enable: (!cleanPlot)
+              - type: CheckBox
                 name: sensSpecTable
-
+              - type: CheckBox
+                name: showThresholdTable
+              - type: TextBox
+                name: maxThresholds
+                format: number
+                enable: (showThresholdTable)
+  - type: CollapseBox
+    label: Additional Plots
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showCriterionPlot
+            label: Show Sensitivity/Specificity vs. Threshold Plot
+          - type: CheckBox
+            name: showPrevalencePlot
+            label: Show Predictive Values vs. Prevalence Plot
+          - type: CheckBox
+            name: showDotPlot
+            label: Show Dot Plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: costratioFP
+        format: number
   - type: CollapseBox
     label: Advanced
     margin: normal
@@ -102,9 +139,35 @@ children:
           - type: TextBox
             name: specifyCutScore
             format: string
-            enable: 'method:oc_manual'
+            enable: method:oc_manual
             label: Custom cut score
           - type: TextBox
             name: boot_runs
             format: number
             label: Bootstrap runs
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: interactiveROC
+      - type: CheckBox
+        name: directLabel
+      - type: CheckBox
+        name: quantileCIs
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: quantiles
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: usePriorPrev
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: priorPrev
+        format: number
