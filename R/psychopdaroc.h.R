@@ -7,8 +7,8 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     public = list(
         initialize = function(
             dependentVars = NULL,
-            positiveClass = NULL,
             classVar = NULL,
+            positiveClass = NULL,
             subGroup = NULL,
             method = "maximize_metric",
             allObserved = FALSE,
@@ -54,10 +54,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "continuous"),
                 permitted=list(
                     "numeric"))
-            private$..positiveClass <- jmvcore::OptionLevel$new(
-                "positiveClass",
-                positiveClass,
-                variable="(classVar)")
             private$..classVar <- jmvcore::OptionVariable$new(
                 "classVar",
                 classVar,
@@ -65,6 +61,10 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..positiveClass <- jmvcore::OptionLevel$new(
+                "positiveClass",
+                positiveClass,
+                variable="(classVar)")
             private$..subGroup <- jmvcore::OptionVariable$new(
                 "subGroup",
                 subGroup,
@@ -245,8 +245,8 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 max=0.999)
 
             self$.addOption(private$..dependentVars)
-            self$.addOption(private$..positiveClass)
             self$.addOption(private$..classVar)
+            self$.addOption(private$..positiveClass)
             self$.addOption(private$..subGroup)
             self$.addOption(private$..method)
             self$.addOption(private$..allObserved)
@@ -281,8 +281,8 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         }),
     active = list(
         dependentVars = function() private$..dependentVars$value,
-        positiveClass = function() private$..positiveClass$value,
         classVar = function() private$..classVar$value,
+        positiveClass = function() private$..positiveClass$value,
         subGroup = function() private$..subGroup$value,
         method = function() private$..method$value,
         allObserved = function() private$..allObserved$value,
@@ -316,8 +316,8 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         priorPrev = function() private$..priorPrev$value),
     private = list(
         ..dependentVars = NA,
-        ..positiveClass = NA,
         ..classVar = NA,
+        ..positiveClass = NA,
         ..subGroup = NA,
         ..method = NA,
         ..allObserved = NA,
@@ -357,19 +357,19 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
+        simpleResultsTable = function() private$.items[["simpleResultsTable"]],
         resultsTable = function() private$.items[["resultsTable"]],
+        thresholdTable = function() private$.items[["thresholdTable"]],
+        sensSpecTable = function() private$.items[["sensSpecTable"]],
+        aucSummaryTable = function() private$.items[["aucSummaryTable"]],
+        delongComparisonTable = function() private$.items[["delongComparisonTable"]],
         delongTest = function() private$.items[["delongTest"]],
         plotROC = function() private$.items[["plotROC"]],
-        sensSpecTable = function() private$.items[["sensSpecTable"]],
+        interactivePlot = function() private$.items[["interactivePlot"]],
         criterionPlot = function() private$.items[["criterionPlot"]],
         prevalencePlot = function() private$.items[["prevalencePlot"]],
         dotPlot = function() private$.items[["dotPlot"]],
-        dotPlotMessage = function() private$.items[["dotPlotMessage"]],
-        simpleResultsTable = function() private$.items[["simpleResultsTable"]],
-        aucSummaryTable = function() private$.items[["aucSummaryTable"]],
-        delongComparisonTable = function() private$.items[["delongComparisonTable"]],
-        thresholdTable = function() private$.items[["thresholdTable"]],
-        interactivePlot = function() private$.items[["interactivePlot"]]),
+        dotPlotMessage = function() private$.items[["dotPlotMessage"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -388,13 +388,40 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="procedureNotes"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="simpleResultsTable",
+                title="ROC Analysis Summary",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="resultsTable",
                 refs=list(
                     "cutpointr",
                     "pROC"),
-                title="Results Table",
+                title="Optimal Cutpoints and Performance",
                 visible=TRUE,
                 clearWith=list(
                     "dependentVars",
@@ -449,10 +476,139 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                             `name`="metricValue", 
                             `title`="Metric Score", 
                             `type`="number")))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="thresholdTable",
+                title="Detailed Threshold Performance",
+                visible="(showThresholdTable)",
+                columns=list(
+                    list(
+                        `name`="threshold", 
+                        `title`="Cut-off", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="plr", 
+                        `title`="+LR", 
+                        `type`="number"),
+                    list(
+                        `name`="nlr", 
+                        `title`="-LR", 
+                        `type`="number"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number"))))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="sensSpecTable",
+                title="Sensitivity & Specificity Tables",
+                visible="(sensSpecTable)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "subGroup",
+                    "method",
+                    "allObserved",
+                    "specifyCutScore",
+                    "metric",
+                    "boot_runs",
+                    "break_ties",
+                    "tol_metric",
+                    "direction",
+                    "positiveClass"),
+                template=jmvcore::Html$new(
+                    options=options)))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="aucSummaryTable",
+                title="Area Under the ROC Curve",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="delongComparisonTable",
+                title="DeLong Test Pairwise Comparisons",
+                visible="(delongTest)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "positiveClass"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="auc_diff", 
+                        `title`="AUC Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `title`="Z-statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="delongTest",
-                title="DeLong Test of Difference between AUCs",
+                title="DeLong Test Details",
                 visible="(delongTest)",
                 clearWith=list(
                     "dependentVars",
@@ -477,26 +633,24 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=450,
                     renderFun=".plotROC",
                     visible="(plotROC)")))
-            self$add(jmvcore::Array$new(
+            self$add(jmvcore::Image$new(
                 options=options,
-                name="sensSpecTable",
-                title="Sensitivity & Specificity",
-                visible="(sensSpecTable)",
+                name="interactivePlot",
+                title="Interactive ROC Plot",
+                width=650,
+                height=500,
+                renderFun=".plotInteractiveROC",
+                visible="(interactiveROC)",
                 clearWith=list(
                     "dependentVars",
                     "classVar",
                     "subGroup",
                     "method",
-                    "allObserved",
-                    "specifyCutScore",
                     "metric",
-                    "boot_runs",
-                    "break_ties",
-                    "tol_metric",
                     "direction",
                     "positiveClass"),
-                template=jmvcore::Html$new(
-                    options=options)))
+                refs=list(
+                    "plotROC")))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="criterionPlot",
@@ -561,161 +715,7 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="dotPlotMessage",
                 title="Dot Plot Note",
-                visible="(showDotPlot && combinePlots)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="simpleResultsTable",
-                title="ROC Analysis Summary",
-                visible=TRUE,
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="auc", 
-                        `title`="AUC", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="aucSummaryTable",
-                title="Area Under the ROC Curve",
-                visible=TRUE,
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="auc", 
-                        `title`="AUC", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="delongComparisonTable",
-                title="DeLong Test Results",
-                visible="(delongTest)",
-                clearWith=list(
-                    "dependentVars",
-                    "classVar",
-                    "positiveClass"),
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="auc_diff", 
-                        `title`="AUC Difference", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="z", 
-                        `title`="Z-statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="thresholdTable",
-                title="Cut-off Values Table",
-                visible="(showThresholdTable)",
-                columns=list(
-                    list(
-                        `name`="threshold", 
-                        `title`="Cut-off", 
-                        `type`="number"),
-                    list(
-                        `name`="sensitivity", 
-                        `title`="Sensitivity", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="specificity", 
-                        `title`="Specificity", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="accuracy", 
-                        `title`="Accuracy", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="ppv", 
-                        `title`="PPV", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="npv", 
-                        `title`="NPV", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="plr", 
-                        `title`="+LR", 
-                        `type`="number"),
-                    list(
-                        `name`="nlr", 
-                        `title`="-LR", 
-                        `type`="number"),
-                    list(
-                        `name`="youden", 
-                        `title`="Youden's J", 
-                        `type`="number"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="interactivePlot",
-                title="Interactive ROC Plot",
-                width=650,
-                height=500,
-                renderFun=".plotInteractiveROC",
-                visible="(interactiveROC)",
-                clearWith=list(
-                    "dependentVars",
-                    "classVar",
-                    "subGroup",
-                    "method",
-                    "metric",
-                    "direction",
-                    "positiveClass"),
-                refs=list(
-                    "plotROC")))}))
+                visible="(showDotPlot && combinePlots)"))}))
 
 psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "psychopdarocBase",
@@ -746,9 +746,9 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dependentVars Variable(s) to be tested for classification
 #'   performance.
+#' @param classVar Binary classification variable (gold standard).
 #' @param positiveClass Specifies which level of the class variable should be
 #'   treated as the positive class.
-#' @param classVar Binary classification variable (gold standard).
 #' @param subGroup Optional variable for subgroup analysis.
 #' @param method Method to determine optimal cut point.
 #' @param allObserved Show all observed scores in results table.
@@ -797,19 +797,19 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
+#'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+#'   \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
-#'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+#'   \code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -822,8 +822,8 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 psychopdaroc <- function(
     data,
     dependentVars,
-    positiveClass,
     classVar,
+    positiveClass,
     subGroup,
     method = "maximize_metric",
     allObserved = FALSE,
@@ -874,8 +874,8 @@ psychopdaroc <- function(
 
     options <- psychopdarocOptions$new(
         dependentVars = dependentVars,
-        positiveClass = positiveClass,
         classVar = classVar,
+        positiveClass = positiveClass,
         subGroup = subGroup,
         method = method,
         allObserved = allObserved,

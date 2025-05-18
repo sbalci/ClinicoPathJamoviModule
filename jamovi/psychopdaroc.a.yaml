@@ -29,16 +29,6 @@ options:
           R: >
             Variable(s) to be tested for classification performance.
 
-    - name: positiveClass
-      title: Positive Class
-      type: Level
-      variable: (classVar)
-      description:
-          ui: >
-            Select which level of the class variable should be treated as the positive class.
-          R: >
-            Specifies which level of the class variable should be treated as the positive class.
-
 
 
     - name: classVar
@@ -51,6 +41,18 @@ options:
       description:
           R: >
             Binary classification variable (gold standard).
+
+
+    - name: positiveClass
+      title: Positive Class
+      type: Level
+      variable: (classVar)
+      description:
+          ui: >
+            Select which level of the class variable should be treated as the positive class.
+          R: >
+            Specifies which level of the class variable should be treated as the positive class.
+
 
     - name: subGroup
       title: Group Variable

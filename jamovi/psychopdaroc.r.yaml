@@ -4,6 +4,9 @@ title: ROC Analysis
 jrs: '1.1'
 
 items:
+    # ==========================================
+    # INTRODUCTION AND GUIDANCE
+    # ==========================================
     - name: instructions
       type: Html
       visible: true
@@ -11,11 +14,39 @@ items:
     - name: procedureNotes
       type: Html
 
+    # ==========================================
+    # SUMMARY RESULTS - Most important information first
+    # ==========================================
+    - name: simpleResultsTable
+      title: ROC Analysis Summary
+      type: Table
+      visible: true
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    # ==========================================
+    # OPTIMAL CUTPOINTS AND DETAILED RESULTS
+    # ==========================================
     - name: resultsTable
       refs: 
         - cutpointr
         - pROC
-      title: Results Table
+      title: Optimal Cutpoints and Performance
       type: Array
       visible: true
       clearWith:
@@ -64,36 +95,46 @@ items:
             title: Metric Score
             type: number
 
-    - name: delongTest
-      title: DeLong Test of Difference between AUCs
-      type: Preformatted
-      visible: (delongTest)
-      clearWith:
-        - dependentVars
-        - classVar
-        - subGroup
-        - method
-        - allObserved
-        - specifyCutScore
-        - metric
-        - boot_runs
-        - break_ties
-        - tol_metric
-        - direction
-        - positiveClass
-
-    - name: plotROC
-      type: Array
-      title: ROC Curves
-      template:
-        type: Image
-        width: 550
-        height: 450
-        renderFun: .plotROC
-        visible: (plotROC)
+    - name: thresholdTable
+      title: Detailed Threshold Performance
+      type: Table
+      visible: (showThresholdTable)
+      columns:
+        - name: threshold
+          title: Cut-off
+          type: number
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: plr
+          title: +LR
+          type: number
+        - name: nlr
+          title: -LR
+          type: number
+        - name: youden
+          title: Youden's J
+          type: number
 
     - name: sensSpecTable
-      title: Sensitivity & Specificity
+      title: Sensitivity & Specificity Tables
       type: Array
       visible: (sensSpecTable)
       clearWith:
@@ -112,6 +153,108 @@ items:
       template:
         type: Html
 
+    # ==========================================
+    # AUC COMPARISON AND DELONG TEST
+    # ==========================================
+    - name: aucSummaryTable
+      title: Area Under the ROC Curve
+      type: Table
+      visible: true
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: delongComparisonTable
+      title: DeLong Test Pairwise Comparisons
+      type: Table
+      visible: (delongTest)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: auc_diff
+          title: AUC Difference
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: z
+          title: Z-statistic
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: delongTest
+      title: DeLong Test Details
+      type: Preformatted
+      visible: (delongTest)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
+        - positiveClass
+
+    # ==========================================
+    # VISUALIZATIONS - Group all plots together
+    # ==========================================
+    - name: plotROC
+      type: Array
+      title: ROC Curves
+      template:
+        type: Image
+        width: 550
+        height: 450
+        renderFun: .plotROC
+        visible: (plotROC)
+
+    - name: interactivePlot
+      title: Interactive ROC Plot
+      type: Image
+      width: 650
+      height: 500
+      renderFun: .plotInteractiveROC
+      visible: (interactiveROC)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - metric
+        - direction
+        - positiveClass
+      refs: 
+        - plotROC
 
     - name: criterionPlot
       title: Sensitivity/Specificity vs. Threshold
@@ -177,142 +320,6 @@ items:
       title: Dot Plot Note
       type: Html
       visible: (showDotPlot && combinePlots)
-
-
-    - name: simpleResultsTable
-      title: ROC Analysis Summary
-      type: Table
-      visible: true
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
-
-    - name: aucSummaryTable
-      title: Area Under the ROC Curve
-      type: Table
-      visible: true
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
-
-
-    - name: delongComparisonTable
-      title: DeLong Test Results
-      type: Table
-      visible: (delongTest)
-      clearWith:
-        - dependentVars
-        - classVar
-        - positiveClass
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: auc_diff
-          title: AUC Difference
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: z
-          title: Z-statistic
-          type: number
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
-
-    - name: thresholdTable
-      title: Cut-off Values Table
-      type: Table
-      visible: (showThresholdTable)
-      columns:
-        - name: threshold
-          title: Cut-off
-          type: number
-        - name: sensitivity
-          title: Sensitivity
-          type: number
-          format: pc
-        - name: specificity
-          title: Specificity
-          type: number
-          format: pc
-        - name: accuracy
-          title: Accuracy
-          type: number
-          format: pc
-        - name: ppv
-          title: PPV
-          type: number
-          format: pc
-        - name: npv
-          title: NPV
-          type: number
-          format: pc
-        - name: plr
-          title: +LR
-          type: number
-        - name: nlr
-          title: -LR
-          type: number
-        - name: youden
-          title: Youden's J
-          type: number
-
-
-    - name: interactivePlot
-      title: Interactive ROC Plot
-      type: Image
-      width: 650
-      height: 500
-      renderFun: .plotInteractiveROC
-      visible: (interactiveROC)
-      clearWith:
-        - dependentVars
-        - classVar
-        - subGroup
-        - method
-        - metric
-        - direction
-        - positiveClass
-      refs: 
-        - plotROC
-
 
 refs:
     - cutpointr
