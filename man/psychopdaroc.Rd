@@ -7,8 +7,8 @@
 psychopdaroc(
   data,
   dependentVars,
-  positiveClass,
   classVar,
+  positiveClass,
   subGroup,
   method = "maximize_metric",
   allObserved = FALSE,
@@ -48,10 +48,10 @@ psychopdaroc(
 \item{dependentVars}{Variable(s) to be tested for classification
 performance.}
 
+\item{classVar}{Binary classification variable (gold standard).}
+
 \item{positiveClass}{Specifies which level of the class variable should be
 treated as the positive class.}
-
-\item{classVar}{Binary classification variable (gold standard).}
 
 \item{subGroup}{Optional variable for subgroup analysis.}
 
@@ -133,19 +133,19 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
+\code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+\code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plotROC} \tab \tab \tab \tab \tab an array of images \cr
-\code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+\code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$criterionPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
-\code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$interactivePlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

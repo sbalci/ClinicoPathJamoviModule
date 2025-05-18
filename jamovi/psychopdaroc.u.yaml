@@ -4,6 +4,9 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # ==========================================
+  # VARIABLES SECTION - Keep at the top
+  # ==========================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -21,6 +24,9 @@ children:
             name: classVar
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: positiveClass
+            enable: (classVar)
       - type: TargetLayoutBox
         label: Group Variable
         children:
@@ -28,20 +34,60 @@ children:
             name: subGroup
             maxItemCount: 1
             isTarget: true
-  - type: Label
-    label: Analysis Settings
+
+  # ==========================================
+  # MAIN ANALYSIS OPTIONS - Basic settings
+  # ==========================================
+  - type: CollapseBox
+    label: Analysis Options
+    margin: normal
+    collapsed: false  # Open by default
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: method
+            label: Method
           - type: CheckBox
             name: allObserved
+            label: Show all observed cutpoints
           - type: TextBox
-            name: positiveClass
+            name: specifyCutScore
             format: string
-            label: Positive class (leave blank for first level)
+            enable: method:oc_manual
+            label: Custom cut score
+          - type: ComboBox
+            name: direction
+            label: Direction
+
+  # ==========================================
+  # PREVALENCE SETTINGS - Group related options
+  # ==========================================
+  - type: CollapseBox
+    label: Prevalence Settings
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: usePriorPrev
+            label: Use prior prevalence
+          - type: TextBox
+            name: priorPrev
+            format: number
+            label: Prior prevalence value
+            enable: (usePriorPrev)
+          - type: TextBox
+            name: costratioFP
+            format: number
+            label: Cost ratio (FP/FN)
+
+  # ==========================================
+  # VISUALIZATION OPTIONS - All plot-related items
+  # ==========================================
   - type: CollapseBox
     label: Visualization
     margin: normal
@@ -51,46 +97,95 @@ children:
         margin: large
         children:
           - type: Label
-            label: Plot Settings
-            fitToGrid: true
-            cell:
-              column: 0
-              row: 0
+            label: Basic Plot Settings
             children:
               - type: CheckBox
                 name: plotROC
+                label: Show ROC curves
               - type: CheckBox
                 name: combinePlots
-              - type: CheckBox
-                name: cleanPlot
+                label: Combine all curves in one plot
+                enable: (plotROC)
               - type: CheckBox
                 name: showOptimalPoint
-                enable: (!cleanPlot)
-              - type: ComboBox
-                name: legendPosition
+                label: Show optimal cutpoint
+                enable: (plotROC)
+              - type: CheckBox
+                name: directLabel
+                label: Label curves directly
+                enable: (plotROC && combinePlots)
+          
+      - type: LayoutBox
+        margin: large
+        children:
           - type: Label
-            label: Plot Options
-            fitToGrid: true
-            cell:
-              column: 1
-              row: 0
+            label: Plot Style
             children:
               - type: CheckBox
+                name: cleanPlot
+                label: Publication-quality plot
+              - type: ComboBox
+                name: legendPosition
+                label: Legend position
+              - type: CheckBox
                 name: smoothing
+                label: Apply LOESS smoothing
+              - type: CheckBox
+                name: interactiveROC
+                label: Create interactive plot
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label 
+            label: Additional Information
+            children:
               - type: CheckBox
                 name: displaySE
+                label: Show standard error bars
                 enable: (!cleanPlot)
               - type: CheckBox
                 name: showConfidenceBands
+                label: Show confidence bands
                 enable: (!cleanPlot)
               - type: CheckBox
-                name: sensSpecTable
-              - type: CheckBox
-                name: showThresholdTable
+                name: quantileCIs
+                label: Show confidence intervals at quantiles
               - type: TextBox
-                name: maxThresholds
-                format: number
-                enable: (showThresholdTable)
+                name: quantiles
+                format: string
+                label: Quantile positions
+                enable: (quantileCIs)
+
+  # ==========================================
+  # ADDITIONAL OUTPUTS
+  # ==========================================
+  - type: CollapseBox
+    label: Additional Outputs
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sensSpecTable
+            label: Show sensitivity/specificity tables
+          - type: CheckBox
+            name: showThresholdTable
+            label: Show threshold table
+          - type: TextBox
+            name: maxThresholds
+            format: number
+            label: Maximum thresholds to display
+            enable: (showThresholdTable)
+          - type: CheckBox
+            name: delongTest
+            label: Perform DeLong's test for comparing AUCs
+
+  # ==========================================
+  # ADDITIONAL PLOTS 
+  # ==========================================
   - type: CollapseBox
     label: Additional Plots
     margin: normal
@@ -101,19 +196,17 @@ children:
         children:
           - type: CheckBox
             name: showCriterionPlot
-            label: Show Sensitivity/Specificity vs. Threshold Plot
+            label: Sensitivity/Specificity vs. Threshold
           - type: CheckBox
             name: showPrevalencePlot
-            label: Show Predictive Values vs. Prevalence Plot
+            label: Predictive Values vs. Prevalence
           - type: CheckBox
             name: showDotPlot
-            label: Show Dot Plot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: costratioFP
-        format: number
+            label: Test Values Distribution
+
+  # ==========================================
+  # ADVANCED OPTIONS
+  # ==========================================
   - type: CollapseBox
     label: Advanced
     margin: normal
@@ -122,52 +215,17 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: delongTest
           - type: ComboBox
             name: metric
+            label: Optimization metric
           - type: TextBox
             name: tol_metric
             format: number
+            label: Metric tolerance
           - type: ComboBox
             name: break_ties
-          - type: ComboBox
-            name: direction
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: specifyCutScore
-            format: string
-            enable: method:oc_manual
-            label: Custom cut score
+            label: Tie-breaking method
           - type: TextBox
             name: boot_runs
             format: number
             label: Bootstrap runs
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: interactiveROC
-      - type: CheckBox
-        name: directLabel
-      - type: CheckBox
-        name: quantileCIs
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: quantiles
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: usePriorPrev
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: priorPrev
-        format: number
