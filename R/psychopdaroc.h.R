@@ -7,6 +7,7 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     public = list(
         initialize = function(
             dependentVars = NULL,
+            positiveClass = NULL,
             classVar = NULL,
             subGroup = NULL,
             method = "maximize_metric",
@@ -23,7 +24,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             smoothing = FALSE,
             sensSpecTable = FALSE,
             delongTest = FALSE,
-            positiveClass = "",
             showCriterionPlot = FALSE,
             showPrevalencePlot = FALSE,
             showDotPlot = FALSE,
@@ -54,6 +54,10 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..positiveClass <- jmvcore::OptionLevel$new(
+                "positiveClass",
+                positiveClass,
+                variable="(classVar)")
             private$..classVar <- jmvcore::OptionVariable$new(
                 "classVar",
                 classVar,
@@ -163,10 +167,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "delongTest",
                 delongTest,
                 default=FALSE)
-            private$..positiveClass <- jmvcore::OptionString$new(
-                "positiveClass",
-                positiveClass,
-                default="")
             private$..showCriterionPlot <- jmvcore::OptionBool$new(
                 "showCriterionPlot",
                 showCriterionPlot,
@@ -245,6 +245,7 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 max=0.999)
 
             self$.addOption(private$..dependentVars)
+            self$.addOption(private$..positiveClass)
             self$.addOption(private$..classVar)
             self$.addOption(private$..subGroup)
             self$.addOption(private$..method)
@@ -261,7 +262,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..smoothing)
             self$.addOption(private$..sensSpecTable)
             self$.addOption(private$..delongTest)
-            self$.addOption(private$..positiveClass)
             self$.addOption(private$..showCriterionPlot)
             self$.addOption(private$..showPrevalencePlot)
             self$.addOption(private$..showDotPlot)
@@ -281,6 +281,7 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         }),
     active = list(
         dependentVars = function() private$..dependentVars$value,
+        positiveClass = function() private$..positiveClass$value,
         classVar = function() private$..classVar$value,
         subGroup = function() private$..subGroup$value,
         method = function() private$..method$value,
@@ -297,7 +298,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         smoothing = function() private$..smoothing$value,
         sensSpecTable = function() private$..sensSpecTable$value,
         delongTest = function() private$..delongTest$value,
-        positiveClass = function() private$..positiveClass$value,
         showCriterionPlot = function() private$..showCriterionPlot$value,
         showPrevalencePlot = function() private$..showPrevalencePlot$value,
         showDotPlot = function() private$..showDotPlot$value,
@@ -316,6 +316,7 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         priorPrev = function() private$..priorPrev$value),
     private = list(
         ..dependentVars = NA,
+        ..positiveClass = NA,
         ..classVar = NA,
         ..subGroup = NA,
         ..method = NA,
@@ -332,7 +333,6 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..smoothing = NA,
         ..sensSpecTable = NA,
         ..delongTest = NA,
-        ..positiveClass = NA,
         ..showCriterionPlot = NA,
         ..showPrevalencePlot = NA,
         ..showDotPlot = NA,
@@ -746,6 +746,8 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dependentVars Variable(s) to be tested for classification
 #'   performance.
+#' @param positiveClass Specifies which level of the class variable should be
+#'   treated as the positive class.
 #' @param classVar Binary classification variable (gold standard).
 #' @param subGroup Optional variable for subgroup analysis.
 #' @param method Method to determine optimal cut point.
@@ -764,8 +766,6 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param smoothing Apply LOESS smoothing to ROC curves.
 #' @param sensSpecTable Display detailed sensitivity/specificity tables.
 #' @param delongTest Perform DeLong's test for comparing AUCs.
-#' @param positiveClass Specify the positive class level. Leave blank to use
-#'   the first level.
 #' @param showCriterionPlot Boolean option to display the
 #'   Sensitivity/Specificity vs. Threshold plot.
 #' @param showPrevalencePlot Boolean option to display the Predictive Values
@@ -822,6 +822,7 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 psychopdaroc <- function(
     data,
     dependentVars,
+    positiveClass,
     classVar,
     subGroup,
     method = "maximize_metric",
@@ -838,7 +839,6 @@ psychopdaroc <- function(
     smoothing = FALSE,
     sensSpecTable = FALSE,
     delongTest = FALSE,
-    positiveClass = "",
     showCriterionPlot = FALSE,
     showPrevalencePlot = FALSE,
     showDotPlot = FALSE,
@@ -874,6 +874,7 @@ psychopdaroc <- function(
 
     options <- psychopdarocOptions$new(
         dependentVars = dependentVars,
+        positiveClass = positiveClass,
         classVar = classVar,
         subGroup = subGroup,
         method = method,
@@ -890,7 +891,6 @@ psychopdaroc <- function(
         smoothing = smoothing,
         sensSpecTable = sensSpecTable,
         delongTest = delongTest,
-        positiveClass = positiveClass,
         showCriterionPlot = showCriterionPlot,
         showPrevalencePlot = showPrevalencePlot,
         showDotPlot = showDotPlot,

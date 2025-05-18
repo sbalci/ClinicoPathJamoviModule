@@ -309,12 +309,12 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       # HELPER METHODS FOR OPTIMAL CUTPOINT CALCULATION
       # ============================================================================
 
-      #' Calculate cutpoint optimized for cost ratio
-      #'
-      #' @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
-      #' @param prevalence The prevalence of the positive class
-      #' @param costRatio The cost ratio of false positives to false negatives
-      #' @return List with optimal index, threshold, and score
+      # Calculate cutpoint optimized for cost ratio
+      #
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @param prevalence The prevalence of the positive class
+      # @param costRatio The cost ratio of false positives to false negatives
+      # @return List with optimal index, threshold, and score
       .calculateCostRatioOptimal = function(confusionMatrix, prevalence, costRatio) {
         # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
@@ -349,10 +349,10 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         ))
       },
 
-      #' Calculate cutpoint with equal sensitivity and specificity
-      #'
-      #' @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
-      #' @return List with optimal index, threshold, and difference
+      # Calculate cutpoint with equal sensitivity and specificity
+      #
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @return List with optimal index, threshold, and difference
       .calculateEqualSensSpec = function(confusionMatrix) {
         # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
@@ -384,10 +384,10 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         ))
       },
 
-      #' Calculate cutpoint closest to (0,1) in ROC space
-      #'
-      #' @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
-      #' @return List with optimal index, threshold, and distance
+      # Calculate cutpoint closest to (0,1) in ROC space
+      #
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @return List with optimal index, threshold, and distance
       .calculateClosestToOptimal = function(confusionMatrix) {
         # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
@@ -424,7 +424,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       # INITIALIZATION METHOD
       # ============================================================================
 
-      #' Initialize the analysis
+      # Initialize the analysis
       .init = function() {
         # Add additional plot items based on user options
         if (self$options$showCriterionPlot)
@@ -439,7 +439,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       # MAIN ANALYSIS METHOD
       # ============================================================================
 
-      #' Execute the ROC analysis
+      # Execute the ROC analysis
       .run = function() {
 
         # -----------------------------------------------------------------------
@@ -560,6 +560,53 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
 
         # Get data
         data <- self$data
+
+
+        # Determine positive class early for use throughout the analysis
+        if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
+          # Use the level selector value
+          positiveClass <- self$options$positiveClass
+
+          # Verify the selected level exists in the data
+          classVar <- data[, self$options$classVar]
+          if (!positiveClass %in% levels(factor(classVar))) {
+            warning(paste("Selected positive class", positiveClass,
+                          "not found in data. Using first level instead."))
+            positiveClass <- levels(factor(classVar))[1]
+          }
+        } else {
+          # Default to first level if not specified
+          classVar <- data[, self$options$classVar]
+          positiveClass <- levels(factor(classVar))[1]
+        }
+
+        # Add this information to procedure notes
+        if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
+          procedureNotes <- paste0(
+            procedureNotes,
+            "<p> Positive Class: ",
+            positiveClass,
+            "</p>"
+          )
+        } else {
+          procedureNotes <- paste0(
+            procedureNotes,
+            "<p> Positive Class: ",
+            positiveClass,
+            " (first level)</p>"
+          )
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         # Set up cutpoint method
         if (self$options$method == "oc_manual") {
@@ -746,12 +793,8 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
             classVar <- data[subGroup == groupName, self$options$classVar]
           }
 
-          # Determine positive class
-          if (self$options$positiveClass == "") {
-            pos_class <- as.character(unique(classVar)[1])
-          } else {
-            pos_class <- self$options$positiveClass
-          }
+          # Use the already determined positive class
+          pos_class <- positiveClass
 
           # -----------------------------------------------------------------------
           # 5. RUN ROC ANALYSIS
@@ -1219,7 +1262,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
               classVar = as.character(data[, self$options$classVar]),
               ref = NULL,
-              pos_class = pos_class,
+              pos_class = positiveClass,
               conf.level = 0.95
             )
 
@@ -1301,29 +1344,74 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           ))
         }
 
-        # Also populate the AUC summary table (for compatibility)
+
+
+        # Populate the AUC summary table without clearing it
         aucSummaryTable <- self$results$aucSummaryTable
 
         for (var in names(aucList)) {
-          # Get values from the simpleTable
-          row <- simpleTable$getRow(rowKey = var)
+          # Get AUC value directly from the list
+          auc_value <- aucList[[var]]
 
-          # Extract values and ensure they are atomic
-          var_value <- as.character(var)
-          auc_value <- as.numeric(row$auc)
-          ci_lower_value <- as.numeric(row$ci_lower)
-          ci_upper_value <- as.numeric(row$ci_upper)
-          p_value <- as.numeric(row$p)
+          # Get data needed for calculations
+          if (is.null(subGroup)) {
+            classVar <- data[, self$options$classVar]
+          } else {
+            # For grouped variables, extract the group
+            varParts <- strsplit(var, split = "_")[[1]]
+            groupName <- paste(varParts[-1], collapse="_")
+            classVar <- data[subGroup == groupName, self$options$classVar]
+          }
 
-          # Add to AUC summary table
-          aucSummaryTable$addRow(rowKey = var, values = list(
-            variable = var_value,
-            auc = auc_value,
-            ci_lower = ci_lower_value,
-            ci_upper = ci_upper_value,
-            p = p_value
-          ))
+          # Determine positive class
+          if (self$options$positiveClass == "") {
+            pos_class <- as.character(unique(classVar)[1])
+          } else {
+            pos_class <- self$options$positiveClass
+          }
+
+          # Calculate counts and statistics
+          n_pos <- sum(classVar == pos_class)
+          n_neg <- sum(classVar != pos_class)
+
+          # Calculate standard error and confidence interval
+          auc_se <- sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))
+          z_critical <- qnorm(0.975)
+          auc_lci <- max(0, auc_value - z_critical * auc_se)
+          auc_uci <- min(1, auc_value + z_critical * auc_se)
+
+          # Calculate p-value
+          z_stat <- (auc_value - 0.5) / auc_se
+          p_val <- 2 * (1 - pnorm(abs(z_stat)))
+
+          # Check if row exists and set/add accordingly
+          try({
+            # Try to set row if it exists (will throw error if it doesn't)
+            aucSummaryTable$setRow(rowKey = var, values = list(
+              variable = as.character(var),
+              auc = auc_value,
+              ci_lower = auc_lci,
+              ci_upper = auc_uci,
+              p = p_val
+            ))
+          }, silent = TRUE)
+
+          try({
+            # Try to add row (will throw error if it already exists)
+            aucSummaryTable$addRow(rowKey = var, values = list(
+              variable = as.character(var),
+              auc = auc_value,
+              ci_lower = auc_lci,
+              ci_upper = auc_uci,
+              p = p_val
+            ))
+          }, silent = TRUE)
         }
+
+
+
+
+
         # -----------------------------------------------------------------------
         # 16. CREATE THRESHOLD TABLE IF REQUESTED
         # -----------------------------------------------------------------------
@@ -1380,11 +1468,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       # PLOTTING METHODS
       # ============================================================================
 
-      #' Plot ROC curves
-      #' @param image The image object
-      #' @param ggtheme The ggplot theme to use
-      #' @param theme Additional theme elements
-      #' @param ... Additional parameters
+      # Plot ROC curves
+      # @param image The image object
+      # @param ggtheme The ggplot theme to use
+      # @param theme Additional theme elements
+      # @param ... Additional parameters
       .plotROC = function(image, ggtheme, theme, ...) {
         plotData <- data.frame(image$state)
 
@@ -1744,11 +1832,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         return(TRUE)
       },
 
-      #' Plot sensitivity/specificity vs criterion
-      #' @param image The image object
-      #' @param ggtheme The ggplot theme to use
-      #' @param theme Additional theme elements
-      #' @param ... Additional parameters
+      # Plot sensitivity/specificity vs criterion
+      # @param image The image object
+      # @param ggtheme The ggplot theme to use
+      # @param theme Additional theme elements
+      # @param ... Additional parameters
       .plotCriterion = function(image, ggtheme, theme, ...) {
         plotData <- image$state
 
@@ -1825,11 +1913,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         return(TRUE)
       },
 
-      #' Plot PPV/NPV vs prevalence
-      #' @param image The image object
-      #' @param ggtheme The ggplot theme to use
-      #' @param theme Additional theme elements
-      #' @param ... Additional parameters
+      # Plot PPV/NPV vs prevalence
+      # @param image The image object
+      # @param ggtheme The ggplot theme to use
+      # @param theme Additional theme elements
+      # @param ... Additional parameters
       .plotPrevalence = function(image, ggtheme, theme, ...) {
         state <- image$state
 
@@ -1901,11 +1989,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         return(TRUE)
       },
 
-      #' Plot dot plot showing distribution of test values by class
-      #' @param image The image object
-      #' @param ggtheme The ggplot theme to use
-      #' @param theme Additional theme elements
-      #' @param ... Additional parameters
+      # Plot dot plot showing distribution of test values by class
+      # @param image The image object
+      # @param ggtheme The ggplot theme to use
+      # @param theme Additional theme elements
+      # @param ... Additional parameters
       .plotDot = function(image, ggtheme, theme, ...) {
         plotData <- image$state
 
@@ -1967,11 +2055,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         return(TRUE)
       },
 
-      #' Generate interactive ROC plot
-      #' @param image The image object
-      #' @param ggtheme The ggplot theme to use
-      #' @param theme Additional theme elements
-      #' @param ... Additional parameters
+      # Generate interactive ROC plot
+      # @param image The image object
+      # @param ggtheme The ggplot theme to use
+      # @param theme Additional theme elements
+      # @param ... Additional parameters
       .plotInteractiveROC = function(image, ggtheme, theme, ...) {
         # This function depends on the plotROC package which must be available
         if (!requireNamespace("plotROC", quietly = TRUE)) {
