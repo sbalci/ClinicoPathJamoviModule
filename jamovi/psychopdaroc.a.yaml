@@ -29,6 +29,18 @@ options:
           R: >
             Variable(s) to be tested for classification performance.
 
+    - name: positiveClass
+      title: Positive Class
+      type: Level
+      variable: (classVar)
+      description:
+          ui: >
+            Select which level of the class variable should be treated as the positive class.
+          R: >
+            Specifies which level of the class variable should be treated as the positive class.
+
+
+
     - name: classVar
       title: Class Variable
       type: Variable
@@ -238,14 +250,6 @@ options:
       description:
           R: >
             Perform DeLong's test for comparing AUCs.
-
-    - name: positiveClass
-      title: Positive class
-      type: String
-      default: ""
-      description:
-          R: >
-            Specify the positive class level. Leave blank to use the first level.
 
 
     - name: showCriterionPlot

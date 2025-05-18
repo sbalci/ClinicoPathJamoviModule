@@ -7,6 +7,7 @@
 psychopdaroc(
   data,
   dependentVars,
+  positiveClass,
   classVar,
   subGroup,
   method = "maximize_metric",
@@ -23,7 +24,6 @@ psychopdaroc(
   smoothing = FALSE,
   sensSpecTable = FALSE,
   delongTest = FALSE,
-  positiveClass = "",
   showCriterionPlot = FALSE,
   showPrevalencePlot = FALSE,
   showDotPlot = FALSE,
@@ -47,6 +47,9 @@ psychopdaroc(
 
 \item{dependentVars}{Variable(s) to be tested for classification
 performance.}
+
+\item{positiveClass}{Specifies which level of the class variable should be
+treated as the positive class.}
 
 \item{classVar}{Binary classification variable (gold standard).}
 
@@ -81,9 +84,6 @@ cutpoint.}
 \item{sensSpecTable}{Display detailed sensitivity/specificity tables.}
 
 \item{delongTest}{Perform DeLong's test for comparing AUCs.}
-
-\item{positiveClass}{Specify the positive class level. Leave blank to use
-the first level.}
 
 \item{showCriterionPlot}{Boolean option to display the
 Sensitivity/Specificity vs. Threshold plot.}
