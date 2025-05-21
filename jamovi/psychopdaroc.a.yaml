@@ -455,5 +455,86 @@ options:
               Number of bootstrap iterations for IDI and NRI confidence intervals.
 
 
+    - name: partialAUC
+      title: Compute partial AUC
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate partial AUC (area under a portion of the ROC curve).
+
+    - name: partialAUCfrom
+      title: Partial AUC from specificity
+      type: Number
+      default: 0.8
+      min: 0.0
+      max: 1.0
+      description:
+          R: >
+            Lower bound of specificity for partial AUC calculation.
+
+    - name: partialAUCto
+      title: Partial AUC to specificity
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1.0
+      description:
+          R: >
+            Upper bound of specificity for partial AUC calculation.
+
+    - name: rocSmoothingMethod
+      title: ROC curve smoothing method
+      type: List
+      options:
+        - name: none
+          title: None
+        - name: binormal
+          title: Binormal
+        - name: density
+          title: Density
+        - name: fitdistr
+          title: Fit distribution
+      default: none
+      description:
+          R: >
+            Method for smoothing the ROC curve (from pROC package).
+
+    - name: bootstrapCI
+      title: Bootstrap confidence intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for AUC and optimal cutpoints.
+
+    - name: bootstrapReps
+      title: Bootstrap replications
+      type: Number
+      default: 2000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap replications for confidence intervals.
+
+# Add to options in psychopdaroc.a.yaml
+    - name: compareClassifiers
+      title: "Compare classifiers' performance"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform comprehensive comparison of classifier performance.
+            
+    - name: precisionRecallCurve
+      title: "Precision-Recall curve"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot precision-recall curve alongside ROC curve.
+
+
 
 ...

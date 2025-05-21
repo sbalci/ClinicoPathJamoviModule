@@ -44,7 +44,15 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             calculateNRI = FALSE,
             refVar = NULL,
             nriThresholds = "",
-            idiNriBootRuns = 1000, ...) {
+            idiNriBootRuns = 1000,
+            partialAUC = FALSE,
+            partialAUCfrom = 0.8,
+            partialAUCto = 1,
+            rocSmoothingMethod = "none",
+            bootstrapCI = FALSE,
+            bootstrapReps = 2000,
+            compareClassifiers = FALSE,
+            precisionRecallCurve = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -268,6 +276,49 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "idiNriBootRuns",
                 idiNriBootRuns,
                 default=1000)
+            private$..partialAUC <- jmvcore::OptionBool$new(
+                "partialAUC",
+                partialAUC,
+                default=FALSE)
+            private$..partialAUCfrom <- jmvcore::OptionNumber$new(
+                "partialAUCfrom",
+                partialAUCfrom,
+                default=0.8,
+                min=0,
+                max=1)
+            private$..partialAUCto <- jmvcore::OptionNumber$new(
+                "partialAUCto",
+                partialAUCto,
+                default=1,
+                min=0,
+                max=1)
+            private$..rocSmoothingMethod <- jmvcore::OptionList$new(
+                "rocSmoothingMethod",
+                rocSmoothingMethod,
+                options=list(
+                    "none",
+                    "binormal",
+                    "density",
+                    "fitdistr"),
+                default="none")
+            private$..bootstrapCI <- jmvcore::OptionBool$new(
+                "bootstrapCI",
+                bootstrapCI,
+                default=FALSE)
+            private$..bootstrapReps <- jmvcore::OptionNumber$new(
+                "bootstrapReps",
+                bootstrapReps,
+                default=2000,
+                min=100,
+                max=10000)
+            private$..compareClassifiers <- jmvcore::OptionBool$new(
+                "compareClassifiers",
+                compareClassifiers,
+                default=FALSE)
+            private$..precisionRecallCurve <- jmvcore::OptionBool$new(
+                "precisionRecallCurve",
+                precisionRecallCurve,
+                default=FALSE)
 
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
@@ -308,6 +359,14 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..refVar)
             self$.addOption(private$..nriThresholds)
             self$.addOption(private$..idiNriBootRuns)
+            self$.addOption(private$..partialAUC)
+            self$.addOption(private$..partialAUCfrom)
+            self$.addOption(private$..partialAUCto)
+            self$.addOption(private$..rocSmoothingMethod)
+            self$.addOption(private$..bootstrapCI)
+            self$.addOption(private$..bootstrapReps)
+            self$.addOption(private$..compareClassifiers)
+            self$.addOption(private$..precisionRecallCurve)
         }),
     active = list(
         dependentVars = function() private$..dependentVars$value,
@@ -348,7 +407,15 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         calculateNRI = function() private$..calculateNRI$value,
         refVar = function() private$..refVar$value,
         nriThresholds = function() private$..nriThresholds$value,
-        idiNriBootRuns = function() private$..idiNriBootRuns$value),
+        idiNriBootRuns = function() private$..idiNriBootRuns$value,
+        partialAUC = function() private$..partialAUC$value,
+        partialAUCfrom = function() private$..partialAUCfrom$value,
+        partialAUCto = function() private$..partialAUCto$value,
+        rocSmoothingMethod = function() private$..rocSmoothingMethod$value,
+        bootstrapCI = function() private$..bootstrapCI$value,
+        bootstrapReps = function() private$..bootstrapReps$value,
+        compareClassifiers = function() private$..compareClassifiers$value,
+        precisionRecallCurve = function() private$..precisionRecallCurve$value),
     private = list(
         ..dependentVars = NA,
         ..classVar = NA,
@@ -388,7 +455,15 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..calculateNRI = NA,
         ..refVar = NA,
         ..nriThresholds = NA,
-        ..idiNriBootRuns = NA)
+        ..idiNriBootRuns = NA,
+        ..partialAUC = NA,
+        ..partialAUCfrom = NA,
+        ..partialAUCto = NA,
+        ..rocSmoothingMethod = NA,
+        ..bootstrapCI = NA,
+        ..bootstrapReps = NA,
+        ..compareClassifiers = NA,
+        ..precisionRecallCurve = NA)
 )
 
 psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -411,7 +486,11 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         dotPlot = function() private$.items[["dotPlot"]],
         dotPlotMessage = function() private$.items[["dotPlotMessage"]],
         idiTable = function() private$.items[["idiTable"]],
-        nriTable = function() private$.items[["nriTable"]]),
+        nriTable = function() private$.items[["nriTable"]],
+        partialAUCTable = function() private$.items[["partialAUCTable"]],
+        bootstrapCITable = function() private$.items[["bootstrapCITable"]],
+        rocComparisonTable = function() private$.items[["rocComparisonTable"]],
+        precisionRecallPlot = function() private$.items[["precisionRecallPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -838,7 +917,107 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="p", 
                         `title`="p-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="partialAUCTable",
+                title="Partial AUC Results",
+                visible="(partialAUC)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="pAUC", 
+                        `title`="Partial AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="pAUC_normalized", 
+                        `title`="Normalized pAUC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="spec_range", 
+                        `title`="Specificity Range", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bootstrapCITable",
+                title="Bootstrap Confidence Intervals",
+                visible="(bootstrapCI)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rocComparisonTable",
+                title="Classifier Performance Comparison",
+                visible="(compareClassifiers)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="auprc", 
+                        `title`="AUPRC", 
+                        `type`="number"),
+                    list(
+                        `name`="brier", 
+                        `title`="Brier Score", 
+                        `type`="number"),
+                    list(
+                        `name`="f1_score", 
+                        `title`="F1 Score", 
+                        `type`="number"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number"),
+                    list(
+                        `name`="balanced_accuracy", 
+                        `title`="Balanced Accuracy", 
+                        `type`="number"))))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="precisionRecallPlot",
+                title="Precision-Recall Curves",
+                visible="(precisionRecallCurve)",
+                template=jmvcore::Image$new(
+                    options=options,
+                    width=550,
+                    height=450,
+                    renderFun=".plotPrecisionRecall")))}))
 
 psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "psychopdarocBase",
@@ -926,6 +1105,21 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   between 0 and 1.
 #' @param idiNriBootRuns Number of bootstrap iterations for IDI and NRI
 #'   confidence intervals.
+#' @param partialAUC Calculate partial AUC (area under a portion of the ROC
+#'   curve).
+#' @param partialAUCfrom Lower bound of specificity for partial AUC
+#'   calculation.
+#' @param partialAUCto Upper bound of specificity for partial AUC calculation.
+#' @param rocSmoothingMethod Method for smoothing the ROC curve (from pROC
+#'   package).
+#' @param bootstrapCI Calculate bootstrap confidence intervals for AUC and
+#'   optimal cutpoints.
+#' @param bootstrapReps Number of bootstrap replications for confidence
+#'   intervals.
+#' @param compareClassifiers Perform comprehensive comparison of classifier
+#'   performance.
+#' @param precisionRecallCurve Plot precision-recall curve alongside ROC
+#'   curve.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -945,6 +1139,10 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$partialAUCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$precisionRecallPlot} \tab \tab \tab \tab \tab an array of images \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -994,7 +1192,15 @@ psychopdaroc <- function(
     calculateNRI = FALSE,
     refVar,
     nriThresholds = "",
-    idiNriBootRuns = 1000) {
+    idiNriBootRuns = 1000,
+    partialAUC = FALSE,
+    partialAUCfrom = 0.8,
+    partialAUCto = 1,
+    rocSmoothingMethod = "none",
+    bootstrapCI = FALSE,
+    bootstrapReps = 2000,
+    compareClassifiers = FALSE,
+    precisionRecallCurve = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("psychopdaroc requires jmvcore to be installed (restart may be required)")
@@ -1051,7 +1257,15 @@ psychopdaroc <- function(
         calculateNRI = calculateNRI,
         refVar = refVar,
         nriThresholds = nriThresholds,
-        idiNriBootRuns = idiNriBootRuns)
+        idiNriBootRuns = idiNriBootRuns,
+        partialAUC = partialAUC,
+        partialAUCfrom = partialAUCfrom,
+        partialAUCto = partialAUCto,
+        rocSmoothingMethod = rocSmoothingMethod,
+        bootstrapCI = bootstrapCI,
+        bootstrapReps = bootstrapReps,
+        compareClassifiers = compareClassifiers,
+        precisionRecallCurve = precisionRecallCurve)
 
     analysis <- psychopdarocClass$new(
         options = options,

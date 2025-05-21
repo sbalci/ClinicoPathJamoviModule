@@ -391,13 +391,90 @@ items:
 
 
 
+    - name: partialAUCTable
+      title: Partial AUC Results
+      type: Table
+      visible: (partialAUC)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: pAUC
+          title: Partial AUC
+          type: number
+        - name: pAUC_normalized
+          title: Normalized pAUC
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: spec_range
+          title: Specificity Range
+          type: text
+
+    - name: bootstrapCITable
+      title: Bootstrap Confidence Intervals
+      type: Table
+      visible: (bootstrapCI)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
 
 
 
+# Add to the psychopdaroc.r.yaml file
+    - name: rocComparisonTable
+      title: Classifier Performance Comparison
+      type: Table
+      visible: (compareClassifiers)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+        - name: auprc
+          title: AUPRC
+          type: number
+        - name: brier
+          title: Brier Score
+          type: number
+        - name: f1_score
+          title: F1 Score
+          type: number
+        - name: accuracy
+          title: Accuracy
+          type: number
+        - name: balanced_accuracy
+          title: Balanced Accuracy
+          type: number
 
-
-
-
+    - name: precisionRecallPlot
+      type: Array
+      title: Precision-Recall Curves
+      visible: (precisionRecallCurve)
+      template:
+        type: Image
+        width: 550
+        height: 450
+        renderFun: .plotPrecisionRecall
 
 
 
