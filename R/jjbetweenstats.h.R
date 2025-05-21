@@ -10,7 +10,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             group = NULL,
             grvar = NULL,
             centralityplotting = FALSE,
-            centralitytype = "parameteric",
+            centralitytype = "parametric",
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
@@ -63,11 +63,11 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "centralitytype",
                 centralitytype,
                 options=list(
-                    "parameteric",
+                    "parametric",
                     "nonparametric",
                     "robust",
                     "bayes"),
-                default="parameteric")
+                default="parametric")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -308,7 +308,7 @@ jjbetweenstats <- function(
     group,
     grvar = NULL,
     centralityplotting = FALSE,
-    centralitytype = "parameteric",
+    centralitytype = "parametric",
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",

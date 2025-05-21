@@ -39,7 +39,12 @@ psychopdaroc(
   quantileCIs = FALSE,
   quantiles = "0.1,0.25,0.5,0.75,0.9",
   usePriorPrev = FALSE,
-  priorPrev = 0.5
+  priorPrev = 0.5,
+  calculateIDI = FALSE,
+  calculateNRI = FALSE,
+  refVar,
+  nriThresholds = "",
+  idiNriBootRuns = 1000
 )
 }
 \arguments{
@@ -127,6 +132,21 @@ from data.}
 
 \item{priorPrev}{Prior probability (disease prevalence) to use for
 calculations.}
+
+\item{calculateIDI}{Calculate Integrated Discrimination Improvement (IDI).
+Raw test values  will be converted to probabilities based on ROC analysis.}
+
+\item{calculateNRI}{Calculate Net Reclassification Index (NRI). Raw test
+values will be converted  to probabilities based on ROC analysis.}
+
+\item{refVar}{Reference variable for IDI and NRI calculation.}
+
+\item{nriThresholds}{Comma-separated thresholds for category-based NRI
+(leave empty for continuous NRI). Thresholds should be probability values
+between 0 and 1.}
+
+\item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
+confidence intervals.}
 }
 \value{
 A results object containing:
@@ -146,6 +166,8 @@ A results object containing:
 \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

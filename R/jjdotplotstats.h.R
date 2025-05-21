@@ -12,7 +12,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             typestatistics = "parametric",
             effsizetype = "biased",
             centralityplotting = FALSE,
-            centralitytype = "parameteric",
+            centralitytype = "parametric",
             mytitle = "",
             xtitle = "",
             ytitle = "",
@@ -74,11 +74,11 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "centralitytype",
                 centralitytype,
                 options=list(
-                    "parameteric",
+                    "parametric",
                     "nonparametric",
                     "robust",
                     "bayes"),
-                default="parameteric")
+                default="parametric")
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -246,7 +246,7 @@ jjdotplotstats <- function(
     typestatistics = "parametric",
     effsizetype = "biased",
     centralityplotting = FALSE,
-    centralitytype = "parameteric",
+    centralitytype = "parametric",
     mytitle = "",
     xtitle = "",
     ytitle = "",

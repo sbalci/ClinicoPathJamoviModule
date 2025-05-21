@@ -287,6 +287,292 @@ print.DeLong = function(x, digits = max(3, getOption("digits") - 3), ...) {
   cat(paste("\nOverall test:\n p-value =", format.pval(x$global.p, digits = digits), "\n"))
 }
 
+#' Convert raw test values to predicted probabilities using ROC curve
+#' @param values Raw test values
+#' @param actual Binary outcomes (0/1)
+#' @param direction Direction of the test ">=" or "<="
+#' @return Vector of predicted probabilities
+raw_to_prob <- function(values, actual, direction = ">=") {
+  # Sort values for thresholds
+  sorted_values <- sort(unique(values))
+
+  # Calculate sensitivity and specificity for each threshold
+  threshold_data <- data.frame(
+    threshold = numeric(length(sorted_values)),
+    sensitivity = numeric(length(sorted_values)),
+    specificity = numeric(length(sorted_values))
+  )
+
+  for (i in seq_along(sorted_values)) {
+    threshold <- sorted_values[i]
+
+    if (direction == ">=") {
+      predicted_pos <- values >= threshold
+    } else {
+      predicted_pos <- values <= threshold
+    }
+
+    tp <- sum(predicted_pos & actual == 1)
+    fp <- sum(predicted_pos & actual == 0)
+    tn <- sum(!predicted_pos & actual == 0)
+    fn <- sum(!predicted_pos & actual == 1)
+
+    threshold_data$threshold[i] <- threshold
+    threshold_data$sensitivity[i] <- tp / (tp + fn)
+    threshold_data$specificity[i] <- tn / (tn + fp)
+  }
+
+  # For each value, find nearest threshold and use sensitivity as probability
+  probs <- numeric(length(values))
+  for (i in seq_along(values)) {
+    idx <- which.min(abs(threshold_data$threshold - values[i]))
+    if (direction == ">=") {
+      probs[i] <- threshold_data$sensitivity[idx]
+    } else {
+      probs[i] <- 1 - threshold_data$sensitivity[idx]
+    }
+  }
+
+  return(probs)
+}
+
+
+#' Calculate Integrated Discrimination Improvement (IDI)
+#' @param values_new Raw values from the new test
+#' @param values_ref Raw values from the reference test
+#' @param actual Actual binary outcomes
+#' @param direction Direction of the test ">=" or "<="
+#' @param ci Calculate confidence intervals
+#' @param boot_runs Number of bootstrap iterations
+#' @return List with IDI value and confidence intervals
+calculate_idi <- function(values_new, values_ref, actual, direction = ">=",
+                          ci = TRUE, boot_runs = 1000) {
+  # Ensure actual is binary (0 or 1)
+  actual_binary <- as.numeric(actual)
+
+  # Convert raw values to probabilities
+  predicted_new <- raw_to_prob(values_new, actual_binary, direction)
+  predicted_ref <- raw_to_prob(values_ref, actual_binary, direction)
+
+  # Calculate discrimination slopes
+  discrim_slope_new <- mean(predicted_new[actual_binary == 1]) -
+    mean(predicted_new[actual_binary == 0])
+  discrim_slope_ref <- mean(predicted_ref[actual_binary == 1]) -
+    mean(predicted_ref[actual_binary == 0])
+
+  # Calculate IDI
+  idi <- discrim_slope_new - discrim_slope_ref
+
+  # Calculate confidence intervals if requested
+  if (ci && boot_runs > 0 && requireNamespace("boot", quietly = TRUE)) {
+    # Bootstrap function for confidence intervals
+    boot_idi <- function(data, indices) {
+      boot_actual <- actual_binary[indices]
+      boot_new <- values_new[indices]
+      boot_ref <- values_ref[indices]
+
+      boot_prob_new <- raw_to_prob(boot_new, boot_actual, direction)
+      boot_prob_ref <- raw_to_prob(boot_ref, boot_actual, direction)
+
+      slope_new <- mean(boot_prob_new[boot_actual == 1]) -
+        mean(boot_prob_new[boot_actual == 0])
+      slope_ref <- mean(boot_prob_ref[boot_actual == 1]) -
+        mean(boot_prob_ref[boot_actual == 0])
+
+      return(slope_new - slope_ref)
+    }
+
+    # Run bootstrap
+    boot_results <- boot::boot(data = data.frame(values_new, values_ref, actual_binary),
+                               statistic = boot_idi,
+                               R = boot_runs)
+
+    # Calculate confidence intervals
+    boot_ci <- boot::boot.ci(boot_results, type = "perc", conf = 0.95)
+    ci_lower <- boot_ci$percent[4]
+    ci_upper <- boot_ci$percent[5]
+
+    # Calculate p-value
+    p_value <- 2 * min(
+      mean(boot_results$t <= 0),
+      mean(boot_results$t >= 0)
+    )
+  } else {
+    ci_lower <- NA
+    ci_upper <- NA
+    p_value <- NA
+  }
+
+  return(list(
+    idi = idi,
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    p_value = p_value
+  ))
+}
+
+
+#' Calculate Net Reclassification Improvement (NRI)
+#' @param values_new Raw values from the new test
+#' @param values_ref Raw values from the reference test
+#' @param actual Actual binary outcomes
+#' @param thresholds Thresholds for category-based NRI (NULL for continuous)
+#' @param direction Direction of the test ">=" or "<="
+#' @param ci Calculate confidence intervals
+#' @param boot_runs Number of bootstrap iterations
+#' @return List with NRI values and confidence intervals
+calculate_nri <- function(values_new, values_ref, actual,
+                          thresholds = NULL, direction = ">=",
+                          ci = TRUE, boot_runs = 1000) {
+  # Ensure actual is binary (0 or 1)
+  actual_binary <- as.numeric(actual)
+
+  # Convert raw values to probabilities
+  predicted_new <- raw_to_prob(values_new, actual_binary, direction)
+  predicted_ref <- raw_to_prob(values_ref, actual_binary, direction)
+
+  # Identify events and non-events
+  events <- actual_binary == 1
+  non_events <- actual_binary == 0
+
+  # Calculate NRI
+  if (is.null(thresholds) || length(thresholds) == 0) {
+    # Continuous NRI calculation
+    up_events <- sum(predicted_new[events] > predicted_ref[events])
+    down_events <- sum(predicted_new[events] < predicted_ref[events])
+    up_non_events <- sum(predicted_new[non_events] > predicted_ref[non_events])
+    down_non_events <- sum(predicted_new[non_events] < predicted_ref[non_events])
+
+    # Calculate proportions
+    p_up_events <- up_events / sum(events)
+    p_down_events <- down_events / sum(events)
+    p_up_non_events <- up_non_events / sum(non_events)
+    p_down_non_events <- down_non_events / sum(non_events)
+
+    # Calculate NRI components
+    event_nri <- p_up_events - p_down_events
+    non_event_nri <- p_down_non_events - p_up_non_events
+  } else {
+    # Category-based NRI calculation
+    # Create risk categories
+    ref_cats <- cut(predicted_ref,
+                    breaks = c(0, thresholds, 1),
+                    labels = 1:(length(thresholds) + 1),
+                    include.lowest = TRUE)
+
+    new_cats <- cut(predicted_new,
+                    breaks = c(0, thresholds, 1),
+                    labels = 1:(length(thresholds) + 1),
+                    include.lowest = TRUE)
+
+    # Calculate movement
+    move_up_event <- sum(as.numeric(new_cats[events]) > as.numeric(ref_cats[events]))
+    move_down_event <- sum(as.numeric(new_cats[events]) < as.numeric(ref_cats[events]))
+    move_up_non_event <- sum(as.numeric(new_cats[non_events]) > as.numeric(ref_cats[non_events]))
+    move_down_non_event <- sum(as.numeric(new_cats[non_events]) < as.numeric(ref_cats[non_events]))
+
+    # Calculate proportions
+    p_up_events <- move_up_event / sum(events)
+    p_down_events <- move_down_event / sum(events)
+    p_up_non_events <- move_up_non_event / sum(non_events)
+    p_down_non_events <- move_down_non_event / sum(non_events)
+
+    # Calculate NRI components
+    event_nri <- p_up_events - p_down_events
+    non_event_nri <- p_down_non_events - p_up_non_events
+  }
+
+  # Calculate overall NRI
+  nri <- event_nri + non_event_nri
+
+  # Calculate confidence intervals via bootstrap if requested
+  if (ci && boot_runs > 0 && requireNamespace("boot", quietly = TRUE)) {
+    # Bootstrap function
+    boot_nri <- function(data, indices) {
+      # Same calculation as above but with bootstrap sample
+      # Using a simplified version for brevity
+      b_actual <- actual_binary[indices]
+      b_events <- b_actual == 1
+      b_non_events <- b_actual == 0
+
+      b_new <- values_new[indices]
+      b_ref <- values_ref[indices]
+
+      b_prob_new <- raw_to_prob(b_new, b_actual, direction)
+      b_prob_ref <- raw_to_prob(b_ref, b_actual, direction)
+
+      # Calculate continuous NRI for bootstrap sample
+      b_up_events <- sum(b_prob_new[b_events] > b_prob_ref[b_events])
+      b_down_events <- sum(b_prob_new[b_events] < b_prob_ref[b_events])
+      b_up_non_events <- sum(b_prob_new[b_non_events] > b_prob_ref[b_non_events])
+      b_down_non_events <- sum(b_prob_new[b_non_events] < b_prob_ref[b_non_events])
+
+      b_p_up_events <- b_up_events / sum(b_events)
+      b_p_down_events <- b_down_events / sum(b_events)
+      b_p_up_non_events <- b_up_non_events / sum(b_non_events)
+      b_p_down_non_events <- b_down_non_events / sum(b_non_events)
+
+      b_event_nri <- b_p_up_events - b_p_down_events
+      b_non_event_nri <- b_p_down_non_events - b_p_up_non_events
+
+      return(b_event_nri + b_non_event_nri)
+    }
+
+    # Run bootstrap
+    boot_results <- boot::boot(data = data.frame(values_new, values_ref, actual_binary),
+                               statistic = boot_nri,
+                               R = boot_runs)
+
+    # Calculate confidence intervals
+    boot_ci <- boot::boot.ci(boot_results, type = "perc", conf = 0.95)
+    ci_lower <- boot_ci$percent[4]
+    ci_upper <- boot_ci$percent[5]
+
+    # Calculate p-value
+    p_value <- 2 * min(
+      mean(boot_results$t <= 0),
+      mean(boot_results$t >= 0)
+    )
+  } else {
+    ci_lower <- NA
+    ci_upper <- NA
+    p_value <- NA
+  }
+
+  return(list(
+    nri = nri,
+    event_nri = event_nri,
+    non_event_nri = non_event_nri,
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    p_value = p_value
+  ))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ============================================================================
 # MAIN ANALYSIS CLASS
 # ============================================================================
@@ -1462,6 +1748,121 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
             }
           }
         }
+
+
+        # -----------------------------------------------------------------------
+        # 17. CALCULATE IDI AND NRI IF REQUESTED
+        # -----------------------------------------------------------------------
+
+        # Calculate IDI and NRI if requested
+        if (self$options$calculateIDI || self$options$calculateNRI) {
+          # Check if we have enough variables
+          if (length(self$options$dependentVars) < 2) {
+            stop("Please specify at least two dependent variables to calculate IDI/NRI.")
+          }
+
+          # Get reference variable
+          if (is.null(self$options$refVar) || self$options$refVar == "") {
+            refVar <- self$options$dependentVars[1]
+          } else {
+            refVar <- self$options$refVar
+          }
+
+          # Get actual class values and convert to binary
+          classVar <- data[, self$options$classVar]
+          pos_class <- ifelse(self$options$positiveClass == "",
+                              as.character(unique(classVar)[1]),
+                              self$options$positiveClass)
+          actual_binary <- as.numeric(classVar == pos_class)
+
+          # Get direction
+          direction <- self$options$direction
+
+          # Get bootstrap runs
+          boot_runs <- as.numeric(self$options$idiNriBootRuns)
+
+          # Calculate IDI if requested
+          if (self$options$calculateIDI) {
+            # Get reference variable values
+            ref_values <- as.numeric(data[, refVar])
+
+            # For each other variable
+            for (var in self$options$dependentVars) {
+              if (var != refVar) {
+                var_values <- as.numeric(data[, var])
+
+                # Calculate IDI
+                idi_result <- calculate_idi(
+                  values_new = var_values,
+                  values_ref = ref_values,
+                  actual = actual_binary,
+                  direction = direction,
+                  ci = TRUE,
+                  boot_runs = boot_runs
+                )
+
+                # Add to IDI table
+                self$results$idiTable$addRow(rowKey = var, values = list(
+                  variable = var,
+                  refVar = refVar,
+                  idi = idi_result$idi,
+                  ci_lower = idi_result$ci_lower,
+                  ci_upper = idi_result$ci_upper,
+                  p = idi_result$p_value
+                ))
+              }
+            }
+          }
+
+          # Calculate NRI if requested
+          if (self$options$calculateNRI) {
+            # Get reference variable values
+            ref_values <- as.numeric(data[, refVar])
+
+            # Parse thresholds string if provided
+            thresholds <- NULL
+            if (!is.null(self$options$nriThresholds) && self$options$nriThresholds != "") {
+              thresholds <- as.numeric(unlist(strsplit(self$options$nriThresholds, ",")))
+              thresholds <- thresholds[!is.na(thresholds)]
+              thresholds <- thresholds[thresholds > 0 & thresholds < 1]
+            }
+
+            # For each other variable
+            for (var in self$options$dependentVars) {
+              if (var != refVar) {
+                var_values <- as.numeric(data[, var])
+
+                # Calculate NRI
+                nri_result <- calculate_nri(
+                  values_new = var_values,
+                  values_ref = ref_values,
+                  actual = actual_binary,
+                  thresholds = thresholds,
+                  direction = direction,
+                  ci = TRUE,
+                  boot_runs = boot_runs
+                )
+
+                # Add to NRI table
+                self$results$nriTable$addRow(rowKey = var, values = list(
+                  variable = var,
+                  refVar = refVar,
+                  nri = nri_result$nri,
+                  event_nri = nri_result$event_nri,
+                  non_event_nri = nri_result$non_event_nri,
+                  ci_lower = nri_result$ci_lower,
+                  ci_upper = nri_result$ci_upper,
+                  p = nri_result$p_value
+                ))
+              }
+            }
+          }
+        }
+
+
+
+
+
       },
 
       # ============================================================================

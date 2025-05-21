@@ -84,15 +84,15 @@ options:
       title: 'Centrality Type'
       type: List
       options:
-        - title: mean (parameteric)
-          name: parameteric
+        - title: mean (parametric)
+          name: parametric
         - title: median (nonparametric)
           name: nonparametric
         - title: robust (trimmed mean)
           name: robust
         - title: bayes (MAP estimator)
           name: bayes 
-      default: parameteric
+      default: parametric
 
     - name: mytitle
       title: Title
