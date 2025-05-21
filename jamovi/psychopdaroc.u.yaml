@@ -259,3 +259,57 @@ children:
             name: boot_runs
             format: number
             label: Bootstrap runs
+
+
+  - type: CollapseBox
+    label: pROC Features
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: partialAUC
+            label: Compute partial AUC
+          - type: TextBox
+            name: partialAUCfrom
+            format: number
+            label: Partial AUC from specificity
+            enable: (partialAUC)
+          - type: TextBox
+            name: partialAUCto
+            format: number
+            label: Partial AUC to specificity
+            enable: (partialAUC)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: rocSmoothingMethod
+            label: ROC curve smoothing method
+          - type: CheckBox
+            name: bootstrapCI
+            label: Bootstrap confidence intervals
+          - type: TextBox
+            name: bootstrapReps
+            format: number
+            label: Bootstrap replications
+            enable: (bootstrapCI)
+
+
+# Add to the psychopdaroc.u.yaml file
+  - type: CollapseBox
+    label: Multiple ROC Features
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: compareClassifiers
+            label: Compare classifiers' performance
+          - type: CheckBox
+            name: precisionRecallCurve
+            label: Precision-Recall curve

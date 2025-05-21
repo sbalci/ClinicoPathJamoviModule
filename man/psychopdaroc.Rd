@@ -44,7 +44,15 @@ psychopdaroc(
   calculateNRI = FALSE,
   refVar,
   nriThresholds = "",
-  idiNriBootRuns = 1000
+  idiNriBootRuns = 1000,
+  partialAUC = FALSE,
+  partialAUCfrom = 0.8,
+  partialAUCto = 1,
+  rocSmoothingMethod = "none",
+  bootstrapCI = FALSE,
+  bootstrapReps = 2000,
+  compareClassifiers = FALSE,
+  precisionRecallCurve = FALSE
 )
 }
 \arguments{
@@ -147,6 +155,29 @@ between 0 and 1.}
 
 \item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
 confidence intervals.}
+
+\item{partialAUC}{Calculate partial AUC (area under a portion of the ROC
+curve).}
+
+\item{partialAUCfrom}{Lower bound of specificity for partial AUC
+calculation.}
+
+\item{partialAUCto}{Upper bound of specificity for partial AUC calculation.}
+
+\item{rocSmoothingMethod}{Method for smoothing the ROC curve (from pROC
+package).}
+
+\item{bootstrapCI}{Calculate bootstrap confidence intervals for AUC and
+optimal cutpoints.}
+
+\item{bootstrapReps}{Number of bootstrap replications for confidence
+intervals.}
+
+\item{compareClassifiers}{Perform comprehensive comparison of classifier
+performance.}
+
+\item{precisionRecallCurve}{Plot precision-recall curve alongside ROC
+curve.}
 }
 \value{
 A results object containing:
@@ -168,6 +199,10 @@ A results object containing:
 \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
 \code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$partialAUCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
+\code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$precisionRecallPlot} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
