@@ -12,7 +12,7 @@ jjdotplotstats(
   typestatistics = "parametric",
   effsizetype = "biased",
   centralityplotting = FALSE,
-  centralitytype = "parameteric",
+  centralitytype = "parametric",
   mytitle = "",
   xtitle = "",
   ytitle = "",

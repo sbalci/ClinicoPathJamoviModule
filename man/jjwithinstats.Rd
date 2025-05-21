@@ -13,7 +13,7 @@ jjwithinstats(
   pointpath = FALSE,
   centralitypath = FALSE,
   centralityplotting = FALSE,
-  centralitytype = "parameteric",
+  centralitytype = "parametric",
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",

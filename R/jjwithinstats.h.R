@@ -13,7 +13,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             pointpath = FALSE,
             centralitypath = FALSE,
             centralityplotting = FALSE,
-            centralitytype = "parameteric",
+            centralitytype = "parametric",
             typestatistics = "parametric",
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
@@ -78,11 +78,11 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "centralitytype",
                 centralitytype,
                 options=list(
-                    "parameteric",
+                    "parametric",
                     "nonparametric",
                     "robust",
                     "bayes"),
-                default="parameteric")
+                default="parametric")
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -330,7 +330,7 @@ jjwithinstats <- function(
     pointpath = FALSE,
     centralitypath = FALSE,
     centralityplotting = FALSE,
-    centralitytype = "parameteric",
+    centralitytype = "parametric",
     typestatistics = "parametric",
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",

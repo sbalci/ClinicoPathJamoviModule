@@ -39,7 +39,12 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             quantileCIs = FALSE,
             quantiles = "0.1,0.25,0.5,0.75,0.9",
             usePriorPrev = FALSE,
-            priorPrev = 0.5, ...) {
+            priorPrev = 0.5,
+            calculateIDI = FALSE,
+            calculateNRI = FALSE,
+            refVar = NULL,
+            nriThresholds = "",
+            idiNriBootRuns = 1000, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -243,6 +248,26 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=0.5,
                 min=0.001,
                 max=0.999)
+            private$..calculateIDI <- jmvcore::OptionBool$new(
+                "calculateIDI",
+                calculateIDI,
+                default=FALSE)
+            private$..calculateNRI <- jmvcore::OptionBool$new(
+                "calculateNRI",
+                calculateNRI,
+                default=FALSE)
+            private$..refVar <- jmvcore::OptionLevel$new(
+                "refVar",
+                refVar,
+                variable="(dependentVars)")
+            private$..nriThresholds <- jmvcore::OptionString$new(
+                "nriThresholds",
+                nriThresholds,
+                default="")
+            private$..idiNriBootRuns <- jmvcore::OptionNumber$new(
+                "idiNriBootRuns",
+                idiNriBootRuns,
+                default=1000)
 
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
@@ -278,6 +303,11 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..quantiles)
             self$.addOption(private$..usePriorPrev)
             self$.addOption(private$..priorPrev)
+            self$.addOption(private$..calculateIDI)
+            self$.addOption(private$..calculateNRI)
+            self$.addOption(private$..refVar)
+            self$.addOption(private$..nriThresholds)
+            self$.addOption(private$..idiNriBootRuns)
         }),
     active = list(
         dependentVars = function() private$..dependentVars$value,
@@ -313,7 +343,12 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         quantileCIs = function() private$..quantileCIs$value,
         quantiles = function() private$..quantiles$value,
         usePriorPrev = function() private$..usePriorPrev$value,
-        priorPrev = function() private$..priorPrev$value),
+        priorPrev = function() private$..priorPrev$value,
+        calculateIDI = function() private$..calculateIDI$value,
+        calculateNRI = function() private$..calculateNRI$value,
+        refVar = function() private$..refVar$value,
+        nriThresholds = function() private$..nriThresholds$value,
+        idiNriBootRuns = function() private$..idiNriBootRuns$value),
     private = list(
         ..dependentVars = NA,
         ..classVar = NA,
@@ -348,7 +383,12 @@ psychopdarocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..quantileCIs = NA,
         ..quantiles = NA,
         ..usePriorPrev = NA,
-        ..priorPrev = NA)
+        ..priorPrev = NA,
+        ..calculateIDI = NA,
+        ..calculateNRI = NA,
+        ..refVar = NA,
+        ..nriThresholds = NA,
+        ..idiNriBootRuns = NA)
 )
 
 psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -369,7 +409,9 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         criterionPlot = function() private$.items[["criterionPlot"]],
         prevalencePlot = function() private$.items[["prevalencePlot"]],
         dotPlot = function() private$.items[["dotPlot"]],
-        dotPlotMessage = function() private$.items[["dotPlotMessage"]]),
+        dotPlotMessage = function() private$.items[["dotPlotMessage"]],
+        idiTable = function() private$.items[["idiTable"]],
+        nriTable = function() private$.items[["nriTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -715,7 +757,88 @@ psychopdarocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="dotPlotMessage",
                 title="Dot Plot Note",
-                visible="(showDotPlot && combinePlots)"))}))
+                visible="(showDotPlot && combinePlots)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="idiTable",
+                title="Integrated Discrimination Improvement (IDI)",
+                visible="(calculateIDI)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "refVar",
+                    "idiNriBootRuns"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="refVar", 
+                        `title`="Reference", 
+                        `type`="text"),
+                    list(
+                        `name`="idi", 
+                        `title`="IDI", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nriTable",
+                title="Net Reclassification Index (NRI)",
+                visible="(calculateNRI)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "refVar",
+                    "nriThresholds",
+                    "idiNriBootRuns"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="refVar", 
+                        `title`="Reference", 
+                        `type`="text"),
+                    list(
+                        `name`="nri", 
+                        `title`="NRI", 
+                        `type`="number"),
+                    list(
+                        `name`="event_nri", 
+                        `title`="Event NRI", 
+                        `type`="number"),
+                    list(
+                        `name`="non_event_nri", 
+                        `title`="Non-Event NRI", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))}))
 
 psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "psychopdarocBase",
@@ -793,6 +916,16 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   from data.
 #' @param priorPrev Prior probability (disease prevalence) to use for
 #'   calculations.
+#' @param calculateIDI Calculate Integrated Discrimination Improvement (IDI).
+#'   Raw test values  will be converted to probabilities based on ROC analysis.
+#' @param calculateNRI Calculate Net Reclassification Index (NRI). Raw test
+#'   values will be converted  to probabilities based on ROC analysis.
+#' @param refVar Reference variable for IDI and NRI calculation.
+#' @param nriThresholds Comma-separated thresholds for category-based NRI
+#'   (leave empty for continuous NRI). Thresholds should be probability values
+#'   between 0 and 1.
+#' @param idiNriBootRuns Number of bootstrap iterations for IDI and NRI
+#'   confidence intervals.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -810,6 +943,8 @@ psychopdarocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
 #'   \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -854,7 +989,12 @@ psychopdaroc <- function(
     quantileCIs = FALSE,
     quantiles = "0.1,0.25,0.5,0.75,0.9",
     usePriorPrev = FALSE,
-    priorPrev = 0.5) {
+    priorPrev = 0.5,
+    calculateIDI = FALSE,
+    calculateNRI = FALSE,
+    refVar,
+    nriThresholds = "",
+    idiNriBootRuns = 1000) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("psychopdaroc requires jmvcore to be installed (restart may be required)")
@@ -906,7 +1046,12 @@ psychopdaroc <- function(
         quantileCIs = quantileCIs,
         quantiles = quantiles,
         usePriorPrev = usePriorPrev,
-        priorPrev = priorPrev)
+        priorPrev = priorPrev,
+        calculateIDI = calculateIDI,
+        calculateNRI = calculateNRI,
+        refVar = refVar,
+        nriThresholds = nriThresholds,
+        idiNriBootRuns = idiNriBootRuns)
 
     analysis <- psychopdarocClass$new(
         options = options,

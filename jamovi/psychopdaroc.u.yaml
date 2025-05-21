@@ -183,6 +183,36 @@ children:
             name: delongTest
             label: Perform DeLong's test for comparing AUCs
 
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Model Comparison
+            children:
+              - type: CheckBox
+                name: calculateIDI
+                label: Calculate IDI
+              - type: CheckBox
+                name: calculateNRI
+                label: Calculate NRI
+              - type: LevelSelector
+                name: refVar
+                label: Reference Variable
+                enable: (calculateIDI || calculateNRI)
+              - type: TextBox
+                name: nriThresholds
+                format: string
+                label: NRI Thresholds
+                enable: (calculateNRI)
+              - type: TextBox
+                name: idiNriBootRuns
+                format: number
+                label: Bootstrap Runs
+                enable: (calculateIDI || calculateNRI)
+
+
+
+
   # ==========================================
   # ADDITIONAL PLOTS 
   # ==========================================

@@ -10,7 +10,7 @@ jjbetweenstats(
   group,
   grvar = NULL,
   centralityplotting = FALSE,
-  centralitytype = "parameteric",
+  centralitytype = "parametric",
   typestatistics = "parametric",
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",

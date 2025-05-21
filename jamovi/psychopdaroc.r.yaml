@@ -321,6 +321,87 @@ items:
       type: Html
       visible: (showDotPlot && combinePlots)
 
+
+    - name: idiTable
+      title: "Integrated Discrimination Improvement (IDI)"
+      type: Table
+      visible: (calculateIDI)
+      clearWith:
+        - dependentVars
+        - classVar
+        - refVar
+        - idiNriBootRuns
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: refVar
+          title: Reference
+          type: text
+        - name: idi
+          title: IDI
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: nriTable
+      title: "Net Reclassification Index (NRI)"
+      type: Table
+      visible: (calculateNRI)
+      clearWith:
+        - dependentVars
+        - classVar
+        - refVar
+        - nriThresholds
+        - idiNriBootRuns
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: refVar
+          title: Reference
+          type: text
+        - name: nri
+          title: NRI
+          type: number
+        - name: event_nri
+          title: Event NRI
+          type: number
+        - name: non_event_nri
+          title: Non-Event NRI
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 refs:
     - cutpointr
     - pROC
