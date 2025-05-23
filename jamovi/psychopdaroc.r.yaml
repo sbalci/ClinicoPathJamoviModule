@@ -5,33 +5,25 @@ jrs: '1.1'
 
 items:
     # ==========================================
-    # INSTRUCTIONS AND GUIDANCE
+    # INTRODUCTION AND GUIDANCE
     # ==========================================
     - name: instructions
-      title: Instructions
       type: Html
       visible: true
 
     - name: procedureNotes
-      title: Analysis Summary
       type: Html
-      visible: true
 
     # ==========================================
-    # PRIMARY RESULTS - AUC AND PERFORMANCE SUMMARY
+    # SUMMARY RESULTS - Most important information first
     # ==========================================
-    - name: aucSummaryTable
+    - name: simpleResultsTable
       title: ROC Analysis Summary
       type: Table
       visible: true
-      clearWith:
-        - dependentVars
-        - classVar
-        - positiveClass
-        - subGroup
       columns:
         - name: variable
-          title: Test Variable
+          title: Variable
           type: text
         - name: auc
           title: AUC
@@ -48,10 +40,13 @@ items:
           format: zto,pvalue
 
     # ==========================================
-    # OPTIMAL CUTPOINTS AND DETAILED PERFORMANCE
+    # OPTIMAL CUTPOINTS AND DETAILED RESULTS
     # ==========================================
     - name: resultsTable
-      title: Optimal Cutpoints and Performance Metrics
+      refs: 
+        - cutpointr
+        - pROC
+      title: Optimal Cutpoints and Performance
       type: Array
       visible: true
       clearWith:
@@ -62,6 +57,9 @@ items:
         - allObserved
         - specifyCutScore
         - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
         - direction
         - positiveClass
       template:
@@ -72,23 +70,23 @@ items:
             title: Cutpoint
             type: number
           - name: sensitivity
-            title: Sensitivity (%)
+            title: 'Sensitivity (%)'
             type: number
             format: pc
           - name: specificity
-            title: Specificity (%)
+            title: 'Specificity (%)'
             type: number
             format: pc
           - name: ppv
-            title: PPV (%)
+            title: 'PPV (%)'
             type: number
             format: pc
           - name: npv
-            title: NPV (%)
+            title: 'NPV (%)'
             type: number
             format: pc
           - name: youden
-            title: Youden's Index
+            title: Youden's index
             type: number
           - name: AUC
             title: AUC
@@ -97,23 +95,13 @@ items:
             title: Metric Score
             type: number
 
-    # ==========================================
-    # DETAILED THRESHOLD ANALYSIS
-    # ==========================================
     - name: thresholdTable
-      title: Performance Across Multiple Thresholds
+      title: Detailed Threshold Performance
       type: Table
       visible: (showThresholdTable)
-      clearWith:
-        - dependentVars
-        - classVar
-        - method
-        - metric
-        - direction
-        - positiveClass
       columns:
         - name: threshold
-          title: Threshold
+          title: Cut-off
           type: number
         - name: sensitivity
           title: Sensitivity
@@ -145,11 +133,8 @@ items:
           title: Youden's J
           type: number
 
-    # ==========================================
-    # CONFUSION MATRICES (OPTIONAL DETAILED TABLES)
-    # ==========================================
     - name: sensSpecTable
-      title: Detailed Confusion Matrices
+      title: Sensitivity & Specificity Tables
       type: Array
       visible: (sensSpecTable)
       clearWith:
@@ -160,17 +145,41 @@ items:
         - allObserved
         - specifyCutScore
         - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
         - direction
         - positiveClass
       template:
         type: Html
-        description: HTML-formatted confusion matrix showing TP, FP, TN, FN counts
 
     # ==========================================
-    # STATISTICAL COMPARISONS
+    # AUC COMPARISON AND DELONG TEST
     # ==========================================
+    - name: aucSummaryTable
+      title: Area Under the ROC Curve
+      type: Table
+      visible: true
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+
     - name: delongComparisonTable
-      title: DeLong Test - Pairwise AUC Comparisons
+      title: DeLong Test Pairwise Comparisons
       type: Table
       visible: (delongTest)
       clearWith:
@@ -199,19 +208,122 @@ items:
           format: zto,pvalue
 
     - name: delongTest
-      title: DeLong Test - Detailed Results
+      title: DeLong Test Details
       type: Preformatted
       visible: (delongTest)
       clearWith:
         - dependentVars
         - classVar
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+        - metric
+        - boot_runs
+        - break_ties
+        - tol_metric
+        - direction
         - positiveClass
 
     # ==========================================
-    # MODEL IMPROVEMENT INDICES
+    # VISUALIZATIONS - Group all plots together
     # ==========================================
+    - name: plotROC
+      type: Array
+      title: ROC Curves
+      template:
+        type: Image
+        width: 550
+        height: 450
+        renderFun: .plotROC
+        visible: (plotROC)
+
+    - name: interactivePlot
+      title: Interactive ROC Plot
+      type: Image
+      width: 650
+      height: 500
+      renderFun: .plotInteractiveROC
+      visible: (interactiveROC)
+      clearWith:
+        - dependentVars
+        - classVar
+        - subGroup
+        - method
+        - metric
+        - direction
+        - positiveClass
+      refs: 
+        - plotROC
+
+    - name: criterionPlot
+      title: Sensitivity/Specificity vs. Threshold
+      type: Array
+      template:
+        title: $key
+        type: Image
+        width: 600
+        height: 400
+        renderFun: .plotCriterion
+        requiresData: true
+      visible: (showCriterionPlot)
+      clearWith:
+        - method
+        - metric
+        - direction
+        - allObserved
+        - break_ties
+        - tol_metric
+        - boot_runs
+
+    - name: prevalencePlot
+      title: Predictive Values vs. Prevalence
+      type: Array
+      template:
+        title: $key
+        type: Image
+        width: 600
+        height: 400
+        renderFun: .plotPrevalence
+        requiresData: true
+      visible: (showPrevalencePlot)
+      clearWith:
+        - method
+        - metric
+        - direction
+        - allObserved
+        - break_ties
+        - tol_metric
+        - boot_runs
+
+    - name: dotPlot
+      title: Test Values Distribution
+      type: Array
+      template:
+        title: $key
+        type: Image
+        width: 600
+        height: 400
+        renderFun: .plotDot
+        requiresData: true
+      visible: (showDotPlot)
+      clearWith:
+        - method
+        - metric
+        - direction
+        - allObserved
+        - break_ties
+        - tol_metric
+        - boot_runs
+
+    - name: dotPlotMessage
+      title: Dot Plot Note
+      type: Html
+      visible: (showDotPlot && combinePlots)
+
+
     - name: idiTable
-      title: Integrated Discrimination Improvement (IDI)
+      title: "Integrated Discrimination Improvement (IDI)"
       type: Table
       visible: (calculateIDI)
       clearWith:
@@ -221,10 +333,10 @@ items:
         - idiNriBootRuns
       columns:
         - name: variable
-          title: Test Variable
+          title: Variable
           type: text
         - name: refVar
-          title: Reference Variable
+          title: Reference
           type: text
         - name: idi
           title: IDI
@@ -241,7 +353,7 @@ items:
           format: zto,pvalue
 
     - name: nriTable
-      title: Net Reclassification Index (NRI)
+      title: "Net Reclassification Index (NRI)"
       type: Table
       visible: (calculateNRI)
       clearWith:
@@ -252,13 +364,13 @@ items:
         - idiNriBootRuns
       columns:
         - name: variable
-          title: Test Variable
+          title: Variable
           type: text
         - name: refVar
-          title: Reference Variable
+          title: Reference
           type: text
         - name: nri
-          title: Overall NRI
+          title: NRI
           type: number
         - name: event_nri
           title: Event NRI
@@ -277,18 +389,12 @@ items:
           type: number
           format: zto,pvalue
 
-    # ==========================================
-    # ADVANCED STATISTICAL ANALYSES
-    # ==========================================
+
+
     - name: partialAUCTable
-      title: Partial AUC Analysis
+      title: Partial AUC Results
       type: Table
       visible: (partialAUC)
-      clearWith:
-        - dependentVars
-        - classVar
-        - partialAUCfrom
-        - partialAUCto
       columns:
         - name: variable
           title: Variable
@@ -313,10 +419,6 @@ items:
       title: Bootstrap Confidence Intervals
       type: Table
       visible: (bootstrapCI)
-      clearWith:
-        - dependentVars
-        - classVar
-        - bootstrapReps
       columns:
         - name: variable
           title: Variable
@@ -334,17 +436,16 @@ items:
           title: 95% CI Upper
           type: number
 
+
+
+# Add to the psychopdaroc.r.yaml file
     - name: rocComparisonTable
-      title: Comprehensive Classifier Performance Comparison
+      title: Classifier Performance Comparison
       type: Table
       visible: (compareClassifiers)
-      clearWith:
-        - dependentVars
-        - classVar
-        - positiveClass
       columns:
         - name: variable
-          title: Test Variable
+          title: Variable
           type: text
         - name: auc
           title: AUC
@@ -365,113 +466,21 @@ items:
           title: Balanced Accuracy
           type: number
 
-    # ==========================================
-    # VISUALIZATIONS
-    # ==========================================
-    - name: plotROC
-      title: ROC Curves
-      type: Array
-      visible: (plotROC)
-      clearWith:
-        - dependentVars
-        - classVar
-        - combinePlots
-        - showOptimalPoint
-        - cleanPlot
-      template:
-        type: Image
-        width: 600
-        height: 500
-        renderFun: .plotROC
-        requiresData: true
-        description: ROC curve showing sensitivity vs (1-specificity)
-
-    - name: criterionPlot
-      title: Sensitivity and Specificity vs Threshold
-      type: Array
-      visible: (showCriterionPlot)
-      clearWith:
-        - dependentVars
-        - classVar
-        - method
-        - metric
-        - direction
-      template:
-        type: Image
-        width: 600
-        height: 450
-        renderFun: .plotCriterion
-        requiresData: true
-        description: Plot showing how sensitivity and specificity change with threshold values
-
-    - name: prevalencePlot
-      title: Predictive Values vs Disease Prevalence
-      type: Array
-      visible: (showPrevalencePlot)
-      clearWith:
-        - dependentVars
-        - classVar
-        - method
-        - metric
-      template:
-        type: Image
-        width: 600
-        height: 450
-        renderFun: .plotPrevalence
-        requiresData: true
-        description: Plot showing how PPV and NPV change with disease prevalence
-
-    - name: dotPlot
-      title: Test Value Distribution by True Classification
-      type: Array
-      visible: (showDotPlot)
-      clearWith:
-        - dependentVars
-        - classVar
-        - method
-        - metric
-      template:
-        type: Image
-        width: 600
-        height: 450
-        renderFun: .plotDot
-        requiresData: true
-        description: Distribution of test values by true classification status
-
     - name: precisionRecallPlot
-      title: Precision-Recall Curves
       type: Array
+      title: Precision-Recall Curves
       visible: (precisionRecallCurve)
-      clearWith:
-        - dependentVars
-        - classVar
-        - combinePlots
       template:
         type: Image
-        width: 600
-        height: 500
+        width: 550
+        height: 450
         renderFun: .plotPrecisionRecall
-        requiresData: true
-        description: Precision-recall curve (especially useful for imbalanced data)
-
-    # ==========================================
-    # INFORMATIONAL MESSAGES
-    # ==========================================
-    - name: dotPlotMessage
-      title: Multiple Plot Information
-      type: Html
-      visible: (showDotPlot && combinePlots)
 
 
-# ==========================================
-# REFERENCES
-# ==========================================
+
+
 refs:
     - cutpointr
     - pROC
     - MASS
-    - plotROC
-    - boot
-    - epiR
-
 ...
