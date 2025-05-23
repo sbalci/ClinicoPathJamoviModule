@@ -22,6 +22,4 @@ List containing comprehensive performance metrics
 }
 \description{
 Calculate comprehensive classifier performance metrics
-
-Calculate comprehensive classifier performance metrics
 }

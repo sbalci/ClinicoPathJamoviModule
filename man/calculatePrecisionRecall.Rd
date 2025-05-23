@@ -22,6 +22,4 @@ List containing precision, recall, thresholds, and AUPRC
 }
 \description{
 Calculate precision-recall curve data
-
-Calculate precision-recall curve data
 }

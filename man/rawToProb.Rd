@@ -2,7 +2,7 @@
 % Please edit documentation in R/psychopdaroc.b.R, R/psychopdaroc_utilities.R
 \name{rawToProb}
 \alias{rawToProb}
-\title{Convert raw test values to predicted probabilities}
+\title{Convert raw test values to predicted probabilities using ROC curve}
 \usage{
 rawToProb(values, actual, direction = ">=")
 
@@ -21,7 +21,5 @@ Vector of predicted probabilities
 Vector of predicted probabilities
 }
 \description{
-Convert raw test values to predicted probabilities
-
 Convert raw test values to predicted probabilities using ROC curve
 }
