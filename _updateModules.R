@@ -105,6 +105,24 @@ fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
               overwrite = TRUE)
 
 
+## meddecide_utility_files ----
+
+meddecide_utility_files <- c(
+  "psychopdaroc_utilities.R",
+  "nomogrammer.R"
+)
+
+
+
+fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_files),
+              file.path(meddecide_dir, "R"),
+              overwrite = TRUE)
+
+
+
+
+
+
 ## meddecide_data_description_files ----
 
 meddecide_data_description_files <- c(

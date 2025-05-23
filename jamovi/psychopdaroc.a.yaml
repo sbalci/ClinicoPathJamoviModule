@@ -3,538 +3,566 @@ name: psychopdaroc
 title: ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC Analysis
-menuSubtitle: ROC Analysis, AUC, Cutpoints
+menuSubtitle: ROC Analysis, AUC, Optimal Cutpoints
 version: '0.0.3'
 jas: '1.2'
 
 description:
     main: >
-        Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
-
+        Comprehensive Receiver Operating Characteristic (ROC) curve analysis for medical decision making.
+        Calculates optimal cutpoints, compares multiple diagnostic tests, and provides detailed 
+        performance metrics including AUC, sensitivity, specificity, and predictive values.
+    R:
+        dontrun: true
+        usage: |
+            # Basic ROC analysis
+            data(mtcars)
+            # Example will be added
 
 options:
+    # ==========================================
+    # CORE DATA INPUTS
+    # ==========================================
     - name: data
       type: Data
       description:
           R: The data as a data frame.
 
     - name: dependentVars
-      title: Dependent Variable
+      title: Test Variables
       type: Variables
-      suggested:
-        - continuous
-      permitted:
-        - numeric
+      suggested: [continuous]
+      permitted: [numeric]
       description:
+          ui: >
+            Select one or more continuous variables representing diagnostic test results.
+            These will be evaluated for their ability to classify cases.
           R: >
-            Variable(s) to be tested for classification performance.
-
-
+            Variable(s) to be tested for classification performance. Must be numeric.
 
     - name: classVar
-      title: Class Variable
+      title: Classification Variable (Gold Standard)
       type: Variable
-      suggested:
-        - nominal
-      permitted:
-        - factor
+      suggested: [nominal]
+      permitted: [factor]
       description:
+          ui: >
+            Select the binary variable that represents the true classification 
+            (e.g., diseased/healthy, positive/negative). This serves as the gold standard.
           R: >
-            Binary classification variable (gold standard).
-
+            Binary classification variable serving as the gold standard for comparison.
 
     - name: positiveClass
-      title: Positive Class
+      title: Positive Class Level
       type: Level
       variable: (classVar)
       description:
           ui: >
-            Select which level of the class variable should be treated as the positive class.
+            Choose which level of the classification variable should be considered 
+            the "positive" case (e.g., "diseased", "positive").
           R: >
-            Specifies which level of the class variable should be treated as the positive class.
-
+            Specifies which level of the class variable represents the positive case.
 
     - name: subGroup
-      title: Group Variable
+      title: Subgroup Variable (Optional)
       type: Variable
-      suggested:
-        - nominal
-      permitted:
-        - factor
+      suggested: [nominal]
+      permitted: [factor]
       description:
+          ui: >
+            Optional: Select a grouping variable to perform separate ROC analyses 
+            for different subgroups (e.g., by gender, age group).
           R: >
-            Optional variable for subgroup analysis.
+            Optional variable for stratified analysis by subgroups.
 
+    # ==========================================
+    # CUTPOINT OPTIMIZATION METHODS
+    # ==========================================
     - name: method
-      title: Method
+      title: Cutpoint Optimization Method
       type: List
       options:
-        - name: oc_manual
-          title: "Custom cut score"
         - name: maximize_metric
-          title: Maximize metric
+          title: "Maximize Metric (Standard)"
         - name: minimize_metric
-          title: Minimize metric
+          title: "Minimize Metric"
+        - name: oc_manual
+          title: "Custom Cut Score"
         - name: maximize_loess_metric
-          title: Maximize metric (LOESS)
+          title: "Maximize Metric (LOESS Smoothed)"
         - name: minimize_loess_metric
-          title: Minimize metric (LOESS)
+          title: "Minimize Metric (LOESS Smoothed)"
         - name: maximize_spline_metric
-          title: Maximize metric (spline)
+          title: "Maximize Metric (Spline Smoothed)"
         - name: minimize_spline_metric
-          title: Minimize metric (spline)
+          title: "Minimize Metric (Spline Smoothed)"
         - name: maximize_boot_metric
-          title: Maximize metric (bootstrap)
+          title: "Maximize Metric (Bootstrap)"
         - name: minimize_boot_metric
-          title: Minimize metric (bootstrap)
+          title: "Minimize Metric (Bootstrap)"
         - name: oc_youden_kernel
-          title: "Maximize Youden-Index (Kernel smoothed)"
+          title: "Youden Index (Kernel Smoothed)"
         - name: oc_youden_normal
-          title: "Maximize Youden-Index (Parametric normal)"
-
+          title: "Youden Index (Normal Distribution)"
         - name: oc_cost_ratio
-          title: "Cost-ratio optimized"
+          title: "Cost-Ratio Optimized"
         - name: oc_equal_sens_spec
-          title: "Equal sensitivity and specificity"
+          title: "Equal Sensitivity & Specificity"
         - name: oc_closest_01
-          title: "Closest to (0,1) point"
-
+          title: "Closest to Perfect Point (0,1)"
       default: maximize_metric
       description:
+          ui: >
+            Choose the method for determining the optimal cutpoint:
+            • Standard: Uses the selected metric to find the best cutpoint
+            • Custom: Specify your own cutpoint value
+            • Smoothed methods: Apply smoothing before optimization
+            • Cost-ratio: Considers relative costs of false positives vs false negatives
           R: >
-            Method to determine optimal cut point.
-
-    - name: allObserved
-      title: All observed scores
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show all observed scores in results table.
+            Method for determining the optimal cutpoint.
 
     - name: specifyCutScore
-      title: Specify cut score
+      title: Custom Cutpoint Value
       type: String
       default: ""
       description:
+          ui: >
+            Enter a specific cutpoint value when using "Custom Cut Score" method.
+            This should be a number within the range of your test variable.
           R: >
-            Specify custom cut score when using manual method.
+            Numeric value for custom cutpoint when using manual method.
 
     - name: metric
-      title: Metric
+      title: Optimization Metric
       type: List
       options:
         - name: youden
-          title: Youden-Index
+          title: "Youden Index (Sensitivity + Specificity - 1)"
         - name: sum_sens_spec
-          title: 'Sum: Sens/Spec'
+          title: "Sum of Sensitivity & Specificity"
         - name: accuracy
-          title: Accuracy
+          title: "Overall Accuracy"
         - name: sum_ppv_npv
-          title: 'Sum: PPV/NPV'
+          title: "Sum of PPV & NPV"
         - name: prod_sens_spec
-          title: 'Prod: Sens/Spec'
+          title: "Product of Sensitivity & Specificity"
         - name: prod_ppv_npv
-          title: 'Prod: PPV/NPV'
+          title: "Product of PPV & NPV"
         - name: cohens_kappa
           title: "Cohen's Kappa"
         - name: abs_d_sens_spec
-          title: 'Abs. d: Sens/Spec'
+          title: "Minimize |Sensitivity - Specificity|"
         - name: roc01
-          title: 'ROC'
+          title: "Distance to Perfect Point (0,1)"
         - name: abs_d_ppv_npv
-          title: 'Abs. d: PPV/NPV'
-        - name: p_chisquared
-          title: 'Chi-squared'
-        - name: odds_ratio
-          title: Odds Ratio
-        - name: risk_ratio
-          title: Risk Ratio
-        - name: misclassification_cost
-          title: Misclassification Cost
-        - name: total_utility
-          title: Total Utility
+          title: "Minimize |PPV - NPV|"
         - name: F1_score
-          title: F1 score
+          title: "F1 Score (Harmonic Mean)"
       default: youden
       description:
+          ui: >
+            Select the metric to optimize when finding the best cutpoint:
+            • Youden Index: Balances sensitivity and specificity equally
+            • Accuracy: Maximizes overall correct classifications
+            • F1 Score: Balances precision and recall
           R: >
-            Metric to optimize when determining cutpoint.
+            Metric function used for cutpoint optimization.
 
-    - name: boot_runs
-      title: Bootstrap runs
-      type: Number
-      default: 0
-      description:
-          R: >
-            Number of bootstrap runs for methods using bootstrapping.
-
-    - name: break_ties
-      title: Ties
-      type: List
-      options:
-        - name: c
-          title: All optimal cutpoints
-        - name: mean
-          title: Mean optimal cutpoint
-        - name: median
-          title: Median optimal cutpoint
-      default: mean
-      description:
-          R: >
-            Method for breaking ties when multiple optimal cutpoints exist.
-
-    - name: tol_metric
-      title: Tolerance metric
-      type: Number
-      default: 0.05
-      description:
-          R: >
-            Tolerance for the metric when determining optimal cutpoint.
-
+    # ==========================================
+    # ANALYSIS PARAMETERS
+    # ==========================================
     - name: direction
-      title: Direction
+      title: Classification Direction
       type: List
       options:
         - name: ">="
-          title: ">="
+          title: "≥ (Greater than or equal)"
         - name: "<="
-          title: "<="
+          title: "≤ (Less than or equal)"
       default: ">="
       description:
+          ui: >
+            Specify how test values relate to positive classification:
+            • ≥: Higher test values indicate positive cases (e.g., biomarker levels)
+            • ≤: Lower test values indicate positive cases (e.g., survival times)
           R: >
-            Direction of classification relative to cutpoint.
+            Direction of classification relative to the cutpoint.
 
-    - name: plotROC
-      title: ROC Curves
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display ROC curves.
-
-    - name: combinePlots
-      title: Combine plots
-      type: Bool
-      default: true
-      description:
-          R: >
-            Combine ROC curves in a single plot.
-
-    - name: displaySE
-      title: Standard error bars
+    - name: allObserved
+      title: Show All Possible Cutpoints
       type: Bool
       default: false
       description:
+          ui: >
+            When checked, displays results for all observed test values as potential cutpoints.
+            When unchecked, shows only the optimal cutpoint(s).
           R: >
-            Display standard error bars on ROC curves.
+            Whether to display all observed values as potential cutpoints.
 
-    - name: smoothing
-      title: LOESS smoothing
-      type: Bool
-      default: false
-      description:
-          R: >
-            Apply LOESS smoothing to ROC curves.
-
-    - name: sensSpecTable
-      title: Sensitivity-specificity tables
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display detailed sensitivity/specificity tables.
-
-    - name: delongTest
-      title: DeLong's test
-      type: Bool
-      default: false
-      description:
-          R: >
-            Perform DeLong's test for comparing AUCs.
-
-
-    - name: showCriterionPlot
-      title: Show Sensitivity/Specificity vs. Threshold Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean option to display the Sensitivity/Specificity vs. Threshold plot.
-
-    - name: showPrevalencePlot
-      title: Show Predictive Values vs. Prevalence Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean option to display the Predictive Values vs. Prevalence plot.
-
-    - name: showDotPlot
-      title: Show Dot Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Boolean option to display the Dot Plot showing distribution of values by class.
-
-
-    - name: showOptimalPoint
-      title: Show optimal point
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display the optimal point on the ROC curve.
-
-    - name: showConfidenceBands
-      title: Show confidence bands
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display confidence bands around the ROC curve.
-
-
-    - name: cleanPlot
-      title: Publication-quality plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Produce a clean ROC curve without annotations, suitable for publications.
-
-            
-    - name: legendPosition
-      title: Legend position
+    # ==========================================
+    # ADVANCED PARAMETERS
+    # ==========================================
+    - name: break_ties
+      title: Tie-Breaking Method
       type: List
       options:
-        - name: "none"
-          title: "None"
-        - name: "right"
-          title: "Right"
-        - name: "bottom"
-          title: "Bottom"
-        - name: "topleft"
-          title: "Top left"
-        - name: "topright" 
-          title: "Top right"
-      default: "right"
+        - name: mean
+          title: "Mean of tied values"
+        - name: median
+          title: "Median of tied values"
+        - name: c
+          title: "All tied values"
+      default: mean
       description:
+          ui: >
+            Method for handling ties when multiple cutpoints have the same optimal metric value.
           R: >
-            Position of the legend in multiple ROC curve plots.
+            Function for breaking ties when multiple optimal cutpoints exist.
 
-
-    - name: showThresholdTable
-      title: Show threshold table
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display detailed table with different threshold values and corresponding 
-            performance metrics (sensitivity, specificity, etc.)
-
-    - name: maxThresholds
-      title: Maximum thresholds to display
+    - name: tol_metric
+      title: Metric Tolerance
       type: Number
-      default: 20
-      min: 5
-      max: 100
+      default: 0.05
+      min: 0.001
+      max: 0.5
       description:
+          ui: >
+            Tolerance level for metric optimization. Smaller values require more precise optimization.
           R: >
-            Maximum number of threshold values to display in the table.
+            Tolerance for metric convergence in optimization methods.
 
+    - name: boot_runs
+      title: Bootstrap Iterations
+      type: Number
+      default: 0
+      min: 0
+      max: 10000
+      description:
+          ui: >
+            Number of bootstrap iterations for methods using bootstrapping (0 = no bootstrapping).
+            More iterations provide better estimates but take longer to compute.
+          R: >
+            Number of bootstrap runs for bootstrap-based methods.
 
-    - name: costratioFP
-      title: Cost ratio (FP/FN)
+    # ==========================================
+    # COST-SENSITIVE ANALYSIS
+    # ==========================================
+    - name: costRatioFP
+      title: Cost Ratio (False Positive / False Negative)
       type: Number
       default: 1.0
       min: 0.01
       max: 100.0
       description:
+          ui: >
+            Relative cost of false positives compared to false negatives.
+            • 1.0: Equal costs
+            • >1.0: False positives are more costly
+            • <1.0: False negatives are more costly
           R: >
-              Cost ratio of false positives to false negatives. Higher values penalize false positives more.
+            Cost ratio of false positives to false negatives for cost-sensitive optimization.
 
+    # ==========================================
+    # VISUALIZATION OPTIONS
+    # ==========================================
+    - name: plotROC
+      title: Display ROC Curves
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate ROC curve plots showing the relationship between sensitivity and 1-specificity.
+          R: >
+            Whether to generate ROC curve plots.
 
-    - name: interactiveROC
-      title: Interactive ROC Plot
+    - name: combinePlots
+      title: Combine Multiple Curves
+      type: Bool
+      default: true
+      description:
+          ui: >
+            When analyzing multiple test variables, combine all ROC curves in a single plot.
+            Uncheck to create separate plots for each variable.
+          R: >
+            Whether to combine multiple ROC curves in one plot.
+
+    - name: showOptimalPoint
+      title: Highlight Optimal Cutpoint
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Mark the optimal cutpoint on the ROC curve with a special symbol.
+          R: >
+            Whether to highlight the optimal cutpoint on ROC curves.
+
+    - name: cleanPlot
+      title: Publication-Quality Plots
       type: Bool
       default: false
       description:
+          ui: >
+            Generate clean, minimal plots suitable for publication without annotations or legends.
           R: >
-              Create an interactive HTML ROC plot.
+            Create publication-ready plots with minimal annotations.
 
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - name: "right"
+          title: "Right"
+        - name: "bottom"
+          title: "Bottom"
+        - name: "top"
+          title: "Top"
+        - name: "left"
+          title: "Left"
+        - name: "none"
+          title: "No Legend"
+      default: "right"
+      description:
+          ui: >
+            Position of the legend in multi-curve plots.
+          R: >
+            Legend position for multiple ROC curve plots.
 
-    - name: directLabel
-      title: Direct Label Curves
+    # ==========================================
+    # STATISTICAL COMPARISONS
+    # ==========================================
+    - name: delongTest
+      title: DeLong's Test for AUC Comparison
       type: Bool
       default: false
       description:
+          ui: >
+            Perform DeLong's test to statistically compare AUC values between different tests.
+            Requires at least two test variables.
           R: >
-              Directly label ROC curves instead of using a legend.
-
-
-
-    - name: quantileCIs 
-      title: Show CIs at Quantiles
-      type: Bool
-      default: false
-      description:
-          R: >
-              Show confidence intervals at specific quantiles.
-
-    - name: quantiles
-      title: Quantile Positions
-      type: String
-      default: "0.1,0.25,0.5,0.75,0.9"
-      description:
-          R: >
-              Comma-separated list of quantiles at which to display confidence intervals. 
-
-    - name: usePriorPrev
-      title: Use prior prevalence
-      type: Bool
-      default: false
-      description:
-          R: >
-              Use a specified prior prevalence instead of calculating from data.
-
-    - name: priorPrev
-      title: Prior prevalence
-      type: Number
-      default: 0.5
-      min: 0.001
-      max: 0.999
-      description:
-          R: >
-              Prior probability (disease prevalence) to use for calculations.
-
-
+            Whether to perform DeLong's test for comparing AUCs.
 
     - name: calculateIDI
-      title: "Calculate IDI"
+      title: Integrated Discrimination Improvement (IDI)
       type: Bool
       default: false
       description:
+          ui: >
+            Calculate IDI to measure improvement in discrimination when comparing tests.
+            Requires at least two test variables and a reference variable.
           R: >
-              Calculate Integrated Discrimination Improvement (IDI). Raw test values 
-              will be converted to probabilities based on ROC analysis.
+            Whether to calculate Integrated Discrimination Improvement.
 
     - name: calculateNRI
-      title: "Calculate NRI"
+      title: Net Reclassification Index (NRI)
       type: Bool
       default: false
       description:
+          ui: >
+            Calculate NRI to measure improvement in risk classification.
+            Can be calculated as continuous or categorical NRI.
           R: >
-              Calculate Net Reclassification Index (NRI). Raw test values will be converted 
-              to probabilities based on ROC analysis.
+            Whether to calculate Net Reclassification Index.
 
     - name: refVar
-      title: "Reference Variable"
+      title: Reference Variable for Comparisons
       type: Level
       variable: (dependentVars)
       description:
+          ui: >
+            Select which test variable to use as the reference for IDI/NRI calculations.
+            Other variables will be compared against this reference.
           R: >
-              Reference variable for IDI and NRI calculation.
+            Reference variable for IDI and NRI calculations.
 
     - name: nriThresholds
-      title: "NRI Thresholds"
+      title: NRI Risk Category Thresholds
       type: String
       default: ""
       description:
+          ui: >
+            Comma-separated probability thresholds for categorical NRI (e.g., "0.1,0.2,0.3").
+            Leave empty for continuous NRI. Values should be between 0 and 1.
           R: >
-              Comma-separated thresholds for category-based NRI (leave empty for continuous NRI).
-              Thresholds should be probability values between 0 and 1.
+            Probability thresholds for categorical NRI calculation.
 
     - name: idiNriBootRuns
-      title: "Bootstrap Runs for IDI/NRI"
+      title: IDI/NRI Bootstrap Iterations
       type: Number
       default: 1000
+      min: 100
+      max: 10000
       description:
+          ui: >
+            Number of bootstrap iterations for calculating confidence intervals for IDI and NRI.
           R: >
-              Number of bootstrap iterations for IDI and NRI confidence intervals.
+            Bootstrap iterations for IDI/NRI confidence intervals.
 
-
-    - name: partialAUC
-      title: Compute partial AUC
+    # ==========================================
+    # ADDITIONAL OUTPUTS
+    # ==========================================
+    - name: sensSpecTable
+      title: Detailed Sensitivity/Specificity Tables
       type: Bool
       default: false
       description:
+          ui: >
+            Generate detailed confusion matrix tables showing true/false positives and negatives.
           R: >
-            Calculate partial AUC (area under a portion of the ROC curve).
+            Whether to display detailed sensitivity/specificity confusion matrices.
+
+    - name: showThresholdTable
+      title: Threshold Performance Table
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display a comprehensive table showing performance metrics across multiple threshold values.
+          R: >
+            Whether to display the threshold performance table.
+
+    - name: maxThresholds
+      title: Maximum Thresholds in Table
+      type: Number
+      default: 20
+      min: 5
+      max: 100
+      description:
+          ui: >
+            Maximum number of threshold values to include in the performance table.
+          R: >
+            Maximum number of thresholds to display in performance table.
+
+    # ==========================================
+    # ADDITIONAL PLOTS
+    # ==========================================
+    - name: showCriterionPlot
+      title: Sensitivity/Specificity vs Threshold Plot
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Create a plot showing how sensitivity and specificity change across different threshold values.
+          R: >
+            Whether to display sensitivity/specificity vs threshold plots.
+
+    - name: showPrevalencePlot
+      title: Predictive Values vs Prevalence Plot
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show how positive and negative predictive values change with disease prevalence.
+          R: >
+            Whether to display predictive values vs prevalence plots.
+
+    - name: showDotPlot
+      title: Test Value Distribution Plot
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display the distribution of test values by true classification status.
+          R: >
+            Whether to display dot plots of test value distributions.
+
+    - name: precisionRecallCurve
+      title: Precision-Recall Curves
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate precision-recall curves, which are especially useful for imbalanced datasets.
+          R: >
+            Whether to generate precision-recall curves.
+
+    # ==========================================
+    # ADVANCED STATISTICAL FEATURES
+    # ==========================================
+    - name: partialAUC
+      title: Partial AUC Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Calculate AUC for a specific region of the ROC curve (partial AUC).
+            Useful when only certain specificity ranges are clinically relevant.
+          R: >
+            Whether to calculate partial AUC.
 
     - name: partialAUCfrom
-      title: Partial AUC from specificity
+      title: Partial AUC - From Specificity
       type: Number
       default: 0.8
       min: 0.0
       max: 1.0
       description:
+          ui: >
+            Lower bound of specificity range for partial AUC calculation.
           R: >
-            Lower bound of specificity for partial AUC calculation.
+            Lower specificity bound for partial AUC.
 
     - name: partialAUCto
-      title: Partial AUC to specificity
+      title: Partial AUC - To Specificity
       type: Number
       default: 1.0
       min: 0.0
       max: 1.0
       description:
+          ui: >
+            Upper bound of specificity range for partial AUC calculation.
           R: >
-            Upper bound of specificity for partial AUC calculation.
+            Upper specificity bound for partial AUC.
 
     - name: rocSmoothingMethod
-      title: ROC curve smoothing method
+      title: ROC Curve Smoothing
       type: List
       options:
         - name: none
-          title: None
+          title: "No Smoothing"
         - name: binormal
-          title: Binormal
+          title: "Binormal Smoothing"
         - name: density
-          title: Density
+          title: "Density-based Smoothing"
         - name: fitdistr
-          title: Fit distribution
+          title: "Distribution Fitting"
       default: none
       description:
+          ui: >
+            Apply smoothing to ROC curves to reduce noise, especially useful with small samples.
           R: >
-            Method for smoothing the ROC curve (from pROC package).
+            ROC curve smoothing method from pROC package.
 
     - name: bootstrapCI
-      title: Bootstrap confidence intervals
+      title: Bootstrap Confidence Intervals
       type: Bool
       default: false
       description:
-          R: >
+          ui: >
             Calculate bootstrap confidence intervals for AUC and optimal cutpoints.
+          R: >
+            Whether to calculate bootstrap confidence intervals.
 
     - name: bootstrapReps
-      title: Bootstrap replications
+      title: Bootstrap Replications
       type: Number
       default: 2000
       min: 100
       max: 10000
       description:
+          ui: >
+            Number of bootstrap replications for confidence interval calculation.
           R: >
-            Number of bootstrap replications for confidence intervals.
+            Number of bootstrap replications for CI calculation.
 
-# Add to options in psychopdaroc.a.yaml
     - name: compareClassifiers
-      title: "Compare classifiers' performance"
+      title: Comprehensive Classifier Comparison
       type: Bool
       default: false
       description:
+          ui: >
+            Perform comprehensive comparison of classifier performance including 
+            AUC, AUPRC, Brier score, F1 score, and accuracy metrics.
           R: >
-            Perform comprehensive comparison of classifier performance.
-            
-    - name: precisionRecallCurve
-      title: "Precision-Recall curve"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Plot precision-recall curve alongside ROC curve.
-
-
+            Whether to perform comprehensive classifier comparison.
 
 ...
