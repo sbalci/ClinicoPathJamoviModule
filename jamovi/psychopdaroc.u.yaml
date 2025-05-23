@@ -4,6 +4,9 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  # ==========================================
+  # VARIABLES SECTION - Keep at the top
+  # ==========================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -31,10 +34,14 @@ children:
             name: subGroup
             maxItemCount: 1
             isTarget: true
+
+  # ==========================================
+  # MAIN ANALYSIS OPTIONS - Basic settings
+  # ==========================================
   - type: CollapseBox
     label: Analysis Options
     margin: normal
-    collapsed: false
+    collapsed: false  # Open by default
     children:
       - type: LayoutBox
         margin: large
@@ -53,6 +60,34 @@ children:
           - type: ComboBox
             name: direction
             label: Direction
+
+  # ==========================================
+  # PREVALENCE SETTINGS - Group related options
+  # ==========================================
+  - type: CollapseBox
+    label: Prevalence Settings
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: usePriorPrev
+            label: Use prior prevalence
+          - type: TextBox
+            name: priorPrev
+            format: number
+            label: Prior prevalence value
+            enable: (usePriorPrev)
+          - type: TextBox
+            name: costratioFP
+            format: number
+            label: Cost ratio (FP/FN)
+
+  # ==========================================
+  # VISUALIZATION OPTIONS - All plot-related items
+  # ==========================================
   - type: CollapseBox
     label: Visualization
     margin: normal
@@ -75,6 +110,11 @@ children:
                 name: showOptimalPoint
                 label: Show optimal cutpoint
                 enable: (plotROC)
+              - type: CheckBox
+                name: directLabel
+                label: Label curves directly
+                enable: (plotROC && combinePlots)
+          
       - type: LayoutBox
         margin: large
         children:
@@ -87,12 +127,39 @@ children:
               - type: ComboBox
                 name: legendPosition
                 label: Legend position
+              - type: CheckBox
+                name: smoothing
+                label: Apply LOESS smoothing
+              - type: CheckBox
+                name: interactiveROC
+                label: Create interactive plot
+
       - type: LayoutBox
         margin: large
         children:
-          - type: Label
+          - type: Label 
             label: Additional Information
-            children: []
+            children:
+              - type: CheckBox
+                name: displaySE
+                label: Show standard error bars
+                enable: (!cleanPlot)
+              - type: CheckBox
+                name: showConfidenceBands
+                label: Show confidence bands
+                enable: (!cleanPlot)
+              - type: CheckBox
+                name: quantileCIs
+                label: Show confidence intervals at quantiles
+              - type: TextBox
+                name: quantiles
+                format: string
+                label: Quantile positions
+                enable: (quantileCIs)
+
+  # ==========================================
+  # ADDITIONAL OUTPUTS
+  # ==========================================
   - type: CollapseBox
     label: Additional Outputs
     margin: normal
@@ -115,6 +182,7 @@ children:
           - type: CheckBox
             name: delongTest
             label: Perform DeLong's test for comparing AUCs
+
       - type: LayoutBox
         margin: large
         children:
@@ -141,6 +209,13 @@ children:
                 format: number
                 label: Bootstrap Runs
                 enable: (calculateIDI || calculateNRI)
+
+
+
+
+  # ==========================================
+  # ADDITIONAL PLOTS 
+  # ==========================================
   - type: CollapseBox
     label: Additional Plots
     margin: normal
@@ -158,6 +233,10 @@ children:
           - type: CheckBox
             name: showDotPlot
             label: Test Values Distribution
+
+  # ==========================================
+  # ADVANCED OPTIONS
+  # ==========================================
   - type: CollapseBox
     label: Advanced
     margin: normal
@@ -180,6 +259,8 @@ children:
             name: boot_runs
             format: number
             label: Bootstrap runs
+
+
   - type: CollapseBox
     label: pROC Features
     margin: normal
@@ -215,12 +296,9 @@ children:
             format: number
             label: Bootstrap replications
             enable: (bootstrapCI)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: costRatioFP
-        format: number
+
+
+# Add to the psychopdaroc.u.yaml file
   - type: CollapseBox
     label: Multiple ROC Features
     margin: normal
