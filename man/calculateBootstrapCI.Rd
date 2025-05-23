@@ -26,6 +26,4 @@ List containing bootstrap confidence intervals
 }
 \description{
 Calculate bootstrap confidence intervals for ROC metrics
-
-Calculate bootstrap confidence intervals for ROC metrics
 }

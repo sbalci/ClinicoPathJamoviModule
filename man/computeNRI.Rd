@@ -26,6 +26,4 @@ List containing NRI components
 }
 \description{
 Compute Net Reclassification Index (NRI)
-
-Compute Net Reclassification Index (NRI)
 }

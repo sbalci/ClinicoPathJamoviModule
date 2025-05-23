@@ -42,6 +42,4 @@ List with NRI components and confidence intervals
 }
 \description{
 Bootstrap NRI calculation with confidence intervals
-
-Bootstrap NRI calculation with confidence intervals
 }

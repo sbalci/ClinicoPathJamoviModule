@@ -26,6 +26,4 @@ List containing partial AUC results
 }
 \description{
 Calculate partial AUC using numerical integration
-
-Calculate partial AUC using numerical integration
 }

@@ -26,6 +26,4 @@ List with IDI and confidence intervals
 }
 \description{
 Bootstrap IDI calculation with confidence intervals
-
-Bootstrap IDI calculation with confidence intervals
 }
