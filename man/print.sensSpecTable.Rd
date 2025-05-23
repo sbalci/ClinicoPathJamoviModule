@@ -29,7 +29,5 @@ HTML table
 \description{
 ROC Analysis
 
-Generate a formatted HTML table for sensitivity/specificity results
-
 Sensitivity and Specificity Table
 }

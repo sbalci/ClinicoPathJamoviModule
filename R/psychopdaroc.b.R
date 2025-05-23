@@ -5,155 +5,142 @@
 #' @import ggplot2
 #' @import cutpointr
 #' @importFrom MASS ginv
-
+#' @importFrom stats pnorm qnorm pchisq quantile aggregate
 
 # ============================================================================
 # UTILITY FUNCTIONS - OUTSIDE THE MAIN CLASS
 # ============================================================================
 
-#' @title Generate a formatted HTML table for sensitivity/specificity results
+# Generate a formatted HTML table for sensitivity/specificity results
+#' @param Title Title for the table
 #' @param TP Number of true positives
 #' @param FP Number of false positives
 #' @param TN Number of true negatives
 #' @param FN Number of false negatives
 #' @return HTML string containing the formatted table
-print.sensSpecTable = function(Title, TP, FP, TN, FN) {
-  # Create HTML table with the confusion matrix results
+print.sensSpecTable <- function(Title, TP, FP, TN, FN) {
   html <- paste0(
     "<style type='text/css'>
-          .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
-          .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
-          .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
-          .tg .tg-s6z2{text-align:center}
-          .tg .tg-uys7{border-color:inherit;text-align:center}
-          .tg .tg-h0x1{text-align:center}
+        .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
+        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg .tg-s6z2{text-align:center}
+        .tg .tg-uys7{border-color:inherit;text-align:center}
+        .tg .tg-h0x1{text-align:center}
         </style>
         <table class='tg'>
-          <tr>
+        <tr>
             <th class='tg-0lax' colspan='4'>", Title, "</th>
-          </tr>
-          <tr>
+        </tr>
+        <tr>
             <td class='tg-s6z2'></td>
             <td class='tg-uys7' colspan='3'>DECISION BASED ON MEASURE</td>
-          </tr>
-          <tr>
+        </tr>
+        <tr>
             <td class='tg-h0x1' rowspan='3'>CRITERION</td>
             <td class='tg-h0x1'></td>
             <td class='tg-h0x1'>Negative</td>
             <td class='tg-h0x1'>Positive</td>
-          </tr>
-          <tr>
+        </tr>
+        <tr>
             <td class='tg-s6z2'>Negative</td>
             <td class='tg-s6z2'>", TN, " (TN)</td>
             <td class='tg-s6z2'>", FP, " (FP)</td>
-          </tr>
-          <tr>
+        </tr>
+        <tr>
             <td class='tg-h0x1'>Positive</td>
             <td class='tg-h0x1'>", FN, " (FN)</td>
             <td class='tg-h0x1'>", TP, " (TP)</td>
-          </tr>
-          <tr>
+        </tr>
+        <tr>
             <td class='tg-tf2e'></td>
             <td class='tg-tf2e'></td>
             <td class='tg-tf2e'></td>
             <td class='tg-tf2e'></td>
-          </tr>
+        </tr>
         </table>"
   )
   return(html)
 }
 
-#' Perform DeLong's test for comparing AUCs
-#'
+# Perform DeLong's test for comparing AUCs
 #' @param data Matrix or data frame with test scores (columns = different tests)
 #' @param classVar Vector of class labels (factor or character)
 #' @param pos_class The positive class label
 #' @param ref Reference test for comparisons (NULL = all pairwise comparisons)
 #' @param conf.level Confidence level for intervals
 #' @return List with test results, AUCs, etc.
-deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95) {
-  # Validate and prepare inputs
-  # Convert factor to character first to handle labels safely
+deLong.test <- function(data, classVar, pos_class, ref = NULL, conf.level = 0.95) {
+  # Convert factor to character for consistent handling
   if (is.factor(classVar)) {
     classVar <- as.character(classVar)
   }
 
-  # Safely identify the positive class
+  # Validate positive class
   if (!pos_class %in% unique(classVar)) {
-    # Try to interpret pos_class as a position index
-    if (is.numeric(try(as.numeric(pos_class), silent = TRUE))) {
-      pos_idx <- as.numeric(pos_class)
-      if (pos_idx <= length(unique(classVar))) {
-        pos_class <- unique(classVar)[pos_idx]
-      }
-    }
-    # If still not found, use the first level
-    if (!pos_class %in% unique(classVar)) {
-      warning("Specified positive class not found. Using first unique value instead.")
-      pos_class <- unique(classVar)[1]
-    }
-  }
-
-  # Check if positive class exists in the data
-  id.pos <- classVar == pos_class
-  if (sum(id.pos) < 1) {
-    stop("Wrong level specified for positive class. No observations found.")
+    stop("Specified positive class not found in data.")
   }
 
   # Check data dimensions
-  if (dim(data)[2] < 2) {
+  if (ncol(data) < 2) {
     stop("Data must contain at least two columns (different measures).")
   }
-  if (dim(data)[1] < 2) {
+  if (nrow(data) < 2) {
     stop("Data must contain at least two rows (observations).")
   }
 
-  # Get counts of positive and negative cases
+  # Identify positive and negative cases
+  id.pos <- classVar == pos_class
   nn <- sum(!id.pos)  # Number of negative cases
   np <- sum(id.pos)   # Number of positive cases
   nauc <- ncol(data)  # Number of tests
 
-  # Set up comparison matrix based on reference or pairwise
+  # Validate we have both positive and negative cases
+  if (np < 1 || nn < 1) {
+    stop("Need both positive and negative cases for ROC analysis.")
+  }
+
+  # Set up comparison matrix
   if (is.null(ref)) {
-    # Create matrix for all pairwise comparisons
+    # All pairwise comparisons
     L <- matrix(0, nrow = nauc * (nauc - 1) / 2, ncol = nauc)
     newa <- 0
     for (i in 1:(nauc - 1)) {
       newl <- nauc - i
       L[(newa + 1):(newa + newl), i] <- rep(1, newl)
-      L[(newa + 1):(newa + newl), ((i + 1):(i + newl))] <-
-        diag(-1, nrow = newl, ncol = newl)
+      L[(newa + 1):(newa + newl), ((i + 1):(i + newl))] <- diag(-1, nrow = newl, ncol = newl)
       newa <- newa + newl
     }
   } else {
-    # Create matrix for comparing all tests against a reference
-    if (ref > nauc)
-      stop(paste("Reference ref must be one of the markers (1...", nauc, " in this case)", sep = ""))
+    # Comparisons against reference
+    if (ref > nauc) {
+      stop(paste("Reference must be one of the markers (1...", nauc, " in this case)", sep = ""))
+    }
     L <- matrix(1, ncol = nauc, nrow = nauc - 1)
     L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
   }
 
-  # Split data into positive and negative cases
+  # Split data by class
   markern <- as.matrix(data[!id.pos,])
   markerp <- as.matrix(data[id.pos,])
 
-  # Function to compute the Wilcoxon statistic
+  # Wilcoxon statistic function
   WK.STAT <- function(data, y) {
     r <- rank(c(data, y))
     n.data <- length(data)
     n.y <- length(y)
     STATISTIC <- sum(r[seq_along(data)]) - n.data * (n.data + 1) / 2
-    STATISTIC
+    return(STATISTIC)
   }
 
-  # Calculate AUC for each test using Wilcoxon statistic
-  auc <- vector("numeric", length = nauc)
+  # Calculate AUC for each test
+  auc <- numeric(nauc)
   for (r in 1:nauc) {
     auc[r] <- WK.STAT(markerp[, r], markern[, r])
   }
   auc <- auc / (nn * np)  # Normalize to [0,1]
 
-  # For AUCs < 0.5, invert the test scores (AUC will be > 0.5)
+  # Handle AUCs < 0.5
   if (any(auc < 0.5)) {
     data[, auc < 0.5] <- -data[, auc < 0.5]
     auc[auc < 0.5] <- 1 - auc[auc < 0.5]
@@ -161,66 +148,58 @@ deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95)
     markerp <- as.matrix(data[id.pos,])
   }
 
-  # Calculate placement values for covariance estimation
+  # Calculate placement values
   V10 <- matrix(0, nrow = np, ncol = nauc)
   V01 <- matrix(0, nrow = nn, ncol = nauc)
 
   tmn <- t(markern)
   tmp <- t(markerp)
 
-  # Calculate placement values for each positive case
   for (i in 1:np) {
     V10[i,] <- rowSums(tmn < tmp[, i]) + 0.5 * rowSums(tmn == tmp[, i])
   }
 
-  # Calculate placement values for each negative case
   for (i in 1:nn) {
     V01[i,] <- rowSums(tmp > tmn[, i]) + 0.5 * rowSums(tmp == tmn[, i])
   }
 
-  # Normalize placement values
   V10 <- V10 / nn
   V01 <- V01 / np
 
   # Calculate covariance matrices
   W10 <- cov(V10)
   W01 <- cov(V01)
-
-  # Estimated covariance matrix for AUCs
   S <- W10 / np + W01 / nn
 
-  # Compute variances of AUCs using Hanley & McNeil (1982) formula
+  # Calculate standard errors and p-values
   q1 <- auc / (2 - auc)
-  q2 <- 2 * auc ^ 2 / (1 + auc)
+  q2 <- 2 * auc^2 / (1 + auc)
 
-  # Calculate standard errors and p-values (against null hypothesis AUC = 0.5)
-  aucvar <- (auc * (1 - auc) + (np - 1) * (q1 - auc ^ 2) + (nn - 1) * (q2 - auc ^ 2)) / (np * nn)
+  aucvar <- (auc * (1 - auc) + (np - 1) * (q1 - auc^2) + (nn - 1) * (q2 - auc^2)) / (np * nn)
   zhalf <- (auc - 0.5) / sqrt(aucvar)
   phalf <- 1 - pnorm(zhalf)
   zdelong <- (auc - 0.5) / sqrt(diag(S))
   pdelong <- 1 - pnorm(zdelong)
 
-  # Global test for difference between AUCs
+  # Global test
   aucdiff <- L %*% auc
   z <- t(aucdiff) %*% MASS::ginv(L %*% S %*% t(L)) %*% aucdiff
   p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 
-  # Calculate confidence intervals for pairwise differences
+  # Calculate confidence intervals
+  quantil <- qnorm(1 - (1 - conf.level) / 2)
+
   if (is.null(ref)) {
     # All pairwise comparisons
     cor.auc <- matrix(ncol = 1, nrow = nauc * (nauc - 1) / 2)
     ci <- matrix(ncol = 2, nrow = nauc * (nauc - 1) / 2)
     ctr <- 1
-    rows <- vector("character", length = (nauc * (nauc - 1) / 2))
+    rows <- character(nauc * (nauc - 1) / 2)
     pairp <- matrix(nrow = nauc * (nauc - 1) / 2, ncol = 1)
-    quantil <- qnorm(1 - (1 - conf.level) / 2)
 
     for (i in 1:(nauc - 1)) {
       for (j in (i + 1):nauc) {
-        # Calculate correlation between AUCs
         cor.auc[ctr] <- S[i, j] / sqrt(S[i, i] * S[j, j])
-
-        # Calculate confidence interval for the difference
         LSL <- t(c(1, -1)) %*% S[c(j, i), c(j, i)] %*% c(1, -1)
         tmpz <- (aucdiff[ctr]) %*% MASS::ginv(LSL) %*% aucdiff[ctr]
         pairp[ctr] <- 1 - pchisq(tmpz, df = qr(LSL)$rank)
@@ -230,18 +209,15 @@ deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95)
       }
     }
   } else {
-    # Comparisons against a reference
+    # Comparisons against reference
     cor.auc <- matrix(ncol = 1, nrow = nauc - 1)
     ci <- matrix(ncol = 2, nrow = nauc - 1)
-    rows <- vector("character", length = nauc - 1)
+    rows <- character(nauc - 1)
     pairp <- matrix(nrow = nauc - 1, ncol = 1)
     comp <- (1:nauc)[-ref]
 
     for (i in 1:(nauc - 1)) {
-      # Calculate correlation between reference and current AUC
       cor.auc[i] <- S[ref, comp[i]] / sqrt(S[ref, ref] * S[comp[i], comp[i]])
-
-      # Calculate confidence interval for the difference
       LSL <- t(c(1, -1)) %*% S[c(ref, comp[i]), c(ref, comp[i])] %*% c(1, -1)
       tmpz <- aucdiff[i] %*% MASS::ginv(LSL) %*% aucdiff[i]
       pairp[i] <- 1 - pchisq(tmpz, df = qr(LSL)$rank)
@@ -250,7 +226,7 @@ deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95)
     }
   }
 
-  # Format results for return
+  # Format results
   newres <- as.data.frame(cbind(aucdiff, ci, pairp, cor.auc))
   names(newres) <- c("AUC Difference", "CI(lower)", "CI(upper)", "P.Value", "Correlation")
   rownames(newres) <- rows
@@ -262,7 +238,7 @@ deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95)
   auc <- as.data.frame(cbind(auc, sqrt(aucvar), phalf, sqrt(diag(S)), pdelong))
   colnames(auc) <- c("AUC", "SD(Hanley)", "P(H0: AUC=0.5)", "SD(DeLong)", "P(H0: AUC=0.5)")
 
-  # Prepare return object
+  # Return results
   ERG <- list(
     AUC = auc,
     difference = newres,
@@ -274,12 +250,9 @@ deLong.test = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95)
   return(ERG)
 }
 
-#' Print method for DeLong test results
-#' @export print.DeLong
-#' @param x DeLong test object
-#' @param digits Number of digits for display
-#' @param ... Additional arguments for print methods
-print.DeLong = function(x, digits = max(3, getOption("digits") - 3), ...) {
+# Print method for DeLong test results
+#' @export
+print.DeLong <- function(x, digits = max(3, getOption("digits") - 3), ...) {
   cat("Estimated AUC's:\n")
   print(format(round(x$AUC, digits = digits, ...), nsmall = digits, ...))
   cat("\nPairwise comparisons:\n")
@@ -287,21 +260,18 @@ print.DeLong = function(x, digits = max(3, getOption("digits") - 3), ...) {
   cat(paste("\nOverall test:\n p-value =", format.pval(x$global.p, digits = digits), "\n"))
 }
 
-#' Convert raw test values to predicted probabilities using ROC curve
+# ============================================================================
+# UTILITY FUNCTIONS FROM psychopdaroc_utilities.R
+# ============================================================================
+
+# Convert raw test values to predicted probabilities
 #' @param values Raw test values
 #' @param actual Binary outcomes (0/1)
-#' @param direction Direction of the test ">=" or "<="
+#' @param direction Direction of test (">=", "<=")
 #' @return Vector of predicted probabilities
-raw_to_prob <- function(values, actual, direction = ">=") {
-  # Sort values for thresholds
+rawToProb <- function(values, actual, direction = ">=") {
   sorted_values <- sort(unique(values))
-
-  # Calculate sensitivity and specificity for each threshold
-  threshold_data <- data.frame(
-    threshold = numeric(length(sorted_values)),
-    sensitivity = numeric(length(sorted_values)),
-    specificity = numeric(length(sorted_values))
-  )
+  probs <- numeric(length(values))
 
   for (i in seq_along(sorted_values)) {
     threshold <- sorted_values[i]
@@ -313,251 +283,202 @@ raw_to_prob <- function(values, actual, direction = ">=") {
     }
 
     tp <- sum(predicted_pos & actual == 1)
-    fp <- sum(predicted_pos & actual == 0)
-    tn <- sum(!predicted_pos & actual == 0)
     fn <- sum(!predicted_pos & actual == 1)
 
-    threshold_data$threshold[i] <- threshold
-    threshold_data$sensitivity[i] <- tp / (tp + fn)
-    threshold_data$specificity[i] <- tn / (tn + fp)
+    sensitivity <- ifelse(tp + fn > 0, tp / (tp + fn), 0)
+
+    value_indices <- which(values == threshold)
+    probs[value_indices] <- ifelse(direction == ">=", sensitivity, 1 - sensitivity)
   }
 
-  # For each value, find nearest threshold and use sensitivity as probability
-  probs <- numeric(length(values))
-  for (i in seq_along(values)) {
-    idx <- which.min(abs(threshold_data$threshold - values[i]))
-    if (direction == ">=") {
-      probs[i] <- threshold_data$sensitivity[idx]
-    } else {
-      probs[i] <- 1 - threshold_data$sensitivity[idx]
-    }
-  }
+  probs[probs < 0] <- 0
+  probs[probs > 1] <- 1
 
   return(probs)
 }
 
+# Compute Net Reclassification Index (NRI)
+#' @param new_values Test values for new test
+#' @param ref_values Test values for reference test
+#' @param actual Binary outcome vector
+#' @param direction Classification direction
+#' @param thresholds Risk category thresholds (NULL for continuous NRI)
+#' @return List containing NRI components
+computeNRI <- function(new_values, ref_values, actual, direction = ">=", thresholds = NULL) {
+  new_probs <- rawToProb(new_values, actual, direction)
+  ref_probs <- rawToProb(ref_values, actual, direction)
 
-#' Calculate Integrated Discrimination Improvement (IDI)
-#' @param values_new Raw values from the new test
-#' @param values_ref Raw values from the reference test
-#' @param actual Actual binary outcomes
-#' @param direction Direction of the test ">=" or "<="
-#' @param ci Calculate confidence intervals
-#' @param boot_runs Number of bootstrap iterations
-#' @return List with IDI value and confidence intervals
-calculate_idi <- function(values_new, values_ref, actual, direction = ">=",
-                          ci = TRUE, boot_runs = 1000) {
-  # Ensure actual is binary (0 or 1)
-  actual_binary <- as.numeric(actual)
+  events <- actual == 1
+  non_events <- actual == 0
 
-  # Convert raw values to probabilities
-  predicted_new <- raw_to_prob(values_new, actual_binary, direction)
-  predicted_ref <- raw_to_prob(values_ref, actual_binary, direction)
-
-  # Calculate discrimination slopes
-  discrim_slope_new <- mean(predicted_new[actual_binary == 1]) -
-    mean(predicted_new[actual_binary == 0])
-  discrim_slope_ref <- mean(predicted_ref[actual_binary == 1]) -
-    mean(predicted_ref[actual_binary == 0])
-
-  # Calculate IDI
-  idi <- discrim_slope_new - discrim_slope_ref
-
-  # Calculate confidence intervals if requested
-  if (ci && boot_runs > 0 && requireNamespace("boot", quietly = TRUE)) {
-    # Bootstrap function for confidence intervals
-    boot_idi <- function(data, indices) {
-      boot_actual <- actual_binary[indices]
-      boot_new <- values_new[indices]
-      boot_ref <- values_ref[indices]
-
-      boot_prob_new <- raw_to_prob(boot_new, boot_actual, direction)
-      boot_prob_ref <- raw_to_prob(boot_ref, boot_actual, direction)
-
-      slope_new <- mean(boot_prob_new[boot_actual == 1]) -
-        mean(boot_prob_new[boot_actual == 0])
-      slope_ref <- mean(boot_prob_ref[boot_actual == 1]) -
-        mean(boot_prob_ref[boot_actual == 0])
-
-      return(slope_new - slope_ref)
-    }
-
-    # Run bootstrap
-    boot_results <- boot::boot(data = data.frame(values_new, values_ref, actual_binary),
-                               statistic = boot_idi,
-                               R = boot_runs)
-
-    # Calculate confidence intervals
-    boot_ci <- boot::boot.ci(boot_results, type = "perc", conf = 0.95)
-    ci_lower <- boot_ci$percent[4]
-    ci_upper <- boot_ci$percent[5]
-
-    # Calculate p-value
-    p_value <- 2 * min(
-      mean(boot_results$t <= 0),
-      mean(boot_results$t >= 0)
-    )
-  } else {
-    ci_lower <- NA
-    ci_upper <- NA
-    p_value <- NA
-  }
-
-  return(list(
-    idi = idi,
-    ci_lower = ci_lower,
-    ci_upper = ci_upper,
-    p_value = p_value
-  ))
-}
-
-
-#' Calculate Net Reclassification Improvement (NRI)
-#' @param values_new Raw values from the new test
-#' @param values_ref Raw values from the reference test
-#' @param actual Actual binary outcomes
-#' @param thresholds Thresholds for category-based NRI (NULL for continuous)
-#' @param direction Direction of the test ">=" or "<="
-#' @param ci Calculate confidence intervals
-#' @param boot_runs Number of bootstrap iterations
-#' @return List with NRI values and confidence intervals
-calculate_nri <- function(values_new, values_ref, actual,
-                          thresholds = NULL, direction = ">=",
-                          ci = TRUE, boot_runs = 1000) {
-  # Ensure actual is binary (0 or 1)
-  actual_binary <- as.numeric(actual)
-
-  # Convert raw values to probabilities
-  predicted_new <- raw_to_prob(values_new, actual_binary, direction)
-  predicted_ref <- raw_to_prob(values_ref, actual_binary, direction)
-
-  # Identify events and non-events
-  events <- actual_binary == 1
-  non_events <- actual_binary == 0
-
-  # Calculate NRI
   if (is.null(thresholds) || length(thresholds) == 0) {
-    # Continuous NRI calculation
-    up_events <- sum(predicted_new[events] > predicted_ref[events])
-    down_events <- sum(predicted_new[events] < predicted_ref[events])
-    up_non_events <- sum(predicted_new[non_events] > predicted_ref[non_events])
-    down_non_events <- sum(predicted_new[non_events] < predicted_ref[non_events])
+    # Continuous NRI
+    up_events <- sum(new_probs[events] > ref_probs[events])
+    down_events <- sum(new_probs[events] < ref_probs[events])
+    up_non_events <- sum(new_probs[non_events] > ref_probs[non_events])
+    down_non_events <- sum(new_probs[non_events] < ref_probs[non_events])
 
-    # Calculate proportions
     p_up_events <- up_events / sum(events)
     p_down_events <- down_events / sum(events)
     p_up_non_events <- up_non_events / sum(non_events)
     p_down_non_events <- down_non_events / sum(non_events)
 
-    # Calculate NRI components
-    event_nri <- p_up_events - p_down_events
-    non_event_nri <- p_down_non_events - p_up_non_events
   } else {
-    # Category-based NRI calculation
-    # Create risk categories
-    ref_cats <- cut(predicted_ref,
+    # Categorical NRI
+    ref_cats <- cut(ref_probs,
                     breaks = c(0, thresholds, 1),
                     labels = 1:(length(thresholds) + 1),
                     include.lowest = TRUE)
 
-    new_cats <- cut(predicted_new,
+    new_cats <- cut(new_probs,
                     breaks = c(0, thresholds, 1),
                     labels = 1:(length(thresholds) + 1),
                     include.lowest = TRUE)
 
-    # Calculate movement
-    move_up_event <- sum(as.numeric(new_cats[events]) > as.numeric(ref_cats[events]))
-    move_down_event <- sum(as.numeric(new_cats[events]) < as.numeric(ref_cats[events]))
-    move_up_non_event <- sum(as.numeric(new_cats[non_events]) > as.numeric(ref_cats[non_events]))
-    move_down_non_event <- sum(as.numeric(new_cats[non_events]) < as.numeric(ref_cats[non_events]))
+    move_up_event <- sum(as.numeric(new_cats[events]) > as.numeric(ref_cats[events]), na.rm = TRUE)
+    move_down_event <- sum(as.numeric(new_cats[events]) < as.numeric(ref_cats[events]), na.rm = TRUE)
+    move_up_non_event <- sum(as.numeric(new_cats[non_events]) > as.numeric(ref_cats[non_events]), na.rm = TRUE)
+    move_down_non_event <- sum(as.numeric(new_cats[non_events]) < as.numeric(ref_cats[non_events]), na.rm = TRUE)
 
-    # Calculate proportions
     p_up_events <- move_up_event / sum(events)
     p_down_events <- move_down_event / sum(events)
     p_up_non_events <- move_up_non_event / sum(non_events)
     p_down_non_events <- move_down_non_event / sum(non_events)
-
-    # Calculate NRI components
-    event_nri <- p_up_events - p_down_events
-    non_event_nri <- p_down_non_events - p_up_non_events
   }
 
-  # Calculate overall NRI
-  nri <- event_nri + non_event_nri
-
-  # Calculate confidence intervals via bootstrap if requested
-  if (ci && boot_runs > 0 && requireNamespace("boot", quietly = TRUE)) {
-    # Bootstrap function
-    boot_nri <- function(data, indices) {
-      # Same calculation as above but with bootstrap sample
-      # Using a simplified version for brevity
-      b_actual <- actual_binary[indices]
-      b_events <- b_actual == 1
-      b_non_events <- b_actual == 0
-
-      b_new <- values_new[indices]
-      b_ref <- values_ref[indices]
-
-      b_prob_new <- raw_to_prob(b_new, b_actual, direction)
-      b_prob_ref <- raw_to_prob(b_ref, b_actual, direction)
-
-      # Calculate continuous NRI for bootstrap sample
-      b_up_events <- sum(b_prob_new[b_events] > b_prob_ref[b_events])
-      b_down_events <- sum(b_prob_new[b_events] < b_prob_ref[b_events])
-      b_up_non_events <- sum(b_prob_new[b_non_events] > b_prob_ref[b_non_events])
-      b_down_non_events <- sum(b_prob_new[b_non_events] < b_prob_ref[b_non_events])
-
-      b_p_up_events <- b_up_events / sum(b_events)
-      b_p_down_events <- b_down_events / sum(b_events)
-      b_p_up_non_events <- b_up_non_events / sum(b_non_events)
-      b_p_down_non_events <- b_down_non_events / sum(b_non_events)
-
-      b_event_nri <- b_p_up_events - b_p_down_events
-      b_non_event_nri <- b_p_down_non_events - b_p_up_non_events
-
-      return(b_event_nri + b_non_event_nri)
-    }
-
-    # Run bootstrap
-    boot_results <- boot::boot(data = data.frame(values_new, values_ref, actual_binary),
-                               statistic = boot_nri,
-                               R = boot_runs)
-
-    # Calculate confidence intervals
-    boot_ci <- boot::boot.ci(boot_results, type = "perc", conf = 0.95)
-    ci_lower <- boot_ci$percent[4]
-    ci_upper <- boot_ci$percent[5]
-
-    # Calculate p-value
-    p_value <- 2 * min(
-      mean(boot_results$t <= 0),
-      mean(boot_results$t >= 0)
-    )
-  } else {
-    ci_lower <- NA
-    ci_upper <- NA
-    p_value <- NA
-  }
+  event_nri <- p_up_events - p_down_events
+  non_event_nri <- p_down_non_events - p_up_non_events
+  overall_nri <- event_nri + non_event_nri
 
   return(list(
-    nri = nri,
+    nri = overall_nri,
     event_nri = event_nri,
-    non_event_nri = non_event_nri,
-    ci_lower = ci_lower,
-    ci_upper = ci_upper,
+    non_event_nri = non_event_nri
+  ))
+}
+
+# Bootstrap IDI calculation with confidence intervals
+#' @param new_values Test values for new test
+#' @param ref_values Test values for reference test
+#' @param actual Binary outcome vector
+#' @param direction Classification direction
+#' @param n_boot Number of bootstrap iterations
+#' @return List with IDI and confidence intervals
+bootstrapIDI <- function(new_values, ref_values, actual, direction = ">=", n_boot = 1000) {
+  n <- length(actual)
+  boot_idi <- numeric(n_boot)
+
+  # Original IDI calculation
+  new_probs <- rawToProb(new_values, actual, direction)
+  ref_probs <- rawToProb(ref_values, actual, direction)
+
+  original_idi <- (mean(new_probs[actual == 1]) - mean(new_probs[actual == 0])) -
+    (mean(ref_probs[actual == 1]) - mean(ref_probs[actual == 0]))
+
+  # Bootstrap
+  for (i in 1:n_boot) {
+    boot_idx <- sample(n, n, replace = TRUE)
+
+    boot_new <- new_values[boot_idx]
+    boot_ref <- ref_values[boot_idx]
+    boot_actual <- actual[boot_idx]
+
+    boot_new_probs <- rawToProb(boot_new, boot_actual, direction)
+    boot_ref_probs <- rawToProb(boot_ref, boot_actual, direction)
+
+    boot_idi[i] <- (mean(boot_new_probs[boot_actual == 1]) - mean(boot_new_probs[boot_actual == 0])) -
+      (mean(boot_ref_probs[boot_actual == 1]) - mean(boot_ref_probs[boot_actual == 0]))
+  }
+
+  # Calculate confidence intervals
+  ci_lower <- quantile(boot_idi, 0.025, na.rm = TRUE)
+  ci_upper <- quantile(boot_idi, 0.975, na.rm = TRUE)
+
+  # Calculate p-value
+  p_value <- 2 * min(mean(boot_idi <= 0, na.rm = TRUE),
+                     mean(boot_idi >= 0, na.rm = TRUE))
+
+  return(list(
+    idi = original_idi,
+    ci_lower = as.numeric(ci_lower),
+    ci_upper = as.numeric(ci_upper),
     p_value = p_value
   ))
 }
 
+# Bootstrap NRI calculation with confidence intervals
+#' @param new_values Test values for new test
+#' @param ref_values Test values for reference test
+#' @param actual Binary outcome vector
+#' @param direction Classification direction
+#' @param thresholds Risk category thresholds (NULL for continuous NRI)
+#' @param n_boot Number of bootstrap iterations
+#' @return List with NRI components and confidence intervals
+bootstrapNRI <- function(new_values, ref_values, actual, direction = ">=",
+                         thresholds = NULL, n_boot = 1000) {
+  n <- length(actual)
+  boot_nri <- numeric(n_boot)
+  boot_event_nri <- numeric(n_boot)
+  boot_non_event_nri <- numeric(n_boot)
 
+  # Original NRI calculation
+  original_nri <- computeNRI(new_values, ref_values, actual, direction, thresholds)
 
-# Calculate precision-recall curve
-.calculatePrecisionRecall = function(x, class, pos_class) {
-  # Convert to binary response (1 = positive, 0 = negative)
+  # Bootstrap
+  for (i in 1:n_boot) {
+    boot_idx <- sample(n, n, replace = TRUE)
+
+    boot_new <- new_values[boot_idx]
+    boot_ref <- ref_values[boot_idx]
+    boot_actual <- actual[boot_idx]
+
+    tryCatch({
+      boot_result <- computeNRI(boot_new, boot_ref, boot_actual, direction, thresholds)
+      boot_nri[i] <- boot_result$nri
+      boot_event_nri[i] <- boot_result$event_nri
+      boot_non_event_nri[i] <- boot_result$non_event_nri
+    }, error = function(e) {
+      boot_nri[i] <- NA
+      boot_event_nri[i] <- NA
+      boot_non_event_nri[i] <- NA
+    })
+  }
+
+  # Remove failed iterations
+  valid_idx <- !is.na(boot_nri)
+  boot_nri <- boot_nri[valid_idx]
+  boot_event_nri <- boot_event_nri[valid_idx]
+  boot_non_event_nri <- boot_non_event_nri[valid_idx]
+
+  # Calculate confidence intervals
+  ci_lower <- quantile(boot_nri, 0.025, na.rm = TRUE)
+  ci_upper <- quantile(boot_nri, 0.975, na.rm = TRUE)
+
+  # Calculate p-value
+  p_value <- 2 * min(mean(boot_nri <= 0, na.rm = TRUE),
+                     mean(boot_nri >= 0, na.rm = TRUE))
+
+  return(list(
+    nri = original_nri$nri,
+    event_nri = original_nri$event_nri,
+    non_event_nri = original_nri$non_event_nri,
+    ci_lower = as.numeric(ci_lower),
+    ci_upper = as.numeric(ci_upper),
+    p_value = p_value
+  ))
+}
+
+# Calculate precision-recall curve data
+#' @param x Numeric vector of test values
+#' @param class Binary class vector
+#' @param pos_class Positive class label
+#' @return List containing precision, recall, thresholds, and AUPRC
+calculatePrecisionRecall <- function(x, class, pos_class) {
+  # Convert to binary response
   response <- as.numeric(class == pos_class)
 
   # Sort values and create thresholds
-  sorted_values <- sort(unique(x))
+  sorted_values <- sort(unique(x), decreasing = TRUE)
   precision <- numeric(length(sorted_values))
   recall <- numeric(length(sorted_values))
 
@@ -566,20 +487,25 @@ calculate_nri <- function(values_new, values_ref, actual,
     threshold <- sorted_values[i]
     predicted_pos <- x >= threshold
 
-    # Compute TP, FP, FN
     tp <- sum(predicted_pos & response == 1)
     fp <- sum(predicted_pos & response == 0)
     fn <- sum(!predicted_pos & response == 1)
 
-    # Calculate precision and recall
     precision[i] <- ifelse(tp + fp > 0, tp / (tp + fp), 0)
     recall[i] <- ifelse(tp + fn > 0, tp / (tp + fn), 0)
   }
 
-  # Calculate AUPRC using the trapezoidal rule
+  # Add points for complete curve
+  precision <- c(1, precision, 0)
+  recall <- c(0, recall, 1)
+  sorted_values <- c(max(x, na.rm = TRUE) + 1, sorted_values, min(x, na.rm = TRUE) - 1)
+
+  # Calculate AUPRC using trapezoidal rule
   auprc <- 0
   for (i in 2:length(recall)) {
-    auprc <- auprc + 0.5 * (precision[i] + precision[i-1]) * abs(recall[i] - recall[i-1])
+    if (recall[i] > recall[i-1]) {
+      auprc <- auprc + 0.5 * (precision[i] + precision[i-1]) * (recall[i] - recall[i-1])
+    }
   }
 
   return(list(
@@ -590,142 +516,377 @@ calculate_nri <- function(values_new, values_ref, actual,
   ))
 }
 
-# Calculate comprehensive performance metrics for classifier comparison
-.calculateClassifierMetrics = function(x, class, pos_class) {
-  # Need to load pROC package
-  if (!requireNamespace("pROC", quietly = TRUE)) {
-    warning("The pROC package is required for classifier comparison.")
-    return(NULL)
+# Calculate comprehensive classifier performance metrics
+#' @param x Numeric vector of test values
+#' @param class Binary class vector
+#' @param pos_class Positive class label
+#' @return List containing comprehensive performance metrics
+calculateComprehensiveMetrics <- function(x, class, pos_class) {
+  # Validate inputs
+  if (length(x) != length(class)) {
+    stop("Test values and class labels must have same length")
   }
 
-  # Create ROC object
-  roc_obj <- pROC::roc(
-    response = class,
-    predictor = x,
-    levels = c(unique(class)[unique(class) != pos_class][1], pos_class),
-    direction = "<",
-    quiet = TRUE
-  )
+  # Remove missing values
+  complete_cases <- !is.na(x) & !is.na(class)
+  x <- x[complete_cases]
+  class <- class[complete_cases]
 
-  # Calculate AUC
-  auc <- pROC::auc(roc_obj)
+  if (length(x) < 10) {
+    warning("Very small sample size may produce unreliable results")
+  }
 
-  # Calculate precision-recall
-  pr_results <- private$.calculatePrecisionRecall(x, class, pos_class)
-  auprc <- pr_results$auprc
-
-  # Convert to binary response (1 = positive, 0 = negative)
+  # Convert to binary response
   response <- as.numeric(class == pos_class)
 
-  # Find optimal threshold using Youden's index
-  coords <- pROC::coords(roc_obj, x = "best", best.method = "youden")
-  threshold <- coords$threshold
+  # Calculate basic ROC metrics
+  thresholds <- sort(unique(x))
+  best_youden <- -Inf
+  best_threshold <- NA
+  best_sens <- NA
+  best_spec <- NA
+  auc <- 0
 
-  # Get predictions using optimal threshold
-  predicted_prob <- pROC::predict.roc(roc_obj)
-  predicted_class <- ifelse(predicted_prob >= threshold, 1, 0)
+  # Store all ROC points for AUC calculation
+  roc_points <- data.frame(
+    fpr = numeric(length(thresholds)),
+    tpr = numeric(length(thresholds))
+  )
+
+  for (i in seq_along(thresholds)) {
+    threshold <- thresholds[i]
+    predicted_pos <- x >= threshold
+
+    tp <- sum(predicted_pos & response == 1)
+    fp <- sum(predicted_pos & response == 0)
+    tn <- sum(!predicted_pos & response == 0)
+    fn <- sum(!predicted_pos & response == 1)
+
+    # Calculate rates
+    sensitivity <- tp / (tp + fn)
+    specificity <- tn / (tn + fp)
+    youden <- sensitivity + specificity - 1
+
+    # Store for AUC calculation
+    roc_points$tpr[i] <- sensitivity
+    roc_points$fpr[i] <- 1 - specificity
+
+    # Update best threshold based on Youden's index
+    if (youden > best_youden) {
+      best_youden <- youden
+      best_threshold <- threshold
+      best_sens <- sensitivity
+      best_spec <- specificity
+    }
+  }
+
+  # Calculate AUC using trapezoidal rule
+  roc_points <- roc_points[order(roc_points$fpr), ]
+  for (i in 2:nrow(roc_points)) {
+    width <- roc_points$fpr[i] - roc_points$fpr[i-1]
+    height <- (roc_points$tpr[i] + roc_points$tpr[i-1]) / 2
+    auc <- auc + width * height
+  }
+
+  # Get predictions at optimal threshold
+  predicted_pos <- x >= best_threshold
+
+  # Calculate confusion matrix at optimal threshold
+  tp <- sum(predicted_pos & response == 1)
+  fp <- sum(predicted_pos & response == 0)
+  tn <- sum(!predicted_pos & response == 0)
+  fn <- sum(!predicted_pos & response == 1)
+
+  # Calculate comprehensive metrics
+  accuracy <- (tp + tn) / (tp + fp + tn + fn)
+  balanced_accuracy <- (best_sens + best_spec) / 2
+
+  # Calculate precision and F1 score
+  precision <- ifelse(tp + fp > 0, tp / (tp + fp), 0)
+  recall <- best_sens  # Same as sensitivity
+  f1_score <- ifelse(precision + recall > 0,
+                     2 * precision * recall / (precision + recall), 0)
 
   # Calculate Brier score
-  brier_score <- mean((predicted_prob - response)^2)
+  prob_predictions <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+  prob_predictions[prob_predictions < 0] <- 0
+  prob_predictions[prob_predictions > 1] <- 1
+  brier_score <- mean((prob_predictions - response)^2, na.rm = TRUE)
 
-  # Calculate confusion matrix metrics
-  tp <- sum(predicted_class == 1 & response == 1)
-  tn <- sum(predicted_class == 0 & response == 0)
-  fp <- sum(predicted_class == 1 & response == 0)
-  fn <- sum(predicted_class == 0 & response == 1)
-
-  # Calculate F1 score
-  precision <- ifelse(tp + fp > 0, tp / (tp + fp), 0)
-  recall <- ifelse(tp + fn > 0, tp / (tp + fn), 0)
-  f1_score <- ifelse(precision + recall > 0, 2 * precision * recall / (precision + recall), 0)
-
-  # Calculate accuracy
-  accuracy <- (tp + tn) / (tp + tn + fp + fn)
-
-  # Calculate balanced accuracy
-  sensitivity <- tp / (tp + fn)
-  specificity <- tn / (tn + fp)
-  balanced_accuracy <- (sensitivity + specificity) / 2
+  # Calculate AUPRC
+  pr_results <- calculatePrecisionRecall(x, class, pos_class)
+  auprc <- pr_results$auprc
 
   return(list(
-    auc = as.numeric(auc),
+    auc = auc,
     auprc = auprc,
     brier = brier_score,
     f1_score = f1_score,
     accuracy = accuracy,
-    balanced_accuracy = balanced_accuracy
+    balanced_accuracy = balanced_accuracy,
+    sensitivity = best_sens,
+    specificity = best_spec,
+    precision = precision,
+    optimal_threshold = best_threshold
   ))
 }
 
+# Calculate partial AUC using numerical integration
+#' @param x Numeric vector of test values
+#' @param class Binary class vector
+#' @param pos_class Positive class label
+#' @param spec_from Lower bound of specificity range
+#' @param spec_to Upper bound of specificity range
+#' @return List containing partial AUC results
+calculatePartialAUC <- function(x, class, pos_class, spec_from = 0.8, spec_to = 1.0) {
+  # Validate inputs
+  if (spec_from >= spec_to) {
+    stop("spec_from must be less than spec_to")
+  }
+  if (spec_from < 0 || spec_to > 1) {
+    stop("Specificity bounds must be between 0 and 1")
+  }
 
+  # Convert to binary response
+  response <- as.numeric(class == pos_class)
 
+  # Calculate ROC curve points
+  thresholds <- sort(unique(x))
+  roc_data <- data.frame(
+    threshold = thresholds,
+    sensitivity = numeric(length(thresholds)),
+    specificity = numeric(length(thresholds))
+  )
 
+  for (i in seq_along(thresholds)) {
+    threshold <- thresholds[i]
+    predicted_pos <- x >= threshold
 
+    tp <- sum(predicted_pos & response == 1)
+    fp <- sum(predicted_pos & response == 0)
+    tn <- sum(!predicted_pos & response == 0)
+    fn <- sum(!predicted_pos & response == 1)
 
+    roc_data$sensitivity[i] <- tp / (tp + fn)
+    roc_data$specificity[i] <- tn / (tn + fp)
+  }
 
+  # Filter for specificity range
+  in_range <- roc_data$specificity >= spec_from & roc_data$specificity <= spec_to
 
+  if (sum(in_range) < 2) {
+    warning("Insufficient data points in specified specificity range")
+    return(list(
+      pAUC = NA,
+      pAUC_normalized = NA,
+      ci_lower = NA,
+      ci_upper = NA,
+      spec_range = paste0("(", spec_from, " - ", spec_to, ")")
+    ))
+  }
 
+  # Extract points in range and sort by specificity
+  partial_data <- roc_data[in_range, ]
+  partial_data <- partial_data[order(partial_data$specificity), ]
 
+  # Calculate partial AUC using trapezoidal rule
+  partial_auc <- 0
+  for (i in 2:nrow(partial_data)) {
+    width <- (1 - partial_data$specificity[i-1]) - (1 - partial_data$specificity[i])
+    height <- (partial_data$sensitivity[i] + partial_data$sensitivity[i-1]) / 2
+    partial_auc <- partial_auc + width * height
+  }
 
+  # Normalize partial AUC to [0,1] range
+  max_possible_pauc <- (1 - spec_from) - (1 - spec_to)
+  normalized_pauc <- partial_auc / max_possible_pauc
 
+  # Simple confidence interval
+  n <- length(x)
+  se_approx <- sqrt(partial_auc * (1 - partial_auc) / n)
+  ci_lower <- max(0, partial_auc - 1.96 * se_approx)
+  ci_upper <- min(max_possible_pauc, partial_auc + 1.96 * se_approx)
 
+  return(list(
+    pAUC = partial_auc,
+    pAUC_normalized = normalized_pauc,
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    spec_range = paste0("(", spec_from, " - ", spec_to, ")")
+  ))
+}
 
+# Calculate bootstrap confidence intervals for ROC metrics
+#' @param x Numeric vector of test values
+#' @param class Binary class vector
+#' @param pos_class Positive class label
+#' @param n_boot Number of bootstrap iterations
+#' @param conf_level Confidence level (default 0.95)
+#' @return List containing bootstrap confidence intervals
+calculateBootstrapCI <- function(x, class, pos_class, n_boot = 2000, conf_level = 0.95) {
+  # Validate inputs
+  if (n_boot < 100) {
+    warning("Very few bootstrap iterations may produce unstable results")
+  }
 
+  # Remove missing values
+  complete_cases <- !is.na(x) & !is.na(class)
+  x <- x[complete_cases]
+  class <- class[complete_cases]
+  n <- length(x)
 
+  if (n < 20) {
+    warning("Small sample size may produce unreliable bootstrap results")
+  }
+
+  # Initialize storage for bootstrap results
+  boot_auc <- numeric(n_boot)
+  boot_threshold <- numeric(n_boot)
+  boot_sensitivity <- numeric(n_boot)
+  boot_specificity <- numeric(n_boot)
+
+  # Original metrics for comparison
+  original_metrics <- calculateComprehensiveMetrics(x, class, pos_class)
+
+  # Bootstrap sampling
+  for (i in 1:n_boot) {
+    # Sample with replacement
+    boot_indices <- sample(n, n, replace = TRUE)
+    x_boot <- x[boot_indices]
+    class_boot <- class[boot_indices]
+
+    # Calculate metrics for bootstrap sample
+    tryCatch({
+      boot_metrics <- calculateComprehensiveMetrics(x_boot, class_boot, pos_class)
+      boot_auc[i] <- boot_metrics$auc
+      boot_threshold[i] <- boot_metrics$optimal_threshold
+      boot_sensitivity[i] <- boot_metrics$sensitivity
+      boot_specificity[i] <- boot_metrics$specificity
+    }, error = function(e) {
+      boot_auc[i] <- NA
+      boot_threshold[i] <- NA
+      boot_sensitivity[i] <- NA
+      boot_specificity[i] <- NA
+    })
+  }
+
+  # Remove failed bootstrap samples
+  valid_boots <- !is.na(boot_auc)
+  boot_auc <- boot_auc[valid_boots]
+  boot_threshold <- boot_threshold[valid_boots]
+  boot_sensitivity <- boot_sensitivity[valid_boots]
+  boot_specificity <- boot_specificity[valid_boots]
+
+  if (length(boot_auc) < n_boot * 0.5) {
+    warning("Many bootstrap samples failed - results may be unreliable")
+  }
+
+  # Calculate confidence intervals using percentile method
+  alpha <- 1 - conf_level
+  lower_pct <- alpha / 2
+  upper_pct <- 1 - alpha / 2
+
+  # Helper function to calculate CI
+  calc_ci <- function(boot_values, original_value) {
+    if (length(boot_values) < 10) {
+      return(list(estimate = original_value, ci_lower = NA, ci_upper = NA))
+    }
+
+    ci_lower <- quantile(boot_values, lower_pct, na.rm = TRUE)
+    ci_upper <- quantile(boot_values, upper_pct, na.rm = TRUE)
+
+    list(
+      estimate = original_value,
+      ci_lower = as.numeric(ci_lower),
+      ci_upper = as.numeric(ci_upper)
+    )
+  }
+
+  return(list(
+    auc = calc_ci(boot_auc, original_metrics$auc),
+    threshold = calc_ci(boot_threshold, original_metrics$optimal_threshold),
+    sensitivity = calc_ci(boot_sensitivity, original_metrics$sensitivity),
+    specificity = calc_ci(boot_specificity, original_metrics$specificity)
+  ))
+}
 
 # ============================================================================
 # MAIN ANALYSIS CLASS
 # ============================================================================
 
-psychopdarocClass = if (requireNamespace('jmvcore'))
+psychopdarocClass <- if (requireNamespace('jmvcore'))
   R6::R6Class(
     "psychopdarocClass",
     inherit = psychopdarocBase,
     private = list(
-      # ============================================================================
+      # ======================================================================
       # CLASS PRIVATE FIELDS
-      # ============================================================================
+      # ======================================================================
 
-      ## Storage for ROC data and other analysis results
-      .rocDataList = list(),            # Store ROC curve data for each variable
-      .optimalCriteriaList = list(),    # Store optimal cutpoints
-      .prevalenceList = list(),         # Store prevalence values
+      ## Storage for ROC data and analysis results
+      .rocDataList = list(),
+      .optimalCriteriaList = list(),
+      .prevalenceList = list(),
 
-      # ============================================================================
-      # HELPER METHODS FOR OPTIMAL CUTPOINT CALCULATION
-      # ============================================================================
+      # ======================================================================
+      # HELPER METHODS
+      # ======================================================================
+
+      # Determine positive class from data
+      # @param classVar Class variable data
+      # @param positiveClassOption User-specified positive class
+      # @return Character string representing positive class
+      .determinePositiveClass = function(classVar, positiveClassOption) {
+        # Convert to factor if needed
+        if (!is.factor(classVar)) {
+          classVar <- factor(classVar)
+        }
+
+        unique_classes <- levels(classVar)
+
+        # Validate we have exactly 2 classes
+        if (length(unique_classes) != 2) {
+          stop("Class variable must have exactly 2 levels")
+        }
+
+        # Determine positive class
+        if (!is.null(positiveClassOption) && positiveClassOption != "") {
+          # Use user-specified class if valid
+          if (positiveClassOption %in% unique_classes) {
+            return(positiveClassOption)
+          } else {
+            warning(paste("Specified positive class", positiveClassOption,
+                          "not found. Using first level instead."))
+            return(unique_classes[1])
+          }
+        } else {
+          # Default to first level
+          return(unique_classes[1])
+        }
+      },
 
       # Calculate cutpoint optimized for cost ratio
-      #
-      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values
       # @param prevalence The prevalence of the positive class
       # @param costRatio The cost ratio of false positives to false negatives
       # @return List with optimal index, threshold, and score
       .calculateCostRatioOptimal = function(confusionMatrix, prevalence, costRatio) {
-        # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
         scores <- numeric(n_thresholds)
 
-        # Calculate utility score for each threshold
         for (i in 1:n_thresholds) {
-          # Extract confusion matrix values
           tp <- confusionMatrix$tp[i]
           fp <- confusionMatrix$fp[i]
           tn <- confusionMatrix$tn[i]
           fn <- confusionMatrix$fn[i]
 
-          # Calculate sensitivity and specificity
           sensitivity <- tp / (tp + fn)
           specificity <- tn / (tn + fp)
 
-          # Calculate utility score considering cost ratio
-          # Higher score means better balance considering costs
-          # This formula weighs the false positives by the cost ratio
           scores[i] <- sensitivity * prevalence -
             (1 - specificity) * (1 - prevalence) * costRatio
         }
 
-        # Find threshold with highest score
         best_idx <- which.max(scores)
 
         return(list(
@@ -736,31 +897,24 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       },
 
       # Calculate cutpoint with equal sensitivity and specificity
-      #
-      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values
       # @return List with optimal index, threshold, and difference
       .calculateEqualSensSpec = function(confusionMatrix) {
-        # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
         differences <- numeric(n_thresholds)
 
-        # Calculate absolute difference between sensitivity and specificity for each threshold
         for (i in 1:n_thresholds) {
-          # Extract confusion matrix values
           tp <- confusionMatrix$tp[i]
           fp <- confusionMatrix$fp[i]
           tn <- confusionMatrix$tn[i]
           fn <- confusionMatrix$fn[i]
 
-          # Calculate sensitivity and specificity
           sensitivity <- tp / (tp + fn)
           specificity <- tn / (tn + fp)
 
-          # Calculate absolute difference
           differences[i] <- abs(sensitivity - specificity)
         }
 
-        # Find threshold with minimal difference
         best_idx <- which.min(differences)
 
         return(list(
@@ -771,32 +925,24 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
       },
 
       # Calculate cutpoint closest to (0,1) in ROC space
-      #
-      # @param confusionMatrix Matrix with tp, fp, tn, fn values for each threshold
+      # @param confusionMatrix Matrix with tp, fp, tn, fn values
       # @return List with optimal index, threshold, and distance
       .calculateClosestToOptimal = function(confusionMatrix) {
-        # Initialize variables
         n_thresholds <- length(confusionMatrix$x.sorted)
         distances <- numeric(n_thresholds)
 
-        # Calculate Euclidean distance to (0,1) in ROC space for each threshold
         for (i in 1:n_thresholds) {
-          # Extract confusion matrix values
           tp <- confusionMatrix$tp[i]
           fp <- confusionMatrix$fp[i]
           tn <- confusionMatrix$tn[i]
           fn <- confusionMatrix$fn[i]
 
-          # Calculate sensitivity and specificity
           sensitivity <- tp / (tp + fn)
           specificity <- tn / (tn + fp)
 
-          # Calculate distance to (0,1) point
-          # In ROC space, x-axis is 1-specificity, y-axis is sensitivity
           distances[i] <- sqrt((1 - specificity)^2 + (1 - sensitivity)^2)
         }
 
-        # Find threshold with minimal distance
         best_idx <- which.min(distances)
 
         return(list(
@@ -806,1446 +952,751 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         ))
       },
 
+      # Run basic ROC analysis using cutpointr or fallback method
+      # @param dependentVar Numeric vector of test values
+      # @param classVar Classification variable
+      # @param pos_class Positive class label
+      # @param method Cutpoint method
+      # @param metric Metric function
+      # @param direction Direction of classification
+      # @param score Manual cutpoint score (if applicable)
+      # @param tol_metric Tolerance for metric
+      # @param boot_runs Number of bootstrap runs
+      # @param break_ties Function for breaking ties
+      # @return Results object with ROC data
+      .runROCAnalysis = function(dependentVar, classVar, pos_class, method, metric,
+                                 direction, score = NULL, tol_metric = NULL,
+                                 boot_runs = 0, break_ties = mean) {
+        result_success <- FALSE
+        result_message <- NULL
 
+        tryCatch({
+          # Primary method using cutpointr
+          results <- cutpointr::cutpointr(
+            x = dependentVar,
+            class = classVar,
+            subgroup = NULL,
+            method = method,
+            cutpoint = score,
+            metric = metric,
+            direction = direction,
+            pos_class = pos_class,
+            tol_metric = tol_metric,
+            boot_runs = boot_runs,
+            break_ties = break_ties,
+            na.rm = TRUE
+          )
+          result_success <- TRUE
+        }, error = function(e) {
+          result_message <- e$message
+        })
 
-      # Calculate partial AUC using pROC package
-      .calculatePartialAUC = function(x, class, pos_class, from, to) {
-        # Need to load pROC package
-        if (!requireNamespace("pROC", quietly = TRUE)) {
-          warning("The pROC package is required for partial AUC calculations.")
-          return(NULL)
-        }
+        # If cutpointr failed, use alternative implementation
+        if (!result_success) {
+          warning(paste("Standard ROC analysis failed:", result_message,
+                        "Using alternative implementation."))
 
-        # Create ROC object
-        roc_obj <- pROC::roc(
-          response = class,
-          predictor = x,
-          levels = c(unique(class)[unique(class) != pos_class][1], pos_class),
-          direction = "<",
-          quiet = TRUE
-        )
+          # Convert to binary response
+          response <- as.numeric(classVar == pos_class)
 
-        # Calculate partial AUC
-        partial_auc <- try(pROC::auc(roc_obj, partial.auc = c(from, to), partial.auc.focus = "specificity"), silent = TRUE)
+          # Create ROC data structure
+          roc_data <- data.frame(
+            x.sorted = sort(unique(dependentVar)),
+            direction = ifelse(direction == ">=", ">", "<")
+          )
 
-        # Calculate normalized partial AUC (scaled to 0-1 range)
-        partial_auc_norm <- try(pROC::auc(roc_obj, partial.auc = c(from, to), partial.auc.focus = "specificity", partial.auc.correct = TRUE), silent = TRUE)
-
-        # Calculate CI if possible
-        if (self$options$bootstrapCI) {
-          ci <- try(pROC::ci.auc(roc_obj, partial.auc = c(from, to), partial.auc.focus = "specificity",
-                                 method = "bootstrap", boot.n = self$options$bootstrapReps), silent = TRUE)
-
-          if (inherits(ci, "try-error")) {
-            ci_lower <- NA
-            ci_upper <- NA
-          } else {
-            ci_lower <- ci[1]
-            ci_upper <- ci[3]
-          }
-        } else {
-          ci_lower <- NA
-          ci_upper <- NA
-        }
-
-        return(list(
-          pAUC = as.numeric(partial_auc),
-          pAUC_normalized = as.numeric(partial_auc_norm),
-          ci_lower = ci_lower,
-          ci_upper = ci_upper,
-          spec_range = paste0("(", from, " - ", to, ")")
-        ))
-      },
-
-      # Create smoothed ROC curve using pROC
-      .createSmoothedROC = function(x, class, pos_class, method) {
-        # Need to load pROC package
-        if (!requireNamespace("pROC", quietly = TRUE)) {
-          warning("The pROC package is required for ROC curve smoothing.")
-          return(NULL)
-        }
-
-        # Create ROC object
-        roc_obj <- pROC::roc(
-          response = class,
-          predictor = x,
-          levels = c(unique(class)[unique(class) != pos_class][1], pos_class),
-          direction = "<",
-          quiet = TRUE
-        )
-
-        # Apply smoothing
-        if (method != "none") {
-          smooth_roc <- try(pROC::smooth(roc_obj, method = method), silent = TRUE)
-
-          if (!inherits(smooth_roc, "try-error")) {
-            # Extract coordinates
-            coords <- pROC::coords(smooth_roc, x = "all", ret = c("threshold", "specificity", "sensitivity"))
-
-            return(list(
-              threshold = coords$threshold,
-              specificity = coords$specificity,
-              sensitivity = coords$sensitivity,
-              auc = pROC::auc(smooth_roc)
-            ))
-          }
-        }
-
-        return(NULL)
-      },
-
-      # Calculate bootstrap confidence intervals for metrics
-      .calculateBootstrapCI = function(x, class, pos_class, metrics = c("auc", "threshold", "sensitivity", "specificity")) {
-        # Need to load pROC package
-        if (!requireNamespace("pROC", quietly = TRUE)) {
-          warning("The pROC package is required for bootstrap confidence intervals.")
-          return(NULL)
-        }
-
-        # Create ROC object
-        roc_obj <- pROC::roc(
-          response = class,
-          predictor = x,
-          levels = c(unique(class)[unique(class) != pos_class][1], pos_class),
-          direction = "<",
-          quiet = TRUE
-        )
-
-        results <- list()
-
-        # Calculate CI for AUC
-        if ("auc" %in% metrics) {
-          auc_ci <- try(pROC::ci.auc(roc_obj, method = "bootstrap", boot.n = self$options$bootstrapReps), silent = TRUE)
-
-          if (!inherits(auc_ci, "try-error")) {
-            results$auc <- list(
-              estimate = as.numeric(pROC::auc(roc_obj)),
-              ci_lower = auc_ci[1],
-              ci_upper = auc_ci[3]
-            )
-          }
-        }
-
-        # Find Youden's J point (optimal threshold)
-        if (any(c("threshold", "sensitivity", "specificity") %in% metrics)) {
-          optimal_coords <- pROC::coords(roc_obj, x = "best", best.method = "youden", ret = c("threshold", "sensitivity", "specificity"))
-
-          # Calculate CI for threshold
-          if ("threshold" %in% metrics) {
-            threshold_ci <- try(pROC::ci.coords(roc_obj, x = "best", best.method = "youden",
-                                                ret = "threshold", method = "bootstrap", boot.n = self$options$bootstrapReps),
-                                silent = TRUE)
-
-            if (!inherits(threshold_ci, "try-error")) {
-              results$threshold <- list(
-                estimate = optimal_coords$threshold,
-                ci_lower = threshold_ci[1],
-                ci_upper = threshold_ci[3]
-              )
+          # Calculate confusion matrix for each threshold
+          for(i in 1:nrow(roc_data)) {
+            threshold <- roc_data$x.sorted[i]
+            if(direction == ">=") {
+              predicted_pos <- dependentVar >= threshold
+            } else {
+              predicted_pos <- dependentVar <= threshold
             }
+
+            roc_data$tp[i] <- sum(predicted_pos & response == 1)
+            roc_data$fp[i] <- sum(predicted_pos & response == 0)
+            roc_data$tn[i] <- sum(!predicted_pos & response == 0)
+            roc_data$fn[i] <- sum(!predicted_pos & response == 1)
           }
 
-          # Calculate CI for sensitivity
-          if ("sensitivity" %in% metrics) {
-            sens_ci <- try(pROC::ci.coords(roc_obj, x = "best", best.method = "youden",
-                                           ret = "sensitivity", method = "bootstrap", boot.n = self$options$bootstrapReps),
-                           silent = TRUE)
+          # Calculate sensitivity and specificity
+          sens <- roc_data$tp / (roc_data$tp + roc_data$fn)
+          spec <- roc_data$tn / (roc_data$tn + roc_data$fp)
 
-            if (!inherits(sens_ci, "try-error")) {
-              results$sensitivity <- list(
-                estimate = optimal_coords$sensitivity,
-                ci_lower = sens_ci[1],
-                ci_upper = sens_ci[3]
-              )
-            }
+          # Calculate AUC
+          roc_points <- data.frame(
+            specificity = spec,
+            sensitivity = sens
+          )
+          roc_points <- roc_points[order(1-roc_points$specificity),]
+
+          auc <- 0
+          for(i in 2:nrow(roc_points)) {
+            x_diff <- (1-roc_points$specificity[i]) - (1-roc_points$specificity[i-1])
+            y_avg <- (roc_points$sensitivity[i] + roc_points$sensitivity[i-1])/2
+            auc <- auc + x_diff * y_avg
           }
 
-          # Calculate CI for specificity
-          if ("specificity" %in% metrics) {
-            spec_ci <- try(pROC::ci.coords(roc_obj, x = "best", best.method = "youden",
-                                           ret = "specificity", method = "bootstrap", boot.n = self$options$bootstrapReps),
-                           silent = TRUE)
+          # Find optimal cutpoint using Youden's index
+          youdens_j <- sens + spec - 1
+          optimal_idx <- which.max(youdens_j)
 
-            if (!inherits(spec_ci, "try-error")) {
-              results$specificity <- list(
-                estimate = optimal_coords$specificity,
-                ci_lower = spec_ci[1],
-                ci_upper = spec_ci[3]
-              )
-            }
-          }
+          # Build minimal result object
+          results <- list(
+            optimal_cutpoint = roc_data$x.sorted[optimal_idx],
+            roc_curve = list(roc_data),
+            AUC = auc
+          )
         }
 
         return(results)
       },
 
+      # Get method function from method name
+      # @param methodName Name of the method
+      # @return Function object for the method
+      .getMethodFunction = function(methodName) {
+        method_map <- list(
+          "maximize_metric" = cutpointr::maximize_metric,
+          "minimize_metric" = cutpointr::minimize_metric,
+          "maximize_loess_metric" = cutpointr::maximize_loess_metric,
+          "minimize_loess_metric" = cutpointr::minimize_loess_metric,
+          "maximize_spline_metric" = cutpointr::maximize_spline_metric,
+          "minimize_spline_metric" = cutpointr::minimize_spline_metric,
+          "maximize_boot_metric" = cutpointr::maximize_boot_metric,
+          "minimize_boot_metric" = cutpointr::minimize_boot_metric,
+          "oc_youden_kernel" = cutpointr::oc_youden_kernel,
+          "oc_youden_normal" = cutpointr::oc_youden_normal,
+          "oc_manual" = cutpointr::oc_manual
+        )
 
+        # For custom methods, use maximize_metric as placeholder
+        if (methodName %in% c("oc_cost_ratio", "oc_equal_sens_spec", "oc_closest_01")) {
+          return(cutpointr::maximize_metric)
+        }
 
+        # Return the method or default to maximize_metric
+        return(method_map[[methodName]] %||% cutpointr::maximize_metric)
+      },
 
+      # Get metric function from metric name
+      # @param metricName Name of the metric
+      # @return Function object for the metric
+      .getMetricFunction = function(metricName) {
+        metric_map <- list(
+          "youden" = cutpointr::youden,
+          "sum_sens_spec" = cutpointr::sum_sens_spec,
+          "accuracy" = cutpointr::accuracy,
+          "sum_ppv_npv" = cutpointr::sum_ppv_npv,
+          "prod_sens_spec" = cutpointr::prod_sens_spec,
+          "prod_ppv_npv" = cutpointr::prod_ppv_npv,
+          "cohens_kappa" = cutpointr::cohens_kappa,
+          "abs_d_sens_spec" = cutpointr::abs_d_sens_spec,
+          "roc01" = cutpointr::roc01,
+          "abs_d_ppv_npv" = cutpointr::abs_d_ppv_npv,
+          "F1_score" = cutpointr::F1_score
+        )
 
+        # Return the metric or default to youden
+        return(metric_map[[metricName]] %||% cutpointr::youden)
+      },
 
+      # Process a single variable for ROC analysis
+      # @param var Variable name
+      # @param data Full dataset
+      # @param subGroup Subgroup variable (if any)
+      # @param params List of analysis parameters
+      # @return List with analysis results
+      .processVariable = function(var, data, subGroup = NULL, params) {
+        # Extract data for analysis
+        if (is.null(subGroup)) {
+          dependentVar <- as.numeric(data[, var])
+          classVar <- data[, params$classVarName]
+        } else {
+          varParts <- strsplit(var, split = "_")[[1]]
+          varName <- varParts[1]
+          groupName <- paste(varParts[-1], collapse="_")
 
+          dependentVar <- as.numeric(data[subGroup == groupName, varName])
+          classVar <- data[subGroup == groupName, params$classVarName]
+        }
 
+        # Run ROC analysis
+        results <- private$.runROCAnalysis(
+          dependentVar = dependentVar,
+          classVar = classVar,
+          pos_class = params$positiveClass,
+          method = params$method,
+          metric = params$metric,
+          direction = params$direction,
+          score = params$score,
+          tol_metric = params$tol_metric,
+          boot_runs = params$boot_runs,
+          break_ties = params$break_ties
+        )
 
+        # Apply custom methods if specified
+        if (params$methodName %in% c("oc_cost_ratio", "oc_equal_sens_spec", "oc_closest_01")) {
+          confusionMatrix <- results$roc_curve[[1]]
 
+          # Calculate prevalence
+          n_pos <- sum(classVar == params$positiveClass)
+          n_neg <- sum(classVar != params$positiveClass)
+          prevalence <- n_pos / (n_pos + n_neg)
 
+          if (params$methodName == "oc_cost_ratio") {
+            cost_results <- private$.calculateCostRatioOptimal(
+              confusionMatrix,
+              prevalence,
+              params$costRatio
+            )
+            results$optimal_cutpoint <- confusionMatrix$x.sorted[cost_results$optimal_idx]
+          }
+          else if (params$methodName == "oc_equal_sens_spec") {
+            eq_results <- private$.calculateEqualSensSpec(confusionMatrix)
+            results$optimal_cutpoint <- confusionMatrix$x.sorted[eq_results$optimal_idx]
+          }
+          else if (params$methodName == "oc_closest_01") {
+            closest_results <- private$.calculateClosestToOptimal(confusionMatrix)
+            results$optimal_cutpoint <- confusionMatrix$x.sorted[closest_results$optimal_idx]
+          }
+        }
 
+        return(list(
+          results = results,
+          dependentVar = dependentVar,
+          classVar = classVar,
+          prevalence = prevalence
+        ))
+      },
 
-
-
-
-
-
-
-
-      # ============================================================================
+      # ======================================================================
       # INITIALIZATION METHOD
-      # ============================================================================
+      # ======================================================================
 
-      # Initialize the analysis
       .init = function() {
-        # Add additional plot items based on user options
+        # Set visibility of optional outputs
         if (self$options$showCriterionPlot)
           self$results$criterionPlot$setVisible(TRUE)
         if (self$options$showPrevalencePlot)
           self$results$prevalencePlot$setVisible(TRUE)
         if (self$options$showDotPlot)
           self$results$dotPlot$setVisible(TRUE)
+        if (self$options$precisionRecallCurve)
+          self$results$precisionRecallPlot$setVisible(TRUE)
       },
 
-      # ============================================================================
+      # ======================================================================
       # MAIN ANALYSIS METHOD
-      # ============================================================================
+      # ======================================================================
 
-      # Execute the ROC analysis
       .run = function() {
-
-        # -----------------------------------------------------------------------
-        # 1. INSTRUCTIONS AND PRELIMINARY CHECKS
-        # -----------------------------------------------------------------------
-
-        # Show instructions if required inputs are not provided
+        # Check for required inputs
         if (is.null(self$options$classVar) || is.null(self$options$dependentVars)) {
-          self$results$instructions$setContent(
-            "<html>
-                        <head>
-                        </head>
-                        <body>
-                        This function was originally developed by Lucas Friesen in pschoPDA module. <a href='https://github.com/ClinicoPath/jamoviPsychoPDA'>The original module</a> is no longer maintained. The testroc function with additional features are added to the meddecide module.
-                        <div class='instructions'>
-                        <p><b>ROC Analysis for Medical Decision Making</b></p>
-                        <p>This analysis creates Receiver Operating Characteristic (ROC) curves and calculates optimal cutpoints for diagnostic tests.</p>
-                        <p>To get started:</p>
-                        <ol>
-                        <li>Place the test result variable(s) in the 'Dependent Variable' slot<br /><br /></li>
-                        <li>Place the binary classification (gold standard) in the 'Class Variable' slot<br /><br /></li>
-                        <li>[<em>Optional</em>] Place a grouping variable in the 'Group Variable' slot<br /><br /></li>
-                        </ol>
-                        <p>The ROC analysis helps you determine optimal cut-off values for classifying cases.</p>
-                        </div>
-                        </body>
-                        </html>"
-          )
+          self$.showInstructions()
           return()
-        } else {
-          # Hide instructions when inputs are provided
-          self$results$instructions$setVisible(visible = FALSE)
-
-          # Create procedure notes with analysis details
-          procedureNotes <- paste0(
-            "<html>
-                        <body>
-                        <p>Procedure Notes</p>
-                        <hr>",
-            "<p> The ROC analysis has been completed using the following specifications: ",
-            "<p>&nbsp;</p>",
-            "<p> Measure Variable(s): ",
-            paste(unlist(self$options$dependentVars), collapse = ", "),
-            "</p>",
-            "<p> Class Variable: ",
-            self$options$classVar,
-            "</p>"
-          )
-
-          # Add positive class info
-          if (self$options$positiveClass == "") {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Positive Class: ", as.character(unique(self$data[,self$options$classVar])[1]),
-              " (first level)</p>")
-          } else {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Positive Class: ",
-              self$options$positiveClass,
-              "</p>")
-          }
-
-          # Add subgroup info if used
-          if (!is.null(self$options$subGroup)) {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Sub-Group Variable: ",
-              self$options$subGroup,
-              "</p>")
-          }
-
-          # Add analysis settings
-          procedureNotes <- paste0(
-            procedureNotes,
-            "<p>&nbsp;</p>",
-            "<p> Method: ",
-            self$options$method,
-            "</p>",
-            "<p> All Observed Cutpoints: ",
-            self$options$allObserved,
-            "</p>",
-            "<p> Metric: ",
-            self$options$metric,
-            "</p>",
-            "<p> Direction (relative to cutpoint): ",
-            self$options$direction,
-            "</p>",
-            "<p> Tie Breakers: ",
-            self$options$break_ties,
-            "</p>",
-            "<p> Metric Tolerance: ",
-            self$options$tol_metric,
-            "</p>",
-            "<p>&nbsp;</p>"
-          )
-
-          # Add bootstrap info if applicable
-          if (self$options$boot_runs > 0) {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Bootstrap Runs: ",
-              self$options$boot_runs,
-              "</p>")
-          }
-
-          # Close notes
-          procedureNotes <- paste0(
-            procedureNotes,
-            "<hr /></body></html>"
-          )
-          self$results$procedureNotes$setContent(procedureNotes)
         }
 
-        # -----------------------------------------------------------------------
-        # 2. SET UP ANALYSIS PARAMETERS
-        # -----------------------------------------------------------------------
+        # Hide instructions and show procedure notes
+        self$results$instructions$setVisible(FALSE)
+        self$.showProcedureNotes()
 
-        # Get data
+        # Set up analysis parameters
+        params <- self$.setupAnalysisParameters()
+
+        # Get data and variables
         data <- self$data
+        vars <- self$.prepareVariables(data, params)
 
+        # Storage for results
+        aucList <- list()
+        plotDataList <- data.frame()
 
-        # Determine positive class early for use throughout the analysis
-        if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
-          # Use the level selector value
-          positiveClass <- self$options$positiveClass
+        # Process each variable
+        for (var in vars) {
+          # Initialize result items
+          self$.initializeResultItems(var)
 
-          # Verify the selected level exists in the data
-          classVar <- data[, self$options$classVar]
-          if (!positiveClass %in% levels(factor(classVar))) {
-            warning(paste("Selected positive class", positiveClass,
-                          "not found in data. Using first level instead."))
-            positiveClass <- levels(factor(classVar))[1]
+          # Process variable
+          var_results <- private$.processVariable(
+            var = var,
+            data = data,
+            subGroup = params$subGroup,
+            params = params
+          )
+
+          # Extract results
+          results <- var_results$results
+          dependentVar <- var_results$dependentVar
+          classVar <- var_results$classVar
+          prevalence <- var_results$prevalence
+
+          # Generate tables and store results
+          self$.generateResultTables(var, results, dependentVar, classVar, params)
+
+          # Store AUC for summary
+          aucList[[var]] <- results$AUC
+
+          # Prepare plot data
+          if (self$options$plotROC) {
+            plotData <- self$.preparePlotData(var, results)
+            if (self$options$combinePlots) {
+              plotDataList <- rbind(plotDataList, plotData)
+            } else {
+              self$.setIndividualPlotStates(var, plotData, results)
+            }
           }
-        } else {
-          # Default to first level if not specified
-          classVar <- data[, self$options$classVar]
-          positiveClass <- levels(factor(classVar))[1]
+
+          # Store data for additional analyses
+          private$.prevalenceList[[var]] <- prevalence
         }
 
-        # Add this information to procedure notes
-        if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
-          procedureNotes <- paste0(
-            procedureNotes,
-            "<p> Positive Class: ",
-            positiveClass,
-            "</p>"
-          )
-        } else {
-          procedureNotes <- paste0(
-            procedureNotes,
-            "<p> Positive Class: ",
-            positiveClass,
-            " (first level)</p>"
-          )
+        # Create combined plots if requested
+        if (self$options$plotROC && self$options$combinePlots && nrow(plotDataList) > 0) {
+          self$.createCombinedPlots(plotDataList)
         }
 
+        # Populate summary tables
+        self$.populateSummaryTables(aucList, data, params)
 
+        # Perform additional analyses
+        self$.performAdditionalAnalyses(data, vars, params)
 
+        # Perform statistical comparisons
+        self$.performStatisticalComparisons(data, params)
+      },
 
+      # ======================================================================
+      # SUPPORTING METHODS
+      # ======================================================================
 
+      # Show instructions when inputs are missing
+      .showInstructions = function() {
+        self$results$instructions$setContent(
+          "<html>
+                    <head></head>
+                    <body>
+                    <p>This function was originally developed by Lucas Friesen.
+                    The testroc function with additional features is now part of the meddecide module.</p>
+                    <div class='instructions'>
+                    <p><b>ROC Analysis for Medical Decision Making</b></p>
+                    <p>This analysis creates Receiver Operating Characteristic (ROC) curves
+                    and calculates optimal cutpoints for diagnostic tests.</p>
+                    <p>To get started:</p>
+                    <ol>
+                    <li>Place the test result variable(s) in the 'Dependent Variable' slot</li>
+                    <li>Place the binary classification (gold standard) in the 'Class Variable' slot</li>
+                    <li>[Optional] Place a grouping variable in the 'Group Variable' slot</li>
+                    </ol>
+                    <p>The ROC analysis helps you determine optimal cut-off values for classifying cases.</p>
+                    </div>
+                    </body>
+                    </html>"
+        )
+      },
 
+      # Show procedure notes with analysis details
+      .showProcedureNotes = function() {
+        notes <- paste0(
+          "<html><body>",
+          "<p>Procedure Notes</p><hr>",
+          "<p>The ROC analysis has been completed using the following specifications:</p>",
+          "<p>&nbsp;</p>",
+          "<p>Measure Variable(s): ", paste(unlist(self$options$dependentVars), collapse = ", "), "</p>",
+          "<p>Class Variable: ", self$options$classVar, "</p>",
+          "<p>Positive Class: ",
+          ifelse(self$options$positiveClass == "",
+                 "First level (will be determined from data)",
+                 self$options$positiveClass), "</p>"
+        )
 
+        if (!is.null(self$options$subGroup)) {
+          notes <- paste0(notes, "<p>Sub-Group Variable: ", self$options$subGroup, "</p>")
+        }
 
+        notes <- paste0(notes,
+                        "<p>&nbsp;</p>",
+                        "<p>Method: ", self$options$method, "</p>",
+                        "<p>All Observed Cutpoints: ", self$options$allObserved, "</p>",
+                        "<p>Metric: ", self$options$metric, "</p>",
+                        "<p>Direction: ", self$options$direction, "</p>",
+                        "<p>Tie Breakers: ", self$options$break_ties, "</p>",
+                        "<p>Metric Tolerance: ", self$options$tol_metric, "</p>"
+        )
 
+        if (self$options$boot_runs > 0) {
+          notes <- paste0(notes, "<p>Bootstrap Runs: ", self$options$boot_runs, "</p>")
+        }
 
+        notes <- paste0(notes, "<hr /></body></html>")
+        self$results$procedureNotes$setContent(notes)
+      },
 
-
-        # Set up cutpoint method
+      # Set up analysis parameters
+      # @return List of analysis parameters
+      .setupAnalysisParameters = function() {
+        # Get method
         if (self$options$method == "oc_manual") {
           method <- cutpointr::oc_manual
           if (self$options$specifyCutScore == "") {
             stop("Please specify a cut score when using the 'Custom cut score' method.")
-          } else {
-            score <- as.numeric(self$options$specifyCutScore)
           }
+          score <- as.numeric(self$options$specifyCutScore)
         } else {
-          # Map method name to actual function
-          methodName <- self$options$method
-          if (methodName == "maximize_metric") {
-            method <- cutpointr::maximize_metric
-          } else if (methodName == "minimize_metric") {
-            method <- cutpointr::minimize_metric
-          } else if (methodName == "maximize_loess_metric") {
-            method <- cutpointr::maximize_loess_metric
-          } else if (methodName == "minimize_loess_metric") {
-            method <- cutpointr::minimize_loess_metric
-          } else if (methodName == "maximize_spline_metric") {
-            method <- cutpointr::maximize_spline_metric
-          } else if (methodName == "minimize_spline_metric") {
-            method <- cutpointr::minimize_spline_metric
-          } else if (methodName == "maximize_boot_metric") {
-            method <- cutpointr::maximize_boot_metric
-          } else if (methodName == "minimize_boot_metric") {
-            method <- cutpointr::minimize_boot_metric
-          } else if (methodName == "oc_youden_kernel") {
-            method <- cutpointr::oc_youden_kernel
-          } else if (methodName == "oc_youden_normal") {
-            method <- cutpointr::oc_youden_normal
-          } else if (methodName %in% c("oc_cost_ratio", "oc_equal_sens_spec", "oc_closest_01")) {
-            # For custom methods, use maximize_metric as placeholder
-            # We'll handle the actual calculation later
-            method <- cutpointr::maximize_metric
-          } else {
-            # Default if method not recognized
-            method <- cutpointr::maximize_metric
-          }
-
+          method <- private$.getMethodFunction(self$options$method)
           score <- NULL
         }
 
-        # Set up tolerance if needed for specific methods
-        if (self$options$method %in% c(
-          "maximize_metric",
-          "minimize_metric",
-          "maximize_loess_metric",
-          "minimize_loess_metric",
-          "maximize_spline_metric",
-          "minimize_spline_metric"
-        )) {
-          tol_metric <- self$options$tol_metric
+        # Get metric
+        metric <- private$.getMetricFunction(self$options$metric)
+
+        # Get break ties function
+        break_ties <- switch(self$options$break_ties,
+                             "c" = c,
+                             "mean" = mean,
+                             "median" = median,
+                             mean  # default
+        )
+
+        # Set up tolerance
+        tol_metric <- if (self$options$method %in% c(
+          "maximize_metric", "minimize_metric",
+          "maximize_loess_metric", "minimize_loess_metric",
+          "maximize_spline_metric", "minimize_spline_metric"
+        )) self$options$tol_metric else NULL
+
+        # Get subgroup if present
+        subGroup <- if (!is.null(self$options$subGroup)) self$data[, self$options$subGroup] else NULL
+
+        # Determine positive class
+        sample_class <- if (is.null(subGroup)) {
+          self$data[, self$options$classVar]
         } else {
-          tol_metric <- NULL
+          self$data[!is.na(subGroup), self$options$classVar]
         }
 
-        # Set up metric function
-        metricName <- self$options$metric
-        if (metricName == "youden") {
-          metric <- cutpointr::youden
-        } else if (metricName == "sum_sens_spec") {
-          metric <- cutpointr::sum_sens_spec
-        } else if (metricName == "accuracy") {
-          metric <- cutpointr::accuracy
-        } else if (metricName == "sum_ppv_npv") {
-          metric <- cutpointr::sum_ppv_npv
-        } else if (metricName == "prod_sens_spec") {
-          metric <- cutpointr::prod_sens_spec
-        } else if (metricName == "prod_ppv_npv") {
-          metric <- cutpointr::prod_ppv_npv
-        } else if (metricName == "cohens_kappa") {
-          metric <- cutpointr::cohens_kappa
-        } else if (metricName == "abs_d_sens_spec") {
-          metric <- cutpointr::abs_d_sens_spec
-        } else if (metricName == "roc01") {
-          metric <- cutpointr::roc01
-        } else if (metricName == "abs_d_ppv_npv") {
-          metric <- cutpointr::abs_d_ppv_npv
-        } else if (metricName == "p_chisquared") {
-          metric <- cutpointr::p_chisquared
-        } else if (metricName == "odds_ratio") {
-          metric <- cutpointr::odds_ratio
-        } else if (metricName == "risk_ratio") {
-          metric <- cutpointr::risk_ratio
-        } else if (metricName == "misclassification_cost") {
-          metric <- cutpointr::misclassification_cost
-        } else if (metricName == "total_utility") {
-          metric <- cutpointr::total_utility
-        } else if (metricName == "F1_score") {
-          metric <- cutpointr::F1_score
-        } else {
-          # Default to Youden's index if not recognized
-          metric <- cutpointr::youden
+        positiveClass <- private$.determinePositiveClass(sample_class, self$options$positiveClass)
+
+        return(list(
+          method = method,
+          methodName = self$options$method,
+          metric = metric,
+          score = score,
+          break_ties = break_ties,
+          tol_metric = tol_metric,
+          direction = self$options$direction,
+          boot_runs = as.numeric(self$options$boot_runs),
+          subGroup = subGroup,
+          positiveClass = positiveClass,
+          classVarName = self$options$classVar,
+          costRatio = self$options$costRatioFP
+        ))
+      },
+
+      # Prepare variables for analysis
+      # @param data Dataset
+      # @param params Analysis parameters
+      # @return Vector of variable names to analyze
+      .prepareVariables = function(data, params) {
+        vars <- self$options$dependentVars
+
+        if (!is.null(params$subGroup)) {
+          # Create combined variable names for subgroups
+          uniqueGroups <- unique(params$subGroup)
+          vars <- apply(expand.grid(vars, uniqueGroups), 1,
+                        function(x) paste(x, collapse="_"))
         }
 
-        # Set up break_ties function
-        if (self$options$break_ties == "c") {
-          break_ties <- c
-        } else if (self$options$break_ties == "mean") {
-          break_ties <- mean
-        } else if (self$options$break_ties == "median") {
-          break_ties <- median
+        return(vars)
+      },
+
+      # Initialize result items for a variable
+      # @param var Variable name
+      .initializeResultItems = function(var) {
+        if (!var %in% self$results$resultsTable$itemKeys) {
+          self$results$sensSpecTable$addItem(key = var)
+          self$results$resultsTable$addItem(key = var)
+
+          if (!self$options$combinePlots) {
+            self$results$plotROC$addItem(key = var)
+
+            if (self$options$showCriterionPlot)
+              self$results$criterionPlot$addItem(key = var)
+            if (self$options$showPrevalencePlot)
+              self$results$prevalencePlot$addItem(key = var)
+            if (self$options$showDotPlot)
+              self$results$dotPlot$addItem(key = var)
+          }
+        }
+      },
+
+      # Generate result tables for a variable
+      # @param var Variable name
+      # @param results Analysis results
+      # @param dependentVar Dependent variable data
+      # @param classVar Class variable data
+      # @param params Analysis parameters
+      .generateResultTables = function(var, results, dependentVar, classVar, params) {
+        # Determine cutpoints to display
+        if (!self$options$allObserved) {
+          resultsToDisplay <- unlist(results$optimal_cutpoint)
         } else {
-          break_ties <- mean
+          resultsToDisplay <- sort(unique(dependentVar))
         }
 
-        # Get other analysis parameters
-        direction <- self$options$direction
-        boot_runs <- as.numeric(self$options$boot_runs)
+        # Get confusion matrix
+        confusionMatrix <- results$roc_curve[[1]]
 
-        # Set up for collecting plot data
-        plotDataList <- data.frame(
-          var = character(),
-          cutpoint = numeric(),
-          sensitivity = numeric(),
-          specificity = numeric(),
-          ppv = numeric(),
-          npv = numeric(),
-          AUC = numeric(),
-          youden = numeric(),
+        # Generate sensitivity/specificity tables if requested
+        if (self$options$sensSpecTable) {
+          for (i in seq_along(resultsToDisplay)) {
+            cp <- resultsToDisplay[i]
+            idx <- which.min(abs(confusionMatrix$x.sorted - cp))
+
+            sensSpecRes <- print.sensSpecTable(
+              Title = paste0("Scale: ", var, " | Cut Score: ",
+                             round(confusionMatrix$x.sorted[idx], 4)),
+              TP = confusionMatrix$tp[idx],
+              FP = confusionMatrix$fp[idx],
+              TN = confusionMatrix$tn[idx],
+              FN = confusionMatrix$fn[idx]
+            )
+
+            sensTable <- self$results$sensSpecTable$get(key = var)
+            sensTable$setContent(sensSpecRes)
+          }
+        }
+
+        # Calculate metrics
+        metrics <- self$.calculateMetrics(confusionMatrix, params$metric)
+
+        # Create results table
+        table <- self$results$resultsTable$get(key = var)
+        table$setTitle(paste0("Scale: ", var))
+
+        for (i in seq_along(resultsToDisplay)) {
+          cp <- resultsToDisplay[i]
+          idx <- which.min(abs(confusionMatrix$x.sorted - cp))
+
+          row <- list(
+            cutpoint = confusionMatrix$x.sorted[idx],
+            sensitivity = metrics$sensitivity[idx],
+            specificity = metrics$specificity[idx],
+            ppv = metrics$ppv[idx],
+            npv = metrics$npv[idx],
+            youden = metrics$youden[idx],
+            AUC = results$AUC,
+            metricValue = metrics$metricValue[idx]
+          )
+
+          table$addRow(rowKey = as.character(i), values = row)
+        }
+
+        # Store ROC data
+        private$.rocDataList[[var]] <- data.frame(
+          threshold = confusionMatrix$x.sorted,
+          sensitivity = metrics$sensitivity,
+          specificity = metrics$specificity,
+          ppv = metrics$ppv,
+          npv = metrics$npv,
+          youden = metrics$youden,
           stringsAsFactors = FALSE
         )
 
-        # -----------------------------------------------------------------------
-        # 3. PREPARE VARIABLES FOR ANALYSIS
-        # -----------------------------------------------------------------------
+        # Store optimal criterion
+        j_max_idx <- which.max(metrics$youden)
+        private$.optimalCriteriaList[[var]] <- list(
+          threshold = confusionMatrix$x.sorted[j_max_idx],
+          sensitivity = metrics$sensitivity[j_max_idx],
+          specificity = metrics$specificity[j_max_idx],
+          ppv = metrics$ppv[j_max_idx],
+          npv = metrics$npv[j_max_idx],
+          youden = metrics$youden[j_max_idx]
+        )
 
-        # Get dependent variables list
-        vars <- self$options$dependentVars
+        # Store raw data for dot plot
+        rawData <- data.frame(
+          value = dependentVar,
+          class = as.factor(ifelse(classVar == params$positiveClass, "Positive", "Negative")),
+          threshold = private$.optimalCriteriaList[[var]]$threshold,
+          direction = params$direction,
+          stringsAsFactors = FALSE
+        )
+        attr(private$.rocDataList[[var]], "rawData") <- rawData
+      },
 
-        # Handle subgroups if present
-        if (!is.null(self$options$subGroup)) {
-          subGroup <- data[, self$options$subGroup]
-          classVar <- data[, self$options$classVar]
-          uniqueGroups <- unique(subGroup)
-          # Create combined variable names (var_group)
-          vars <- apply(expand.grid(vars, uniqueGroups), 1, function(x) paste(x, collapse="_"))
-        } else {
-          subGroup <- NULL
+      # Calculate metrics from confusion matrix
+      # @param confusionMatrix Confusion matrix data
+      # @param metric Metric function
+      # @return List of calculated metrics
+      .calculateMetrics = function(confusionMatrix, metric) {
+        list(
+          sensitivity = cutpointr::sensitivity(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          ),
+          specificity = cutpointr::specificity(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          ),
+          ppv = cutpointr::ppv(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          ),
+          npv = cutpointr::npv(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          ),
+          youden = cutpointr::youden(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          ),
+          metricValue = metric(
+            tp = confusionMatrix$tp,
+            fp = confusionMatrix$fp,
+            tn = confusionMatrix$tn,
+            fn = confusionMatrix$fn
+          )
+        )
+      },
+
+      # Prepare plot data for a variable
+      # @param var Variable name
+      # @param results Analysis results
+      # @return Data frame for plotting
+      .preparePlotData = function(var, results) {
+        confusionMatrix <- results$roc_curve[[1]]
+        metrics <- self$.calculateMetrics(confusionMatrix, private$.getMetricFunction(self$options$metric))
+        j_max_idx <- which.max(metrics$youden)
+
+        data.frame(
+          var = rep(var, length(confusionMatrix$x.sorted)),
+          cutpoint = confusionMatrix$x.sorted,
+          sensitivity = metrics$sensitivity,
+          specificity = metrics$specificity,
+          ppv = metrics$ppv,
+          npv = metrics$npv,
+          AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
+          youden = metrics$youden,
+          j_max_idx = j_max_idx,
+          stringsAsFactors = FALSE
+        )
+      },
+
+      # Set plot states for individual plots
+      # @param var Variable name
+      # @param plotData Plot data
+      # @param results Analysis results
+      .setIndividualPlotStates = function(var, plotData, results) {
+        # ROC plot
+        image <- self$results$plotROC$get(key = var)
+        image$setTitle(paste0("ROC Curve: ", var))
+        image$setState(plotData)
+
+        # Additional plots
+        if (self$options$showCriterionPlot) {
+          criterionImage <- self$results$criterionPlot$get(key = var)
+          criterionImage$setTitle(paste0("Sensitivity and Specificity vs. Threshold: ", var))
+          criterionImage$setState(private$.rocDataList[[var]])
         }
 
-        # Storage for AUCs
-        aucList <- list()
-
-        # -----------------------------------------------------------------------
-        # 4. PROCESS EACH VARIABLE
-        # -----------------------------------------------------------------------
-
-        for (var in vars) {
-          # Add items to results tables if not already present
-          if (!var %in% self$results$resultsTable$itemKeys) {
-            self$results$sensSpecTable$addItem(key = var)
-            self$results$resultsTable$addItem(key = var)
-
-            # Add individual plots if not combining
-            if (self$options$combinePlots == FALSE) {
-              self$results$plotROC$addItem(key = var)
-
-              # Add additional plot items if enabled
-              if (self$options$showCriterionPlot)
-                self$results$criterionPlot$addItem(key = var)
-              if (self$options$showPrevalencePlot)
-                self$results$prevalencePlot$addItem(key = var)
-              if (self$options$showDotPlot)
-                self$results$dotPlot$addItem(key = var)
-            }
-          }
-
-          # Extract data for analysis
-          if (is.null(subGroup)) {
-            # Standard case - no grouping
-            dependentVar <- as.numeric(data[, var])
-            classVar <- data[, self$options$classVar]
-          } else {
-            # Case with grouping - extract data for this group
-            varParts <- strsplit(var, split = "_")[[1]]
-            varName <- varParts[1]
-            groupName <- paste(varParts[-1], collapse="_")
-
-            # Filter data for this group
-            dependentVar <- as.numeric(data[subGroup == groupName, varName])
-            classVar <- data[subGroup == groupName, self$options$classVar]
-          }
-
-          # Use the already determined positive class
-          pos_class <- positiveClass
-
-          # -----------------------------------------------------------------------
-          # 5. RUN ROC ANALYSIS
-          # -----------------------------------------------------------------------
-
-          # Try to use cutpointr package; handle errors gracefully
-          result_success <- FALSE
-          result_message <- NULL
-
-          tryCatch({
-            # Primary method using cutpointr
-            results <- cutpointr::cutpointr(
-              x = dependentVar,
-              class = classVar,
-              subgroup = NULL,
-              method = method,
-              cutpoint = score,
-              metric = metric,
-              direction = direction,
-              pos_class = pos_class,
-              tol_metric = tol_metric,
-              boot_runs = boot_runs,
-              break_ties = break_ties,
-              na.rm = TRUE
-            )
-            result_success <- TRUE
-          }, error = function(e) {
-            result_message <- e$message
-          })
-
-          # If cutpointr failed, use alternative implementation
-          if (!result_success) {
-            self$results$procedureNotes$setContent(paste0(
-              self$results$procedureNotes$content,
-              "<p><strong>Note:</strong> Standard ROC analysis failed with error: '",
-              result_message,
-              "'. Using alternative implementation.</p>"
-            ))
-
-            # Convert to binary response (1 = positive, 0 = negative)
-            response <- as.numeric(classVar == pos_class)
-
-            # Create minimal ROC data structure
-            roc_data <- data.frame(
-              x.sorted = sort(unique(dependentVar)),
-              direction = ifelse(direction == ">=", ">", "<")
-            )
-
-            # Calculate confusion matrix for each threshold
-            for(i in 1:nrow(roc_data)) {
-              threshold <- roc_data$x.sorted[i]
-              if(direction == ">=") {
-                predicted_pos <- dependentVar >= threshold
-              } else {
-                predicted_pos <- dependentVar <= threshold
-              }
-
-              # Compute TP, FP, TN, FN
-              roc_data$tp[i] <- sum(predicted_pos & response == 1)
-              roc_data$fp[i] <- sum(predicted_pos & response == 0)
-              roc_data$tn[i] <- sum(!predicted_pos & response == 0)
-              roc_data$fn[i] <- sum(!predicted_pos & response == 1)
-            }
-
-            # Calculate sensitivity and specificity
-            sens <- roc_data$tp / (roc_data$tp + roc_data$fn)
-            spec <- roc_data$tn / (roc_data$tn + roc_data$fp)
-
-            # Compute ROC curve points
-            roc_points <- data.frame(
-              specificity = spec,
-              sensitivity = sens
-            )
-
-            # Order by increasing 1-specificity for AUC calculation
-            roc_points <- roc_points[order(1-roc_points$specificity),]
-
-            # Calculate AUC using trapezoidal rule
-            auc <- 0
-            for(i in 2:nrow(roc_points)) {
-              # Area of trapezoid
-              x_diff <- (1-roc_points$specificity[i]) - (1-roc_points$specificity[i-1])
-              y_avg <- (roc_points$sensitivity[i] + roc_points$sensitivity[i-1])/2
-              auc <- auc + x_diff * y_avg
-            }
-
-            # Find optimal cutpoint using Youden's index
-            youdens_j <- sens + spec - 1
-            optimal_idx <- which.max(youdens_j)
-
-            # Build minimal result object
-            results <- list(
-              optimal_cutpoint = roc_data$x.sorted[optimal_idx],
-              roc_curve = list(roc_data),
-              AUC = auc
-            )
-          }
-
-          # -----------------------------------------------------------------------
-          # 6. HANDLE CUSTOM CUTPOINT METHODS
-          # -----------------------------------------------------------------------
-
-          # Apply custom methods if specified
-          if (self$options$method %in% c("oc_cost_ratio", "oc_equal_sens_spec", "oc_closest_01")) {
-            # Get the confusion matrix data
-            confusionMatrix <- results$roc_curve[[1]]
-
-            # Calculate prevalence for cost-ratio method
-            n_pos <- sum(classVar == pos_class)
-            n_neg <- sum(classVar != pos_class)
-            prevalence <- n_pos / (n_pos + n_neg)
-
-            if (self$options$method == "oc_cost_ratio") {
-              # Use custom cost ratio optimization
-              cost_results <- private$.calculateCostRatioOptimal(
-                confusionMatrix,
-                prevalence,
-                self$options$costratioFP
-              )
-              # Override the optimal cutpoint
-              results$optimal_cutpoint <- confusionMatrix$x.sorted[cost_results$optimal_idx]
-            }
-            else if (self$options$method == "oc_equal_sens_spec") {
-              # Find cutpoint with equal sensitivity and specificity
-              eq_results <- private$.calculateEqualSensSpec(confusionMatrix)
-              results$optimal_cutpoint <- confusionMatrix$x.sorted[eq_results$optimal_idx]
-            }
-            else if (self$options$method == "oc_closest_01") {
-              # Find cutpoint closest to (0,1) point in ROC space
-              closest_results <- private$.calculateClosestToOptimal(confusionMatrix)
-              results$optimal_cutpoint <- confusionMatrix$x.sorted[closest_results$optimal_idx]
-            }
-          }
-
-
-
-          # Calculate partial AUC if requested
-          if (self$options$partialAUC) {
-            # Set up partial AUC table if not already done
-            if (!self$results$partialAUCTable$isVisible) {
-              self$results$partialAUCTable$setVisible(TRUE)
-            }
-
-            for (var in vars) {
-              # Get the necessary data
-              if (is.null(subGroup)) {
-                # Standard case - no grouping
-                dependentVar <- as.numeric(data[, var])
-                classVar <- data[, self$options$classVar]
-              } else {
-                # Case with grouping - extract data for this group
-                varParts <- strsplit(var, split = "_")[[1]]
-                varName <- varParts[1]
-                groupName <- paste(varParts[-1], collapse="_")
-
-                # Filter data for this group
-                dependentVar <- as.numeric(data[subGroup == groupName, varName])
-                classVar <- data[subGroup == groupName, self$options$classVar]
-              }
-
-              # Calculate partial AUC
-              pAUC_results <- private$.calculatePartialAUC(
-                x = dependentVar,
-                class = classVar,
-                pos_class = positiveClass,
-                from = self$options$partialAUCfrom,
-                to = self$options$partialAUCto
-              )
-
-              # Add to table
-              if (!is.null(pAUC_results)) {
-                self$results$partialAUCTable$addRow(rowKey = var, values = list(
-                  variable = var,
-                  pAUC = pAUC_results$pAUC,
-                  pAUC_normalized = pAUC_results$pAUC_normalized,
-                  ci_lower = pAUC_results$ci_lower,
-                  ci_upper = pAUC_results$ci_upper,
-                  spec_range = pAUC_results$spec_range
-                ))
-              }
-            }
-          }
-
-          # Apply ROC curve smoothing if requested
-          if (self$options$rocSmoothingMethod != "none") {
-            for (var in vars) {
-              # Get the necessary data
-              if (is.null(subGroup)) {
-                # Standard case - no grouping
-                dependentVar <- as.numeric(data[, var])
-                classVar <- data[, self$options$classVar]
-              } else {
-                # Case with grouping - extract data for this group
-                varParts <- strsplit(var, split = "_")[[1]]
-                varName <- varParts[1]
-                groupName <- paste(varParts[-1], collapse="_")
-
-                # Filter data for this group
-                dependentVar <- as.numeric(data[subGroup == groupName, varName])
-                classVar <- data[subGroup == groupName, self$options$classVar]
-              }
-
-              # Create smoothed ROC curve
-              smooth_results <- private$.createSmoothedROC(
-                x = dependentVar,
-                class = classVar,
-                pos_class = positiveClass,
-                method = self$options$rocSmoothingMethod
-              )
-
-              # Store smoothed ROC curve data for plotting
-              if (!is.null(smooth_results)) {
-                # Store for plotting
-                private$.rocDataList[[paste0(var, "_smooth")]] <- data.frame(
-                  threshold = smooth_results$threshold,
-                  sensitivity = smooth_results$sensitivity,
-                  specificity = smooth_results$specificity,
-                  var = var,
-                  smoothed = TRUE,
-                  method = self$options$rocSmoothingMethod
-                )
-              }
-            }
-          }
-
-          # Calculate bootstrap confidence intervals if requested
-          if (self$options$bootstrapCI) {
-            # Set up bootstrap CI table if not already done
-            if (!self$results$bootstrapCITable$isVisible) {
-              self$results$bootstrapCITable$setVisible(TRUE)
-            }
-
-            for (var in vars) {
-              # Get the necessary data
-              if (is.null(subGroup)) {
-                # Standard case - no grouping
-                dependentVar <- as.numeric(data[, var])
-                classVar <- data[, self$options$classVar]
-              } else {
-                # Case with grouping - extract data for this group
-                varParts <- strsplit(var, split = "_")[[1]]
-                varName <- varParts[1]
-                groupName <- paste(varParts[-1], collapse="_")
-
-                # Filter data for this group
-                dependentVar <- as.numeric(data[subGroup == groupName, varName])
-                classVar <- data[subGroup == groupName, self$options$classVar]
-              }
-
-              # Calculate bootstrap CIs
-              bootstrap_results <- private$.calculateBootstrapCI(
-                x = dependentVar,
-                class = classVar,
-                pos_class = positiveClass
-              )
-
-              # Add to table
-              if (!is.null(bootstrap_results)) {
-                for (param in names(bootstrap_results)) {
-                  self$results$bootstrapCITable$addRow(rowKey = paste0(var, "_", param), values = list(
-                    variable = var,
-                    parameter = param,
-                    estimate = bootstrap_results[[param]]$estimate,
-                    ci_lower = bootstrap_results[[param]]$ci_lower,
-                    ci_upper = bootstrap_results[[param]]$ci_upper
-                  ))
-                }
-              }
-            }
-          }
-
-
-
-
-
-
-
-
-
-          # -----------------------------------------------------------------------
-          # 7. DETERMINE CUTPOINTS TO DISPLAY
-          # -----------------------------------------------------------------------
-
-          # Determine which cutpoints to display
-          if (!self$options$allObserved) {
-            # Just show the optimal cutpoint(s)
-            resultsToDisplay <- unlist(results$optimal_cutpoint)
-          } else {
-            # Show all observed values as potential cutpoints
-            resultsToDisplay <- sort(unique(dependentVar))
-          }
-
-          # Get ROC curve data
-          confusionMatrix <- results$roc_curve[[1]]
-
-          # Filter confusion matrix for display
-          if (!self$options$allObserved) {
-            confusionMatrixForTable <- confusionMatrix[which(confusionMatrix$x.sorted %in% resultsToDisplay),]
-          } else {
-            confusionMatrixForTable <- confusionMatrix
-          }
-
-          # -----------------------------------------------------------------------
-          # 8. GENERATE SENSITIVITY-SPECIFICITY TABLES
-          # -----------------------------------------------------------------------
-
-          if (self$options$sensSpecTable) {
-            # Generate individual tables for each cutpoint
-            for (i in seq_along(resultsToDisplay)) {
-              cp <- resultsToDisplay[i]
-              # Find the closest cutpoint in the confusion matrix
-              idx <- which.min(abs(confusionMatrix$x.sorted - cp))
-
-              # Create HTML table with confusion matrix
-              sensSpecRes <- print.sensSpecTable(
-                Title = paste0("Scale: ", var, " | Cut Score: ", round(confusionMatrix$x.sorted[idx], 4)),
-                TP = confusionMatrix$tp[idx],
-                FP = confusionMatrix$fp[idx],
-                TN = confusionMatrix$tn[idx],
-                FN = confusionMatrix$fn[idx]
-              )
-
-              # Add to the results
-              sensTable <- self$results$sensSpecTable$get(key = var)
-              sensTable$setContent(sensSpecRes)
-            }
-          }
-
-          # -----------------------------------------------------------------------
-          # 9. CALCULATE PERFORMANCE METRICS
-          # -----------------------------------------------------------------------
-
-          # Calculate metrics based on confusion matrix
-          sensList <- cutpointr::sensitivity(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          specList <- cutpointr::specificity(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          ppvList <- cutpointr::ppv(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          npvList <- cutpointr::npv(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          youdenList <- cutpointr::youden(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          # Calculate the selected metric
-          metricList <- metric(
-            tp = confusionMatrix$tp,
-            fp = confusionMatrix$fp,
-            tn = confusionMatrix$tn,
-            fn = confusionMatrix$fn
-          )
-
-          # -----------------------------------------------------------------------
-          # 10. CREATE RESULTS TABLE
-          # -----------------------------------------------------------------------
-
-          # Get the table and set title
-          table <- self$results$resultsTable$get(key = var)
-          table$setTitle(paste0("Scale: ", var))
-
-          # Add rows to the results table for each cutpoint to display
-          for (i in seq_along(resultsToDisplay)) {
-            cp <- resultsToDisplay[i]
-
-            # Find the closest cutpoint in the confusion matrix
-            idx <- which.min(abs(confusionMatrix$x.sorted - cp))
-
-            # Get the values for this cutpoint
-            row <- list(
-              cutpoint = confusionMatrix$x.sorted[idx],
-              sensitivity = sensList[idx],
-              specificity = specList[idx],
-              ppv = ppvList[idx],
-              npv = npvList[idx],
-              youden = youdenList[idx],
-              AUC = results$AUC,
-              metricValue = metricList[idx]
-            )
-
-            # Add row to the table
-            table$addRow(rowKey = as.character(i), values = row)
-          }
-
-          # Save AUC value for summary tables
-          aucList[[var]] <- results$AUC
-
-          # -----------------------------------------------------------------------
-          # 11. STORE DATA FOR ADDITIONAL PLOTS
-          # -----------------------------------------------------------------------
-
-          # Store ROC data for additional plots
-          rocData <- data.frame(
-            threshold = confusionMatrix$x.sorted,
-            sensitivity = sensList,
-            specificity = specList,
-            ppv = ppvList,
-            npv = npvList,
-            youden = youdenList,
-            stringsAsFactors = FALSE
-          )
-          private$.rocDataList[[var]] <- rocData
-
-          # Save optimal criterion data (based on Youden's index)
-          j_max_idx <- which.max(youdenList)
-          optimalCriterion <- list(
-            threshold = confusionMatrix$x.sorted[j_max_idx],
-            sensitivity = sensList[j_max_idx],
-            specificity = specList[j_max_idx],
-            ppv = ppvList[j_max_idx],
-            npv = npvList[j_max_idx],
-            youden = youdenList[j_max_idx]
-          )
-          private$.optimalCriteriaList[[var]] <- optimalCriterion
-
-          # Calculate and store prevalence
-          n_pos <- sum(classVar == pos_class)
-          n_neg <- sum(classVar != pos_class)
-          prevalence <- n_pos / (n_pos + n_neg)
-          private$.prevalenceList[[var]] <- prevalence
-
-          # Store raw data for dot plot
-          rawData <- data.frame(
-            value = dependentVar,
-            class = as.factor(ifelse(classVar == pos_class, "Positive", "Negative")),
-            threshold = optimalCriterion$threshold,
-            direction = direction,
-            stringsAsFactors = FALSE
-          )
-          attr(private$.rocDataList[[var]], "rawData") <- rawData
-
-
-
-
-
-          # Add to the main .run method to calculate precision-recall curves
-
-          # Calculate precision-recall curves if requested
-          if (self$options$precisionRecallCurve) {
-            # Initialize precision-recall plot array
-            if (self$options$combinePlots) {
-              # Add a single item for combined plot
-              self$results$precisionRecallPlot$addItem(key = 1)
-              pr_plot_data <- data.frame()
-            }
-
-            for (var in vars) {
-              # Get the necessary data
-              if (is.null(subGroup)) {
-                # Standard case - no grouping
-                dependentVar <- as.numeric(data[, var])
-                classVar <- data[, self$options$classVar]
-              } else {
-                # Case with grouping - extract data for this group
-                varParts <- strsplit(var, split = "_")[[1]]
-                varName <- varParts[1]
-                groupName <- paste(varParts[-1], collapse="_")
-
-                # Filter data for this group
-                dependentVar <- as.numeric(data[subGroup == groupName, varName])
-                classVar <- data[subGroup == groupName, self$options$classVar]
-              }
-
-              # Calculate precision-recall
-              pr_results <- private$.calculatePrecisionRecall(
-                x = dependentVar,
-                class = classVar,
-                pos_class = positiveClass
-              )
-
-              if (!is.null(pr_results)) {
-                if (self$options$combinePlots) {
-                  # Add to combined data
-                  pr_plot_data <- rbind(
-                    pr_plot_data,
-                    data.frame(
-                      threshold = pr_results$threshold,
-                      precision = pr_results$precision,
-                      recall = pr_results$recall,
-                      auprc = rep(pr_results$auprc, length(pr_results$threshold)),
-                      var = rep(var, length(pr_results$threshold))
-                    )
-                  )
-                } else {
-                  # Create individual plot
-                  self$results$precisionRecallPlot$addItem(key = var)
-                  pr_plot <- self$results$precisionRecallPlot$get(key = var)
-                  pr_plot$setTitle(paste0("Precision-Recall Curve: ", var))
-                  pr_plot$setState(
-                    data.frame(
-                      threshold = pr_results$threshold,
-                      precision = pr_results$precision,
-                      recall = pr_results$recall,
-                      auprc = rep(pr_results$auprc, length(pr_results$threshold))
-                    )
-                  )
-                }
-              }
-            }
-
-            # Set state for combined plot if using
-            if (self$options$combinePlots && nrow(pr_plot_data) > 0) {
-              pr_plot <- self$results$precisionRecallPlot$get(key = 1)
-              pr_plot$setTitle("Precision-Recall Curves: Combined")
-              pr_plot$setState(pr_plot_data)
-            }
-          }
-
-          # Compare classifier performance if requested
-          if (self$options$compareClassifiers) {
-            # Set up comparison table
-            if (!self$results$rocComparisonTable$isVisible) {
-              self$results$rocComparisonTable$setVisible(TRUE)
-            }
-
-            for (var in vars) {
-              # Get the necessary data
-              if (is.null(subGroup)) {
-                # Standard case - no grouping
-                dependentVar <- as.numeric(data[, var])
-                classVar <- data[, self$options$classVar]
-              } else {
-                # Case with grouping - extract data for this group
-                varParts <- strsplit(var, split = "_")[[1]]
-                varName <- varParts[1]
-                groupName <- paste(varParts[-1], collapse="_")
-
-                # Filter data for this group
-                dependentVar <- as.numeric(data[subGroup == groupName, varName])
-                classVar <- data[subGroup == groupName, self$options$classVar]
-              }
-
-              # Calculate classifier metrics
-              metrics <- private$.calculateClassifierMetrics(
-                x = dependentVar,
-                class = classVar,
-                pos_class = positiveClass
-              )
-
-              # Add to table
-              if (!is.null(metrics)) {
-                self$results$rocComparisonTable$addRow(rowKey = var, values = list(
-                  variable = var,
-                  auc = metrics$auc,
-                  auprc = metrics$auprc,
-                  brier = metrics$brier,
-                  f1_score = metrics$f1_score,
-                  accuracy = metrics$accuracy,
-                  balanced_accuracy = metrics$balanced_accuracy
-                ))
-              }
-            }
-          }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          # -----------------------------------------------------------------------
-          # 12. PREPARE PLOTTING DATA
-          # -----------------------------------------------------------------------
-
-          if (self$options$plotROC) {
-            if (self$options$combinePlots == FALSE) {
-              # Individual plot for this variable
-              image <- self$results$plotROC$get(key = var)
-              image$setTitle(paste0("ROC Curve: ", var))
-              image$setState(
-                data.frame(
-                  var = rep(var, length(confusionMatrix$x.sorted)),
-                  cutpoint = confusionMatrix$x.sorted,
-                  sensitivity = sensList,
-                  specificity = specList,
-                  ppv = ppvList,
-                  npv = npvList,
-                  AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
-                  youden = youdenList,
-                  j_max_idx = j_max_idx,
-                  stringsAsFactors = FALSE
-                )
-              )
-
-              # Set states for additional plots if enabled
-              if (self$options$showCriterionPlot) {
-                criterionImage <- self$results$criterionPlot$get(key = var)
-                criterionImage$setTitle(paste0("Sensitivity and Specificity vs. Threshold: ", var))
-                criterionImage$setState(private$.rocDataList[[var]])
-              }
-
-              if (self$options$showPrevalencePlot) {
-                prevImage <- self$results$prevalencePlot$get(key = var)
-                prevImage$setTitle(paste0("Predictive Values vs. Prevalence: ", var))
-                prevImage$setState(list(
-                  optimal = private$.optimalCriteriaList[[var]],
-                  prevalence = private$.prevalenceList[[var]]
-                ))
-              }
-
-              if (self$options$showDotPlot) {
-                dotImage <- self$results$dotPlot$get(key = var)
-                dotImage$setTitle(paste0("Dot Plot: ", var))
-                dotImage$setState(rawData)
-              }
-            } else {
-              # Collect data for combined plot
-              plotDataList <- rbind(
-                plotDataList,
-                data.frame(
-                  var = rep(var, length(confusionMatrix$x.sorted)),
-                  cutpoint = confusionMatrix$x.sorted,
-                  sensitivity = sensList,
-                  specificity = specList,
-                  ppv = ppvList,
-                  npv = npvList,
-                  AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
-                  youden = youdenList,
-                  j_max_idx = j_max_idx,
-                  stringsAsFactors = FALSE
-                )
-              )
-            }
-          }
-        } # End of loop through variables
-
-        # -----------------------------------------------------------------------
-        # 13. CREATE COMBINED PLOTS
-        # -----------------------------------------------------------------------
-
-        # Create combined plot if requested
-        if (self$options$plotROC && self$options$combinePlots && nrow(plotDataList) > 0) {
-          # Add the combined plot
-          self$results$plotROC$addItem(key = 1)
-          image <- self$results$plotROC$get(key = 1)
-          image$setTitle("ROC Curve: Combined")
-          image$setState(plotDataList)
-
-          # Combined criterion plot if enabled
-          if (self$options$showCriterionPlot) {
-            self$results$criterionPlot$addItem(key = 1)
-            criterionImage <- self$results$criterionPlot$get(key = 1)
-            criterionImage$setTitle("Sensitivity and Specificity vs. Threshold: Combined")
-
-            # Prepare combined data for criterion plot
-            combinedCriterionData <- data.frame()
-            for (var in names(private$.rocDataList)) {
-              varData <- private$.rocDataList[[var]]
-              varData$var <- var
-              combinedCriterionData <- rbind(combinedCriterionData, varData)
-            }
-            criterionImage$setState(combinedCriterionData)
-          }
-
-          # Dot plots can't be combined meaningfully
-          if (self$options$showDotPlot) {
-            # Add a message about dot plots in combined mode
-            if (!"dotPlotMessage" %in% names(self$results)) {
-              self$results$dotPlotMessage <- jmvcore::Html$new(
-                options = self$options,
-                name = "dotPlotMessage",
-                title = "Dot Plot Note",
-                visible = (self$options$showDotPlot && self$options$combinePlots)
-              )
-            }
-
-            # Set content and make visible
-            self$results$dotPlotMessage$setContent(
-              "<p>Dot plots aren't available in combined plot mode. Please uncheck 'Combine plots' to view individual dot plots.</p>"
-            )
-            self$results$dotPlotMessage$setVisible(TRUE)
-
-            # Hide the actual plot in combined mode
-            self$results$dotPlot$setVisible(FALSE)
-          }
-        }
-
-        # Combined prevalence plot if enabled
         if (self$options$showPrevalencePlot) {
-          self$results$prevalencePlot$addItem(key = 1)
-          prevImage <- self$results$prevalencePlot$get(key = 1)
-          prevImage$setTitle("Predictive Values vs. Prevalence: Combined")
-
-          # Use the first variable's data for demonstration
-          if (length(private$.optimalCriteriaList) > 0 && length(private$.prevalenceList) > 0) {
-            firstVar <- names(private$.optimalCriteriaList)[1]
-            prevImage$setState(list(
-              optimal = private$.optimalCriteriaList[[firstVar]],
-              prevalence = private$.prevalenceList[[firstVar]]
-            ))
-          }
-        }
-
-        # -----------------------------------------------------------------------
-        # 14. PERFORM DELONG'S TEST FOR AUC COMPARISON
-        # -----------------------------------------------------------------------
-
-        if (self$options$delongTest) {
-          # Check if we have enough variables to compare
-          if (length(self$options$dependentVars) < 2) {
-            stop("Please specify at least two dependent variables to use DeLong's test.")
-          }
-
-          if (!is.null(self$options$subGroup)) {
-            stop("DeLong's test does not currently support the group variable.")
-          } else {
-            # Get positive class
-            if (self$options$positiveClass == "") {
-              pos_class <- as.character(unique(data[, self$options$classVar])[1])
-            } else {
-              pos_class <- self$options$positiveClass
-            }
-
-            # Run DeLong's test
-            delongResults <- deLong.test(
-              data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
-              classVar = as.character(data[, self$options$classVar]),
-              ref = NULL,
-              pos_class = positiveClass,
-              conf.level = 0.95
-            )
-
-            # Display results
-            self$results$delongTest$setVisible(visible = TRUE)
-            self$results$delongTest$setContent(paste0(capture.output(print.DeLong(delongResults)), collapse = "\n"))
-
-            # Format results for the DeLong comparison table
-            delongTable <- self$results$delongComparisonTable
-
-            # Extract pairwise comparisons from DeLong test results
-            diff_data <- delongResults$difference
-
-            for (i in 1:nrow(diff_data)) {
-              comparison <- rownames(diff_data)[i]
-              delongTable$addRow(rowKey = comparison, values = list(
-                comparison = comparison,
-                auc_diff = diff_data[i, "AUC Difference"],
-                ci_lower = diff_data[i, "CI(lower)"],
-                ci_upper = diff_data[i, "CI(upper)"],
-                z = sqrt(qchisq(1 - diff_data[i, "P.Value"], df = 1)),
-                p = diff_data[i, "P.Value"]
-              ))
-            }
-          }
-        }
-
-        # -----------------------------------------------------------------------
-        # 15. CREATE SIMPLIFIED RESULTS TABLES
-        # -----------------------------------------------------------------------
-
-        # Create simplified summary table
-        simpleTable <- self$results$simpleResultsTable
-
-        # Add rows for each variable
-        for (var in names(aucList)) {
-          # Calculate confidence interval for AUC
-          auc_value <- aucList[[var]]
-
-          # Get counts of positive and negative cases for this variable
-          if (is.null(subGroup)) {
-            classVar <- data[, self$options$classVar]
-          } else {
-            # For grouped variables, extract the group
-            varParts <- strsplit(var, split = "_")[[1]]
-            groupName <- paste(varParts[-1], collapse="_")
-            classVar <- data[subGroup == groupName, self$options$classVar]
-          }
-
-          # Get positive class
-          if (self$options$positiveClass == "") {
-            pos_class <- as.character(unique(classVar)[1])
-          } else {
-            pos_class <- self$options$positiveClass
-          }
-
-          n_pos <- sum(classVar == pos_class)
-          n_neg <- sum(classVar != pos_class)
-
-          # Calculate standard error using Hanley & McNeil formula
-          auc_se <- sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))
-
-          # Calculate 95% confidence interval
-          z_critical <- qnorm(0.975)
-          auc_lci <- max(0, auc_value - z_critical * auc_se)
-          auc_uci <- min(1, auc_value + z_critical * auc_se)
-
-          # Calculate p-value (against null hypothesis AUC = 0.5)
-          z_stat <- (auc_value - 0.5) / auc_se
-          p_val <- 2 * (1 - pnorm(abs(z_stat)))
-
-          # Add row to simple table
-          simpleTable$addRow(rowKey = var, values = list(
-            variable = var,
-            auc = auc_value,
-            ci_lower = auc_lci,
-            ci_upper = auc_uci,
-            p = p_val
+          prevImage <- self$results$prevalencePlot$get(key = var)
+          prevImage$setTitle(paste0("Predictive Values vs. Prevalence: ", var))
+          prevImage$setState(list(
+            optimal = private$.optimalCriteriaList[[var]],
+            prevalence = private$.prevalenceList[[var]]
           ))
         }
 
+        if (self$options$showDotPlot) {
+          rawData <- attr(private$.rocDataList[[var]], "rawData")
+          dotImage <- self$results$dotPlot$get(key = var)
+          dotImage$setTitle(paste0("Dot Plot: ", var))
+          dotImage$setState(rawData)
+        }
+      },
 
+      # Create combined plots
+      # @param plotDataList Combined plot data
+      .createCombinedPlots = function(plotDataList) {
+        # Combined ROC plot
+        self$results$plotROC$addItem(key = 1)
+        image <- self$results$plotROC$get(key = 1)
+        image$setTitle("ROC Curve: Combined")
+        image$setState(plotDataList)
 
-        # Populate the AUC summary table without clearing it
+        # Combined criterion plot
+        if (self$options$showCriterionPlot) {
+          self$results$criterionPlot$addItem(key = 1)
+          criterionImage <- self$results$criterionPlot$get(key = 1)
+          criterionImage$setTitle("Sensitivity and Specificity vs. Threshold: Combined")
+
+          combinedCriterionData <- data.frame()
+          for (var in names(private$.rocDataList)) {
+            varData <- private$.rocDataList[[var]]
+            varData$var <- var
+            combinedCriterionData <- rbind(combinedCriterionData, varData)
+          }
+          criterionImage$setState(combinedCriterionData)
+        }
+
+        # Handle dot plot message
+        if (self$options$showDotPlot) {
+          self$results$dotPlotMessage$setContent(
+            "<p>Dot plots aren't available in combined plot mode.
+                        Please uncheck 'Combine plots' to view individual dot plots.</p>"
+          )
+          self$results$dotPlotMessage$setVisible(TRUE)
+          self$results$dotPlot$setVisible(FALSE)
+        }
+      },
+
+      # Populate summary tables
+      # @param aucList List of AUC values
+      # @param data Dataset
+      # @param params Analysis parameters
+      .populateSummaryTables = function(aucList, data, params) {
         aucSummaryTable <- self$results$aucSummaryTable
 
         for (var in names(aucList)) {
-          # Get AUC value directly from the list
+          # Get AUC value
           auc_value <- aucList[[var]]
 
-          # Get data needed for calculations
-          if (is.null(subGroup)) {
-            classVar <- data[, self$options$classVar]
+          # Get class counts
+          if (is.null(params$subGroup)) {
+            classVar <- data[, params$classVarName]
           } else {
-            # For grouped variables, extract the group
             varParts <- strsplit(var, split = "_")[[1]]
             groupName <- paste(varParts[-1], collapse="_")
-            classVar <- data[subGroup == groupName, self$options$classVar]
+            classVar <- data[params$subGroup == groupName, params$classVarName]
           }
 
-          # Determine positive class
-          if (self$options$positiveClass == "") {
-            pos_class <- as.character(unique(classVar)[1])
-          } else {
-            pos_class <- self$options$positiveClass
-          }
+          n_pos <- sum(classVar == params$positiveClass)
+          n_neg <- sum(classVar != params$positiveClass)
 
-          # Calculate counts and statistics
-          n_pos <- sum(classVar == pos_class)
-          n_neg <- sum(classVar != pos_class)
-
-          # Calculate standard error and confidence interval
+          # Calculate statistics
           auc_se <- sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))
           z_critical <- qnorm(0.975)
           auc_lci <- max(0, auc_value - z_critical * auc_se)
           auc_uci <- min(1, auc_value + z_critical * auc_se)
 
-          # Calculate p-value
           z_stat <- (auc_value - 0.5) / auc_se
           p_val <- 2 * (1 - pnorm(abs(z_stat)))
 
-          # Check if row exists and set/add accordingly
-          try({
-            # Try to set row if it exists (will throw error if it doesn't)
+          # Add or update row
+          tryCatch({
             aucSummaryTable$setRow(rowKey = var, values = list(
               variable = as.character(var),
               auc = auc_value,
@@ -2253,10 +1704,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               ci_upper = auc_uci,
               p = p_val
             ))
-          }, silent = TRUE)
-
-          try({
-            # Try to add row (will throw error if it already exists)
+          }, error = function(e) {
             aucSummaryTable$addRow(rowKey = var, values = list(
               variable = as.character(var),
               auc = auc_value,
@@ -2264,183 +1712,415 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               ci_upper = auc_uci,
               p = p_val
             ))
-          }, silent = TRUE)
+          })
         }
 
-
-
-
-
-        # -----------------------------------------------------------------------
-        # 16. CREATE THRESHOLD TABLE IF REQUESTED
-        # -----------------------------------------------------------------------
-
+        # Create threshold table if requested
         if (self$options$showThresholdTable) {
-          thresholdTable <- self$results$thresholdTable
-          thresholdTable$clear()  # Clear previous results
+          self$.createThresholdTable()
+        }
+      },
 
-          for (var in names(private$.rocDataList)) {
-            rocData <- private$.rocDataList[[var]]
-            # Get prevalence for this variable
-            prevalence <- private$.prevalenceList[[var]]
+      # Create threshold performance table
+      .createThresholdTable = function() {
+        thresholdTable <- self$results$thresholdTable
+        thresholdTable$clear()
 
-            # Select a reasonable number of thresholds to display
-            n_thresholds <- min(nrow(rocData), self$options$maxThresholds)
-            step <- max(1, floor(nrow(rocData) / n_thresholds))
-            indices <- seq(1, nrow(rocData), by = step)
+        for (var in names(private$.rocDataList)) {
+          rocData <- private$.rocDataList[[var]]
+          prevalence <- private$.prevalenceList[[var]]
 
-            # Add the Youden's optimal point
-            optimal_idx <- which.max(rocData$youden)
-            indices <- sort(unique(c(indices, optimal_idx)))
+          # Select thresholds to display
+          n_thresholds <- min(nrow(rocData), self$options$maxThresholds)
+          step <- max(1, floor(nrow(rocData) / n_thresholds))
+          indices <- seq(1, nrow(rocData), by = step)
 
-            # Add rows to threshold table
-            for (i in indices) {
-              # Calculate likelihood ratios
-              plr <- rocData$sensitivity[i] / (1 - rocData$specificity[i])
-              nlr <- (1 - rocData$sensitivity[i]) / rocData$specificity[i]
+          # Add optimal point
+          optimal_idx <- which.max(rocData$youden)
+          indices <- sort(unique(c(indices, optimal_idx)))
 
-              # Avoid division by zero in likelihood ratios
-              if (!is.finite(plr)) plr <- NA
-              if (!is.finite(nlr)) nlr <- NA
+          # Add rows
+          for (i in indices) {
+            plr <- rocData$sensitivity[i] / (1 - rocData$specificity[i])
+            nlr <- (1 - rocData$sensitivity[i]) / rocData$specificity[i]
 
-              # Calculate accuracy using current variable's prevalence
-              accuracy <- (rocData$sensitivity[i] * prevalence) +
-                (rocData$specificity[i] * (1 - prevalence))
+            if (!is.finite(plr)) plr <- NA
+            if (!is.finite(nlr)) nlr <- NA
 
-              thresholdTable$addRow(rowKey = paste0(var, "_", i), values = list(
-                threshold = rocData$threshold[i],
-                sensitivity = rocData$sensitivity[i],
-                specificity = rocData$specificity[i],
-                accuracy = accuracy,
-                ppv = rocData$ppv[i],
-                npv = rocData$npv[i],
-                plr = plr,
-                nlr = nlr,
-                youden = rocData$youden[i]
+            accuracy <- (rocData$sensitivity[i] * prevalence) +
+              (rocData$specificity[i] * (1 - prevalence))
+
+            thresholdTable$addRow(rowKey = paste0(var, "_", i), values = list(
+              threshold = rocData$threshold[i],
+              sensitivity = rocData$sensitivity[i],
+              specificity = rocData$specificity[i],
+              accuracy = accuracy,
+              ppv = rocData$ppv[i],
+              npv = rocData$npv[i],
+              plr = plr,
+              nlr = nlr,
+              youden = rocData$youden[i]
+            ))
+          }
+        }
+      },
+
+      # Perform additional analyses
+      # @param data Dataset
+      # @param vars Variable names
+      # @param params Analysis parameters
+      .performAdditionalAnalyses = function(data, vars, params) {
+        # Partial AUC
+        if (self$options$partialAUC) {
+          self$.calculatePartialAUCs(data, vars, params)
+        }
+
+        # Bootstrap CIs
+        if (self$options$bootstrapCI) {
+          self$.calculateBootstrapCIs(data, vars, params)
+        }
+
+        # Precision-Recall curves
+        if (self$options$precisionRecallCurve) {
+          self$.calculatePrecisionRecall(data, vars, params)
+        }
+
+        # Comprehensive classifier comparison
+        if (self$options$compareClassifiers) {
+          self$.compareClassifiers(data, vars, params)
+        }
+      },
+
+      # Calculate partial AUCs
+      # @param data Dataset
+      # @param vars Variable names
+      # @param params Analysis parameters
+      .calculatePartialAUCs = function(data, vars, params) {
+        self$results$partialAUCTable$setVisible(TRUE)
+
+        for (var in vars) {
+          # Get data
+          var_data <- self$.getVariableData(var, data, params)
+
+          # Calculate partial AUC
+          pAUC_results <- calculatePartialAUC(
+            x = var_data$dependentVar,
+            class = var_data$classVar,
+            pos_class = params$positiveClass,
+            spec_from = self$options$partialAUCfrom,
+            spec_to = self$options$partialAUCto
+          )
+
+          if (!is.null(pAUC_results)) {
+            self$results$partialAUCTable$addRow(rowKey = var, values = list(
+              variable = var,
+              pAUC = pAUC_results$pAUC,
+              pAUC_normalized = pAUC_results$pAUC_normalized,
+              ci_lower = pAUC_results$ci_lower,
+              ci_upper = pAUC_results$ci_upper,
+              spec_range = pAUC_results$spec_range
+            ))
+          }
+        }
+      },
+
+      # Calculate bootstrap confidence intervals
+      # @param data Dataset
+      # @param vars Variable names
+      # @param params Analysis parameters
+      .calculateBootstrapCIs = function(data, vars, params) {
+        self$results$bootstrapCITable$setVisible(TRUE)
+
+        for (var in vars) {
+          # Get data
+          var_data <- self$.getVariableData(var, data, params)
+
+          # Calculate bootstrap CIs
+          bootstrap_results <- calculateBootstrapCI(
+            x = var_data$dependentVar,
+            class = var_data$classVar,
+            pos_class = params$positiveClass,
+            n_boot = self$options$bootstrapReps,
+            conf_level = 0.95
+          )
+
+          if (!is.null(bootstrap_results)) {
+            for (param in names(bootstrap_results)) {
+              self$results$bootstrapCITable$addRow(
+                rowKey = paste0(var, "_", param),
+                values = list(
+                  variable = var,
+                  parameter = param,
+                  estimate = bootstrap_results[[param]]$estimate,
+                  ci_lower = bootstrap_results[[param]]$ci_lower,
+                  ci_upper = bootstrap_results[[param]]$ci_upper
+                )
+              )
+            }
+          }
+        }
+      },
+
+      # Calculate precision-recall curves
+      # @param data Dataset
+      # @param vars Variable names
+      # @param params Analysis parameters
+      .calculatePrecisionRecall = function(data, vars, params) {
+        if (self$options$combinePlots) {
+          self$results$precisionRecallPlot$addItem(key = 1)
+          pr_plot_data <- data.frame()
+        }
+
+        for (var in vars) {
+          # Get data
+          var_data <- self$.getVariableData(var, data, params)
+
+          # Calculate precision-recall
+          pr_results <- calculatePrecisionRecall(
+            x = var_data$dependentVar,
+            class = var_data$classVar,
+            pos_class = params$positiveClass
+          )
+
+          if (!is.null(pr_results)) {
+            if (self$options$combinePlots) {
+              pr_plot_data <- rbind(
+                pr_plot_data,
+                data.frame(
+                  threshold = pr_results$threshold,
+                  precision = pr_results$precision,
+                  recall = pr_results$recall,
+                  auprc = rep(pr_results$auprc, length(pr_results$threshold)),
+                  var = rep(var, length(pr_results$threshold))
+                )
+              )
+            } else {
+              self$results$precisionRecallPlot$addItem(key = var)
+              pr_plot <- self$results$precisionRecallPlot$get(key = var)
+              pr_plot$setTitle(paste0("Precision-Recall Curve: ", var))
+              pr_plot$setState(
+                data.frame(
+                  threshold = pr_results$threshold,
+                  precision = pr_results$precision,
+                  recall = pr_results$recall,
+                  auprc = rep(pr_results$auprc, length(pr_results$threshold))
+                )
+              )
+            }
+          }
+        }
+
+        if (self$options$combinePlots && nrow(pr_plot_data) > 0) {
+          pr_plot <- self$results$precisionRecallPlot$get(key = 1)
+          pr_plot$setTitle("Precision-Recall Curves: Combined")
+          pr_plot$setState(pr_plot_data)
+        }
+      },
+
+      # Compare classifiers
+      # @param data Dataset
+      # @param vars Variable names
+      # @param params Analysis parameters
+      .compareClassifiers = function(data, vars, params) {
+        self$results$rocComparisonTable$setVisible(TRUE)
+
+        for (var in vars) {
+          # Get data
+          var_data <- self$.getVariableData(var, data, params)
+
+          # Calculate metrics
+          metrics <- calculateComprehensiveMetrics(
+            x = var_data$dependentVar,
+            class = var_data$classVar,
+            pos_class = params$positiveClass
+          )
+
+          if (!is.null(metrics)) {
+            self$results$rocComparisonTable$addRow(rowKey = var, values = list(
+              variable = var,
+              auc = metrics$auc,
+              auprc = metrics$auprc,
+              brier = metrics$brier,
+              f1_score = metrics$f1_score,
+              accuracy = metrics$accuracy,
+              balanced_accuracy = metrics$balanced_accuracy
+            ))
+          }
+        }
+      },
+
+      # Get variable data for analysis
+      # @param var Variable name
+      # @param data Dataset
+      # @param params Analysis parameters
+      # @return List with dependentVar and classVar
+      .getVariableData = function(var, data, params) {
+        if (is.null(params$subGroup)) {
+          dependentVar <- as.numeric(data[, var])
+          classVar <- data[, params$classVarName]
+        } else {
+          varParts <- strsplit(var, split = "_")[[1]]
+          varName <- varParts[1]
+          groupName <- paste(varParts[-1], collapse="_")
+
+          dependentVar <- as.numeric(data[params$subGroup == groupName, varName])
+          classVar <- data[params$subGroup == groupName, params$classVarName]
+        }
+
+        return(list(
+          dependentVar = dependentVar,
+          classVar = classVar
+        ))
+      },
+
+      # Perform statistical comparisons
+      # @param data Dataset
+      # @param params Analysis parameters
+      .performStatisticalComparisons = function(data, params) {
+        # DeLong's test
+        if (self$options$delongTest) {
+          self$.performDeLongTest(data, params)
+        }
+
+        # IDI and NRI
+        if (self$options$calculateIDI || self$options$calculateNRI) {
+          self$.calculateIDINRI(data, params)
+        }
+      },
+
+      # Perform DeLong's test
+      # @param data Dataset
+      # @param params Analysis parameters
+      .performDeLongTest = function(data, params) {
+        if (length(self$options$dependentVars) < 2) {
+          stop("Please specify at least two dependent variables to use DeLong's test.")
+        }
+
+        if (!is.null(self$options$subGroup)) {
+          stop("DeLong's test does not currently support the group variable.")
+        }
+
+        # Run DeLong's test
+        delongResults <- deLong.test(
+          data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
+          classVar = as.character(data[, params$classVarName]),
+          ref = NULL,
+          pos_class = params$positiveClass,
+          conf.level = 0.95
+        )
+
+        # Display results
+        self$results$delongTest$setVisible(TRUE)
+        self$results$delongTest$setContent(
+          paste0(capture.output(print.DeLong(delongResults)), collapse = "\n")
+        )
+
+        # Format table
+        delongTable <- self$results$delongComparisonTable
+        diff_data <- delongResults$difference
+
+        for (i in 1:nrow(diff_data)) {
+          comparison <- rownames(diff_data)[i]
+          delongTable$addRow(rowKey = comparison, values = list(
+            comparison = comparison,
+            auc_diff = diff_data[i, "AUC Difference"],
+            ci_lower = diff_data[i, "CI(lower)"],
+            ci_upper = diff_data[i, "CI(upper)"],
+            z = sqrt(qchisq(1 - diff_data[i, "P.Value"], df = 1)),
+            p = diff_data[i, "P.Value"]
+          ))
+        }
+      },
+
+      # Calculate IDI and NRI
+      # @param data Dataset
+      # @param params Analysis parameters
+      .calculateIDINRI = function(data, params) {
+        if (length(self$options$dependentVars) < 2) {
+          stop("Please specify at least two dependent variables to calculate IDI/NRI.")
+        }
+
+        # Get reference variable
+        refVar <- if (!is.null(self$options$refVar) && self$options$refVar != "") {
+          self$options$refVar
+        } else {
+          self$options$dependentVars[1]
+        }
+
+        # Get actual class values
+        classVar <- data[, params$classVarName]
+        actual_binary <- as.numeric(classVar == params$positiveClass)
+
+        # Get reference values
+        ref_values <- as.numeric(data[, refVar])
+
+        # Calculate IDI if requested
+        if (self$options$calculateIDI) {
+          for (var in self$options$dependentVars) {
+            if (var != refVar) {
+              var_values <- as.numeric(data[, var])
+
+              idi_result <- bootstrapIDI(
+                new_values = var_values,
+                ref_values = ref_values,
+                actual = actual_binary,
+                direction = params$direction,
+                n_boot = as.numeric(self$options$idiNriBootRuns)
+              )
+
+              self$results$idiTable$addRow(rowKey = var, values = list(
+                variable = var,
+                refVar = refVar,
+                idi = idi_result$idi,
+                ci_lower = idi_result$ci_lower,
+                ci_upper = idi_result$ci_upper,
+                p = idi_result$p_value
               ))
             }
           }
         }
 
-
-        # -----------------------------------------------------------------------
-        # 17. CALCULATE IDI AND NRI IF REQUESTED
-        # -----------------------------------------------------------------------
-
-        # Calculate IDI and NRI if requested
-        if (self$options$calculateIDI || self$options$calculateNRI) {
-          # Check if we have enough variables
-          if (length(self$options$dependentVars) < 2) {
-            stop("Please specify at least two dependent variables to calculate IDI/NRI.")
+        # Calculate NRI if requested
+        if (self$options$calculateNRI) {
+          # Parse thresholds
+          thresholds <- NULL
+          if (!is.null(self$options$nriThresholds) && self$options$nriThresholds != "") {
+            thresholds <- as.numeric(unlist(strsplit(self$options$nriThresholds, ",")))
+            thresholds <- thresholds[!is.na(thresholds)]
+            thresholds <- thresholds[thresholds > 0 & thresholds < 1]
           }
 
-          # Get reference variable
-          if (is.null(self$options$refVar) || self$options$refVar == "") {
-            refVar <- self$options$dependentVars[1]
-          } else {
-            refVar <- self$options$refVar
-          }
+          for (var in self$options$dependentVars) {
+            if (var != refVar) {
+              var_values <- as.numeric(data[, var])
 
-          # Get actual class values and convert to binary
-          classVar <- data[, self$options$classVar]
-          pos_class <- ifelse(self$options$positiveClass == "",
-                              as.character(unique(classVar)[1]),
-                              self$options$positiveClass)
-          actual_binary <- as.numeric(classVar == pos_class)
+              nri_result <- bootstrapNRI(
+                new_values = var_values,
+                ref_values = ref_values,
+                actual = actual_binary,
+                thresholds = thresholds,
+                direction = params$direction,
+                n_boot = as.numeric(self$options$idiNriBootRuns)
+              )
 
-          # Get direction
-          direction <- self$options$direction
-
-          # Get bootstrap runs
-          boot_runs <- as.numeric(self$options$idiNriBootRuns)
-
-          # Calculate IDI if requested
-          if (self$options$calculateIDI) {
-            # Get reference variable values
-            ref_values <- as.numeric(data[, refVar])
-
-            # For each other variable
-            for (var in self$options$dependentVars) {
-              if (var != refVar) {
-                var_values <- as.numeric(data[, var])
-
-                # Calculate IDI
-                idi_result <- calculate_idi(
-                  values_new = var_values,
-                  values_ref = ref_values,
-                  actual = actual_binary,
-                  direction = direction,
-                  ci = TRUE,
-                  boot_runs = boot_runs
-                )
-
-                # Add to IDI table
-                self$results$idiTable$addRow(rowKey = var, values = list(
-                  variable = var,
-                  refVar = refVar,
-                  idi = idi_result$idi,
-                  ci_lower = idi_result$ci_lower,
-                  ci_upper = idi_result$ci_upper,
-                  p = idi_result$p_value
-                ))
-              }
-            }
-          }
-
-          # Calculate NRI if requested
-          if (self$options$calculateNRI) {
-            # Get reference variable values
-            ref_values <- as.numeric(data[, refVar])
-
-            # Parse thresholds string if provided
-            thresholds <- NULL
-            if (!is.null(self$options$nriThresholds) && self$options$nriThresholds != "") {
-              thresholds <- as.numeric(unlist(strsplit(self$options$nriThresholds, ",")))
-              thresholds <- thresholds[!is.na(thresholds)]
-              thresholds <- thresholds[thresholds > 0 & thresholds < 1]
-            }
-
-            # For each other variable
-            for (var in self$options$dependentVars) {
-              if (var != refVar) {
-                var_values <- as.numeric(data[, var])
-
-                # Calculate NRI
-                nri_result <- calculate_nri(
-                  values_new = var_values,
-                  values_ref = ref_values,
-                  actual = actual_binary,
-                  thresholds = thresholds,
-                  direction = direction,
-                  ci = TRUE,
-                  boot_runs = boot_runs
-                )
-
-                # Add to NRI table
-                self$results$nriTable$addRow(rowKey = var, values = list(
-                  variable = var,
-                  refVar = refVar,
-                  nri = nri_result$nri,
-                  event_nri = nri_result$event_nri,
-                  non_event_nri = nri_result$non_event_nri,
-                  ci_lower = nri_result$ci_lower,
-                  ci_upper = nri_result$ci_upper,
-                  p = nri_result$p_value
-                ))
-              }
+              self$results$nriTable$addRow(rowKey = var, values = list(
+                variable = var,
+                refVar = refVar,
+                nri = nri_result$nri,
+                event_nri = nri_result$event_nri,
+                non_event_nri = nri_result$non_event_nri,
+                ci_lower = nri_result$ci_lower,
+                ci_upper = nri_result$ci_upper,
+                p = nri_result$p_value
+              ))
             }
           }
         }
-
-
-
-
-
       },
 
-      # ============================================================================
+      # ======================================================================
       # PLOTTING METHODS
-      # ============================================================================
+      # ======================================================================
 
       # Plot ROC curves
       # @param image The image object
@@ -2452,7 +2132,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
 
         if (nrow(plotData) == 0) return(FALSE)
 
-        # Determine if we're creating a combined or individual plot
+        # Create base plot
         if (self$options$combinePlots == TRUE && length(unique(plotData$var)) > 1) {
           # Multiple variables in one plot
           plot <- ggplot2::ggplot(plotData,
@@ -2486,7 +2166,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           ggplot2::xlim(0, 1) +
           ggplot2::ylim(0, 1)
 
-        # Apply theme based on clean plot option
+        # Apply theme
         if (self$options$cleanPlot) {
           plot <- plot +
             ggplot2::theme_minimal() +
@@ -2497,7 +2177,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               panel.border = ggplot2::element_rect(color = "black", fill = NA)
             )
 
-          # Handle legend positioning for clean plots
+          # Handle legend for clean plots
           if (self$options$combinePlots && length(unique(plotData$var)) > 1) {
             if (self$options$legendPosition == "none") {
               plot <- plot + ggplot2::theme(legend.position = "none")
@@ -2511,234 +2191,13 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
             }
           }
         } else {
-          # Use the provided theme
           plot <- plot + ggtheme
         }
 
-
-        # Add the following code inside the .run method at an appropriate location (after the basic ROC analysis is done)
-
-        # Calculate partial AUC if requested
-        if (self$options$partialAUC) {
-          # Set up partial AUC table if not already done
-          if (!self$results$partialAUCTable$isVisible) {
-            self$results$partialAUCTable$setVisible(TRUE)
-          }
-
-          for (var in vars) {
-            # Get the necessary data
-            if (is.null(subGroup)) {
-              # Standard case - no grouping
-              dependentVar <- as.numeric(data[, var])
-              classVar <- data[, self$options$classVar]
-            } else {
-              # Case with grouping - extract data for this group
-              varParts <- strsplit(var, split = "_")[[1]]
-              varName <- varParts[1]
-              groupName <- paste(varParts[-1], collapse="_")
-
-              # Filter data for this group
-              dependentVar <- as.numeric(data[subGroup == groupName, varName])
-              classVar <- data[subGroup == groupName, self$options$classVar]
-            }
-
-            # Calculate partial AUC
-            pAUC_results <- private$.calculatePartialAUC(
-              x = dependentVar,
-              class = classVar,
-              pos_class = positiveClass,
-              from = self$options$partialAUCfrom,
-              to = self$options$partialAUCto
-            )
-
-            # Add to table
-            if (!is.null(pAUC_results)) {
-              self$results$partialAUCTable$addRow(rowKey = var, values = list(
-                variable = var,
-                pAUC = pAUC_results$pAUC,
-                pAUC_normalized = pAUC_results$pAUC_normalized,
-                ci_lower = pAUC_results$ci_lower,
-                ci_upper = pAUC_results$ci_upper,
-                spec_range = pAUC_results$spec_range
-              ))
-            }
-          }
-        }
-
-
-
-
-        # Modify the .plotROC function to handle smoothed curves
-        # Add this within the existing plot function when generating the ggplot
-
-        # Check if we have smoothed curves
-        has_smoothed <- any(grepl("_smooth", names(private$.rocDataList)))
-
-        if (has_smoothed && self$options$rocSmoothingMethod != "none") {
-          # Prepare data for smoothed curves
-          smoothed_data <- data.frame()
-
-          for (var_name in names(private$.rocDataList)) {
-            if (grepl("_smooth", var_name)) {
-              smooth_data <- private$.rocDataList[[var_name]]
-              if (!is.null(smooth_data)) {
-                smoothed_data <- rbind(smoothed_data, smooth_data)
-              }
-            }
-          }
-
-          if (nrow(smoothed_data) > 0) {
-            # Add smoothed curves
-            if (self$options$combinePlots && length(unique(smoothed_data$var)) > 1) {
-              # For combined plot
-              plot <- plot +
-                ggplot2::geom_line(
-                  data = smoothed_data,
-                  ggplot2::aes(
-                    x = 1 - specificity,
-                    y = sensitivity,
-                    color = var
-                  ),
-                  linetype = "solid",
-                  size = 1.5,
-                  alpha = 0.8
-                )
-            } else {
-              # For individual plot
-              plot <- plot +
-                ggplot2::geom_line(
-                  data = smoothed_data,
-                  ggplot2::aes(
-                    x = 1 - specificity,
-                    y = sensitivity
-                  ),
-                  linetype = "solid",
-                  size = 1.5,
-                  color = "blue",
-                  alpha = 0.8
-                )
-            }
-
-            # Add annotation about smoothing
-            plot <- plot +
-              ggplot2::annotate(
-                "text",
-                x = 0.25,
-                y = 0.1,
-                label = paste("Smoothing:", self$options$rocSmoothingMethod),
-                hjust = 0,
-                alpha = 0.7
-              )
-          }
-        }
-
-
-
-
-
-
-
-
-
-
-        # Apply ROC curve smoothing if requested
-        if (self$options$rocSmoothingMethod != "none") {
-          for (var in vars) {
-            # Get the necessary data
-            if (is.null(subGroup)) {
-              # Standard case - no grouping
-              dependentVar <- as.numeric(data[, var])
-              classVar <- data[, self$options$classVar]
-            } else {
-              # Case with grouping - extract data for this group
-              varParts <- strsplit(var, split = "_")[[1]]
-              varName <- varParts[1]
-              groupName <- paste(varParts[-1], collapse="_")
-
-              # Filter data for this group
-              dependentVar <- as.numeric(data[subGroup == groupName, varName])
-              classVar <- data[subGroup == groupName, self$options$classVar]
-            }
-
-            # Create smoothed ROC curve
-            smooth_results <- private$.createSmoothedROC(
-              x = dependentVar,
-              class = classVar,
-              pos_class = positiveClass,
-              method = self$options$rocSmoothingMethod
-            )
-
-            # Store smoothed ROC curve data for plotting
-            if (!is.null(smooth_results)) {
-              # Store for plotting
-              private$.rocDataList[[paste0(var, "_smooth")]] <- data.frame(
-                threshold = smooth_results$threshold,
-                sensitivity = smooth_results$sensitivity,
-                specificity = smooth_results$specificity,
-                var = var,
-                smoothed = TRUE,
-                method = self$options$rocSmoothingMethod
-              )
-            }
-          }
-        }
-
-        # Calculate bootstrap confidence intervals if requested
-        if (self$options$bootstrapCI) {
-          # Set up bootstrap CI table if not already done
-          if (!self$results$bootstrapCITable$isVisible) {
-            self$results$bootstrapCITable$setVisible(TRUE)
-          }
-
-          for (var in vars) {
-            # Get the necessary data
-            if (is.null(subGroup)) {
-              # Standard case - no grouping
-              dependentVar <- as.numeric(data[, var])
-              classVar <- data[, self$options$classVar]
-            } else {
-              # Case with grouping - extract data for this group
-              varParts <- strsplit(var, split = "_")[[1]]
-              varName <- varParts[1]
-              groupName <- paste(varParts[-1], collapse="_")
-
-              # Filter data for this group
-              dependentVar <- as.numeric(data[subGroup == groupName, varName])
-              classVar <- data[subGroup == groupName, self$options$classVar]
-            }
-
-            # Calculate bootstrap CIs
-            bootstrap_results <- private$.calculateBootstrapCI(
-              x = dependentVar,
-              class = classVar,
-              pos_class = positiveClass
-            )
-
-            # Add to table
-            if (!is.null(bootstrap_results)) {
-              for (param in names(bootstrap_results)) {
-                self$results$bootstrapCITable$addRow(rowKey = paste0(var, "_", param), values = list(
-                  variable = var,
-                  parameter = param,
-                  estimate = bootstrap_results[[param]]$estimate,
-                  ci_lower = bootstrap_results[[param]]$ci_lower,
-                  ci_upper = bootstrap_results[[param]]$ci_upper
-                ))
-              }
-            }
-          }
-        }
-
-
-        # Add smoothing if requested
-        if (self$options$smoothing) {
-          plot <- plot + ggplot2::geom_smooth(se = self$options$displaySE)
-        }
-
-        # Mark optimal points if not clean plot or if specifically requested
+        # Mark optimal points
         if (!self$options$cleanPlot || self$options$showOptimalPoint) {
           if (self$options$combinePlots == TRUE && length(unique(plotData$var)) > 1) {
-            # For combined plot, find optimal points for each variable
+            # Find optimal points for each variable
             optimal_points <- data.frame()
             for (var_name in unique(plotData$var)) {
               var_data <- plotData[plotData$var == var_name,]
@@ -2761,11 +2220,10 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
                 )
             }
           } else {
-            # For single variable plot
+            # Single variable optimal point
             if ('j_max_idx' %in% names(plotData)) {
               j_max_idx <- unique(plotData$j_max_idx)
               if (length(j_max_idx) == 1 && !is.na(j_max_idx)) {
-                # Add optimal point
                 plot <- plot +
                   ggplot2::geom_point(
                     data = plotData[j_max_idx,],
@@ -2776,7 +2234,6 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
                     size = 3, shape = 18, color = "red"
                   )
 
-                # Add annotation if not clean plot
                 if (!self$options$cleanPlot) {
                   plot <- plot +
                     ggplot2::annotate(
@@ -2792,13 +2249,13 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           }
         }
 
-        # Add AUC annotations if not in clean plot mode
+        # Add AUC annotations
         if (!self$options$cleanPlot) {
           if (self$options$combinePlots && length(unique(plotData$var)) > 1) {
-            # Multiple AUC annotations for combined plot
+            # Multiple AUC annotations
             auc_data <- aggregate(AUC ~ var, data = plotData, FUN = function(x) x[1])
             auc_data$AUC_formatted <- sprintf("AUC = %.3f", auc_data$AUC)
-            auc_data$x <- 0.75  # Position for annotations
+            auc_data$x <- 0.75
             auc_data$y <- seq(0.3, 0.1, length.out = nrow(auc_data))
 
             plot <- plot +
@@ -2806,7 +2263,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
                                  ggplot2::aes(x = x, y = y, label = AUC_formatted, color = var),
                                  hjust = 0, show.legend = FALSE)
           } else {
-            # Single AUC annotation for individual plot
+            # Single AUC annotation
             if (nrow(plotData) > 0) {
               auc_value <- unique(plotData$AUC)[1]
               plot <- plot + ggplot2::annotate(
@@ -2815,204 +2272,6 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
                 y = 0.25,
                 label = sprintf("AUC = %.3f", auc_value)
               )
-            }
-          }
-        }
-
-        # Add direct labels if requested
-        if (self$options$directLabel && self$options$combinePlots) {
-          # Get unique variables and their optimal points
-          unique_vars <- unique(plotData$var)
-          label_points <- data.frame()
-
-          for (var_name in unique_vars) {
-            var_data <- plotData[plotData$var == var_name,]
-            j_max_idx <- which.max(var_data$youden)
-            if (length(j_max_idx) > 0) {
-              label_points <- rbind(label_points, var_data[j_max_idx,])
-            }
-          }
-
-          # Add text labels directly to curves
-          plot <- plot +
-            ggplot2::geom_text(
-              data = label_points,
-              ggplot2::aes(
-                x = 1 - specificity,
-                y = sensitivity,
-                label = var
-              ),
-              hjust = -0.1,
-              vjust = 1.1
-            )
-        }
-
-        # Add confidence bands if requested
-        if (self$options$showConfidenceBands && !self$options$cleanPlot) {
-          # Only implemented for individual plots currently
-          if (!self$options$combinePlots || length(unique(plotData$var)) == 1) {
-            # Calculate SE bands using binomial approximation (simple approach)
-            if (nrow(plotData) > 0) {
-              var_name <- unique(plotData$var)[1]
-
-              # Get the raw data
-              if (!is.null(attr(private$.rocDataList[[var_name]], "rawData"))) {
-                rawData <- attr(private$.rocDataList[[var_name]], "rawData")
-
-                # Get counts
-                n_pos <- sum(rawData$class == "Positive")
-                n_neg <- sum(rawData$class == "Negative")
-
-                # Create confidence bands (simplified approach)
-                # This uses a normal approximation to the binomial
-                sens_se <- sqrt(plotData$sensitivity * (1 - plotData$sensitivity) / n_pos)
-                spec_se <- sqrt(plotData$specificity * (1 - plotData$specificity) / n_neg)
-
-                # Create bands data
-                bands_data <- data.frame(
-                  x = 1 - plotData$specificity,
-                  y = plotData$sensitivity,
-                  ymin = pmax(0, plotData$sensitivity - 1.96 * sens_se),
-                  ymax = pmin(1, plotData$sensitivity + 1.96 * sens_se),
-                  xmin = pmax(0, 1 - (plotData$specificity + 1.96 * spec_se)),
-                  xmax = pmin(1, 1 - (plotData$specificity - 1.96 * spec_se))
-                )
-
-                # Add confidence bands to plot
-                plot <- plot +
-                  ggplot2::geom_ribbon(
-                    data = bands_data,
-                    ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax),
-                    alpha = 0.1, fill = "blue"
-                  )
-              }
-            }
-          }
-        }
-
-        # Handle quantile CIs if requested
-        if (self$options$quantileCIs && !self$options$cleanPlot) {
-          # Parse quantiles string
-          quantiles_str <- self$options$quantiles
-          quantiles_vec <- as.numeric(unlist(strsplit(quantiles_str, ",")))
-
-          # Ensure quantiles are valid
-          quantiles_vec <- quantiles_vec[quantiles_vec >= 0 & quantiles_vec <= 1]
-
-          if (length(quantiles_vec) > 0) {
-            # For each variable in the plot
-            for (var_name in unique(plotData$var)) {
-              var_data <- plotData[plotData$var == var_name, ]
-
-              # Extract the predictor values
-              if (!is.null(attr(private$.rocDataList[[var_name]], "rawData"))) {
-                raw_data <- attr(private$.rocDataList[[var_name]], "rawData")
-                predictor_values <- raw_data$value
-
-                # Calculate class-specific counts
-                n_pos <- sum(raw_data$class == "Positive")
-                n_neg <- sum(raw_data$class == "Negative")
-
-                # Calculate predictor quantiles
-                pred_quantiles <- quantile(predictor_values, probs = quantiles_vec, na.rm = TRUE)
-
-                # Create a data frame for quantile points
-                quantile_points <- data.frame()
-
-                # For each quantile, find the nearest threshold
-                for (q_idx in seq_along(pred_quantiles)) {
-                  q <- pred_quantiles[q_idx]
-                  q_prob <- quantiles_vec[q_idx]
-
-                  # Find closest threshold
-                  idx <- which.min(abs(var_data$cutpoint - q))
-
-                  if (length(idx) > 0) {
-                    # Get coordinates
-                    x <- 1 - var_data$specificity[idx]
-                    y <- var_data$sensitivity[idx]
-
-                    # Calculate binomial confidence intervals
-                    sens_ci_lower <- max(0, y - 1.96 * sqrt(y * (1 - y) / n_pos))
-                    sens_ci_upper <- min(1, y + 1.96 * sqrt(y * (1 - y) / n_pos))
-
-                    spec <- var_data$specificity[idx]
-                    spec_ci_lower <- max(0, spec - 1.96 * sqrt(spec * (1 - spec) / n_neg))
-                    spec_ci_upper <- min(1, spec + 1.96 * sqrt(spec * (1 - spec) / n_neg))
-
-                    # Add to data frame
-                    quantile_points <- rbind(quantile_points, data.frame(
-                      x = x,
-                      y = y,
-                      ymin = sens_ci_lower,
-                      ymax = sens_ci_upper,
-                      xmin = 1 - spec_ci_upper,
-                      xmax = 1 - spec_ci_lower,
-                      var = var_name,
-                      q_label = sprintf("q=%.2f", q_prob)
-                    ))
-                  }
-                }
-
-                # Add quantile points and CIs to plot
-                if (nrow(quantile_points) > 0) {
-                  if (self$options$combinePlots && length(unique(plotData$var)) > 1) {
-                    # For combined plot with multiple variables
-                    plot <- plot +
-                      # Horizontal error bars
-                      ggplot2::geom_errorbarh(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, xmin = xmin, xmax = xmax, color = var),
-                        height = 0.02
-                      ) +
-                      # Vertical error bars
-                      ggplot2::geom_errorbar(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax, color = var),
-                        width = 0.02
-                      ) +
-                      # Points
-                      ggplot2::geom_point(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, color = var),
-                        size = 3, shape = 4
-                      ) +
-                      # Labels
-                      ggplot2::geom_text(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, label = q_label, color = var),
-                        hjust = -0.2, vjust = -0.5, size = 3
-                      )
-                  } else {
-                    # For single variable plot
-                    plot <- plot +
-                      # Horizontal error bars
-                      ggplot2::geom_errorbarh(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, xmin = xmin, xmax = xmax),
-                        height = 0.02, color = "blue"
-                      ) +
-                      # Vertical error bars
-                      ggplot2::geom_errorbar(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax),
-                        width = 0.02, color = "blue"
-                      ) +
-                      # Points
-                      ggplot2::geom_point(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y),
-                        size = 3, shape = 4, color = "blue"
-                      ) +
-                      # Labels
-                      ggplot2::geom_text(
-                        data = quantile_points,
-                        ggplot2::aes(x = x, y = y, label = q_label),
-                        hjust = -0.2, vjust = -0.5, size = 3, color = "blue"
-                      )
-                  }
-                }
-              }
             }
           }
         }
@@ -3032,13 +2291,14 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         if (is.null(plotData) || (is.data.frame(plotData) && nrow(plotData) == 0))
           return(FALSE)
 
-        # Check if this is a combined plot with multiple variables
+        # Check if this is a combined plot
         if ("var" %in% names(plotData)) {
           # Multiple variables
           plot <- ggplot2::ggplot(plotData, ggplot2::aes(x = threshold, group = var, color = var)) +
             ggplot2::geom_line(ggplot2::aes(y = sensitivity, linetype = "Sensitivity")) +
             ggplot2::geom_line(ggplot2::aes(y = specificity, linetype = "Specificity")) +
-            ggplot2::scale_linetype_manual(name = "Metric", values = c("Sensitivity" = "solid", "Specificity" = "dashed")) +
+            ggplot2::scale_linetype_manual(name = "Metric",
+                                           values = c("Sensitivity" = "solid", "Specificity" = "dashed")) +
             ggplot2::labs(
               x = "Threshold",
               y = "Value",
@@ -3046,7 +2306,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               title = "Sensitivity and Specificity vs. Threshold"
             )
         } else {
-          # Single variable - reshape data for better plotting
+          # Single variable - reshape data
           plot_data_long <- tidyr::gather(
             plotData,
             key = "metric",
@@ -3054,14 +2314,12 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
             sensitivity, specificity
           )
 
-          # Make metric names nicer
           plot_data_long$metric <- factor(
             plot_data_long$metric,
             levels = c("sensitivity", "specificity"),
             labels = c("Sensitivity", "Specificity")
           )
 
-          # Create plot
           plot <- ggplot2::ggplot(
             plot_data_long,
             ggplot2::aes(x = threshold, y = value, color = metric)
@@ -3074,12 +2332,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
               title = "Sensitivity and Specificity vs. Threshold"
             )
 
-          # Find optimal threshold (Youden's index)
+          # Add optimal threshold line
           optimal_idx <- which.max(plotData$youden)
           if (length(optimal_idx) > 0) {
             opt_threshold <- plotData$threshold[optimal_idx]
 
-            # Add vertical line at optimal threshold
             plot <- plot + ggplot2::geom_vline(
               xintercept = opt_threshold,
               linetype = "dotted",
@@ -3095,7 +2352,6 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           }
         }
 
-        # Apply theme
         plot <- plot + ggtheme
 
         print(plot)
@@ -3113,7 +2369,6 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         if (is.null(state))
           return(FALSE)
 
-        # Extract data
         optimal <- state$optimal
         prevalence <- state$prevalence
 
@@ -3124,11 +2379,9 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         prev_seq <- seq(0.01, 0.99, by = 0.01)
 
         # Calculate PPV and NPV for different prevalence values
-        # PPV = (sens * prev) / (sens * prev + (1-spec) * (1-prev))
         ppv_vals <- (optimal$sensitivity * prev_seq) /
           ((optimal$sensitivity * prev_seq) + ((1 - optimal$specificity) * (1 - prev_seq)))
 
-        # NPV = (spec * (1-prev)) / (spec * (1-prev) + (1-sens) * prev)
         npv_vals <- (optimal$specificity * (1 - prev_seq)) /
           ((optimal$specificity * (1 - prev_seq)) + ((1 - optimal$sensitivity) * prev_seq))
 
@@ -3232,7 +2485,7 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
           ggplot2::theme(legend.position = "none") +
           ggtheme
 
-        # Add boxplots if helpful for distribution visualization
+        # Add boxplots
         plot <- plot +
           ggplot2::geom_boxplot(
             alpha = 0.3,
@@ -3244,105 +2497,11 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         return(TRUE)
       },
 
-      # Generate interactive ROC plot
+      # Plot precision-recall curves
       # @param image The image object
       # @param ggtheme The ggplot theme to use
       # @param theme Additional theme elements
       # @param ... Additional parameters
-      .plotInteractiveROC = function(image, ggtheme, theme, ...) {
-        # This function depends on the plotROC package which must be available
-        if (!requireNamespace("plotROC", quietly = TRUE)) {
-          warning("The plotROC package is not available. Cannot create interactive ROC plot.")
-          return(FALSE)
-        }
-
-        # Get data from state
-        plotData <- image$state
-
-        if (is.null(plotData) || (is.data.frame(plotData) && nrow(plotData) == 0))
-          return(FALSE)
-
-        # Check for data format - if it's already ROC data, we need to reformat
-        if (all(c("sensitivity", "specificity") %in% names(plotData))) {
-          # Create mock data for plotROC
-          if (!"var" %in% names(plotData)) {
-            # Single variable
-            # Convert ROC coords to data plotROC expects
-            interactive_data <- data.frame(
-              predictor = plotData$cutpoint,
-              response = rep(c(1, 0), each = nrow(plotData)),
-              stringsAsFactors = FALSE
-            )
-          } else {
-            # Multiple variables
-            # For each variable, create mock data
-            interactive_data <- data.frame(
-              predictor = numeric(),
-              response = numeric(),
-              D = character(),
-              stringsAsFactors = FALSE
-            )
-
-            for (var_name in unique(plotData$var)) {
-              var_data <- plotData[plotData$var == var_name, ]
-              # Add to interactive data
-              interactive_data <- rbind(interactive_data, data.frame(
-                predictor = var_data$cutpoint,
-                response = rep(c(1, 0), each = nrow(var_data)),
-                D = var_name,
-                stringsAsFactors = FALSE
-              ))
-            }
-          }
-        } else {
-          # If already in correct format, use as is
-          interactive_data <- plotData
-        }
-
-        # Create interactive plot
-        try({
-          # Create basic plot using ggplot2 syntax
-          if ("D" %in% names(interactive_data)) {
-            # Multiple groups
-            p <- plotROC::ggplot(interactive_data,
-                                 plotROC::aes(d = response, m = predictor, color = D)) +
-              plotROC::geom_roc(n.cuts = 20) +
-              plotROC::style_roc(theme = ggtheme)
-          } else {
-            # Single group
-            p <- plotROC::ggplot(interactive_data,
-                                 plotROC::aes(d = response, m = predictor)) +
-              plotROC::geom_roc(n.cuts = 20) +
-              plotROC::style_roc(theme = ggtheme)
-          }
-
-          # Add AUC labels if we have them
-          if ("AUC" %in% names(plotData)) {
-            unique_vars <- unique(plotData$var)
-            auc_labels <- sapply(unique_vars, function(v) {
-              sprintf("%s AUC: %.3f", v, plotData$AUC[plotData$var == v][1])
-            })
-            p <- p + ggplot2::annotate("text", x = 0.75, y = 0.25,
-                                       label = paste(auc_labels, collapse = "\n"))
-          }
-
-          # Convert to interactive plot
-          interactive_plot <- plotROC::plot_interactive_roc(p)
-
-          # Print the plot
-          print(interactive_plot)
-          return(TRUE)
-        }, silent = FALSE)
-
-        # If there was an error, return FALSE
-        return(FALSE)
-      },
-
-
-
-
-
-      # Add this function to plot precision-recall curves
       .plotPrecisionRecall = function(image, ggtheme, theme, ...) {
         plotData <- image$state
 
@@ -3419,11 +2578,5 @@ psychopdarocClass = if (requireNamespace('jmvcore'))
         print(plot)
         return(TRUE)
       }
-
-
-
-
-
-
     )
   )

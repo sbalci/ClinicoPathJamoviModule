@@ -694,10 +694,12 @@ analyses:
     menuGroup: meddecide
     menuTitle: ROC Analysis
     menuSubgroup: ROC Analysis
-    menuSubtitle: ROC Analysis, AUC, Cutpoints
+    menuSubtitle: ROC Analysis, AUC, Optimal Cutpoints
     description: >
-      Receiver Operating Characteristic (ROC) curve analysis with optimal
-      cutpoint determination.
+      Comprehensive Receiver Operating Characteristic (ROC) curve analysis for
+      medical decision making. Calculates optimal cutpoints, compares multiple
+      diagnostic tests, and provides detailed  performance metrics including
+      AUC, sensitivity, specificity, and predictive values.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
