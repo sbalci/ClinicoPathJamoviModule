@@ -105,32 +105,37 @@ fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
               overwrite = TRUE)
 
 
-## meddecide_utility_files ----
+## meddecide_utility_data_description_files ----
 
-meddecide_utility_files <- c(
+meddecide_utility_data_description_files <- c(
   "psychopdaroc_utilities.R",
-  "nomogrammer.R"
+  "nomogrammer.R",
+  "meddecide-utils.R",
+  "meddecide-package.R",
+  "meddecide-data.R",
+  "meddecide_stats_utils.R",
+  "data-histopathology.R",
+  "diagnostic_metrics.R"
 )
 
 
 
-fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_files),
+fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_data_description_files),
               file.path(meddecide_dir, "R"),
               overwrite = TRUE)
 
 
 
 
-
-
-## meddecide_data_description_files ----
+## meddecide_testdata_files ----
 
 meddecide_data_description_files <- c(
-  "data-histopathology.R"
+  "test-decision.R",
+  "test-roc.R"
 )
 
-fs::file_copy(file.path(main_repo_dir, "R", meddecide_data_description_files),
-              file.path(meddecide_dir, "R"),
+fs::file_copy(file.path(main_repo_dir, "tests/testthat", meddecide_data_description_files),
+              file.path(meddecide_dir, "tests/testthat"),
               overwrite = TRUE)
 
 
@@ -424,7 +429,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.3.08"
+new_version <- "0.0.3.10"
 new_date <- "2024-05-24"
 
 # Run the update process

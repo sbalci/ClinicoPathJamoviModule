@@ -7,7 +7,7 @@
 #' @param n_neg Number of negative cases
 #' @param conf_level Confidence level (default 0.95)
 #' @return Vector containing lower and upper CI bounds
-#' #' @export
+#' @export
 auc_ci <- function(auc, n_pos, n_neg, conf_level = 0.95) {
   if (!is.numeric(auc) || auc < 0 || auc > 1) {
     stop("AUC must be between 0 and 1")
@@ -30,6 +30,7 @@ auc_ci <- function(auc, n_pos, n_neg, conf_level = 0.95) {
 #' @param metric Function to calculate desired metric
 #' @param R Number of bootstrap iterations
 #' @return List containing point estimate and confidence intervals
+#' @export
 bootstrap_ci <- function(data, metric, R = 1000) {
   boot_results <- boot::boot(data, metric, R = R)
   ci <- boot::boot.ci(boot_results, type = "bca")
