@@ -413,6 +413,10 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       n_neg <- sum(classVar != positiveClass)
       prevalence <- n_pos / (n_pos + n_neg)
 
+      # Override with prior prevalence if requested
+      if (self$options$usePriorPrev)
+        prevalence <- self$options$priorPrev
+
       # Store prevalence for this variable
       private$.prevalenceList[[var]] <- prevalence
 
@@ -1221,6 +1225,10 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           n_pos <- sum(classVar == positiveClass)
           n_neg <- sum(classVar != positiveClass)
           prevalence <- n_pos / (n_pos + n_neg)
+
+          # Override with prior prevalence if requested
+          if (self$options$usePriorPrev)
+            prevalence <- self$options$priorPrev
 
           if (self$options$method == "oc_cost_ratio") {
             # Use custom cost ratio optimization
@@ -2443,6 +2451,10 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # Extract data
       optimal <- state$optimal
       prevalence <- state$prevalence
+
+      # Override with prior prevalence if requested
+      if (self$options$usePriorPrev)
+        prevalence <- self$options$priorPrev
 
       if (is.null(optimal) || is.null(prevalence))
         return(FALSE)
