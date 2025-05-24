@@ -4,21 +4,30 @@
 \alias{bootstrapIDI}
 \title{Bootstrap IDI calculation with confidence intervals}
 \usage{
-bootstrapIDI(new_values, ref_values, actual, direction = ">=", n_boot = 1000)
+bootstrapIDI(
+  new_values,
+  ref_values,
+  actual,
+  direction = ">=",
+  n_boot = 1000,
+  conf_level = 0.95
+)
 }
 \arguments{
 \item{new_values}{Test values for new test}
 
 \item{ref_values}{Test values for reference test}
 
-\item{actual}{Binary outcome vector}
+\item{actual}{Binary outcome vector (0/1)}
 
-\item{direction}{Classification direction}
+\item{direction}{Classification direction (">=" or "<=")}
 
 \item{n_boot}{Number of bootstrap iterations}
+
+\item{conf_level}{Confidence level (default 0.95)}
 }
 \value{
-List with IDI and confidence intervals
+List with IDI, confidence intervals, and p-value
 }
 \description{
 Bootstrap IDI calculation with confidence intervals

@@ -11,173 +11,190 @@ psychopdaroc(
   positiveClass,
   subGroup,
   method = "maximize_metric",
-  allObserved = FALSE,
-  specifyCutScore = "",
   metric = "youden",
-  boot_runs = 0,
-  break_ties = "mean",
-  tol_metric = 0.05,
   direction = ">=",
+  specifyCutScore = "",
+  tol_metric = 0.05,
+  break_ties = "mean",
+  allObserved = FALSE,
+  boot_runs = 0,
+  usePriorPrev = FALSE,
+  priorPrev = 0.5,
+  costratioFP = 1,
+  sensSpecTable = FALSE,
+  showThresholdTable = FALSE,
+  maxThresholds = 20,
+  delongTest = FALSE,
   plotROC = TRUE,
   combinePlots = TRUE,
+  cleanPlot = FALSE,
+  showOptimalPoint = TRUE,
   displaySE = FALSE,
   smoothing = FALSE,
-  sensSpecTable = FALSE,
-  delongTest = FALSE,
+  showConfidenceBands = FALSE,
+  legendPosition = "right",
+  directLabel = FALSE,
+  interactiveROC = FALSE,
   showCriterionPlot = FALSE,
   showPrevalencePlot = FALSE,
   showDotPlot = FALSE,
-  showOptimalPoint = TRUE,
-  showConfidenceBands = FALSE,
-  cleanPlot = FALSE,
-  legendPosition = "right",
-  showThresholdTable = FALSE,
-  maxThresholds = 20,
-  costratioFP = 1,
-  interactiveROC = FALSE,
-  directLabel = FALSE,
-  quantileCIs = FALSE,
-  quantiles = "0.1,0.25,0.5,0.75,0.9",
-  usePriorPrev = FALSE,
-  priorPrev = 0.5,
-  calculateIDI = FALSE,
-  calculateNRI = FALSE,
-  refVar,
-  nriThresholds = "",
-  idiNriBootRuns = 1000,
+  precisionRecallCurve = FALSE,
   partialAUC = FALSE,
   partialAUCfrom = 0.8,
   partialAUCto = 1,
   rocSmoothingMethod = "none",
   bootstrapCI = FALSE,
   bootstrapReps = 2000,
+  quantileCIs = FALSE,
+  quantiles = "0.1,0.25,0.5,0.75,0.9",
   compareClassifiers = FALSE,
-  precisionRecallCurve = FALSE
+  calculateIDI = FALSE,
+  calculateNRI = FALSE,
+  refVar,
+  nriThresholds = "",
+  idiNriBootRuns = 1000
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dependentVars}{Variable(s) to be tested for classification
-performance.}
+\item{dependentVars}{Test variable(s) to be evaluated for classification
+performance. Multiple variables can be selected for comparison.}
 
-\item{classVar}{Binary classification variable (gold standard).}
+\item{classVar}{Binary classification variable representing the true class
+(gold standard). Must have exactly two levels.}
 
 \item{positiveClass}{Specifies which level of the class variable should be
 treated as the positive class.}
 
-\item{subGroup}{Optional variable for subgroup analysis.}
+\item{subGroup}{Optional grouping variable for stratified analysis.  ROC
+curves will be calculated separately for each group.}
 
-\item{method}{Method to determine optimal cut point.}
+\item{method}{Method for determining the optimal cutpoint. Different
+methods optimize different aspects of classifier performance.}
 
-\item{allObserved}{Show all observed scores in results table.}
+\item{metric}{Metric to optimize when determining the cutpoint.  Only
+applies to maximize/minimize methods.}
 
-\item{specifyCutScore}{Specify custom cut score when using manual method.}
+\item{direction}{Direction of classification relative to the cutpoint. Use
+'>=' when higher test values indicate the positive class.}
 
-\item{metric}{Metric to optimize when determining cutpoint.}
+\item{specifyCutScore}{Specific cutpoint value to use when method is set to
+'Manual cutpoint'.}
 
-\item{boot_runs}{Number of bootstrap runs for methods using bootstrapping.}
+\item{tol_metric}{Tolerance for the metric value when multiple cutpoints
+yield similar performance. Cutpoints within this tolerance are considered
+equivalent.}
 
-\item{break_ties}{Method for breaking ties when multiple optimal cutpoints
-exist.}
+\item{break_ties}{Method for handling ties when multiple cutpoints achieve
+the same metric value.}
 
-\item{tol_metric}{Tolerance for the metric when determining optimal
-cutpoint.}
+\item{allObserved}{Display performance metrics for all observed test values
+as potential cutpoints, not just the optimal cutpoint.}
 
-\item{direction}{Direction of classification relative to cutpoint.}
+\item{boot_runs}{Number of bootstrap iterations for methods using
+bootstrapping. Set to 0 to disable bootstrapping.}
 
-\item{plotROC}{Display ROC curves.}
+\item{usePriorPrev}{Use a specified prior prevalence instead of the sample
+prevalence for calculating predictive values.}
 
-\item{combinePlots}{Combine ROC curves in a single plot.}
+\item{priorPrev}{Population prevalence to use for predictive value
+calculations. Only used when 'Use Prior Prevalence' is checked.}
 
-\item{displaySE}{Display standard error bars on ROC curves.}
+\item{costratioFP}{Relative cost of false positives compared to false
+negatives. Values > 1 penalize false positives more heavily.}
 
-\item{smoothing}{Apply LOESS smoothing to ROC curves.}
+\item{sensSpecTable}{Display detailed confusion matrices at optimal
+cutpoints.}
 
-\item{sensSpecTable}{Display detailed sensitivity/specificity tables.}
+\item{showThresholdTable}{Display detailed table with performance metrics
+at multiple thresholds.}
 
-\item{delongTest}{Perform DeLong's test for comparing AUCs.}
+\item{maxThresholds}{Maximum number of threshold values to show in the
+threshold table.}
 
-\item{showCriterionPlot}{Boolean option to display the
-Sensitivity/Specificity vs. Threshold plot.}
+\item{delongTest}{Perform DeLong's test for comparing AUCs between multiple
+test variables. Requires at least two test variables.}
 
-\item{showPrevalencePlot}{Boolean option to display the Predictive Values
-vs. Prevalence plot.}
+\item{plotROC}{Display ROC curves for visual assessment of classifier
+performance.}
 
-\item{showDotPlot}{Boolean option to display the Dot Plot showing
-distribution of values by class.}
+\item{combinePlots}{When multiple test variables are selected, combine all
+ROC curves in a single plot.}
 
-\item{showOptimalPoint}{Display the optimal point on the ROC curve.}
+\item{cleanPlot}{Create clean ROC curves without annotations, suitable for
+publications.}
+
+\item{showOptimalPoint}{Display the optimal cutpoint on the ROC curve.}
+
+\item{displaySE}{Display standard error bands on ROC curves (when LOESS
+smoothing is applied).}
+
+\item{smoothing}{Apply LOESS smoothing to ROC curves for visualization.}
 
 \item{showConfidenceBands}{Display confidence bands around the ROC curve.}
 
-\item{cleanPlot}{Produce a clean ROC curve without annotations, suitable
-for publications.}
+\item{legendPosition}{Position of the legend in plots with multiple ROC
+curves.}
 
-\item{legendPosition}{Position of the legend in multiple ROC curve plots.}
+\item{directLabel}{Label curves directly on the plot instead of using a
+legend.}
 
-\item{showThresholdTable}{Display detailed table with different threshold
-values and corresponding  performance metrics (sensitivity, specificity,
-etc.)}
+\item{interactiveROC}{Create an interactive HTML ROC plot (requires plotROC
+package).}
 
-\item{maxThresholds}{Maximum number of threshold values to display in the
-table.}
+\item{showCriterionPlot}{Plot showing how sensitivity and specificity
+change across different thresholds.}
 
-\item{costratioFP}{Cost ratio of false positives to false negatives. Higher
-values penalize false positives more.}
+\item{showPrevalencePlot}{Plot showing how PPV and NPV change with disease
+prevalence.}
 
-\item{interactiveROC}{Create an interactive HTML ROC plot.}
+\item{showDotPlot}{Dot plot showing the distribution of test values by
+class.}
 
-\item{directLabel}{Directly label ROC curves instead of using a legend.}
+\item{precisionRecallCurve}{Display precision-recall curves alongside ROC
+curves.}
 
-\item{quantileCIs}{Show confidence intervals at specific quantiles.}
+\item{partialAUC}{Calculate AUC for a specific region of the ROC curve.}
 
-\item{quantiles}{Comma-separated list of quantiles at which to display
-confidence intervals.}
-
-\item{usePriorPrev}{Use a specified prior prevalence instead of calculating
-from data.}
-
-\item{priorPrev}{Prior probability (disease prevalence) to use for
-calculations.}
-
-\item{calculateIDI}{Calculate Integrated Discrimination Improvement (IDI).
-Raw test values  will be converted to probabilities based on ROC analysis.}
-
-\item{calculateNRI}{Calculate Net Reclassification Index (NRI). Raw test
-values will be converted  to probabilities based on ROC analysis.}
-
-\item{refVar}{Reference variable for IDI and NRI calculation.}
-
-\item{nriThresholds}{Comma-separated thresholds for category-based NRI
-(leave empty for continuous NRI). Thresholds should be probability values
-between 0 and 1.}
-
-\item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
-confidence intervals.}
-
-\item{partialAUC}{Calculate partial AUC (area under a portion of the ROC
-curve).}
-
-\item{partialAUCfrom}{Lower bound of specificity for partial AUC
+\item{partialAUCfrom}{Lower bound of specificity range for partial AUC
 calculation.}
 
-\item{partialAUCto}{Upper bound of specificity for partial AUC calculation.}
+\item{partialAUCto}{Upper bound of specificity range for partial AUC
+calculation.}
 
-\item{rocSmoothingMethod}{Method for smoothing the ROC curve (from pROC
+\item{rocSmoothingMethod}{Method for smoothing the ROC curve (requires pROC
 package).}
 
 \item{bootstrapCI}{Calculate bootstrap confidence intervals for AUC and
 optimal cutpoints.}
 
 \item{bootstrapReps}{Number of bootstrap replications for confidence
-intervals.}
+interval calculation.}
+
+\item{quantileCIs}{Display confidence intervals at specific quantiles of
+the test variable.}
+
+\item{quantiles}{Comma-separated list of quantiles (0-1) at which to
+display confidence intervals.}
 
 \item{compareClassifiers}{Perform comprehensive comparison of classifier
-performance.}
+performance metrics.}
 
-\item{precisionRecallCurve}{Plot precision-recall curve alongside ROC
-curve.}
+\item{calculateIDI}{Calculate Integrated Discrimination Improvement for
+model comparison.}
+
+\item{calculateNRI}{Calculate Net Reclassification Index for model
+comparison.}
+
+\item{refVar}{Reference test variable for IDI and NRI calculations. Other
+variables will be compared against this reference.}
+
+\item{nriThresholds}{Comma-separated probability thresholds (0-1) defining
+risk categories for NRI. Leave empty for continuous NRI.}
+
+\item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
+confidence intervals.}
 }
 \value{
 A results object containing:
@@ -186,8 +203,8 @@ A results object containing:
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
-\code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+\code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$aucSummaryTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$delongComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$delongTest} \tab \tab \tab \tab \tab a preformatted \cr
@@ -197,12 +214,12 @@ A results object containing:
 \code{results$prevalencePlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$dotPlotMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$precisionRecallPlot} \tab \tab \tab \tab \tab an array of images \cr
 \code{results$idiTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nriTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$partialAUCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$precisionRecallPlot} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

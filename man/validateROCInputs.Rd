@@ -4,12 +4,12 @@
 \alias{validateROCInputs}
 \title{Validate inputs for ROC analysis}
 \usage{
-validateROCInputs(x, class, pos_class = NULL)
+validateROCInputs(x, class_var, pos_class = NULL)
 }
 \arguments{
 \item{x}{Test values}
 
-\item{class}{Classification labels}
+\item{class_var}{Classification labels}
 
 \item{pos_class}{Positive class label}
 }

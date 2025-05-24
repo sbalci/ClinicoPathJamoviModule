@@ -10,7 +10,8 @@ bootstrapNRI(
   actual,
   direction = ">=",
   thresholds = NULL,
-  n_boot = 1000
+  n_boot = 1000,
+  conf_level = 0.95
 )
 }
 \arguments{
@@ -18,13 +19,15 @@ bootstrapNRI(
 
 \item{ref_values}{Test values for reference test}
 
-\item{actual}{Binary outcome vector}
+\item{actual}{Binary outcome vector (0/1)}
 
-\item{direction}{Classification direction}
+\item{direction}{Classification direction (">=" or "<=")}
 
 \item{thresholds}{Risk category thresholds (NULL for continuous NRI)}
 
 \item{n_boot}{Number of bootstrap iterations}
+
+\item{conf_level}{Confidence level (default 0.95)}
 }
 \value{
 List with NRI components and confidence intervals
