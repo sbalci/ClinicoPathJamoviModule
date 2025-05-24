@@ -94,9 +94,14 @@ fs::file_copy(file.path(main_repo_dir, "R", jjstatsplot_data_description_files),
 ## meddecide_example_files ----
 
 meddecide_example_files <- c(
-  "histopathology.rda"
+  "histopathology.rda",
   # "histopathologyMedicalDecision.omv"
-)
+  "roc_analysis_test_data.RData",
+  "cancer_biomarker_data.csv",
+  "cardiac_troponin_data.csv",
+  "sepsis_biomarker_data.csv",
+  "thyroid_function_data.csv"
+  )
 
 
 
@@ -429,7 +434,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.3.10"
+new_version <- "0.0.3.11"
 new_date <- "2024-05-24"
 
 # Run the update process
