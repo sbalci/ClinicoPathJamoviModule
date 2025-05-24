@@ -11,7 +11,7 @@ computeNRI(new_values, ref_values, actual, direction = ">=", thresholds = NULL)
 
 \item{ref_values}{Test values for reference test}
 
-\item{actual}{Binary outcome vector}
+\item{actual}{Binary outcome vector (0/1)}
 
 \item{direction}{Classification direction}
 

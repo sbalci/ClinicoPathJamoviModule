@@ -10,9 +10,10 @@ items:
     - name: instructions
       type: Html
       visible: true
-
+      
     - name: procedureNotes
       type: Html
+      visible: true
 
     # ==========================================
     # SUMMARY RESULTS - Most important information first
@@ -28,12 +29,15 @@ items:
         - name: auc
           title: AUC
           type: number
+          format: zto,pvalue
         - name: ci_lower
           title: 95% CI Lower
           type: number
+          format: zto
         - name: ci_upper
           title: 95% CI Upper
           type: number
+          format: zto
         - name: p
           title: p-value
           type: number
@@ -43,25 +47,24 @@ items:
     # OPTIMAL CUTPOINTS AND DETAILED RESULTS
     # ==========================================
     - name: resultsTable
-      refs: 
-        - cutpointr
-        - pROC
       title: Optimal Cutpoints and Performance
       type: Array
       visible: true
+      refs: 
+        - cutpointr
       clearWith:
         - dependentVars
         - classVar
+        - positiveClass
         - subGroup
         - method
+        - metric
+        - direction
         - allObserved
         - specifyCutScore
-        - metric
         - boot_runs
         - break_ties
         - tol_metric
-        - direction
-        - positiveClass
       template:
         type: Table
         rows: 0
@@ -69,40 +72,69 @@ items:
           - name: cutpoint
             title: Cutpoint
             type: number
+            format: zto
           - name: sensitivity
-            title: 'Sensitivity (%)'
+            title: Sensitivity
             type: number
             format: pc
           - name: specificity
-            title: 'Specificity (%)'
+            title: Specificity
             type: number
             format: pc
           - name: ppv
-            title: 'PPV (%)'
+            title: PPV
             type: number
             format: pc
           - name: npv
-            title: 'NPV (%)'
+            title: NPV
             type: number
             format: pc
           - name: youden
-            title: Youden's index
+            title: "Youden's J"
             type: number
+            format: zto
           - name: AUC
             title: AUC
             type: number
+            format: zto
           - name: metricValue
             title: Metric Score
             type: number
+            format: zto
 
+    - name: sensSpecTable
+      title: Confusion Matrices
+      type: Array
+      visible: (sensSpecTable)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - subGroup
+        - method
+        - allObserved
+        - specifyCutScore
+      template:
+        type: Html
+
+    # ==========================================
+    # THRESHOLD ANALYSIS
+    # ==========================================
     - name: thresholdTable
       title: Detailed Threshold Performance
       type: Table
       visible: (showThresholdTable)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - subGroup
+        - direction
       columns:
         - name: threshold
           title: Cut-off
           type: number
+          format: zto
         - name: sensitivity
           title: Sensitivity
           type: number
@@ -126,35 +158,18 @@ items:
         - name: plr
           title: +LR
           type: number
+          format: zto
         - name: nlr
           title: -LR
           type: number
+          format: zto
         - name: youden
-          title: Youden's J
+          title: "Youden's J"
           type: number
-
-    - name: sensSpecTable
-      title: Sensitivity & Specificity Tables
-      type: Array
-      visible: (sensSpecTable)
-      clearWith:
-        - dependentVars
-        - classVar
-        - subGroup
-        - method
-        - allObserved
-        - specifyCutScore
-        - metric
-        - boot_runs
-        - break_ties
-        - tol_metric
-        - direction
-        - positiveClass
-      template:
-        type: Html
+          format: zto
 
     # ==========================================
-    # AUC COMPARISON AND DELONG TEST
+    # AUC COMPARISON AND ANALYSIS
     # ==========================================
     - name: aucSummaryTable
       title: Area Under the ROC Curve
@@ -167,12 +182,15 @@ items:
         - name: auc
           title: AUC
           type: number
+          format: zto
         - name: ci_lower
           title: 95% CI Lower
           type: number
+          format: zto
         - name: ci_upper
           title: 95% CI Upper
           type: number
+          format: zto
         - name: p
           title: p-value
           type: number
@@ -193,15 +211,19 @@ items:
         - name: auc_diff
           title: AUC Difference
           type: number
+          format: zto
         - name: ci_lower
           title: 95% CI Lower
           type: number
+          format: zto
         - name: ci_upper
           title: 95% CI Upper
           type: number
+          format: zto
         - name: z
           title: Z-statistic
           type: number
+          format: zto
         - name: p
           title: p-value
           type: number
@@ -214,29 +236,33 @@ items:
       clearWith:
         - dependentVars
         - classVar
-        - subGroup
-        - method
-        - allObserved
-        - specifyCutScore
-        - metric
-        - boot_runs
-        - break_ties
-        - tol_metric
-        - direction
         - positiveClass
+      refs:
+        - DeLong1988
 
     # ==========================================
-    # VISUALIZATIONS - Group all plots together
+    # VISUALIZATIONS - Main plots
     # ==========================================
     - name: plotROC
       type: Array
       title: ROC Curves
+      visible: (plotROC)
       template:
         type: Image
         width: 550
         height: 450
         renderFun: .plotROC
-        visible: (plotROC)
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - direction
+          - smoothing
+          - showOptimalPoint
+          - cleanPlot
+          - showConfidenceBands
+          - quantileCIs
 
     - name: interactivePlot
       title: Interactive ROC Plot
@@ -248,17 +274,18 @@ items:
       clearWith:
         - dependentVars
         - classVar
-        - subGroup
-        - method
-        - metric
-        - direction
         - positiveClass
+        - subGroup
       refs: 
         - plotROC
 
+    # ==========================================
+    # ADDITIONAL PLOTS
+    # ==========================================
     - name: criterionPlot
       title: Sensitivity/Specificity vs. Threshold
       type: Array
+      visible: (showCriterionPlot)
       template:
         title: $key
         type: Image
@@ -266,19 +293,19 @@ items:
         height: 400
         renderFun: .plotCriterion
         requiresData: true
-      visible: (showCriterionPlot)
-      clearWith:
-        - method
-        - metric
-        - direction
-        - allObserved
-        - break_ties
-        - tol_metric
-        - boot_runs
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - method
+          - metric
+          - direction
 
     - name: prevalencePlot
       title: Predictive Values vs. Prevalence
       type: Array
+      visible: (showPrevalencePlot)
       template:
         title: $key
         type: Image
@@ -286,19 +313,18 @@ items:
         height: 400
         renderFun: .plotPrevalence
         requiresData: true
-      visible: (showPrevalencePlot)
-      clearWith:
-        - method
-        - metric
-        - direction
-        - allObserved
-        - break_ties
-        - tol_metric
-        - boot_runs
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - usePriorPrev
+          - priorPrev
 
     - name: dotPlot
       title: Test Values Distribution
       type: Array
+      visible: (showDotPlot)
       template:
         title: $key
         type: Image
@@ -306,165 +332,17 @@ items:
         height: 400
         renderFun: .plotDot
         requiresData: true
-      visible: (showDotPlot)
-      clearWith:
-        - method
-        - metric
-        - direction
-        - allObserved
-        - break_ties
-        - tol_metric
-        - boot_runs
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - direction
 
     - name: dotPlotMessage
       title: Dot Plot Note
       type: Html
       visible: (showDotPlot && combinePlots)
-
-
-    - name: idiTable
-      title: "Integrated Discrimination Improvement (IDI)"
-      type: Table
-      visible: (calculateIDI)
-      clearWith:
-        - dependentVars
-        - classVar
-        - refVar
-        - idiNriBootRuns
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: refVar
-          title: Reference
-          type: text
-        - name: idi
-          title: IDI
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
-    - name: nriTable
-      title: "Net Reclassification Index (NRI)"
-      type: Table
-      visible: (calculateNRI)
-      clearWith:
-        - dependentVars
-        - classVar
-        - refVar
-        - nriThresholds
-        - idiNriBootRuns
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: refVar
-          title: Reference
-          type: text
-        - name: nri
-          title: NRI
-          type: number
-        - name: event_nri
-          title: Event NRI
-          type: number
-        - name: non_event_nri
-          title: Non-Event NRI
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
-
-
-    - name: partialAUCTable
-      title: Partial AUC Results
-      type: Table
-      visible: (partialAUC)
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: pAUC
-          title: Partial AUC
-          type: number
-        - name: pAUC_normalized
-          title: Normalized pAUC
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-        - name: spec_range
-          title: Specificity Range
-          type: text
-
-    - name: bootstrapCITable
-      title: Bootstrap Confidence Intervals
-      type: Table
-      visible: (bootstrapCI)
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: parameter
-          title: Parameter
-          type: text
-        - name: estimate
-          title: Estimate
-          type: number
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-
-
-
-# Add to the psychopdaroc.r.yaml file
-    - name: rocComparisonTable
-      title: Classifier Performance Comparison
-      type: Table
-      visible: (compareClassifiers)
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-        - name: auprc
-          title: AUPRC
-          type: number
-        - name: brier
-          title: Brier Score
-          type: number
-        - name: f1_score
-          title: F1 Score
-          type: number
-        - name: accuracy
-          title: Accuracy
-          type: number
-        - name: balanced_accuracy
-          title: Balanced Accuracy
-          type: number
 
     - name: precisionRecallPlot
       type: Array
@@ -475,12 +353,216 @@ items:
         width: 550
         height: 450
         renderFun: .plotPrecisionRecall
+        clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
 
+    # ==========================================
+    # ADVANCED ANALYSES - Model comparison
+    # ==========================================
+    - name: idiTable
+      title: Integrated Discrimination Improvement (IDI)
+      type: Table
+      visible: (calculateIDI)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - refVar
+        - idiNriBootRuns
+        - direction
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: refVar
+          title: Reference
+          type: text
+        - name: idi
+          title: IDI
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+      refs:
+        - Pencina2008
 
+    - name: nriTable
+      title: Net Reclassification Index (NRI)
+      type: Table
+      visible: (calculateNRI)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - refVar
+        - nriThresholds
+        - idiNriBootRuns
+        - direction
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: refVar
+          title: Reference
+          type: text
+        - name: nri
+          title: NRI
+          type: number
+          format: zto
+        - name: event_nri
+          title: Event NRI
+          type: number
+          format: zto
+        - name: non_event_nri
+          title: Non-Event NRI
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+      refs:
+        - Pencina2008
+        - Pencina2011
 
+    # ==========================================
+    # ADVANCED ANALYSES - Additional metrics
+    # ==========================================
+    - name: partialAUCTable
+      title: Partial AUC Results
+      type: Table
+      visible: (partialAUC)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - partialAUCfrom
+        - partialAUCto
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: pAUC
+          title: Partial AUC
+          type: number
+          format: zto
+        - name: pAUC_normalized
+          title: Normalized pAUC
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: spec_range
+          title: Specificity Range
+          type: text
+      refs:
+        - McClish1989
+
+    - name: bootstrapCITable
+      title: Bootstrap Confidence Intervals
+      type: Table
+      visible: (bootstrapCI)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+        - bootstrapReps
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: rocComparisonTable
+      title: Classifier Performance Comparison
+      type: Table
+      visible: (compareClassifiers)
+      clearWith:
+        - dependentVars
+        - classVar
+        - positiveClass
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auprc
+          title: AUPRC
+          type: number
+          format: zto
+        - name: brier
+          title: Brier Score
+          type: number
+          format: zto
+        - name: f1_score
+          title: F1 Score
+          type: number
+          format: zto
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: balanced_accuracy
+          title: Balanced Accuracy
+          type: number
+          format: pc
+
+# ==========================================
+# REFERENCES
+# ==========================================
+    # - DeLong1988: "DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. Biometrics, 44(3), 837-845."
+    # - Pencina2008: "Pencina MJ, D'Agostino RB Sr, D'Agostino RB Jr, Vasan RS (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond. Statistics in Medicine, 27(2), 157-172."
+    # - Pencina2011: "Pencina MJ, D'Agostino RB Sr, Steyerberg EW (2011). Extensions of net reclassification improvement calculations to measure usefulness of new biomarkers. Statistics in Medicine, 30(1), 11-21."
+    # - McClish1989: "McClish DK (1989). Analyzing a portion of the ROC curve. Medical Decision Making, 9(3), 190-195."
 
 refs:
     - cutpointr
     - pROC
     - MASS
+    - plotROC
+
 ...

@@ -12,13 +12,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Test Variables
         children:
           - type: VariablesListBox
             name: dependentVars
             isTarget: true
       - type: TargetLayoutBox
-        label: Class Variable
+        label: Class Variable (Gold Standard)
         children:
           - type: VariablesListBox
             name: classVar
@@ -26,9 +26,10 @@ children:
             isTarget: true
           - type: LevelSelector
             name: positiveClass
+            label: Positive Class
             enable: (classVar)
       - type: TargetLayoutBox
-        label: Group Variable
+        label: Group Variable (Optional)
         children:
           - type: VariablesListBox
             name: subGroup
@@ -36,42 +37,71 @@ children:
             isTarget: true
 
   # ==========================================
-  # MAIN ANALYSIS OPTIONS - Basic settings
+  # CUTPOINT OPTIMIZATION - Main analysis settings
   # ==========================================
   - type: CollapseBox
-    label: Analysis Options
+    label: Cutpoint Optimization
     margin: normal
-    collapsed: false  # Open by default
+    collapsed: false  # Open by default as it's essential
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: method
-            label: Method
-          - type: CheckBox
-            name: allObserved
-            label: Show all observed cutpoints
+            label: Cutpoint Method
+          - type: ComboBox
+            name: metric
+            label: Optimization Metric
+            enable: (!method:oc_manual && !method:oc_cost_ratio && !method:oc_equal_sens_spec && !method:oc_closest_01)
+          - type: ComboBox
+            name: direction
+            label: Classification Direction
           - type: TextBox
             name: specifyCutScore
             format: string
-            enable: method:oc_manual
-            label: Custom cut score
-          - type: ComboBox
-            name: direction
-            label: Direction
+            enable: (method:oc_manual)
+            label: Manual Cut Score
+          - type: TextBox
+            name: costratioFP
+            format: number
+            label: Cost Ratio (FP:FN)
+            enable: (method:oc_cost_ratio)
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Advanced Settings
+            children:
+              - type: TextBox
+                name: tol_metric
+                format: number
+                label: Metric Tolerance
+                enable: (method:maximize_metric || method:minimize_metric || method:maximize_loess_metric || method:minimize_loess_metric || method:maximize_spline_metric || method:minimize_spline_metric)
+              - type: ComboBox
+                name: break_ties
+                label: Tie Breaking Method
+              - type: TextBox
+                name: boot_runs
+                format: number
+                label: Bootstrap Iterations
+                enable: (method:maximize_boot_metric || method:minimize_boot_metric)
 
   # ==========================================
-  # PREVALENCE SETTINGS - Group related options
+  # ANALYSIS OPTIONS - General analysis settings
   # ==========================================
   - type: CollapseBox
-    label: Prevalence Settings
+    label: Analysis Options
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: allObserved
+            label: Show all observed cutpoints
           - type: CheckBox
             name: usePriorPrev
             label: Use prior prevalence
@@ -80,10 +110,32 @@ children:
             format: number
             label: Prior prevalence value
             enable: (usePriorPrev)
+
+  # ==========================================
+  # OUTPUT OPTIONS - Tables and tests
+  # ==========================================
+  - type: CollapseBox
+    label: Output Options
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sensSpecTable
+            label: Show confusion matrices
+          - type: CheckBox
+            name: showThresholdTable
+            label: Show threshold table
           - type: TextBox
-            name: costratioFP
+            name: maxThresholds
             format: number
-            label: Cost ratio (FP/FN)
+            label: Maximum thresholds to display
+            enable: (showThresholdTable)
+          - type: CheckBox
+            name: delongTest
+            label: Compare AUCs (DeLong's test)
 
   # ==========================================
   # VISUALIZATION OPTIONS - All plot-related items
@@ -124,33 +176,38 @@ children:
               - type: CheckBox
                 name: cleanPlot
                 label: Publication-quality plot
+                enable: (plotROC)
               - type: ComboBox
                 name: legendPosition
                 label: Legend position
+                enable: (plotROC && combinePlots && !directLabel)
               - type: CheckBox
                 name: smoothing
                 label: Apply LOESS smoothing
+                enable: (plotROC)
+              - type: CheckBox
+                name: displaySE
+                label: Show standard error bands
+                enable: (plotROC && smoothing && !cleanPlot)
               - type: CheckBox
                 name: interactiveROC
                 label: Create interactive plot
+                enable: (plotROC)
 
       - type: LayoutBox
         margin: large
         children:
           - type: Label 
-            label: Additional Information
+            label: Confidence Intervals
             children:
-              - type: CheckBox
-                name: displaySE
-                label: Show standard error bars
-                enable: (!cleanPlot)
               - type: CheckBox
                 name: showConfidenceBands
                 label: Show confidence bands
-                enable: (!cleanPlot)
+                enable: (plotROC && !cleanPlot)
               - type: CheckBox
                 name: quantileCIs
-                label: Show confidence intervals at quantiles
+                label: Show CIs at quantiles
+                enable: (plotROC && !cleanPlot)
               - type: TextBox
                 name: quantiles
                 format: string
@@ -158,63 +215,7 @@ children:
                 enable: (quantileCIs)
 
   # ==========================================
-  # ADDITIONAL OUTPUTS
-  # ==========================================
-  - type: CollapseBox
-    label: Additional Outputs
-    margin: normal
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: sensSpecTable
-            label: Show sensitivity/specificity tables
-          - type: CheckBox
-            name: showThresholdTable
-            label: Show threshold table
-          - type: TextBox
-            name: maxThresholds
-            format: number
-            label: Maximum thresholds to display
-            enable: (showThresholdTable)
-          - type: CheckBox
-            name: delongTest
-            label: Perform DeLong's test for comparing AUCs
-
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Model Comparison
-            children:
-              - type: CheckBox
-                name: calculateIDI
-                label: Calculate IDI
-              - type: CheckBox
-                name: calculateNRI
-                label: Calculate NRI
-              - type: LevelSelector
-                name: refVar
-                label: Reference Variable
-                enable: (calculateIDI || calculateNRI)
-              - type: TextBox
-                name: nriThresholds
-                format: string
-                label: NRI Thresholds
-                enable: (calculateNRI)
-              - type: TextBox
-                name: idiNriBootRuns
-                format: number
-                label: Bootstrap Runs
-                enable: (calculateIDI || calculateNRI)
-
-
-
-
-  # ==========================================
-  # ADDITIONAL PLOTS 
+  # ADDITIONAL PLOTS
   # ==========================================
   - type: CollapseBox
     label: Additional Plots
@@ -233,74 +234,61 @@ children:
           - type: CheckBox
             name: showDotPlot
             label: Test Values Distribution
+          - type: CheckBox
+            name: precisionRecallCurve
+            label: Precision-Recall Curve
 
   # ==========================================
-  # ADVANCED OPTIONS
+  # ADVANCED ANALYSES - pROC features
   # ==========================================
   - type: CollapseBox
-    label: Advanced
+    label: Advanced ROC Analysis
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: ComboBox
-            name: metric
-            label: Optimization metric
-          - type: TextBox
-            name: tol_metric
-            format: number
-            label: Metric tolerance
-          - type: ComboBox
-            name: break_ties
-            label: Tie-breaking method
-          - type: TextBox
-            name: boot_runs
-            format: number
-            label: Bootstrap runs
+          - type: Label
+            label: Partial AUC
+            children:
+              - type: CheckBox
+                name: partialAUC
+                label: Calculate partial AUC
+              - type: TextBox
+                name: partialAUCfrom
+                format: number
+                label: From specificity
+                enable: (partialAUC)
+              - type: TextBox
+                name: partialAUCto
+                format: number
+                label: To specificity
+                enable: (partialAUC)
 
-
-  - type: CollapseBox
-    label: pROC Features
-    margin: normal
-    collapsed: true
-    children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: partialAUC
-            label: Compute partial AUC
-          - type: TextBox
-            name: partialAUCfrom
-            format: number
-            label: Partial AUC from specificity
-            enable: (partialAUC)
-          - type: TextBox
-            name: partialAUCto
-            format: number
-            label: Partial AUC to specificity
-            enable: (partialAUC)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: rocSmoothingMethod
-            label: ROC curve smoothing method
-          - type: CheckBox
-            name: bootstrapCI
-            label: Bootstrap confidence intervals
-          - type: TextBox
-            name: bootstrapReps
-            format: number
-            label: Bootstrap replications
-            enable: (bootstrapCI)
+          - type: Label
+            label: ROC Smoothing
+            children:
+              - type: ComboBox
+                name: rocSmoothingMethod
+                label: Smoothing method
+              - type: CheckBox
+                name: bootstrapCI
+                label: Bootstrap confidence intervals
+              - type: TextBox
+                name: bootstrapReps
+                format: number
+                label: Bootstrap replications
+                enable: (bootstrapCI)
 
-
-# Add to the psychopdaroc.u.yaml file
+  # ==========================================
+  # MODEL COMPARISON
+  # ==========================================
   - type: CollapseBox
-    label: Multiple ROC Features
+    label: Model Comparison
     margin: normal
     collapsed: true
     children:
@@ -309,7 +297,31 @@ children:
         children:
           - type: CheckBox
             name: compareClassifiers
-            label: Compare classifiers' performance
-          - type: CheckBox
-            name: precisionRecallCurve
-            label: Precision-Recall curve
+            label: Compare classifier performance
+          
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: IDI and NRI Analysis
+            children:
+              - type: CheckBox
+                name: calculateIDI
+                label: Calculate IDI
+              - type: CheckBox
+                name: calculateNRI
+                label: Calculate NRI
+              - type: LevelSelector
+                name: refVar
+                label: Reference Variable
+                enable: (calculateIDI || calculateNRI)
+              - type: TextBox
+                name: nriThresholds
+                format: string
+                label: NRI thresholds (comma-separated)
+                enable: (calculateNRI)
+              - type: TextBox
+                name: idiNriBootRuns
+                format: number
+                label: Bootstrap iterations
+                enable: (calculateIDI || calculateNRI)
