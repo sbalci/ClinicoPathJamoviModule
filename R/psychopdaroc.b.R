@@ -1575,7 +1575,7 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       if (self$options$showThresholdTable) {
         thresholdTable <- self$results$thresholdTable
-        thresholdTable$clear()  # Clear previous results
+        thresholdTable$deleteRows()  # Clear previous results
 
         for (var in names(private$.rocDataList)) {
           rocData <- private$.rocDataList[[var]]
@@ -1619,6 +1619,10 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
         }
       }
+
+
+
+
 
       # -----------------------------------------------------------------------
       # 13. HANDLE ADDITIONAL ANALYSES

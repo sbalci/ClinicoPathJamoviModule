@@ -113,6 +113,10 @@ options:
           name: latent_class
         - title: Composite Reference
           name: composite
+        - title: All Tests Positive
+          name: all_positive
+        - title: Any Test Positive
+          name: any_positive
         - title: Bayesian Analysis
           name: bayesian
       default: latent_class

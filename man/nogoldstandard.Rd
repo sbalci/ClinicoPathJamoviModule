@@ -60,6 +60,7 @@ A results object containing:
 \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
 \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -93,6 +93,17 @@ items:
       width: 500
       height: 400
 
+
+    - name: agreement_plot2
+      title: Test Agreement Plot 2
+      type: Image
+      renderFun: .plot_ggplot
+      width: 500
+      height: 400
+
+
+
+
 refs: 
     - NoGoldDiagnostic
     - ClinicoPathJamoviModule

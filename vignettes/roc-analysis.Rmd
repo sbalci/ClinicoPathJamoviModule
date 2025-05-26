@@ -1,0 +1,48 @@
+---
+title: "ROC Curve Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ROC Curve Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette shows how to perform Receiver Operating Characteristic
+(ROC) analysis with **meddecide** using the `psychopdaroc()` function.
+
+## Loading the Data
+
+```{r, eval=FALSE}
+df_roc <- read.csv(system.file("extdata", "roc_example.csv", package = "meddecide"))
+head(df_roc)
+```
+
+## Creating the ROC Curve
+
+```{r, eval=FALSE}
+roc_res <- psychopdaroc(data = df_roc, class = df_roc$class, value = df_roc$value)
+roc_res$plot
+```
+
+The resulting plot shows the ROC curve along with the area under the curve (AUC).
+You can extract the AUC value and other statistics from the result object.
+
+```{r, eval=FALSE}
+roc_res$AUC
+```
+
+## Bootstrapping and Confidence Intervals
+
+`auc_ci()` and `bootstrap_ci()` provide convenience wrappers for computing
+confidence intervals for diagnostic metrics.
+
+```{r, eval=FALSE}
+auc_ci(roc_res)
+bootstrap_ci(roc_res)
+```
+
+These utilities allow you to assess the stability of your ROC analysis.
