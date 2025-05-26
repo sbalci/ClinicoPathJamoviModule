@@ -67,6 +67,17 @@ children:
         children:
           - type: ComboBox
             name: method
+            options:
+              - name: latent_class
+                title: Latent Class Analysis
+              - name: composite
+                title: Composite Reference
+              - name: all_positive
+                title: All Tests Positive
+              - name: any_positive
+                title: Any Test Positive
+              - name: bayesian
+                title: Bayesian Analysis
 
   - type: Label
     label: Bootstrap Options  

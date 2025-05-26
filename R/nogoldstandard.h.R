@@ -88,6 +88,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=list(
                     "latent_class",
                     "composite",
+                    "all_positive",
+                    "any_positive",
                     "bayesian"),
                 default="latent_class")
             private$..bootstrap <- jmvcore::OptionBool$new(
@@ -161,7 +163,8 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         prevalence = function() private$.items[["prevalence"]],
         test_metrics = function() private$.items[["test_metrics"]],
         model_fit = function() private$.items[["model_fit"]],
-        agreement_plot = function() private$.items[["agreement_plot"]]),
+        agreement_plot = function() private$.items[["agreement_plot"]],
+        agreement_plot2 = function() private$.items[["agreement_plot2"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -257,6 +260,13 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Test Agreement Plot",
                 renderFun=".plot",
                 width=500,
+                height=400))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="agreement_plot2",
+                title="Test Agreement Plot 2",
+                renderFun=".plot_ggplot",
+                width=500,
                 height=400))}))
 
 nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -309,6 +319,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

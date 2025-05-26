@@ -135,6 +135,18 @@ fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_data_description_f
 ## meddecide_testdata_files ----
 
 meddecide_data_description_files <- c(
+  "nogoldstandard.Rmd"
+)
+
+fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_files),
+              file.path(meddecide_dir, "vignettes"),
+              overwrite = TRUE)
+
+
+
+## meddecide_vignettes ----
+
+meddecide_data_description_files <- c(
   "test-decision.R",
   "test-roc.R"
 )
@@ -142,6 +154,9 @@ meddecide_data_description_files <- c(
 fs::file_copy(file.path(main_repo_dir, "tests/testthat", meddecide_data_description_files),
               file.path(meddecide_dir, "tests/testthat"),
               overwrite = TRUE)
+
+
+
 
 
 ## jsurvival_example_files ----
@@ -434,8 +449,8 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.3.11"
-new_date <- "2024-05-24"
+new_version <- "0.0.3.12"
+new_date <- "2024-05-26"
 
 # Run the update process
 update_modules(new_version, new_date)

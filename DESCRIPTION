@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.11
-Date: 2024-05-24
+Version: 0.0.3.12
+Date: 2024-05-26
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -119,7 +119,12 @@ Imports:
     cutpointr,
     binom,
     pROC,
-    plotROC
+    plotROC,
+    UpSetR,
+    htmlTable,
+    rlang,
+    vtree,
+    poLCA
 VignetteBuilder:
     knitr,
     tiff

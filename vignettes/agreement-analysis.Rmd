@@ -1,0 +1,52 @@
+---
+title: "Agreement and Reliability"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Agreement and Reliability}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+The package also includes tools to assess agreement between raters and
+to plan reliability studies.
+
+## Example Dataset
+
+```{r, eval=FALSE}
+df_agr <- read.csv(system.file("extdata", "agreement_example.csv", package = "meddecide"))
+head(df_agr)
+```
+
+## Calculating Agreement
+
+Use the `agreement()` function to compute Cohen's or Fleiss' Kappa
+statistics depending on the number of raters.
+
+```{r, eval=FALSE}
+agr_res <- agreement(data = df_agr)
+agr_res$kappa
+```
+
+## Sample Size for Agreement Studies
+
+The functions `kappaSizeCI()`, `kappaSizeFixedN()` and
+`kappaSizePower()` help determine the sample size needed for agreement
+research.
+
+```{r, eval=FALSE}
+# precision based approach
+kappaSizeCI(kappa0 = 0.7, conf.level = 0.95, w = 0.1)
+
+# fixed number of raters
+kappaSizeFixedN(kappa0 = 0.7, n = 60)
+
+# power based approach
+kappaSizePower(kappa0 = 0.7, kappa1 = 0.8, power = 0.8)
+```
+
+These calculations support planning of reliability experiments in
+clinical research.
