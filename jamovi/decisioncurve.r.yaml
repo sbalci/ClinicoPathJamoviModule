@@ -1,0 +1,256 @@
+---
+name: decisioncurve
+title: Decision Curve Analysis
+jrs: '1.1'
+
+items:
+    # Instructions and procedure notes
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: procedureNotes
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    # Main results table
+    - name: resultsTable
+      title: Net Benefit at Selected Thresholds
+      type: Table
+      visible: (showTable)
+      rows: 0
+      columns:
+        - name: threshold
+          title: 'Threshold Probability'
+          type: number
+          format: pc
+        - name: treat_all
+          title: 'Treat All'
+          type: number
+          format: zto
+        - name: treat_none
+          title: 'Treat None'
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - selectedThresholds
+
+    # Optimal thresholds table
+    - name: optimalTable
+      title: Optimal Thresholds
+      type: Table
+      visible: (showOptimalThreshold)
+      rows: 0
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: optimal_threshold
+          title: 'Optimal Threshold'
+          type: number
+          format: pc
+        - name: max_net_benefit
+          title: 'Maximum Net Benefit'
+          type: number
+          format: zto
+        - name: threshold_range_start
+          title: 'Beneficial Range Start'
+          type: number
+          format: pc
+        - name: threshold_range_end
+          title: 'Beneficial Range End'
+          type: number
+          format: pc
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+
+    # Clinical impact table
+    - name: clinicalImpactTable
+      title: Clinical Impact Analysis
+      type: Table
+      visible: (calculateClinicalImpact)
+      rows: 0
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: threshold
+          title: 'Threshold'
+          type: number
+          format: pc
+        - name: interventions_per_100
+          title: 'Interventions per 100'
+          type: number
+          format: zto
+        - name: true_positives_per_100
+          title: 'True Positives per 100'
+          type: number
+          format: zto
+        - name: false_positives_per_100
+          title: 'False Positives per 100'
+          type: number
+          format: zto
+        - name: interventions_avoided
+          title: 'Interventions Avoided vs Treat All'
+          type: number
+          format: zto
+        - name: number_needed_to_screen
+          title: 'Number Needed to Screen'
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - populationSize
+        - selectedThresholds
+
+    # Model comparison table
+    - name: comparisonTable
+      title: Model Comparison
+      type: Table
+      visible: (compareModels)
+      rows: 0
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: weighted_auc_diff
+          title: 'Weighted AUC Difference'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - compareModels
+
+    # Weighted AUC table
+    - name: weightedAUCTable
+      title: Weighted Area Under Decision Curve
+      type: Table
+      visible: (weightedAUC)
+      rows: 0
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: weighted_auc
+          title: 'Weighted AUC'
+          type: number
+          format: zto
+        - name: auc_range
+          title: 'Threshold Range'
+          type: text
+        - name: relative_benefit
+          title: 'Relative Benefit vs Treat All'
+          type: number
+          format: pc
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+
+    # Decision curve plot
+    - name: dcaPlot
+      title: Decision Curve Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotDCA
+      visible: (showPlot)
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - plotStyle
+        - showReferenceLinesLabels
+        - highlightRange
+        - confidenceIntervals
+
+    # Clinical impact plot
+    - name: clinicalImpactPlot
+      title: Clinical Impact
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotClinicalImpact
+      visible: (calculateClinicalImpact && showPlot)
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - populationSize
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+
+    # Interventions avoided plot
+    - name: interventionsAvoidedPlot
+      title: Interventions Avoided
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotInterventionsAvoided
+      visible: (showInterventionAvoided && showPlot)
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+
+    # Summary text
+    - name: summaryText
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+
+refs:
+    - DecisionCurve
+    - rmda
+    - ggplot2
+    - dplyr
+    - ClinicoPathJamoviModule
+
+...

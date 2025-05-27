@@ -1,0 +1,51 @@
+patient_id,age,sex,diabetes,hypertension,smoking,cholesterol,troponin,creatinine,cardiac_event,basic_model,enhanced_model,biomarker_model,miscalibrated_model,poor_model,risk_category,hospital
+1,67,Male,Yes,No,Former,245,2.1,1.3,Yes,0.234,0.289,0.312,0.421,0.156,Moderate,Hospital A
+2,59,Female,No,Yes,Never,198,0.8,0.9,No,0.089,0.102,0.098,0.160,0.067,Low,Hospital B
+3,72,Male,Yes,Yes,Current,267,3.2,1.6,Yes,0.421,0.523,0.578,0.758,0.298,High,Hospital C
+4,61,Female,No,No,Never,201,1.1,1.0,No,0.067,0.071,0.069,0.121,0.045,Low,Hospital A
+5,74,Male,No,Yes,Former,234,1.8,1.2,No,0.198,0.223,0.234,0.356,0.123,Moderate,Hospital B
+6,55,Female,Yes,No,Current,278,2.5,1.1,Yes,0.312,0.398,0.423,0.562,0.234,High,Hospital C
+7,68,Male,No,No,Never,189,0.9,0.8,No,0.123,0.134,0.128,0.221,0.089,Low,Hospital A
+8,70,Male,Yes,Yes,Current,298,4.1,1.8,Yes,0.567,0.678,0.723,0.894,0.423,Very High,Hospital B
+9,63,Female,No,Yes,Former,212,1.4,1.1,No,0.098,0.112,0.109,0.176,0.078,Low,Hospital C
+10,76,Male,Yes,No,Former,256,2.8,1.5,Yes,0.389,0.467,0.512,0.700,0.267,High,Hospital A
+11,58,Female,No,No,Never,195,0.7,0.9,No,0.056,0.061,0.058,0.101,0.034,Low,Hospital B
+12,65,Male,No,Yes,Current,243,2.2,1.2,No,0.234,0.298,0.312,0.421,0.178,Moderate,Hospital C
+13,71,Female,Yes,Yes,Former,289,3.5,1.7,Yes,0.434,0.523,0.567,0.781,0.312,High,Hospital A
+14,60,Male,No,No,Never,207,1.0,1.0,No,0.089,0.098,0.094,0.160,0.067,Low,Hospital B
+15,73,Male,Yes,Yes,Current,312,4.8,2.1,Yes,0.623,0.734,0.789,0.934,0.489,Very High,Hospital C
+16,62,Female,No,Yes,Never,221,1.3,1.1,No,0.087,0.098,0.095,0.157,0.065,Low,Hospital A
+17,69,Male,Yes,No,Former,234,2.0,1.3,Yes,0.298,0.367,0.389,0.536,0.223,Moderate,Hospital B
+18,56,Female,No,No,Current,201,1.5,0.9,No,0.134,0.167,0.156,0.241,0.089,Low,Hospital C
+19,75,Male,No,Yes,Former,267,2.6,1.4,No,0.223,0.267,0.278,0.401,0.156,Moderate,Hospital A
+20,64,Female,Yes,Yes,Current,245,3.1,1.6,Yes,0.456,0.556,0.589,0.821,0.334,High,Hospital B
+21,57,Male,No,No,Never,198,0.8,0.8,No,0.078,0.087,0.082,0.140,0.056,Low,Hospital C
+22,70,Female,Yes,No,Former,278,2.4,1.2,Yes,0.334,0.401,0.423,0.601,0.245,High,Hospital A
+23,66,Male,No,Yes,Current,234,2.7,1.3,No,0.267,0.334,0.356,0.481,0.198,Moderate,Hospital B
+24,72,Female,No,Yes,Never,212,1.6,1.1,No,0.112,0.123,0.118,0.201,0.089,Low,Hospital C
+25,68,Male,Yes,Yes,Former,289,3.8,1.7,Yes,0.523,0.623,0.667,0.943,0.378,Very High,Hospital A
+26,59,Female,No,No,Current,195,1.2,0.9,No,0.098,0.123,0.112,0.176,0.078,Low,Hospital B
+27,74,Male,Yes,No,Former,256,2.3,1.4,Yes,0.367,0.434,0.467,0.660,0.267,High,Hospital C
+28,61,Female,No,Yes,Never,207,1.1,1.0,No,0.078,0.089,0.085,0.140,0.067,Low,Hospital A
+29,77,Male,No,Yes,Current,298,3.2,1.8,Yes,0.434,0.523,0.567,0.781,0.334,High,Hospital B
+30,63,Female,Yes,No,Former,234,1.9,1.2,No,0.198,0.234,0.245,0.356,0.156,Moderate,Hospital C
+31,65,Male,No,No,Never,189,0.9,0.8,No,0.089,0.098,0.094,0.160,0.067,Low,Hospital A
+32,71,Female,Yes,Yes,Current,312,4.2,1.9,Yes,0.567,0.667,0.712,0.922,0.423,Very High,Hospital B
+33,58,Male,No,Yes,Former,221,1.4,1.1,No,0.123,0.134,0.128,0.221,0.098,Low,Hospital C
+34,69,Female,No,No,Current,243,2.1,1.0,No,0.156,0.189,0.178,0.281,0.123,Low,Hospital A
+35,76,Male,Yes,Yes,Former,267,3.4,1.6,Yes,0.489,0.589,0.623,0.881,0.367,Very High,Hospital B
+36,60,Female,No,No,Never,198,0.7,0.9,No,0.067,0.074,0.071,0.121,0.045,Low,Hospital C
+37,73,Male,No,Yes,Current,289,2.9,1.5,No,0.298,0.367,0.389,0.536,0.223,Moderate,Hospital A
+38,62,Female,Yes,No,Former,212,1.7,1.1,No,0.178,0.212,0.223,0.320,0.134,Moderate,Hospital B
+39,67,Male,Yes,Yes,Current,234,3.6,1.7,Yes,0.523,0.623,0.667,0.943,0.389,Very High,Hospital C
+40,64,Female,No,Yes,Never,256,1.3,1.2,No,0.098,0.112,0.109,0.176,0.089,Low,Hospital A
+41,75,Male,No,No,Former,201,1.8,1.0,No,0.178,0.198,0.189,0.320,0.134,Moderate,Hospital B
+42,66,Female,Yes,Yes,Current,278,3.9,1.8,Yes,0.556,0.656,0.701,0.901,0.401,Very High,Hospital C
+43,59,Male,No,Yes,Never,234,1.2,1.1,No,0.109,0.123,0.118,0.196,0.089,Low,Hospital A
+44,72,Female,No,No,Former,245,2.0,1.0,No,0.134,0.156,0.145,0.241,0.112,Low,Hospital B
+45,68,Male,Yes,No,Current,298,2.8,1.4,Yes,0.401,0.489,0.523,0.722,0.298,High,Hospital C
+46,61,Female,No,Yes,Former,189,1.5,1.0,No,0.089,0.102,0.098,0.160,0.078,Low,Hospital A
+47,74,Male,Yes,Yes,Current,267,4.1,1.9,Yes,0.589,0.689,0.734,0.943,0.434,Very High,Hospital B
+48,63,Female,No,No,Never,221,0.9,0.9,No,0.078,0.087,0.082,0.140,0.056,Low,Hospital C
+49,70,Male,No,Yes,Former,312,2.5,1.3,No,0.223,0.267,0.278,0.401,0.167,Moderate,Hospital A
+50,65,Female,Yes,No,Current,234,3.2,1.6,Yes,0.434,0.523,0.556,0.781,0.312,High,Hospital B

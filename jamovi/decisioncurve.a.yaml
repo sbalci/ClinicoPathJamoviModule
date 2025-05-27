@@ -1,0 +1,262 @@
+---
+name: decisioncurve
+title: Decision Curve Analysis
+menuGroup: meddecide
+menuSubgroup: Decision Curve Analysis
+menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Decision Curve Analysis for evaluating the clinical utility of prediction models
+        and diagnostic tests. Calculates net benefit across threshold probabilities to
+        determine if using a model provides more benefit than default strategies.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Binary outcome variable (0/1 or FALSE/TRUE). This represents the
+            condition or event you want to predict.
+
+    - name: outcomePositive
+      title: Positive Outcome Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Which level of the outcome variable represents the positive case
+            (presence of condition/event).
+
+    - name: models
+      title: Prediction Variables/Models
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables representing predicted probabilities or risk scores from
+            different models. Can include multiple models for comparison.
+
+    - name: modelNames
+      title: Model Names
+      type: String
+      default: ""
+      description:
+          R: >
+            Optional comma-separated list of names for the models. If not provided,
+            variable names will be used.
+
+    - name: thresholdRange
+      title: Threshold Range
+      type: List
+      options:
+        - name: auto
+          title: Automatic (0.01 to 0.99)
+        - name: clinical
+          title: Clinical range (0.05 to 0.50)
+        - name: custom
+          title: Custom range
+      default: clinical
+      description:
+          R: >
+            Range of threshold probabilities to evaluate.
+
+    - name: thresholdMin
+      title: Minimum Threshold
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Minimum threshold probability when using custom range.
+
+    - name: thresholdMax
+      title: Maximum Threshold
+      type: Number
+      default: 0.50
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Maximum threshold probability when using custom range.
+
+    - name: thresholdStep
+      title: Threshold Step Size
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.1
+      description:
+          R: >
+            Step size between threshold probabilities.
+
+    - name: showTable
+      title: Show Results Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table with net benefit values at selected thresholds.
+
+    - name: selectedThresholds
+      title: Selected Thresholds for Table
+      type: String
+      default: "0.05, 0.10, 0.15, 0.20, 0.25, 0.30"
+      description:
+          R: >
+            Comma-separated list of threshold probabilities to display in table.
+
+    - name: showPlot
+      title: Show Decision Curve Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display the decision curve plot.
+
+    - name: plotStyle
+      title: Plot Style
+      type: List
+      options:
+        - name: standard
+          title: Standard (with reference lines)
+        - name: clean
+          title: Clean (minimal annotations)
+        - name: detailed
+          title: Detailed (with annotations)
+      default: standard
+      description:
+          R: >
+            Style of the decision curve plot.
+
+    - name: showReferenceLinesLabels
+      title: Show Reference Line Labels
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show labels for "Treat All" and "Treat None" reference lines.
+
+    - name: highlightRange
+      title: Highlight Clinical Range
+      type: Bool
+      default: false
+      description:
+          R: >
+            Highlight a clinically relevant threshold range on the plot.
+
+    - name: highlightMin
+      title: Highlight Range Minimum
+      type: Number
+      default: 0.10
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Minimum threshold for highlighted range.
+
+    - name: highlightMax
+      title: Highlight Range Maximum
+      type: Number
+      default: 0.30
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Maximum threshold for highlighted range.
+
+    - name: calculateClinicalImpact
+      title: Calculate Clinical Impact
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate clinical impact metrics (number needed to screen, etc.).
+
+    - name: populationSize
+      title: Population Size for Clinical Impact
+      type: Number
+      default: 1000
+      min: 100
+      max: 1000000
+      description:
+          R: >
+            Population size for calculating clinical impact metrics.
+
+    - name: showInterventionAvoided
+      title: Show Interventions Avoided
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show how many unnecessary interventions are avoided compared to treat-all.
+
+    - name: confidenceIntervals
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for net benefit curves.
+
+    - name: bootReps
+      title: Bootstrap Replications
+      type: Number
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap replications for confidence intervals.
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for bootstrap confidence intervals.
+
+    - name: showOptimalThreshold
+      title: Show Optimal Thresholds
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify and display optimal threshold probabilities for each model.
+
+    - name: compareModels
+      title: Model Comparison Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate statistical tests for comparing model performance.
+
+    - name: weightedAUC
+      title: Calculate Weighted AUC
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate weighted area under the decision curve.
+
+...

@@ -131,11 +131,14 @@ fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_data_description_f
 
 
 
+## meddecide_vignettes ----
 
-## meddecide_testdata_files ----
 
 meddecide_data_description_files <- c(
-  "nogoldstandard.Rmd"
+  "nogoldstandard.Rmd",
+  "agreement-analysis.Rmd",
+  "diagnostic-tests.Rmd",
+  "roc-analysis.Rmd"
 )
 
 fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_files),
@@ -144,7 +147,7 @@ fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_f
 
 
 
-## meddecide_vignettes ----
+## meddecide_testdata_files ----
 
 meddecide_data_description_files <- c(
   "test-decision.R",
@@ -297,13 +300,20 @@ update_modules <- function(new_version, new_date) {
 
     ## meddecide module functions ----
     meddecide_modules <- c(
-        "agreement",
-        "decision",
-        "decisioncalculator",
-        "psychopdaroc",
-        "kappasizeci",
-        "kappasizefixedn",
-        "kappasizepower"
+      # Decision
+      "agreement",
+      "decision",
+      "decisioncalculator",
+      "nogoldstandard",
+
+      # ROC
+      "psychopdaroc",
+      # "decisioncurve",
+
+      # Power
+      "kappasizeci",
+      "kappasizefixedn",
+      "kappasizepower"
     )
 
     ## jsurvival module functions ----

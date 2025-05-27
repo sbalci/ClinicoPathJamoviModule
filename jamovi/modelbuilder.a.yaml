@@ -1,0 +1,455 @@
+---
+name: modelbuilder
+title: Prediction Model Builder
+menuGroup: meddecide
+menuSubgroup: Decision Curve Analysis
+menuSubtitle: Build prediction models for Decision Curve Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Build and validate prediction models for medical decision making.
+        Creates multiple logistic regression models with predicted probabilities
+        that can be directly used in Decision Curve Analysis.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    # ==========================================
+    # OUTCOME AND BASIC SETUP
+    # ==========================================
+    
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Binary outcome variable to predict (e.g., disease presence, 
+            adverse event occurrence).
+
+    - name: outcomePositive
+      title: Positive Outcome Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Which level of the outcome variable represents the positive case.
+
+    - name: splitData
+      title: Data Splitting
+      type: Bool
+      default: true
+      description:
+          R: >
+            Split data into training (70%) and validation (30%) sets for
+            unbiased model evaluation.
+
+    - name: randomSeed
+      title: Random Seed
+      type: Number
+      default: 123
+      min: 1
+      max: 99999
+      description:
+          R: >
+            Random seed for reproducible data splitting and results.
+
+    # ==========================================
+    # MODEL DEFINITIONS
+    # ==========================================
+    
+    - name: buildBasicModel
+      title: Build Basic Clinical Model
+      type: Bool
+      default: true
+      description:
+          R: >
+            Build a basic clinical model using demographic and primary risk factors.
+
+    - name: basicPredictors
+      title: Basic Model Predictors
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables for the basic clinical model (e.g., age, sex, primary risk factors).
+
+    - name: basicModelName
+      title: Basic Model Name
+      type: String
+      default: "basic_model"
+      description:
+          R: >
+            Name for the basic model (used as column name for predictions).
+
+    - name: buildEnhancedModel
+      title: Build Enhanced Clinical Model  
+      type: Bool
+      default: false
+      description:
+          R: >
+            Build an enhanced model with additional clinical variables.
+
+    - name: enhancedPredictors
+      title: Enhanced Model Predictors
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables for the enhanced model (should include basic predictors plus additional ones).
+
+    - name: enhancedModelName
+      title: Enhanced Model Name
+      type: String
+      default: "enhanced_model"
+      description:
+          R: >
+            Name for the enhanced model (used as column name for predictions).
+
+    - name: buildBiomarkerModel
+      title: Build Biomarker Model
+      type: Bool
+      default: false
+      description:
+          R: >
+            Build a model incorporating biomarkers or advanced diagnostics.
+
+    - name: biomarkerPredictors
+      title: Biomarker Model Predictors
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables for the biomarker model (clinical variables plus biomarkers).
+
+    - name: biomarkerModelName
+      title: Biomarker Model Name
+      type: String
+      default: "biomarker_model"
+      description:
+          R: >
+            Name for the biomarker model (used as column name for predictions).
+
+    - name: buildCustomModel
+      title: Build Custom Model
+      type: Bool
+      default: false
+      description:
+          R: >
+            Build a custom model with user-specified variables.
+
+    - name: customPredictors
+      title: Custom Model Predictors
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables for the custom model.
+
+    - name: customModelName
+      title: Custom Model Name
+      type: String
+      default: "custom_model"
+      description:
+          R: >
+            Name for the custom model (used as column name for predictions).
+
+    # ==========================================
+    # ADVANCED MODELING OPTIONS
+    # ==========================================
+    
+    - name: includeInteractions
+      title: Include Interactions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include two-way interactions between predictor variables.
+
+    - name: interactionTerms
+      title: Specific Interactions
+      type: String
+      default: ""
+      description:
+          R: >
+            Specify interactions (e.g., "age*sex, diabetes*smoking"). Leave empty for all pairwise.
+
+    - name: useStepwise
+      title: Stepwise Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use stepwise variable selection to optimize models.
+
+    - name: stepwiseDirection
+      title: Stepwise Direction
+      type: List
+      options:
+        - name: both
+          title: Both (forward and backward)
+        - name: forward
+          title: Forward selection
+        - name: backward
+          title: Backward elimination
+      default: both
+      description:
+          R: >
+            Direction for stepwise variable selection.
+
+    - name: selectionCriterion
+      title: Selection Criterion
+      type: List
+      options:
+        - name: aic
+          title: AIC (Akaike Information Criterion)
+        - name: bic
+          title: BIC (Bayesian Information Criterion)
+      default: aic
+      description:
+          R: >
+            Criterion for stepwise variable selection.
+
+    - name: transformVariables
+      title: Variable Transformations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply automatic transformations to continuous variables.
+
+    - name: transformMethod
+      title: Transformation Method
+      type: List
+      options:
+        - name: log
+          title: Log transformation (for skewed variables)
+        - name: polynomial
+          title: Polynomial terms (quadratic)
+        - name: spline
+          title: Restricted cubic splines
+      default: log
+      description:
+          R: >
+            Type of transformation to apply to continuous variables.
+
+    # ==========================================
+    # MISSING DATA HANDLING
+    # ==========================================
+    
+    - name: missingDataMethod
+      title: Missing Data Handling
+      type: List
+      options:
+        - name: complete_cases
+          title: Complete cases only
+        - name: mean_imputation
+          title: Mean/mode imputation
+        - name: multiple_imputation
+          title: Multiple imputation
+        - name: exclude_missing
+          title: Exclude variables with >20% missing
+      default: complete_cases
+      description:
+          R: >
+            Method for handling missing data in predictor variables.
+
+    - name: imputationSets
+      title: Multiple Imputation Sets
+      type: Number
+      default: 5
+      min: 3
+      max: 20
+      description:
+          R: >
+            Number of imputation sets for multiple imputation.
+
+    # ==========================================
+    # VALIDATION OPTIONS
+    # ==========================================
+    
+    - name: crossValidation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform k-fold cross-validation for robust model assessment.
+
+    - name: cvFolds
+      title: CV Folds
+      type: Number
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation.
+
+    - name: bootstrapValidation
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform bootstrap validation to assess optimism and shrinkage.
+
+    - name: bootstrapReps
+      title: Bootstrap Replications
+      type: Number
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap replications for validation.
+
+    # ==========================================
+    # OUTPUT OPTIONS
+    # ==========================================
+    
+    - name: showModelSummary
+      title: Show Model Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display regression coefficients and model statistics.
+
+    - name: showPerformanceMetrics
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display AUC, calibration, and other performance measures.
+
+    - name: showCalibrationPlots
+      title: Show Calibration Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display calibration plots for each model.
+
+    - name: showROCCurves
+      title: Show ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display ROC curves for discrimination assessment.
+
+    - name: compareModels
+      title: Model Comparison Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display side-by-side comparison of all models.
+
+    - name: createPredictions
+      title: Add Predictions to Data
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add predicted probability columns to dataset for DCA use.
+
+    - name: exportForDCA
+      title: Prepare for Decision Curve Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Format output specifically for use in Decision Curve Analysis module.
+
+    # ==========================================
+    # ADVANCED FEATURES
+    # ==========================================
+    
+    - name: calculateNRI
+      title: Calculate Net Reclassification Index
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate NRI comparing enhanced models to basic model.
+
+    - name: nriThresholds
+      title: NRI Risk Thresholds
+      type: String
+      default: "0.05, 0.10, 0.20"
+      description:
+          R: >
+            Risk thresholds for NRI calculation (comma-separated).
+
+    - name: calculateIDI
+      title: Calculate Integrated Discrimination Index
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate IDI comparing models.
+
+    - name: penalizedRegression
+      title: Penalized Regression
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use penalized regression (LASSO/Ridge) for variable selection.
+
+    - name: penaltyType
+      title: Penalty Type
+      type: List
+      options:
+        - name: lasso
+          title: LASSO (L1 penalty)
+        - name: ridge
+          title: Ridge (L2 penalty)
+        - name: elastic_net
+          title: Elastic Net (combined L1/L2)
+      default: lasso
+      description:
+          R: >
+            Type of penalty for regularized regression.
+
+    - name: generateRiskScore
+      title: Generate Risk Score
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create integer risk score from best model for clinical use.
+
+    - name: riskScorePoints
+      title: Risk Score Point System
+      type: List
+      options:
+        - name: framingham
+          title: Framingham-style (age-based points)
+        - name: simple
+          title: Simple integer weights
+        - name: deciles
+          title: Risk decile-based scoring
+      default: simple
+      description:
+          R: >
+            Method for creating clinical risk score.
+
+...
