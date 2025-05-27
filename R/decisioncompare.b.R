@@ -152,7 +152,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                         self$results$epirTable3$setVisible(TRUE)
                         }
 
-                        self$results$cTable2$setVisible(TRUE)
+                        self$results$cTable3$setVisible(TRUE)
 
                         cTable <- self$results$cTable3
                         epirTable <- self$results$epirTable3
