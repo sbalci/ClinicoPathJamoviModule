@@ -82,6 +82,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 # Remove NA values
                 complete_cases <- complete.cases(outcomes)
                 outcomes <- outcomes[complete_cases]
+                data <- data[complete_cases, , drop = FALSE]
 
                 # Count cases for prevalence
                 if (self$options$useExternalPrevalence) {
@@ -191,7 +192,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     }
 
                     table <- self$results$modelResults$get(key = predictor)
-                    pred_values <- data[[predictor]][complete.cases(outcomes)]
+                    pred_values <- data[[predictor]]
 
                     # Storage for this predictor
                     nb_values <- numeric(length(thresholds))
@@ -280,7 +281,6 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
             .runFrequentistDCA = function(outcomes, data, predictorVars, thresholds, prevalence) {
                 # Frequentist DCA implementation
-                complete_cases <- complete.cases(outcomes)
 
                 # Calculate treat all/none
                 treatAllNB <- prevalence - (1 - prevalence) * thresholds / (1 - thresholds)
@@ -317,7 +317,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     }
 
                     table <- self$results$modelResults$get(key = predictor)
-                    pred_values <- data[[predictor]][complete_cases]
+                    pred_values <- data[[predictor]]
 
                     # Storage
                     nb_values <- numeric(length(thresholds))
