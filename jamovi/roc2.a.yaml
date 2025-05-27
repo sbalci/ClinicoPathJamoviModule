@@ -2,7 +2,7 @@
 name:  roc2
 title: ROC
 menuGroup: meddecide
-menuSubgroup: Drafts
+menuSubgroup: ROC - Drafts
 menuSubtitle: Decision
 version: '1.0.0'
 jas: '1.2'

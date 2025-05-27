@@ -1,0 +1,192 @@
+title: Decision Curve Analysis
+name: decisioncurve
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  # Variables section
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: outcomePositive
+            label: Positive Outcome
+            enable: (outcome)
+      - type: TargetLayoutBox
+        label: Prediction Models/Variables
+        children:
+          - type: VariablesListBox
+            name: models
+            isTarget: true
+          - type: TextBox
+            name: modelNames
+            label: Model Names (optional)
+            format: string
+
+  # Analysis Options
+  - type: CollapseBox
+    label: Analysis Options
+    margin: normal
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Threshold Range
+            children:
+              - type: ComboBox
+                name: thresholdRange
+                label: Threshold Range
+              - type: TextBox
+                name: thresholdMin
+                format: number
+                label: Minimum Threshold
+                enable: (thresholdRange:custom)
+              - type: TextBox
+                name: thresholdMax
+                format: number
+                label: Maximum Threshold
+                enable: (thresholdRange:custom)
+              - type: TextBox
+                name: thresholdStep
+                format: number
+                label: Step Size
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Features
+            children:
+              - type: CheckBox
+                name: showOptimalThreshold
+                label: Identify optimal thresholds
+              - type: CheckBox
+                name: compareModels
+                label: Statistical model comparison
+              - type: CheckBox
+                name: weightedAUC
+                label: Calculate weighted AUC
+
+  # Output Options
+  - type: CollapseBox
+    label: Output Options
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Tables
+            children:
+              - type: CheckBox
+                name: showTable
+                label: Show results table
+              - type: TextBox
+                name: selectedThresholds
+                format: string
+                label: Thresholds for table
+                enable: (showTable)
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plots
+            children:
+              - type: CheckBox
+                name: showPlot
+                label: Show decision curve plot
+              - type: ComboBox
+                name: plotStyle
+                label: Plot style
+                enable: (showPlot)
+              - type: CheckBox
+                name: showReferenceLinesLabels
+                label: Show reference line labels
+                enable: (showPlot)
+
+  # Clinical Impact Analysis
+  - type: CollapseBox
+    label: Clinical Impact Analysis
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: calculateClinicalImpact
+            label: Calculate clinical impact metrics
+          - type: TextBox
+            name: populationSize
+            format: number
+            label: Population size
+            enable: (calculateClinicalImpact)
+          - type: CheckBox
+            name: showInterventionAvoided
+            label: Show interventions avoided
+            enable: (calculateClinicalImpact)
+
+  # Plot Customization
+  - type: CollapseBox
+    label: Plot Customization
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Highlight Clinical Range
+            children:
+              - type: CheckBox
+                name: highlightRange
+                label: Highlight threshold range
+                enable: (showPlot)
+              - type: TextBox
+                name: highlightMin
+                format: number
+                label: Range minimum
+                enable: (highlightRange)
+              - type: TextBox
+                name: highlightMax
+                format: number
+                label: Range maximum
+                enable: (highlightRange)
+
+  # Advanced Options
+  - type: CollapseBox
+    label: Advanced Options
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap Confidence Intervals
+            children:
+              - type: CheckBox
+                name: confidenceIntervals
+                label: Calculate confidence intervals
+              - type: TextBox
+                name: bootReps
+                format: number
+                label: Bootstrap replications
+                enable: (confidenceIntervals)
+              - type: TextBox
+                name: ciLevel
+                format: number
+                label: Confidence level
+                enable: (confidenceIntervals)

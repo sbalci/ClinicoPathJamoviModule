@@ -1,0 +1,433 @@
+---
+name: modelbuilder
+title: Prediction Model Builder
+jrs: '1.1'
+
+items:
+    # ==========================================
+    # INSTRUCTIONS AND SUMMARY
+    # ==========================================
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: dataSummary
+      title: Data Summary
+      type: Html
+      visible: true
+
+    - name: dcaReadyMessage
+      title: Ready for Decision Curve Analysis
+      type: Html
+      visible: (createPredictions)
+
+    # ==========================================
+    # MODEL SUMMARIES
+    # ==========================================
+    - name: basicModelSummary
+      title: Basic Clinical Model
+      type: Table
+      visible: (buildBasicModel && showModelSummary)
+      columns:
+        - name: term
+          title: Variable
+          type: text
+        - name: estimate
+          title: Coefficient
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: z-value
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: odds_ratio
+          title: Odds Ratio
+          type: number
+          format: zto
+        - name: ci_lower
+          title: OR 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: OR 95% CI Upper
+          type: number
+          format: zto
+      clearWith:
+        - basicPredictors
+        - outcome
+        - outcomePositive
+
+    - name: enhancedModelSummary
+      title: Enhanced Clinical Model
+      type: Table
+      visible: (buildEnhancedModel && showModelSummary)
+      columns:
+        - name: term
+          title: Variable
+          type: text
+        - name: estimate
+          title: Coefficient
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: z-value
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: odds_ratio
+          title: Odds Ratio
+          type: number
+          format: zto
+        - name: ci_lower
+          title: OR 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: OR 95% CI Upper
+          type: number
+          format: zto
+      clearWith:
+        - enhancedPredictors
+        - outcome
+        - outcomePositive
+
+    - name: biomarkerModelSummary
+      title: Biomarker Model
+      type: Table
+      visible: (buildBiomarkerModel && showModelSummary)
+      columns:
+        - name: term
+          title: Variable
+          type: text
+        - name: estimate
+          title: Coefficient
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: z-value
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: odds_ratio
+          title: Odds Ratio
+          type: number
+          format: zto
+        - name: ci_lower
+          title: OR 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: OR 95% CI Upper
+          type: number
+          format: zto
+      clearWith:
+        - biomarkerPredictors
+        - outcome
+        - outcomePositive
+
+    - name: customModelSummary
+      title: Custom Model
+      type: Table
+      visible: (buildCustomModel && showModelSummary)
+      columns:
+        - name: term
+          title: Variable
+          type: text
+        - name: estimate
+          title: Coefficient
+          type: number
+          format: zto
+        - name: std_error
+          title: Std. Error
+          type: number
+          format: zto
+        - name: z_value
+          title: z-value
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: odds_ratio
+          title: Odds Ratio
+          type: number
+          format: zto
+        - name: ci_lower
+          title: OR 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: OR 95% CI Upper
+          type: number
+          format: zto
+      clearWith:
+        - customPredictors
+        - outcome
+        - outcomePositive
+
+    # ==========================================
+    # PERFORMANCE COMPARISON
+    # ==========================================
+    - name: modelComparisonTable
+      title: Model Performance Comparison
+      type: Table
+      visible: (compareModels && showPerformanceMetrics)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: n_predictors
+          title: Variables
+          type: integer
+        - name: auc_training
+          title: AUC (Training)
+          type: number
+          format: zto
+        - name: auc_validation
+          title: AUC (Validation)
+          type: number
+          format: zto
+        - name: calibration_slope
+          title: Calibration Slope
+          type: number
+          format: zto
+        - name: calibration_intercept
+          title: Calibration Intercept
+          type: number
+          format: zto
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+          format: zto
+        - name: aic
+          title: AIC
+          type: number
+          format: zto
+        - name: bic
+          title: BIC
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+        - outcomePositive
+        - splitData
+
+    # ==========================================
+    # VALIDATION RESULTS
+    # ==========================================
+    - name: validationResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (crossValidation)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: cv_auc_mean
+          title: CV AUC (Mean)
+          type: number
+          format: zto
+        - name: cv_auc_sd
+          title: CV AUC (SD)
+          type: number
+          format: zto
+        - name: cv_calibration_slope
+          title: CV Calibration Slope
+          type: number
+          format: zto
+        - name: cv_brier_score
+          title: CV Brier Score
+          type: number
+          format: zto
+        - name: optimism
+          title: Optimism
+          type: number
+          format: zto
+      clearWith:
+        - cvFolds
+        - outcome
+        - outcomePositive
+
+    # ==========================================
+    # MODEL IMPROVEMENT METRICS
+    # ==========================================
+    - name: nriTable
+      title: Net Reclassification Index
+      type: Table
+      visible: (calculateNRI)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: nri_events
+          title: NRI (Events)
+          type: number
+          format: zto
+        - name: nri_non_events
+          title: NRI (Non-Events)
+          type: number
+          format: zto
+        - name: nri_overall
+          title: NRI (Overall)
+          type: number
+          format: zto
+        - name: nri_p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - nriThresholds
+        - outcome
+
+    - name: idiTable
+      title: Integrated Discrimination Index
+      type: Table
+      visible: (calculateIDI)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: idi
+          title: IDI
+          type: number
+          format: zto
+        - name: idi_p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: discrimination_slope_new
+          title: Disc. Slope (New)
+          type: number
+          format: zto
+        - name: discrimination_slope_old
+          title: Disc. Slope (Reference)
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+
+    # ==========================================
+    # RISK SCORE TABLE
+    # ==========================================
+    - name: riskScoreTable
+      title: Clinical Risk Score
+      type: Table
+      visible: (generateRiskScore)
+      columns:
+        - name: variable
+          title: Risk Factor
+          type: text
+        - name: category
+          title: Category
+          type: text
+        - name: points
+          title: Points
+          type: integer
+        - name: coefficient
+          title: Coefficient
+          type: number
+          format: zto
+        - name: interpretation
+          title: Clinical Impact
+          type: text
+      clearWith:
+        - riskScorePoints
+        - outcome
+
+    # ==========================================
+    # PLOTS
+    # ==========================================
+    - name: rocCurvesPlot
+      title: ROC Curves Comparison
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotROCCurves
+      visible: (showROCCurves)
+      clearWith:
+        - outcome
+        - outcomePositive
+        - splitData
+
+    - name: calibrationPlotsArray
+      title: Calibration Plots
+      type: Array
+      visible: (showCalibrationPlots)
+      template:
+        title: $key
+        type: Image
+        width: 500
+        height: 400
+        renderFun: .plotCalibration
+        clearWith:
+          - outcome
+          - outcomePositive
+          - splitData
+
+    - name: modelComparisonPlot
+      title: Model Performance Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotModelComparison
+      visible: (compareModels)
+      clearWith:
+        - outcome
+        - outcomePositive
+
+    - name: validationPlot
+      title: Cross-Validation Results
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotValidation
+      visible: (crossValidation || bootstrapValidation)
+      clearWith:
+        - cvFolds
+        - bootstrapReps
+
+    # ==========================================
+    # DECISION ANALYSIS PREPARATION
+    # ==========================================
+    - name: dcaPreparationSummary
+      title: Decision Curve Analysis Preparation
+      type: Html
+      visible: (exportForDCA)
+
+refs:
+    - glmnet
+    - rms
+    - pROC
+    - mice
+    - VIM
+    - ClinicoPathJamoviModule
+
+...
