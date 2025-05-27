@@ -182,6 +182,8 @@ bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelResults = function() private$.items[["modelResults"]],
         comparisonTable = function() private$.items[["comparisonTable"]],
         evpiTable = function() private$.items[["evpiTable"]],
+        usefulStrategiesTable = function() private$.items[["usefulStrategiesTable"]],
+        pairwiseComparisonsTable = function() private$.items[["pairwiseComparisonsTable"]],
         mainPlot = function() private$.items[["mainPlot"]],
         deltaPlot = function() private$.items[["deltaPlot"]],
         probPlot = function() private$.items[["probPlot"]],
@@ -338,7 +340,63 @@ bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotEVPI",
-                visible="(calculateEVPI)"))}))
+                        visible="(calculateEVPI)"))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="usefulStrategiesTable",
+                title="Usefulness of Strategies (vs. Best Default)",
+                visible=TRUE,
+                template=jmvcore::Table$new(
+                    options=options,
+                    title="$key vs. Best Default",
+                    columns=list(
+                        list(
+                            `name`="threshold",
+                            `title`="Threshold",
+                            `type`="number",
+                            `format`="pc"),
+                        list(
+                            `name`="deltaNB",
+                            `title`="Net Benefit Difference",
+                            `type`="number",
+                            `format`="zto"),
+                        list(
+                            `name`="probUseful",
+                            `title`="Probability Useful",
+                            `type`="number",
+                            `format`="pc",
+                            `visible`="(bayesianAnalysis)")))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairwiseComparisonsTable",
+                title="Pairwise Model/Test Comparisons",
+                visible="(predictors.length > 1)",
+                columns=list(
+                    list(
+                        `name`="threshold",
+                        `title`="Threshold",
+                        `type`="number",
+                        `format`="pc"),
+                    list(
+                        `name`="strategy1",
+                        `title`="Strategy 1",
+                        `type`="text"),
+                    list(
+                        `name`="strategy2",
+                        `title`="Strategy 2",
+                        `type`="text"),
+                    list(
+                        `name`="deltaNB_S1_S2",
+                        `title`="NB(S1) - NB(S2)",
+                        `type`="number",
+                        `format`="zto"),
+                    list(
+                        `name`="prob_S1_better_S2",
+                        `title`="P(S1 > S2)",
+                        `type`="number",
+                        `format`="pc",
+                        `visible`="(bayesianAnalysis)"))))
+}))
 
 bayesdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "bayesdcaBase",
