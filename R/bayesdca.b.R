@@ -146,9 +146,8 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
                 # Calculate pairwise comparisons
                 self$.calculatePairwiseComparisons()
-                }
-            },
-            
+                },
+
             .calculatePairwiseComparisons = function() {
                 # Calculate pairwise comparisons between models/tests
                 if (is.null(private$.dcaResults)) return()
@@ -181,18 +180,18 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
                     prob_S1_better_S2_values <- rep(NA, length(thresholds))
 
-                    if (self$options$bayesianAnalysis && 
+                    if (self$options$bayesianAnalysis &&
                         !is.null(private$.posteriorDraws) &&
-                        strategy1 %in% names(private$.posteriorDraws) && 
+                        strategy1 %in% names(private$.posteriorDraws) &&
                         strategy2 %in% names(private$.posteriorDraws)) {
-                        
+
                         NB_S1_draws <- private$.posteriorDraws[[strategy1]]
                         NB_S2_draws <- private$.posteriorDraws[[strategy2]]
                         deltaNB_S1_S2_draws <- NB_S1_draws - NB_S2_draws
-                        
+
                         # Recalculate deltaNB_S1_S2_point from mean of draws for consistency
                         # deltaNB_S1_S2_point <- apply(deltaNB_S1_S2_draws, 2, mean)
-                        
+
                         prob_S1_better_S2_values <- apply(deltaNB_S1_S2_draws > 0, 2, mean)
                     }
 
@@ -220,13 +219,13 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 if (length(predictorVars) == 0) return()
 
                 # Ensure "Treat all" and "Treat none" are in posteriorDraws if Bayesian
-                if (self$options$bayesianAnalysis && 
-                    (!("Treat all" %in% names(private$.posteriorDraws)) || 
+                if (self$options$bayesianAnalysis &&
+                    (!("Treat all" %in% names(private$.posteriorDraws)) ||
                      !("Treat none" %in% names(private$.posteriorDraws)))) {
                     jmvcore::reject("Default strategy draws not found for useful strategies calculation.")
                     return()
                 }
-                
+
                 NB_TreatAll_draws <- NULL
                 NB_TreatNone_draws <- NULL
 
@@ -245,7 +244,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     NB_model_point <- private$.dcaResults$strategies[[predictor]]$netBenefit
                     NB_TreatAll_point <- private$.dcaResults$strategies[["Treat all"]]$netBenefit
                     NB_TreatNone_point <- private$.dcaResults$strategies[["Treat none"]]$netBenefit
-                    
+
                     NB_BestDefault_point <- pmax(NB_TreatAll_point, NB_TreatNone_point)
                     deltaNB_point <- NB_model_point - NB_BestDefault_point
 
@@ -255,10 +254,10 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         NB_model_draws <- private$.posteriorDraws[[predictor]]
                         NB_BestDefault_draws <- pmax(NB_TreatAll_draws, NB_TreatNone_draws)
                         deltaNB_draws <- NB_model_draws - NB_BestDefault_draws
-                        
+
                         # Recalculate deltaNB_point from mean of draws for consistency in Bayesian mode
                         # deltaNB_point <- apply(deltaNB_draws, 2, mean) # Use column means
-                        
+
                         probUseful_values <- apply(deltaNB_draws > 0, 2, mean) # Use column means
                     }
 
@@ -865,5 +864,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 print(plot)
                 return(TRUE)
             }
+
+
         )
     )
