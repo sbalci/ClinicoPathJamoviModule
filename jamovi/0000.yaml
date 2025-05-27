@@ -721,6 +721,13 @@ analyses:
       Build and validate prediction models for medical decision making. Creates
       multiple logistic regression models with predicted probabilities that can
       be directly used in Decision Curve Analysis.
+  - title: Bayesian Decision Curve Analysis
+    name: bayesdca
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Bayesian Decision Curve Analysis
+    menuSubgroup: Decision Curve Analysis
+    menuSubtitle: Bayesian Decision Curve Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

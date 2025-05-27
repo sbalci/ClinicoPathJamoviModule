@@ -124,7 +124,8 @@ Imports:
     htmlTable,
     rlang,
     vtree,
-    poLCA
+    poLCA,
+    patchwork
 VignetteBuilder:
     knitr,
     tiff

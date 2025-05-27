@@ -1,0 +1,116 @@
+title: Bayesian Decision Curve Analysis
+name: bayesdca
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome
+        children:
+          - type: VariablesListBox
+            name: outcomes
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: outcomePos
+            label: Positive Outcome
+            enable: (outcomes)
+      - type: TargetLayoutBox
+        label: Models or Tests
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+
+  - type: CollapseBox
+    label: Threshold Settings
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: thresholdMin
+            format: number
+            label: Minimum
+          - type: TextBox
+            name: thresholdMax
+            format: number
+            label: Maximum
+          - type: TextBox
+            name: thresholdPoints
+            format: number
+            label: Number of Points
+
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Classification Direction
+            children:
+              - type: RadioButton
+                name: directionGE
+                optionName: directionIndicator
+                optionPart: ">="
+                label: "≥ (higher values indicate positive class)"
+              - type: RadioButton
+                name: directionLE
+                optionName: directionIndicator
+                optionPart: "<="
+                label: "≤ (lower values indicate positive class)"
+          - type: CheckBox
+            name: bayesianAnalysis
+            label: Bayesian Analysis
+          - type: TextBox
+            name: nDraws
+            format: number
+            label: Number of Posterior Draws
+            enable: (bayesianAnalysis)
+          - type: TextBox
+            name: priorStrength
+            format: number
+            label: Prior Strength
+            enable: (bayesianAnalysis)
+          - type: CheckBox
+            name: bootstrapCI
+            label: Bootstrap Confidence Intervals
+            enable: (!bayesianAnalysis)
+          - type: TextBox
+            name: bootstrapReps
+            format: number
+            label: Bootstrap Replications
+            enable: (bootstrapCI && !bayesianAnalysis)
+          - type: CheckBox
+            name: calculateEVPI
+            label: Calculate EVPI
+            enable: (bayesianAnalysis)
+
+  - type: CollapseBox
+    label: Prevalence Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: useExternalPrevalence
+            label: Use External Prevalence
+          - type: TextBox
+            name: externalCases
+            format: number
+            label: Number of Cases
+            enable: (useExternalPrevalence)
+          - type: TextBox
+            name: externalTotal
+            format: number
+            label: Total Sample Size
+            enable: (useExternalPrevalence)

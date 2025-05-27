@@ -1,0 +1,153 @@
+---
+name: bayesdca
+title: Bayesian Decision Curve Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    # Main net benefit table
+    - name: netBenefitTable
+      title: Net Benefit Results
+      type: Table
+      visible: true
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+          format: pc
+        - name: treatAll
+          title: Treat All
+          type: number
+          format: zto
+        - name: treatNone
+          title: Treat None
+          type: number
+          format: zto
+
+    # Dynamic tables for each model/test
+    - name: modelResults
+      title: Model/Test Results
+      type: Array
+      visible: true
+      template:
+        title: $key
+        type: Table
+        columns:
+          - name: threshold
+            title: Threshold
+            type: number
+            format: pc
+          - name: netBenefit
+            title: Net Benefit
+            type: number
+            format: zto
+          - name: lowerCI
+            title: Lower CI
+            type: number
+            format: zto
+            visible: (bayesianAnalysis || bootstrapCI)
+          - name: upperCI
+            title: Upper CI
+            type: number
+            format: zto
+            visible: (bayesianAnalysis || bootstrapCI)
+          - name: sensitivity
+            title: Sensitivity
+            type: number
+            format: pc
+          - name: specificity
+            title: Specificity
+            type: number
+            format: pc
+
+    # Comparison table
+    - name: comparisonTable
+      title: Strategy Comparison
+      type: Table
+      visible: true
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+          format: pc
+        - name: bestStrategy
+          title: Best Strategy
+          type: text
+        - name: diffFromNext
+          title: Difference from Next Best
+          type: number
+          format: zto
+        - name: probBest
+          title: Probability Best
+          type: number
+          format: pc
+          visible: (bayesianAnalysis)
+
+    # EVPI table
+    - name: evpiTable
+      title: Expected Value of Perfect Information
+      type: Table
+      visible: (calculateEVPI)
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+          format: pc
+        - name: evpi
+          title: EVPI
+          type: number
+          format: zto
+
+    # Main decision curve plot
+    - name: mainPlot
+      title: Decision Curves
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotDCA
+      visible: true
+
+    # Uncertainty plots
+    - name: deltaPlot
+      title: Net Benefit Differences
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotDeltaNB
+      visible: true
+
+    # Probability plots
+    - name: probPlot
+      title: Probability of Superiority
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotProbability
+      visible: (bayesianAnalysis)
+
+    # EVPI plot
+    - name: evpiPlot
+      title: Expected Value of Perfect Information
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotEVPI
+      visible: (calculateEVPI)
+
+    # # Combined plots
+    # - name: combinedPlot
+    #   title: Combined Analysis
+    #   type: Image
+    #   width: 800
+    #   height: 600
+    #   renderFun: .plotCombined
+    #   visible: true
