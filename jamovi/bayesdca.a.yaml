@@ -1,0 +1,169 @@
+---
+name: bayesdca
+title: Bayesian Decision Curve Analysis
+menuGroup: meddecide
+menuSubgroup: Decision Curve Analysis
+menuSubtitle: Bayesian Decision Curve Analysis
+version: '1.0.0'
+jas: '1.2'
+
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcomes
+      title: Outcomes
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Binary outcome variable (0/1) representing the true disease status or event.
+
+    - name: outcomePos
+      title: Positive Outcome
+      type: Level
+      variable: (outcomes)
+      description:
+          R: >
+            Specifies which level of the outcome variable should be treated as the positive class.
+
+    - name: predictors
+      title: Models or Tests
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables containing either probability predictions from models or binary results (0/1) from diagnostic tests.
+
+    - name: thresholdMin
+      title: Minimum Threshold
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.5
+      description:
+          R: >
+            Minimum decision threshold for the analysis.
+
+    - name: thresholdMax
+      title: Maximum Threshold
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Maximum decision threshold for the analysis.
+
+    - name: thresholdPoints
+      title: Number of Thresholds
+      type: Integer
+      default: 50
+      min: 10
+      max: 100
+      description:
+          R: >
+            Number of threshold points to evaluate.
+
+    - name: useExternalPrevalence
+      title: Use External Prevalence
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use external prevalence data instead of sample prevalence.
+
+    - name: externalCases
+      title: External Cases
+      type: Integer
+      default: 100
+      min: 1
+      description:
+          R: >
+            Number of cases in external prevalence data.
+          ui: >
+            Number of cases (positive outcomes) in external data.
+
+    - name: externalTotal
+      title: External Total
+      type: Integer
+      default: 500
+      min: 2
+      description:
+          R: >
+            Total sample size in external prevalence data.
+          ui: >
+            Total sample size in external data (must be greater than number of cases).
+
+    - name: bayesianAnalysis
+      title: Bayesian Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Bayesian analysis with uncertainty quantification.
+
+    - name: priorStrength
+      title: Prior Strength
+      type: Number
+      default: 2
+      min: 0.1
+      max: 10
+      description:
+          R: >
+            Strength of prior (effective sample size).
+
+    - name: bootstrapCI
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for non-Bayesian analysis.
+
+    - name: bootstrapReps
+      title: Bootstrap Replications
+      type: Integer
+      default: 2000
+      min: 500
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap replications for confidence intervals.
+
+    - name: calculateEVPI
+      title: Calculate EVPI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Expected Value of Perfect Information.
+
+    - name: nDraws
+      title: Number of Posterior Draws
+      type: Integer
+      default: 2000
+      min: 500
+      max: 10000
+      description:
+          R: >
+            Number of posterior draws for Bayesian analysis.
+
+    - name: directionIndicator
+      title: Direction Indicator
+      type: List
+      options:
+        - name: ">="
+          title: ">= (higher values indicate positive class)"
+        - name: "<="
+          title: "<= (lower values indicate positive class)"
+      default: ">="
+      description:
+          R: >
+            Direction of classification relative to the cutpoint.
+            Use '>=' when higher values predict positive outcomes.
