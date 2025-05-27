@@ -3,7 +3,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @importFrom stats rbeta qbeta quantile
+#' @importFrom stats rbeta quantile
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom scales percent
 
 bayesdcaClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -126,149 +128,23 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     strategies = list()
                 )
 
-                # Run analysis
+                # Run analysis - FIXED: Use private$ instead of self$
                 if (self$options$bayesianAnalysis) {
-                    self$.runBayesianDCA(outcomes, data, predictorVars, thresholds, prevalence)
+                    private$.runBayesianDCA(outcomes, data, predictorVars, thresholds, prevalence)
                 } else {
-                    self$.runFrequentistDCA(outcomes, data, predictorVars, thresholds, prevalence)
+                    private$.runFrequentistDCA(outcomes, data, predictorVars, thresholds, prevalence)
                 }
 
-                # Calculate comparisons
-                self$.calculateComparisons()
+                # Calculate comparisons - FIXED: Use private$ instead of self$
+                private$.calculateComparisons()
 
-                # Calculate EVPI if requested
+                # Calculate EVPI if requested - FIXED: Use private$ instead of self$
                 if (self$options$calculateEVPI && self$options$bayesianAnalysis) {
-                    self$.calculateEVPI()
+                    private$.calculateEVPI()
                 }
 
-                # Calculate useful strategies
-                self$.calculateUsefulStrategies()
-
-                # Calculate pairwise comparisons
-                self$.calculatePairwiseComparisons()
-                },
-
-            .calculatePairwiseComparisons = function() {
-                # Calculate pairwise comparisons between models/tests
-                if (is.null(private$.dcaResults)) return()
-
-                thresholds <- private$.thresholds
-                predictorVars <- self$options$predictors
-
-                if (length(predictorVars) < 2) {
-                    self$results$pairwiseComparisonsTable$setVisible(FALSE)
-                    return()
-                }
-                self$results$pairwiseComparisonsTable$setVisible(TRUE)
-
-
-                compTable <- self$results$pairwiseComparisonsTable
-                # Clear existing rows before populating (important for re-runs)
-                compTable$clearRows()
-
-
-                # Create unique pairs of predictors
-                predictorPairs <- utils::combn(predictorVars, 2, simplify = FALSE)
-
-                for (pair in predictorPairs) {
-                    strategy1 <- pair[1]
-                    strategy2 <- pair[2]
-
-                    NB_S1_point <- private$.dcaResults$strategies[[strategy1]]$netBenefit
-                    NB_S2_point <- private$.dcaResults$strategies[[strategy2]]$netBenefit
-                    deltaNB_S1_S2_point <- NB_S1_point - NB_S2_point
-
-                    prob_S1_better_S2_values <- rep(NA, length(thresholds))
-
-                    if (self$options$bayesianAnalysis &&
-                        !is.null(private$.posteriorDraws) &&
-                        strategy1 %in% names(private$.posteriorDraws) &&
-                        strategy2 %in% names(private$.posteriorDraws)) {
-
-                        NB_S1_draws <- private$.posteriorDraws[[strategy1]]
-                        NB_S2_draws <- private$.posteriorDraws[[strategy2]]
-                        deltaNB_S1_S2_draws <- NB_S1_draws - NB_S2_draws
-
-                        # Recalculate deltaNB_S1_S2_point from mean of draws for consistency
-                        # deltaNB_S1_S2_point <- apply(deltaNB_S1_S2_draws, 2, mean)
-
-                        prob_S1_better_S2_values <- apply(deltaNB_S1_S2_draws > 0, 2, mean)
-                    }
-
-                    for (i in seq_along(thresholds)) {
-                        # Add a unique rowKey for each row
-                        rowKey <- paste(strategy1, strategy2, i, sep = "_")
-                        compTable$addRow(rowKey = rowKey, values = list(
-                            threshold = thresholds[i],
-                            strategy1 = strategy1,
-                            strategy2 = strategy2,
-                            deltaNB_S1_S2 = deltaNB_S1_S2_point[i],
-                            prob_S1_better_S2 = prob_S1_better_S2_values[i]
-                        ))
-                    }
-                }
-            },
-
-            .calculateUsefulStrategies = function() {
-                # Calculate usefulness of strategies vs. best default
-                if (is.null(private$.dcaResults)) return()
-
-                thresholds <- private$.thresholds
-                predictorVars <- self$options$predictors
-
-                if (length(predictorVars) == 0) return()
-
-                # Ensure "Treat all" and "Treat none" are in posteriorDraws if Bayesian
-                if (self$options$bayesianAnalysis &&
-                    (!("Treat all" %in% names(private$.posteriorDraws)) ||
-                     !("Treat none" %in% names(private$.posteriorDraws)))) {
-                    jmvcore::reject("Default strategy draws not found for useful strategies calculation.")
-                    return()
-                }
-
-                NB_TreatAll_draws <- NULL
-                NB_TreatNone_draws <- NULL
-
-                if (self$options$bayesianAnalysis) {
-                    NB_TreatAll_draws <- private$.posteriorDraws[["Treat all"]]
-                    NB_TreatNone_draws <- private$.posteriorDraws[["Treat none"]]
-                }
-
-
-                for (predictor in predictorVars) {
-                    if (!predictor %in% self$results$usefulStrategiesTable$itemKeys) {
-                        self$results$usefulStrategiesTable$addItem(key = predictor)
-                    }
-                    table <- self$results$usefulStrategiesTable$get(key = predictor)
-
-                    NB_model_point <- private$.dcaResults$strategies[[predictor]]$netBenefit
-                    NB_TreatAll_point <- private$.dcaResults$strategies[["Treat all"]]$netBenefit
-                    NB_TreatNone_point <- private$.dcaResults$strategies[["Treat none"]]$netBenefit
-
-                    NB_BestDefault_point <- pmax(NB_TreatAll_point, NB_TreatNone_point)
-                    deltaNB_point <- NB_model_point - NB_BestDefault_point
-
-                    probUseful_values <- rep(NA, length(thresholds))
-
-                    if (self$options$bayesianAnalysis) {
-                        NB_model_draws <- private$.posteriorDraws[[predictor]]
-                        NB_BestDefault_draws <- pmax(NB_TreatAll_draws, NB_TreatNone_draws)
-                        deltaNB_draws <- NB_model_draws - NB_BestDefault_draws
-
-                        # Recalculate deltaNB_point from mean of draws for consistency in Bayesian mode
-                        # deltaNB_point <- apply(deltaNB_draws, 2, mean) # Use column means
-
-                        probUseful_values <- apply(deltaNB_draws > 0, 2, mean) # Use column means
-                    }
-
-                    for (i in seq_along(thresholds)) {
-                        table$addRow(rowKey = i, values = list(
-                            threshold = thresholds[i],
-                            deltaNB = deltaNB_point[i],
-                            probUseful = probUseful_values[i]
-                        ))
-                    }
-                }
+                # Populate plot states - FIXED: Use private$ instead of self$
+                private$.preparePlotData()
             },
 
             .runBayesianDCA = function(outcomes, data, predictorVars, thresholds, prevalence) {
@@ -286,8 +162,8 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
                 # Store posterior draws
                 private$.posteriorDraws <- list(
-                    treat_all = matrix(rep(treatAllNB, n_draws), nrow = n_draws, byrow = TRUE),
-                    treat_none = matrix(0, nrow = n_draws, ncol = length(thresholds))
+                    "Treat all" = matrix(rep(treatAllNB, n_draws), nrow = n_draws, byrow = TRUE),
+                    "Treat none" = matrix(0, nrow = n_draws, ncol = length(thresholds))
                 )
 
                 # Populate net benefit table
@@ -371,15 +247,15 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         post_spec_beta <- fp + prior_beta
 
                         # Draw from posterior
-                        sens_draws <- rbeta(n_draws, post_sens_alpha, post_sens_beta)
-                        spec_draws <- rbeta(n_draws, post_spec_alpha, post_spec_beta)
+                        sens_draws <- stats::rbeta(n_draws, post_sens_alpha, post_sens_beta)
+                        spec_draws <- stats::rbeta(n_draws, post_spec_alpha, post_spec_beta)
 
                         # Calculate net benefit for each draw
                         nb_draws[, i] <- sens_draws * prevalence -
                             (1 - spec_draws) * (1 - prevalence) * thresh / (1 - thresh)
 
                         # Get credible intervals
-                        nb_ci <- quantile(nb_draws[, i], c(0.025, 0.975))
+                        nb_ci <- stats::quantile(nb_draws[, i], c(0.025, 0.975))
                         lowerCI[i] <- nb_ci[1]
                         upperCI[i] <- nb_ci[2]
 
@@ -523,7 +399,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                             }
 
                             # Get CI
-                            boot_ci <- quantile(boot_nb, c(0.025, 0.975))
+                            boot_ci <- stats::quantile(boot_nb, c(0.025, 0.975))
                             lowerCI[i] <- boot_ci[1]
                             upperCI[i] <- boot_ci[2]
                         } else {
@@ -619,28 +495,55 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 thresholds <- private$.thresholds
                 strategies <- names(private$.posteriorDraws)
 
+                if (length(strategies) == 0) {
+                    return()
+                }
+
                 for (i in seq_along(thresholds)) {
                     # Get draws for all strategies at this threshold
-                    all_draws <- lapply(strategies, function(s) {
-                        private$.posteriorDraws[[s]][, i]
-                    })
+                    all_draws <- list()
 
-                    # Calculate EVPI
-                    # E[max(NB)] - max(E[NB])
+                    for (s in strategies) {
+                        if (s %in% names(private$.posteriorDraws)) {
+                            all_draws[[s]] <- private$.posteriorDraws[[s]][, i]
+                        }
+                    }
+
+                    # Also include treat all/none if they exist but aren't in posterior draws
+                    all_strategies <- names(private$.dcaResults$strategies)
+                    for (s in all_strategies) {
+                        if (!s %in% names(all_draws)) {
+                            # For strategies without posterior draws (treat all/none),
+                            # create constant draws
+                            n_draws <- nrow(private$.posteriorDraws[[1]])
+                            all_draws[[s]] <- rep(private$.dcaResults$strategies[[s]]$netBenefit[i], n_draws)
+                        }
+                    }
+
+                    if (length(all_draws) == 0) {
+                        evpiTable$addRow(rowKey = i, values = list(
+                            threshold = thresholds[i],
+                            evpi = 0
+                        ))
+                        next
+                    }
+
+                    # Calculate EVPI: E[max(NB)] - max(E[NB])
                     n_draws <- length(all_draws[[1]])
                     max_nb_draws <- numeric(n_draws)
 
                     for (draw in 1:n_draws) {
                         draw_values <- sapply(all_draws, function(d) d[draw])
-                        max_nb_draws[draw] <- max(draw_values)
+                        max_nb_draws[draw] <- max(draw_values, na.rm = TRUE)
                     }
 
-                    expected_max_nb <- mean(max_nb_draws)
-                    max_expected_nb <- max(sapply(strategies, function(s) {
-                        mean(private$.posteriorDraws[[s]][, i])
-                    }))
+                    expected_max_nb <- mean(max_nb_draws, na.rm = TRUE)
+                    max_expected_nb <- max(sapply(all_draws, mean, na.rm = TRUE), na.rm = TRUE)
 
                     evpi <- expected_max_nb - max_expected_nb
+
+                    # Ensure EVPI is non-negative (should be by theory)
+                    evpi <- max(0, evpi)
 
                     evpiTable$addRow(rowKey = i, values = list(
                         threshold = thresholds[i],
@@ -649,23 +552,61 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 }
             },
 
-            .plotDCA = function(image, ggtheme, theme, ...) {
-                # Main DCA plot
-                if (is.null(private$.dcaResults)) return(FALSE)
+            .preparePlotData = function() {
+                # Prepare data for all plots
+                if (is.null(private$.dcaResults)) return()
 
-                # Prepare data for plotting
-                plotData <- data.frame()
+                thresholds <- private$.thresholds
                 strategies <- names(private$.dcaResults$strategies)
 
+                # Main DCA plot data
+                mainPlotData <- list(
+                    thresholds = thresholds,
+                    strategies = strategies,
+                    dcaResults = private$.dcaResults$strategies
+                )
+
+                # Set plot states
+                self$results$mainPlot$setState(mainPlotData)
+                self$results$deltaPlot$setState(mainPlotData)
+
+                if (self$options$bayesianAnalysis) {
+                    self$results$probPlot$setState(mainPlotData)
+                }
+
+                if (self$options$calculateEVPI && self$options$bayesianAnalysis) {
+                    self$results$evpiPlot$setState(mainPlotData)
+                }
+            },
+
+            .plotDCA = function(image, ggtheme, theme, ...) {
+                # Main DCA plot
+                plotData <- image$state
+                if (is.null(plotData)) return(FALSE)
+
+                thresholds <- plotData$thresholds
+                strategies <- plotData$strategies
+                dcaResults <- plotData$dcaResults
+
+                # Check if required packages are available
+                if (!requireNamespace("RColorBrewer", quietly = TRUE) ||
+                    !requireNamespace("scales", quietly = TRUE)) {
+                    return(FALSE)
+                }
+
+                # Prepare data for plotting
+                plotDf <- data.frame()
+
                 for (strategy in strategies) {
-                    strat_data <- private$.dcaResults$strategies[[strategy]]
-                    plotData <- rbind(plotData, data.frame(
-                        threshold = private$.thresholds,
+                    strat_data <- dcaResults[[strategy]]
+                    df <- data.frame(
+                        threshold = thresholds,
                         strategy = strategy,
                         netBenefit = strat_data$netBenefit,
                         lower = strat_data$lowerCI,
                         upper = strat_data$upperCI
-                    ))
+                    )
+                    plotDf <- rbind(plotDf, df)
                 }
 
                 # Create color palette
@@ -673,7 +614,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 if (n_strategies <= 8) {
                     colors <- RColorBrewer::brewer.pal(max(3, n_strategies), "Dark2")
                 } else {
-                    colors <- colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(n_strategies)
+                    colors <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(n_strategies)
                 }
 
                 # Override colors for default strategies
@@ -682,7 +623,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 if ("Treat none" %in% strategies) color_values["Treat none"] <- "gray40"
 
                 # Create plot
-                plot <- ggplot2::ggplot(plotData, ggplot2::aes(
+                plot <- ggplot2::ggplot(plotDf, ggplot2::aes(
                     x = threshold,
                     y = netBenefit,
                     color = strategy,
@@ -698,7 +639,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     ) +
                     ggplot2::scale_x_continuous(labels = scales::percent) +
                     ggplot2::coord_cartesian(
-                        ylim = c(min(plotData$netBenefit) * 1.1, max(plotData$netBenefit) * 1.1)
+                        ylim = c(min(plotDf$netBenefit) * 1.1, max(plotDf$netBenefit) * 1.1)
                     )
 
                 # Add confidence bands if Bayesian
@@ -718,36 +659,45 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
             .plotDeltaNB = function(image, ggtheme, theme, ...) {
                 # Delta net benefit plot
-                if (is.null(private$.dcaResults)) return(FALSE)
+                plotData <- image$state
+                if (is.null(plotData)) return(FALSE)
+
+                thresholds <- plotData$thresholds
+                strategies <- plotData$strategies
+                dcaResults <- plotData$dcaResults
 
                 # Get non-default strategies
-                strategies <- names(private$.dcaResults$strategies)
                 strategies <- strategies[!strategies %in% c("Treat all", "Treat none")]
-
                 if (length(strategies) == 0) return(FALSE)
 
+                # Check if required packages are available
+                if (!requireNamespace("scales", quietly = TRUE)) {
+                    return(FALSE)
+                }
+
                 # Calculate deltas
-                plotData <- data.frame()
+                plotDf <- data.frame()
 
                 for (strategy in strategies) {
-                    strat_nb <- private$.dcaResults$strategies[[strategy]]$netBenefit
+                    strat_nb <- dcaResults[[strategy]]$netBenefit
 
                     # Compare to best of treat all/none
-                    treat_all_nb <- private$.dcaResults$strategies[["Treat all"]]$netBenefit
-                    treat_none_nb <- private$.dcaResults$strategies[["Treat none"]]$netBenefit
+                    treat_all_nb <- dcaResults[["Treat all"]]$netBenefit
+                    treat_none_nb <- dcaResults[["Treat none"]]$netBenefit
                     best_default <- pmax(treat_all_nb, treat_none_nb)
 
                     delta <- strat_nb - best_default
 
-                    plotData <- rbind(plotData, data.frame(
-                        threshold = private$.thresholds,
+                    df <- data.frame(
+                        threshold = thresholds,
                         strategy = strategy,
                         delta = delta
-                    ))
+                    )
+                    plotDf <- rbind(plotDf, df)
                 }
 
                 # Create plot
-                plot <- ggplot2::ggplot(plotData, ggplot2::aes(
+                plot <- ggplot2::ggplot(plotDf, ggplot2::aes(
                     x = threshold,
                     y = delta,
                     color = strategy,
@@ -774,6 +724,14 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     return(FALSE)
                 }
 
+                plotData <- image$state
+                if (is.null(plotData)) return(FALSE)
+
+                # Check if required packages are available
+                if (!requireNamespace("scales", quietly = TRUE)) {
+                    return(FALSE)
+                }
+
                 # Calculate probability each strategy is best
                 strategies <- names(private$.posteriorDraws)
                 thresholds <- private$.thresholds
@@ -796,17 +754,18 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 }
 
                 # Create plot data
-                plotData <- data.frame()
+                plotDf <- data.frame()
                 for (strategy in strategies) {
-                    plotData <- rbind(plotData, data.frame(
+                    df <- data.frame(
                         threshold = thresholds,
                         strategy = strategy,
                         probability = prob_matrix[, strategy]
-                    ))
+                    )
+                    plotDf <- rbind(plotDf, df)
                 }
 
                 # Create plot
-                plot <- ggplot2::ggplot(plotData, ggplot2::aes(
+                plot <- ggplot2::ggplot(plotDf, ggplot2::aes(
                     x = threshold,
                     y = probability,
                     color = strategy,
@@ -832,39 +791,90 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     return(FALSE)
                 }
 
-                # Get EVPI data from table
-                evpiTable <- self$results$evpiTable
-                if (evpiTable$rowCount == 0) return(FALSE)
+                # Check if required packages are available
+                if (!requireNamespace("scales", quietly = TRUE)) {
+                    return(FALSE)
+                }
 
-                # Extract data
-                plotData <- data.frame(
-                    threshold = numeric(),
-                    evpi = numeric()
+                # Alternative approach: calculate EVPI directly from stored posterior draws
+                if (is.null(private$.posteriorDraws) || is.null(private$.thresholds)) {
+                    return(FALSE)
+                }
+
+                thresholds <- private$.thresholds
+                strategies <- names(private$.posteriorDraws)
+
+                if (length(strategies) == 0) {
+                    return(FALSE)
+                }
+
+                # Calculate EVPI directly
+                evpi_values <- numeric(length(thresholds))
+
+                for (i in seq_along(thresholds)) {
+                    # Get draws for all strategies at this threshold
+                    all_draws <- lapply(strategies, function(s) {
+                        if (s %in% names(private$.posteriorDraws)) {
+                            private$.posteriorDraws[[s]][, i]
+                        } else {
+                            # For treat all/none strategies, use the fixed values
+                            rep(private$.dcaResults$strategies[[s]]$netBenefit[i],
+                                nrow(private$.posteriorDraws[[1]]))
+                        }
+                    })
+
+                    # Skip if no valid draws
+                    if (length(all_draws) == 0 || any(sapply(all_draws, function(x) length(x) == 0))) {
+                        evpi_values[i] <- 0
+                        next
+                    }
+
+                    # Calculate EVPI: E[max(NB)] - max(E[NB])
+                    n_draws <- length(all_draws[[1]])
+                    max_nb_draws <- numeric(n_draws)
+
+                    for (draw in 1:n_draws) {
+                        draw_values <- sapply(all_draws, function(d) d[draw])
+                        max_nb_draws[draw] <- max(draw_values, na.rm = TRUE)
+                    }
+
+                    expected_max_nb <- mean(max_nb_draws, na.rm = TRUE)
+                    max_expected_nb <- max(sapply(all_draws, mean, na.rm = TRUE), na.rm = TRUE)
+
+                    evpi_values[i] <- expected_max_nb - max_expected_nb
+                }
+
+                # Create plot data
+                plotDf <- data.frame(
+                    threshold = thresholds,
+                    evpi = evpi_values
                 )
 
-                for (i in 1:evpiTable$rowCount) {
-                    row <- evpiTable$getRow(i)
-                    plotData <- rbind(plotData, data.frame(
-                        threshold = row$values[["threshold"]],
-                        evpi = row$values[["evpi"]]
-                    ))
+                # Remove any rows with NA or infinite values
+                plotDf <- plotDf[is.finite(plotDf$evpi), ]
+
+                if (nrow(plotDf) == 0) {
+                    return(FALSE)
                 }
 
                 # Create plot
-                plot <- ggplot2::ggplot(plotData, ggplot2::aes(x = threshold, y = evpi)) +
-                    ggplot2::geom_line(size = 1) +
+                plot <- ggplot2::ggplot(plotDf, ggplot2::aes(x = threshold, y = evpi)) +
+                    ggplot2::geom_line(size = 1, color = "blue") +
+                    ggplot2::geom_point(size = 1, color = "blue", alpha = 0.6) +
                     ggplot2::theme_bw(base_size = 14) +
                     ggplot2::labs(
                         x = "Decision Threshold",
                         y = "Expected Value of Perfect Information",
                         subtitle = "EVPI: Value of Reducing Uncertainty"
                     ) +
-                    ggplot2::scale_x_continuous(labels = scales::percent)
+                    ggplot2::scale_x_continuous(labels = scales::percent) +
+                    ggplot2::scale_y_continuous(labels = function(x) format(x, digits = 4))
+
+                # Add horizontal line at zero for reference
+                plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5)
 
                 print(plot)
                 return(TRUE)
             }
-
-
         )
     )

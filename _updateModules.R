@@ -460,7 +460,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date
-new_version <- "0.0.3.13"
+new_version <- "0.0.3.14"
 new_date <- "2024-05-27"
 
 # Run the update process

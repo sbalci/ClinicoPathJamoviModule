@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.13
+Version: 0.0.3.14
 Date: 2024-05-27
 Authors@R: 
     person(given = "Serdar",
@@ -125,7 +125,8 @@ Imports:
     rlang,
     vtree,
     poLCA,
-    patchwork
+    RColorBrewer,
+    scales
 VignetteBuilder:
     knitr,
     tiff
