@@ -140,6 +140,136 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 if (self$options$calculateEVPI && self$options$bayesianAnalysis) {
                     self$.calculateEVPI()
                 }
+
+                # Calculate useful strategies
+                self$.calculateUsefulStrategies()
+
+                # Calculate pairwise comparisons
+                self$.calculatePairwiseComparisons()
+                }
+            },
+            
+            .calculatePairwiseComparisons = function() {
+                # Calculate pairwise comparisons between models/tests
+                if (is.null(private$.dcaResults)) return()
+
+                thresholds <- private$.thresholds
+                predictorVars <- self$options$predictors
+
+                if (length(predictorVars) < 2) {
+                    self$results$pairwiseComparisonsTable$setVisible(FALSE)
+                    return()
+                }
+                self$results$pairwiseComparisonsTable$setVisible(TRUE)
+
+
+                compTable <- self$results$pairwiseComparisonsTable
+                # Clear existing rows before populating (important for re-runs)
+                compTable$clearRows()
+
+
+                # Create unique pairs of predictors
+                predictorPairs <- utils::combn(predictorVars, 2, simplify = FALSE)
+
+                for (pair in predictorPairs) {
+                    strategy1 <- pair[1]
+                    strategy2 <- pair[2]
+
+                    NB_S1_point <- private$.dcaResults$strategies[[strategy1]]$netBenefit
+                    NB_S2_point <- private$.dcaResults$strategies[[strategy2]]$netBenefit
+                    deltaNB_S1_S2_point <- NB_S1_point - NB_S2_point
+
+                    prob_S1_better_S2_values <- rep(NA, length(thresholds))
+
+                    if (self$options$bayesianAnalysis && 
+                        !is.null(private$.posteriorDraws) &&
+                        strategy1 %in% names(private$.posteriorDraws) && 
+                        strategy2 %in% names(private$.posteriorDraws)) {
+                        
+                        NB_S1_draws <- private$.posteriorDraws[[strategy1]]
+                        NB_S2_draws <- private$.posteriorDraws[[strategy2]]
+                        deltaNB_S1_S2_draws <- NB_S1_draws - NB_S2_draws
+                        
+                        # Recalculate deltaNB_S1_S2_point from mean of draws for consistency
+                        # deltaNB_S1_S2_point <- apply(deltaNB_S1_S2_draws, 2, mean)
+                        
+                        prob_S1_better_S2_values <- apply(deltaNB_S1_S2_draws > 0, 2, mean)
+                    }
+
+                    for (i in seq_along(thresholds)) {
+                        # Add a unique rowKey for each row
+                        rowKey <- paste(strategy1, strategy2, i, sep = "_")
+                        compTable$addRow(rowKey = rowKey, values = list(
+                            threshold = thresholds[i],
+                            strategy1 = strategy1,
+                            strategy2 = strategy2,
+                            deltaNB_S1_S2 = deltaNB_S1_S2_point[i],
+                            prob_S1_better_S2 = prob_S1_better_S2_values[i]
+                        ))
+                    }
+                }
+            },
+
+            .calculateUsefulStrategies = function() {
+                # Calculate usefulness of strategies vs. best default
+                if (is.null(private$.dcaResults)) return()
+
+                thresholds <- private$.thresholds
+                predictorVars <- self$options$predictors
+
+                if (length(predictorVars) == 0) return()
+
+                # Ensure "Treat all" and "Treat none" are in posteriorDraws if Bayesian
+                if (self$options$bayesianAnalysis && 
+                    (!("Treat all" %in% names(private$.posteriorDraws)) || 
+                     !("Treat none" %in% names(private$.posteriorDraws)))) {
+                    jmvcore::reject("Default strategy draws not found for useful strategies calculation.")
+                    return()
+                }
+                
+                NB_TreatAll_draws <- NULL
+                NB_TreatNone_draws <- NULL
+
+                if (self$options$bayesianAnalysis) {
+                    NB_TreatAll_draws <- private$.posteriorDraws[["Treat all"]]
+                    NB_TreatNone_draws <- private$.posteriorDraws[["Treat none"]]
+                }
+
+
+                for (predictor in predictorVars) {
+                    if (!predictor %in% self$results$usefulStrategiesTable$itemKeys) {
+                        self$results$usefulStrategiesTable$addItem(key = predictor)
+                    }
+                    table <- self$results$usefulStrategiesTable$get(key = predictor)
+
+                    NB_model_point <- private$.dcaResults$strategies[[predictor]]$netBenefit
+                    NB_TreatAll_point <- private$.dcaResults$strategies[["Treat all"]]$netBenefit
+                    NB_TreatNone_point <- private$.dcaResults$strategies[["Treat none"]]$netBenefit
+                    
+                    NB_BestDefault_point <- pmax(NB_TreatAll_point, NB_TreatNone_point)
+                    deltaNB_point <- NB_model_point - NB_BestDefault_point
+
+                    probUseful_values <- rep(NA, length(thresholds))
+
+                    if (self$options$bayesianAnalysis) {
+                        NB_model_draws <- private$.posteriorDraws[[predictor]]
+                        NB_BestDefault_draws <- pmax(NB_TreatAll_draws, NB_TreatNone_draws)
+                        deltaNB_draws <- NB_model_draws - NB_BestDefault_draws
+                        
+                        # Recalculate deltaNB_point from mean of draws for consistency in Bayesian mode
+                        # deltaNB_point <- apply(deltaNB_draws, 2, mean) # Use column means
+                        
+                        probUseful_values <- apply(deltaNB_draws > 0, 2, mean) # Use column means
+                    }
+
+                    for (i in seq_along(thresholds)) {
+                        table$addRow(rowKey = i, values = list(
+                            threshold = thresholds[i],
+                            deltaNB = deltaNB_point[i],
+                            probUseful = probUseful_values[i]
+                        ))
+                    }
+                }
             },
 
             .runBayesianDCA = function(outcomes, data, predictorVars, thresholds, prevalence) {
