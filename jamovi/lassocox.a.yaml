@@ -9,6 +9,10 @@ jas: '1.2'
 
 description:
     main: Performs Lasso-penalized Cox regression for variable selection in survival analysis.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
 
 options:
     - name: data
@@ -21,23 +25,35 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+        R: >
+          The numeric variable representing follow-up time until the event or last observation.
 
     - name: outcome
       title: 'Outcome'
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
+      description:
+        R: >
+          The outcome variable. Typically indicates event status (e.g., death, recurrence).
 
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      description:
+        R: >
+          The level of `outcome` considered as the event.
 
     - name: explanatory
       title: Explanatory Variables
       type: Variables
       suggested: [ nominal, ordinal, continuous ]
       permitted: [ factor, numeric ]
+      description:
+        R: >
+          Variables to be considered for selection in the Lasso-Cox regression.
       
     - name: lambda
       title: Lambda Selection Method
@@ -48,36 +64,56 @@ options:
         - title: 1SE Rule
           name: lambda.1se
       default: lambda.1se
+      description:
+        R: >
+          Method for selecting the optimal lambda parameter from cross-validation.
 
     - name: nfolds
       title: Number of CV Folds
       type: Integer
       default: 10
       min: 3
+      description:
+        R: >
+          Number of folds for cross-validation.
       
     - name: standardize
       title: Standardize Variables
       type: Bool
       default: true
+      description:
+        R: >
+          Whether to standardize predictor variables before fitting.
 
-    - name: plots
-      title: Plots
-      type: Group
-      items:
-        - name: cv_plot
-          title: Cross-validation Plot
-          type: Bool
-          default: true
-        - name: coef_plot
-          title: Coefficient Plot
-          type: Bool
-          default: true
-        - name: survival_plot
-          title: Risk Group Survival Plot
-          type: Bool
-          default: true
+    - name: cv_plot
+      title: Cross-validation Plot
+      type: Bool
+      default: true
+      description:
+        R: >
+          Whether to show the cross-validation plot.
+
+    - name: coef_plot
+      title: Coefficient Plot
+      type: Bool
+      default: true
+      description:
+        R: >
+          Whether to show the coefficient path plot.
+
+    - name: survival_plot
+      title: Risk Group Survival Plot
+      type: Bool
+      default: true
+      description:
+        R: >
+          Whether to show survival curves by risk groups.
 
     - name: riskScore
       title: Add Risk Score to Data
       type: Output
+      description:
+        R: >
+          If true, adds calculated risk scores to the dataset.
+
 ...

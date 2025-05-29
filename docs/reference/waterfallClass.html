@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,21 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_optimisation.html">Introduction to Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostic-tests.html">Diagnostic Test Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
+    <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -130,28 +139,21 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Category    Number of Patients    Percentage   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    CR     ᵃ                     1           10%   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    PR     ᵇ                     2           20%   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    SD     ᵈ                     5           50%   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    PD     ᵉ                     2           20%   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Complete Response (CR): Complete</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    disappearance of all target lesions.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ Partial Response (PR): At least 30%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    decrease in sum of target lesions.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵈ Stable Disease (SD): Neither PR nor PD</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    criteria met.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵉ Progressive Disease (PD): At least 20%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    increase in sum of target lesions.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Response Metrics                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric                             Value   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Objective Response Rate (CR+PR)    30%     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Disease Control Rate (CR+PR+SD)    80%     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Category    Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Response Metrics </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric    Value   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

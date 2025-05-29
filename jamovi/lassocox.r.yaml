@@ -4,6 +4,15 @@ title: Lasso-Cox Regression
 jrs: '1.1'
 
 items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
     - name: modelSummary
       title: Model Summary
       type: Table
@@ -15,6 +24,14 @@ items:
         - name: value
           title: "Value"
           type: number
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
 
     - name: coefficients
       title: Selected Variables
@@ -27,30 +44,14 @@ items:
         - name: coefficient
           title: "Coefficient"
           type: number
-          
-    - name: cv_plot
-      title: Cross-validation Plot
-      type: Image
-      renderFun: .cvPlot
-      width: 600
-      height: 400
-      visible: (cv_plot)
-      
-    - name: coef_plot
-      title: Coefficient Plot
-      type: Image
-      renderFun: .coefPlot
-      width: 600
-      height: 400
-      visible: (coef_plot)
-      
-    - name: survival_plot
-      title: Risk Group Survival Plot
-      type: Image
-      renderFun: .survivalPlot
-      width: 600
-      height: 400
-      visible: (survival_plot)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
 
     - name: performance
       title: Model Performance
@@ -63,4 +64,89 @@ items:
         - name: value
           title: "Value"
           type: number
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          
+    - name: cv_plot
+      title: Cross-validation Plot
+      type: Image
+      renderFun: .cvPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (cv_plot)
+      refs: glmnet
+      clearWith:
+          - cv_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+      
+    - name: coef_plot
+      title: Coefficient Plot
+      type: Image
+      renderFun: .coefPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (coef_plot)
+      refs: glmnet
+      clearWith:
+          - coef_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+      
+    - name: survival_plot
+      title: Risk Group Survival Plot
+      type: Image
+      renderFun: .survivalPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (survival_plot)
+      refs: survminer
+      clearWith:
+          - survival_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+    - name: riskScore
+      title: Add Risk Score to Data
+      type: Output
+      varTitle: 'Calculated Risk Score from Lasso-Cox Regression'
+      varDescription: Risk Score Based on Lasso-Cox Model
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+refs:
+    - glmnet
+    - survival
+    - survminer
+
 ...

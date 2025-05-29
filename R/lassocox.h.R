@@ -5,7 +5,17 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lassocoxOptions",
     inherit = jmvcore::Options,
     public = list(
-        initialize = function( ...) {
+        initialize = function(
+            elapsedtime = NULL,
+            outcome = NULL,
+            outcomeLevel = NULL,
+            explanatory = NULL,
+            lambda = "lambda.1se",
+            nfolds = 10,
+            standardize = TRUE,
+            cv_plot = TRUE,
+            coef_plot = TRUE,
+            survival_plot = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -13,24 +23,138 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..elapsedtime <- jmvcore::OptionVariable$new(
+                "elapsedtime",
+                elapsedtime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..outcome <- jmvcore::OptionVariable$new(
+                "outcome",
+                outcome,
+                suggested=list(
+                    "ordinal",
+                    "nominal",
+                    "continuous"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(outcome)")
+            private$..explanatory <- jmvcore::OptionVariables$new(
+                "explanatory",
+                explanatory,
+                suggested=list(
+                    "nominal",
+                    "ordinal",
+                    "continuous"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..lambda <- jmvcore::OptionList$new(
+                "lambda",
+                lambda,
+                options=list(
+                    "lambda.min",
+                    "lambda.1se"),
+                default="lambda.1se")
+            private$..nfolds <- jmvcore::OptionInteger$new(
+                "nfolds",
+                nfolds,
+                default=10,
+                min=3)
+            private$..standardize <- jmvcore::OptionBool$new(
+                "standardize",
+                standardize,
+                default=TRUE)
+            private$..cv_plot <- jmvcore::OptionBool$new(
+                "cv_plot",
+                cv_plot,
+                default=TRUE)
+            private$..coef_plot <- jmvcore::OptionBool$new(
+                "coef_plot",
+                coef_plot,
+                default=TRUE)
+            private$..survival_plot <- jmvcore::OptionBool$new(
+                "survival_plot",
+                survival_plot,
+                default=TRUE)
+            private$..riskScore <- jmvcore::OptionOutput$new(
+                "riskScore")
 
+            self$.addOption(private$..elapsedtime)
+            self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..explanatory)
+            self$.addOption(private$..lambda)
+            self$.addOption(private$..nfolds)
+            self$.addOption(private$..standardize)
+            self$.addOption(private$..cv_plot)
+            self$.addOption(private$..coef_plot)
+            self$.addOption(private$..survival_plot)
+            self$.addOption(private$..riskScore)
         }),
-    active = list(),
-    private = list()
+    active = list(
+        elapsedtime = function() private$..elapsedtime$value,
+        outcome = function() private$..outcome$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        explanatory = function() private$..explanatory$value,
+        lambda = function() private$..lambda$value,
+        nfolds = function() private$..nfolds$value,
+        standardize = function() private$..standardize$value,
+        cv_plot = function() private$..cv_plot$value,
+        coef_plot = function() private$..coef_plot$value,
+        survival_plot = function() private$..survival_plot$value,
+        riskScore = function() private$..riskScore$value),
+    private = list(
+        ..elapsedtime = NA,
+        ..outcome = NA,
+        ..outcomeLevel = NA,
+        ..explanatory = NA,
+        ..lambda = NA,
+        ..nfolds = NA,
+        ..standardize = NA,
+        ..cv_plot = NA,
+        ..coef_plot = NA,
+        ..survival_plot = NA,
+        ..riskScore = NA)
 )
 
 lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lassocoxResults",
     inherit = jmvcore::Group,
     active = list(
-        modelSummary = function() private$.items[["modelSummary"]]),
+        todo = function() private$.items[["todo"]],
+        modelSummary = function() private$.items[["modelSummary"]],
+        coefficients = function() private$.items[["coefficients"]],
+        performance = function() private$.items[["performance"]],
+        cv_plot = function() private$.items[["cv_plot"]],
+        coef_plot = function() private$.items[["coef_plot"]],
+        survival_plot = function() private$.items[["survival_plot"]],
+        riskScore = function() private$.items[["riskScore"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Lasso-Cox Regression")
+                title="Lasso-Cox Regression",
+                refs=list(
+                    "glmnet",
+                    "survival",
+                    "survminer"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",
@@ -44,7 +168,130 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="number"))))}))
+                        `type`="number")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="coefficients",
+                title="Selected Variables",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="coefficient", 
+                        `title`="Coefficient", 
+                        `type`="number")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="performance",
+                title="Model Performance",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="cv_plot",
+                title="Cross-validation Plot",
+                renderFun=".cvPlot",
+                width=600,
+                height=400,
+                requiresData=TRUE,
+                visible="(cv_plot)",
+                refs="glmnet",
+                clearWith=list(
+                    "cv_plot",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="coef_plot",
+                title="Coefficient Plot",
+                renderFun=".coefPlot",
+                width=600,
+                height=400,
+                requiresData=TRUE,
+                visible="(coef_plot)",
+                refs="glmnet",
+                clearWith=list(
+                    "coef_plot",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survival_plot",
+                title="Risk Group Survival Plot",
+                renderFun=".survivalPlot",
+                width=600,
+                height=400,
+                requiresData=TRUE,
+                visible="(survival_plot)",
+                refs="survminer",
+                clearWith=list(
+                    "survival_plot",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="riskScore",
+                title="Add Risk Score to Data",
+                varTitle="Calculated Risk Score from Lasso-Cox Regression",
+                varDescription="Risk Score Based on Lasso-Cox Model",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))}))
 
 lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lassocoxBase",
@@ -64,16 +311,44 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Lasso-Cox Regression
 #'
-#' 
+#' Performs Lasso-penalized Cox regression for variable selection in survival 
+#' analysis.
+#'
+#' @examples
+#' \donttest{
+#' # example will be added
+#'}
 #' @param data The data as a data frame.
+#' @param elapsedtime The numeric variable representing follow-up time until
+#'   the event or last observation.
+#' @param outcome The outcome variable. Typically indicates event status
+#'   (e.g., death, recurrence).
+#' @param outcomeLevel The level of \code{outcome} considered as the event.
+#' @param explanatory Variables to be considered for selection in the
+#'   Lasso-Cox regression.
+#' @param lambda Method for selecting the optimal lambda parameter from
+#'   cross-validation.
+#' @param nfolds Number of folds for cross-validation.
+#' @param standardize Whether to standardize predictor variables before
+#'   fitting.
+#' @param cv_plot Whether to show the cross-validation plot.
+#' @param coef_plot Whether to show the coefficient path plot.
+#' @param survival_plot Whether to show survival curves by risk groups.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$performance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cv_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -84,17 +359,43 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 lassocox <- function(
-    data) {
+    data,
+    elapsedtime,
+    outcome,
+    outcomeLevel,
+    explanatory,
+    lambda = "lambda.1se",
+    nfolds = 10,
+    standardize = TRUE,
+    cv_plot = TRUE,
+    coef_plot = TRUE,
+    survival_plot = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("lassocox requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(elapsedtime)) elapsedtime <- jmvcore::resolveQuo(jmvcore::enquo(elapsedtime))
+    if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
+    if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
     if (missing(data))
         data <- jmvcore::marshalData(
-            parent.frame())
+            parent.frame(),
+            `if`( ! missing(elapsedtime), elapsedtime, NULL),
+            `if`( ! missing(outcome), outcome, NULL),
+            `if`( ! missing(explanatory), explanatory, NULL))
 
 
-    options <- lassocoxOptions$new()
+    options <- lassocoxOptions$new(
+        elapsedtime = elapsedtime,
+        outcome = outcome,
+        outcomeLevel = outcomeLevel,
+        explanatory = explanatory,
+        lambda = lambda,
+        nfolds = nfolds,
+        standardize = standardize,
+        cv_plot = cv_plot,
+        coef_plot = coef_plot,
+        survival_plot = survival_plot)
 
     analysis <- lassocoxClass$new(
         options = options,

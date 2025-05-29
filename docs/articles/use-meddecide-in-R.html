@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,12 +34,21 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+<li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_optimisation.html">Introduction to Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostic-tests.html">Diagnostic Test Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
+    <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -75,7 +84,21 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
+<span><span class="co">#&gt; 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::auc' by 'pROC::auc' when loading</span></span>
+<span><span class="co">#&gt; 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'magrittr::extract' by 'tidyr::extract' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'jmvcore::select' by 'dplyr::select' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'ROCR::plot' by 'graphics::plot' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span></code></pre></div>
 <p>agreement()</p>
 <p>Interrater Reliability</p>
 <p>agreementClass</p>

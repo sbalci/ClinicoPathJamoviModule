@@ -358,7 +358,7 @@ save(covid_screening_data,
      tb_diagnosis_data,
      mi_ruleout_data,
      thyroid_nodule_data,
-     file = "decision_panel_test_data.RData")
+     file = "./data/decision_panel_test_data.RData")
 
 # Save as CSV files for external use
 write.csv(covid_screening_data, "./data/covid_screening_data.csv", row.names = FALSE)

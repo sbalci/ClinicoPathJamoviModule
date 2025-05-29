@@ -4,15 +4,59 @@
 \alias{lassocox}
 \title{Lasso-Cox Regression}
 \usage{
-lassocox(data)
+lassocox(
+  data,
+  elapsedtime,
+  outcome,
+  outcomeLevel,
+  explanatory,
+  lambda = "lambda.1se",
+  nfolds = 10,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
+
+\item{elapsedtime}{The numeric variable representing follow-up time until
+the event or last observation.}
+
+\item{outcome}{The outcome variable. Typically indicates event status
+(e.g., death, recurrence).}
+
+\item{outcomeLevel}{The level of \code{outcome} considered as the event.}
+
+\item{explanatory}{Variables to be considered for selection in the
+Lasso-Cox regression.}
+
+\item{lambda}{Method for selecting the optimal lambda parameter from
+cross-validation.}
+
+\item{nfolds}{Number of folds for cross-validation.}
+
+\item{standardize}{Whether to standardize predictor variables before
+fitting.}
+
+\item{cv_plot}{Whether to show the cross-validation plot.}
+
+\item{coef_plot}{Whether to show the coefficient path plot.}
+
+\item{survival_plot}{Whether to show survival curves by risk groups.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
+\code{results$performance} \tab \tab \tab \tab \tab a table \cr
+\code{results$cv_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -22,5 +66,11 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$modelSummary)}
 }
 \description{
-Lasso-Cox Regression
+Performs Lasso-penalized Cox regression for variable selection in survival
+analysis.
+}
+\examples{
+\donttest{
+# example will be added
+}
 }
