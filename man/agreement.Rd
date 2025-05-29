@@ -8,6 +8,8 @@ agreement(
   data,
   vars,
   sft = FALSE,
+  heatmap = FALSE,
+  heatmapDetails = FALSE,
   wght = "unweighted",
   exct = FALSE,
   kripp = FALSE,
@@ -25,6 +27,12 @@ diagnosis given by the observer, variable can be categorical or ordinal.}
 \item{sft}{Boolean selection whether to show frequency table. Default is
 'false'. If 'true', the function will show frequency table for each
 observer.}
+
+\item{heatmap}{Boolean selection whether to show agreement heatmap. Default
+is 'true'.}
+
+\item{heatmapDetails}{Boolean selection whether to show detailed heatmap
+with kappa values. Default is 'false'.}
 
 \item{wght}{A list for the argument weight (wght), for weighted kappa
 analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
@@ -47,6 +55,7 @@ Krippendorff's alpha.}
 A results object containing:
 \tabular{llllll}{
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
+\code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr

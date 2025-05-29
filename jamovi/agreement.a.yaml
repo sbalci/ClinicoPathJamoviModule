@@ -42,6 +42,24 @@ options:
             frequency table for each observer.
 
 
+    - name: heatmap
+      title: Agreement Heatmap
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show agreement heatmap. Default is 'true'.
+
+
+    - name: heatmapDetails
+      title: Show Detailed Heatmap
+      type: Bool
+      default: false
+      description:
+          R: >
+            Boolean selection whether to show detailed heatmap with kappa values. Default is 'false'.
+
+
     - name: wght
       title: Weighted Kappa (Ordinal Variables only)
       type: List

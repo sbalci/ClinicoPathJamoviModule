@@ -88,6 +88,20 @@ items:
           - exct
 
 
+    - name: heatmapPlot
+      title: 'Agreement Heatmap'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .heatmapPlot
+      visible: (heatmap)
+      clearWith:
+          - vars
+          - wght
+          - exct
+          - heatmap
+          - heatmapDetails
+          
     - name:  text2
       title: 'Table'
       type:  Html

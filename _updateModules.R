@@ -138,7 +138,10 @@ meddecide_data_description_files <- c(
   "nogoldstandard.Rmd",
   "agreement-analysis.Rmd",
   "diagnostic-tests.Rmd",
-  "roc-analysis.Rmd"
+  "roc-analysis.Rmd",
+  "decisionpanel_advanced.Rmd",
+  "decisionpanel_optimisation.Rmd",
+  "decisionpanel_clinical.Rmd"
 )
 
 fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_files),
@@ -306,9 +309,17 @@ update_modules <- function(new_version, new_date) {
       "decisioncalculator",
       "nogoldstandard",
       "decisioncompare",
+      # "decisioncombine",
+      # "decisionpanel",
+      # "screeningcalculator",
+      # "cotest",
+      # "sequentialtests",
 
       # ROC
       "psychopdaroc",
+
+      # Decision Curve Analysis
+      # "bayesiandca",
       # "decisioncurve",
 
       # Power
@@ -459,9 +470,9 @@ update_yaml_a_files(paths = yaml_a_paths,
   message("Modules updated to version ", new_version, " and date ", new_date)
 }
 
-# Define the new version and date
-new_version <- "0.0.3.14"
-new_date <- "2024-05-27"
+# Define the new version and date ----
+new_version <- "0.0.3.16"
+new_date <- "2024-05-29"
 
 # Run the update process
 update_modules(new_version, new_date)

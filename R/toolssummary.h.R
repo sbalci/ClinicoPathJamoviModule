@@ -6,7 +6,10 @@ toolssummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL, ...) {
+            vars = NULL,
+            excludeNA = FALSE,
+            showFreq = TRUE,
+            showStats = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,21 +20,44 @@ toolssummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
+            private$..excludeNA <- jmvcore::OptionBool$new(
+                "excludeNA",
+                excludeNA,
+                default=FALSE)
+            private$..showFreq <- jmvcore::OptionBool$new(
+                "showFreq",
+                showFreq,
+                default=TRUE)
+            private$..showStats <- jmvcore::OptionBool$new(
+                "showStats",
+                showStats,
+                default=TRUE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..excludeNA)
+            self$.addOption(private$..showFreq)
+            self$.addOption(private$..showStats)
         }),
     active = list(
-        vars = function() private$..vars$value),
+        vars = function() private$..vars$value,
+        excludeNA = function() private$..excludeNA$value,
+        showFreq = function() private$..showFreq$value,
+        showStats = function() private$..showStats$value),
     private = list(
-        ..vars = NA)
+        ..vars = NA,
+        ..excludeNA = NA,
+        ..showFreq = NA,
+        ..showStats = NA)
 )
 
 toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "toolssummaryResults",
     inherit = jmvcore::Group,
     active = list(
-        tablestyle4 = function() private$.items[["tablestyle4"]],
-        tablestyle4html = function() private$.items[["tablestyle4html"]]),
+        todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        frequencies = function() private$.items[["frequencies"]],
+        numericStats = function() private$.items[["numericStats"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -41,14 +67,70 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Tools for data summary",
                 refs=list(
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="tablestyle4",
-                title="toolssummary"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="tablestyle4html",
-                title="toolssummary"))}))
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Summary Statistics",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="type", 
+                        `title`="Type", 
+                        `type`="text"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="unique", 
+                        `title`="Unique", 
+                        `type`="integer"),
+                    list(
+                        `name`="stats", 
+                        `title`="Statistics", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="frequencies",
+                title="Frequency Tables",
+                visible="(showFreq)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="numericStats",
+                title="Numeric Variable Statistics",
+                visible="(showStats)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number"),
+                    list(
+                        `name`="min", 
+                        `title`="Min", 
+                        `type`="number"),
+                    list(
+                        `name`="max", 
+                        `title`="Max", 
+                        `type`="number"))))}))
 
 toolssummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "toolssummaryBase",
@@ -74,18 +156,32 @@ toolssummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Tools for data summary
 #'
 #' 
-#' @param data .
-#' @param vars .
+#' @param data The data as a data frame.
+#' @param vars Variables to summarize
+#' @param excludeNA .
+#' @param showFreq .
+#' @param showStats .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$tablestyle4html} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frequencies} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$numericStats} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 toolssummary <- function(
     data,
-    vars) {
+    vars,
+    excludeNA = FALSE,
+    showFreq = TRUE,
+    showStats = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("toolssummary requires jmvcore to be installed (restart may be required)")
@@ -98,7 +194,10 @@ toolssummary <- function(
 
 
     options <- toolssummaryOptions$new(
-        vars = vars)
+        vars = vars,
+        excludeNA = excludeNA,
+        showFreq = showFreq,
+        showStats = showStats)
 
     analysis <- toolssummaryClass$new(
         options = options,

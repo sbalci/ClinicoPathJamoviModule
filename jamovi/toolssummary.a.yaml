@@ -2,17 +2,35 @@
 name:  toolssummary
 title: Tools for data summary
 menuGroup: Exploration
-menuSubgroup: Drafts
+menuSubgroup: ClinicoPath Descriptives
 version: '1.0.0'
 jas: '1.2'
 
 options:
     - name: data
       type: Data
+      description:
+          R: >
+            The data as a data frame.
 
     - name: vars
       title: Variables
       type: Variables
+      description:
+          R: >
+            Variables to summarize
 
+    - name: excludeNA
+      title: Exclude Missing Values
+      type: Bool
+      default: false
 
-...
+    - name: showFreq
+      title: Show Frequencies
+      type: Bool
+      default: true
+
+    - name: showStats
+      title: Show Statistics
+      type: Bool
+      default: true

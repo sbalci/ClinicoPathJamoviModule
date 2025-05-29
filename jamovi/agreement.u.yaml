@@ -24,6 +24,24 @@ children:
         children:
           - type: CheckBox
             name: sft
+            label: Show Frequency Tables
+
+
+  - type: Label
+    label: Plots
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: heatmap
+            label: Agreement Heatmap
+          - type: CheckBox
+            name: heatmapDetails
+            label: Show Detailed Statistics
+            enable: (heatmap)
+
+
   - type: Label
     label: Tests
     children:
@@ -32,11 +50,13 @@ children:
         children:
           - type: CheckBox
             name: exct
+            label: Exact Kappa (>=3 Variables)
           - type: ComboBox
             name: wght
-
+            label: Weighted Kappa
+                 
   - type: Label
-    label: "Krippendorff's Alpha"
+    label: Krippendorff's Alpha
     children:
       - type: LayoutBox
         margin: large

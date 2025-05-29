@@ -1,0 +1,413 @@
+---
+name: decisionpanel
+title: Decision Panel Optimization
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Optimize test panels and decision trees
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Optimize diagnostic test panels by evaluating various combination strategies including
+        parallel testing (cotest), sequential testing, and repeated tests. Creates decision
+        trees to minimize cost while maximizing accuracy.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    # ==========================================
+    # TEST VARIABLES
+    # ==========================================
+    
+    - name: tests
+      title: Diagnostic Tests
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      rejectUnusedLevels: true
+      description:
+          R: >
+            Variables representing different diagnostic tests. 
+            Can select multiple tests (up to 10) for panel optimization.
+
+
+    - name: testLevels
+      title: Positive Test Levels
+      type: String
+      default: ""
+      description:
+          ui: >
+            Specify which level indicates a positive test result for each test.
+            
+            For single test: "Positive" 
+            For multiple tests: "Positive,Yes,1" (comma-separated)
+            
+            Leave blank to auto-detect common positive values like:
+            "Positive", "Yes", "True", "1"
+          R: >
+            String specifying positive test levels. Can be:
+            - Single value (used for all tests): "Positive"
+            - Multiple values (comma-separated): "Positive,Yes,1"  
+            - Empty string (auto-detection): ""
+
+
+    - name: gold
+      title: Gold Standard
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            The gold standard variable for disease classification.
+
+    - name: goldPositive
+      title: Positive Level (Disease Present)
+      type: Level
+      variable: (gold)
+      description:
+          R: >
+            The level of the gold standard variable that indicates disease presence.
+
+    # ==========================================
+    # COST PARAMETERS
+    # ==========================================
+    
+    - name: useCosts
+      title: Include Cost Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include cost considerations in the optimization process.
+
+    - name: testCosts
+      title: Test Costs
+      type: String
+      default: ""
+      description:
+          R: >
+            Comma-separated costs for each test in the same order as selected tests.
+            Example: "10,25,50" for three tests.
+
+    - name: fpCost
+      title: False Positive Cost
+      type: Number
+      default: 100
+      min: 0
+      description:
+          R: >
+            Cost or harm associated with a false positive result.
+
+    - name: fnCost
+      title: False Negative Cost
+      type: Number
+      default: 1000
+      min: 0
+      description:
+          R: >
+            Cost or harm associated with a false negative result.
+
+    # ==========================================
+    # TESTING STRATEGIES
+    # ==========================================
+    
+    - name: strategies
+      title: Testing Strategies to Evaluate
+      type: List
+      options:
+        - name: all
+          title: All strategies
+        - name: single
+          title: Single tests only
+        - name: parallel
+          title: Parallel (cotest) only
+        - name: sequential
+          title: Sequential only
+        - name: custom
+          title: Custom selection
+      default: all
+      description:
+          R: >
+            Which testing strategies to evaluate in the analysis.
+
+    - name: parallelRules
+      title: Parallel Testing Rules
+      type: List
+      options:
+        - name: any
+          title: Any positive (OR rule)
+        - name: all
+          title: All positive (AND rule)
+        - name: majority
+          title: Majority positive
+        - name: custom
+          title: Custom threshold
+      default: any
+      description:
+          R: >
+            Rule for combining results in parallel testing.
+
+    - name: customThreshold
+      title: Custom Positive Threshold
+      type: Number
+      default: 2
+      min: 1
+      description:
+          R: >
+            Number of positive tests required for overall positive result (when using custom rule).
+
+    - name: maxTests
+      title: Maximum Tests in Combination
+      type: Number
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: >
+            Maximum number of tests to combine in any strategy.
+
+    - name: sequentialStop
+      title: Sequential Testing Stop Rule
+      type: List
+      options:
+        - name: positive
+          title: Stop on first positive
+        - name: negative
+          title: Stop on first negative
+        - name: confirmatory
+          title: Confirmatory (require 2 positives)
+        - name: exclusion
+          title: Exclusion (require 2 negatives)
+      default: positive
+      description:
+          R: >
+            When to stop testing in sequential strategies.
+
+    # ==========================================
+    # OPTIMIZATION CRITERIA
+    # ==========================================
+    
+    - name: optimizationCriteria
+      title: Optimization Criteria
+      type: List
+      options:
+        - name: accuracy
+          title: Maximize accuracy
+        - name: sensitivity
+          title: Maximize sensitivity
+        - name: specificity
+          title: Maximize specificity
+        - name: ppv
+          title: Maximize PPV
+        - name: npv
+          title: Maximize NPV
+        - name: youden
+          title: Maximize Youden's J
+        - name: utility
+          title: Maximize utility (cost-adjusted)
+        - name: efficiency
+          title: Maximize efficiency (accuracy/cost)
+      default: accuracy
+      description:
+          R: >
+            Primary criterion for optimizing test panels.
+
+    - name: minSensitivity
+      title: Minimum Acceptable Sensitivity
+      type: Number
+      default: 0.80
+      min: 0
+      max: 1
+      description:
+          R: >
+            Minimum sensitivity constraint for panel selection.
+
+    - name: minSpecificity
+      title: Minimum Acceptable Specificity
+      type: Number
+      default: 0.80
+      min: 0
+      max: 1
+      description:
+          R: >
+            Minimum specificity constraint for panel selection.
+
+    # ==========================================
+    # DECISION TREE OPTIONS
+    # ==========================================
+    
+    - name: createTree
+      title: Create Decision Tree
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate an optimal decision tree for test sequencing.
+
+    - name: treeMethod
+      title: Tree Construction Method
+      type: List
+      options:
+        - name: cart
+          title: CART (Classification and Regression Trees)
+        - name: conditional
+          title: Conditional inference trees
+        - name: costSensitive
+          title: Cost-sensitive trees
+        - name: ensemble
+          title: Ensemble method
+      default: costSensitive
+      description:
+          R: >
+            Method for constructing the decision tree.
+
+    - name: maxDepth
+      title: Maximum Tree Depth
+      type: Number
+      default: 5
+      min: 1
+      max: 10
+      description:
+          R: >
+            Maximum depth of the decision tree.
+
+    - name: minSplit
+      title: Minimum Node Size for Split
+      type: Number
+      default: 20
+      min: 5
+      description:
+          R: >
+            Minimum number of observations required to split a node.
+
+    # ==========================================
+    # OUTPUT OPTIONS
+    # ==========================================
+    
+    - name: showAllCombinations
+      title: Show All Test Combinations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display performance metrics for all possible test combinations.
+
+    - name: topN
+      title: Number of Top Panels to Show
+      type: Number
+      default: 10
+      min: 1
+      max: 50
+      description:
+          R: >
+            Number of best-performing panels to display in results.
+
+    - name: compareStrategies
+      title: Compare Testing Strategies
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comparative analysis of different testing strategies.
+
+    - name: bootstrap
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for performance metrics.
+
+    - name: bootReps
+      title: Bootstrap Replications
+      type: Number
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap replications for confidence intervals.
+
+    # ==========================================
+    # VISUALIZATION OPTIONS
+    # ==========================================
+    
+    - name: plotTree
+      title: Plot Decision Tree
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display visual representation of the optimal decision tree.
+
+    - name: plotComparison
+      title: Plot Strategy Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create comparison plots for different testing strategies.
+
+    - name: plotCostEffect
+      title: Plot Cost-Effectiveness
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create cost-effectiveness frontier plot.
+
+    - name: plotROC
+      title: Plot ROC Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display ROC curves for top performing panels.
+
+    # ==========================================
+    # ADDITIONAL OPTIONS
+    # ==========================================
+    
+    - name: prevalence
+      title: Disease Prevalence
+      type: Number
+      default: 0
+      min: 0
+      max: 1
+      description:
+          R: >
+            Known disease prevalence (0 = use sample prevalence).
+
+    - name: crossValidate
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform k-fold cross-validation for panel performance.
+
+    - name: nFolds
+      title: Number of Folds
+      type: Number
+      default: 5
+      min: 2
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation.
+
+    - name: seed
+      title: Random Seed
+      type: Number
+      default: 12345
+      description:
+          R: >
+            Random seed for reproducibility in bootstrap and cross-validation.

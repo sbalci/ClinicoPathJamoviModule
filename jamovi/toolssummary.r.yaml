@@ -1,19 +1,62 @@
 ---
-name:  toolssummary
+name: toolssummary
 title: Tools for data summary
-jrs:   '1.1'
+jrs: '1.1'
 
 items:
-    - name:  tablestyle4
-      title: toolssummary
-      type:  Preformatted
+    - name: todo
+      title: To Do
+      type: Html
 
+    - name: summary
+      title: Summary Statistics
+      type: Table
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: type
+          title: "Type"
+          type: text
+        - name: missing
+          title: "Missing"
+          type: integer
+        - name: unique
+          title: "Unique"
+          type: integer
+        - name: stats
+          title: "Statistics"
+          type: text
 
-    - name:  tablestyle4html
-      title: toolssummary
-      type:  Html
+    - name: frequencies
+      title: Frequency Tables
+      type: Html
+      visible: (showFreq)
+
+    - name: numericStats
+      title: Numeric Variable Statistics
+      type: Table
+      visible: (showStats)
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: mean
+          title: "Mean"
+          type: number
+        - name: sd
+          title: "SD"
+          type: number
+        - name: median
+          title: "Median"
+          type: number
+        - name: min
+          title: "Min"
+          type: number
+        - name: max
+          title: "Max"
+          type: number
 
 refs:
     - ClinicoPathJamoviModule
-
 ...
