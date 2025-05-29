@@ -12,7 +12,22 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             targetLevel = NULL,
             train = NULL,
             trainLevel = NULL,
-            showPlot = FALSE, ...) {
+            imputeMissing = FALSE,
+            balanceClasses = FALSE,
+            scaleFeatures = FALSE,
+            clinicalMetrics = FALSE,
+            featureImportance = FALSE,
+            showInterpretation = FALSE,
+            showPlot = FALSE,
+            minCases = 10,
+            maxDepth = 4,
+            confidenceInterval = FALSE,
+            riskStratification = FALSE,
+            exportPredictions = FALSE,
+            clinicalContext = "diagnosis",
+            costRatio = 1,
+            prevalenceAdjustment = FALSE,
+            expectedPrevalence = 10, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -59,10 +74,85 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "trainLevel",
                 trainLevel,
                 variable="(train)")
+            private$..imputeMissing <- jmvcore::OptionBool$new(
+                "imputeMissing",
+                imputeMissing,
+                default=FALSE)
+            private$..balanceClasses <- jmvcore::OptionBool$new(
+                "balanceClasses",
+                balanceClasses,
+                default=FALSE)
+            private$..scaleFeatures <- jmvcore::OptionBool$new(
+                "scaleFeatures",
+                scaleFeatures,
+                default=FALSE)
+            private$..clinicalMetrics <- jmvcore::OptionBool$new(
+                "clinicalMetrics",
+                clinicalMetrics,
+                default=FALSE)
+            private$..featureImportance <- jmvcore::OptionBool$new(
+                "featureImportance",
+                featureImportance,
+                default=FALSE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=FALSE)
             private$..showPlot <- jmvcore::OptionBool$new(
                 "showPlot",
                 showPlot,
                 default=FALSE)
+            private$..minCases <- jmvcore::OptionInteger$new(
+                "minCases",
+                minCases,
+                default=10,
+                min=5,
+                max=50)
+            private$..maxDepth <- jmvcore::OptionInteger$new(
+                "maxDepth",
+                maxDepth,
+                default=4,
+                min=2,
+                max=8)
+            private$..confidenceInterval <- jmvcore::OptionBool$new(
+                "confidenceInterval",
+                confidenceInterval,
+                default=FALSE)
+            private$..riskStratification <- jmvcore::OptionBool$new(
+                "riskStratification",
+                riskStratification,
+                default=FALSE)
+            private$..exportPredictions <- jmvcore::OptionBool$new(
+                "exportPredictions",
+                exportPredictions,
+                default=FALSE)
+            private$..clinicalContext <- jmvcore::OptionList$new(
+                "clinicalContext",
+                clinicalContext,
+                options=list(
+                    "diagnosis",
+                    "screening",
+                    "staging",
+                    "prognosis",
+                    "treatment",
+                    "biomarker"),
+                default="diagnosis")
+            private$..costRatio <- jmvcore::OptionNumber$new(
+                "costRatio",
+                costRatio,
+                default=1,
+                min=0.1,
+                max=10)
+            private$..prevalenceAdjustment <- jmvcore::OptionBool$new(
+                "prevalenceAdjustment",
+                prevalenceAdjustment,
+                default=FALSE)
+            private$..expectedPrevalence <- jmvcore::OptionNumber$new(
+                "expectedPrevalence",
+                expectedPrevalence,
+                default=10,
+                min=0.1,
+                max=50)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
@@ -70,7 +160,22 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..targetLevel)
             self$.addOption(private$..train)
             self$.addOption(private$..trainLevel)
+            self$.addOption(private$..imputeMissing)
+            self$.addOption(private$..balanceClasses)
+            self$.addOption(private$..scaleFeatures)
+            self$.addOption(private$..clinicalMetrics)
+            self$.addOption(private$..featureImportance)
+            self$.addOption(private$..showInterpretation)
             self$.addOption(private$..showPlot)
+            self$.addOption(private$..minCases)
+            self$.addOption(private$..maxDepth)
+            self$.addOption(private$..confidenceInterval)
+            self$.addOption(private$..riskStratification)
+            self$.addOption(private$..exportPredictions)
+            self$.addOption(private$..clinicalContext)
+            self$.addOption(private$..costRatio)
+            self$.addOption(private$..prevalenceAdjustment)
+            self$.addOption(private$..expectedPrevalence)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -79,7 +184,22 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         targetLevel = function() private$..targetLevel$value,
         train = function() private$..train$value,
         trainLevel = function() private$..trainLevel$value,
-        showPlot = function() private$..showPlot$value),
+        imputeMissing = function() private$..imputeMissing$value,
+        balanceClasses = function() private$..balanceClasses$value,
+        scaleFeatures = function() private$..scaleFeatures$value,
+        clinicalMetrics = function() private$..clinicalMetrics$value,
+        featureImportance = function() private$..featureImportance$value,
+        showInterpretation = function() private$..showInterpretation$value,
+        showPlot = function() private$..showPlot$value,
+        minCases = function() private$..minCases$value,
+        maxDepth = function() private$..maxDepth$value,
+        confidenceInterval = function() private$..confidenceInterval$value,
+        riskStratification = function() private$..riskStratification$value,
+        exportPredictions = function() private$..exportPredictions$value,
+        clinicalContext = function() private$..clinicalContext$value,
+        costRatio = function() private$..costRatio$value,
+        prevalenceAdjustment = function() private$..prevalenceAdjustment$value,
+        expectedPrevalence = function() private$..expectedPrevalence$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
@@ -87,7 +207,22 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..targetLevel = NA,
         ..train = NA,
         ..trainLevel = NA,
-        ..showPlot = NA)
+        ..imputeMissing = NA,
+        ..balanceClasses = NA,
+        ..scaleFeatures = NA,
+        ..clinicalMetrics = NA,
+        ..featureImportance = NA,
+        ..showInterpretation = NA,
+        ..showPlot = NA,
+        ..minCases = NA,
+        ..maxDepth = NA,
+        ..confidenceInterval = NA,
+        ..riskStratification = NA,
+        ..exportPredictions = NA,
+        ..clinicalContext = NA,
+        ..costRatio = NA,
+        ..prevalenceAdjustment = NA,
+        ..expectedPrevalence = NA)
 )
 
 treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -100,20 +235,42 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text2a = function() private$.items[["text2a"]],
         text2b = function() private$.items[["text2b"]],
         text3 = function() private$.items[["text3"]],
-        text4 = function() private$.items[["text4"]]),
+        text4 = function() private$.items[["text4"]],
+        dataQuality = function() private$.items[["dataQuality"]],
+        missingDataReport = function() private$.items[["missingDataReport"]],
+        modelSummary = function() private$.items[["modelSummary"]],
+        clinicalMetrics = function() private$.items[["clinicalMetrics"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        featureImportance = function() private$.items[["featureImportance"]],
+        riskStratification = function() private$.items[["riskStratification"]],
+        confusionMatrix = function() private$.items[["confusionMatrix"]],
+        adjustedMetrics = function() private$.items[["adjustedMetrics"]],
+        plot = function() private$.items[["plot"]],
+        deploymentGuidelines = function() private$.items[["deploymentGuidelines"]],
+        predictions = function() private$.items[["predictions"]],
+        probabilities = function() private$.items[["probabilities"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Decision Tree",
+                title="Medical Decision Tree Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "FFTrees",
+                    "pROC",
+                    "caret",
+                    "rpart",
+                    "rpart.plot",
+                    "ClinicoPathJamoviModule",
+                    "whoisinthisstudy",
+                    "recist",
+                    "DiagnosticTests",
+                    "PathologyKappa"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do",
+                title="Instructions",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -124,7 +281,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Data View 1",
+                title="Model Progress",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -135,7 +292,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Data View 2",
+                title="Data Summary",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -146,7 +303,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2a",
-                title="Data View 2a",
+                title="Training Data View",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -157,7 +314,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2b",
-                title="Data View 2b",
+                title="Test Data View",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -168,7 +325,7 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text3",
-                title="Decision Tree 3",
+                title="Model Status",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -179,14 +336,234 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text4",
-                title="Decision Tree 4",
+                title="Model Output",
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
                     "train",
-                    "trainLevel")))}))
+                    "trainLevel")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="dataQuality",
+                title="Data Quality Report",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "imputeMissing",
+                    "balanceClasses")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="missingDataReport",
+                title="Missing Data Analysis",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="missing_count", 
+                        `title`="Missing Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="missing_percent", 
+                        `title`="Missing %", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
+                        `name`="complete_cases", 
+                        `title`="Complete Cases", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "imputeMissing")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelSummary",
+                title="Decision Tree Model Summary",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "minCases",
+                    "maxDepth")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clinicalMetrics",
+                title="Clinical Performance Metrics",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Clinical Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel",
+                    "balanceClasses")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Clinical Interpretation & Recommendations",
+                clearWith=list(
+                    "clinicalContext",
+                    "costRatio")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="featureImportance",
+                title="Clinical Variable Importance",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="feature", 
+                        `title`="Clinical Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="importance", 
+                        `title`="Importance Score", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="clinical_relevance", 
+                        `title`="Clinical Relevance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="riskStratification",
+                title="Risk Stratification Performance",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="risk_group", 
+                        `title`="Risk Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_patients", 
+                        `title`="N Patients", 
+                        `type`="integer"),
+                    list(
+                        `name`="event_rate", 
+                        `title`="Event Rate (%)", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
+                        `name`="relative_risk", 
+                        `title`="Relative Risk", 
+                        `type`="number", 
+                        `format`="dp:2"),
+                    list(
+                        `name`="clinical_action", 
+                        `title`="Recommended Clinical Action", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="confusionMatrix",
+                title="Confusion Matrix & Clinical Outcomes",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="predicted", 
+                        `title`="Predicted", 
+                        `type`="text"),
+                    list(
+                        `name`="actual_disease", 
+                        `title`="Actual Disease", 
+                        `type`="integer"),
+                    list(
+                        `name`="actual_control", 
+                        `title`="Actual Control", 
+                        `type`="integer"),
+                    list(
+                        `name`="clinical_consequence", 
+                        `title`="Clinical Consequence", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="adjustedMetrics",
+                title="Population-Adjusted Performance",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="study_value", 
+                        `title`="Study Population", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="adjusted_value", 
+                        `title`="Target Population", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="dp:3"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Clinical Decision Tree",
+                width=800,
+                height=600,
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel",
+                    "minCases",
+                    "maxDepth")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="deploymentGuidelines",
+                title="Clinical Implementation Guidelines"))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="predictions",
+                title="Patient Predictions",
+                varTitle="`Predicted Risk Category`",
+                varDescription="Predicted risk category based on clinical decision tree model\n",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="probabilities",
+                title="Disease Probabilities",
+                varTitle="`Disease Probability`",
+                varDescription="Predicted probability of disease based on clinical variables\n",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target")))}))
 
 treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treeBase",
@@ -209,22 +586,72 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Decision Tree
+#' Medical Decision Tree
 #'
-#' Function for making Decision Trees.
+#' Enhanced decision tree analysis for medical research, pathology and 
+#' oncology. Provides clinical performance metrics, handles missing data 
+#' appropriately, and offers interpretations relevant to medical 
+#' decision-making.
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
-#' @param data The data as a data frame.
-#' @param vars continuous explanatory variables
-#' @param facs categorical explanatory variables
-#' @param target target variable
-#' @param targetLevel .
-#' @param train Variable containing Test/Train information
-#' @param trainLevel .
-#' @param showPlot .
+#' # Example for cancer diagnosis
+#' data(cancer_biomarkers)
+#' tree(
+#'     data = cancer_biomarkers,
+#'     vars = c("PSA", "age", "tumor_size"),
+#'     facs = c("grade", "stage"),
+#'     target = "diagnosis",
+#'     targetLevel = "cancer",
+#'     train = "cohort",
+#'     trainLevel = "discovery",
+#'     imputeMissing = TRUE,
+#'     balanceClasses = TRUE
+#' )
+#'
+#' @param data The data as a data frame containing clinical variables,
+#'   biomarkers,  and patient outcomes.
+#' @param vars Continuous variables such as biomarker levels, age,  laboratory
+#'   values, or quantitative pathological measurements.
+#' @param facs Categorical variables such as tumor grade, stage,  histological
+#'   type, or patient demographics.
+#' @param target Primary outcome variable: disease status, treatment response,
+#'   survival status, or diagnostic category.
+#' @param targetLevel Level representing disease presence, positive outcome,
+#'   or event of interest.
+#' @param train Variable indicating training vs validation cohorts.  If not
+#'   provided, data will be split automatically.
+#' @param trainLevel Level indicating the training/discovery cohort.
+#' @param imputeMissing Impute missing values using medically appropriate
+#'   methods  (median within disease groups for continuous, mode for
+#'   categorical).
+#' @param balanceClasses Balance classes to handle rare diseases or imbalanced
+#'   outcomes.  Recommended for disease prevalence <20\%.
+#' @param scaleFeatures Standardize continuous variables (useful when
+#'   combining  biomarkers with different scales/units).
+#' @param clinicalMetrics Display sensitivity, specificity, predictive values,
+#'   likelihood ratios, and other clinical metrics.
+#' @param featureImportance Identify most important clinical variables and
+#'   biomarkers  for the decision tree.
+#' @param showInterpretation Provide clinical interpretation of results
+#'   including  diagnostic utility and clinical recommendations.
+#' @param showPlot Display visual representation of the decision tree.
+#' @param minCases Minimum number of cases required in each terminal node
+#'   (higher values prevent overfitting).
+#' @param maxDepth Maximum depth of decision tree (deeper trees may overfit).
+#' @param confidenceInterval Display confidence intervals for performance
+#'   metrics.
+#' @param riskStratification Analyze risk stratification performance and
+#'   create  risk categories based on tree predictions.
+#' @param exportPredictions Add predicted classifications and probabilities to
+#'   the dataset.
+#' @param clinicalContext Clinical context affects interpretation thresholds
+#'   and  recommendations (e.g., screening requires high sensitivity).
+#' @param costRatio Relative cost of missing a case vs false alarm.  Higher
+#'   values favor sensitivity over specificity.
+#' @param prevalenceAdjustment Adjust predictive values for expected disease
+#'   prevalence  in target population (different from study sample).
+#' @param expectedPrevalence Expected disease prevalence in target population
+#'   for  adjusted predictive value calculations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -234,7 +661,26 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataQuality} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$missingDataReport} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$predictions} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$probabilities} \tab \tab \tab \tab \tab an output \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$missingDataReport$asDF}
+#'
+#' \code{as.data.frame(results$missingDataReport)}
 #'
 #' @export
 tree <- function(
@@ -245,7 +691,22 @@ tree <- function(
     targetLevel,
     train,
     trainLevel,
-    showPlot = FALSE) {
+    imputeMissing = FALSE,
+    balanceClasses = FALSE,
+    scaleFeatures = FALSE,
+    clinicalMetrics = FALSE,
+    featureImportance = FALSE,
+    showInterpretation = FALSE,
+    showPlot = FALSE,
+    minCases = 10,
+    maxDepth = 4,
+    confidenceInterval = FALSE,
+    riskStratification = FALSE,
+    exportPredictions = FALSE,
+    clinicalContext = "diagnosis",
+    costRatio = 1,
+    prevalenceAdjustment = FALSE,
+    expectedPrevalence = 10) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tree requires jmvcore to be installed (restart may be required)")
@@ -273,7 +734,22 @@ tree <- function(
         targetLevel = targetLevel,
         train = train,
         trainLevel = trainLevel,
-        showPlot = showPlot)
+        imputeMissing = imputeMissing,
+        balanceClasses = balanceClasses,
+        scaleFeatures = scaleFeatures,
+        clinicalMetrics = clinicalMetrics,
+        featureImportance = featureImportance,
+        showInterpretation = showInterpretation,
+        showPlot = showPlot,
+        minCases = minCases,
+        maxDepth = maxDepth,
+        confidenceInterval = confidenceInterval,
+        riskStratification = riskStratification,
+        exportPredictions = exportPredictions,
+        clinicalContext = clinicalContext,
+        costRatio = costRatio,
+        prevalenceAdjustment = prevalenceAdjustment,
+        expectedPrevalence = expectedPrevalence)
 
     analysis <- treeClass$new(
         options = options,

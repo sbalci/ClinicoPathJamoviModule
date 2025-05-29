@@ -1,14 +1,13 @@
 ---
-name:  tree
-title: Decision Tree
-jrs:   '1.1'
-
+name: tree
+title: Medical Decision Tree Analysis
+jrs: '1.1'
 
 items:
-
-    - name:  todo
-      title: To Do
-      type:  Html
+    # Welcome and instructions
+    - name: todo
+      title: Instructions
+      type: Html
       clearWith:
           - vars
           - facs
@@ -17,11 +16,10 @@ items:
           - train
           - trainLevel
 
-
-
-    - name:  text1
-      title: Data View 1
-      type:  Preformatted
+    # Progress indicator and data views (matching .b.R references)
+    - name: text1
+      title: Model Progress
+      type: Preformatted
       clearWith:
           - vars
           - facs
@@ -30,9 +28,9 @@ items:
           - train
           - trainLevel
 
-    - name:  text2
-      title: Data View 2
-      type:  Preformatted
+    - name: text2
+      title: Data Summary
+      type: Preformatted
       clearWith:
           - vars
           - facs
@@ -41,9 +39,9 @@ items:
           - train
           - trainLevel
 
-    - name:  text2a
-      title: Data View 2a
-      type:  Preformatted
+    - name: text2a
+      title: Training Data View
+      type: Preformatted
       clearWith:
           - vars
           - facs
@@ -52,11 +50,9 @@ items:
           - train
           - trainLevel
 
-
-
-    - name:  text2b
-      title: Data View 2b
-      type:  Preformatted
+    - name: text2b
+      title: Test Data View
+      type: Preformatted
       clearWith:
           - vars
           - facs
@@ -65,11 +61,9 @@ items:
           - train
           - trainLevel
 
-
-
-    - name:  text3
-      title: Decision Tree 3
-      type:  Preformatted
+    - name: text3
+      title: Model Status
+      type: Preformatted
       clearWith:
           - vars
           - facs
@@ -78,10 +72,9 @@ items:
           - train
           - trainLevel
 
-
-    - name:  text4
-      title: Decision Tree 4
-      type:  Html
+    - name: text4
+      title: Model Output
+      type: Html
       clearWith:
           - vars
           - facs
@@ -90,50 +83,224 @@ items:
           - train
           - trainLevel
 
+    # Data quality and preprocessing
+    - name: dataQuality
+      title: Data Quality Report
+      type: Preformatted
+      clearWith:
+          - vars
+          - facs
+          - target
+          - imputeMissing
+          - balanceClasses
 
+    - name: missingDataReport
+      title: Missing Data Analysis
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: missing_count
+          title: "Missing Count"
+          type: integer
+        - name: missing_percent
+          title: "Missing %"
+          type: number
+          format: dp:1
+        - name: complete_cases
+          title: "Complete Cases"
+          type: integer
+      clearWith:
+          - vars
+          - facs
+          - target
+          - imputeMissing
 
-    # - name: plot1
-    #   title: Decision Tree Explore
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot1
-    #   requiresData: true
-    #   visible: (sty:explore & showPlot)
-    #   refs: explore
+    - name: modelSummary
+      title: Decision Tree Model Summary
+      type: Html
+      clearWith:
+          - vars
+          - facs
+          - target
+          - minCases
+          - maxDepth
 
+    # Clinical performance metrics
+    - name: clinicalMetrics
+      title: Clinical Performance Metrics
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Clinical Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Clinical Interpretation"
+          type: text
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+          - balanceClasses
 
-    # - name: plot2
-    #   title: Decision Tree FFTrees
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot2
-    #   requiresData: true
-    #   visible: (sty:fftrees & showPlot)
-    #   refs: FFTrees
-    #   clearWith:
-    #       - vars
-    #       - facs
-    #       - target
-    #       - targetLevel
-    #       - train
-    #       - trainLevel
+    # Clinical interpretation
+    - name: clinicalInterpretation
+      title: Clinical Interpretation & Recommendations
+      type: Html
+      clearWith:
+          - clinicalContext
+          - costRatio
 
-    # - name: plot3
-    #   title: Decision Tree rpart
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot3
-    #   requiresData: true
-    #   visible: (sty:rpart & showPlot)
-    #   refs:
-    #       - rpart
-    #       - rpart.plot
+    # Feature importance for biomarker selection
+    - name: featureImportance
+      title: Clinical Variable Importance
+      type: Table
+      rows: 0
+      columns:
+        - name: feature
+          title: "Clinical Variable"
+          type: text
+        - name: importance
+          title: "Importance Score"
+          type: number
+          format: dp:3
+        - name: rank
+          title: "Rank"
+          type: integer
+        - name: clinical_relevance
+          title: "Clinical Relevance"
+          type: text
+
+    # Risk stratification analysis
+    - name: riskStratification
+      title: Risk Stratification Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+        - name: n_patients
+          title: "N Patients"
+          type: integer
+        - name: event_rate
+          title: "Event Rate (%)"
+          type: number
+          format: dp:1
+        - name: relative_risk
+          title: "Relative Risk"
+          type: number
+          format: dp:2
+        - name: clinical_action
+          title: "Recommended Clinical Action"
+          type: text
+
+    # Confusion matrix with clinical context
+    - name: confusionMatrix
+      title: Confusion Matrix & Clinical Outcomes
+      type: Table
+      rows: 0
+      columns:
+        - name: predicted
+          title: "Predicted"
+          type: text
+        - name: actual_disease
+          title: "Actual Disease"
+          type: integer
+        - name: actual_control
+          title: "Actual Control"
+          type: integer
+        - name: clinical_consequence
+          title: "Clinical Consequence"
+          type: text
+
+    # Prevalence-adjusted metrics
+    - name: adjustedMetrics
+      title: Population-Adjusted Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: study_value
+          title: "Study Population"
+          type: number
+          format: dp:3
+        - name: adjusted_value
+          title: "Target Population"
+          type: number
+          format: dp:3
+        - name: difference
+          title: "Difference"
+          type: number
+          format: dp:3
+
+    # Clinical decision tree visualization
+    - name: plot
+      title: Clinical Decision Tree
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+          - minCases
+          - maxDepth
+
+    # Model deployment guidelines
+    - name: deploymentGuidelines
+      title: Clinical Implementation Guidelines
+      type: Html
+
+    # Export options
+    - name: predictions
+      title: Patient Predictions
+      type: Output
+      varTitle: '`Predicted Risk Category`'
+      varDescription: >
+        Predicted risk category based on clinical decision tree model
+      clearWith:
+          - vars
+          - facs
+          - target
+
+    - name: probabilities
+      title: Disease Probabilities
+      type: Output
+      varTitle: '`Disease Probability`'
+      varDescription: >
+        Predicted probability of disease based on clinical variables
+      clearWith:
+          - vars
+          - facs
+          - target
 
 refs:
+    - FFTrees
+    - pROC
+    - caret
+    - rpart
+    - rpart.plot
     - ClinicoPathJamoviModule
-
+    - whoisinthisstudy
+    - recist
+    - DiagnosticTests
+    - PathologyKappa
 
 ...

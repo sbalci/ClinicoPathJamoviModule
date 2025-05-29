@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.16
+version: 0.0.3.17
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -142,14 +142,18 @@ analyses:
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: Function for Medical Decision Calculator.
-  - title: Decision Tree
+  - title: Medical Decision Tree
     name: tree
     ns: ClinicoPath
     menuGroup: meddecide
-    menuSubgroup: Drafts
-    menuTitle: Decision Tree
-    description: Function for making Decision Trees.
-    menuSubtitle: Classification
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Medical Decision Tree
+    description: >-
+      Enhanced decision tree analysis for medical research, pathology and
+      oncology. Provides clinical performance metrics, handles missing data
+      appropriately, and offers interpretations relevant to medical
+      decision-making.
+    menuSubtitle: Diagnosis & Prognosis
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
