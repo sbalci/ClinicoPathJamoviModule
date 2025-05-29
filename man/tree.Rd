@@ -2,7 +2,7 @@
 % Please edit documentation in R/tree.h.R
 \name{tree}
 \alias{tree}
-\title{Decision Tree}
+\title{Medical Decision Tree}
 \usage{
 tree(
   data,
@@ -12,25 +12,91 @@ tree(
   targetLevel,
   train,
   trainLevel,
-  showPlot = FALSE
+  imputeMissing = FALSE,
+  balanceClasses = FALSE,
+  scaleFeatures = FALSE,
+  clinicalMetrics = FALSE,
+  featureImportance = FALSE,
+  showInterpretation = FALSE,
+  showPlot = FALSE,
+  minCases = 10,
+  maxDepth = 4,
+  confidenceInterval = FALSE,
+  riskStratification = FALSE,
+  exportPredictions = FALSE,
+  clinicalContext = "diagnosis",
+  costRatio = 1,
+  prevalenceAdjustment = FALSE,
+  expectedPrevalence = 10
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame containing clinical variables,
+biomarkers,  and patient outcomes.}
 
-\item{vars}{continuous explanatory variables}
+\item{vars}{Continuous variables such as biomarker levels, age,  laboratory
+values, or quantitative pathological measurements.}
 
-\item{facs}{categorical explanatory variables}
+\item{facs}{Categorical variables such as tumor grade, stage,  histological
+type, or patient demographics.}
 
-\item{target}{target variable}
+\item{target}{Primary outcome variable: disease status, treatment response,
+survival status, or diagnostic category.}
 
-\item{targetLevel}{.}
+\item{targetLevel}{Level representing disease presence, positive outcome,
+or event of interest.}
 
-\item{train}{Variable containing Test/Train information}
+\item{train}{Variable indicating training vs validation cohorts.  If not
+provided, data will be split automatically.}
 
-\item{trainLevel}{.}
+\item{trainLevel}{Level indicating the training/discovery cohort.}
 
-\item{showPlot}{.}
+\item{imputeMissing}{Impute missing values using medically appropriate
+methods  (median within disease groups for continuous, mode for
+categorical).}
+
+\item{balanceClasses}{Balance classes to handle rare diseases or imbalanced
+outcomes.  Recommended for disease prevalence <20\\%.}
+
+\item{scaleFeatures}{Standardize continuous variables (useful when
+combining  biomarkers with different scales/units).}
+
+\item{clinicalMetrics}{Display sensitivity, specificity, predictive values,
+likelihood ratios, and other clinical metrics.}
+
+\item{featureImportance}{Identify most important clinical variables and
+biomarkers  for the decision tree.}
+
+\item{showInterpretation}{Provide clinical interpretation of results
+including  diagnostic utility and clinical recommendations.}
+
+\item{showPlot}{Display visual representation of the decision tree.}
+
+\item{minCases}{Minimum number of cases required in each terminal node
+(higher values prevent overfitting).}
+
+\item{maxDepth}{Maximum depth of decision tree (deeper trees may overfit).}
+
+\item{confidenceInterval}{Display confidence intervals for performance
+metrics.}
+
+\item{riskStratification}{Analyze risk stratification performance and
+create  risk categories based on tree predictions.}
+
+\item{exportPredictions}{Add predicted classifications and probabilities to
+the dataset.}
+
+\item{clinicalContext}{Clinical context affects interpretation thresholds
+and  recommendations (e.g., screening requires high sensitivity).}
+
+\item{costRatio}{Relative cost of missing a case vs false alarm.  Higher
+values favor sensitivity over specificity.}
+
+\item{prevalenceAdjustment}{Adjust predictive values for expected disease
+prevalence  in target population (different from study sample).}
+
+\item{expectedPrevalence}{Expected disease prevalence in target population
+for  adjusted predictive value calculations.}
 }
 \value{
 A results object containing:
@@ -42,13 +108,46 @@ A results object containing:
 \code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text4} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataQuality} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$missingDataReport} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
+\code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
+\code{results$predictions} \tab \tab \tab \tab \tab an output \cr
+\code{results$probabilities} \tab \tab \tab \tab \tab an output \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$missingDataReport$asDF}
+
+\code{as.data.frame(results$missingDataReport)}
 }
 \description{
-Function for making Decision Trees.
+Enhanced decision tree analysis for medical research, pathology and
+oncology. Provides clinical performance metrics, handles missing data
+appropriately, and offers interpretations relevant to medical
+decision-making.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Example for cancer diagnosis
+data(cancer_biomarkers)
+tree(
+    data = cancer_biomarkers,
+    vars = c("PSA", "age", "tumor_size"),
+    facs = c("grade", "stage"),
+    target = "diagnosis",
+    targetLevel = "cancer",
+    train = "cohort",
+    trainLevel = "discovery",
+    imputeMissing = TRUE,
+    balanceClasses = TRUE
+)
+
 }

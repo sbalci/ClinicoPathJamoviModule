@@ -141,7 +141,9 @@ meddecide_data_description_files <- c(
   "roc-analysis.Rmd",
   "decisionpanel_advanced.Rmd",
   "decisionpanel_optimisation.Rmd",
-  "decisionpanel_clinical.Rmd"
+  "decisionpanel_clinical.Rmd",
+  "meddecide-vignettes.Rmd",
+  "medical_decision_tree_guide.Rmd"
 )
 
 fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_files),
@@ -471,7 +473,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 # Define the new version and date ----
-new_version <- "0.0.3.16"
+new_version <- "0.0.3.17"
 new_date <- "2024-05-29"
 
 # Run the update process

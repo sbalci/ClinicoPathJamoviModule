@@ -1,90 +1,241 @@
 ---
-name:  tree
-title: Decision Tree
+name: tree
+title: Medical Decision Tree
 menuGroup: meddecide
-menuSubgroup: Drafts
-menuSubtitle: Classification
+menuSubgroup: Clinical Decision Support
+menuSubtitle: Diagnosis & Prognosis
 version: '1.0.0'
 jas: '1.2'
 
 description:
-    main: Function for making Decision Trees.
+    main: Enhanced decision tree analysis for medical research, pathology and oncology. 
+          Provides clinical performance metrics, handles missing data appropriately, 
+          and offers interpretations relevant to medical decision-making.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # example will be added
+            # Example for cancer diagnosis
+            data(cancer_biomarkers)
+            tree(
+                data = cancer_biomarkers,
+                vars = c("PSA", "age", "tumor_size"),
+                facs = c("grade", "stage"),
+                target = "diagnosis",
+                targetLevel = "cancer",
+                train = "cohort",
+                trainLevel = "discovery",
+                imputeMissing = TRUE,
+                balanceClasses = TRUE
+            )
 
 options:
     - name: data
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The data as a data frame containing clinical variables, biomarkers, 
+            and patient outcomes.
 
-
+    # Core variables
     - name: vars
-      title: Continuous Explanatory Variables
+      title: Continuous Clinical Variables
       type: Variables
-      suggested: [ continuous ]
-      permitted: [ numeric ]
+      suggested: [continuous]
+      permitted: [numeric]
       description: >
-                  continuous explanatory variables
+                  Continuous variables such as biomarker levels, age, 
+                  laboratory values, or quantitative pathological measurements.
 
     - name: facs
-      title: Categorical Explanatory Variables
+      title: Categorical Clinical Variables  
       type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ordinal, nominal]
+      permitted: [factor]
       description: >
-                  categorical explanatory variables
+                  Categorical variables such as tumor grade, stage, 
+                  histological type, or patient demographics.
 
     - name: target
-      title: Target Variable
+      title: Target Outcome
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ordinal, nominal]
+      permitted: [factor]
       description: >
-                  target variable
+                  Primary outcome variable: disease status, treatment response, 
+                  survival status, or diagnostic category.
 
     - name: targetLevel
-      title: Target Level
+      title: Disease/Positive Level
       type: Level
       variable: (target)
+      description: >
+                  Level representing disease presence, positive outcome, 
+                  or event of interest.
 
     - name: train
-      title: Test Train
+      title: Training/Validation Cohort
       type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ordinal, nominal]
+      permitted: [factor]
       description: >
-                  Variable containing Test/Train information
+                  Variable indicating training vs validation cohorts. 
+                  If not provided, data will be split automatically.
 
     - name: trainLevel
-      title: Select Train Level
+      title: Training Cohort Level
       type: Level
       variable: (train)
+      description: >
+                  Level indicating the training/discovery cohort.
 
-
-    - name: showPlot
-      title: Show Plot
+    # Medical-specific options
+    - name: imputeMissing
+      title: Handle Missing Data
       type: Bool
       default: false
+      description: >
+                  Impute missing values using medically appropriate methods 
+                  (median within disease groups for continuous, mode for categorical).
 
+    - name: balanceClasses
+      title: Balance Disease Classes
+      type: Bool
+      default: false
+      description: >
+                  Balance classes to handle rare diseases or imbalanced outcomes. 
+                  Recommended for disease prevalence <20%.
 
-    # - name: sty
-    #   title: Tree Style
-    #   type: List
-    #   options:
-    #     - title: Explore
-    #       name: explore
-    #     - title: FFTrees
-    #       name: fftrees
-    #     - title: rpart
-    #       name: rpart
-    #   default: explore
+    - name: scaleFeatures
+      title: Standardize Biomarkers
+      type: Bool
+      default: false
+      description: >
+                  Standardize continuous variables (useful when combining 
+                  biomarkers with different scales/units).
 
+    # Analysis options
+    - name: clinicalMetrics
+      title: Show Clinical Performance Metrics
+      type: Bool
+      default: false
+      description: >
+                  Display sensitivity, specificity, predictive values, 
+                  likelihood ratios, and other clinical metrics.
 
+    - name: featureImportance
+      title: Analyze Feature Importance
+      type: Bool
+      default: false
+      description: >
+                  Identify most important clinical variables and biomarkers 
+                  for the decision tree.
 
+    - name: showInterpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: false
+      description: >
+                  Provide clinical interpretation of results including 
+                  diagnostic utility and clinical recommendations.
 
+    - name: showPlot
+      title: Show Decision Tree Plot
+      type: Bool
+      default: false
+      description: >
+                  Display visual representation of the decision tree.
+
+    # Advanced options
+    - name: minCases
+      title: Minimum Cases per Node
+      type: Integer
+      default: 10
+      min: 5
+      max: 50
+      description: >
+                  Minimum number of cases required in each terminal node 
+                  (higher values prevent overfitting).
+
+    - name: maxDepth
+      title: Maximum Tree Depth
+      type: Integer
+      default: 4
+      min: 2
+      max: 8
+      description: >
+                  Maximum depth of decision tree (deeper trees may overfit).
+
+    # Reporting options
+    - name: confidenceInterval
+      title: Show Confidence Intervals
+      type: Bool
+      default: false
+      description: >
+                  Display confidence intervals for performance metrics.
+
+    - name: riskStratification
+      title: Risk Stratification Analysis
+      type: Bool
+      default: false
+      description: >
+                  Analyze risk stratification performance and create 
+                  risk categories based on tree predictions.
+
+    - name: exportPredictions
+      title: Export Predictions
+      type: Bool
+      default: false
+      description: >
+                  Add predicted classifications and probabilities to the dataset.
+
+    # Clinical context options
+    - name: clinicalContext
+      title: Clinical Context
+      type: List
+      options:
+        - title: General Diagnosis
+          name: diagnosis
+        - title: Cancer Screening
+          name: screening
+        - title: Cancer Staging
+          name: staging
+        - title: Prognosis Prediction
+          name: prognosis
+        - title: Treatment Response
+          name: treatment
+        - title: Biomarker Discovery
+          name: biomarker
+      default: diagnosis
+      description: >
+                  Clinical context affects interpretation thresholds and 
+                  recommendations (e.g., screening requires high sensitivity).
+
+    - name: costRatio
+      title: False Negative to False Positive Cost Ratio
+      type: Number
+      default: 1
+      min: 0.1
+      max: 10
+      description: >
+                  Relative cost of missing a case vs false alarm. 
+                  Higher values favor sensitivity over specificity.
+
+    - name: prevalenceAdjustment
+      title: Adjust for Population Prevalence
+      type: Bool
+      default: false
+      description: >
+                  Adjust predictive values for expected disease prevalence 
+                  in target population (different from study sample).
+
+    - name: expectedPrevalence
+      title: Expected Population Prevalence (%)
+      type: Number
+      default: 10
+      min: 0.1
+      max: 50
+      description: >
+                  Expected disease prevalence in target population for 
+                  adjusted predictive value calculations.
 
 ...

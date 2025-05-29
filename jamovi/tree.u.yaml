@@ -1,4 +1,4 @@
-title: Decision Tree
+title: Medical Decision Tree
 name: tree
 jus: '3.0'
 stage: 0
@@ -9,19 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Continuous Explanatory Variables
-        children:
-          - type: VariablesListBox
-            name: vars
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Categorical Explanatory Variables
-        children:
-          - type: VariablesListBox
-            name: facs
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Target Variable
+        label: Primary Outcome
         children:
           - type: VariablesListBox
             name: target
@@ -31,19 +19,129 @@ children:
             name: targetLevel
             enable: (target)
       - type: TargetLayoutBox
-        label: Test Train
+        label: Continuous Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Categorical Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: facs
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Training/Validation Cohort (Optional)
         children:
           - type: VariablesListBox
             name: train
             maxItemCount: 1
             isTarget: true
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: LevelSelector
-                name: trainLevel
-  - type: LayoutBox
-    margin: large
+          - type: LevelSelector
+            name: trainLevel
+            enable: (train)
+  - type: CollapseBox
+    label: Clinical Context & Data Processing
+    collapsed: false
+    stretchFactor: 1
     children:
-      - type: CheckBox
-        name: showPlot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Context
+            children:
+              - type: ComboBox
+                name: clinicalContext
+              - type: TextBox
+                name: costRatio
+                format: number
+                suffix: ':1 (FN:FP cost ratio)'
+          - type: Label
+            label: Data Processing
+            children:
+              - type: CheckBox
+                name: imputeMissing
+              - type: CheckBox
+                name: balanceClasses
+              - type: CheckBox
+                name: scaleFeatures
+  - type: CollapseBox
+    label: Model Parameters
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Tree Structure
+            children:
+              - type: TextBox
+                name: minCases
+                format: number
+                suffix: cases per node
+              - type: TextBox
+                name: maxDepth
+                format: number
+                suffix: maximum depth
+          - type: Label
+            label: Validation
+            children: []
+  - type: CollapseBox
+    label: Clinical Analysis
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Performance Metrics
+            children:
+              - type: CheckBox
+                name: clinicalMetrics
+              - type: CheckBox
+                name: confidenceInterval
+              - type: CheckBox
+                name: featureImportance
+          - type: Label
+            label: Clinical Interpretation
+            children:
+              - type: CheckBox
+                name: showInterpretation
+              - type: CheckBox
+                name: riskStratification
+  - type: CollapseBox
+    label: Population Prevalence Adjustment
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: prevalenceAdjustment
+          - type: TextBox
+            name: expectedPrevalence
+            format: number
+            suffix: '% expected prevalence'
+            enable: (prevalenceAdjustment)
+  - type: CollapseBox
+    label: Visualization & Output
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plots
+            children:
+              - type: CheckBox
+                name: showPlot
+          - type: Label
+            label: Export Results
+            children:
+              - type: CheckBox
+                name: exportPredictions

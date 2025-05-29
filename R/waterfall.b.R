@@ -38,24 +38,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # For raw measurements validation
         if (inputType == "raw") {
           if (is.null(timeVar)) {
-            validation_messages <- c(validation_messages, paste0(
-              "<br>Time Variable Required for Raw Measurements:",
-              "<br>When using raw tumor measurements, a time variable is essential to:",
-              "<br>- Identify baseline measurements (time = 0)",
-              "<br>- Calculate accurate percentage changes",
-              "<br>- Track response progression over time",
-              "<br><br>Recommended Data Format:",
-              "<br>PatientID  Time  Measurement",
-              "<br>PT1        0     50          (baseline)",
-              "<br>PT1        2     25          (2 months)",
-              "<br>PT1        4     10          (4 months)"
+            validation_messages <- c(validation_messages, paste(
+              "\nTime Variable Required for Raw Measurements:",
+              "\nWhen using raw tumor measurements, a time variable is essential to:",
+              "\n• Identify baseline measurements (time = 0)",
+              "\n• Calculate accurate percentage changes",
+              "\n• Track response progression over time",
+              "\n\nRecommended Data Format:",
+              "\nPatientID  Time  Measurement",
+              "\nPT1        0     50          (baseline)",
+              "\nPT1        2     25          (2 months)",
+              "\nPT1        4     10          (4 months)"
             ))
             data_valid <- FALSE
           } else {
             # Check time variable exists
             if (!timeVar %in% names(df)) {
               validation_messages <- c(validation_messages, sprintf(
-                "<br>Time variable '%s' not found in the data. Please ensure the time variable is correctly specified.",
+                "\nTime variable '%s' not found in the data. Please ensure the time variable is correctly specified.",
                 timeVar
               ))
               data_valid <- FALSE
@@ -73,14 +73,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::filter(!has_baseline) %>%
                 dplyr::pull(!!patientID)
               if (length(patients_without_baseline) > 0) {
-                validation_messages <- c(validation_messages, paste0(
-                  "<br>Missing Baseline Measurements:",
-                  sprintf("<br>The following patients lack baseline (time = 0) measurements: %s",
+                validation_messages <- c(validation_messages, paste(
+                  "\nMissing Baseline Measurements:",
+                  sprintf("\nThe following patients lack baseline (time = 0) measurements: %s",
                           paste(patients_without_baseline, collapse = ", ")),
-                  "<br><br>Why this matters:",
-                  "<br>- Baseline measurements are the reference point for calculating changes",
-                  "<br>- Without baseline values, percentage changes cannot be calculated accurately",
-                  "<br>- Please ensure each patient has a measurement at time = 0"
+                  "\n\nWhy this matters:",
+                  "\n• Baseline measurements are the reference point for calculating changes",
+                  "\n• Without baseline values, percentage changes cannot be calculated accurately",
+                  "\n• Please ensure each patient has a measurement at time = 0"
                 ))
                 data_valid <- FALSE
               }
@@ -98,12 +98,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(invalid_shrinkage) > 0) {
-            validation_messages <- c(validation_messages, paste0(
-              "<br>Invalid Tumor Shrinkage Values Detected:",
-              "<br>Tumor shrinkage cannot exceed 100% (complete disappearance).",
-              "<br>The following measurements will be capped at -100%:",
-              paste(capture.output(print(invalid_shrinkage)), collapse = "<br>"),
-              "<br><br>Please verify these measurements for data entry errors."
+            validation_messages <- c(validation_messages, paste(
+              "\nInvalid Tumor Shrinkage Values Detected:",
+              "\nTumor shrinkage cannot exceed 100% (complete disappearance).",
+              "\nThe following measurements will be capped at -100%:",
+              paste(capture.output(print(invalid_shrinkage)), collapse = "\n"),
+              "\n\nPlease verify these measurements for data entry errors."
             ))
             # Cap shrinkage values at -100%
             df[[responseVar]] <- pmax(df[[responseVar]], -100)
@@ -115,15 +115,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(large_growth) > 0) {
-            validation_messages <- c(validation_messages, paste0(
-              "<br>Unusually Large Growth Values Detected:",
-              "<br>The following measurements show >200% growth:",
-              paste(capture.output(print(large_growth)), collapse = "<br>"),
-              "<br><br>While such large increases are possible, please verify:",
-              "<br>- Measurement accuracy",
-              "<br>- Calculation methods",
-              "<br>- Any additional clinical factors",
-              "<br><br>These values will be included in the analysis but may affect scaling."
+            validation_messages <- c(validation_messages, paste(
+              "\nUnusually Large Growth Values Detected:",
+              "\nThe following measurements show >200% growth:",
+              paste(capture.output(print(large_growth)), collapse = "\n"),
+              "\n\nWhile such large increases are possible, please verify:",
+              "\n• Measurement accuracy",
+              "\n• Calculation methods",
+              "\n• Any additional clinical factors",
+              "\n\nThese values will be included in the analysis but may affect scaling."
             ))
           }
         }
@@ -132,31 +132,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         attr(df, "validation_messages") <- validation_messages
         attr(df, "data_valid") <- data_valid
 
-
-
-
-        # # Add checks for unrealistic values
-        # if (any(df$response > 1000 | df$response < -100, na.rm=TRUE)) {
-        #   validation_messages <- c(validation_messages,
-        #                            "Warning: Response values outside expected range detected")
-        # }
-        #
-        # # Add check for duplicate measurements
-        # duplicates <- df %>%
-        #   dplyr::group_by(!!rlang::sym(patientID), !!rlang::sym(timeVar)) %>%
-        #   dplyr::filter(n() > 1)
-        # if (nrow(duplicates) > 0) {
-        #   validation_messages <- c(validation_messages,
-        #                            "Warning: Duplicate measurements found for some time points")
-        # }
-
-
-
-
         # Return modified dataframe with validation attributes
         return(df)
       }
-
 
 
       ,
@@ -376,6 +354,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ,
       # run ----
       .run = function() {
+
+        tryCatch({
 
         ## TODO text ----
 
@@ -662,37 +642,57 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #   )
         # )
 
-
         ## Add response category to data ----
+        if (self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
 
-        if (is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
-          df <- processed_data$waterfall
-          self$results$addResponseCategory$setRowNums(rownames(df))
-          self$results$addResponseCategory$setValues(df$category)
+          # Get waterfall data (contains best response per patient)
+          df_waterfall <- processed_data$waterfall
+
+          # Validate that we have the required data
+          if (is.null(df_waterfall) || nrow(df_waterfall) == 0) {
+            warning("No waterfall data available for response categorization")
+            return()
           }
 
-        if (!is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
-          # Get waterfall data and extract unique patient categories
-          df <- processed_data$waterfall %>%
+          # Extract unique patient-category pairs
+          patient_categories <- df_waterfall %>%
             dplyr::select(!!rlang::sym(self$options$patientID), category) %>%
             dplyr::distinct()
 
-          # keys<-1:length(newVariables)
-          # measureTypes<-sapply(newVariables,function(x) { if (is.character(x)) "Nominal" else "Continuous"})
-          #
-          # self$results$sendSample$set(keys=keys,titles=names(newVariables),
-          #                             descriptions=rep("simulated",length(newVariables)),
-          #                             measureTypes=measureTypes
-          # )
-          # self$results$sendSample$setValues(newVariables)
+          # Create a lookup table for joining
+          join_by <- stats::setNames(self$options$patientID, self$options$patientID)
 
-          # Join with original data
-          df2 <- self$data %>%
-            dplyr::left_join(df, by = self$options$patientID)
+          # Join with original data to maintain all rows
+          df_with_categories <- self$data %>%
+            dplyr::left_join(patient_categories, by = join_by)
 
-          # Update response category output
-          self$results$addResponseCategory$setRowNums(rownames(df2))
-          self$results$addResponseCategory$setValues(df2$category)
+          # Handle cases where patients might not have categories (shouldn't happen, but defensive)
+          if (any(is.na(df_with_categories$category))) {
+            # Fill missing categories with "Not Evaluable"
+            df_with_categories$category[is.na(df_with_categories$category)] <- "NE"
+            warning("Some patients missing response categories - filled with 'NE' (Not Evaluable)")
+          }
+
+          # Convert factor to character for better handling
+          category_values <- as.character(df_with_categories$category)
+
+          # Set the response category output
+          self$results$addResponseCategory$setRowNums(seq_len(nrow(df_with_categories)))
+          self$results$addResponseCategory$setValues(category_values)
+
+          # Set descriptive information
+          description <- paste0(
+            "RECIST v1.1 response categories: ",
+            "CR (Complete Response ≤-100%), ",
+            "PR (Partial Response -30% to -99%), ",
+            "SD (Stable Disease -29% to +19%), ",
+            "PD (Progressive Disease ≥+20%)"
+          )
+
+          # Add footnote or description if the method exists
+          if (exists("setDescription", where = self$results$addResponseCategory)) {
+            self$results$addResponseCategory$setDescription(description)
+          }
         }
 
 
@@ -738,6 +738,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           imagespider$setState(plotData)
         }
 
+        }, error = function(e) {
+          msg <- sprintf("Error in analysis: %s", e$message)
+          self$results$todo$setContent(msg)
+          return()
+        }, warning = function(w) {
+          msg <- sprintf("Warning in analysis: %s", w$message)
+          self$results$todo2$setContent(msg)
+        })
       }
 
 
@@ -889,6 +897,29 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           p <- p + ggtheme
         }
 
+
+
+        # Add confidence bands around median line
+        if (plotData$options$showCI) {
+          p <- p +
+            ggplot2::geom_ribbon(
+              data = median_response,
+              aes(ymin = ci_lower, ymax = ci_upper),
+              alpha = 0.2
+            )
+        }
+
+        # Add optional patient annotations
+        if (plotData$options$showPatientLabels) {
+          p <- p +
+            ggplot2::geom_text(
+              aes(label = ifelse(abs(response) > labelThreshold,
+                                 as.character(patientID), "")),
+              vjust = -0.5
+            )
+        }
+
+        # Finalize plot aesthetics
         p <- p +
           ggplot2::theme(
             axis.text.x = ggplot2::element_blank(),
@@ -902,9 +933,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         # Add waterfall plot faceting by subgroup
-        # if (!is.null(plotData$options$subgroupVar)) {
-        #   p <- p + ggplot2::facet_wrap(~subgroup)
-        # }
+        if (!is.null(plotData$options$subgroupVar)) {
+          p <- p + ggplot2::facet_wrap(~subgroup)
+        }
 
 
 

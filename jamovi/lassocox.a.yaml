@@ -7,7 +7,8 @@ menuSubtitle: 'Variable Selection with Lasso Regularization'
 version: '1.0.0'
 jas: '1.2'
 
-
+description:
+    main: Performs Lasso-penalized Cox regression for variable selection in survival analysis.
 
 options:
     - name: data
@@ -15,69 +16,68 @@ options:
       description:
           R: The data as a data frame.
 
-    # - name: elapsedtime
-    #   title: 'Time Elapsed'
-    #   type: Variable
-    #   suggested: [ continuous ]
-    #   permitted: [ numeric ]
-    #
-    # - name: outcome
-    #   title: 'Outcome'
-    #   type: Variable
-    #   suggested: [ ordinal, nominal, continuous ]
-    #   permitted: [ factor, numeric ]
-    #
-    # - name: outcomeLevel
-    #   title: Event Level
-    #   type: Level
-    #   variable: (outcome)
-    #
-    # - name: explanatory
-    #   title: Explanatory Variables
-    #   type: Variables
-    #   suggested: [ nominal, ordinal, continuous ]
-    #   permitted: [ factor, numeric ]
-    #
-    # - name: lambda
-    #   title: Lambda Selection Method
-    #   type: List
-    #   options:
-    #     - title: Minimum CV Error
-    #       name: lambda.min
-    #     - title: 1SE Rule
-    #       name: lambda.1se
-    #   default: lambda.1se
-    #
-    # - name: nfolds
-    #   title: Number of CV Folds
-    #   type: Integer
-    #   default: 10
-    #   min: 3
-    #
-    # - name: standardize
-    #   title: Standardize Variables
-    #   type: Bool
-    #   default: true
-    #
-    # - name: plots
-    #   title: Plots
-    #   type: Group
-    #   items:
-    #     - name: cv_plot
-    #       title: Cross-validation Plot
-    #       type: Bool
-    #       default: true
-    #     - name: coef_plot
-    #       title: Coefficient Plot
-    #       type: Bool
-    #       default: true
-    #     - name: survival_plot
-    #       title: Risk Group Survival Plot
-    #       type: Bool
-    #       default: true
-    #
-    # - name: riskScore
-    #   title: Add Risk Score to Data
-    #   type: Output
+    - name: elapsedtime
+      title: 'Time Elapsed'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
 
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      
+    - name: lambda
+      title: Lambda Selection Method
+      type: List
+      options:
+        - title: Minimum CV Error
+          name: lambda.min
+        - title: 1SE Rule
+          name: lambda.1se
+      default: lambda.1se
+
+    - name: nfolds
+      title: Number of CV Folds
+      type: Integer
+      default: 10
+      min: 3
+      
+    - name: standardize
+      title: Standardize Variables
+      type: Bool
+      default: true
+
+    - name: plots
+      title: Plots
+      type: Group
+      items:
+        - name: cv_plot
+          title: Cross-validation Plot
+          type: Bool
+          default: true
+        - name: coef_plot
+          title: Coefficient Plot
+          type: Bool
+          default: true
+        - name: survival_plot
+          title: Risk Group Survival Plot
+          type: Bool
+          default: true
+
+    - name: riskScore
+      title: Add Risk Score to Data
+      type: Output
 ...

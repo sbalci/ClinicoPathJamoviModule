@@ -1,0 +1,506 @@
+# meddecide: Medical Decision Making in R
+
+## Overview
+
+The `meddecide` package provides comprehensive tools for medical decision-making, including:
+
+- **ROC Analysis**: Receiver Operating Characteristic curve analysis with optimal cutpoint determination
+- **Diagnostic Test Evaluation**: Sensitivity, specificity, predictive values, and likelihood ratios
+- **Interrater Reliability**: Cohen's kappa and Fleiss' kappa for agreement analysis
+- **Power Analysis**: Sample size calculations for kappa statistics
+
+---
+
+## Vignette 1: ROC Analysis with `psychopdaroc`
+
+### Introduction
+
+ROC (Receiver Operating Characteristic) analysis is fundamental in evaluating diagnostic tests. The `psychopdaroc` function provides comprehensive ROC analysis with multiple methods for determining optimal cutpoints.
+
+### Basic Usage
+
+```r
+library(meddecide)
+
+# Load example data
+data(cancer_biomarker)  # Hypothetical dataset
+
+# Basic ROC analysis
+roc_result <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",           # Test variable
+  classVar = "cancer_status",      # Binary outcome (0/1)
+  positiveClass = "1"              # Which level is positive
+)
+```
+
+### Understanding ROC Curves
+
+An ROC curve plots sensitivity (true positive rate) against 1-specificity (false positive rate) across all possible cutpoints. The area under the curve (AUC) summarizes overall diagnostic accuracy:
+
+- AUC = 0.5: No discrimination (diagonal line)
+- AUC = 0.7-0.8: Acceptable discrimination
+- AUC = 0.8-0.9: Excellent discrimination
+- AUC > 0.9: Outstanding discrimination
+
+### Optimal Cutpoint Methods
+
+The package offers several methods to determine optimal cutpoints:
+
+```r
+# Method 1: Maximize Youden's Index (default)
+roc_youden <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  method = "maximize_metric",
+  metric = "youden"  # Sensitivity + Specificity - 1
+)
+
+# Method 2: Cost-benefit optimization
+roc_cost <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  method = "oc_cost_ratio",
+  costratioFP = 2.5  # False positives cost 2.5x more than false negatives
+)
+
+# Method 3: Equal sensitivity and specificity
+roc_equal <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  method = "oc_equal_sens_spec"
+)
+```
+
+### Comparing Multiple Tests
+
+```r
+# Compare multiple biomarkers
+roc_comparison <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = c("PSA", "CA125", "CEA"),  # Multiple tests
+  classVar = "cancer_status",
+  positiveClass = "1",
+  combinePlots = TRUE,        # Show all curves in one plot
+  delongTest = TRUE           # Statistical comparison of AUCs
+)
+```
+
+### Advanced Features
+
+```r
+# Bootstrap confidence intervals
+roc_bootstrap <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  bootstrapCI = TRUE,
+  bootstrapReps = 2000
+)
+
+# Partial AUC (focus on high specificity region)
+roc_partial <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  partialAUC = TRUE,
+  partialAUCfrom = 0.8,  # Specificity range 80-100%
+  partialAUCto = 1.0
+)
+
+# Net Reclassification Index (NRI) and IDI
+roc_nri <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = c("PSA", "NewBiomarker"),
+  classVar = "cancer_status",
+  positiveClass = "1",
+  calculateIDI = TRUE,
+  calculateNRI = TRUE,
+  refVar = "PSA",  # Compare NewBiomarker against PSA
+  nriThresholds = "0.2,0.5"  # Risk categories: <20%, 20-50%, >50%
+)
+```
+
+### Visualization Options
+
+```r
+# Publication-ready plots
+roc_publication <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = c("PSA", "CA125"),
+  classVar = "cancer_status",
+  positiveClass = "1",
+  plotROC = TRUE,
+  cleanPlot = TRUE,           # Clean plot for publications
+  showOptimalPoint = TRUE,    # Mark optimal cutpoint
+  legendPosition = "bottomright"
+)
+
+# Additional diagnostic plots
+roc_diagnostic <- psychopdaroc(
+  data = cancer_biomarker,
+  dependentVars = "PSA",
+  classVar = "cancer_status",
+  positiveClass = "1",
+  showCriterionPlot = TRUE,   # Sensitivity/Specificity vs threshold
+  showPrevalencePlot = TRUE,  # PPV/NPV vs prevalence
+  showDotPlot = TRUE          # Distribution by class
+)
+```
+
+---
+
+## Vignette 2: Diagnostic Test Evaluation with `decision`
+
+### Introduction
+
+The `decision` function evaluates diagnostic test performance against a gold standard, calculating sensitivity, specificity, predictive values, and likelihood ratios.
+
+### Basic Analysis
+
+```r
+# Evaluate a new rapid test against gold standard
+decision_result <- decision(
+  data = diagnostic_data,
+  gold = "pcr_result",        # Gold standard test
+  goldPositive = "positive",   # Positive level of gold standard
+  newtest = "rapid_test",      # New test to evaluate
+  testPositive = "positive"    # Positive level of new test
+)
+```
+
+### Understanding the Output
+
+The function provides:
+
+1. **Confusion Matrix**: True positives, false positives, true negatives, false negatives
+2. **Performance Metrics**:
+   - Sensitivity: Proportion of true positives correctly identified
+   - Specificity: Proportion of true negatives correctly identified
+   - PPV: Probability of disease given positive test
+   - NPV: Probability of no disease given negative test
+   - Likelihood ratios: How much a test result changes disease probability
+
+### Using Prior Probability
+
+When the study population differs from the target population:
+
+```r
+# Adjust for population prevalence
+decision_adjusted <- decision(
+  data = diagnostic_data,
+  gold = "pcr_result",
+  goldPositive = "positive",
+  newtest = "rapid_test",
+  testPositive = "positive",
+  pp = TRUE,                  # Use prior probability
+  pprob = 0.05                # 5% prevalence in general population
+)
+```
+
+### Confidence Intervals
+
+```r
+# Add 95% confidence intervals
+decision_ci <- decision(
+  data = diagnostic_data,
+  gold = "pcr_result",
+  goldPositive = "positive",
+  newtest = "rapid_test",
+  testPositive = "positive",
+  ci = TRUE                   # Calculate confidence intervals
+)
+```
+
+### Fagan Nomogram
+
+Visualize how test results change disease probability:
+
+```r
+# Create Fagan nomogram
+decision_fagan <- decision(
+  data = diagnostic_data,
+  gold = "pcr_result",
+  goldPositive = "positive",
+  newtest = "rapid_test",
+  testPositive = "positive",
+  fagan = TRUE                # Generate Fagan nomogram
+)
+```
+
+---
+
+## Vignette 3: Decision Calculator with `decisioncalculator`
+
+### Introduction
+
+When you have summary statistics instead of raw data, use `decisioncalculator`.
+
+### Basic Usage
+
+```r
+# From a published 2x2 table
+calc_result <- decisioncalculator(
+  TP = 85,    # True positives
+  FP = 15,    # False positives  
+  FN = 10,    # False negatives
+  TN = 90     # True negatives
+)
+```
+
+### Adjusting for Prevalence
+
+```r
+# Adjust for different population prevalence
+calc_adjusted <- decisioncalculator(
+  TP = 85,
+  FP = 15,
+  FN = 10,
+  TN = 90,
+  pp = TRUE,
+  pprob = 0.02  # 2% prevalence in screening population
+)
+```
+
+### Interpreting Results
+
+The calculator provides:
+- **Accuracy**: Overall correct classification rate
+- **Prevalence**: Disease frequency in the study
+- **Post-test probabilities**: Updated disease probability after testing
+- **Likelihood ratios**: Diagnostic test strength
+
+---
+
+## Vignette 4: Interrater Reliability with `agreement`
+
+### Introduction
+
+The `agreement` function assesses how well multiple raters agree when classifying the same subjects.
+
+### Two Raters (Cohen's Kappa)
+
+```r
+# Two pathologists rating tumor grades
+kappa_result <- agreement(
+  data = pathology_data,
+  vars = c("pathologist1", "pathologist2")
+)
+```
+
+### Interpretation:
+- κ < 0.00: Poor agreement
+- κ = 0.00-0.20: Slight agreement
+- κ = 0.21-0.40: Fair agreement
+- κ = 0.41-0.60: Moderate agreement
+- κ = 0.61-0.80: Substantial agreement
+- κ = 0.81-1.00: Almost perfect agreement
+
+### Weighted Kappa for Ordinal Data
+
+```r
+# For ordinal categories (e.g., grades 1-5)
+weighted_kappa <- agreement(
+  data = pathology_data,
+  vars = c("pathologist1", "pathologist2"),
+  wght = "squared"  # Squared weights for ordinal data
+)
+```
+
+### Multiple Raters (Fleiss' Kappa)
+
+```r
+# Three or more raters
+fleiss_kappa <- agreement(
+  data = radiology_data,
+  vars = c("radiologist1", "radiologist2", "radiologist3", "radiologist4")
+)
+```
+
+### Exact Kappa
+
+```r
+# For small samples with 3+ raters
+exact_kappa <- agreement(
+  data = small_study,
+  vars = c("rater1", "rater2", "rater3"),
+  exct = TRUE  # Use exact method
+)
+```
+
+---
+
+## Vignette 5: Power Analysis for Kappa with `kappaSizePower`
+
+### Introduction
+
+Plan sample sizes for interrater reliability studies.
+
+### Basic Sample Size Calculation
+
+```r
+# Sample size for binary outcome
+sample_size <- kappaSizePower(
+  outcome = "2",           # Binary outcome
+  kappa0 = 0.4,           # Null hypothesis: fair agreement
+  kappa1 = 0.6,           # Alternative: moderate agreement
+  props = "0.3, 0.7",     # 30% positive, 70% negative
+  raters = "2",           # Two raters
+  alpha = 0.05,           # Type I error rate
+  power = 0.80            # Statistical power
+)
+```
+
+### Multiple Categories
+
+```r
+# Sample size for 3-category outcome
+sample_size_3cat <- kappaSizePower(
+  outcome = "3",
+  kappa0 = 0.4,
+  kappa1 = 0.6,
+  props = "0.2, 0.5, 0.3",  # Category proportions
+  raters = "2",
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+### Multiple Raters
+
+```r
+# Sample size for 3 raters
+sample_size_3raters <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.4,
+  kappa1 = 0.6,
+  props = "0.4, 0.6",
+  raters = "3",             # Three raters
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+---
+
+## Vignette 6: Confidence Interval Approach with `kappaSizeCI`
+
+### Introduction
+
+Calculate sample size based on desired confidence interval width.
+
+### Basic Usage
+
+```r
+# Sample size for precise kappa estimation
+ci_sample_size <- kappaSizeCI(
+  outcome = "2",
+  kappa0 = 0.6,      # Expected kappa
+  kappaL = 0.4,      # Lower CI bound
+  kappaU = 0.8,      # Upper CI bound
+  props = "0.2, 0.8",
+  raters = "2",
+  alpha = 0.05
+)
+```
+
+### Planning for Publication
+
+```r
+# Narrow CI for publication standards
+publication_size <- kappaSizeCI(
+  outcome = "2",
+  kappa0 = 0.7,      # Expected substantial agreement
+  kappaL = 0.6,      # Lower bound still substantial
+  kappaU = 0.8,      # Upper bound
+  props = "0.3, 0.7",
+  raters = "2",
+  alpha = 0.05
+)
+```
+
+---
+
+## Vignette 7: Fixed Sample Size Analysis with `kappaSizeFixedN`
+
+### Introduction
+
+When sample size is predetermined, calculate expected kappa precision.
+
+### Usage
+
+```r
+# What kappa precision with 100 subjects?
+fixed_n_result <- kappaSizeFixedN(
+  outcome = "2",
+  kappa0 = 0.5,       # Expected kappa
+  props = "0.4, 0.6",
+  raters = "2",
+  alpha = 0.05,
+  n = 100             # Fixed sample size
+)
+```
+
+### Feasibility Assessment
+
+```r
+# Check if available sample provides adequate precision
+feasibility <- kappaSizeFixedN(
+  outcome = "3",
+  kappa0 = 0.6,
+  props = "0.3, 0.4, 0.3",
+  raters = "2",
+  alpha = 0.05,
+  n = 50              # Available subjects
+)
+```
+
+---
+
+## Best Practices
+
+### 1. ROC Analysis
+- Always verify positive class specification
+- Consider clinical costs when choosing cutpoints
+- Use bootstrap CIs for small samples
+- Report both sensitivity and specificity at chosen cutpoint
+
+### 2. Diagnostic Test Evaluation
+- Account for spectrum bias in study design
+- Adjust for target population prevalence
+- Report confidence intervals
+- Consider clinical context for interpretation
+
+### 3. Interrater Reliability
+- Use appropriate kappa variant (weighted for ordinal data)
+- Ensure raters are properly trained
+- Consider prevalence effects on kappa
+- Report percentage agreement alongside kappa
+
+### 4. Power Analysis
+- Be realistic about expected agreement levels
+- Consider dropout rates
+- Account for category imbalance
+- Plan for pilot studies when parameters uncertain
+
+---
+
+## References
+
+1. DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. Biometrics 44:837-845.
+
+2. Cohen J (1960). A coefficient of agreement for nominal scales. Educational and Psychological Measurement 20:37-46.
+
+3. Fleiss JL (1971). Measuring nominal scale agreement among many raters. Psychological Bulletin 76:378-382.
+
+4. Pencina MJ, D'Agostino RB Sr, D'Agostino RB Jr, Vasan RS (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond. Statistics in Medicine 27:157-172.
+
+5. Fagan TJ (1975). Nomogram for Bayes theorem. New England Journal of Medicine 293:257.
