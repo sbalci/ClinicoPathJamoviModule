@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,21 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_optimisation.html">Introduction to Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostic-tests.html">Diagnostic Test Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
+    <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -112,10 +121,28 @@
         <dd>Treatment Pathway Alluvial Plot</dd>
       </dl><dl><dt>
 
+          <code><a href="alluvialSurvivalClass.html">alluvialSurvivalClass</a></code>
+
+        </dt>
+        <dd>Alluvial Survival Plot</dd>
+      </dl><dl><dt>
+
           <code><a href="auc_ci.html">auc_ci()</a></code>
 
         </dt>
         <dd>Statistical Utility Functions</dd>
+      </dl><dl><dt>
+
+          <code><a href="bayesdca.html">bayesdca()</a></code>
+
+        </dt>
+        <dd>Bayesian Decision Curve Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="bayesdcaClass.html">bayesdcaClass</a></code>
+
+        </dt>
+        <dd>Bayesian Decision Curve Analysis</dd>
       </dl><dl><dt>
 
           <code><a href="benford.html">benford()</a></code>
@@ -124,10 +151,46 @@
         <dd>Benford Analysis</dd>
       </dl><dl><dt>
 
+          <code><a href="benfordClass.html">benfordClass</a></code>
+
+        </dt>
+        <dd>Benford's Law Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="bootstrapIDI.html">bootstrapIDI()</a></code>
+
+        </dt>
+        <dd>Bootstrap IDI calculation with confidence intervals</dd>
+      </dl><dl><dt>
+
+          <code><a href="bootstrapNRI.html">bootstrapNRI()</a></code>
+
+        </dt>
+        <dd>Bootstrap NRI calculation with confidence intervals</dd>
+      </dl><dl><dt>
+
           <code><a href="bootstrap_ci.html">bootstrap_ci()</a></code>
 
         </dt>
         <dd>Bootstrap confidence intervals for diagnostic metrics</dd>
+      </dl><dl><dt>
+
+          <code><a href="calculate_auc.html">calculate_auc()</a></code>
+
+        </dt>
+        <dd>Approximate AUC from sensitivity and specificity</dd>
+      </dl><dl><dt>
+
+          <code><a href="calculate_sensitivity.html">calculate_sensitivity()</a></code>
+
+        </dt>
+        <dd>Diagnostic metric calculations</dd>
+      </dl><dl><dt>
+
+          <code><a href="calculate_specificity.html">calculate_specificity()</a></code>
+
+        </dt>
+        <dd>Calculate test specificity</dd>
       </dl><dl><dt>
 
           <code><a href="checkdata.html">checkdata()</a></code>
@@ -140,6 +203,18 @@
 
         </dt>
         <dd>Title</dd>
+      </dl><dl><dt>
+
+          <code><a href="chisqposttest.html">chisqposttest()</a></code>
+
+        </dt>
+        <dd>Chi-Square Post-Hoc Tests</dd>
+      </dl><dl><dt>
+
+          <code><a href="chisqposttestClass.html">chisqposttestClass</a></code>
+
+        </dt>
+        <dd>Chi-Square Post-Hoc Tests</dd>
       </dl><dl><dt>
 
           <code><a href="ciSingle.html">ciSingle()</a></code>
@@ -170,6 +245,12 @@
 
         </dt>
         <dd>Competing Survival Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="computeNRI.html">computeNRI()</a></code>
+
+        </dt>
+        <dd>Compute Net Reclassification Index (NRI)</dd>
       </dl><dl><dt>
 
           <code><a href="consort.html">consort()</a></code>
@@ -208,6 +289,18 @@
         <dd>Correlation Analysis</dd>
       </dl><dl><dt>
 
+          <code><a href="cotest.html">cotest()</a></code>
+
+        </dt>
+        <dd>Co-Testing Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="cotestClass.html">cotestClass</a></code>
+
+        </dt>
+        <dd>Co-Testing Analysis</dd>
+      </dl><dl><dt>
+
           <code><a href="crosstable.html">crosstable()</a></code>
 
         </dt>
@@ -217,7 +310,7 @@
           <code><a href="crosstableClass.html">crosstableClass</a></code>
 
         </dt>
-        <dd>Cross Table</dd>
+        <dd>Cross Table for Clinicopathological Comparisons</dd>
       </dl><dl><dt>
 
           <code><a href="decision.html">decision()</a></code>
@@ -248,6 +341,54 @@
 
         </dt>
         <dd>Decision Calculator</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncombine.html">decisioncombine()</a></code>
+
+        </dt>
+        <dd>Combine Medical Decision Tests</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncombineClass.html">decisioncombineClass</a></code>
+
+        </dt>
+        <dd>Combine Medical Decision Tests</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncompare.html">decisioncompare()</a></code>
+
+        </dt>
+        <dd>Compare Medical Decision Tests</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncompareClass.html">decisioncompareClass</a></code>
+
+        </dt>
+        <dd>Compare Medical Decision Tests</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncurve.html">decisioncurve()</a></code>
+
+        </dt>
+        <dd>Decision Curve Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisioncurveClass.html">decisioncurveClass</a></code>
+
+        </dt>
+        <dd>Decision Curve Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisionpanel.html">decisionpanel()</a></code>
+
+        </dt>
+        <dd>Decision Panel Optimization</dd>
+      </dl><dl><dt>
+
+          <code><a href="decisionpanelClass.html">decisionpanelClass</a></code>
+
+        </dt>
+        <dd>Decision Panel Optimization</dd>
       </dl><dl><dt>
 
           <code><a href="dendogram.html">dendogram()</a></code>
@@ -299,12 +440,6 @@
       </dl><dl><dt>
 
           <code><a href="ihcstats.html">ihcstats()</a></code>
-
-        </dt>
-        <dd>IHC Expression Analysis</dd>
-      </dl><dl><dt>
-
-          <code><a href="ihcstatsClass.html">ihcstatsClass</a></code>
 
         </dt>
         <dd>IHC Expression Analysis</dd>
@@ -550,6 +685,12 @@
         <dd>Nomogram</dd>
       </dl><dl><dt>
 
+          <code><a href="nomogrammer.html">nomogrammer()</a></code>
+
+        </dt>
+        <dd>Fagan Nomogram Function</dd>
+      </dl><dl><dt>
+
           <code><a href="oddsratio.html">oddsratio()</a></code>
 
         </dt>
@@ -566,6 +707,18 @@
 
         </dt>
         <dd>One Survival Outcome</dd>
+      </dl><dl><dt>
+
+          <code><a href="outcomeorganizer.html">outcomeorganizer()</a></code>
+
+        </dt>
+        <dd>Enhanced Outcome Organizer for Survival Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="outcomeorganizerClass.html">outcomeorganizerClass</a></code>
+
+        </dt>
+        <dd>Enhanced Outcome Organizer for Survival Analysis</dd>
       </dl><dl><dt>
 
           <code><a href="pairchi2.html">pairchi2()</a></code>
@@ -586,6 +739,30 @@
         <dd>Parallel Plot</dd>
       </dl><dl><dt>
 
+          <code><a href="patientTimelines.html">patientTimelines</a></code>
+
+        </dt>
+        <dd>Patient Timeline Data for Clinical Oncology</dd>
+      </dl><dl><dt>
+
+          <code><a href="patientTimelinesDates.html">patientTimelinesDates</a></code>
+
+        </dt>
+        <dd>Patient Timeline Data with Dates for Clinical Oncology</dd>
+      </dl><dl><dt>
+
+          <code><a href="powersurvival.html">powersurvival()</a></code>
+
+        </dt>
+        <dd>Power Analysis for Survival Studies</dd>
+      </dl><dl><dt>
+
+          <code><a href="powersurvivalClass.html">powersurvivalClass</a></code>
+
+        </dt>
+        <dd>Power Analysis for Survival Studies</dd>
+      </dl><dl><dt>
+
           <code><a href="ppv.html">ppv()</a></code>
 
         </dt>
@@ -601,7 +778,25 @@
           <code><a href="print.sensSpecTable.html">print(<i>&lt;sensSpecTable&gt;</i>)</a></code>
 
         </dt>
-        <dd>Sensitivity and Specificity Table</dd>
+        <dd>Print formatted HTML table for sensitivity/specificity results</dd>
+      </dl><dl><dt>
+
+          <code><a href="psychopdaroc.html">psychopdaroc()</a></code>
+
+        </dt>
+        <dd>ROC Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="psychopdarocClass.html">psychopdarocClass</a></code>
+
+        </dt>
+        <dd>ROC Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="raw_to_prob.html">raw_to_prob()</a></code>
+
+        </dt>
+        <dd>Convert raw test values to predicted probabilities using ROC curve</dd>
       </dl><dl><dt>
 
           <code><a href="reportcat.html">reportcat()</a></code>
@@ -628,16 +823,64 @@
         <dd>Find Retracted Papers from DOI</dd>
       </dl><dl><dt>
 
+          <code><a href="riverplot.html">riverplot()</a></code>
+
+        </dt>
+        <dd>River Plots</dd>
+      </dl><dl><dt>
+
+          <code><a href="riverplotClass.html">riverplotClass</a></code>
+
+        </dt>
+        <dd>River Plots</dd>
+      </dl><dl><dt>
+
           <code><a href="roc.html">roc()</a></code>
+
+        </dt>
+        <dd>ROC Curve Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="roc2.html">roc2()</a></code>
 
         </dt>
         <dd>ROC</dd>
       </dl><dl><dt>
 
-          <code><a href="rocClass.html">rocClass</a></code>
+          <code><a href="roc2Class.html">roc2Class</a></code>
 
         </dt>
         <dd>ROC Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="rocClass.html">rocClass</a></code>
+
+        </dt>
+        <dd>ROC Curve Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="screeningcalculator.html">screeningcalculator()</a></code>
+
+        </dt>
+        <dd>Screening Test Calculator</dd>
+      </dl><dl><dt>
+
+          <code><a href="screeningcalculatorClass.html">screeningcalculatorClass</a></code>
+
+        </dt>
+        <dd>Screening Test Calculator</dd>
+      </dl><dl><dt>
+
+          <code><a href="sequentialtests.html">sequentialtests()</a></code>
+
+        </dt>
+        <dd>Sequential Testing Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="sequentialtestsClass.html">sequentialtestsClass</a></code>
+
+        </dt>
+        <dd>Sequential Testing Analysis</dd>
       </dl><dl><dt>
 
           <code><a href="singlearm.html">singlearm()</a></code>
@@ -650,6 +893,18 @@
 
         </dt>
         <dd>Single Arm Survival</dd>
+      </dl><dl><dt>
+
+          <code><a href="stagemigration.html">stagemigration()</a></code>
+
+        </dt>
+        <dd>Stage Migration Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="stagemigrationClass.html">stagemigrationClass</a></code>
+
+        </dt>
+        <dd>Stage Migration Analysis</dd>
       </dl><dl><dt>
 
           <code><a href="statsplot2.html">statsplot2()</a></code>
@@ -673,7 +928,7 @@
           <code><a href="summarydataClass.html">summarydataClass</a></code>
 
         </dt>
-        <dd>Summary of Continuous Variables</dd>
+        <dd>Summary of Continuous Variables with Distribution Diagnostics</dd>
       </dl><dl><dt>
 
           <code><a href="survival.html">survival()</a></code>
@@ -704,6 +959,18 @@
 
         </dt>
         <dd>Swimmer Plot</dd>
+      </dl><dl><dt>
+
+          <code><a href="swimmerplot2.html">swimmerplot2()</a></code>
+
+        </dt>
+        <dd>Swimmer Plot 2</dd>
+      </dl><dl><dt>
+
+          <code><a href="swimmerplot2Class.html">swimmerplot2Class</a></code>
+
+        </dt>
+        <dd>Swimmer Plot 2</dd>
       </dl><dl><dt>
 
           <code><a href="swimmerplotClass.html">swimmerplotClass</a></code>
@@ -769,19 +1036,25 @@
           <code><a href="tree.html">tree()</a></code>
 
         </dt>
-        <dd>Decision Tree</dd>
+        <dd>Medical Decision Tree</dd>
       </dl><dl><dt>
 
           <code><a href="treeClass.html">treeClass</a></code>
 
         </dt>
-        <dd>Decision Tree</dd>
+        <dd>Medical Decision Tree</dd>
       </dl><dl><dt>
 
           <code><a href="tumor_response_examples.html">tumor_response_examples</a></code>
 
         </dt>
         <dd>Example Tumor Response Datasets</dd>
+      </dl><dl><dt>
+
+          <code><a href="validateROCInputs.html">validateROCInputs()</a></code>
+
+        </dt>
+        <dd>Validate inputs for ROC analysis</dd>
       </dl><dl><dt>
 
           <code><a href="vartree.html">vartree()</a></code>
@@ -806,6 +1079,18 @@
 
         </dt>
         <dd>Venn Diagram</dd>
+      </dl><dl><dt>
+
+          <code><a href="vtree3.html">vtree3()</a></code>
+
+        </dt>
+        <dd>Variable Tree V3</dd>
+      </dl><dl><dt>
+
+          <code><a href="vtree3Class.html">vtree3Class</a></code>
+
+        </dt>
+        <dd>Variable Tree V3</dd>
       </dl><dl><dt>
 
           <code><a href="waffle.html">waffle()</a></code>

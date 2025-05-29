@@ -448,6 +448,9 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Lasso-Cox Regression
     menuSubtitle: Variable Selection with Lasso Regularization
+    description: >-
+      Performs Lasso-penalized Cox regression for variable selection in survival
+      analysis.
   - title: Time-Dependent ROC Analysis
     name: timeroc
     ns: ClinicoPath
@@ -550,20 +553,6 @@ analyses:
     description: >-
       Creates a swimmer plot to visualize individual patient timelines and
       clinical events.
-  - title: Variable Tree 2
-    name: vartree2
-    ns: ClinicoPath
-    menuGroup: Exploration
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Variable Tree 2
-    description: Function for Generating Tree Summaries of Variables.
-  - title: Variable Tree V3
-    name: vartree3
-    ns: ClinicoPath
-    menuGroup: Exploration
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Variable Tree V3
-    description: Function for Generating Enhanced Tree Summaries of Variables
   - title: Swimmer Plot 2
     name: swimmerplot2
     ns: ClinicoPath
@@ -744,6 +733,13 @@ analyses:
       strategies including parallel testing (cotest), sequential testing, and
       repeated tests. Creates decision trees to minimize cost while maximizing
       accuracy.
+  - title: Variable Tree V3
+    name: vtree3
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuTitle: Variable Tree V3
+    menuSubgroup: ClinicoPath Descriptive Plots
+    description: Function for Generating Enhanced Tree Summaries of Variables
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

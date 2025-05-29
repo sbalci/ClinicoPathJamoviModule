@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,21 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_optimisation.html">Introduction to Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostic-tests.html">Diagnostic Test Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
+    <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -85,7 +94,10 @@
 <span>  ci95 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  risktable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censored <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  medianline <span class="op">=</span> <span class="st">"none"</span></span>
+<span>  medianline <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  person_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  time_intervals <span class="op">=</span> <span class="st">"12, 36, 60"</span>,</span>
+<span>  rate_multiplier <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -261,10 +273,28 @@ survival plots.</p></dd>
 <dd><p>If true, displays a line indicating the median survival
 time on the survival plot.</p></dd>
 
+
+<dt id="arg-person-time">person_time<a class="anchor" aria-label="anchor" href="#arg-person-time"></a></dt>
+<dd><p>Enable this option to calculate and display person-time
+metrics, including total follow-up time and incidence rates. These metrics
+help quantify the rate of events per unit of time in your study population.</p></dd>
+
+
+<dt id="arg-time-intervals">time_intervals<a class="anchor" aria-label="anchor" href="#arg-time-intervals"></a></dt>
+<dd><p>Specify time intervals for stratified person-time
+analysis. Enter a  comma-separated list of time points to create intervals.
+For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
+60+.</p></dd>
+
+
+<dt id="arg-rate-multiplier">rate_multiplier<a class="anchor" aria-label="anchor" href="#arg-rate-multiplier"></a></dt>
+<dd><p>Specify the multiplier for incidence rates (e.g.,
+100 for rates per 100 person-years, 1000 for rates per 1000 person-years).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calculatedcutoff</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calculatedcutoff</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$coxTable$asDF</code></p>
 <p><code>as.data.frame(results$coxTable)</code></p>
     </div>

@@ -8,8 +8,6 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = lassocoxBase,
     private = list(
 
-        # Add to .init function in lassocox.b.R
-
         .init = function() {
             # Check for required packages
             if (!requireNamespace("glmnet", quietly=TRUE))
@@ -62,6 +60,11 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 is.null(self$options$explanatory))
                 return()
 
+            # Show results
+            self$results$modelSummary$setVisible(TRUE)
+            self$results$coefficients$setVisible(TRUE)
+            self$results$performance$setVisible(TRUE)
+
             # Prepare data
             data <- private$.cleanData()
             if (is.null(data))
@@ -80,7 +83,6 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Save plots for rendering
             private$.savePlotData(results)
         },
-
 
         .cleanData = function() {
             # Get variables
@@ -132,9 +134,6 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 variable_names = colnames(X)
             ))
         },
-
-
-
 
         .fitModel = function(data) {
             # Required packages
@@ -237,8 +236,7 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(results))
                 return()
 
-            plot <- plot(results$cv_fit)
-            print(plot)
+            plot(results$cv_fit)
             TRUE
         },
 
@@ -250,8 +248,7 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(results))
                 return()
 
-            plot <- plot(results$final_model)
-            print(plot)
+            plot(results$final_model)
             TRUE
         },
 
@@ -274,13 +271,15 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Create plot
+            plot_data <- data.frame(
+                time = results$data$time,
+                status = results$data$status,
+                risk_groups = risk_groups
+            )
+
             plot <- survminer::ggsurvplot(
                 fit,
-                data = data.frame(
-                    time = results$data$time,
-                    status = results$data$status,
-                    risk_groups = risk_groups
-                ),
+                data = plot_data,
                 risk.table = TRUE,
                 pval = TRUE
             )
@@ -300,7 +299,7 @@ lassocoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$survival_plot$setState(results)
 
             # Add risk scores to dataset if requested
-            if (self$options$riskScore && is.null(self$results$riskScore))
+            if (!is.null(self$results$riskScore))
                 self$results$riskScore$setValues(results$risk_scores)
         }
     )

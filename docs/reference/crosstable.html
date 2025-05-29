@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,21 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/decisionpanel_optimisation.html">Introduction to Decision Panel Optimization</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostic-tests.html">Diagnostic Test Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
+    <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -73,11 +82,12 @@
 
 
 <dt id="arg-vars">vars<a class="anchor" aria-label="anchor" href="#arg-vars"></a></dt>
-<dd><p>variable in the rows</p></dd>
+<dd><p>The variable(s) that will appear as rows in the cross table.</p></dd>
 
 
 <dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
-<dd><p>variable in the column</p></dd>
+<dd><p>The variable that will appear as columns (groups) in the
+table.</p></dd>
 
 
 <dt id="arg-sty">sty<a class="anchor" aria-label="anchor" href="#arg-sty"></a></dt>
@@ -85,7 +95,7 @@
 
 
 <dt id="arg-excl">excl<a class="anchor" aria-label="anchor" href="#arg-excl"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>Exclude rows with missing values.</p></dd>
 
 
 <dt id="arg-cont">cont<a class="anchor" aria-label="anchor" href="#arg-cont"></a></dt>
@@ -98,12 +108,23 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle1</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle3</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table></div>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$subtitle</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle1</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle3</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tablestyle4</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># example will be added</span></span></span>
+<span class="r-in"><span><span class="co"># Example usage:</span></span></span>
+<span class="r-in"><span><span class="co"># dat &lt;- as.data.frame(your_data)</span></span></span>
+<span class="r-in"><span><span class="co"># ClinicoPathDescriptives::crosstable(</span></span></span>
+<span class="r-in"><span><span class="co">#   data = dat,</span></span></span>
+<span class="r-in"><span><span class="co">#   vars = vars(YourRowVariable),</span></span></span>
+<span class="r-in"><span><span class="co">#   group = "YourGroupingVariable",</span></span></span>
+<span class="r-in"><span><span class="co">#   sty = "finalfit",</span></span></span>
+<span class="r-in"><span><span class="co">#   excl = TRUE,</span></span></span>
+<span class="r-in"><span><span class="co">#   cont = "mean",</span></span></span>
+<span class="r-in"><span><span class="co">#   pcat = "chisq",</span></span></span>
+<span class="r-in"><span><span class="co">#   exportCSV = TRUE</span></span></span>
+<span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

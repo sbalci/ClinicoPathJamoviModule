@@ -41,25 +41,16 @@ children:
       - type: Label
         label: Lambda Selection
         children:
-          - type: RadioButton
+          - type: ComboBox
             name: lambda
-            optionName: lambda.min
-            label: Minimum CV Error
-          - type: RadioButton  
-            name: lambda
-            optionName: lambda.1se
-            label: 1SE Rule
       - type: Label
         label: Cross-validation
         children:
           - type: TextBox
             name: nfolds
-            label: Number of Folds
             format: number
-            enable: true
       - type: CheckBox
         name: standardize
-        label: Standardize Variables
         
   - type: CollapseBox
     label: Plots
@@ -68,13 +59,10 @@ children:
     children:
       - type: CheckBox
         name: cv_plot
-        label: Cross-validation Plot
       - type: CheckBox  
         name: coef_plot
-        label: Coefficient Plot
       - type: CheckBox
         name: survival_plot
-        label: Risk Group Survival Plot
         
   - type: CollapseBox
     label: Output Options

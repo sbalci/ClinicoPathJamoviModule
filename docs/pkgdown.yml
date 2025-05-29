@@ -1,19 +1,28 @@
-pandoc: '3.2'
+pandoc: '3.4'
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
+  agreement-analysis: agreement-analysis.html
   data-preperation: data-preperation.html
+  decisionpanel_advanced: decisionpanel_advanced.html
+  decisionpanel_clinical: decisionpanel_clinical.html
+  decisionpanel_optimisation: decisionpanel_optimisation.html
+  diagnostic-tests: diagnostic-tests.html
   examples: examples.html
+  meddecide-vignettes: meddecide-vignettes.html
+  medical_decision_tree_guide: medical_decision_tree_guide.html
   module_development_jamovi: module_development_jamovi.html
   motivation: motivation.html
+  nogoldstandard: nogoldstandard.html
   pathology_jamovi: pathology_jamovi.html
   pkgnet-report: pkgnet-report.html
+  roc-analysis: roc-analysis.html
   use-ClinicoPathDescriptives-in-R: use-ClinicoPathDescriptives-in-R.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   use-jsurvival-in-R: use-jsurvival-in-R.html
   use-meddecide-in-R: use-meddecide-in-R.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2025-02-22T14:43Z
+last_built: 2025-05-29T19:20Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles
