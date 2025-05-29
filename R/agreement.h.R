@@ -8,6 +8,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sft = FALSE,
+            heatmap = FALSE,
+            heatmapDetails = FALSE,
             wght = "unweighted",
             exct = FALSE,
             kripp = FALSE,
@@ -31,6 +33,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
                 sft,
+                default=FALSE)
+            private$..heatmap <- jmvcore::OptionBool$new(
+                "heatmap",
+                heatmap,
+                default=FALSE)
+            private$..heatmapDetails <- jmvcore::OptionBool$new(
+                "heatmapDetails",
+                heatmapDetails,
                 default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
@@ -64,6 +74,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
+            self$.addOption(private$..heatmap)
+            self$.addOption(private$..heatmapDetails)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..kripp)
@@ -73,6 +85,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         vars = function() private$..vars$value,
         sft = function() private$..sft$value,
+        heatmap = function() private$..heatmap$value,
+        heatmapDetails = function() private$..heatmapDetails$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
@@ -81,6 +95,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..vars = NA,
         ..sft = NA,
+        ..heatmap = NA,
+        ..heatmapDetails = NA,
         ..wght = NA,
         ..exct = NA,
         ..kripp = NA,
@@ -93,6 +109,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         irrtable = function() private$.items[["irrtable"]],
+        heatmapPlot = function() private$.items[["heatmapPlot"]],
         text2 = function() private$.items[["text2"]],
         text = function() private$.items[["text"]],
         krippTable = function() private$.items[["krippTable"]]),
@@ -147,6 +164,20 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "wght",
                     "exct")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="heatmapPlot",
+                title="Agreement Heatmap",
+                width=700,
+                height=500,
+                renderFun=".heatmapPlot",
+                visible="(heatmap)",
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct",
+                    "heatmap",
+                    "heatmapDetails")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
@@ -239,6 +270,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sft Boolean selection whether to show frequency table. Default is
 #'   'false'. If 'true', the function will show frequency table for each
 #'   observer.
+#' @param heatmap Boolean selection whether to show agreement heatmap. Default
+#'   is 'true'.
+#' @param heatmapDetails Boolean selection whether to show detailed heatmap
+#'   with kappa values. Default is 'false'.
 #' @param wght A list for the argument weight (wght), for weighted kappa
 #'   analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
 #'   only with ordinal variables. The function gives error if the variable type
@@ -254,6 +289,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
@@ -270,6 +306,8 @@ agreement <- function(
     data,
     vars,
     sft = FALSE,
+    heatmap = FALSE,
+    heatmapDetails = FALSE,
     wght = "unweighted",
     exct = FALSE,
     kripp = FALSE,
@@ -290,6 +328,8 @@ agreement <- function(
     options <- agreementOptions$new(
         vars = vars,
         sft = sft,
+        heatmap = heatmap,
+        heatmapDetails = heatmapDetails,
         wght = wght,
         exct = exct,
         kripp = kripp,

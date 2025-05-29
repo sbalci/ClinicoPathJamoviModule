@@ -1,0 +1,381 @@
+---
+name: decisionpanel
+title: Decision Panel Optimization
+jrs: '1.1'
+
+items:
+    # ==========================================
+    # SUMMARY RESULTS
+    # ==========================================
+    
+    - name: summary
+      title: Summary
+      type: Html
+      visible: true
+      
+    - name: optimalPanel
+      title: Optimal Test Panel
+      type: Table
+      visible: true
+      columns:
+        - name: rank
+          title: Rank
+          type: integer
+        - name: tests
+          title: Test Combination
+          type: text
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: zto
+        - name: cost
+          title: Cost
+          type: number
+          format: zto
+          visible: (useCosts)
+        - name: utility
+          title: Utility
+          type: number
+          format: zto
+          visible: (useCosts)
+        - name: efficiency
+          title: Efficiency
+          type: number
+          format: zto
+          visible: (useCosts)
+
+    # ==========================================
+    # STRATEGY COMPARISON
+    # ==========================================
+    
+    - name: strategyComparison
+      title: Testing Strategy Comparison
+      type: Table
+      visible: (compareStrategies)
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: nTests
+          title: Tests Used
+          type: integer
+        - name: avgSens
+          title: Avg Sensitivity
+          type: number
+          format: pc
+        - name: avgSpec
+          title: Avg Specificity
+          type: number
+          format: pc
+        - name: avgAccuracy
+          title: Avg Accuracy
+          type: number
+          format: pc
+        - name: avgCost
+          title: Avg Cost
+          type: number
+          format: zto
+          visible: (useCosts)
+        - name: bestPanel
+          title: Best Panel
+          type: text
+        - name: bestPerformance
+          title: Best Performance
+          type: number
+          format: zto
+
+    # ==========================================
+    # INDIVIDUAL TEST PERFORMANCE
+    # ==========================================
+    
+    - name: individualTests
+      title: Individual Test Performance
+      type: Table
+      visible: true
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: plr
+          title: +LR
+          type: number
+          format: zto
+        - name: nlr
+          title: -LR
+          type: number
+          format: zto
+        - name: cost
+          title: Cost
+          type: number
+          format: zto
+          visible: (useCosts)
+
+    # ==========================================
+    # ALL COMBINATIONS TABLE
+    # ==========================================
+    
+    - name: allCombinations
+      title: All Test Combinations
+      type: Table
+      visible: (showAllCombinations)
+      columns:
+        - name: tests
+          title: Tests
+          type: text
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: nTests
+          title: N Tests
+          type: integer
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: cost
+          title: Cost
+          type: number
+          format: zto
+          visible: (useCosts)
+        - name: utility
+          title: Utility
+          type: number
+          format: zto
+          visible: (useCosts)
+
+    # ==========================================
+    # DECISION TREE RESULTS
+    # ==========================================
+    
+    - name: treeStructure
+      title: Decision Tree Structure
+      type: Html
+      visible: (createTree)
+      
+    - name: treePerformance
+      title: Decision Tree Performance
+      type: Table
+      visible: (createTree)
+      columns:
+        - name: node
+          title: Node
+          type: text
+        - name: condition
+          title: Condition
+          type: text
+        - name: nCases
+          title: N Cases
+          type: integer
+        - name: probPositive
+          title: P(Disease+)
+          type: number
+          format: pc
+        - name: decision
+          title: Decision
+          type: text
+        - name: accuracy
+          title: Node Accuracy
+          type: number
+          format: pc
+
+    # ==========================================
+    # CROSS-VALIDATION RESULTS
+    # ==========================================
+    
+    - name: crossValidation
+      title: Cross-Validation Results
+      type: Table
+      visible: (crossValidate)
+      columns:
+        - name: panel
+          title: Test Panel
+          type: text
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: cvSensitivity
+          title: CV Sensitivity
+          type: number
+          format: pc
+        - name: cvSensitivitySD
+          title: SD
+          type: number
+          format: zto
+        - name: cvSpecificity
+          title: CV Specificity
+          type: number
+          format: pc
+        - name: cvSpecificitySD
+          title: SD
+          type: number
+          format: zto
+        - name: cvAccuracy
+          title: CV Accuracy
+          type: number
+          format: pc
+        - name: cvAccuracySD
+          title: SD
+          type: number
+          format: zto
+
+    # ==========================================
+    # BOOTSTRAP RESULTS
+    # ==========================================
+    
+    - name: bootstrapResults
+      title: Bootstrap Confidence Intervals
+      type: Table
+      visible: (bootstrap)
+      columns:
+        - name: panel
+          title: Test Panel
+          type: text
+        - name: metric
+          title: Metric
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: lower
+          title: "2.5%"
+          type: number
+          format: zto
+        - name: upper
+          title: "97.5%"
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+
+    # ==========================================
+    # PLOTS
+    # ==========================================
+    
+    - name: treeVisualization
+      title: Decision Tree
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotTree
+      visible: (plotTree && createTree)
+      clearWith:
+        - tests
+        - gold
+        - goldPositive
+        - treeMethod
+        - maxDepth
+        - minSplit
+
+    - name: strategyComparisonPlot
+      title: Strategy Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotStrategyComparison
+      visible: (plotComparison && compareStrategies)
+      clearWith:
+        - tests
+        - strategies
+        - optimizationCriteria
+
+    - name: costEffectivenessPlot
+      title: Cost-Effectiveness Frontier
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCostEffectiveness
+      visible: (plotCostEffect && useCosts)
+      clearWith:
+        - tests
+        - testCosts
+        - fpCost
+        - fnCost
+
+    - name: rocCurvesPlot
+      title: ROC Curves for Top Panels
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotROCCurves
+      visible: (plotROC)
+      clearWith:
+        - tests
+        - topN
+
+    # ==========================================
+    # RECOMMENDATIONS
+    # ==========================================
+    
+    - name: recommendations
+      title: Recommendations
+      type: Html
+      visible: true
+
+refs:
+    - rpart
+    - partykit
+    - DiagrammeR
+    - ROCR
+    - ClinicoPathJamoviModule

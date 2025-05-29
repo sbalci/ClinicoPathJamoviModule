@@ -4,19 +4,33 @@
 \alias{toolssummary}
 \title{Tools for data summary}
 \usage{
-toolssummary(data, vars)
+toolssummary(data, vars, excludeNA = FALSE, showFreq = TRUE, showStats = TRUE)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{vars}{.}
+\item{vars}{Variables to summarize}
+
+\item{excludeNA}{.}
+
+\item{showFreq}{.}
+
+\item{showStats}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$tablestyle4} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$tablestyle4html} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$frequencies} \tab \tab \tab \tab \tab a html \cr
+\code{results$numericStats} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
 Tools for data summary

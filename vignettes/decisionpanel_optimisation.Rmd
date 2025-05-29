@@ -1,0 +1,322 @@
+---
+title: "Introduction to Decision Panel Optimization"
+author: "meddecide Development Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Decision Panel Optimization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Introduction
+
+The Decision Panel Optimization module in the `meddecide` package provides a comprehensive framework for optimizing diagnostic test combinations in medical decision-making. This vignette introduces the basic concepts and demonstrates core functionality.
+
+## Key Concepts
+
+### Testing Strategies
+
+When multiple diagnostic tests are available, they can be combined in different ways:
+
+1. **Single Testing**: Use individual tests independently
+2. **Parallel Testing**: Perform multiple tests simultaneously
+   - ANY rule (OR): Positive if any test is positive
+   - ALL rule (AND): Positive only if all tests are positive
+   - MAJORITY rule: Positive if majority of tests are positive
+3. **Sequential Testing**: Perform tests in sequence based on previous results
+   - Stop on first positive
+   - Confirmatory (require multiple positives)
+   - Exclusion (require multiple negatives)
+
+### Optimization Criteria
+
+The module can optimize test panels based on various criteria:
+
+- **Accuracy**: Overall correct classification rate
+- **Sensitivity**: Ability to detect disease (minimize false negatives)
+- **Specificity**: Ability to rule out disease (minimize false positives)
+- **Predictive Values**: PPV and NPV
+- **Cost-Effectiveness**: Balance performance with resource utilization
+- **Utility**: Custom utility functions incorporating costs of errors
+
+## Installation and Loading
+
+```{r installation, eval=FALSE}
+# Install meddecide package
+install.packages("meddecide")
+
+# Or install from GitHub
+devtools::install_github("ClinicoPath/meddecide")
+```
+
+```{r loading}
+# Load required libraries
+library(meddecide)
+library(dplyr)
+library(ggplot2)
+
+# Load test datasets
+load("decision_panel_test_data.RData")
+```
+
+## Basic Example: COVID-19 Screening
+
+Let's start with a simple example using COVID-19 screening data:
+
+```{r covid_example}
+# Examine the data structure
+str(covid_screening_data)
+
+# Check disease prevalence
+table(covid_screening_data$covid_status)
+prop.table(table(covid_screening_data$covid_status))
+```
+
+### Running Basic Analysis
+
+```{r basic_analysis, eval=FALSE}
+# Basic decision panel analysis
+covid_panel <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct"),
+  testLevels = c("Positive", "Positive", "Abnormal"),
+  gold = "covid_status",
+  goldPositive = "Positive",
+  strategies = "all",
+  optimizationCriteria = "accuracy"
+)
+```
+
+### Interpreting Results
+
+The analysis provides several key outputs:
+
+1. **Individual Test Performance**: How each test performs alone
+2. **Optimal Panel**: The best combination of tests
+3. **Strategy Comparison**: Performance of different testing approaches
+4. **Decision Tree**: Optimal sequence for testing
+
+## Understanding Testing Strategies
+
+### Parallel Testing Example
+
+```{r parallel_example}
+# Simulate parallel testing with ANY rule
+# Positive if rapid_antigen OR pcr is positive
+parallel_any <- with(covid_screening_data, 
+  rapid_antigen == "Positive" | pcr == "Positive"
+)
+
+# Create confusion matrix
+conf_matrix_any <- table(
+  Predicted = parallel_any,
+  Actual = covid_screening_data$covid_status == "Positive"
+)
+
+print(conf_matrix_any)
+
+# Calculate metrics
+sensitivity_any <- conf_matrix_any[2,2] / sum(conf_matrix_any[,2])
+specificity_any <- conf_matrix_any[1,1] / sum(conf_matrix_any[,1])
+
+cat("Parallel ANY Rule:\n")
+cat(sprintf("Sensitivity: %.1f%%\n", sensitivity_any * 100))
+cat(sprintf("Specificity: %.1f%%\n", specificity_any * 100))
+```
+
+### Sequential Testing Example
+
+```{r sequential_example}
+# Simulate sequential testing
+# Start with rapid test, only do PCR if rapid is positive
+sequential_result <- rep("Negative", nrow(covid_screening_data))
+
+# Those with positive rapid test
+rapid_pos_idx <- which(covid_screening_data$rapid_antigen == "Positive")
+
+# Among those, check PCR
+sequential_result[rapid_pos_idx] <- 
+  ifelse(covid_screening_data$pcr[rapid_pos_idx] == "Positive", 
+         "Positive", "Negative")
+
+# Create confusion matrix
+conf_matrix_seq <- table(
+  Predicted = sequential_result == "Positive",
+  Actual = covid_screening_data$covid_status == "Positive"
+)
+
+print(conf_matrix_seq)
+
+# Calculate metrics
+sensitivity_seq <- conf_matrix_seq[2,2] / sum(conf_matrix_seq[,2])
+specificity_seq <- conf_matrix_seq[1,1] / sum(conf_matrix_seq[,1])
+
+cat("\nSequential Testing:\n")
+cat(sprintf("Sensitivity: %.1f%%\n", sensitivity_seq * 100))
+cat(sprintf("Specificity: %.1f%%\n", specificity_seq * 100))
+
+# Calculate cost savings
+pcr_tests_saved <- sum(covid_screening_data$rapid_antigen == "Negative")
+cat(sprintf("PCR tests saved: %d (%.1f%%)\n", 
+            pcr_tests_saved, 
+            pcr_tests_saved/nrow(covid_screening_data) * 100))
+```
+
+## Cost-Effectiveness Analysis
+
+When costs are considered, the optimal strategy may change:
+
+```{r cost_analysis, eval=FALSE}
+# Analysis with costs
+covid_panel_cost <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct"),
+  testLevels = c("Positive", "Positive", "Abnormal"),
+  gold = "covid_status",
+  goldPositive = "Positive",
+  strategies = "all",
+  optimizationCriteria = "utility",
+  useCosts = TRUE,
+  testCosts = "5,50,200",  # Costs for each test
+  fpCost = 500,            # Cost of false positive
+  fnCost = 5000            # Cost of false negative
+)
+```
+
+## Visualization
+
+### Performance Comparison Plot
+
+```{r visualization}
+# Create performance comparison data
+strategies <- data.frame(
+  Strategy = c("Rapid Only", "PCR Only", "Parallel ANY", "Sequential"),
+  Sensitivity = c(65, 95, 98, 62),
+  Specificity = c(98, 99, 97, 99.9),
+  Cost = c(5, 50, 55, 15)
+)
+
+# Plot sensitivity vs specificity
+ggplot(strategies, aes(x = 100 - Specificity, y = Sensitivity)) +
+  geom_point(aes(size = Cost), alpha = 0.6) +
+  geom_text(aes(label = Strategy), vjust = -1) +
+  scale_size_continuous(range = c(3, 10)) +
+  xlim(0, 5) + ylim(60, 100) +
+  labs(
+    title = "Testing Strategy Comparison",
+    x = "False Positive Rate (%)",
+    y = "Sensitivity (%)",
+    size = "Cost ($)"
+  ) +
+  theme_minimal()
+```
+
+## Decision Trees
+
+Decision trees provide clear algorithms for clinical use:
+
+```{r decision_tree, eval=FALSE}
+# Generate decision tree
+covid_tree <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct", "symptom_score"),
+  testLevels = c("Positive", "Positive", "Abnormal", ">5"),
+  gold = "covid_status",
+  goldPositive = "Positive",
+  createTree = TRUE,
+  treeMethod = "cart",
+  maxDepth = 3
+)
+```
+
+### Interpreting the Tree
+
+A typical decision tree output might look like:
+
+```
+1. Start with Rapid Antigen Test
+   ├─ If Positive (2% of patients)
+   │  └─ Confirm with PCR
+   │     ├─ If Positive → COVID Positive (PPV: 95%)
+   │     └─ If Negative → COVID Negative (NPV: 98%)
+   └─ If Negative (98% of patients)
+      ├─ If Symptoms > 5
+      │  └─ Perform Chest CT
+      │     ├─ If Abnormal → Perform PCR
+      │     └─ If Normal → COVID Negative
+      └─ If Symptoms ≤ 5 → COVID Negative
+```
+
+## Advanced Features
+
+### Cross-Validation
+
+Validate panel performance using k-fold cross-validation:
+
+```{r cross_validation, eval=FALSE}
+# Run with cross-validation
+covid_panel_cv <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct"),
+  testLevels = c("Positive", "Positive", "Abnormal"),
+  gold = "covid_status",
+  goldPositive = "Positive",
+  crossValidate = TRUE,
+  nFolds = 5,
+  seed = 123
+)
+```
+
+### Bootstrap Confidence Intervals
+
+Get uncertainty estimates for performance metrics:
+
+```{r bootstrap, eval=FALSE}
+# Run with bootstrap
+covid_panel_boot <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct"),
+  testLevels = c("Positive", "Positive", "Abnormal"),
+  gold = "covid_status",
+  goldPositive = "Positive",
+  bootstrap = TRUE,
+  bootReps = 1000,
+  seed = 123
+)
+```
+
+## Best Practices
+
+1. **Start Simple**: Begin with individual test performance before combinations
+2. **Consider Context**: Screening vs. diagnosis requires different strategies
+3. **Validate Results**: Use cross-validation or separate test sets
+4. **Include Costs**: Real-world decisions must consider resources
+5. **Think Sequentially**: Often more efficient than parallel testing
+6. **Set Constraints**: Define minimum acceptable performance
+7. **Interpret Clinically**: Statistical optimality isn't everything
+
+## Conclusion
+
+The Decision Panel Optimization module provides a systematic approach to combining diagnostic tests. By considering various strategies, costs, and constraints, it helps identify practical testing algorithms that balance performance with resource utilization.
+
+## Next Steps
+
+- See the "Clinical Applications" vignette for disease-specific examples
+- Review "Advanced Optimization" for complex scenarios
+- Check "Implementation Guide" for deploying algorithms in practice
+
+## Session Information
+
+```{r session_info}
+sessionInfo()
+```

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.14
+version: 0.0.3.16
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-05-27'
+date: '2024-05-29'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -389,7 +389,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: Exploration
     menuTitle: Tools for data summary
-    menuSubgroup: Drafts
+    menuSubgroup: ClinicoPath Descriptives
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
@@ -728,6 +728,18 @@ analyses:
     menuTitle: Bayesian Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
+  - title: Decision Panel Optimization
+    name: decisionpanel
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Decision Panel Optimization
+    menuSubgroup: Decision
+    menuSubtitle: Optimize test panels and decision trees
+    description: >
+      Optimize diagnostic test panels by evaluating various combination
+      strategies including parallel testing (cotest), sequential testing, and
+      repeated tests. Creates decision trees to minimize cost while maximizing
+      accuracy.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
