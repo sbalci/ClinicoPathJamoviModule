@@ -4,7 +4,7 @@ title: Medical Decision Tree
 menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Diagnosis & Prognosis
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

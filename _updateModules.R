@@ -1,5 +1,14 @@
 #!/usr/bin/env Rscript
 
+# Define the new version and date ----
+new_version <- "0.0.3.18"
+new_date <- "2024-05-30"
+
+# Define the WIP status ----
+WIP <- FALSE
+# WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
+
+
 # Load required packages ----
 library(xfun)
 library(fs)
@@ -13,10 +22,7 @@ meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
 jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival"
 ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
 
-# Define the WIP flag
-WIP <- FALSE
-# WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
-# If WIP is TRUE, append "-rc" to the version number
+
 
 if (WIP) {
   jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot-WIP"
@@ -88,6 +94,11 @@ jjstatsplot_example_files <- c(
   # "histopathologyGraphsPlots.omv"
 )
 
+# Create directories if they do not exist
+if (!dir.exists(file.path(jjstatsplot_dir, "data"))) {
+  dir.create(file.path(jjstatsplot_dir, "data"), recursive = TRUE)
+}
+
 
 fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
               file.path(jjstatsplot_dir, "data"),
@@ -98,6 +109,13 @@ fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
 jjstatsplot_data_description_files <- c(
   "data-histopathology.R"
 )
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(jjstatsplot_dir, "R"))) {
+  dir.create(file.path(jjstatsplot_dir, "R"), recursive = TRUE)
+}
+
 
 fs::file_copy(file.path(main_repo_dir, "R", jjstatsplot_data_description_files),
               file.path(jjstatsplot_dir, "R"),
@@ -115,6 +133,12 @@ jjstatsplot_vignette_files <- c(
 "continuous-comparisons.Rmd",
 "categorical-plots.Rmd"
 )
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(jjstatsplot_dir, "vignettes"))) {
+  dir.create(file.path(jjstatsplot_dir, "vignettes"), recursive = TRUE)
+}
 
 fs::file_copy(file.path(main_repo_dir, "vignettes", jjstatsplot_vignette_files),
               file.path(jjstatsplot_dir, "vignettes"),
@@ -134,6 +158,10 @@ meddecide_example_files <- c(
   "thyroid_function_data.csv"
   )
 
+# Create directories if they do not exist
+if (!dir.exists(file.path(meddecide_dir, "data"))) {
+ dir.create(file.path(meddecide_dir, "data"), recursive = TRUE)
+ }
 
 
 fs::file_copy(file.path(main_repo_dir, "data", meddecide_example_files),
@@ -154,7 +182,10 @@ meddecide_utility_data_description_files <- c(
   "diagnostic_metrics.R"
 )
 
-
+# Create directories if they do not exist
+if (!dir.exists(file.path(meddecide_dir, "R"))) {
+  dir.create(file.path(meddecide_dir, "R"), recursive = TRUE)
+}
 
 fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_data_description_files),
               file.path(meddecide_dir, "R"),
@@ -177,6 +208,13 @@ meddecide_vignette_files <- c(
   "medical_decision_tree_guide.Rmd"
 )
 
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(meddecide_dir, "vignettes"))) {
+  dir.create(file.path(meddecide_dir, "vignettes"), recursive = TRUE)
+}
+
+
 fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
               file.path(meddecide_dir, "vignettes"),
               overwrite = TRUE)
@@ -189,6 +227,14 @@ meddecide_data_description_files <- c(
   "test-decision.R",
   "test-roc.R"
 )
+
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(meddecide_dir, "tests/testthat"))) {
+  dir.create(file.path(meddecide_dir, "tests/testthat"), recursive = TRUE)
+}
+
 
 fs::file_copy(file.path(main_repo_dir, "tests/testthat", meddecide_data_description_files),
               file.path(meddecide_dir, "tests/testthat"),
@@ -205,6 +251,13 @@ jsurvival_example_files <- c(
   # "histopathologySurvival.omv"
 )
 
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(jsurvival_dir, "data"))) {
+  dir.create(file.path(jsurvival_dir, "data"), recursive = TRUE)
+}
+
 fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
               file.path(jsurvival_dir, "data"),
               overwrite = TRUE)
@@ -214,6 +267,12 @@ fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
 jsurvival_data_description_files <- c(
   "data-histopathology.R"
 )
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(jsurvival_dir, "R"))) {
+  dir.create(file.path(jsurvival_dir, "R"), recursive = TRUE)
+}
 
 fs::file_copy(file.path(main_repo_dir, "R", jsurvival_data_description_files),
               file.path(jsurvival_dir, "R"),
@@ -228,6 +287,12 @@ fs::file_copy(file.path(main_repo_dir, "R", jsurvival_data_description_files),
 jsurvival_vignette_files <- c(
 "jsurvival.Rmd"
 )
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(jsurvival_dir, "vignettes"))) {
+  dir.create(file.path(jsurvival_dir, "vignettes"), recursive = TRUE)
+}
 
 fs::file_copy(file.path(main_repo_dir, "vignettes", jsurvival_vignette_files),
               file.path(jsurvival_dir, "vignettes"),
@@ -271,6 +336,10 @@ ClinicoPathDescriptives_example_files <- c(
 )
 
 
+# Create directories if they do not exist
+if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "data"))) {
+  dir.create(file.path(ClinicoPathDescriptives_dir, "data"), recursive = TRUE)
+}
 
 
 fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_files),
@@ -288,6 +357,13 @@ ClinicoPathDescriptives_data_description_files <- c(
 
 "ClinicoPathDescriptives-package.R"
 )
+
+
+# Create directories if they do not exist
+if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "R"))) {
+  dir.create(file.path(ClinicoPathDescriptives_dir, "R"), recursive = TRUE)
+}
+
 
 fs::file_copy(file.path(main_repo_dir, "R", ClinicoPathDescriptives_data_description_files),
               file.path(ClinicoPathDescriptives_dir, "R"),
@@ -339,6 +415,12 @@ ClinicoPathDescriptives_vignette_files <- c(
 "visualization.Rmd"
 )
 
+# Create directories if they do not exist
+
+if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "vignettes"))) {
+  dir.create(file.path(ClinicoPathDescriptives_dir, "vignettes"), recursive = TRUE)
+}
+
 fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vignette_files),
               file.path(ClinicoPathDescriptives_dir, "vignettes"),
               overwrite = TRUE)
@@ -376,7 +458,6 @@ update_modules <- function(new_version, new_date) {
       jjstatsplot_modules <- c(
         jjstatsplot_modules,
         "jjarcdiagram",
-        "jstats",
         "jjridgestats",
         "jjstreamgraph",
         "jjtreemap",
@@ -519,6 +600,7 @@ update_modules <- function(new_version, new_date) {
 
 
 
+    if (!WIP) {
 
   # --- Update DESCRIPTION files ---
   description_paths <- c(
@@ -531,6 +613,8 @@ update_modules <- function(new_version, new_date) {
   update_description_files(paths = description_paths,
                            version = new_version,
                            date = new_date)
+    }
+
 
   # --- Update YAML files ---
   yaml_0000_paths <- c(
@@ -628,20 +712,13 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 
+# Run the update process ----
 
-
-
-# Define the new version and date ----
-new_version <- "0.0.3.17"
-new_date <- "2024-05-29"
-
-if (WIP) {new_version <- paste0(new_version, "-rc")}
-
-
-
-
-# Run the update process
-update_modules(new_version, new_date)
+tryCatch({
+    update_modules(new_version, new_date)
+}, error = function(e) {
+    message("Error during module update: ", e$message)
+})
 
 
 jmvtools::prepare()

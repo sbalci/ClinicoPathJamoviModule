@@ -4,7 +4,7 @@ title: Co-Testing Analysis
 menuGroup: meddecideD
 menuSubgroup: Decision
 menuSubtitle: Analyze combined test results
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

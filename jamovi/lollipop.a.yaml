@@ -3,7 +3,7 @@ name:  lollipop
 title: Lollipop Chart
 menuGroup: JJStatsPlotD
 menuSubgroup: Drafts
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 options:

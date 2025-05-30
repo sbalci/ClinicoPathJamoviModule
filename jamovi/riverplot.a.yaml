@@ -4,7 +4,7 @@ title: River Plots
 menuGroup: JJStatsPlotD
 menuSubgroup: 'Categorical Over Time'
 menuSubtitle: 'Flow and Transition Visualization'
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

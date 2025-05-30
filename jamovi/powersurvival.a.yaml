@@ -4,7 +4,7 @@ title: Power Analysis for Survival Studies
 menuGroup: SurvivalD
 menuSubgroup: Design and Analysis
 menuSubtitle: 'Power analysis for survival studies'
-version: '0.1.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

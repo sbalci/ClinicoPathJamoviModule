@@ -136,7 +136,7 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "competingsurvival",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = competingsurvivalResults$new(options=options),
                 data = data,

@@ -99,7 +99,7 @@ ciSingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "ciSingle",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = ciSingleResults$new(options=options),
                 data = data,

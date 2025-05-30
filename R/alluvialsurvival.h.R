@@ -200,7 +200,7 @@ alluvialSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "alluvialSurvival",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = alluvialSurvivalResults$new(options=options),
                 data = data,

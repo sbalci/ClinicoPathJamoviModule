@@ -4,7 +4,7 @@ title: Decision Panel Optimization
 menuGroup: meddecideD
 menuSubgroup: Decision
 menuSubtitle: Optimize test panels and decision trees
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

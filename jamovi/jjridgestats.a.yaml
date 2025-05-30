@@ -4,7 +4,7 @@ title: Ridgeline Plot
 menuGroup: JJStatsPlotD
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Distribution Comparison'
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 options:

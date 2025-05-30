@@ -4,7 +4,7 @@ title: Combine Medical Decision Tests
 menuGroup: meddecideD
 menuSubgroup: Decision
 menuSubtitle: Combine tests and evaluate performance
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:
