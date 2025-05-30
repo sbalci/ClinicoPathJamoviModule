@@ -1,7 +1,7 @@
 ---
 name: powersurvival
 title: Power Analysis for Survival Studies
-menuGroup: Survival
+menuGroup: Survival - Drafts
 menuSubgroup: Design and Analysis
 menuSubtitle: 'Power analysis for survival studies'
 version: '0.1.0'

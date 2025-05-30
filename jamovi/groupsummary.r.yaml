@@ -1,0 +1,58 @@
+---
+name: groupsummary
+title: Group and Summarize
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - groupVars
+          - sumVars
+
+    - name: dateInfo
+      title: Date Processing Information
+      type: Html
+      clearWith:
+          - dateVar
+          - dateFormat
+          - timeAggregation
+      visible: (dateVar)
+
+    - name: summaryTable
+      title: 'Group Summary Statistics'
+      type: Table
+      rows: 0
+      columns: []  # Columns will be added dynamically
+      clearWith:
+          - groupVars
+          - sumVars
+          - statistics
+          - showMissing
+          - sortBy
+          - dateVar
+          - dateFormat
+          - timeAggregation
+
+    - name: plot
+      title: 'Summary Plot'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - groupVars
+          - sumVars
+          - statistics
+          - showMissing
+          - sortBy
+          - dateVar
+          - dateFormat
+          - timeAggregation
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

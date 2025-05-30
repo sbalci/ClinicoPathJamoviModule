@@ -1,0 +1,50 @@
+---
+title: "Continuous Variable Comparisons"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Continuous Variable Comparisons}
+  %\VignetteEngine{rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+library(jjstatsplot)
+data(mtcars)
+```
+
+This article focuses on functions that compare continuous variables.
+
+## Comparing groups with `jjbetweenstats()`
+
+`jjbetweenstats()` combines box and violin plots to compare a continuous
+response across groups. Statistical tests such as ANOVA or their
+non-parametric equivalents are performed automatically depending on the
+`typestatistics` argument.
+
+```{r}
+jjbetweenstats(data = mtcars, dep = mpg, group = cyl)
+```
+
+## Repeated measures with `jjwithinstats()`
+
+For paired or repeated observations, `jjwithinstats()` displays the
+measurements for each condition alongside the results of a paired test.
+Below we compare miles-per-gallon recorded in two hypothetical
+conditions represented by `mpg` and `hp` just for demonstration.
+
+```{r}
+jjwithinstats(data = mtcars, dep1 = mpg, dep2 = hp)
+```
+
+## Histograms with `jjhistostats()`
+
+`jjhistostats()` produces histograms and overlays the results of a test
+for normality. The example below shows the distribution of engine
+horsepower.
+
+```{r}
+jjhistostats(data = mtcars, dep = hp)
+```
+
+

@@ -1,0 +1,51 @@
+---
+title: "Categorical Plot Functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Categorical Plot Functions}
+  %\VignetteEngine{rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+library(jjstatsplot)
+data(mtcars)
+```
+
+This vignette demonstrates the functions designed for categorical data:
+`jjbarstats()`, `jjpiestats()` and `jjdotplotstats()`.
+
+## Bar charts with `jjbarstats()`
+
+`jjbarstats()` creates a bar chart and automatically performs a
+chi-squared test to compare the distribution of two categorical
+variables. The example below compares the number of cylinders (`cyl`)
+across transmission types (`am`).
+
+```{r}
+jjbarstats(data = mtcars, group = cyl, grvar = am)
+```
+
+## Pie charts with `jjpiestats()`
+
+`jjpiestats()` is similar to `jjbarstats()` but displays the results as a
+pie chart.
+
+```{r}
+jjpiestats(data = mtcars, dep = cyl, group = am)
+```
+
+## Dot charts with `jjdotplotstats()`
+
+`jjdotplotstats()` shows group means using a dot plot. In this example we
+plot horsepower (`hp`) by engine configuration (`vs`).
+
+```{r}
+jjdotplotstats(data = mtcars, dep = hp, group = vs)
+```
+
+Each function returns a results object whose `plot` element contains the
+`ggplot2` visualisation.
+
+

@@ -3,12 +3,19 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   agreement-analysis: agreement-analysis.html
+  categorical-plots: categorical-plots.html
+  clinicoPathDescriptives-introduction: clinicoPathDescriptives-introduction.html
+  continuous-comparisons: continuous-comparisons.html
+  correlations-scatterplots: correlations-scatterplots.html
   data-preperation: data-preperation.html
+  data-summary: data-summary.html
   decisionpanel_advanced: decisionpanel_advanced.html
   decisionpanel_clinical: decisionpanel_clinical.html
   decisionpanel_optimisation: decisionpanel_optimisation.html
   diagnostic-tests: diagnostic-tests.html
   examples: examples.html
+  jjstatsplot-introduction: jjstatsplot-introduction.html
+  jsurvival: jsurvival.html
   meddecide-vignettes: meddecide-vignettes.html
   medical_decision_tree_guide: medical_decision_tree_guide.html
   module_development_jamovi: module_development_jamovi.html
@@ -22,7 +29,8 @@ articles:
   use-jsurvival-in-R: use-jsurvival-in-R.html
   use-meddecide-in-R: use-meddecide-in-R.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2025-05-29T19:20Z
+  visualization: visualization.html
+last_built: 2025-05-29T20:00Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

@@ -1,7 +1,7 @@
 ---
 name: tree
 title: Medical Decision Tree
-menuGroup: meddecide
+menuGroup: meddecide - Drafts
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Diagnosis & Prognosis
 version: '1.0.0'

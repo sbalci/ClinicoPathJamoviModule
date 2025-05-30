@@ -1,7 +1,7 @@
 ---
 name:  checkdata
 title: Checking data
-menuGroup: fromOthers
+menuGroup: fromOthers - Drafts
 menuSubgroup: PUBH5018
 version: '1.0.0'
 jas: '1.2'

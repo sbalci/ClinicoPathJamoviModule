@@ -1,0 +1,47 @@
+---
+title: "Introduction to jjstatsplot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to jjstatsplot}
+  %\VignetteEngine{rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+`jjstatsplot` provides easy wrappers around functions from the
+[`ggstatsplot`](https://indrajeetpatil.github.io/ggstatsplot/) package.
+These wrappers are primarily used by the *jamovi* interface but can also
+be called directly from R. The package includes functions for creating
+bar charts, box--violin plots, scatter plots, histograms, and more while
+reporting relevant statistical tests automatically.
+
+The main functions exported are:
+
+- `jjbarstats()` -- bar charts for categorical variables
+- `jjbetweenstats()` -- compare continuous variables between groups
+- `jjcorrmat()` -- correlation matrix visualisations
+- `jjdotplotstats()` -- dot charts with summary statistics
+- `jjhistostats()` -- histograms with statistical annotations
+- `jjpiestats()` -- pie charts for categorical data
+- `jjscatterstats()` -- scatter plots with regression details
+- `jjwithinstats()` -- paired comparisons of repeated measures
+
+All functions return a jamovi results object, but the primary component
+of interest is usually the generated **ggplot2** object stored in the
+`plot` element. In this vignette we give a quick overview of how to call
+the wrappers from R.
+
+We will use the built-in `mtcars` data set for the examples below.
+
+```{r}
+library(jjstatsplot)
+data(mtcars)
+head(mtcars)
+```
+
+The following sections demonstrate some of the available plots.
+
+

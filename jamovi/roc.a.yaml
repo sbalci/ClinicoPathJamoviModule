@@ -1,7 +1,7 @@
 ---
 name:  roc
 title: ROC Curve Analysis
-menuGroup: meddecide
+menuGroup: meddecide - Drafts
 menuSubgroup: ROC - Drafts
 menuSubtitle: Sensitivity, Specificity, AUC, ...
 version: '1.0.0'
