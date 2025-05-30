@@ -6,7 +6,7 @@ new_date <- "2024-05-30"
 
 # Define WIP, check, extended status ----
 check <- FALSE
-extended <- TRUE
+extended <- FALSE
 WIP <- FALSE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 
@@ -19,6 +19,9 @@ library(devtools)
 
 # Define base directories (adjust these absolute paths as needed) ----
 main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
+
+setwd(main_repo_dir)
+
 jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
 meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
 jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival"
