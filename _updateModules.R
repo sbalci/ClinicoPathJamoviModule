@@ -1,10 +1,12 @@
 #!/usr/bin/env Rscript
 
 # Define the new version and date ----
-new_version <- "0.0.3.19"
+new_version <- "0.0.3.20"
 new_date <- "2024-05-30"
 
-# Define the WIP status ----
+# Define WIP, check, extended status ----
+check <- FALSE
+extended <- TRUE
 WIP <- FALSE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 
@@ -721,12 +723,61 @@ tryCatch({
 })
 
 
+if (extended) {
+
+  setwd(jjstatsplot_dir)
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::install()
+  if (check) {
+    devtools::check()
+  }
+
+  setwd(meddecide_dir)
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::install()
+  if (check) {
+    devtools::check()
+  }
+
+  setwd(jsurvival_dir)
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::install()
+  if (check) {
+    devtools::check()
+  }
+
+  setwd(ClinicoPathDescriptives_dir)
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::install()
+  if (check) {
+    devtools::check()
+  }
+
+}
+
+setwd(main_repo_dir)
+
 jmvtools::prepare()
 devtools::document()
 jmvtools::prepare()
 devtools::document()
 jmvtools::install()
 
+if (check) {
+  devtools::check()
+}
 
 # "This is the jjhistostats function in jjstatsplot module of jamovi. Suggest improvements to be more useful for end users. Suggest improvements for R and yaml files. Improve documentation for R and yaml files, also for DESCRIPTION and data files. Make the function more user friendly and explanatory for the end user. Add new features as necessary. When adding new features also consider original library function arguments. Improve the interface and output. Make it more visually appealing. Do not add or change color plates. Do not suggest changes for export. Give the new codes separately with explanatory texts. Then give me complete codes with recommended suggestions. Use comments for changes. Do not make breaking changes."
 
