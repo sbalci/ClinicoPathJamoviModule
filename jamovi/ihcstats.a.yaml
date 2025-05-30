@@ -1,7 +1,7 @@
 ---
 name: ihcstats
 title: IHC Expression Analysis
-menuGroup: Pathology - Drafts
+menuGroup: ExplorationD
 menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'

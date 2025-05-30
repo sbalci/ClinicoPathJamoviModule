@@ -1,7 +1,7 @@
 ---
 name:  gtsummary
 title: Tables via gtsummary
-menuGroup: Exploration - Drafts
+menuGroup: ExplorationD
 menuSubgroup: Drafts
 menuSubtitle: Comparisons
 version: '1.0.0'

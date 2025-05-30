@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecide - Drafts
+menuGroup: meddecideD
 menuSubgroup: Decision
 menuSubtitle: Sequential Test Analysis
 version: '1.0.0'

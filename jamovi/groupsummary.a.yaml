@@ -1,7 +1,7 @@
 ---
 name: groupsummary
 title: Group and Summarize
-menuGroup: Exploration - Drafts
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 version: '1.0.0'
 jas: '1.2'

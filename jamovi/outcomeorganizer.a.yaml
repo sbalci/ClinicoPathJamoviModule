@@ -1,7 +1,7 @@
 ---
 name:  outcomeorganizer
 title: Enhanced Outcome Organizer for Survival Analysis
-menuGroup: Survival - Drafts
+menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
 version: '1.0.0'

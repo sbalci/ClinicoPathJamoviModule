@@ -1,7 +1,7 @@
 ---
 name:  icccoeff
 title: ICC coefficients
-menuGroup: meddecide - Drafts
+menuGroup: meddecideD
 menuSubgroup: Drafts
 menuSubtitle: Agreement
 version: '1.0.0'

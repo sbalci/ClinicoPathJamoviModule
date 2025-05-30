@@ -13,6 +13,19 @@ meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
 jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival"
 ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
 
+# Define the WIP flag
+WIP <- FALSE
+# WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
+# If WIP is TRUE, append "-rc" to the version number
+
+if (WIP) {
+  jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot-WIP"
+  meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide-WIP"
+  jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival-WIP"
+  ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives-WIP"
+}
+
+
 # Function to update DESCRIPTION files with new version and date ----
 update_description_files <- function(paths, version, date) {
   version_pattern <- "Version:.*$"
@@ -615,10 +628,7 @@ update_yaml_a_files(paths = yaml_a_paths,
 }
 
 
-# Define the WIP flag
-WIP <- FALSE
-# WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
-# If WIP is TRUE, append "-rc" to the version number
+
 
 
 # Define the new version and date ----

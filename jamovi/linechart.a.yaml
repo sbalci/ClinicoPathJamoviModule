@@ -1,7 +1,7 @@
 ---
 name:  linechart
 title: Line Chart
-menuGroup: Graphs - Drafts
+menuGroup: JJStatsPlotD
 menuSubgroup: Drafts
 menuSubtitle: Exploration
 version: '1.0.0'

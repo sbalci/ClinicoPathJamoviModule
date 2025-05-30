@@ -1,7 +1,7 @@
 ---
 name:  stagemigration
 title: Stage Migration Analysis
-menuGroup: Survival - Drafts
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Will Rogers Phenomenon Analysis'
 version: '1.0.0'

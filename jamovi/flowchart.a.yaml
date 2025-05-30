@@ -1,7 +1,7 @@
 ---
 name: flowchart
 title: Study Flowchart
-menuGroup: Exploration - Drafts
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '1.0.0'
 jas: '1.2'

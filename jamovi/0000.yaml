@@ -145,7 +145,7 @@ analyses:
   - title: Medical Decision Tree
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Tree
     description: >-
@@ -157,7 +157,7 @@ analyses:
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: Drafts
     menuTitle: Find Retracted Papers from DOI
     menuSubtitle: Bibliometrics
@@ -180,33 +180,33 @@ analyses:
   - title: Checking data
     name: checkdata
     ns: ClinicoPath
-    menuGroup: fromOthers - Drafts
+    menuGroup: ExplorationD
     menuTitle: Checking data
     menuSubgroup: PUBH5018
   - title: Confidence interval for a mean
     name: ciSingle
     ns: ClinicoPath
-    menuGroup: fromOthers - Drafts
+    menuGroup: ExplorationD
     menuTitle: Confidence interval for a mean
     menuSubgroup: PUBH5018
   - title: Decision tree
     name: classification
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Decision tree
     menuSubgroup: Drafts
     menuSubtitle: Classification
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -214,7 +214,7 @@ analyses:
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
-    menuGroup: fromOthers - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Independent Samples
     menuSubtitle: χ² test of association
@@ -226,7 +226,7 @@ analyses:
   - title: Paired Samples Contingency Tables
     name: contTablesPaired
     ns: ClinicoPath
-    menuGroup: fromOthers - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Paired Samples
     menuSubtitle: McNemar test
@@ -234,7 +234,7 @@ analyses:
   - title: Correlation
     name: correlation
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: Drafts
     menuTitle: Correlation
     description: Function for Correlation.
@@ -242,7 +242,7 @@ analyses:
   - title: Decision 2 for using init
     name: decision2
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: Drafts
     menuTitle: Decision 2 for using init
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -252,20 +252,20 @@ analyses:
   - title: Dendogram
     name: dendogram
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Dendogram
     menuSubgroup: Drafts
   - title: Tables via gtsummary
     name: gtsummary
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: Drafts
     menuTitle: Tables via gtsummary
     menuSubtitle: Comparisons
   - title: ICC coefficients
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: Drafts
     menuTitle: ICC coefficients
     description: Function for Interclass Correlation Coefficient Calculation.
@@ -273,7 +273,7 @@ analyses:
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Drafts JJStatsPlot
     menuTitle: Graphs and Plots
     description: Function for Generating Plots and Graphs Based on Variable Types.
@@ -321,60 +321,60 @@ analyses:
   - title: Violin Plot
     name: jviolin
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Drafts
     menuTitle: Violin Plot
     menuSubtitle: R Graph Gallery Violin
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Drafts
     menuTitle: Line Chart
     menuSubtitle: Exploration
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Drafts
     menuTitle: Lollipop Chart
   - title: Nomogram
     name: nomogram
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Nomogram
     menuSubgroup: Drafts
   - title: One Survival Outcome
     name: oneSurvival
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuTitle: One Survival Outcome
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Pairwise Chi-Square Test
     menuSubgroup: Drafts
     menuSubtitle: Association
   - title: Parallel Plot
     name: parallelplot
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuTitle: Parallel Plot
     menuSubgroup: Drafts
     menuSubtitle: Exploration
   - title: Positive Predictive Value
     name: ppv
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Positive Predictive Value
     menuSubgroup: Drafts
   - title: ROC Curve Analysis
     name: roc
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: ROC - Drafts
     menuTitle: ROC Curve Analysis
     description: >
@@ -384,14 +384,14 @@ analyses:
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Variable Type Based Graphs and Plots
     menuTitle: Graphs and Plots
     description: Function for Generating Plots and Graphs Based on Variable Types.
   - title: Tools for data summary
     name: toolssummary
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Tools for data summary
     menuSubgroup: ClinicoPath Descriptives
   - title: Confidence Interval Approach for the Number of Subjects Required
@@ -438,13 +438,13 @@ analyses:
   - title: Test ROC
     name: TestROC
     ns: ClinicoPath
-    menuGroup: fromOthers - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: PPDA
     menuTitle: Test ROC
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Lasso-Cox Regression
     menuSubtitle: Variable Selection with Lasso Regularization
@@ -454,37 +454,37 @@ analyses:
   - title: Time-Dependent ROC Analysis
     name: timeroc
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Time-Dependent ROC Analysis
     menuSubtitle: Predictive Performance Over Time
   - title: Treatment Pathway Alluvial Plot
     name: alluvialSurvival
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuTitle: Treatment Pathway Alluvial Plot
   - title: CONSORT Flowchart
     name: consort
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Reports
     menuTitle: CONSORT Flowchart
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Study Flowchart
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
-    menuGroup: Pathology - Drafts
+    menuGroup: ExplorationD
     menuSubgroup: IHC Analysis
     menuTitle: IHC Expression Analysis
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >
@@ -493,14 +493,14 @@ analyses:
   - title: Ridgeline Plot
     name: jjridgestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Categorical vs Continuous
     menuTitle: Ridgeline Plot
     menuSubtitle: Distribution Comparison
   - title: StreamGraphs
     name: jjstreamgraph
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Time Series Visualization
     menuTitle: StreamGraphs
     description: |
@@ -508,7 +508,7 @@ analyses:
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuSubgroup: Categorical
     menuTitle: Treemap
     description: |
@@ -532,7 +532,7 @@ analyses:
   - title: Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: Graphs - Drafts
+    menuGroup: JJStatsPlotD
     menuTitle: Tidy Plots
   - title: Treatment Response Analysis
     name: waterfall
@@ -556,14 +556,14 @@ analyses:
   - title: Swimmer Plot 2
     name: swimmerplot2
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Swimmer Plot 2
     menuSubgroup: Patient Follow-Up Plots
     description: Creates a swimmer plot to visualize subject response data over time.
   - title: Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Stage Migration Analysis
     menuSubtitle: Will Rogers Phenomenon Analysis
@@ -575,7 +575,7 @@ analyses:
   - title: River Plots
     name: riverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlot - Drafts
+    menuGroup: JJStatsPlotD
     menuTitle: River Plots
     menuSubgroup: Categorical Over Time
     menuSubtitle: Flow and Transition Visualization
@@ -598,7 +598,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
@@ -610,7 +610,7 @@ analyses:
   - title: Screening Test Calculator
     name: screeningcalculator
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Screening Test Calculator
     menuSubgroup: Decision
     menuSubtitle: Calculate disease probability based on test characteristics
@@ -618,7 +618,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -629,14 +629,14 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis
@@ -654,7 +654,7 @@ analyses:
   - title: Enhanced Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuTitle: Enhanced Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -665,7 +665,7 @@ analyses:
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
-    menuGroup: Survival - Drafts
+    menuGroup: SurvivalD
     menuTitle: Power Analysis for Survival Studies
     menuSubgroup: Design and Analysis
     menuSubtitle: Power analysis for survival studies
@@ -676,7 +676,7 @@ analyses:
   - title: ROC
     name: roc2
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuSubgroup: ROC - Drafts
     menuTitle: ROC
     menuSubtitle: Decision
@@ -694,7 +694,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -706,7 +706,7 @@ analyses:
   - title: Prediction Model Builder
     name: modelbuilder
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Prediction Model Builder
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Build prediction models for Decision Curve Analysis
@@ -717,14 +717,14 @@ analyses:
   - title: Bayesian Decision Curve Analysis
     name: bayesdca
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Bayesian Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
-    menuGroup: meddecide - Drafts
+    menuGroup: meddecideD
     menuTitle: Decision Panel Optimization
     menuSubgroup: Decision
     menuSubtitle: Optimize test panels and decision trees
@@ -736,14 +736,14 @@ analyses:
   - title: Variable Tree V3
     name: vtree3
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Variable Tree V3
     menuSubgroup: ClinicoPath Descriptive Plots
     description: Function for Generating Enhanced Tree Summaries of Variables
   - title: Group and Summarize
     name: groupsummary
     ns: ClinicoPath
-    menuGroup: Exploration - Drafts
+    menuGroup: ExplorationD
     menuTitle: Group and Summarize
     menuSubgroup: ClinicoPath Descriptives
     description: Group data by categorical variables and calculate summary statistics
