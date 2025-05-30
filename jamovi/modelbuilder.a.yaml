@@ -4,7 +4,7 @@ title: Prediction Model Builder
 menuGroup: meddecideD
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Build prediction models for Decision Curve Analysis
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

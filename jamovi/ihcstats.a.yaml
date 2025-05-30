@@ -3,7 +3,7 @@ name: ihcstats
 title: IHC Expression Analysis
 menuGroup: ExplorationD
 menuSubgroup: IHC Analysis
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 options:
@@ -77,7 +77,7 @@ options:
 # title: IHC Expression Analysis
 # menuGroup: Pathology
 # menuSubgroup: IHC Analysis
-# version: '1.0.0'
+# version: '0.0.3'
 # jas: '1.2'
 
 # options:

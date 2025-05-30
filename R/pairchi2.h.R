@@ -83,7 +83,7 @@ pairchi2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "pairchi2",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = pairchi2Results$new(options=options),
                 data = data,

@@ -4,7 +4,7 @@ title: Decision Curve Analysis
 menuGroup: meddecideD
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

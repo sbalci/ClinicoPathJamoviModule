@@ -4,7 +4,7 @@ title: Lasso-Cox Regression
 menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Variable Selection with Lasso Regularization'
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

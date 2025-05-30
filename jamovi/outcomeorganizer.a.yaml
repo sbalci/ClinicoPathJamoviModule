@@ -4,7 +4,7 @@ title: Enhanced Outcome Organizer for Survival Analysis
 menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:
