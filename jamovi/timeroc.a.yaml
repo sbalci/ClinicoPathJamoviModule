@@ -1,7 +1,7 @@
 ---
 name: timeroc
 title: Time-Dependent ROC Analysis
-menuGroup: Survival - Drafts
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Predictive Performance Over Time'
 version: '1.0.0'

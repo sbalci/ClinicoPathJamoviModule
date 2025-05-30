@@ -1,7 +1,7 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecide - Drafts
+menuGroup: meddecideD
 menuSubgroup: Decision
 menuSubtitle: Analyze combined test results
 version: '1.0.0'

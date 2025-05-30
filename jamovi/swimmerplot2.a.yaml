@@ -1,7 +1,7 @@
 ---
 name: swimmerplot2
 title: Swimmer Plot 2
-menuGroup: Exploration - Drafts
+menuGroup: ExplorationD
 menuSubgroup: Patient Follow-Up Plots
 version: '1.0.0'
 jas: '1.2'
