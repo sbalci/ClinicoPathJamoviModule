@@ -7,7 +7,8 @@ new_date <- "2024-05-30"
 # Define WIP, check, extended status ----
 check <- FALSE
 extended <- FALSE
-WIP <- FALSE
+webpage <- FALSE
+WIP <- TRUE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 
 
@@ -372,7 +373,8 @@ if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "R"))) {
 
 fs::file_copy(file.path(main_repo_dir, "R", ClinicoPathDescriptives_data_description_files),
               file.path(ClinicoPathDescriptives_dir, "R"),
-              overwrite = TRUE)
+              overwrite = TRUE
+              )
 
 
 
@@ -435,7 +437,7 @@ fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vign
 # Function to update module files and commit changes ----
 
 # Main update function that performs all steps ----
-update_modules <- function(new_version, new_date) {
+# update_modules <- function(new_version, new_date) {
 
     # --- Module files ---
 
@@ -509,7 +511,6 @@ update_modules <- function(new_version, new_date) {
         "screeningcalculator",
         "cotest",
         "sequentialtests",
-        "bayesiandca",
         "decisioncurve",
         "dendogram",
         "icccoeff",
@@ -546,7 +547,6 @@ update_modules <- function(new_version, new_date) {
         "comparingsurvival",
         "competingsurvival",
         "lassocox",
-        "linet",
         "powersurvival",
         "stagemigration"
       )
@@ -582,16 +582,13 @@ update_modules <- function(new_version, new_date) {
       ClinicoPathDescriptives_modules <- c(
         ClinicoPathDescriptives_modules,
         "checkdata",
-        "chisq.multcomp.R",
         "chisqposttest",
         "cisingle",
         "consort",
         "conttables",
         "conttablespaired",
-        "flowt",
         "groupsummary",
         "gtsummary",
-        "ihcstats-complete",
         "ihcstats",
         "pairchi2",
         "retracted",
@@ -605,8 +602,6 @@ update_modules <- function(new_version, new_date) {
 
 
 
-    if (!WIP) {
-
   # --- Update DESCRIPTION files ---
   description_paths <- c(
     file.path(main_repo_dir, "DESCRIPTION"),             # Main repository
@@ -618,7 +613,6 @@ update_modules <- function(new_version, new_date) {
   update_description_files(paths = description_paths,
                            version = new_version,
                            date = new_date)
-    }
 
 
   # --- Update YAML files ---
@@ -661,7 +655,12 @@ update_yaml_a_files(paths = yaml_a_paths,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(jjstatsplot_dir, "R"),
                     file_extensions = c(".b.R"))
-  copy_module_files(jjstatsplot_modules,
+
+  if (!dir.exists(file.path(jjstatsplot_dir, "jamovi"))) {
+    dir.create(file.path(jjstatsplot_dir, "jamovi"), recursive = TRUE)
+  }
+
+    copy_module_files(jjstatsplot_modules,
                     source_dir = file.path(main_repo_dir, "jamovi"),
                     dest_dir = file.path(jjstatsplot_dir, "jamovi"),
                     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"))
@@ -671,6 +670,11 @@ update_yaml_a_files(paths = yaml_a_paths,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(meddecide_dir, "R"),
                     file_extensions = c(".b.R"))
+
+  if (!dir.exists(file.path(meddecide_dir, "jamovi"))) {
+    dir.create(file.path(meddecide_dir, "jamovi"), recursive = TRUE)
+  }
+
   copy_module_files(meddecide_modules,
                     source_dir = file.path(main_repo_dir, "jamovi"),
                     dest_dir = file.path(meddecide_dir, "jamovi"),
@@ -682,6 +686,11 @@ update_yaml_a_files(paths = yaml_a_paths,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(jsurvival_dir, "R"),
                     file_extensions = c(".b.R"))
+
+  if (!dir.exists(file.path(jsurvival_dir, "jamovi"))) {
+    dir.create(file.path(jsurvival_dir, "jamovi"), recursive = TRUE)
+  }
+
   copy_module_files(jsurvival_modules,
                     source_dir = file.path(main_repo_dir, "jamovi"),
                     dest_dir = file.path(jsurvival_dir, "jamovi"),
@@ -693,6 +702,11 @@ update_yaml_a_files(paths = yaml_a_paths,
                     source_dir = file.path(main_repo_dir, "R"),
                     dest_dir = file.path(ClinicoPathDescriptives_dir, "R"),
                     file_extensions = c(".b.R"))
+
+  if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "jamovi"))) {
+    dir.create(file.path(ClinicoPathDescriptives_dir, "jamovi"), recursive = TRUE)
+  }
+
   copy_module_files(ClinicoPathDescriptives_modules,
                     source_dir = file.path(main_repo_dir, "jamovi"),
                     dest_dir = file.path(ClinicoPathDescriptives_dir, "jamovi"),
@@ -714,16 +728,18 @@ update_yaml_a_files(paths = yaml_a_paths,
   # commit_repo(ClinicoPathDescriptives_dir, commit_message)
 
   message("Modules updated to version ", new_version, " and date ", new_date)
-}
+# }
 
 
 # Run the update process ----
 
-tryCatch({
-    update_modules(new_version, new_date)
-}, error = function(e) {
-    message("Error during module update: ", e$message)
-})
+# update_modules(new_version, new_date)
+
+# tryCatch({
+#     update_modules(new_version, new_date)
+# }, error = function(e) {
+#     message("Error during module update: ", e$message)
+# })
 
 
 if (extended) {
@@ -737,6 +753,9 @@ if (extended) {
   if (check) {
     devtools::check()
   }
+  if (webpage) {
+    pkgdown::build_site()
+  }
 
   setwd(meddecide_dir)
   jmvtools::prepare()
@@ -746,6 +765,9 @@ if (extended) {
   jmvtools::install()
   if (check) {
     devtools::check()
+  }
+  if (webpage) {
+    pkgdown::build_site()
   }
 
   setwd(jsurvival_dir)
@@ -757,6 +779,9 @@ if (extended) {
   if (check) {
     devtools::check()
   }
+  if (webpage) {
+    pkgdown::build_site()
+  }
 
   setwd(ClinicoPathDescriptives_dir)
   jmvtools::prepare()
@@ -767,20 +792,32 @@ if (extended) {
   if (check) {
     devtools::check()
   }
+  if (webpage) {
+    pkgdown::build_site()
+  }
 
 }
 
 setwd(main_repo_dir)
 
-jmvtools::prepare()
-devtools::document()
-jmvtools::prepare()
-devtools::document()
-jmvtools::install()
 
-if (check) {
-  devtools::check()
+if (!WIP) {
+  # Update the main repository
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::prepare()
+  devtools::document()
+  jmvtools::install()
+
+  if (check) {
+    devtools::check()
+  }
+
+  if (webpage) {
+    pkgdown::build_site()
+  }
 }
+
 
 # "This is the jjhistostats function in jjstatsplot module of jamovi. Suggest improvements to be more useful for end users. Suggest improvements for R and yaml files. Improve documentation for R and yaml files, also for DESCRIPTION and data files. Make the function more user friendly and explanatory for the end user. Add new features as necessary. When adding new features also consider original library function arguments. Improve the interface and output. Make it more visually appealing. Do not add or change color plates. Do not suggest changes for export. Give the new codes separately with explanatory texts. Then give me complete codes with recommended suggestions. Use comments for changes. Do not make breaking changes."
 
