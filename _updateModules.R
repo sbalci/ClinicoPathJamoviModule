@@ -91,6 +91,24 @@ fs::file_copy(file.path(main_repo_dir, "R", jjstatsplot_data_description_files),
               overwrite = TRUE)
 
 
+
+
+## jjstatsplot_vignettes ----
+
+
+jjstatsplot_vignette_files <- c(
+"jjstatsplot-introduction.Rmd",
+"correlations-scatterplots.Rmd",
+"continuous-comparisons.Rmd",
+"categorical-plots.Rmd"
+)
+
+fs::file_copy(file.path(main_repo_dir, "vignettes", jjstatsplot_vignette_files),
+              file.path(jjstatsplot_dir, "vignettes"),
+              overwrite = TRUE)
+
+
+
 ## meddecide_example_files ----
 
 meddecide_example_files <- c(
@@ -134,7 +152,7 @@ fs::file_copy(file.path(main_repo_dir, "R", meddecide_utility_data_description_f
 ## meddecide_vignettes ----
 
 
-meddecide_data_description_files <- c(
+meddecide_vignette_files <- c(
   "nogoldstandard.Rmd",
   "agreement-analysis.Rmd",
   "diagnostic-tests.Rmd",
@@ -146,7 +164,7 @@ meddecide_data_description_files <- c(
   "medical_decision_tree_guide.Rmd"
 )
 
-fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_data_description_files),
+fs::file_copy(file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
               file.path(meddecide_dir, "vignettes"),
               overwrite = TRUE)
 
@@ -187,6 +205,26 @@ jsurvival_data_description_files <- c(
 fs::file_copy(file.path(main_repo_dir, "R", jsurvival_data_description_files),
               file.path(jsurvival_dir, "R"),
               overwrite = TRUE)
+
+
+
+
+## jsurvival_vignettes ----
+
+
+jsurvival_vignette_files <- c(
+"jsurvival.Rmd"
+)
+
+fs::file_copy(file.path(main_repo_dir, "vignettes", jsurvival_vignette_files),
+              file.path(jsurvival_dir, "vignettes"),
+              overwrite = TRUE)
+
+
+
+
+
+
 
 
 ## ClinicoPathDescriptives_example_files ----
@@ -279,6 +317,23 @@ fs::file_copy(file.path(main_repo_dir, "R", ClinicoPathDescriptives_data_descrip
 
 
 
+## ClinicoPathDescriptives_vignettes ----
+
+
+ClinicoPathDescriptives_vignette_files <- c(
+"clinicoPathDescriptives-introduction.Rmd",
+"data-summary.Rmd",
+"visualization.Rmd"
+)
+
+fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vignette_files),
+              file.path(ClinicoPathDescriptives_dir, "vignettes"),
+              overwrite = TRUE)
+
+
+
+# Function to update module files and commit changes ----
+
 # Main update function that performs all steps ----
 update_modules <- function(new_version, new_date) {
 
@@ -303,6 +358,24 @@ update_modules <- function(new_version, new_date) {
         "waffle"
     )
 
+    if (WIP) {
+
+      jjstatsplot_modules <- c(
+        jjstatsplot_modules,
+        "jjarcdiagram",
+        "jstats",
+        "jjridgestats",
+        "jjstreamgraph",
+        "jjtreemap",
+        "jviolin",
+        "lollipop",
+        "parallelplot",
+        "statsplot2",
+        "tidyplots"
+      )
+    }
+
+
     ## meddecide module functions ----
     meddecide_modules <- c(
       # Decision
@@ -311,24 +384,49 @@ update_modules <- function(new_version, new_date) {
       "decisioncalculator",
       "nogoldstandard",
       "decisioncompare",
-      # "decisioncombine",
-      # "decisionpanel",
-      # "screeningcalculator",
-      # "cotest",
-      # "sequentialtests",
 
       # ROC
       "psychopdaroc",
 
       # Decision Curve Analysis
-      # "bayesiandca",
-      # "decisioncurve",
+
 
       # Power
       "kappasizeci",
       "kappasizefixedn",
       "kappasizepower"
     )
+
+    if (WIP) {
+
+      meddecide_modules <- c(
+        meddecide_modules,
+        "bayesdca",
+        "decisioncombine",
+        "decisionpanel",
+        "classification",
+        "correlation",
+        "decision2",
+        "screeningcalculator",
+        "cotest",
+        "sequentialtests",
+        "bayesiandca",
+        "decisioncurve",
+        "dendogram",
+        "icccoeff",
+        "modelbuilder",
+        "nomogram",
+        "outcomeorganizer",
+        "ppv",
+        "roc",
+        "roc2",
+        "screeningcalculator",
+        "sequentialtests",
+        "tree"
+      )
+    }
+
+
 
     ## jsurvival module functions ----
     jsurvival_modules <- c(
@@ -340,6 +438,24 @@ update_modules <- function(new_version, new_date) {
         "multisurvival",
         "oddsratio"
     )
+
+    if (WIP) {
+
+      jsurvival_modules <- c(
+        jsurvival_modules,
+        "alluvialsurvival",
+        "comparingsurvival",
+        "competingsurvival",
+        "lassocox",
+        "linet",
+        "powersurvival",
+        "stagemigration"
+      )
+    }
+
+
+
+
 
     ## ClinicoPathDescriptives module functions ----
     ClinicoPathDescriptives_modules <- c(
@@ -353,15 +469,41 @@ update_modules <- function(new_version, new_date) {
         "alluvial",
         "venn",
         "vartree",
-        # "vartree2",
-        # "vartree3",
-        #
+
         # Patient Follow-up
         "waterfall",
         "swimmerplot",
+
         # Comparisons
         "crosstable"
     )
+
+    if (WIP) {
+
+      ClinicoPathDescriptives_modules <- c(
+        ClinicoPathDescriptives_modules,
+        "checkdata",
+        "chisq.multcomp.R",
+        "chisqposttest",
+        "cisingle",
+        "consort",
+        "conttables",
+        "conttablespaired",
+        "flowt",
+        "groupsummary",
+        "gtsummary",
+        "ihcstats-complete",
+        "ihcstats",
+        "pairchi2",
+        "retracted",
+        "riverplot",
+        "summarydata",
+        "swimmerplot2",
+        "toolssummary",
+        "vtree3"
+      )
+    }
+
 
 
 
@@ -472,9 +614,21 @@ update_yaml_a_files(paths = yaml_a_paths,
   message("Modules updated to version ", new_version, " and date ", new_date)
 }
 
+
+# Define the WIP flag
+WIP <- FALSE
+# WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
+# If WIP is TRUE, append "-rc" to the version number
+
+
 # Define the new version and date ----
 new_version <- "0.0.3.17"
 new_date <- "2024-05-29"
+
+if (WIP) {new_version <- paste0(new_version, "-rc")}
+
+
+
 
 # Run the update process
 update_modules(new_version, new_date)

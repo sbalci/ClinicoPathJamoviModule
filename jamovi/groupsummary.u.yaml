@@ -1,0 +1,81 @@
+title: Group and Summarize
+name: groupsummary
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Group By Variables
+        children:
+          - type: VariablesListBox
+            name: groupVars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Variables to Summarize
+        children:
+          - type: VariablesListBox
+            name: sumVars
+            isTarget: true
+  - type: CollapseBox
+    label: Statistics Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Statistics to Calculate
+            children:
+              - type: CheckBox
+                name: statistics_sum
+                optionName: statistics
+                optionPart: sum
+              - type: CheckBox
+                name: statistics_mean
+                optionName: statistics
+                optionPart: mean
+              - type: CheckBox
+                name: statistics_median
+                optionName: statistics
+                optionPart: median
+              - type: CheckBox
+                name: statistics_n
+                optionName: statistics
+                optionPart: n
+  - type: CollapseBox
+    label: Date Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Date Variable Settings
+            children:
+              - type: VariablesListBox
+                name: dateVar
+                maxItemCount: 1
+                enable: (groupVars)
+              - type: ComboBox
+                name: dateFormat
+                enable: (dateVar)
+              - type: ComboBox
+                name: timeAggregation
+                enable: (dateVar)
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showMissing
+          - type: CheckBox
+            name: addPercentage
+          - type: ComboBox
+            name: sortBy

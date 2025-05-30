@@ -1,0 +1,67 @@
+---
+title: "Summarising Clinicopathological Data"
+author: "ClinicoPathDescriptives Team"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Summarising Clinicopathological Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette focuses on the functions that generate tables and textual summaries.
+
+## Continuous Variables
+
+`summarydata()` provides descriptive statistics (mean, median, quartiles) for numeric variables.
+
+```{r cont-sum, eval=FALSE}
+summarydata(
+  data = histopathology,
+  vars = vars(Age, TumorSize)
+)
+```
+
+## Categorical Variables
+
+`reportcat()` summarises categorical variables with counts and percentages.
+
+```{r cat-sum, eval=FALSE}
+reportcat(
+  data = histopathology,
+  vars = vars(Sex, Grade)
+)
+```
+
+## Cross Tables
+
+Use `crosstable()` to create cross tabulations with statistical tests. The `group` argument defines the column variable.
+
+```{r crosstable-vig, eval=FALSE}
+crosstable(
+  data = histopathology,
+  vars = vars(Sex, Grade),
+  group = "PreinvasiveComponent",
+  sty = "nejm",
+  excl = TRUE
+)
+```
+
+## Table One for Publications
+
+`tableone()` creates publication-ready tables of baseline characteristics.
+
+```{r tableone-vig, eval=FALSE}
+tableone(
+  data = histopathology,
+  vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+  sty = "t3",
+  excl = TRUE
+)
+```
+
+These functions output results objects that contain tables which can be converted to data frames for further customisation.
+

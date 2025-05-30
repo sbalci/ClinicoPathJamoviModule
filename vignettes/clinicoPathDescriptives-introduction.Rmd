@@ -1,0 +1,133 @@
+---
+title: "Getting Started with ClinicoPathDescriptives"
+author: "ClinicoPathDescriptives Team"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with ClinicoPathDescriptives}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Introduction
+
+`ClinicoPathDescriptives` provides a suite of functions for summarising and visualising clinicopathological data. This vignette showcases the main tools in the package with reproducible examples. The package ships with example data sets `histopathology` and `treatmentResponse` to illustrate typical workflows.
+
+```{r load-package, eval=FALSE}
+# install.packages("ClinicoPathDescriptives")
+library(ClinicoPathDescriptives)
+
+# Example data
+data(histopathology)
+head(histopathology)
+```
+
+# Summaries of Continuous Variables
+
+Use `summarydata()` to obtain descriptive statistics for numeric variables.
+
+```{r summarydata, eval=FALSE}
+summarydata(data = histopathology, vars = vars(Age, TumorSize))
+```
+
+# Summaries of Categorical Variables
+
+`reportcat()` creates frequency tables and counts for categorical variables.
+
+```{r reportcat, eval=FALSE}
+reportcat(data = histopathology, vars = vars(Sex, Grade))
+```
+
+# Cross Tables
+
+Generate cross tabulations with chi-square tests using `crosstable()`.
+
+```{r crosstable, eval=FALSE}
+crosstable(
+  data = histopathology,
+  vars = vars(Sex, Grade),
+  group = "PreinvasiveComponent",
+  sty = "nejm",
+  excl = TRUE
+)
+```
+
+# Table One
+
+`tableone()` produces formatted baseline characteristic tables for reports.
+
+```{r tableone, eval=FALSE}
+tableone(
+  data = histopathology,
+  vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
+  sty = "t3",
+  excl = TRUE
+)
+```
+
+# Visualisations
+
+The package includes multiple plotting functions to explore data.
+
+## Age Pyramid
+
+```{r agepyramid, eval=FALSE}
+agepyramid(
+  data = histopathology,
+  age = "Age",
+  gender = "Sex",
+  female = "Female"
+)
+```
+
+## Alluvial Diagrams
+
+```{r alluvial, eval=FALSE}
+alluvial(
+  data = histopathology,
+  vars = vars(Grade, LVI, PNI),
+  fill = "first_variable"
+)
+```
+
+## Benford Analysis
+
+```{r benford, eval=FALSE}
+benford(data = histopathology, var = "TumorSize")
+```
+
+## Venn and Variable Trees
+
+```{r venn-vartree, eval=FALSE}
+venn(data = histopathology, vars = vars(LVI, PNI, PreinvasiveComponent))
+vartree(
+  data = histopathology,
+  vars = vars(Grade, LVI, PNI),
+  percvar = "Grade",
+  percvarLevel = "High"
+)
+```
+
+## Waterfall Plots
+
+`waterfall()` visualises tumor response over time.
+
+```{r waterfall, eval=FALSE}
+waterfall(
+  data = treatmentResponse,
+  patientID = "PatientID",
+  responseVar = "Response",
+  timeVar = "Month",
+  inputType = "percentage",
+  showWaterfallPlot = TRUE,
+  showSpiderPlot = TRUE
+)
+```
+
+# Conclusion
+
+These examples demonstrate the versatility of `ClinicoPathDescriptives` for summarising and visualising clinicopathological data. Explore the help pages of each function for additional options and customisation.
+

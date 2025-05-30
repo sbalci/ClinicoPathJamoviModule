@@ -1,0 +1,133 @@
+---
+name: groupsummary
+title: Group and Summarize
+menuGroup: Exploration - Drafts
+menuSubgroup: ClinicoPath Descriptives
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Group data by categorical variables and calculate summary statistics
+    R:
+        dontrun: true
+        usage: |
+            # Group by one or more categorical variables and sum numeric variables
+            groupsummary(
+                data = mydata,
+                groupVars = c("Category", "Group"),
+                sumVars = c("Value1", "Value2")
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: groupVars
+      title: Group By Variables
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric, id]
+      description:
+          R: >
+            Variables to group by (categorical or date).
+
+    - name: sumVars
+      title: Variables to Summarize
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Numeric variables to calculate statistics for each group.
+
+    - name: statistics
+      title: Statistics to Calculate
+      type: NMXList
+      options:
+        - name: sum
+          title: Sum
+        - name: mean
+          title: Mean
+        - name: median
+          title: Median
+        - name: n
+          title: Count (n)
+      default:
+        - sum
+        - mean
+        - n
+
+    - name: dateVar
+      title: Date Variable (if grouping by date)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Select the date variable from group variables to apply date formatting.
+
+    - name: dateFormat
+      title: Date Format
+      type: List
+      options:
+        - title: Year-Month-Day (ymd)
+          name: ymd
+        - title: Day-Month-Year (dmy)
+          name: dmy
+        - title: Month-Day-Year (mdy)
+          name: mdy
+        - title: Year-Month-Day Hour:Min:Sec (ymd_hms)
+          name: ymd_hms
+        - title: Day-Month-Year Hour:Min:Sec (dmy_hms)
+          name: dmy_hms
+        - title: Month-Day-Year Hour:Min:Sec (mdy_hms)
+          name: mdy_hms
+      default: ymd
+
+    - name: timeAggregation
+      title: Time Aggregation
+      type: List
+      options:
+        - title: Hourly
+          name: hour
+        - title: Daily
+          name: day
+        - title: Weekly
+          name: week
+        - title: Monthly
+          name: month
+        - title: Yearly
+          name: year
+      default: day
+
+    - name: showMissing
+      title: Include Missing Values
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include groups with missing values in the summary.
+
+    - name: addPercentage
+      title: Add Percentage of Total
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add percentage of total for sum values.
+
+    - name: sortBy
+      title: Sort Results By
+      type: List
+      options:
+        - title: Group Names
+          name: groups
+        - title: First Summary Variable (Descending)
+          name: first_desc
+        - title: First Summary Variable (Ascending)
+          name: first_asc
+      default: groups
+...

@@ -1,7 +1,7 @@
 ---
 name: screeningcalculator
 title: Screening Test Calculator
-menuGroup: meddecide
+menuGroup: meddecide - Drafts
 menuSubgroup: Decision
 menuSubtitle: Calculate disease probability based on test characteristics
 version: '1.0.0'
