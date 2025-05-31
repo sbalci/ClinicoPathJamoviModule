@@ -23,7 +23,7 @@ and reports the associated tests. Here we look at the relationships
 between `mpg`, `hp` and `wt` in the `mtcars` data.
 
 ```{r}
-jjcorrmat(data = mtcars, dep = c(mpg, hp, wt))
+jjcorrmat(data = mtcars, dep = c(mpg, hp, wt), grvar = NULL)
 ```
 
 ## Scatter plots with `jjscatterstats()`
@@ -32,7 +32,7 @@ jjcorrmat(data = mtcars, dep = c(mpg, hp, wt))
 textual output describing the correlation and regression statistics.
 
 ```{r}
-jjscatterstats(data = mtcars, dep = mpg, group = hp)
+jjscatterstats(data = mtcars, dep = mpg, group = hp, grvar = NULL)
 ```
 
 
