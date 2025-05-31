@@ -7,8 +7,8 @@ new_date <- "2024-05-30"
 # Define WIP, check, extended status ----
 check <- FALSE
 extended <- FALSE
-webpage <- FALSE
-WIP <- TRUE
+webpage <- TRUE
+WIP <- FALSE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 
 
@@ -472,6 +472,7 @@ fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vign
         "lollipop",
         "parallelplot",
         "statsplot2",
+        "riverplot",
         "tidyplots"
       )
     }
@@ -592,7 +593,6 @@ fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vign
         "ihcstats",
         "pairchi2",
         "retracted",
-        "riverplot",
         "summarydata",
         "swimmerplot2",
         "toolssummary",
