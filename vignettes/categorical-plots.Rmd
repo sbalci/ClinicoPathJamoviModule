@@ -24,7 +24,7 @@ variables. The example below compares the number of cylinders (`cyl`)
 across transmission types (`am`).
 
 ```{r}
-jjbarstats(data = mtcars, group = cyl, grvar = am)
+jjbarstats(data = mtcars, dep = cyl, group = am, grvar = NULL)
 ```
 
 ## Pie charts with `jjpiestats()`
@@ -33,7 +33,7 @@ jjbarstats(data = mtcars, group = cyl, grvar = am)
 pie chart.
 
 ```{r}
-jjpiestats(data = mtcars, dep = cyl, group = am)
+jjpiestats(data = mtcars, dep = cyl, group = am, grvar = NULL)
 ```
 
 ## Dot charts with `jjdotplotstats()`
@@ -42,10 +42,8 @@ jjpiestats(data = mtcars, dep = cyl, group = am)
 plot horsepower (`hp`) by engine configuration (`vs`).
 
 ```{r}
-jjdotplotstats(data = mtcars, dep = hp, group = vs)
+jjdotplotstats(data = mtcars, dep = hp, group = vs, grvar = NULL)
 ```
 
 Each function returns a results object whose `plot` element contains the
 `ggplot2` visualisation.
-
-

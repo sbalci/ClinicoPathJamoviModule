@@ -7,7 +7,7 @@ new_date <- "2024-05-30"
 # Define WIP, check, extended status ----
 check <- FALSE
 extended <- FALSE
-webpage <- TRUE
+webpage <- FALSE
 WIP <- FALSE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 
