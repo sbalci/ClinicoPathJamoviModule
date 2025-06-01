@@ -1,0 +1,64 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: ClinicoPathJamoviModule
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Serdar
+    family-names: Balci
+    email: serdarbalci@serdarbalci.com
+    orcid: 'https://orcid.org/0000-0002-7852-3851'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.3997188
+    description: zenodo
+  - type: doi
+    value: 10.17605/OSF.IO/9SZUD
+    description: OSF
+  - type: url
+    value: 'https://github.com/sbalci/ClinicoPathJamoviModule/'
+    description: GitHub
+  - type: url
+    value: 'https://sbalci.github.io/ClinicoPathJamoviModule/'
+    description: webpage
+  - type: url
+    value: >-
+      https://github.com/sbalci/ClinicoPathJamoviModule/issues/
+    description: BugReports
+  - type: url
+    value: 'https://github.com/sbalci/ClinicoPathDescriptives/'
+    description: ClinicoPathDescriptives
+  - type: url
+    value: 'https://github.com/sbalci/jjstatsplot'
+    description: jjstatsplot
+  - type: url
+    value: 'https://github.com/sbalci/meddecide'
+    description: meddecide
+  - type: url
+    value: 'https://github.com/sbalci/jsurvival'
+    description: jsurvival
+repository-code: 'https://github.com/sbalci/ClinicoPathJamoviModule/'
+url: 'https://www.serdarbalci.com/ClinicoPathJamoviModule'
+abstract: >-
+  Analysis for Clinicopathological Research: ClinicoPath
+  help researchers to generate natural language summaries of
+  their dataset, generate cross tables with statistical
+  tests, and survival analysis with survival tables,
+  survival plots, and natural language summaries. 
+keywords:
+  - jamovi
+  - module
+  - R-project
+  - package
+  - pathology
+  - research
+  - biostatistics
+  - survival
+  - agreement
+  - descriptives
+  - plots
+license: GPL-2.0
