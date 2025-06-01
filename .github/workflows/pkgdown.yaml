@@ -14,6 +14,8 @@ permissions: read-all
 
 jobs:
   pkgdown:
+      # Skip this entire job if the commit message includes "WIP"
+    if: "!contains(github.event.head_commit.message, 'WIP')"
     runs-on: ubuntu-latest
     # Only restrict concurrency for non-PR jobs
     concurrency:
