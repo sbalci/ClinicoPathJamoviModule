@@ -36,6 +36,24 @@ process_csv <- function(path) {
     # Read with base::read.csv (you can swap in readr::read_csv if you prefer)
     df <- read.csv(path, stringsAsFactors = FALSE, check.names = TRUE)
 
+    if (obj_name == "histopathology") {
+      if ("LastFollowUpDate" %in% names(df)) df$LastFollowUpDate <- as.POSIXct(df$LastFollowUpDate, format = "%Y.%m.%d %H:%M:%S", tz = "UTC")
+      if ("SurgeryDate" %in% names(df)) df$SurgeryDate <- as.POSIXct(df$SurgeryDate, format = "%Y.%m.%d %H:%M:%S", tz = "UTC")
+    } else if (obj_name == "hospital_admission_hourly") {
+      if ("AdmissionDate" %in% names(df)) df$AdmissionDate <- as.Date(df$AdmissionDate, format = "%Y-%m-%d")
+      if ("AdmissionTime" %in% names(df)) df$AdmissionTime <- as.POSIXct(df$AdmissionTime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+    } else if (obj_name == "date_formats") {
+      if ("StartDate" %in% names(df)) df$StartDate <- as.Date(df$StartDate, format = "%Y-%m-%d")
+      if ("EndDate" %in% names(df)) df$EndDate <- as.Date(df$EndDate, format = "%Y-%m-%d")
+      if ("StartDate_YMD" %in% names(df)) df$StartDate_YMD <- as.Date(df$StartDate_YMD, format = "%Y-%m-%d")
+      # For DMY and MDY, ensure the source format in CSV is known. Using common US/Euro formats:
+      if ("StartDate_DMY" %in% names(df)) df$StartDate_DMY <- as.Date(df$StartDate_DMY, format = "%d/%m/%Y")
+      if ("StartDate_MDY" %in% names(df)) df$StartDate_MDY <- as.Date(df$StartDate_MDY, format = "%m/%d/%Y")
+      if ("EndDate_YMD" %in% names(df)) df$EndDate_YMD <- as.Date(df$EndDate_YMD, format = "%Y-%m-%d")
+      if ("EndDate_DMY" %in% names(df)) df$EndDate_DMY <- as.Date(df$EndDate_DMY, format = "%d/%m/%Y")
+      if ("EndDate_MDY" %in% names(df)) df$EndDate_MDY <- as.Date(df$EndDate_MDY, format = "%m/%d/%Y")
+    }
+
     if (!is.data.frame(df)) {
         stop("Expected a data.frame from read.csv for ", fname)
     }

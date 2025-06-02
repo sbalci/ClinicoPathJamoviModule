@@ -14,7 +14,7 @@
 #'   \item{PreinvasiveComponent}{Character. Presence of preinvasive component (e.g., "Present", "Absent").}
 #'   \item{LVI}{Character. Lymphovascular invasion status (e.g., "Present", "Absent").}
 #'   \item{PNI}{Character. Perineural invasion status (e.g., "Present", "Absent").}
-#'   \item{LastFollowUpDate}{Character. Date of the last follow-up (e.g., "2019.10.22 00:00:00"). Should ideally be Date type.}
+#'   \item{LastFollowUpDate}{POSIXct. Date and time of the last follow-up.}
 #'   \item{Death}{Character. Death status (e.g., "YANLIŞ" for False/No, "DOĞRU" for True/Yes). Indicates if the patient died.}
 #'   \item{Group}{Character. Treatment or control group (e.g., "Control", "Treatment").}
 #'   \item{Grade}{Numeric. Tumor grade (e.g., 1, 2, 3).}
@@ -25,7 +25,7 @@
 #'   \item{Valid}{Character. Validity status (e.g., "YANLIŞ", "DOĞRU"). Meaning needs context.}
 #'   \item{Smoker}{Character. Smoking status (e.g., "YANLIŞ", "DOĞRU").}
 #'   \item{Grade_Level}{Character. Tumor grade categorized (e.g., "low", "high", "moderate").}
-#'   \item{SurgeryDate}{Character. Date of surgery (e.g., "2019.07.08 00:00:00"). Should ideally be Date type.}
+#'   \item{SurgeryDate}{POSIXct. Date and time of surgery.}
 #'   \item{DeathTime}{Character. Time to death category (e.g., "Within1Year").}
 #'   \item{int}{Character. Interval string, likely representing the duration between two dates.}
 #'   \item{OverallTime}{Numeric. Overall time, likely survival time in some unit (e.g., months).}
@@ -188,8 +188,7 @@
 #' @description A simulated dataset representing patient responses to cancer treatment.
 #' It includes patient identifiers and a numeric value indicating treatment response,
 #' likely as a percentage change in tumor size or a similar metric.
-#' Note: This documentation describes the 'oncology_data' object loaded from 'treatmentResponse.rda'.
-#' The data object loaded will be named 'oncology_data'.
+#' The data object loaded will be named 'treatmentResponse'.
 #' @usage data(treatmentResponse)
 #' @format A data frame with 250 rows and 2 variables:
 #' \describe{
@@ -200,19 +199,11 @@
 #'                        indicate tumor growth.}
 #' }
 #' @examples
-#' # To load the data:
-#' # data(treatmentResponse)
-#' # You will find an object named 'oncology_data' in your environment.
-#' # To use it, you might want to assign it:
-#' # treatmentResponse_df <- oncology_data
-#' #
-#' # Example usage (assuming you've loaded and assigned it):
-#' # str(treatmentResponse_df)
-#' # head(treatmentResponse_df)
-#' # summary(treatmentResponse_df$ResponseValue)
-#' # if (exists("treatmentResponse_df")) {
-#' #   hist(treatmentResponse_df$ResponseValue, main="Histogram of Treatment Response")
-#' # }
+#' data(treatmentResponse)
+#' str(treatmentResponse)
+#' head(treatmentResponse)
+#' summary(treatmentResponse$ResponseValue)
+#' hist(treatmentResponse$ResponseValue, main="Histogram of Treatment Response")
 "treatmentResponse"
 
 #' @title Wisconsin Breast Cancer Data
@@ -506,21 +497,6 @@
 #' summary(data_raw$Measurement)
 "data_raw"
 
-#' @title List of Available Data Files
-#'
-#' @description A character vector containing the names of various data files
-#' (e.g., .csv, .omv, .rda, .RData, .xlsx, .jasp) available within the data directory
-#' of the package or project. This object is likely used internally or for
-#' informational purposes about the data resources.
-#' @usage data(data_sets)
-#' @format A character vector with 79 elements. Each element is a filename.
-#' @examples
-#' data(data_sets)
-#' length(data_sets)
-#' head(data_sets)
-#' print(data_sets)
-"data_sets"
-
 #' @title Subgroup Analysis Data
 #'
 #' @description A dataset containing patient responses, potentially to a treatment,
@@ -650,9 +626,9 @@
 #' @format A data frame with 1200 rows and 9 variables:
 #' \describe{
 #'   \item{PatientID}{Character. Unique patient identifier.}
-#'   \item{AdmissionDate}{Character. The date of hospital admission. Should ideally be parsed as Date.}
+#'   \item{AdmissionDate}{Date. The date of hospital admission.}
 #'   \item{Hour}{Integer. The hour of hospital admission (0-23).}
-#'   \item{AdmissionTime}{Character. Combined date and time of admission. Should ideally be parsed as POSIXct or similar datetime object.}
+#'   \item{AdmissionTime}{POSIXct. Combined date and time of admission.}
 #'   \item{Department}{Character. The hospital department to which the patient was admitted (e.g., "Emergency", "Cardiology").}
 #'   \item{HeartRate}{Integer. Patient's heart rate at admission.}
 #'   \item{SystolicBP}{Integer. Patient's systolic blood pressure at admission.}
@@ -852,21 +828,3 @@
 #' head(nogold_standard)
 #' table(nogold_standard$test1, nogold_standard$test2)
 "nogold_standard"
-
-#' @title Oncology Patient Response Data
-#'
-#' @description A dataset containing patient identifiers and their numeric response
-#' values to an oncology treatment. This data is similar in structure to the data
-#' loaded by `treatmentResponse.rda` (which loads as `oncology_data`).
-#' @usage data(oncology_response_data)
-#' @format A data frame with 250 rows and 2 variables:
-#' \describe{
-#'   \item{PatientID}{Character. Unique identifier for each patient.}
-#'   \item{ResponseValue}{Numeric. The numeric value representing the patient's response to treatment.}
-#' }
-#' @examples
-#' data(oncology_response_data)
-#' str(oncology_response_data)
-#' head(oncology_response_data)
-#' summary(oncology_response_data$ResponseValue)
-"oncology_response_data"
