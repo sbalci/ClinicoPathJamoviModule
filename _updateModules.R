@@ -720,12 +720,12 @@ update_yaml_a_files(paths = yaml_a_paths,
   jmvtools::install(main_repo_dir)
 
   # --- Commit changes in each repository ---
-  commit_message <- sprintf("Update modules to version %s and date %s", new_version, new_date)
+  commit_message <- sprintf("WIP, update modules to version %s and date %s", new_version, new_date)
   commit_repo(main_repo_dir, commit_message)
-  # commit_repo(jjstatsplot_dir, commit_message)
-  # commit_repo(meddecide_dir, commit_message)
-  # commit_repo(jsurvival_dir, commit_message)
-  # commit_repo(ClinicoPathDescriptives_dir, commit_message)
+  commit_repo(jjstatsplot_dir, commit_message)
+  commit_repo(meddecide_dir, commit_message)
+  commit_repo(jsurvival_dir, commit_message)
+  commit_repo(ClinicoPathDescriptives_dir, commit_message)
 
   message("Modules updated to version ", new_version, " and date ", new_date)
 # }
