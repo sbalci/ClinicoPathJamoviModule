@@ -180,6 +180,59 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         #     }
         # },
 
+        .calculatePersonTimeMetrics = function(df, event_data = NULL) {
+            # Calculate total person-time across all subjects
+            if (self$options$timetype == "datetime" && self$options$startType == "absolute") {
+                intervals <- lubridate::interval(df$Start, df$End)
+                durations <- lubridate::time_length(intervals, unit = self$options$timetypeoutput)
+            } else {
+                durations <- df$End - df$Start
+            }
+            
+            # Calculate key person-time metrics
+            metrics <- list(
+                total_person_time = sum(durations, na.rm = TRUE),
+                n_subjects = nrow(df),
+                mean_follow_up = mean(durations, na.rm = TRUE)
+            )
+            
+            # Calculate incidence rates if event data is available
+            if (!is.null(event_data)) {
+                # Get unique event types
+                event_types <- unique(event_data)
+                event_types <- event_types[!is.na(event_types)]
+                
+                # For each event type, calculate incidence rate
+                for (event_type in event_types) {
+                    n_events <- sum(event_data == event_type, na.rm = TRUE)
+                    incidence_rate <- n_events / metrics$total_person_time * 100
+                    metrics[[paste0("incidence_", event_type)]] <- incidence_rate
+                }
+            }
+            
+            # Calculate time-varying cumulative rates
+            # Sort durations in ascending order
+            sorted_durations <- sort(durations)
+            cumulative_time <- cumsum(sorted_durations)
+            
+            # Generate time points for cumulative person-time curve
+            time_points <- seq(0, max(durations, na.rm = TRUE), length.out = 100)
+            cumulative_person_time <- numeric(length(time_points))
+            
+            for (i in seq_along(time_points)) {
+                t <- time_points[i]
+                # Count how many subjects have follow-up time >= t
+                cumulative_person_time[i] <- sum(durations >= t, na.rm = TRUE)
+            }
+            
+            metrics$time_points <- time_points
+            metrics$cumulative_person_time <- cumulative_person_time
+            
+            return(metrics)
+        },
+
+
+
         .run = function() {
             # Check that required options are provided.
             if (is.null(self$options$patientID) ||
@@ -206,6 +259,8 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         <br>- Styling: Clinical-oriented themes and colors
         <hr>
         <br>Clinical application: Swimmer plots are valuable for visualizing individual patient journeys through treatment and follow-up, allowing clinicians to identify patterns in treatment response, progression, and outcomes.
+        <br><br>
+        <b>Person-time analysis:</b> The tool also calculates person-time metrics for epidemiological analysis, including total follow-up time, average follow-up, and incidence rates when event data is available.
         "
                 self$results$todo$setContent(todo)
                 return()
@@ -237,8 +292,10 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Optionally add event markers if provided.
+            event_data <- NULL
             if (!is.null(self$options$event)) {
                 df$Event <- as.factor(data[[self$options$event]])
+                event_data <- df$Event
             }
 
             # Sort the data: if sortVariable is provided, sort accordingly;
@@ -254,6 +311,9 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
             # Calculate summary statistics for durations.
             stats <- private$.calculateStats(df)
+
+            # Calculate person-time metrics
+            person_time_metrics <- private$.calculatePersonTimeMetrics(df, event_data)
 
             # Prepare markers data for ggswim if event type is provided
             markers_data <- NULL
@@ -362,6 +422,22 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 value = stats$q3
             ))
 
+
+            # Add person-time metrics to summary table
+            self$results$summary$addRow(rowKey = 9, values = list(
+                metric = "Total Person-Time",
+                value = person_time_metrics$total_person_time
+            ))
+            self$results$summary$addRow(rowKey = 10, values = list(
+                metric = "Number of Subjects",
+                value = person_time_metrics$n_subjects
+            ))
+            self$results$summary$addRow(rowKey = 11, values = list(
+                metric = "Mean Follow-up Time",
+                value = person_time_metrics$mean_follow_up
+            ))
+
+
             # Add clinical metrics if event data exists
             if (!is.null(self$options$event)) {
                 # Count patients with each event type
@@ -378,6 +454,15 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         metric = paste0(event_name, " Rate"),
                         value = event_percent
                     ))
+
+                # Add incidence rate per 100 person-time units if available
+                if (paste0("incidence_", event_name) %in% names(person_time_metrics)) {
+                        self$results$summary$addRow(rowKey = 11 + length(event_counts) + i, values = list(
+                            metric = paste0(event_name, " Incidence (per 100 ", self$options$timetypeoutput, ")"),
+                            value = person_time_metrics[[paste0("incidence_", event_name)]]
+                        ))
+                    }
+
                 }
             }
 
@@ -394,7 +479,8 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     referenceLines = self$options$referenceLines,
                     customReferenceTime = self$options$customReferenceTime
                 ),
-                stats = stats
+                stats = stats,
+                person_time = person_time_metrics
             )
 
             self$results$plot$setState(plotData)
@@ -409,6 +495,7 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # milestone_data <- plotData$milestone_data
             opts <- plotData$options
             stats <- plotData$stats
+            person_time <- plotData$person_time
 
 
             if (self$options$useggswim) {
@@ -681,6 +768,17 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 opts$timeUnit
             )
 
+            # Add person-time information to subtitle
+            person_time_info <- sprintf(
+                "Total person-time: %.1f %s | Avg follow-up: %.1f %s",
+                person_time$total_person_time,
+                opts$timeUnit,
+                person_time$mean_follow_up,
+                opts$timeUnit
+            )
+            
+            plot_subtitle <- paste(plot_subtitle, person_time_info, sep = "\n")
+
             p <- p + ggplot2::labs(
                 x = paste0("Time (", opts$timeUnit, ")"),
                 y = "Patient ID",
@@ -688,7 +786,21 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 subtitle = plot_subtitle
             )
 
-
+            # Create a second plot with cumulative person-time curve
+            # This data represents how many patients are still being followed at each time point
+            time_data <- data.frame(
+                Time = person_time$time_points,
+                Remaining = person_time$cumulative_person_time
+            )
+            
+            p2 <- ggplot2::ggplot(time_data, ggplot2::aes(x = Time, y = Remaining)) +
+                ggplot2::geom_line(color = "steelblue", size = 1) +
+                ggplot2::labs(
+                    x = paste0("Time (", opts$timeUnit, ")"),
+                    y = "Number of patients at risk",
+                    title = "Cumulative Person-Time Analysis"
+                ) +
+                ggplot2::theme_minimal()
 
 
             if (self$options$useggswim) {
@@ -711,7 +823,25 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
                 }
 
-            print(p)
+            # Create a multiplot layout with the main swimmer plot and the person-time curve
+            # Using gridExtra to arrange the plots
+            if (requireNamespace("gridExtra", quietly = TRUE)) {
+                combined_plot <- gridExtra::grid.arrange(
+                    p, p2, 
+                    ncol = 1,
+                    heights = c(3, 1)  # Main plot is 3x the height of the person-time curve
+                )
+                print(combined_plot)
+            } else {
+                # If gridExtra is not available, just print the main plot
+                print(p)
+                message("Install 'gridExtra' package to see the combined swimmer plot with person-time curve")
+            }
+            
+
+
+
+
             TRUE
         }
     )
