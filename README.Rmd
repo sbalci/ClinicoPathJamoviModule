@@ -709,7 +709,64 @@ https://paypal.me/serdarbalci
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxRBOaoEoP4JfAMi7aIbkRXPXGUEwzTNv" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+## Accessing Raw and External Data Files
 
+Beyond the datasets readily available with `data(dataset_name)`, this package also includes various raw and external data files in other formats like CSV (Comma Separated Values), XLSX (Excel), and OMV (Jamovi files). These can be useful for users who want to access the original data, use it with other software, or understand how the R data objects (`.rda` files) were generated.
 
+These files are typically located in the `inst/extdata` directory of the package. You can get the full path to a file in `inst/extdata` using the `system.file()` function. For example:
 
+```r
+# Get the path to 'BreastCancer.csv' in inst/extdata
+# (Assuming BreastCancer.csv will be moved to inst/extdata in a later step)
+csv_path <- system.file("extdata", "BreastCancer.csv", package = "ClinicoPath")
 
+if (nzchar(csv_path)) {
+  # Read the CSV file
+  breast_cancer_df <- read.csv(csv_path)
+  head(breast_cancer_df)
+} else {
+  message("BreastCancer.csv not found in inst/extdata. This example assumes it's present there.")
+}
+```
+
+### Common File Types
+
+#### CSV Files
+
+Many datasets are available in CSV format. These can be easily read into R using `read.csv()` or other functions from packages like `readr` or `data.table`.
+
+*   **Example:** The `BreastCancer` dataset, also available via `data(BreastCancer)`, has its source data potentially available as `BreastCancer.csv`.
+*   Other CSV files like `oncology_response_data.csv` (related to the `treatmentResponse` dataset) and `colon.csv` are also available.
+
+#### XLSX Files (Excel)
+
+Some datasets might be provided in Excel format. You can read these using packages like `readxl`.
+
+*   **Example:** `heartdisease.xlsx`
+    ```r
+    # Ensure readxl is installed: install.packages("readxl")
+    # xlsx_path <- system.file("extdata", "heartdisease.xlsx", package = "ClinicoPath")
+    # if (nzchar(xlsx_path)) {
+    #   heartdisease_df <- readxl::read_excel(xlsx_path)
+    #   head(heartdisease_df)
+    # }
+    ```
+    *(Note: The availability and specific location of `heartdisease.xlsx` in `inst/extdata` will be finalized in a later step).*
+
+#### OMV Files (Jamovi)
+
+Files with the `.omv` extension are project files for Jamovi, a free and open statistical spreadsheet. These files often contain datasets and analyses demonstrating the use of this R package's functionalities within the Jamovi environment. They are not typically read directly into R but opened with Jamovi.
+
+*   **Examples:** `BreastCancer.omv`, `colon.omv`, `histopathology.omv`, and many others found in `data/` or `inst/extdata/`.
+
+#### JASP Files
+
+Files with the `.jasp` extension are for JASP software, another alternative to SPSS. Similar to Jamovi files, these demonstrate analyses and data.
+
+*   **Example:** `histopathology_jasp.jasp`
+
+### Relationship to `.rda` Data Files
+
+Many of the `.rda` files (loaded using `data(dataset_name)`) provided by this package are derived from these raw data files (like CSVs). The `.rda` files are offered for convenience, as they load directly into your R session with proper data types already set. Accessing the raw files can be useful for reproducibility, using the data in other tools, or for specific data manipulation needs not covered by the pre-processed `.rda` versions.
+
+Please explore the `inst/extdata` directory (once files are organized in Step 5 of the data documentation improvement plan) to see the full list of available raw and external files.
