@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
 # Define the new version and date ----
-new_version <- "0.0.3.20"
-new_date <- "2024-05-30"
+new_version <- "0.0.3.21"
+new_date <- "2024-06-02"
 
 # Define WIP, check, extended status ----
 check <- FALSE
@@ -113,7 +113,7 @@ fs::file_copy(file.path(main_repo_dir, "data", jjstatsplot_example_files),
 ## jjstatsplot_data_description_files ----
 
 jjstatsplot_data_description_files <- c(
-  "data-histopathology.R"
+  # "data-histopathology.R"
 )
 
 
@@ -184,7 +184,7 @@ meddecide_utility_data_description_files <- c(
   "meddecide-package.R",
   "meddecide-data.R",
   "meddecide_stats_utils.R",
-  "data-histopathology.R",
+  # "data-histopathology.R",
   "diagnostic_metrics.R"
 )
 
@@ -271,7 +271,7 @@ fs::file_copy(file.path(main_repo_dir, "data", jsurvival_example_files),
 ## jsurvival_data_description_files ----
 
 jsurvival_data_description_files <- c(
-  "data-histopathology.R"
+  # "data-histopathology.R"
 )
 
 
@@ -356,8 +356,8 @@ fs::file_copy(file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_f
 ## ClinicoPathDescriptives_data_description_files ----
 
 ClinicoPathDescriptives_data_description_files <- c(
-  "data-histopathology.R",
-  "data-treatmentResponse.R",
+  # "data-histopathology.R",
+  # "data-treatmentResponse.R",
   # "tumor_response_examples.R"
 # "data-swimmer-plot-documentation.r"
 
