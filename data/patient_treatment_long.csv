@@ -1,0 +1,2001 @@
+"PatientID","TimePoint","Age","Gender","Diagnosis","TreatmentStatus","Cost"
+"P1","Initial",60,"Male","Mild","Medication A",111.331540267915
+"P1","Month3",60,"Male","Mild","Stable",95.1166770653799
+"P1","Month6",60,"Male","Mild","Stable",96.2612176826224
+"P1","Month12",60,"Male","Mild","Stable",104.302356136031
+"P2","Initial",44,"Male","Severe","Combination",1312.83026808873
+"P2","Month3",44,"Male","Severe","Stable",649.905380578712
+"P2","Month6",44,"Male","Severe","Stable",710.37562630605
+"P2","Month12",44,"Male","Severe","Improved",509.504830546677
+"P3","Initial",80,"Male","Moderate","Medication A",355.320550912991
+"P3","Month3",80,"Male","Moderate","Worsened",448.443914533127
+"P3","Month6",80,"Male","Moderate","Stable",297.88901404012
+"P3","Month12",80,"Male","Moderate","Stable",299.172116224654
+"P4","Initial",43,"Female","Mild","Medication A",125.702037239447
+"P4","Month3",43,"Female","Mild","Worsened",164.729589354247
+"P4","Month6",43,"Female","Mild","Discontinued",32.0424501523376
+"P4","Month12",43,"Female","Mild","Discontinued",27.6715579326265
+"P5","Initial",32,"Male","Moderate","Medication A",386.022375080735
+"P5","Month3",32,"Male","Moderate","Improved",243.256861813366
+"P5","Month6",32,"Male","Moderate","Improved",248.797388155013
+"P5","Month12",32,"Male","Moderate","Improved",253.901062980294
+"P6","Initial",71,"Male","Moderate","Combination",588.303063986823
+"P6","Month3",71,"Male","Moderate","Stable",321.196631365456
+"P6","Month6",71,"Male","Moderate","Stable",281.376331946813
+"P6","Month12",71,"Male","Moderate","Stable",299.743297984824
+"P7","Initial",79,"Male","Mild","Watchful Waiting",46.200443492271
+"P7","Month3",79,"Male","Mild","Stable",94.5732661243528
+"P7","Month6",79,"Male","Mild","Worsened",162.164936894551
+"P7","Month12",79,"Male","Mild","Stable",99.4754974637181
+"P8","Initial",72,"Female","Moderate","Combination",604.857213506475
+"P8","Month3",72,"Female","Moderate","Improved",262.74217531085
+"P8","Month6",72,"Female","Moderate","Stable",328.345741289668
+"P8","Month12",72,"Female","Moderate","Improved",248.897254541516
+"P9","Initial",66,"Female","Moderate","Combination",633.595098378137
+"P9","Month3",66,"Female","Moderate","Stable",271.227193046361
+"P9","Month6",66,"Female","Moderate","Stable",313.707944434136
+"P9","Month12",66,"Female","Moderate","Stable",325.361906751059
+"P10","Initial",43,"Female","Moderate","Medication A",355.712961444631
+"P10","Month3",43,"Female","Moderate","Stable",312.334486870095
+"P10","Month6",43,"Female","Moderate","Stable",319.003487457521
+"P10","Month12",43,"Female","Moderate","Stable",299.196558804251
+"P11","Initial",54,"Female","Severe","Surgery",3740.09959229734
+"P11","Month3",54,"Female","Severe","Improved",559.201868545264
+"P11","Month6",54,"Female","Severe","Stable",632.473690570332
+"P11","Month12",54,"Female","Severe","Stable",691.665136115626
+"P12","Initial",55,"Male","Mild","Watchful Waiting",49.7792466287501
+"P12","Month3",55,"Male","Mild","Improved",81.6198491826653
+"P12","Month6",55,"Male","Mild","Improved",79.0919475741684
+"P12","Month12",55,"Male","Mild","Improved",76.9148390851915
+"P13","Initial",56,"Female","Moderate","Medication A",372.455223580822
+"P13","Month3",56,"Female","Moderate","Worsened",459.820283772424
+"P13","Month6",56,"Female","Moderate","Stable",328.420712468214
+"P13","Month12",56,"Female","Moderate","Worsened",420.825124110561
+"P14","Initial",34,"Female","Mild","Medication A",131.357435395941
+"P14","Month3",34,"Female","Mild","Improved",81.2690742202103
+"P14","Month6",34,"Female","Mild","Improved",83.8100041672587
+"P14","Month12",34,"Female","Mild","Improved",85.8530862256885
+"P15","Initial",80,"Male","Mild","Medication A",123.539666494355
+"P15","Month3",80,"Male","Mild","Stable",103.89392235782
+"P15","Month6",80,"Male","Mild","Improved",87.9344870112836
+"P15","Month12",80,"Male","Mild","Improved",85.5899743996561
+"P16","Initial",56,"Male","Severe","Surgery",3686.07556680217
+"P16","Month3",56,"Male","Severe","Stable",649.273145250045
+"P16","Month6",56,"Male","Severe","Improved",514.661160621792
+"P16","Month12",56,"Male","Severe","Improved",562.447001412511
+"P17","Initial",57,"Female","Mild","Medication A",112.619063330814
+"P17","Month3",57,"Female","Mild","Stable",104.629303561524
+"P17","Month6",57,"Female","Mild","Improved",79.9133916608989
+"P17","Month12",57,"Female","Mild","Stable",92.8551830677316
+"P18","Initial",38,"Male","Mild","Medication A",128.189207257703
+"P18","Month3",38,"Male","Mild","Stable",108.826079186983
+"P18","Month6",38,"Male","Mild","Stable",95.5593495396897
+"P18","Month12",38,"Male","Mild","Stable",93.0075857555494
+"P19","Initial",58,"Female","Mild","Medication A",124.960162622854
+"P19","Month3",58,"Female","Mild","Worsened",151.960157831199
+"P19","Month6",58,"Female","Mild","Improved",73.4480390548706
+"P19","Month12",58,"Female","Mild","Improved",80.9654465131462
+"P20","Initial",64,"Female","Mild","Medication A",122.766241516918
+"P20","Month3",64,"Female","Mild","Stable",100.968398712575
+"P20","Month6",64,"Female","Mild","Worsened",146.804728461429
+"P20","Month12",64,"Female","Mild","Discontinued",29.5000089034438
+"P21","Initial",37,"Male","Moderate","Combination",648.589310590178
+"P21","Month3",37,"Male","Moderate","Discontinued",93.1251957155764
+"P21","Month6",37,"Male","Moderate","Discontinued",98.1862241760828
+"P21","Month12",37,"Male","Moderate","Discontinued",83.7221732418984
+"P22","Initial",55,"Male","Moderate","Medication A",364.301397945732
+"P22","Month3",55,"Male","Moderate","Improved",220.734516039491
+"P22","Month6",55,"Male","Moderate","Improved",245.925598405302
+"P22","Month12",55,"Male","Moderate","Improved",228.305892471224
+"P23","Initial",36,"Male","Mild","Medication A",119.50239755027
+"P23","Month3",36,"Male","Mild","Improved",79.6342961005867
+"P23","Month6",36,"Male","Mild","Stable",106.609828327782
+"P23","Month12",36,"Male","Mild","Improved",86.3292402029037
+"P24","Initial",71,"Female","Moderate","Medication A",365.53505191952
+"P24","Month3",71,"Female","Moderate","Stable",326.627705488354
+"P24","Month6",71,"Female","Moderate","Improved",230.008094631135
+"P24","Month12",71,"Female","Moderate","Stable",307.519156588241
+"P25","Initial",38,"Male","Severe","Surgery",3584.12870441098
+"P25","Month3",38,"Male","Severe","Improved",576.645199477673
+"P25","Month6",38,"Male","Severe","Improved",530.309988126159
+"P25","Month12",38,"Male","Severe","Improved",549.220328498632
+"P26","Initial",48,"Male","Mild","Watchful Waiting",46.7094982112758
+"P26","Month3",48,"Male","Mild","Stable",100.383260576054
+"P26","Month6",48,"Male","Mild","Worsened",152.530841405969
+"P26","Month12",48,"Male","Mild","Worsened",137.402345412411
+"P27","Initial",65,"Male","Moderate","Medication A",376.480981819332
+"P27","Month3",65,"Male","Moderate","Discontinued",92.05319752777
+"P27","Month6",65,"Male","Moderate","Discontinued",93.0761236832477
+"P27","Month12",65,"Male","Moderate","Discontinued",86.3304040697403
+"P28","Initial",43,"Female","Severe","Combination",1360.95918049105
+"P28","Month3",43,"Female","Severe","Worsened",1077.52392059891
+"P28","Month6",43,"Female","Severe","Worsened",1146.62224671571
+"P28","Month12",43,"Female","Severe","Worsened",1021.58245771425
+"P29","Initial",46,"Female","Moderate","Medication B",422.819092709105
+"P29","Month3",46,"Female","Moderate","Stable",285.246525811963
+"P29","Month6",46,"Female","Moderate","Improved",239.29452861473
+"P29","Month12",46,"Female","Moderate","Improved",235.837519146502
+"P30","Initial",72,"Male","Mild","Medication A",115.87788792327
+"P30","Month3",72,"Male","Mild","Improved",77.7095195278525
+"P30","Month6",72,"Male","Mild","Improved",82.9417480677366
+"P30","Month12",72,"Male","Mild","Stable",107.262985301204
+"P31","Initial",68,"Male","Mild","Medication A",119.255249669775
+"P31","Month3",68,"Male","Mild","Stable",101.657141954638
+"P31","Month6",68,"Male","Mild","Worsened",149.956799042411
+"P31","Month12",68,"Male","Mild","Discontinued",31.0038471445441
+"P32","Initial",41,"Female","Mild","Medication A",124.508958298713
+"P32","Month3",41,"Female","Mild","Stable",92.1465985011309
+"P32","Month6",41,"Female","Mild","Worsened",138.366278058384
+"P32","Month12",41,"Female","Mild","Improved",86.9244828149676
+"P33","Initial",44,"Female","Moderate","Combination",590.625105025247
+"P33","Month3",44,"Female","Moderate","Stable",303.798689120449
+"P33","Month6",44,"Female","Moderate","Worsened",491.061796909198
+"P33","Month12",44,"Female","Moderate","Worsened",422.632896546274
+"P34","Initial",61,"Male","Moderate","Medication B",425.137180073652
+"P34","Month3",61,"Male","Moderate","Stable",307.281418587081
+"P34","Month6",61,"Male","Moderate","Stable",320.073998258449
+"P34","Month12",61,"Male","Moderate","Improved",254.782481990755
+"P35","Initial",71,"Male","Severe","Medication B",976.725425084587
+"P35","Month3",71,"Male","Severe","Discontinued",192.49560393719
+"P35","Month6",71,"Male","Severe","Discontinued",221.715086130425
+"P35","Month12",71,"Male","Severe","Discontinued",229.088842618279
+"P36","Initial",74,"Male","Mild","Medication A",122.841634338722
+"P36","Month3",74,"Male","Mild","Discontinued",29.6232978170738
+"P36","Month6",74,"Male","Mild","Discontinued",30.9865288753062
+"P36","Month12",74,"Male","Mild","Discontinued",32.2133544730023
+"P37","Initial",36,"Female","Mild","Watchful Waiting",50.0262145348824
+"P37","Month3",36,"Female","Mild","Worsened",150.864090810064
+"P37","Month6",36,"Female","Mild","Stable",105.414870763198
+"P37","Month12",36,"Female","Mild","Worsened",146.093549807556
+"P38","Initial",38,"Male","Severe","Surgery",3808.35188848432
+"P38","Month3",38,"Male","Severe","Worsened",951.984342264477
+"P38","Month6",38,"Male","Severe","Stable",677.358849430457
+"P38","Month12",38,"Male","Severe","Stable",648.987996783108
+"P39","Initial",70,"Male","Mild","Watchful Waiting",48.371247688774
+"P39","Month3",70,"Male","Mild","Worsened",149.505369057879
+"P39","Month6",70,"Male","Mild","Worsened",157.714702715166
+"P39","Month12",70,"Male","Mild","Worsened",158.883689814247
+"P40","Initial",39,"Male","Moderate","Medication A",353.985020689666
+"P40","Month3",39,"Male","Moderate","Improved",217.437111519277
+"P40","Month6",39,"Male","Moderate","Stable",326.301120319404
+"P40","Month12",39,"Male","Moderate","Improved",259.944126583636
+"P41","Initial",52,"Male","Moderate","Medication B",460.090219611302
+"P41","Month3",52,"Male","Moderate","Worsened",487.718287250027
+"P41","Month6",52,"Male","Moderate","Improved",246.06043310836
+"P41","Month12",52,"Male","Moderate","Improved",222.069775510579
+"P42","Initial",56,"Female","Severe","Surgery",3249.84914655797
+"P42","Month3",56,"Female","Severe","Improved",580.344112366438
+"P42","Month6",56,"Female","Severe","Improved",607.378779519349
+"P42","Month12",56,"Female","Severe","Improved",520.873072057962
+"P43","Initial",36,"Female","Mild","Medication A",129.236324284226
+"P43","Month3",36,"Female","Mild","Stable",99.0036524226889
+"P43","Month6",36,"Female","Mild","Stable",90.9333998523653
+"P43","Month12",36,"Female","Mild","Improved",85.1754887141287
+"P44","Initial",56,"Female","Moderate","Medication A",393.572568168864
+"P44","Month3",56,"Female","Moderate","Stable",318.443747358397
+"P44","Month6",56,"Female","Moderate","Stable",287.775163580664
+"P44","Month12",56,"Female","Moderate","Improved",225.498819407076
+"P45","Initial",61,"Male","Moderate","Medication A",338.520450660959
+"P45","Month3",61,"Male","Moderate","Stable",290.970761189237
+"P45","Month6",61,"Male","Moderate","Stable",283.445091806352
+"P45","Month12",61,"Male","Moderate","Worsened",419.804253901821
+"P46","Initial",67,"Male","Moderate","Medication B",413.345695591997
+"P46","Month3",67,"Male","Moderate","Improved",246.379194863141
+"P46","Month6",67,"Male","Moderate","Stable",317.087300601415
+"P46","Month12",67,"Male","Moderate","Stable",273.569357888773
+"P47","Initial",54,"Female","Mild","Medication A",110.023191712797
+"P47","Month3",54,"Female","Mild","Improved",72.0684435814619
+"P47","Month6",54,"Female","Mild","Stable",92.84441429656
+"P47","Month12",54,"Female","Mild","Stable",108.583874073811
+"P48","Initial",63,"Male","Moderate","Medication B",419.569634080399
+"P48","Month3",63,"Male","Moderate","Improved",263.448055196553
+"P48","Month6",63,"Male","Moderate","Stable",312.253395575099
+"P48","Month12",63,"Male","Moderate","Stable",289.472553287633
+"P49","Initial",58,"Female","Moderate","Medication A",347.622136808932
+"P49","Month3",58,"Female","Moderate","Stable",316.602124543861
+"P49","Month6",58,"Female","Moderate","Worsened",449.874281531665
+"P49","Month12",58,"Female","Moderate","Worsened",449.730616486631
+"P50","Initial",34,"Female","Moderate","Medication A",343.178988492116
+"P50","Month3",34,"Female","Moderate","Improved",260.630468878895
+"P50","Month6",34,"Female","Moderate","Improved",248.522197589278
+"P50","Month12",34,"Female","Moderate","Stable",312.615589932539
+"P51","Initial",37,"Male","Mild","Medication A",114.763057792559
+"P51","Month3",37,"Male","Mild","Worsened",152.420758288354
+"P51","Month6",37,"Male","Mild","Stable",109.085136088543
+"P51","Month12",37,"Male","Mild","Stable",90.7199709676206
+"P52","Initial",41,"Female","Moderate","Medication A",360.736987838522
+"P52","Month3",41,"Female","Moderate","Worsened",482.452735989355
+"P52","Month6",41,"Female","Moderate","Stable",286.64954201784
+"P52","Month12",41,"Female","Moderate","Stable",291.770944786258
+"P53","Initial",42,"Male","Moderate","Medication A",389.989260222763
+"P53","Month3",42,"Male","Moderate","Improved",219.851297970861
+"P53","Month6",42,"Male","Moderate","Improved",240.610782589763
+"P53","Month12",42,"Male","Moderate","Improved",236.161816611886
+"P54","Initial",47,"Female","Severe","Combination",1304.25385063514
+"P54","Month3",47,"Female","Severe","Discontinued",207.881435621995
+"P54","Month6",47,"Female","Severe","Discontinued",196.124070933089
+"P54","Month12",47,"Female","Severe","Discontinued",224.920382761862
+"P55","Initial",62,"Female","Mild","Medication A",124.515196105465
+"P55","Month3",62,"Female","Mild","Stable",92.4305047281086
+"P55","Month6",62,"Female","Mild","Worsened",138.573480339255
+"P55","Month12",62,"Female","Mild","Worsened",143.656316329725
+"P56","Initial",56,"Male","Mild","Watchful Waiting",54.4023559708148
+"P56","Month3",56,"Male","Mild","Stable",108.632807391696
+"P56","Month6",56,"Male","Mild","Worsened",140.487855265383
+"P56","Month12",56,"Male","Mild","Stable",108.25747482013
+"P57","Initial",54,"Female","Mild","Watchful Waiting",45.6645783153363
+"P57","Month3",54,"Female","Mild","Improved",86.042060315609
+"P57","Month6",54,"Female","Mild","Improved",72.9409683905542
+"P57","Month12",54,"Female","Mild","Stable",109.033917468041
+"P58","Initial",67,"Female","Severe","Combination",1304.81943421066
+"P58","Month3",67,"Female","Severe","Stable",711.316949925386
+"P58","Month6",67,"Female","Severe","Stable",729.598336620256
+"P58","Month12",67,"Female","Severe","Improved",535.396122038364
+"P59","Initial",50,"Female","Moderate","Medication B",407.396851039957
+"P59","Month3",50,"Female","Moderate","Discontinued",93.7912041437812
+"P59","Month6",50,"Female","Moderate","Discontinued",86.6294427397661
+"P59","Month12",50,"Female","Moderate","Discontinued",96.3924670116976
+"P60","Initial",44,"Male","Mild","Watchful Waiting",49.7181930672377
+"P60","Month3",44,"Male","Mild","Stable",109.842056571506
+"P60","Month6",44,"Male","Mild","Stable",91.5572789218277
+"P60","Month12",44,"Male","Mild","Stable",90.494162752293
+"P61","Initial",70,"Male","Mild","Watchful Waiting",50.7516850624233
+"P61","Month3",70,"Male","Mild","Stable",102.153279641643
+"P61","Month6",70,"Male","Mild","Stable",90.0873041851446
+"P61","Month12",70,"Male","Mild","Improved",83.8991999030113
+"P62","Initial",76,"Female","Moderate","Medication B",409.20990482904
+"P62","Month3",76,"Female","Moderate","Worsened",448.040619471576
+"P62","Month6",76,"Female","Moderate","Worsened",489.469954117667
+"P62","Month12",76,"Female","Moderate","Improved",218.862609140575
+"P63","Initial",55,"Female","Moderate","Combination",654.436908205971
+"P63","Month3",55,"Female","Moderate","Improved",252.998645011336
+"P63","Month6",55,"Female","Moderate","Improved",256.874371211976
+"P63","Month12",55,"Female","Moderate","Improved",226.462300859392
+"P64","Initial",60,"Female","Mild","Medication A",131.867345944047
+"P64","Month3",60,"Female","Mild","Discontinued",31.1611383617856
+"P64","Month6",60,"Female","Mild","Discontinued",28.7227987563238
+"P64","Month12",60,"Female","Mild","Discontinued",31.9076545997523
+"P65","Initial",45,"Male","Moderate","Medication B",491.348201322835
+"P65","Month3",45,"Male","Moderate","Improved",259.220232132822
+"P65","Month6",45,"Male","Moderate","Stable",277.610362158157
+"P65","Month12",45,"Male","Moderate","Stable",273.577965963632
+"P66","Initial",59,"Male","Moderate","Medication A",382.925730893388
+"P66","Month3",59,"Male","Moderate","Stable",321.618982530199
+"P66","Month6",59,"Male","Moderate","Worsened",409.067966749426
+"P66","Month12",59,"Male","Moderate","Worsened",425.207746059168
+"P67","Initial",35,"Male","Mild","Medication A",124.915630437434
+"P67","Month3",35,"Male","Mild","Improved",73.5791305936873
+"P67","Month6",35,"Male","Mild","Stable",90.3178214980289
+"P67","Month12",35,"Male","Mild","Stable",108.112616883591
+"P68","Initial",72,"Male","Severe","Surgery",3184.32342866436
+"P68","Month3",72,"Male","Severe","Improved",601.905494958162
+"P68","Month6",72,"Male","Severe","Stable",646.879840586334
+"P68","Month12",72,"Male","Severe","Stable",686.582977366634
+"P69","Initial",37,"Male","Mild","Medication A",113.518151594326
+"P69","Month3",37,"Male","Mild","Stable",105.524708186276
+"P69","Month6",37,"Male","Mild","Worsened",152.289754981175
+"P69","Month12",37,"Male","Mild","Worsened",140.844142665155
+"P70","Initial",51,"Male","Moderate","Medication B",443.228162443265
+"P70","Month3",51,"Male","Moderate","Discontinued",88.9195571285672
+"P70","Month6",51,"Male","Moderate","Discontinued",97.3592361845076
+"P70","Month12",51,"Male","Moderate","Discontinued",89.3279610397294
+"P71","Initial",51,"Male","Moderate","Medication B",488.843805980869
+"P71","Month3",51,"Male","Moderate","Worsened",440.050940334331
+"P71","Month6",51,"Male","Moderate","Worsened",477.473710239865
+"P71","Month12",51,"Male","Moderate","Worsened",474.170014788397
+"P72","Initial",68,"Female","Mild","Medication A",116.181774957106
+"P72","Month3",68,"Female","Mild","Stable",108.757868772373
+"P72","Month6",68,"Female","Mild","Improved",80.0613004788756
+"P72","Month12",68,"Female","Mild","Improved",77.1884369291365
+"P73","Initial",60,"Female","Mild","Medication A",118.623490668833
+"P73","Month3",60,"Female","Mild","Stable",99.73946955055
+"P73","Month6",60,"Female","Mild","Improved",85.4656422510743
+"P73","Month12",60,"Female","Mild","Improved",87.1865505836904
+"P74","Initial",77,"Female","Mild","Watchful Waiting",49.7036981233396
+"P74","Month3",77,"Female","Mild","Stable",97.4212396750227
+"P74","Month6",77,"Female","Mild","Improved",75.6145362444222
+"P74","Month12",77,"Female","Mild","Stable",90.0921325245872
+"P75","Initial",46,"Female","Moderate","Medication A",375.079489756375
+"P75","Month3",46,"Female","Moderate","Stable",311.782100563869
+"P75","Month6",46,"Female","Moderate","Worsened",406.32254563272
+"P75","Month12",46,"Female","Moderate","Worsened",421.891442276537
+"P76","Initial",79,"Male","Mild","Medication A",120.884496806189
+"P76","Month3",79,"Male","Mild","Improved",74.5441468730569
+"P76","Month6",79,"Male","Mild","Improved",75.9361598044634
+"P76","Month12",79,"Male","Mild","Improved",86.7570398785174
+"P77","Initial",78,"Male","Mild","Watchful Waiting",48.6310460767709
+"P77","Month3",78,"Male","Mild","Stable",109.856347576715
+"P77","Month6",78,"Male","Mild","Improved",83.611594285816
+"P77","Month12",78,"Male","Mild","Improved",74.3875274918973
+"P78","Initial",63,"Female","Mild","Watchful Waiting",50.9190202481113
+"P78","Month3",63,"Female","Mild","Worsened",160.462064668536
+"P78","Month6",63,"Female","Mild","Stable",104.679889143445
+"P78","Month12",63,"Female","Mild","Stable",99.2499171756208
+"P79","Initial",33,"Female","Moderate","Medication A",360.798255929723
+"P79","Month3",33,"Female","Moderate","Improved",242.706429831684
+"P79","Month6",33,"Female","Moderate","Improved",225.638191133738
+"P79","Month12",33,"Female","Moderate","Improved",258.681165196002
+"P80","Initial",42,"Male","Moderate","Medication B",418.894559454639
+"P80","Month3",42,"Male","Moderate","Stable",305.075973663479
+"P80","Month6",42,"Male","Moderate","Improved",239.084974799305
+"P80","Month12",42,"Male","Moderate","Improved",225.469594303519
+"P81","Initial",34,"Female","Severe","Combination",1533.95885197446
+"P81","Month3",34,"Female","Severe","Worsened",1011.99660737766
+"P81","Month6",34,"Female","Severe","Stable",636.270417454652
+"P81","Month12",34,"Female","Severe","Worsened",1103.27407904668
+"P82","Initial",80,"Female","Moderate","Medication A",364.813844321296
+"P82","Month3",80,"Female","Moderate","Improved",216.467855617404
+"P82","Month6",80,"Female","Moderate","Improved",230.436195395887
+"P82","Month12",80,"Female","Moderate","Improved",257.438169982284
+"P83","Initial",54,"Female","Severe","Combination",1325.00154295005
+"P83","Month3",54,"Female","Severe","Improved",510.556458055973
+"P83","Month6",54,"Female","Severe","Stable",729.546987619251
+"P83","Month12",54,"Female","Severe","Stable",701.224794224836
+"P84","Initial",51,"Female","Moderate","Medication A",353.156186839566
+"P84","Month3",51,"Female","Moderate","Stable",295.47083508689
+"P84","Month6",51,"Female","Moderate","Stable",324.837947068736
+"P84","Month12",51,"Female","Moderate","Stable",324.120389493182
+"P85","Initial",54,"Male","Severe","Combination",1321.05827905238
+"P85","Month3",54,"Male","Severe","Improved",568.388189263642
+"P85","Month6",54,"Male","Severe","Stable",635.69143908564
+"P85","Month12",54,"Male","Severe","Stable",705.683651603758
+"P86","Initial",61,"Female","Severe","Medication B",968.693977100775
+"P86","Month3",61,"Female","Severe","Improved",588.834833182395
+"P86","Month6",61,"Female","Severe","Improved",516.448148101568
+"P86","Month12",61,"Female","Severe","Improved",526.860812913626
+"P87","Initial",75,"Female","Mild","Medication A",126.424891518429
+"P87","Month3",75,"Female","Mild","Stable",98.4468933055177
+"P87","Month6",75,"Female","Mild","Worsened",151.408619424328
+"P87","Month12",75,"Female","Mild","Worsened",161.415565120988
+"P88","Initial",54,"Male","Mild","Medication A",125.463106837124
+"P88","Month3",54,"Male","Mild","Worsened",157.585385665298
+"P88","Month6",54,"Male","Mild","Worsened",153.022168502212
+"P88","Month12",54,"Male","Mild","Worsened",138.032002178952
+"P89","Initial",52,"Female","Mild","Watchful Waiting",53.2622270612046
+"P89","Month3",52,"Female","Mild","Stable",104.764979127795
+"P89","Month6",52,"Female","Mild","Stable",107.659513079561
+"P89","Month12",52,"Female","Mild","Stable",91.6833001654595
+"P90","Initial",64,"Male","Severe","Surgery",3730.63075237442
+"P90","Month3",64,"Male","Severe","Improved",534.779424324632
+"P90","Month6",64,"Male","Severe","Improved",541.432176306844
+"P90","Month12",64,"Male","Severe","Improved",603.348148971796
+"P91","Initial",69,"Male","Moderate","Medication B",422.219346645288
+"P91","Month3",69,"Male","Moderate","Discontinued",81.2194440797903
+"P91","Month6",69,"Male","Moderate","Discontinued",93.6961959837936
+"P91","Month12",69,"Male","Moderate","Discontinued",81.6771369385533
+"P92","Initial",77,"Female","Moderate","Medication B",479.027297208086
+"P92","Month3",77,"Female","Moderate","Stable",324.206072352827
+"P92","Month6",77,"Female","Moderate","Stable",279.987456724048
+"P92","Month12",77,"Female","Moderate","Stable",282.455728026107
+"P93","Initial",59,"Female","Mild","Medication A",127.101124182343
+"P93","Month3",59,"Female","Mild","Stable",107.863925965503
+"P93","Month6",59,"Female","Mild","Stable",94.8736590286717
+"P93","Month12",59,"Female","Mild","Worsened",147.995796853211
+"P94","Initial",41,"Female","Mild","Medication A",117.555679354817
+"P94","Month3",41,"Female","Mild","Stable",103.311855499633
+"P94","Month6",41,"Female","Mild","Worsened",144.155906913802
+"P94","Month12",41,"Female","Mild","Worsened",158.759127447847
+"P95","Initial",60,"Male","Mild","Medication A",116.189443035051
+"P95","Month3",60,"Male","Mild","Worsened",142.723646149971
+"P95","Month6",60,"Male","Mild","Stable",90.0792304659262
+"P95","Month12",60,"Male","Mild","Stable",97.6067772973329
+"P96","Initial",75,"Male","Severe","Combination",1427.83943924122
+"P96","Month3",75,"Male","Severe","Discontinued",203.239486299455
+"P96","Month6",75,"Male","Severe","Discontinued",196.382938119583
+"P96","Month12",75,"Male","Severe","Discontinued",230.897912888322
+"P97","Initial",59,"Male","Moderate","Medication B",428.885964788496
+"P97","Month3",59,"Male","Moderate","Worsened",454.517302305903
+"P97","Month6",59,"Male","Moderate","Stable",278.114679981954
+"P97","Month12",59,"Male","Moderate","Stable",310.909332968295
+"P98","Initial",64,"Male","Mild","Medication A",118.808425571769
+"P98","Month3",64,"Male","Mild","Improved",77.8663130551577
+"P98","Month6",64,"Male","Mild","Improved",78.1781014464796
+"P98","Month12",64,"Male","Mild","Improved",78.4715391099453
+"P99","Initial",43,"Female","Moderate","Medication A",383.584659911692
+"P99","Month3",43,"Female","Moderate","Improved",259.968709979206
+"P99","Month6",43,"Female","Moderate","Improved",252.537740506232
+"P99","Month12",43,"Female","Moderate","Improved",233.632736731321
+"P100","Initial",58,"Female","Severe","Combination",1453.58866634779
+"P100","Month3",58,"Female","Severe","Worsened",1051.68686275603
+"P100","Month6",58,"Female","Severe","Worsened",949.079446862452
+"P100","Month12",58,"Female","Severe","Worsened",1080.8488193946
+"P101","Initial",61,"Female","Moderate","Combination",614.760919734836
+"P101","Month3",61,"Female","Moderate","Stable",289.97826655861
+"P101","Month6",61,"Female","Moderate","Improved",217.261768151075
+"P101","Month12",61,"Female","Moderate","Improved",262.797473240644
+"P102","Initial",36,"Female","Severe","Surgery",3843.89239987358
+"P102","Month3",36,"Female","Severe","Improved",512.576938576996
+"P102","Month6",36,"Female","Severe","Improved",564.249825734645
+"P102","Month12",36,"Female","Severe","Improved",613.519507229328
+"P103","Initial",32,"Male","Moderate","Medication A",331.896579796448
+"P103","Month3",32,"Male","Moderate","Improved",233.403464544564
+"P103","Month6",32,"Male","Moderate","Improved",239.991329178214
+"P103","Month12",32,"Male","Moderate","Improved",259.806163273752
+"P104","Initial",52,"Female","Severe","Combination",1420.1770336926
+"P104","Month3",52,"Female","Severe","Stable",633.191240462475
+"P104","Month6",52,"Female","Severe","Stable",749.732147632167
+"P104","Month12",52,"Female","Severe","Improved",597.014235071838
+"P105","Initial",44,"Female","Moderate","Medication B",484.033595679794
+"P105","Month3",44,"Female","Moderate","Improved",254.860905088484
+"P105","Month6",44,"Female","Moderate","Improved",216.003136161715
+"P105","Month12",44,"Female","Moderate","Stable",276.109543978237
+"P106","Initial",50,"Male","Mild","Medication A",128.035821044818
+"P106","Month3",50,"Male","Mild","Worsened",141.634421884082
+"P106","Month6",50,"Male","Mild","Worsened",135.912491299678
+"P106","Month12",50,"Male","Mild","Worsened",152.301780651323
+"P107","Initial",66,"Male","Moderate","Medication B",473.119178437628
+"P107","Month3",66,"Male","Moderate","Discontinued",96.7257730686106
+"P107","Month6",66,"Male","Moderate","Discontinued",82.0865864502266
+"P107","Month12",66,"Male","Moderate","Discontinued",84.9930904582143
+"P108","Initial",37,"Male","Severe","Surgery",3439.81762048788
+"P108","Month3",37,"Male","Severe","Discontinued",206.275844452903
+"P108","Month6",37,"Male","Severe","Discontinued",213.334393850528
+"P108","Month12",37,"Male","Severe","Discontinued",228.561855961103
+"P109","Initial",80,"Male","Severe","Combination",1536.52760724537
+"P109","Month3",80,"Male","Severe","Stable",648.171698842198
+"P109","Month6",80,"Male","Severe","Stable",668.482497408986
+"P109","Month12",80,"Male","Severe","Improved",596.778876036406
+"P110","Initial",39,"Male","Moderate","Medication A",395.370627768338
+"P110","Month3",39,"Male","Moderate","Improved",248.313626792282
+"P110","Month6",39,"Male","Moderate","Improved",219.714675094932
+"P110","Month12",39,"Male","Moderate","Improved",222.451363462955
+"P111","Initial",79,"Male","Mild","Medication A",116.114322686568
+"P111","Month3",79,"Male","Mild","Improved",76.0337436832488
+"P111","Month6",79,"Male","Mild","Improved",76.0131781771779
+"P111","Month12",79,"Male","Mild","Improved",84.5322866812348
+"P112","Initial",71,"Male","Moderate","Medication A",336.512615779415
+"P112","Month3",71,"Male","Moderate","Improved",244.718587953597
+"P112","Month6",71,"Male","Moderate","Stable",311.494982661679
+"P112","Month12",71,"Male","Moderate","Worsened",488.064203930553
+"P113","Initial",73,"Male","Severe","Medication B",1089.89474662347
+"P113","Month3",73,"Male","Severe","Improved",534.649805411696
+"P113","Month6",73,"Male","Severe","Improved",505.22585786134
+"P113","Month12",73,"Male","Severe","Improved",508.840594924986
+"P114","Initial",63,"Female","Mild","Watchful Waiting",46.6789780044928
+"P114","Month3",63,"Female","Mild","Improved",85.6422532238066
+"P114","Month6",63,"Female","Mild","Stable",90.9182669222355
+"P114","Month12",63,"Female","Mild","Improved",76.3422021828592
+"P115","Initial",39,"Female","Moderate","Medication B",485.004865557421
+"P115","Month3",39,"Female","Moderate","Stable",302.873597675934
+"P115","Month6",39,"Female","Moderate","Stable",318.289055312052
+"P115","Month12",39,"Female","Moderate","Stable",327.431797119789
+"P116","Initial",51,"Male","Moderate","Medication B",467.076967237517
+"P116","Month3",51,"Male","Moderate","Discontinued",88.2204043418169
+"P116","Month6",51,"Male","Moderate","Discontinued",98.4787351959385
+"P116","Month12",51,"Male","Moderate","Discontinued",97.9087654449977
+"P117","Initial",41,"Male","Moderate","Medication B",451.645402126014
+"P117","Month3",41,"Male","Moderate","Discontinued",83.4532231776975
+"P117","Month6",41,"Male","Moderate","Discontinued",92.2812479152344
+"P117","Month12",41,"Male","Moderate","Discontinued",95.8076997189783
+"P118","Initial",49,"Male","Mild","Medication A",111.270368529484
+"P118","Month3",49,"Male","Mild","Improved",81.5594910234213
+"P118","Month6",49,"Male","Mild","Improved",87.7274250872433
+"P118","Month12",49,"Male","Mild","Improved",75.6900903731585
+"P119","Initial",75,"Female","Moderate","Medication A",354.050667922944
+"P119","Month3",75,"Female","Moderate","Stable",276.016259961762
+"P119","Month6",75,"Female","Moderate","Worsened",430.066026323475
+"P119","Month12",75,"Female","Moderate","Stable",301.832789489999
+"P120","Initial",46,"Female","Moderate","Combination",577.694334983826
+"P120","Month3",46,"Female","Moderate","Stable",306.042124363594
+"P120","Month6",46,"Female","Moderate","Stable",329.225881104358
+"P120","Month12",46,"Female","Moderate","Stable",306.556889154017
+"P121","Initial",75,"Male","Moderate","Medication B",418.116359047126
+"P121","Month3",75,"Male","Moderate","Worsened",468.388481426518
+"P121","Month6",75,"Male","Moderate","Improved",248.6006545946
+"P121","Month12",75,"Male","Moderate","Improved",231.484025537968
+"P122","Initial",64,"Male","Mild","Watchful Waiting",49.2331564100459
+"P122","Month3",64,"Male","Mild","Worsened",144.133925547358
+"P122","Month6",64,"Male","Mild","Stable",106.656375639141
+"P122","Month12",64,"Male","Mild","Improved",81.4983601346612
+"P123","Initial",69,"Female","Severe","Medication B",1114.51129468158
+"P123","Month3",69,"Female","Severe","Improved",536.933687113225
+"P123","Month6",69,"Female","Severe","Improved",519.801544826478
+"P123","Month12",69,"Female","Severe","Stable",754.4069543574
+"P124","Initial",75,"Female","Moderate","Medication B",405.745650376193
+"P124","Month3",75,"Female","Moderate","Stable",304.147239178419
+"P124","Month6",75,"Female","Moderate","Improved",262.442409116775
+"P124","Month12",75,"Female","Moderate","Improved",228.921060640365
+"P125","Initial",80,"Male","Moderate","Medication B",493.556406358257
+"P125","Month3",80,"Male","Moderate","Improved",217.698695406318
+"P125","Month6",80,"Male","Moderate","Improved",228.382868662477
+"P125","Month12",80,"Male","Moderate","Improved",228.47477382794
+"P126","Initial",59,"Female","Moderate","Combination",653.782618520781
+"P126","Month3",59,"Female","Moderate","Improved",263.021891456097
+"P126","Month6",59,"Female","Moderate","Improved",251.250473454595
+"P126","Month12",59,"Female","Moderate","Improved",229.799028318375
+"P127","Initial",44,"Female","Mild","Medication A",117.815018841997
+"P127","Month3",44,"Female","Mild","Stable",94.0315529610962
+"P127","Month6",44,"Female","Mild","Stable",105.331727182493
+"P127","Month12",44,"Female","Mild","Stable",104.862098796293
+"P128","Initial",53,"Male","Mild","Watchful Waiting",49.9846138083376
+"P128","Month3",53,"Male","Mild","Improved",82.72799352929
+"P128","Month6",53,"Male","Mild","Improved",84.0394046977162
+"P128","Month12",53,"Male","Mild","Improved",84.3818067014217
+"P129","Initial",78,"Female","Severe","Combination",1429.44740412757
+"P129","Month3",78,"Female","Severe","Improved",547.737763274461
+"P129","Month6",78,"Female","Severe","Improved",579.158448182046
+"P129","Month12",78,"Female","Severe","Improved",601.351274892688
+"P130","Initial",52,"Male","Moderate","Combination",592.368344776332
+"P130","Month3",52,"Male","Moderate","Improved",221.782864529639
+"P130","Month6",52,"Male","Moderate","Improved",245.709761258215
+"P130","Month12",52,"Male","Moderate","Improved",239.064420048147
+"P131","Initial",72,"Male","Mild","Medication A",130.173434151337
+"P131","Month3",72,"Male","Mild","Worsened",142.220180556178
+"P131","Month6",72,"Male","Mild","Discontinued",31.6588894533925
+"P131","Month12",72,"Male","Mild","Discontinued",31.5119273294695
+"P132","Initial",36,"Female","Moderate","Medication A",372.70673458837
+"P132","Month3",36,"Female","Moderate","Stable",303.10316783376
+"P132","Month6",36,"Female","Moderate","Stable",305.871631870978
+"P132","Month12",36,"Female","Moderate","Stable",321.986254896037
+"P133","Initial",58,"Male","Moderate","Medication A",359.664531307295
+"P133","Month3",58,"Male","Moderate","Stable",328.813737840392
+"P133","Month6",58,"Male","Moderate","Improved",219.329984989017
+"P133","Month12",58,"Male","Moderate","Improved",242.68459026888
+"P134","Initial",44,"Male","Mild","Watchful Waiting",46.8937352532521
+"P134","Month3",44,"Male","Mild","Improved",76.7433197051287
+"P134","Month6",44,"Male","Mild","Stable",106.820082436316
+"P134","Month12",44,"Male","Mild","Improved",75.2817136198282
+"P135","Initial",52,"Female","Severe","Combination",1423.16134511493
+"P135","Month3",52,"Female","Severe","Stable",685.476707750931
+"P135","Month6",52,"Female","Severe","Worsened",1009.16996800806
+"P135","Month12",52,"Female","Severe","Worsened",1044.17361075757
+"P136","Initial",55,"Female","Mild","Watchful Waiting",52.43249097839
+"P136","Month3",55,"Female","Mild","Stable",109.536072132178
+"P136","Month6",55,"Female","Mild","Stable",93.1252770265564
+"P136","Month12",55,"Female","Mild","Worsened",138.882774340454
+"P137","Initial",67,"Female","Mild","Medication A",121.933423267677
+"P137","Month3",67,"Female","Mild","Stable",92.7429834986106
+"P137","Month6",67,"Female","Mild","Stable",94.0399288898334
+"P137","Month12",67,"Female","Mild","Stable",96.832981291227
+"P138","Initial",75,"Female","Moderate","Medication A",343.144868161529
+"P138","Month3",75,"Female","Moderate","Improved",250.636127114296
+"P138","Month6",75,"Female","Moderate","Improved",249.383591249585
+"P138","Month12",75,"Female","Moderate","Improved",254.122018899769
+"P139","Initial",61,"Male","Moderate","Combination",572.936399839818
+"P139","Month3",61,"Male","Moderate","Improved",224.733905375004
+"P139","Month6",61,"Male","Moderate","Improved",238.204976018518
+"P139","Month12",61,"Male","Moderate","Improved",242.426163688302
+"P140","Initial",36,"Female","Severe","Combination",1434.3609599676
+"P140","Month3",36,"Female","Severe","Stable",697.605079342611
+"P140","Month6",36,"Female","Severe","Stable",648.176336381584
+"P140","Month12",36,"Female","Severe","Stable",753.75955298543
+"P141","Initial",56,"Female","Moderate","Medication B",494.218613505363
+"P141","Month3",56,"Female","Moderate","Stable",321.717926161364
+"P141","Month6",56,"Female","Moderate","Improved",256.908034455031
+"P141","Month12",56,"Female","Moderate","Improved",234.115853145719
+"P142","Initial",71,"Male","Moderate","Medication B",460.536884986796
+"P142","Month3",71,"Male","Moderate","Discontinued",90.3301630653441
+"P142","Month6",71,"Male","Moderate","Discontinued",81.6647257790901
+"P142","Month12",71,"Male","Moderate","Discontinued",94.3745838208124
+"P143","Initial",34,"Female","Severe","Surgery",3739.69995297957
+"P143","Month3",34,"Female","Severe","Improved",509.500915523618
+"P143","Month6",34,"Female","Severe","Improved",604.048391263932
+"P143","Month12",34,"Female","Severe","Improved",546.355874717236
+"P144","Initial",35,"Female","Mild","Medication A",124.69354323484
+"P144","Month3",35,"Female","Mild","Worsened",156.519340875093
+"P144","Month6",35,"Female","Mild","Worsened",155.475748402532
+"P144","Month12",35,"Female","Mild","Worsened",144.012190683279
+"P145","Initial",45,"Female","Moderate","Combination",576.31478193216
+"P145","Month3",45,"Female","Moderate","Stable",298.566623898223
+"P145","Month6",45,"Female","Moderate","Improved",218.327159229666
+"P145","Month12",45,"Female","Moderate","Improved",239.597751360387
+"P146","Initial",53,"Female","Mild","Medication A",122.126993369311
+"P146","Month3",53,"Female","Mild","Discontinued",28.4078359706327
+"P146","Month6",53,"Female","Mild","Discontinued",32.7878294968978
+"P146","Month12",53,"Female","Mild","Discontinued",27.9599679624662
+"P147","Initial",61,"Male","Moderate","Medication B",456.771418545395
+"P147","Month3",61,"Male","Moderate","Discontinued",88.5742598203942
+"P147","Month6",61,"Male","Moderate","Discontinued",83.2037347527221
+"P147","Month12",61,"Male","Moderate","Discontinued",87.5571337323636
+"P148","Initial",50,"Female","Moderate","Medication A",395.908283488825
+"P148","Month3",50,"Female","Moderate","Improved",254.298542071134
+"P148","Month6",50,"Female","Moderate","Improved",232.792872559279
+"P148","Month12",50,"Female","Moderate","Improved",260.974898625165
+"P149","Initial",40,"Male","Mild","Medication A",125.116737099364
+"P149","Month3",40,"Male","Mild","Improved",79.923900295049
+"P149","Month6",40,"Male","Mild","Stable",106.244907234795
+"P149","Month12",40,"Male","Mild","Stable",103.09865089599
+"P150","Initial",65,"Female","Moderate","Medication B",437.467129288707
+"P150","Month3",65,"Female","Moderate","Worsened",447.47383968439
+"P150","Month6",65,"Female","Moderate","Worsened",458.8521935069
+"P150","Month12",65,"Female","Moderate","Stable",313.571989866905
+"P151","Initial",73,"Female","Mild","Watchful Waiting",48.5599973099306
+"P151","Month3",73,"Female","Mild","Worsened",152.594353496097
+"P151","Month6",73,"Female","Mild","Worsened",150.498107636813
+"P151","Month12",73,"Female","Mild","Worsened",152.805440684315
+"P152","Initial",75,"Female","Severe","Medication B",1131.53661277145
+"P152","Month3",75,"Female","Severe","Stable",751.39785782434
+"P152","Month6",75,"Female","Severe","Worsened",1119.55228762468
+"P152","Month12",75,"Female","Severe","Stable",652.640535575338
+"P153","Initial",48,"Male","Moderate","Medication B",434.825797076337
+"P153","Month3",48,"Male","Moderate","Worsened",488.355520956684
+"P153","Month6",48,"Male","Moderate","Stable",325.502347270958
+"P153","Month12",48,"Male","Moderate","Stable",308.189852284268
+"P154","Initial",54,"Male","Severe","Surgery",3705.03688759636
+"P154","Month3",54,"Male","Severe","Discontinued",213.013347033877
+"P154","Month6",54,"Male","Severe","Discontinued",190.653778825421
+"P154","Month12",54,"Male","Severe","Discontinued",201.081604243722
+"P155","Initial",68,"Male","Moderate","Combination",597.700990615413
+"P155","Month3",68,"Male","Moderate","Worsened",444.142237713095
+"P155","Month6",68,"Male","Moderate","Stable",325.948193231598
+"P155","Month12",68,"Male","Moderate","Stable",308.740835138597
+"P156","Initial",55,"Male","Mild","Medication A",108.019895128906
+"P156","Month3",55,"Male","Mild","Stable",90.3904482163489
+"P156","Month6",55,"Male","Mild","Worsened",143.909237079788
+"P156","Month12",55,"Male","Mild","Stable",95.4749239562079
+"P157","Initial",38,"Male","Mild","Watchful Waiting",53.2947133923881
+"P157","Month3",38,"Male","Mild","Stable",104.4211884588
+"P157","Month6",38,"Male","Mild","Stable",103.611117769033
+"P157","Month12",38,"Male","Mild","Stable",97.6838978519663
+"P158","Initial",36,"Male","Mild","Medication A",112.446563210338
+"P158","Month3",36,"Male","Mild","Worsened",141.351078164298
+"P158","Month6",36,"Male","Mild","Stable",104.07384309452
+"P158","Month12",36,"Male","Mild","Stable",95.2497554942966
+"P159","Initial",63,"Female","Severe","Combination",1323.37761905044
+"P159","Month3",63,"Female","Severe","Improved",570.436865080148
+"P159","Month6",63,"Female","Severe","Improved",520.505519211292
+"P159","Month12",63,"Female","Severe","Improved",509.7167150639
+"P160","Initial",77,"Female","Mild","Medication A",108.333240704611
+"P160","Month3",77,"Female","Mild","Stable",106.163710006513
+"P160","Month6",77,"Female","Mild","Stable",106.051290598698
+"P160","Month12",77,"Female","Mild","Improved",72.2407011799514
+"P161","Initial",42,"Female","Mild","Medication A",122.287073247135
+"P161","Month3",42,"Female","Mild","Stable",96.1472557950765
+"P161","Month6",42,"Female","Mild","Stable",102.122217398137
+"P161","Month12",42,"Female","Mild","Improved",75.449400357902
+"P162","Initial",48,"Female","Mild","Watchful Waiting",54.4786934065633
+"P162","Month3",48,"Female","Mild","Stable",92.1181133389473
+"P162","Month6",48,"Female","Mild","Worsened",138.584726031404
+"P162","Month12",48,"Female","Mild","Worsened",139.216126792599
+"P163","Initial",76,"Male","Moderate","Medication B",431.356982972939
+"P163","Month3",76,"Male","Moderate","Stable",305.924174180254
+"P163","Month6",76,"Male","Moderate","Worsened",423.813106943853
+"P163","Month12",76,"Male","Moderate","Worsened",445.709796748124
+"P164","Initial",68,"Male","Moderate","Medication A",356.603719655424
+"P164","Month3",68,"Male","Moderate","Worsened",439.358708560467
+"P164","Month6",68,"Male","Moderate","Stable",329.254392692819
+"P164","Month12",68,"Male","Moderate","Improved",216.487190064043
+"P165","Initial",33,"Female","Moderate","Medication B",482.89382467512
+"P165","Month3",33,"Female","Moderate","Improved",220.449517250061
+"P165","Month6",33,"Female","Moderate","Stable",280.925548220985
+"P165","Month12",33,"Female","Moderate","Stable",296.865970962681
+"P166","Initial",30,"Male","Severe","Combination",1464.14521754719
+"P166","Month3",30,"Male","Severe","Discontinued",196.978417597711
+"P166","Month6",30,"Male","Severe","Discontinued",194.851080052089
+"P166","Month12",30,"Male","Severe","Discontinued",197.937290218659
+"P167","Initial",69,"Female","Mild","Medication A",112.049477415159
+"P167","Month3",69,"Female","Mild","Improved",85.648565389216
+"P167","Month6",69,"Female","Mild","Improved",83.8402495495975
+"P167","Month12",69,"Female","Mild","Stable",101.393826398998
+"P168","Initial",59,"Male","Mild","Watchful Waiting",53.5533619252965
+"P168","Month3",59,"Male","Mild","Improved",74.3724582754076
+"P168","Month6",59,"Male","Mild","Improved",78.0393137671053
+"P168","Month12",59,"Male","Mild","Improved",77.1142955943942
+"P169","Initial",59,"Male","Mild","Medication A",108.718366524205
+"P169","Month3",59,"Male","Mild","Stable",97.7571809245273
+"P169","Month6",59,"Male","Mild","Worsened",156.28317073686
+"P169","Month12",59,"Male","Mild","Improved",75.9705406092107
+"P170","Initial",54,"Female","Moderate","Medication A",370.648826217279
+"P170","Month3",54,"Female","Moderate","Worsened",420.075856922194
+"P170","Month6",54,"Female","Moderate","Worsened",474.515341068618
+"P170","Month12",54,"Female","Moderate","Worsened",448.140816511586
+"P171","Initial",45,"Female","Mild","Medication A",109.448886115104
+"P171","Month3",45,"Female","Mild","Stable",105.414246087894
+"P171","Month6",45,"Female","Mild","Stable",107.540233209729
+"P171","Month12",45,"Female","Mild","Worsened",152.691917605698
+"P172","Initial",53,"Female","Mild","Medication A",122.634425243363
+"P172","Month3",53,"Female","Mild","Worsened",147.620484111831
+"P172","Month6",53,"Female","Mild","Stable",90.9702932136133
+"P172","Month12",53,"Female","Mild","Stable",103.018509331159
+"P173","Initial",40,"Female","Moderate","Medication A",360.136626865715
+"P173","Month3",40,"Female","Moderate","Stable",317.18271149788
+"P173","Month6",40,"Female","Moderate","Stable",302.821593498811
+"P173","Month12",40,"Female","Moderate","Improved",237.318094074726
+"P174","Initial",77,"Male","Mild","Medication A",128.107137540355
+"P174","Month3",77,"Male","Mild","Stable",103.514699479565
+"P174","Month6",77,"Male","Mild","Stable",91.0332378419116
+"P174","Month12",77,"Male","Mild","Stable",92.5197190744802
+"P175","Initial",49,"Male","Severe","Combination",1491.38417640701
+"P175","Month3",49,"Male","Severe","Stable",686.200024220161
+"P175","Month6",49,"Male","Severe","Worsened",1051.06637814548
+"P175","Month12",49,"Male","Severe","Improved",541.75898373872
+"P176","Initial",69,"Male","Mild","Watchful Waiting",51.2384007149376
+"P176","Month3",69,"Male","Mild","Stable",101.551272394136
+"P176","Month6",69,"Male","Mild","Stable",94.4449610216543
+"P176","Month12",69,"Male","Mild","Stable",102.791473856196
+"P177","Initial",32,"Female","Moderate","Medication B",437.107042414136
+"P177","Month3",32,"Female","Moderate","Worsened",445.572798836511
+"P177","Month6",32,"Female","Moderate","Worsened",441.062263722997
+"P177","Month12",32,"Female","Moderate","Worsened",424.959698072635
+"P178","Initial",58,"Female","Severe","Surgery",3323.51249991916
+"P178","Month3",58,"Female","Severe","Improved",523.741067674011
+"P178","Month6",58,"Female","Severe","Improved",552.418378476053
+"P178","Month12",58,"Female","Severe","Improved",572.285685896873
+"P179","Initial",65,"Male","Moderate","Medication A",353.451939962804
+"P179","Month3",65,"Male","Moderate","Improved",259.804006755352
+"P179","Month6",65,"Male","Moderate","Improved",229.490345221013
+"P179","Month12",65,"Male","Moderate","Stable",282.936074961908
+"P180","Initial",73,"Female","Moderate","Medication B",454.717814319301
+"P180","Month3",73,"Female","Moderate","Improved",232.809277888387
+"P180","Month6",73,"Female","Moderate","Stable",326.282785339281
+"P180","Month12",73,"Female","Moderate","Stable",307.773426314816
+"P181","Initial",51,"Female","Mild","Medication A",118.487512143329
+"P181","Month3",51,"Female","Mild","Worsened",143.687314500567
+"P181","Month6",51,"Female","Mild","Stable",90.7332630222663
+"P181","Month12",51,"Female","Mild","Improved",80.7740981467068
+"P182","Initial",78,"Female","Mild","Medication A",115.688977539539
+"P182","Month3",78,"Female","Mild","Worsened",149.430571838748
+"P182","Month6",78,"Female","Mild","Worsened",159.279206218198
+"P182","Month12",78,"Female","Mild","Stable",94.3760045338422
+"P183","Initial",71,"Female","Severe","Medication B",963.76902639633
+"P183","Month3",71,"Female","Severe","Stable",741.599291726016
+"P183","Month6",71,"Female","Severe","Improved",523.533591870219
+"P183","Month12",71,"Female","Severe","Improved",593.746662188321
+"P184","Initial",49,"Female","Mild","Watchful Waiting",45.3694221447222
+"P184","Month3",49,"Female","Mild","Stable",106.942306123674
+"P184","Month6",49,"Female","Mild","Improved",85.1462273709476
+"P184","Month12",49,"Female","Mild","Improved",86.3616066873074
+"P185","Initial",40,"Female","Moderate","Medication B",438.68671964854
+"P185","Month3",40,"Female","Moderate","Improved",230.702464677393
+"P185","Month6",40,"Female","Moderate","Improved",260.110274802893
+"P185","Month12",40,"Female","Moderate","Improved",231.415260348469
+"P186","Initial",37,"Female","Mild","Medication A",130.207618860528
+"P186","Month3",37,"Female","Mild","Improved",81.6486047655344
+"P186","Month6",37,"Female","Mild","Improved",81.2986322902143
+"P186","Month12",37,"Female","Mild","Improved",83.7708672061563
+"P187","Initial",75,"Female","Mild","Medication A",117.592288786545
+"P187","Month3",75,"Female","Mild","Improved",77.8731045722961
+"P187","Month6",75,"Female","Mild","Improved",78.8993819393218
+"P187","Month12",75,"Female","Mild","Improved",77.376349568367
+"P188","Initial",50,"Female","Severe","Surgery",3638.66075465921
+"P188","Month3",50,"Female","Severe","Improved",534.038195848465
+"P188","Month6",50,"Female","Severe","Improved",599.591149024665
+"P188","Month12",50,"Female","Severe","Improved",608.255951240659
+"P189","Initial",74,"Female","Mild","Medication A",119.152608767152
+"P189","Month3",74,"Female","Mild","Improved",72.0970875434577
+"P189","Month6",74,"Female","Mild","Improved",87.0529741384089
+"P189","Month12",74,"Female","Mild","Improved",78.9353220425546
+"P190","Initial",31,"Male","Mild","Medication A",127.996830001473
+"P190","Month3",31,"Male","Mild","Worsened",150.457230799366
+"P190","Month6",31,"Male","Mild","Discontinued",29.8802291750908
+"P190","Month12",31,"Male","Mild","Discontinued",27.8679667627439
+"P191","Initial",72,"Female","Moderate","Medication B",410.215117977932
+"P191","Month3",72,"Female","Moderate","Stable",309.002342987806
+"P191","Month6",72,"Female","Moderate","Worsened",438.619840443134
+"P191","Month12",72,"Female","Moderate","Improved",217.180154442787
+"P192","Initial",42,"Female","Moderate","Combination",548.980015693232
+"P192","Month3",42,"Female","Moderate","Improved",255.849757321179
+"P192","Month6",42,"Female","Moderate","Improved",251.246126655489
+"P192","Month12",42,"Female","Moderate","Stable",272.887208140455
+"P193","Initial",75,"Male","Mild","Watchful Waiting",52.2507620276883
+"P193","Month3",75,"Male","Mild","Stable",90.2761343494058
+"P193","Month6",75,"Male","Mild","Stable",102.219130233862
+"P193","Month12",75,"Male","Mild","Stable",94.4512720685452
+"P194","Initial",35,"Male","Moderate","Medication B",460.84421786014
+"P194","Month3",35,"Male","Moderate","Improved",243.090179052204
+"P194","Month6",35,"Male","Moderate","Improved",240.358539506793
+"P194","Month12",35,"Male","Moderate","Improved",228.352330438793
+"P195","Initial",37,"Female","Moderate","Combination",583.068910650909
+"P195","Month3",37,"Female","Moderate","Stable",287.278976230882
+"P195","Month6",37,"Female","Moderate","Improved",225.120619017631
+"P195","Month12",37,"Female","Moderate","Improved",246.264490697533
+"P196","Initial",73,"Male","Moderate","Medication B",405.969434177969
+"P196","Month3",73,"Male","Moderate","Stable",278.689347216859
+"P196","Month6",73,"Male","Moderate","Stable",300.562089937739
+"P196","Month12",73,"Male","Moderate","Stable",297.947580604814
+"P197","Initial",61,"Female","Severe","Surgery",3514.73111344967
+"P197","Month3",61,"Female","Severe","Stable",726.702810386196
+"P197","Month6",61,"Female","Severe","Improved",615.993431925774
+"P197","Month12",61,"Female","Severe","Improved",610.273382417858
+"P198","Initial",65,"Male","Moderate","Combination",654.293928556144
+"P198","Month3",65,"Male","Moderate","Improved",248.84118745476
+"P198","Month6",65,"Male","Moderate","Improved",251.33505840227
+"P198","Month12",65,"Male","Moderate","Improved",261.926671687514
+"P199","Initial",74,"Male","Mild","Medication A",112.97424530983
+"P199","Month3",74,"Male","Mild","Worsened",155.24349749554
+"P199","Month6",74,"Male","Mild","Stable",91.953624910675
+"P199","Month12",74,"Male","Mild","Improved",79.9793115891516
+"P200","Initial",43,"Female","Moderate","Medication A",378.579645585269
+"P200","Month3",43,"Female","Moderate","Stable",270.721114967018
+"P200","Month6",43,"Female","Moderate","Stable",279.592574648559
+"P200","Month12",43,"Female","Moderate","Stable",276.621116772294
+"P201","Initial",45,"Female","Mild","Medication A",127.271764274687
+"P201","Month3",45,"Female","Mild","Discontinued",29.2492645606399
+"P201","Month6",45,"Female","Mild","Discontinued",30.7838316927664
+"P201","Month12",45,"Female","Mild","Discontinued",31.5711080739275
+"P202","Initial",52,"Female","Moderate","Medication A",341.900625027716
+"P202","Month3",52,"Female","Moderate","Stable",292.411909941584
+"P202","Month6",52,"Female","Moderate","Worsened",435.552767417394
+"P202","Month12",52,"Female","Moderate","Worsened",468.599251653068
+"P203","Initial",62,"Male","Mild","Medication A",121.719910986722
+"P203","Month3",62,"Male","Mild","Discontinued",27.8622425207868
+"P203","Month6",62,"Male","Mild","Discontinued",28.7799445632845
+"P203","Month12",62,"Male","Mild","Discontinued",29.3519548256882
+"P204","Initial",69,"Male","Moderate","Medication B",451.998268954922
+"P204","Month3",69,"Male","Moderate","Discontinued",91.5461672572419
+"P204","Month6",69,"Male","Moderate","Discontinued",86.5633713067509
+"P204","Month12",69,"Male","Moderate","Discontinued",87.4737590043806
+"P205","Initial",69,"Male","Severe","Combination",1520.20640050992
+"P205","Month3",69,"Male","Severe","Improved",565.030816730112
+"P205","Month6",69,"Male","Severe","Improved",569.970858581364
+"P205","Month12",69,"Male","Severe","Improved",532.133339975029
+"P206","Initial",39,"Female","Moderate","Medication A",351.991238068789
+"P206","Month3",39,"Female","Moderate","Improved",247.004460286349
+"P206","Month6",39,"Female","Moderate","Improved",233.532770566642
+"P206","Month12",39,"Female","Moderate","Improved",238.44955920428
+"P207","Initial",54,"Male","Severe","Surgery",3273.91266343184
+"P207","Month3",54,"Male","Severe","Discontinued",209.21195185231
+"P207","Month6",54,"Male","Severe","Discontinued",228.126370477024
+"P207","Month12",54,"Male","Severe","Discontinued",190.077738053631
+"P208","Initial",37,"Male","Moderate","Combination",585.982068227604
+"P208","Month3",37,"Male","Moderate","Stable",285.015661292709
+"P208","Month6",37,"Male","Moderate","Improved",243.727047499269
+"P208","Month12",37,"Male","Moderate","Improved",219.271628178656
+"P209","Initial",47,"Male","Severe","Medication B",1081.57658504555
+"P209","Month3",47,"Male","Severe","Worsened",956.375266921241
+"P209","Month6",47,"Male","Severe","Stable",670.748921404593
+"P209","Month12",47,"Male","Severe","Stable",673.497211923823
+"P210","Initial",38,"Female","Moderate","Combination",593.003139244393
+"P210","Month3",38,"Female","Moderate","Worsened",444.251348928083
+"P210","Month6",38,"Female","Moderate","Worsened",494.296131357551
+"P210","Month12",38,"Female","Moderate","Worsened",460.047745867632
+"P211","Initial",36,"Female","Mild","Medication A",115.560035945848
+"P211","Month3",36,"Female","Mild","Worsened",160.872640181333
+"P211","Month6",36,"Female","Mild","Stable",96.7539179790765
+"P211","Month12",36,"Female","Mild","Improved",82.7459743022919
+"P212","Initial",36,"Female","Mild","Medication A",129.588362116367
+"P212","Month3",36,"Female","Mild","Stable",106.884955824353
+"P212","Month6",36,"Female","Mild","Stable",91.791988639161
+"P212","Month12",36,"Female","Mild","Improved",76.7893810644746
+"P213","Initial",39,"Female","Moderate","Medication B",452.778168374207
+"P213","Month3",39,"Female","Moderate","Stable",292.746118423529
+"P213","Month6",39,"Female","Moderate","Stable",320.715052038431
+"P213","Month12",39,"Female","Moderate","Improved",257.331675186753
+"P214","Initial",53,"Male","Mild","Medication A",124.352118814364
+"P214","Month3",53,"Male","Mild","Improved",80.0077055469155
+"P214","Month6",53,"Male","Mild","Stable",106.018982115202
+"P214","Month12",53,"Male","Mild","Stable",90.9290972258896
+"P215","Initial",52,"Female","Mild","Medication A",114.282678131014
+"P215","Month3",52,"Female","Mild","Improved",75.1779432445765
+"P215","Month6",52,"Female","Mild","Improved",85.0583651028574
+"P215","Month12",52,"Female","Mild","Improved",85.4907971657813
+"P216","Initial",55,"Male","Moderate","Combination",639.936763141304
+"P216","Month3",55,"Male","Moderate","Improved",228.992964942008
+"P216","Month6",55,"Male","Moderate","Improved",216.935708295554
+"P216","Month12",55,"Male","Moderate","Improved",246.268822688609
+"P217","Initial",72,"Female","Mild","Medication A",125.953398473561
+"P217","Month3",72,"Female","Mild","Stable",100.113476943225
+"P217","Month6",72,"Female","Mild","Improved",77.8340746723115
+"P217","Month12",72,"Female","Mild","Improved",76.9571370966733
+"P218","Initial",62,"Male","Mild","Medication A",116.630504926667
+"P218","Month3",62,"Male","Mild","Stable",97.2574860742316
+"P218","Month6",62,"Male","Mild","Improved",80.6183870062232
+"P218","Month12",62,"Male","Mild","Improved",82.437882412225
+"P219","Initial",58,"Male","Mild","Watchful Waiting",49.0341197722591
+"P219","Month3",58,"Male","Mild","Worsened",152.490053947549
+"P219","Month6",58,"Male","Mild","Worsened",155.873203841038
+"P219","Month12",58,"Male","Mild","Worsened",161.745700570755
+"P220","Initial",80,"Male","Moderate","Medication B",490.316321232822
+"P220","Month3",80,"Male","Moderate","Stable",295.248645879328
+"P220","Month6",80,"Male","Moderate","Worsened",462.294352927711
+"P220","Month12",80,"Male","Moderate","Worsened",421.015445908997
+"P221","Initial",39,"Male","Mild","Medication A",109.927597856149
+"P221","Month3",39,"Male","Mild","Stable",101.317667835392
+"P221","Month6",39,"Male","Mild","Improved",85.0718296915293
+"P221","Month12",39,"Male","Mild","Improved",84.1551834605634
+"P222","Initial",42,"Male","Mild","Medication A",121.723774798214
+"P222","Month3",42,"Male","Mild","Stable",109.775087037124
+"P222","Month6",42,"Male","Mild","Improved",87.9227442219853
+"P222","Month12",42,"Male","Mild","Improved",77.1429990492761
+"P223","Initial",72,"Female","Severe","Medication B",981.123763066716
+"P223","Month3",72,"Female","Severe","Improved",545.672784488648
+"P223","Month6",72,"Female","Severe","Improved",564.362278684974
+"P223","Month12",72,"Female","Severe","Improved",594.859431497753
+"P224","Initial",40,"Female","Mild","Medication A",124.768431097269
+"P224","Month3",40,"Female","Mild","Stable",107.999068172649
+"P224","Month6",40,"Female","Mild","Improved",83.5721389353275
+"P224","Month12",40,"Female","Mild","Stable",95.1010009134188
+"P225","Initial",54,"Male","Moderate","Medication B",432.780449904967
+"P225","Month3",54,"Male","Moderate","Improved",251.848193440586
+"P225","Month6",54,"Male","Moderate","Improved",225.8518181853
+"P225","Month12",54,"Male","Moderate","Improved",229.727199174464
+"P226","Initial",55,"Male","Mild","Medication A",129.572899231687
+"P226","Month3",55,"Male","Mild","Improved",74.6876805685461
+"P226","Month6",55,"Male","Mild","Improved",74.2975456006825
+"P226","Month12",55,"Male","Mild","Improved",83.7356209270656
+"P227","Initial",36,"Male","Moderate","Medication B",453.855207120068
+"P227","Month3",36,"Male","Moderate","Stable",302.544377320446
+"P227","Month6",36,"Male","Moderate","Improved",249.751285325736
+"P227","Month12",36,"Male","Moderate","Improved",247.271246418357
+"P228","Initial",54,"Female","Moderate","Medication A",378.806911585853
+"P228","Month3",54,"Female","Moderate","Worsened",430.27088026749
+"P228","Month6",54,"Female","Moderate","Worsened",493.568189491052
+"P228","Month12",54,"Female","Moderate","Discontinued",98.3460851158015
+"P229","Initial",52,"Male","Mild","Medication A",108.674165619537
+"P229","Month3",52,"Male","Mild","Stable",104.94133702945
+"P229","Month6",52,"Male","Mild","Stable",97.3355335835367
+"P229","Month12",52,"Male","Mild","Improved",77.6648396104574
+"P230","Initial",55,"Female","Severe","Combination",1265.43107638136
+"P230","Month3",55,"Female","Severe","Discontinued",220.873543158174
+"P230","Month6",55,"Female","Severe","Discontinued",195.619970450643
+"P230","Month12",55,"Female","Severe","Discontinued",193.715578347445
+"P231","Initial",61,"Male","Moderate","Medication B",469.243232540321
+"P231","Month3",61,"Male","Moderate","Stable",296.71313714236
+"P231","Month6",61,"Male","Moderate","Improved",217.254759483039
+"P231","Month12",61,"Male","Moderate","Improved",260.147756583989
+"P232","Initial",49,"Female","Mild","Watchful Waiting",52.8493036120199
+"P232","Month3",49,"Female","Mild","Worsened",147.753281453624
+"P232","Month6",49,"Female","Mild","Worsened",138.874156668317
+"P232","Month12",49,"Female","Mild","Worsened",159.561540491413
+"P233","Initial",53,"Female","Mild","Watchful Waiting",52.1680672629736
+"P233","Month3",53,"Female","Mild","Worsened",147.365619102493
+"P233","Month6",53,"Female","Mild","Discontinued",28.0494702192955
+"P233","Month12",53,"Female","Mild","Discontinued",27.0646808668971
+"P234","Initial",38,"Female","Mild","Watchful Waiting",48.4090273454785
+"P234","Month3",38,"Female","Mild","Stable",93.7874418217689
+"P234","Month6",38,"Female","Mild","Improved",80.9974804855883
+"P234","Month12",38,"Female","Mild","Improved",81.410070180893
+"P235","Initial",70,"Female","Moderate","Combination",573.81070506759
+"P235","Month3",70,"Female","Moderate","Improved",260.447466094047
+"P235","Month6",70,"Female","Moderate","Improved",249.793076634407
+"P235","Month12",70,"Female","Moderate","Improved",229.269889432937
+"P236","Initial",66,"Male","Moderate","Medication A",375.49306598492
+"P236","Month3",66,"Male","Moderate","Improved",245.218459390104
+"P236","Month6",66,"Male","Moderate","Improved",235.594296488911
+"P236","Month12",66,"Male","Moderate","Improved",224.031248107553
+"P237","Initial",52,"Male","Moderate","Combination",542.935562264174
+"P237","Month3",52,"Male","Moderate","Improved",223.425892118365
+"P237","Month6",52,"Male","Moderate","Improved",244.155955541879
+"P237","Month12",52,"Male","Moderate","Improved",226.48732779175
+"P238","Initial",43,"Male","Moderate","Medication B",408.995248521678
+"P238","Month3",43,"Male","Moderate","Stable",324.870603648014
+"P238","Month6",43,"Male","Moderate","Improved",257.766883525997
+"P238","Month12",43,"Male","Moderate","Improved",255.670595236123
+"P239","Initial",75,"Female","Moderate","Medication A",367.896295046434
+"P239","Month3",75,"Female","Moderate","Improved",250.734333638102
+"P239","Month6",75,"Female","Moderate","Improved",254.250415027142
+"P239","Month12",75,"Female","Moderate","Improved",257.648345869035
+"P240","Initial",35,"Female","Mild","Watchful Waiting",52.0033977157436
+"P240","Month3",35,"Female","Mild","Worsened",145.068838319276
+"P240","Month6",35,"Female","Mild","Discontinued",29.9858428873122
+"P240","Month12",35,"Female","Mild","Discontinued",31.6574774743058
+"P241","Initial",56,"Male","Moderate","Medication B",442.724278843962
+"P241","Month3",56,"Male","Moderate","Stable",304.981289310381
+"P241","Month6",56,"Male","Moderate","Worsened",432.049862123094
+"P241","Month12",56,"Male","Moderate","Worsened",418.235925114714
+"P242","Initial",30,"Female","Severe","Combination",1337.15509168804
+"P242","Month3",30,"Female","Severe","Improved",526.732555247843
+"P242","Month6",30,"Female","Severe","Stable",661.527355667204
+"P242","Month12",30,"Female","Severe","Improved",562.23550831154
+"P243","Initial",55,"Female","Moderate","Medication A",390.284868154675
+"P243","Month3",55,"Female","Moderate","Improved",243.910082571208
+"P243","Month6",55,"Female","Moderate","Improved",228.552028689533
+"P243","Month12",55,"Female","Moderate","Stable",292.438163794577
+"P244","Initial",71,"Male","Mild","Medication A",121.524933680892
+"P244","Month3",71,"Male","Mild","Improved",74.552092179656
+"P244","Month6",71,"Male","Mild","Improved",82.7328374348581
+"P244","Month12",71,"Male","Mild","Improved",72.2923020943999
+"P245","Initial",78,"Female","Mild","Watchful Waiting",45.1238823961467
+"P245","Month3",78,"Female","Mild","Improved",82.6346799060702
+"P245","Month6",78,"Female","Mild","Improved",75.2890195958316
+"P245","Month12",78,"Female","Mild","Improved",78.1422906927764
+"P246","Initial",46,"Female","Moderate","Medication A",335.484261469916
+"P246","Month3",46,"Female","Moderate","Improved",250.010518770665
+"P246","Month6",46,"Female","Moderate","Stable",306.885051559657
+"P246","Month12",46,"Female","Moderate","Stable",273.663921025582
+"P247","Initial",58,"Male","Severe","Medication B",1030.31363855582
+"P247","Month3",58,"Male","Severe","Improved",515.764675088227
+"P247","Month6",58,"Male","Severe","Improved",549.080627292395
+"P247","Month12",58,"Male","Severe","Improved",555.035777777433
+"P248","Initial",55,"Female","Mild","Medication A",122.991485914215
+"P248","Month3",55,"Female","Mild","Improved",73.2616844810545
+"P248","Month6",55,"Female","Mild","Improved",77.4717235937715
+"P248","Month12",55,"Female","Mild","Improved",72.3789806514978
+"P249","Initial",56,"Male","Moderate","Medication A",348.589183565229
+"P249","Month3",56,"Male","Moderate","Improved",253.601338718086
+"P249","Month6",56,"Male","Moderate","Improved",251.578091125935
+"P249","Month12",56,"Male","Moderate","Improved",255.176213242114
+"P250","Initial",50,"Female","Moderate","Medication B",410.00069843838
+"P250","Month3",50,"Female","Moderate","Stable",279.090812257491
+"P250","Month6",50,"Female","Moderate","Worsened",463.779535288923
+"P250","Month12",50,"Female","Moderate","Worsened",440.351009429432
+"P251","Initial",36,"Female","Moderate","Medication A",337.231708455831
+"P251","Month3",36,"Female","Moderate","Improved",222.163341913372
+"P251","Month6",36,"Female","Moderate","Stable",277.733780136332
+"P251","Month12",36,"Female","Moderate","Stable",307.449645255692
+"P252","Initial",55,"Female","Mild","Medication A",120.048065671697
+"P252","Month3",55,"Female","Mild","Stable",99.76323611103
+"P252","Month6",55,"Female","Mild","Worsened",161.184491654858
+"P252","Month12",55,"Female","Mild","Worsened",140.768929857295
+"P253","Initial",70,"Female","Moderate","Medication A",378.69863820076
+"P253","Month3",70,"Female","Moderate","Stable",283.164064711891
+"P253","Month6",70,"Female","Moderate","Stable",279.399137813598
+"P253","Month12",70,"Female","Moderate","Stable",278.645964665338
+"P254","Initial",49,"Male","Moderate","Medication B",484.771989863366
+"P254","Month3",49,"Male","Moderate","Stable",310.123043758795
+"P254","Month6",49,"Male","Moderate","Stable",297.408013022505
+"P254","Month12",49,"Male","Moderate","Stable",312.960190689191
+"P255","Initial",35,"Female","Moderate","Medication A",374.915281299502
+"P255","Month3",35,"Female","Moderate","Worsened",463.20462501375
+"P255","Month6",35,"Female","Moderate","Worsened",487.437597806566
+"P255","Month12",35,"Female","Moderate","Improved",225.582963120192
+"P256","Initial",79,"Female","Moderate","Medication B",444.1493480606
+"P256","Month3",79,"Female","Moderate","Improved",217.777723174542
+"P256","Month6",79,"Female","Moderate","Improved",223.556021500379
+"P256","Month12",79,"Female","Moderate","Stable",312.134851799347
+"P257","Initial",59,"Male","Mild","Watchful Waiting",52.4007843225263
+"P257","Month3",59,"Male","Mild","Stable",98.5946209123358
+"P257","Month6",59,"Male","Mild","Stable",97.018679198809
+"P257","Month12",59,"Male","Mild","Stable",99.6857758751139
+"P258","Initial",60,"Male","Mild","Watchful Waiting",45.2360815787688
+"P258","Month3",60,"Male","Mild","Worsened",160.46981750289
+"P258","Month6",60,"Male","Mild","Worsened",154.579397602938
+"P258","Month12",60,"Male","Mild","Worsened",140.573714927305
+"P259","Initial",58,"Male","Mild","Watchful Waiting",50.4737669951282
+"P259","Month3",58,"Male","Mild","Stable",107.473827190697
+"P259","Month6",58,"Male","Mild","Improved",75.6720849052072
+"P259","Month12",58,"Male","Mild","Improved",77.4357305243611
+"P260","Initial",46,"Male","Severe","Combination",1477.3305162508
+"P260","Month3",46,"Male","Severe","Stable",663.301068386063
+"P260","Month6",46,"Male","Severe","Improved",512.558586969972
+"P260","Month12",46,"Male","Severe","Improved",550.87139588967
+"P261","Initial",66,"Female","Moderate","Combination",563.933312930167
+"P261","Month3",66,"Female","Moderate","Stable",309.104341082275
+"P261","Month6",66,"Female","Moderate","Stable",307.301997039467
+"P261","Month12",66,"Female","Moderate","Improved",236.060195054859
+"P262","Initial",49,"Male","Severe","Combination",1301.63240730762
+"P262","Month3",49,"Male","Severe","Improved",524.599621567875
+"P262","Month6",49,"Male","Severe","Improved",551.640374526381
+"P262","Month12",49,"Male","Severe","Improved",547.580971311778
+"P263","Initial",64,"Male","Moderate","Medication B",410.152762192301
+"P263","Month3",64,"Male","Moderate","Stable",270.33072557766
+"P263","Month6",64,"Male","Moderate","Stable",322.979937801138
+"P263","Month12",64,"Male","Moderate","Stable",288.332836213522
+"P264","Initial",54,"Male","Mild","Watchful Waiting",54.6247707633302
+"P264","Month3",54,"Male","Mild","Stable",103.515857262537
+"P264","Month6",54,"Male","Mild","Improved",85.6687607653439
+"P264","Month12",54,"Male","Mild","Improved",78.924738433212
+"P265","Initial",75,"Female","Mild","Watchful Waiting",54.255966336932
+"P265","Month3",75,"Female","Mild","Improved",84.0700285769999
+"P265","Month6",75,"Female","Mild","Improved",76.4326982721686
+"P265","Month12",75,"Female","Mild","Improved",82.9841630086303
+"P266","Initial",62,"Male","Moderate","Medication A",390.337002284825
+"P266","Month3",62,"Male","Moderate","Worsened",471.667132820003
+"P266","Month6",62,"Male","Moderate","Stable",310.350363026373
+"P266","Month12",62,"Male","Moderate","Stable",314.646143903956
+"P267","Initial",31,"Male","Severe","Combination",1291.7396922037
+"P267","Month3",31,"Male","Severe","Stable",635.747597441077
+"P267","Month6",31,"Male","Severe","Stable",682.236885060556
+"P267","Month12",31,"Male","Severe","Improved",560.185860186815
+"P268","Initial",33,"Female","Moderate","Medication A",392.427661651745
+"P268","Month3",33,"Female","Moderate","Stable",326.90738174133
+"P268","Month6",33,"Female","Moderate","Stable",308.67709916085
+"P268","Month12",33,"Female","Moderate","Stable",288.926472142339
+"P269","Initial",39,"Male","Severe","Combination",1409.06252781861
+"P269","Month3",39,"Male","Severe","Worsened",1086.67744384613
+"P269","Month6",39,"Male","Severe","Stable",750.007572886534
+"P269","Month12",39,"Male","Severe","Improved",566.385162908584
+"P270","Initial",62,"Male","Moderate","Medication A",330.796307047829
+"P270","Month3",62,"Male","Moderate","Stable",312.674427735619
+"P270","Month6",62,"Male","Moderate","Worsened",480.169945384841
+"P270","Month12",62,"Male","Moderate","Worsened",440.351949145552
+"P271","Initial",34,"Female","Moderate","Medication B",422.525434009731
+"P271","Month3",34,"Female","Moderate","Discontinued",85.6511225542054
+"P271","Month6",34,"Female","Moderate","Discontinued",81.6686338707805
+"P271","Month12",34,"Female","Moderate","Discontinued",90.516302361153
+"P272","Initial",54,"Female","Severe","Medication B",1069.06008279417
+"P272","Month3",54,"Female","Severe","Discontinued",213.4571552407
+"P272","Month6",54,"Female","Severe","Discontinued",226.675862970762
+"P272","Month12",54,"Female","Severe","Discontinued",206.912336729933
+"P273","Initial",37,"Female","Moderate","Medication B",426.382421404123
+"P273","Month3",37,"Female","Moderate","Improved",240.601965319365
+"P273","Month6",37,"Female","Moderate","Improved",219.192407760769
+"P273","Month12",37,"Female","Moderate","Improved",247.660451989621
+"P274","Initial",54,"Female","Moderate","Combination",628.154184054583
+"P274","Month3",54,"Female","Moderate","Worsened",424.693818991072
+"P274","Month6",54,"Female","Moderate","Worsened",422.083486723714
+"P274","Month12",54,"Female","Moderate","Worsened",483.551072145347
+"P275","Initial",50,"Male","Severe","Surgery",3354.30680436548
+"P275","Month3",50,"Male","Severe","Improved",614.445832017809
+"P275","Month6",50,"Male","Severe","Improved",585.664335049689
+"P275","Month12",50,"Male","Severe","Improved",608.181246176362
+"P276","Initial",74,"Male","Mild","Medication A",126.042237661779
+"P276","Month3",74,"Male","Mild","Stable",96.495281024836
+"P276","Month6",74,"Male","Mild","Stable",97.5081430748105
+"P276","Month12",74,"Male","Mild","Improved",72.5465637110174
+"P277","Initial",47,"Male","Mild","Medication A",129.475848969072
+"P277","Month3",47,"Male","Mild","Stable",100.43222552631
+"P277","Month6",47,"Male","Mild","Improved",77.516843020916
+"P277","Month12",47,"Male","Mild","Improved",84.9703094065189
+"P278","Initial",71,"Male","Moderate","Medication A",381.011333126575
+"P278","Month3",71,"Male","Moderate","Improved",253.523853231221
+"P278","Month6",71,"Male","Moderate","Improved",241.537862040102
+"P278","Month12",71,"Male","Moderate","Improved",221.25100658834
+"P279","Initial",60,"Male","Mild","Medication A",129.320148227736
+"P279","Month3",60,"Male","Mild","Worsened",138.984669812489
+"P279","Month6",60,"Male","Mild","Worsened",159.893237922806
+"P279","Month12",60,"Male","Mild","Worsened",151.595932322089
+"P280","Initial",35,"Male","Severe","Combination",1416.03583729826
+"P280","Month3",35,"Male","Severe","Improved",586.249351438135
+"P280","Month6",35,"Male","Severe","Stable",684.383921166882
+"P280","Month12",35,"Male","Severe","Stable",743.210976566188
+"P281","Initial",36,"Female","Mild","Medication A",128.450511580333
+"P281","Month3",36,"Female","Mild","Improved",84.6857921779156
+"P281","Month6",36,"Female","Mild","Improved",78.6717325933278
+"P281","Month12",36,"Female","Mild","Stable",93.3305660355836
+"P282","Initial",70,"Female","Mild","Watchful Waiting",52.2484085522592
+"P282","Month3",70,"Female","Mild","Stable",91.8931607250124
+"P282","Month6",70,"Female","Mild","Improved",72.9099848233163
+"P282","Month12",70,"Female","Mild","Improved",72.3533214218915
+"P283","Initial",77,"Female","Moderate","Combination",618.274518018588
+"P283","Month3",77,"Female","Moderate","Stable",311.591816917062
+"P283","Month6",77,"Female","Moderate","Worsened",421.658929937985
+"P283","Month12",77,"Female","Moderate","Worsened",476.657670233399
+"P284","Initial",46,"Male","Moderate","Medication B",476.171927629039
+"P284","Month3",46,"Male","Moderate","Stable",307.890496090986
+"P284","Month6",46,"Male","Moderate","Improved",261.855974871665
+"P284","Month12",46,"Male","Moderate","Improved",222.94903472811
+"P285","Initial",74,"Male","Moderate","Combination",547.32639754191
+"P285","Month3",74,"Male","Moderate","Stable",326.491582235321
+"P285","Month6",74,"Male","Moderate","Worsened",481.206738464534
+"P285","Month12",74,"Male","Moderate","Stable",291.338197574951
+"P286","Initial",57,"Male","Moderate","Combination",588.153419690207
+"P286","Month3",57,"Male","Moderate","Improved",262.194396704435
+"P286","Month6",57,"Male","Moderate","Improved",220.674437664449
+"P286","Month12",57,"Male","Moderate","Improved",250.047405034304
+"P287","Initial",69,"Male","Moderate","Medication A",363.86886927858
+"P287","Month3",69,"Male","Moderate","Stable",322.982270275243
+"P287","Month6",69,"Male","Moderate","Worsened",470.968407732435
+"P287","Month12",69,"Male","Moderate","Discontinued",92.3314953418449
+"P288","Initial",36,"Male","Mild","Watchful Waiting",46.5550076309592
+"P288","Month3",36,"Male","Mild","Improved",79.5876071900129
+"P288","Month6",36,"Male","Mild","Improved",78.9629986956716
+"P288","Month12",36,"Male","Mild","Stable",93.1127607729286
+"P289","Initial",49,"Male","Moderate","Medication A",383.985883075744
+"P289","Month3",49,"Male","Moderate","Improved",229.835839737207
+"P289","Month6",49,"Male","Moderate","Improved",246.522557202727
+"P289","Month12",49,"Male","Moderate","Improved",239.0982545726
+"P290","Initial",47,"Female","Mild","Watchful Waiting",50.6607018969953
+"P290","Month3",47,"Female","Mild","Stable",102.221132856794
+"P290","Month6",47,"Female","Mild","Stable",92.1210043225437
+"P290","Month12",47,"Female","Mild","Improved",79.7879982218146
+"P291","Initial",58,"Male","Mild","Medication A",111.896590327844
+"P291","Month3",58,"Male","Mild","Discontinued",29.5762349339202
+"P291","Month6",58,"Male","Mild","Discontinued",31.0228530443273
+"P291","Month12",58,"Male","Mild","Discontinued",30.4367487793788
+"P292","Initial",46,"Male","Severe","Combination",1334.72522836179
+"P292","Month3",46,"Male","Severe","Improved",537.60110880062
+"P292","Month6",46,"Male","Severe","Stable",631.496972627938
+"P292","Month12",46,"Male","Severe","Improved",537.152099076658
+"P293","Initial",62,"Male","Moderate","Combination",624.456699779257
+"P293","Month3",62,"Male","Moderate","Worsened",411.546341793146
+"P293","Month6",62,"Male","Moderate","Worsened",492.717923009768
+"P293","Month12",62,"Male","Moderate","Worsened",477.116940147243
+"P294","Initial",31,"Female","Severe","Combination",1509.48073747568
+"P294","Month3",31,"Female","Severe","Improved",562.096240609884
+"P294","Month6",31,"Female","Severe","Improved",542.461597554386
+"P294","Month12",31,"Female","Severe","Stable",695.334864724427
+"P295","Initial",78,"Female","Mild","Medication A",110.607384525239
+"P295","Month3",78,"Female","Mild","Worsened",141.881141751073
+"P295","Month6",78,"Female","Mild","Stable",97.4974850891158
+"P295","Month12",78,"Female","Mild","Improved",78.4344749860466
+"P296","Initial",31,"Female","Severe","Medication B",1084.84687824268
+"P296","Month3",31,"Female","Severe","Improved",519.519435800612
+"P296","Month6",31,"Female","Severe","Stable",695.015495987609
+"P296","Month12",31,"Female","Severe","Stable",650.582889970392
+"P297","Initial",42,"Male","Mild","Medication A",121.267868276685
+"P297","Month3",42,"Male","Mild","Stable",90.5499043595046
+"P297","Month6",42,"Male","Mild","Stable",106.099632792175
+"P297","Month12",42,"Male","Mild","Worsened",160.106276019942
+"P298","Initial",53,"Male","Moderate","Medication A",338.50256446749
+"P298","Month3",53,"Male","Moderate","Stable",303.007189063355
+"P298","Month6",53,"Male","Moderate","Stable",306.777135855518
+"P298","Month12",53,"Male","Moderate","Stable",277.92269859463
+"P299","Initial",78,"Female","Moderate","Medication A",374.205520547926
+"P299","Month3",78,"Female","Moderate","Worsened",483.997027154546
+"P299","Month6",78,"Female","Moderate","Worsened",490.535611223895
+"P299","Month12",78,"Female","Moderate","Worsened",471.049242073204
+"P300","Initial",32,"Male","Mild","Medication A",108.041118806228
+"P300","Month3",32,"Male","Mild","Stable",105.421442398801
+"P300","Month6",32,"Male","Mild","Stable",96.8840247625485
+"P300","Month12",32,"Male","Mild","Stable",98.2137988088652
+"P301","Initial",47,"Male","Mild","Watchful Waiting",45.0313313887455
+"P301","Month3",47,"Male","Mild","Worsened",145.085829840973
+"P301","Month6",47,"Male","Mild","Stable",96.4877079101279
+"P301","Month12",47,"Male","Mild","Improved",79.3751221932471
+"P302","Initial",31,"Male","Moderate","Medication B",479.279224905185
+"P302","Month3",31,"Male","Moderate","Improved",247.54308225587
+"P302","Month6",31,"Male","Moderate","Improved",233.597650296986
+"P302","Month12",31,"Male","Moderate","Improved",253.829753547907
+"P303","Initial",66,"Female","Mild","Medication A",117.159395104274
+"P303","Month3",66,"Female","Mild","Worsened",163.320682235062
+"P303","Month6",66,"Female","Mild","Worsened",158.154491528403
+"P303","Month12",66,"Female","Mild","Stable",96.1070287227631
+"P304","Initial",41,"Female","Moderate","Medication A",341.349233765155
+"P304","Month3",41,"Female","Moderate","Stable",279.295100681484
+"P304","Month6",41,"Female","Moderate","Stable",323.288933252916
+"P304","Month12",41,"Female","Moderate","Stable",302.410120242275
+"P305","Initial",42,"Male","Severe","Surgery",3784.53441769816
+"P305","Month3",42,"Male","Severe","Stable",769.824283015914
+"P305","Month6",42,"Male","Severe","Worsened",1061.59352410119
+"P305","Month12",42,"Male","Severe","Stable",676.77419715561
+"P306","Initial",71,"Female","Mild","Medication A",124.048722993582
+"P306","Month3",71,"Female","Mild","Stable",107.480729101226
+"P306","Month6",71,"Female","Mild","Stable",109.55870046746
+"P306","Month12",71,"Female","Mild","Stable",98.0792930722237
+"P307","Initial",35,"Female","Mild","Watchful Waiting",52.3437610222027
+"P307","Month3",35,"Female","Mild","Stable",96.3226360315457
+"P307","Month6",35,"Female","Mild","Worsened",148.699057472404
+"P307","Month12",35,"Female","Mild","Discontinued",28.4323365194723
+"P308","Initial",71,"Male","Severe","Surgery",3634.63986862916
+"P308","Month3",71,"Male","Severe","Worsened",1032.4331210833
+"P308","Month6",71,"Male","Severe","Worsened",1089.85767212464
+"P308","Month12",71,"Male","Severe","Stable",762.955572879873
+"P309","Initial",71,"Male","Mild","Watchful Waiting",45.5094675603323
+"P309","Month3",71,"Male","Mild","Stable",102.372310892679
+"P309","Month6",71,"Male","Mild","Stable",104.933043005876
+"P309","Month12",71,"Male","Mild","Improved",82.9917990453541
+"P310","Initial",67,"Male","Moderate","Medication A",386.962119229138
+"P310","Month3",67,"Male","Moderate","Worsened",476.927208392881
+"P310","Month6",67,"Male","Moderate","Stable",322.953345598653
+"P310","Month12",67,"Male","Moderate","Stable",328.851313577034
+"P311","Initial",77,"Female","Mild","Medication A",121.166147874668
+"P311","Month3",77,"Female","Mild","Stable",105.620259256102
+"P311","Month6",77,"Female","Mild","Worsened",152.384525863454
+"P311","Month12",77,"Female","Mild","Worsened",137.303216939326
+"P312","Initial",45,"Male","Severe","Surgery",3478.1551406486
+"P312","Month3",45,"Male","Severe","Improved",520.876421235502
+"P312","Month6",45,"Male","Severe","Improved",566.302620653063
+"P312","Month12",45,"Male","Severe","Improved",510.26962986961
+"P313","Initial",64,"Female","Severe","Surgery",3665.57908770628
+"P313","Month3",64,"Female","Severe","Improved",504.245948631316
+"P313","Month6",64,"Female","Severe","Stable",642.22403052263
+"P313","Month12",64,"Female","Severe","Stable",756.224282085896
+"P314","Initial",65,"Male","Mild","Watchful Waiting",54.7415794036351
+"P314","Month3",65,"Male","Mild","Improved",76.9720095694065
+"P314","Month6",65,"Male","Mild","Improved",82.2719015777111
+"P314","Month12",65,"Male","Mild","Improved",82.457083735615
+"P315","Initial",56,"Male","Severe","Medication B",1073.57921022456
+"P315","Month3",56,"Male","Severe","Discontinued",226.015495130327
+"P315","Month6",56,"Male","Severe","Discontinued",221.822849993594
+"P315","Month12",56,"Male","Severe","Discontinued",201.784130332991
+"P316","Initial",56,"Female","Moderate","Medication B",409.861191026866
+"P316","Month3",56,"Female","Moderate","Stable",296.77912350744
+"P316","Month6",56,"Female","Moderate","Worsened",443.341576571111
+"P316","Month12",56,"Female","Moderate","Worsened",462.323409884702
+"P317","Initial",64,"Male","Mild","Watchful Waiting",52.4470240133815
+"P317","Month3",64,"Male","Mild","Stable",101.787046431564
+"P317","Month6",64,"Male","Mild","Stable",99.2570747807622
+"P317","Month12",64,"Male","Mild","Improved",75.5099550969899
+"P318","Initial",52,"Male","Severe","Medication B",1040.2306692861
+"P318","Month3",52,"Male","Severe","Stable",737.457575551234
+"P318","Month6",52,"Male","Severe","Stable",666.153593007475
+"P318","Month12",52,"Male","Severe","Improved",583.222275495529
+"P319","Initial",32,"Male","Moderate","Medication B",475.085299483035
+"P319","Month3",32,"Male","Moderate","Improved",234.552068263292
+"P319","Month6",32,"Male","Moderate","Improved",230.810909707099
+"P319","Month12",32,"Male","Moderate","Improved",221.317526835948
+"P320","Initial",60,"Female","Moderate","Medication A",358.552123205736
+"P320","Month3",60,"Female","Moderate","Improved",251.363620284945
+"P320","Month6",60,"Female","Moderate","Stable",301.063332608901
+"P320","Month12",60,"Female","Moderate","Stable",325.397095391527
+"P321","Initial",77,"Male","Mild","Medication A",108.347005985677
+"P321","Month3",77,"Male","Mild","Worsened",162.488589556888
+"P321","Month6",77,"Male","Mild","Stable",101.592192701064
+"P321","Month12",77,"Male","Mild","Improved",84.9371016435325
+"P322","Initial",31,"Male","Severe","Medication B",1036.04734727181
+"P322","Month3",31,"Male","Severe","Improved",539.223991066217
+"P322","Month6",31,"Male","Severe","Improved",549.788486789912
+"P322","Month12",31,"Male","Severe","Improved",537.3299905397
+"P323","Initial",76,"Male","Mild","Watchful Waiting",46.2014522193931
+"P323","Month3",76,"Male","Mild","Worsened",143.351158748847
+"P323","Month6",76,"Male","Mild","Discontinued",28.6533546047285
+"P323","Month12",76,"Male","Mild","Discontinued",29.0416826633736
+"P324","Initial",52,"Female","Mild","Watchful Waiting",45.1834093313664
+"P324","Month3",52,"Female","Mild","Stable",105.217907112092
+"P324","Month6",52,"Female","Mild","Stable",98.9433023380116
+"P324","Month12",52,"Female","Mild","Stable",102.023555068299
+"P325","Initial",32,"Male","Moderate","Combination",552.587206838652
+"P325","Month3",32,"Male","Moderate","Stable",271.902065556496
+"P325","Month6",32,"Male","Moderate","Stable",281.07763457112
+"P325","Month12",32,"Male","Moderate","Stable",271.88407282345
+"P326","Initial",38,"Female","Mild","Watchful Waiting",54.3881855648942
+"P326","Month3",38,"Female","Mild","Stable",99.817826077342
+"P326","Month6",38,"Female","Mild","Stable",106.049651959911
+"P326","Month12",38,"Female","Mild","Worsened",151.787805918138
+"P327","Initial",68,"Female","Moderate","Medication B",414.887414204422
+"P327","Month3",68,"Female","Moderate","Worsened",405.946277850308
+"P327","Month6",68,"Female","Moderate","Discontinued",88.7815943215974
+"P327","Month12",68,"Female","Moderate","Discontinued",84.728199523408
+"P328","Initial",59,"Female","Mild","Medication A",127.350958406925
+"P328","Month3",59,"Female","Mild","Stable",100.21987836808
+"P328","Month6",59,"Female","Mild","Stable",100.773730897345
+"P328","Month12",59,"Female","Mild","Improved",86.8496009744704
+"P329","Initial",60,"Female","Mild","Watchful Waiting",45.761677462142
+"P329","Month3",60,"Female","Mild","Worsened",135.661926618777
+"P329","Month6",60,"Female","Mild","Improved",80.92521841079
+"P329","Month12",60,"Female","Mild","Improved",73.674540258944
+"P330","Initial",59,"Female","Mild","Medication A",114.314100500196
+"P330","Month3",59,"Female","Mild","Improved",74.2400445193052
+"P330","Month6",59,"Female","Mild","Improved",74.4477345459163
+"P330","Month12",59,"Female","Mild","Improved",81.1138527356088
+"P331","Initial",38,"Female","Moderate","Medication B",410.269434240181
+"P331","Month3",38,"Female","Moderate","Worsened",461.665533143096
+"P331","Month6",38,"Female","Moderate","Discontinued",94.2480054530315
+"P331","Month12",38,"Female","Moderate","Discontinued",87.7360131558962
+"P332","Initial",65,"Female","Mild","Medication A",124.925354305655
+"P332","Month3",65,"Female","Mild","Stable",91.0689043812454
+"P332","Month6",65,"Female","Mild","Stable",101.675161272287
+"P332","Month12",65,"Female","Mild","Worsened",142.924998379312
+"P333","Initial",63,"Female","Mild","Medication A",112.320577355102
+"P333","Month3",63,"Female","Mild","Improved",76.601183898747
+"P333","Month6",63,"Female","Mild","Stable",102.076759631746
+"P333","Month12",63,"Female","Mild","Improved",78.7156984806061
+"P334","Initial",51,"Female","Moderate","Medication B",462.247957962099
+"P334","Month3",51,"Female","Moderate","Discontinued",98.0584744624794
+"P334","Month6",51,"Female","Moderate","Discontinued",90.465025825426
+"P334","Month12",51,"Female","Moderate","Discontinued",85.4869639696553
+"P335","Initial",73,"Male","Mild","Watchful Waiting",52.4304420920089
+"P335","Month3",73,"Male","Mild","Stable",100.607912554406
+"P335","Month6",73,"Male","Mild","Improved",74.1813898906112
+"P335","Month12",73,"Male","Mild","Improved",75.8444989956915
+"P336","Initial",70,"Female","Mild","Medication A",110.838328957558
+"P336","Month3",70,"Female","Mild","Discontinued",27.6446733637713
+"P336","Month6",70,"Female","Mild","Discontinued",30.9046680321917
+"P336","Month12",70,"Female","Mild","Discontinued",31.4255688339472
+"P337","Initial",57,"Male","Mild","Medication A",118.732802549377
+"P337","Month3",57,"Male","Mild","Stable",92.9342915350571
+"P337","Month6",57,"Male","Mild","Stable",106.810452011414
+"P337","Month12",57,"Male","Mild","Stable",109.937659450807
+"P338","Initial",58,"Female","Moderate","Medication A",325.40074310638
+"P338","Month3",58,"Female","Moderate","Improved",241.769980922341
+"P338","Month6",58,"Female","Moderate","Improved",254.226558309048
+"P338","Month12",58,"Female","Moderate","Improved",241.153111763299
+"P339","Initial",72,"Female","Mild","Watchful Waiting",47.4660008121282
+"P339","Month3",72,"Female","Mild","Stable",99.4694376317784
+"P339","Month6",72,"Female","Mild","Improved",76.6748216375709
+"P339","Month12",72,"Female","Mild","Improved",87.4781215079129
+"P340","Initial",68,"Male","Mild","Watchful Waiting",51.9909499539062
+"P340","Month3",68,"Male","Mild","Worsened",157.398945630994
+"P340","Month6",68,"Male","Mild","Improved",72.2181110009551
+"P340","Month12",68,"Male","Mild","Improved",78.4145707860589
+"P341","Initial",74,"Male","Moderate","Medication B",445.848023970611
+"P341","Month3",74,"Male","Moderate","Worsened",415.959196910262
+"P341","Month6",74,"Male","Moderate","Stable",285.432076589204
+"P341","Month12",74,"Male","Moderate","Stable",278.96794104483
+"P342","Initial",66,"Female","Mild","Watchful Waiting",49.1697818483226
+"P342","Month3",66,"Female","Mild","Stable",94.3245984427631
+"P342","Month6",66,"Female","Mild","Worsened",150.680738613009
+"P342","Month12",66,"Female","Mild","Stable",107.756142411381
+"P343","Initial",72,"Female","Severe","Medication B",1053.49311667727
+"P343","Month3",72,"Female","Severe","Worsened",1034.26126152277
+"P343","Month6",72,"Female","Severe","Stable",671.33379008621
+"P343","Month12",72,"Female","Severe","Improved",529.140129048377
+"P344","Initial",62,"Female","Moderate","Medication B",409.785979937296
+"P344","Month3",62,"Female","Moderate","Improved",253.720176078379
+"P344","Month6",62,"Female","Moderate","Improved",261.991453852504
+"P344","Month12",62,"Female","Moderate","Improved",259.714389458299
+"P345","Initial",48,"Female","Severe","Surgery",3354.33577953372
+"P345","Month3",48,"Female","Severe","Improved",531.291542503983
+"P345","Month6",48,"Female","Severe","Improved",538.469872321934
+"P345","Month12",48,"Female","Severe","Stable",675.945794712752
+"P346","Initial",41,"Female","Mild","Medication A",122.750729184598
+"P346","Month3",41,"Female","Mild","Improved",82.1609542071819
+"P346","Month6",41,"Female","Mild","Improved",73.7292183451355
+"P346","Month12",41,"Female","Mild","Improved",79.9690777137876
+"P347","Initial",63,"Male","Severe","Surgery",3183.29827631824
+"P347","Month3",63,"Male","Severe","Improved",577.669491894543
+"P347","Month6",63,"Male","Severe","Improved",610.91446640715
+"P347","Month12",63,"Male","Severe","Improved",611.156432710588
+"P348","Initial",50,"Female","Moderate","Medication A",389.54611916095
+"P348","Month3",50,"Female","Moderate","Stable",298.555433289148
+"P348","Month6",50,"Female","Moderate","Stable",292.153548630886
+"P348","Month12",50,"Female","Moderate","Stable",293.368163080886
+"P349","Initial",46,"Male","Moderate","Medication B",489.669975915458
+"P349","Month3",46,"Male","Moderate","Worsened",466.767793111503
+"P349","Month6",46,"Male","Moderate","Worsened",442.526782744098
+"P349","Month12",46,"Male","Moderate","Worsened",448.229012740776
+"P350","Initial",41,"Male","Severe","Combination",1469.18397410773
+"P350","Month3",41,"Male","Severe","Discontinued",219.866684883367
+"P350","Month6",41,"Male","Severe","Discontinued",208.789608165622
+"P350","Month12",41,"Male","Severe","Discontinued",206.278374798596
+"P351","Initial",59,"Male","Severe","Surgery",3431.45534882788
+"P351","Month3",59,"Male","Severe","Stable",723.982861558907
+"P351","Month6",59,"Male","Severe","Stable",726.704452880658
+"P351","Month12",59,"Male","Severe","Stable",638.251493298449
+"P352","Initial",64,"Female","Moderate","Medication B",446.418094052933
+"P352","Month3",64,"Female","Moderate","Improved",240.266235832125
+"P352","Month6",64,"Female","Moderate","Stable",279.430172787979
+"P352","Month12",64,"Female","Moderate","Stable",288.17110708449
+"P353","Initial",59,"Male","Mild","Medication A",112.805154360831
+"P353","Month3",59,"Male","Mild","Worsened",138.507498039398
+"P353","Month6",59,"Male","Mild","Worsened",160.539412109647
+"P353","Month12",59,"Male","Mild","Stable",96.7955592134967
+"P354","Initial",54,"Female","Mild","Medication A",109.48272953555
+"P354","Month3",54,"Female","Mild","Stable",102.901033842936
+"P354","Month6",54,"Female","Mild","Worsened",157.910635164008
+"P354","Month12",54,"Female","Mild","Worsened",151.103616594337
+"P355","Initial",79,"Male","Mild","Watchful Waiting",50.0244645262137
+"P355","Month3",79,"Male","Mild","Stable",105.119939842261
+"P355","Month6",79,"Male","Mild","Improved",86.1763589158654
+"P355","Month12",79,"Male","Mild","Improved",85.2259479761124
+"P356","Initial",76,"Female","Moderate","Combination",600.105937086046
+"P356","Month3",76,"Female","Moderate","Stable",317.777767293155
+"P356","Month6",76,"Female","Moderate","Stable",281.572466916405
+"P356","Month12",76,"Female","Moderate","Stable",292.367031387985
+"P357","Initial",32,"Male","Mild","Watchful Waiting",49.0719757275656
+"P357","Month3",32,"Male","Mild","Stable",91.8412651587278
+"P357","Month6",32,"Male","Mild","Stable",90.040195682086
+"P357","Month12",32,"Male","Mild","Stable",97.7922052238137
+"P358","Initial",80,"Female","Moderate","Medication A",335.41550344415
+"P358","Month3",80,"Female","Moderate","Improved",258.188648309559
+"P358","Month6",80,"Female","Moderate","Stable",305.428739539348
+"P358","Month12",80,"Female","Moderate","Stable",297.099412218668
+"P359","Initial",47,"Female","Mild","Watchful Waiting",50.3270493354648
+"P359","Month3",47,"Female","Mild","Stable",91.0156953334808
+"P359","Month6",47,"Female","Mild","Improved",84.0545745827258
+"P359","Month12",47,"Female","Mild","Improved",83.0147566348314
+"P360","Initial",61,"Male","Mild","Medication A",111.070433685556
+"P360","Month3",61,"Male","Mild","Stable",102.219179370441
+"P360","Month6",61,"Male","Mild","Stable",102.993836738169
+"P360","Month12",61,"Male","Mild","Worsened",145.330682639033
+"P361","Initial",46,"Male","Mild","Watchful Waiting",51.8890317482874
+"P361","Month3",46,"Male","Mild","Stable",101.376327145845
+"P361","Month6",46,"Male","Mild","Stable",95.5341228377074
+"P361","Month12",46,"Male","Mild","Improved",86.632975064218
+"P362","Initial",67,"Female","Severe","Surgery",3182.22774162423
+"P362","Month3",67,"Female","Severe","Improved",605.142908006907
+"P362","Month6",67,"Female","Severe","Stable",744.448148026131
+"P362","Month12",67,"Female","Severe","Stable",675.372354420833
+"P363","Initial",71,"Female","Severe","Medication B",1032.68942468567
+"P363","Month3",71,"Female","Severe","Stable",700.595641494729
+"P363","Month6",71,"Female","Severe","Worsened",1060.93876727857
+"P363","Month12",71,"Female","Severe","Worsened",960.321767712012
+"P364","Initial",69,"Female","Severe","Surgery",3373.45949260052
+"P364","Month3",69,"Female","Severe","Stable",662.673522587866
+"P364","Month6",69,"Female","Severe","Stable",643.664296818897
+"P364","Month12",69,"Female","Severe","Worsened",1150.31513598282
+"P365","Initial",71,"Female","Mild","Medication A",116.214100174606
+"P365","Month3",71,"Female","Mild","Improved",86.9269540980458
+"P365","Month6",71,"Female","Mild","Improved",84.9617288224399
+"P365","Month12",71,"Female","Mild","Improved",78.5493675284088
+"P366","Initial",61,"Male","Moderate","Medication A",381.422968072817
+"P366","Month3",61,"Male","Moderate","Improved",227.727486245334
+"P366","Month6",61,"Male","Moderate","Stable",316.704702456482
+"P366","Month12",61,"Male","Moderate","Improved",220.121841844171
+"P367","Initial",55,"Male","Severe","Medication B",989.515028181486
+"P367","Month3",55,"Male","Severe","Improved",614.124059461057
+"P367","Month6",55,"Male","Severe","Improved",509.057327397168
+"P367","Month12",55,"Male","Severe","Improved",565.11063753441
+"P368","Initial",42,"Male","Severe","Combination",1448.65767273121
+"P368","Month3",42,"Male","Severe","Stable",668.67823950015
+"P368","Month6",42,"Male","Severe","Worsened",1048.52074971423
+"P368","Month12",42,"Male","Severe","Worsened",1125.49461104907
+"P369","Initial",49,"Male","Severe","Medication B",1046.80548403412
+"P369","Month3",49,"Male","Severe","Stable",649.005882954225
+"P369","Month6",49,"Male","Severe","Stable",674.403119739145
+"P369","Month12",49,"Male","Severe","Improved",589.820394322276
+"P370","Initial",67,"Male","Moderate","Medication B",409.065968084615
+"P370","Month3",67,"Male","Moderate","Stable",325.511360107921
+"P370","Month6",67,"Male","Moderate","Improved",248.780135180801
+"P370","Month12",67,"Male","Moderate","Improved",236.004837077111
+"P371","Initial",49,"Female","Mild","Watchful Waiting",46.3533437135629
+"P371","Month3",49,"Female","Mild","Improved",86.8263868503273
+"P371","Month6",49,"Female","Mild","Improved",75.7056809812784
+"P371","Month12",49,"Female","Mild","Stable",104.788355319761
+"P372","Initial",58,"Female","Mild","Watchful Waiting",45.0810357718728
+"P372","Month3",58,"Female","Mild","Stable",94.9725976260379
+"P372","Month6",58,"Female","Mild","Stable",109.789263508283
+"P372","Month12",58,"Female","Mild","Stable",104.342438047752
+"P373","Initial",49,"Female","Mild","Watchful Waiting",51.5172828827053
+"P373","Month3",49,"Female","Mild","Stable",94.8111241450533
+"P373","Month6",49,"Female","Mild","Stable",91.7358550941572
+"P373","Month12",49,"Female","Mild","Stable",95.9335256088525
+"P374","Initial",59,"Female","Severe","Combination",1411.77926450968
+"P374","Month3",59,"Female","Severe","Worsened",1108.93614572939
+"P374","Month6",59,"Female","Severe","Stable",668.057814557105
+"P374","Month12",59,"Female","Severe","Stable",674.404088403098
+"P375","Initial",70,"Female","Moderate","Medication B",490.288921273313
+"P375","Month3",70,"Female","Moderate","Stable",299.415351231582
+"P375","Month6",70,"Female","Moderate","Stable",328.37754744105
+"P375","Month12",70,"Female","Moderate","Improved",256.603220958263
+"P376","Initial",77,"Female","Moderate","Medication B",493.170388389844
+"P376","Month3",77,"Female","Moderate","Improved",221.471503905952
+"P376","Month6",77,"Female","Moderate","Improved",231.071112614125
+"P376","Month12",77,"Female","Moderate","Improved",261.344483099878
+"P377","Initial",37,"Male","Severe","Surgery",3599.08142047934
+"P377","Month3",37,"Male","Severe","Improved",613.695266086608
+"P377","Month6",37,"Male","Severe","Stable",766.081681065261
+"P377","Month12",37,"Male","Severe","Stable",732.277185046114
+"P378","Initial",68,"Female","Mild","Medication A",117.404228271917
+"P378","Month3",68,"Female","Mild","Worsened",154.903871146962
+"P378","Month6",68,"Female","Mild","Stable",95.1446463353932
+"P378","Month12",68,"Female","Mild","Improved",76.9567755050957
+"P379","Initial",39,"Male","Moderate","Medication A",384.512859530747
+"P379","Month3",39,"Male","Moderate","Discontinued",93.388916364871
+"P379","Month6",39,"Male","Moderate","Discontinued",94.9487781305797
+"P379","Month12",39,"Male","Moderate","Discontinued",86.5411205808632
+"P380","Initial",46,"Male","Severe","Medication B",1079.72821702715
+"P380","Month3",46,"Male","Severe","Stable",715.87482785806
+"P380","Month6",46,"Male","Severe","Improved",529.374113798141
+"P380","Month12",46,"Male","Severe","Improved",531.569832313806
+"P381","Initial",47,"Male","Severe","Surgery",3764.43060475867
+"P381","Month3",47,"Male","Severe","Stable",739.867761605419
+"P381","Month6",47,"Male","Severe","Stable",633.59256236814
+"P381","Month12",47,"Male","Severe","Worsened",1103.61995251151
+"P382","Initial",69,"Female","Moderate","Medication A",388.635544203222
+"P382","Month3",69,"Female","Moderate","Improved",258.867163483053
+"P382","Month6",69,"Female","Moderate","Stable",277.166145737283
+"P382","Month12",69,"Female","Moderate","Improved",262.861061409116
+"P383","Initial",80,"Male","Mild","Medication A",129.841252041981
+"P383","Month3",80,"Male","Mild","Stable",95.1799324620515
+"P383","Month6",80,"Male","Mild","Improved",86.2234242521226
+"P383","Month12",80,"Male","Mild","Improved",85.3284043036401
+"P384","Initial",71,"Female","Mild","Medication A",118.542845545337
+"P384","Month3",71,"Female","Mild","Improved",73.2280225455761
+"P384","Month6",71,"Female","Mild","Improved",85.8584637418389
+"P384","Month12",71,"Female","Mild","Improved",77.178587064147
+"P385","Initial",40,"Female","Severe","Medication B",993.739618125837
+"P385","Month3",40,"Female","Severe","Stable",745.890552802011
+"P385","Month6",40,"Female","Severe","Improved",615.054339639843
+"P385","Month12",40,"Female","Severe","Improved",529.775568742305
+"P386","Initial",78,"Male","Severe","Surgery",3212.17010177206
+"P386","Month3",78,"Male","Severe","Improved",575.141685348004
+"P386","Month6",78,"Male","Severe","Stable",749.917131969705
+"P386","Month12",78,"Male","Severe","Stable",655.751854986884
+"P387","Initial",73,"Female","Mild","Medication A",120.13139638491
+"P387","Month3",73,"Female","Mild","Stable",97.111211954616
+"P387","Month6",73,"Female","Mild","Worsened",159.734876523726
+"P387","Month12",73,"Female","Mild","Stable",99.6745779458433
+"P388","Initial",31,"Male","Moderate","Medication A",340.697730777785
+"P388","Month3",31,"Male","Moderate","Stable",286.209805989638
+"P388","Month6",31,"Male","Moderate","Improved",255.503688041121
+"P388","Month12",31,"Male","Moderate","Improved",217.240140181035
+"P389","Initial",48,"Male","Mild","Medication A",117.742212127894
+"P389","Month3",48,"Male","Mild","Stable",101.920692282729
+"P389","Month6",48,"Male","Mild","Stable",100.574793051928
+"P389","Month12",48,"Male","Mild","Stable",103.651418169029
+"P390","Initial",42,"Female","Mild","Medication A",120.187509784475
+"P390","Month3",42,"Female","Mild","Discontinued",30.3262307723053
+"P390","Month6",42,"Female","Mild","Discontinued",32.0474406285211
+"P390","Month12",42,"Female","Mild","Discontinued",28.8750609615818
+"P391","Initial",42,"Male","Mild","Medication A",108.86275488697
+"P391","Month3",42,"Male","Mild","Worsened",159.479821817949
+"P391","Month6",42,"Male","Mild","Worsened",158.357303682715
+"P391","Month12",42,"Male","Mild","Worsened",160.781384739093
+"P392","Initial",60,"Female","Mild","Watchful Waiting",45.6571935652755
+"P392","Month3",60,"Female","Mild","Stable",90.176122370176
+"P392","Month6",60,"Female","Mild","Worsened",152.750426265411
+"P392","Month12",60,"Female","Mild","Worsened",161.088461412583
+"P393","Initial",59,"Female","Mild","Medication A",118.711005259305
+"P393","Month3",59,"Female","Mild","Stable",90.7515000924468
+"P393","Month6",59,"Female","Mild","Improved",78.5646493323147
+"P393","Month12",59,"Female","Mild","Improved",77.843459378928
+"P394","Initial",80,"Female","Mild","Medication A",119.438035933301
+"P394","Month3",80,"Female","Mild","Discontinued",27.802066534292
+"P394","Month6",80,"Female","Mild","Discontinued",29.8767375396565
+"P394","Month12",80,"Female","Mild","Discontinued",28.5858761505224
+"P395","Initial",51,"Female","Mild","Medication A",119.758390596136
+"P395","Month3",51,"Female","Mild","Discontinued",32.4363672276959
+"P395","Month6",51,"Female","Mild","Discontinued",30.0059840655886
+"P395","Month12",51,"Female","Mild","Discontinued",31.2210408593528
+"P396","Initial",59,"Female","Severe","Medication B",957.161105812993
+"P396","Month3",59,"Female","Severe","Improved",581.202822774649
+"P396","Month6",59,"Female","Severe","Improved",593.465070895851
+"P396","Month12",59,"Female","Severe","Improved",506.111763641238
+"P397","Initial",39,"Female","Severe","Medication B",952.731060083024
+"P397","Month3",39,"Female","Severe","Discontinued",213.268533750437
+"P397","Month6",39,"Female","Severe","Discontinued",222.181506096851
+"P397","Month12",39,"Female","Severe","Discontinued",219.880963398144
+"P398","Initial",45,"Female","Moderate","Medication A",343.334715770558
+"P398","Month3",45,"Female","Moderate","Worsened",477.482978194021
+"P398","Month6",45,"Female","Moderate","Discontinued",88.6487917997874
+"P398","Month12",45,"Female","Moderate","Discontinued",83.9738734709099
+"P399","Initial",34,"Female","Mild","Medication A",122.49714166671
+"P399","Month3",34,"Female","Mild","Stable",106.515207123011
+"P399","Month6",34,"Female","Mild","Worsened",158.428527822252
+"P399","Month12",34,"Female","Mild","Worsened",137.444306979887
+"P400","Initial",65,"Male","Mild","Medication A",109.698200840503
+"P400","Month3",65,"Male","Mild","Worsened",163.768800529651
+"P400","Month6",65,"Male","Mild","Worsened",137.708782714326
+"P400","Month12",65,"Male","Mild","Worsened",141.367537567858
+"P401","Initial",79,"Male","Moderate","Medication B",444.528323365375
+"P401","Month3",79,"Male","Moderate","Improved",253.337831452489
+"P401","Month6",79,"Male","Moderate","Improved",256.867582049221
+"P401","Month12",79,"Male","Moderate","Improved",245.986747384071
+"P402","Initial",62,"Male","Moderate","Medication A",351.938945520669
+"P402","Month3",62,"Male","Moderate","Discontinued",83.5875873151235
+"P402","Month6",62,"Male","Moderate","Discontinued",96.8701104763895
+"P402","Month12",62,"Male","Moderate","Discontinued",96.7273526256904
+"P403","Initial",45,"Female","Mild","Medication A",116.126968609169
+"P403","Month3",45,"Female","Mild","Stable",100.26625927072
+"P403","Month6",45,"Female","Mild","Stable",99.8787084873766
+"P403","Month12",45,"Female","Mild","Stable",105.868756128475
+"P404","Initial",57,"Female","Moderate","Medication B",487.65736072557
+"P404","Month3",57,"Female","Moderate","Stable",305.181616125628
+"P404","Month6",57,"Female","Moderate","Worsened",479.113235478289
+"P404","Month12",57,"Female","Moderate","Worsened",477.669501900673
+"P405","Initial",78,"Female","Mild","Medication A",114.757751623169
+"P405","Month3",78,"Female","Mild","Worsened",150.259457977954
+"P405","Month6",78,"Female","Mild","Discontinued",28.7713766419329
+"P405","Month12",78,"Female","Mild","Discontinued",32.2057426166721
+"P406","Initial",41,"Male","Moderate","Medication A",375.362452145666
+"P406","Month3",41,"Male","Moderate","Stable",291.741078374907
+"P406","Month6",41,"Male","Moderate","Improved",263.857452426106
+"P406","Month12",41,"Male","Moderate","Improved",249.648158848286
+"P407","Initial",57,"Male","Mild","Medication A",113.699493454769
+"P407","Month3",57,"Male","Mild","Stable",102.949939314276
+"P407","Month6",57,"Male","Mild","Stable",96.8790454510599
+"P407","Month12",57,"Male","Mild","Improved",84.8100178949535
+"P408","Initial",31,"Female","Mild","Medication A",115.800668762997
+"P408","Month3",31,"Female","Mild","Stable",95.3457166673616
+"P408","Month6",31,"Female","Mild","Worsened",137.09343370283
+"P408","Month12",31,"Female","Mild","Worsened",152.115521121304
+"P409","Initial",79,"Male","Mild","Medication A",108.100100202486
+"P409","Month3",79,"Male","Mild","Worsened",143.427049540915
+"P409","Month6",79,"Male","Mild","Stable",95.601743971929
+"P409","Month12",79,"Male","Mild","Stable",106.364586725831
+"P410","Initial",41,"Female","Moderate","Medication B",415.560088001657
+"P410","Month3",41,"Female","Moderate","Stable",285.729874391109
+"P410","Month6",41,"Female","Moderate","Improved",237.083174966276
+"P410","Month12",41,"Female","Moderate","Improved",262.002454251051
+"P411","Initial",76,"Male","Moderate","Medication B",433.586267384235
+"P411","Month3",76,"Male","Moderate","Worsened",475.681015192531
+"P411","Month6",76,"Male","Moderate","Worsened",416.83766009286
+"P411","Month12",76,"Male","Moderate","Worsened",449.507833253592
+"P412","Initial",80,"Female","Mild","Watchful Waiting",50.2521056868136
+"P412","Month3",80,"Female","Mild","Stable",107.722582546994
+"P412","Month6",80,"Female","Mild","Improved",77.7869421429932
+"P412","Month12",80,"Female","Mild","Improved",79.4606928266585
+"P413","Initial",35,"Female","Mild","Medication A",118.561866514385
+"P413","Month3",35,"Female","Mild","Worsened",156.40115557937
+"P413","Month6",35,"Female","Mild","Stable",91.0237183561549
+"P413","Month12",35,"Female","Mild","Stable",104.026355869137
+"P414","Initial",45,"Male","Moderate","Medication B",464.712867185008
+"P414","Month3",45,"Male","Moderate","Improved",247.865586631
+"P414","Month6",45,"Male","Moderate","Improved",239.995375927538
+"P414","Month12",45,"Male","Moderate","Improved",229.215955149382
+"P415","Initial",44,"Female","Severe","Surgery",3411.23155432288
+"P415","Month3",44,"Female","Severe","Stable",644.769390719011
+"P415","Month6",44,"Female","Severe","Improved",532.555758453906
+"P415","Month12",44,"Female","Severe","Improved",509.188192583621
+"P416","Initial",48,"Male","Mild","Medication A",119.270592631772
+"P416","Month3",48,"Male","Mild","Discontinued",28.9445306751877
+"P416","Month6",48,"Male","Mild","Discontinued",28.2599239940755
+"P416","Month12",48,"Male","Mild","Discontinued",31.5157874305733
+"P417","Initial",32,"Female","Severe","Medication B",996.21386082843
+"P417","Month3",32,"Female","Severe","Worsened",1030.16303376993
+"P417","Month6",32,"Female","Severe","Worsened",1092.71347154863
+"P417","Month12",32,"Female","Severe","Worsened",969.028258379549
+"P418","Initial",75,"Female","Mild","Watchful Waiting",46.3475603819825
+"P418","Month3",75,"Female","Mild","Stable",109.689536043443
+"P418","Month6",75,"Female","Mild","Stable",109.535455466248
+"P418","Month12",75,"Female","Mild","Stable",105.173267167993
+"P419","Initial",62,"Male","Mild","Watchful Waiting",45.3005947801284
+"P419","Month3",62,"Male","Mild","Stable",109.484194549732
+"P419","Month6",62,"Male","Mild","Stable",105.205406942405
+"P419","Month12",62,"Male","Mild","Stable",107.74884078186
+"P420","Initial",62,"Male","Moderate","Medication B",424.975779487286
+"P420","Month3",62,"Male","Moderate","Improved",228.982766915113
+"P420","Month6",62,"Male","Moderate","Improved",245.148241192102
+"P420","Month12",62,"Male","Moderate","Improved",232.329532194883
+"P421","Initial",77,"Female","Moderate","Medication A",378.501788970083
+"P421","Month3",77,"Female","Moderate","Stable",274.490244872868
+"P421","Month6",77,"Female","Moderate","Worsened",485.156603129581
+"P421","Month12",77,"Female","Moderate","Stable",316.22961699497
+"P422","Initial",40,"Male","Moderate","Combination",645.923811877146
+"P422","Month3",40,"Male","Moderate","Stable",326.866543698125
+"P422","Month6",40,"Male","Moderate","Worsened",434.16045503458
+"P422","Month12",40,"Male","Moderate","Worsened",421.079374663532
+"P423","Initial",65,"Female","Severe","Medication B",976.468512013089
+"P423","Month3",65,"Female","Severe","Stable",646.050086962059
+"P423","Month6",65,"Female","Severe","Worsened",1043.96845929092
+"P423","Month12",65,"Female","Severe","Worsened",1115.37192435935
+"P424","Initial",73,"Female","Mild","Watchful Waiting",53.6674242792651
+"P424","Month3",73,"Female","Mild","Stable",91.2939825840294
+"P424","Month6",73,"Female","Mild","Improved",83.7113037146628
+"P424","Month12",73,"Female","Mild","Improved",87.562762785703
+"P425","Initial",74,"Male","Moderate","Medication B",433.000547785778
+"P425","Month3",74,"Male","Moderate","Improved",250.386480029672
+"P425","Month6",74,"Male","Moderate","Improved",244.569689724594
+"P425","Month12",74,"Male","Moderate","Improved",218.072747290134
+"P426","Initial",39,"Male","Mild","Medication A",118.779284885153
+"P426","Month3",39,"Male","Mild","Stable",102.773496485315
+"P426","Month6",39,"Male","Mild","Stable",106.013501929119
+"P426","Month12",39,"Male","Mild","Stable",100.837684883736
+"P427","Initial",71,"Female","Moderate","Combination",645.818359460682
+"P427","Month3",71,"Female","Moderate","Improved",216.325712420046
+"P427","Month6",71,"Female","Moderate","Stable",296.80948858615
+"P427","Month12",71,"Female","Moderate","Stable",298.998356019147
+"P428","Initial",53,"Male","Mild","Medication A",127.038481352851
+"P428","Month3",53,"Male","Mild","Improved",76.4562286697328
+"P428","Month6",53,"Male","Mild","Improved",81.4488048292696
+"P428","Month12",53,"Male","Mild","Improved",74.9993521794677
+"P429","Initial",57,"Female","Mild","Watchful Waiting",53.0728174862452
+"P429","Month3",57,"Female","Mild","Improved",81.5093985795975
+"P429","Month6",57,"Female","Mild","Improved",76.3574419729412
+"P429","Month12",57,"Female","Mild","Improved",84.8413576483727
+"P430","Initial",68,"Female","Moderate","Combination",612.588798506185
+"P430","Month3",68,"Female","Moderate","Improved",261.980014253408
+"P430","Month6",68,"Female","Moderate","Improved",224.573245178908
+"P430","Month12",68,"Female","Moderate","Improved",216.203417189419
+"P431","Initial",47,"Female","Moderate","Medication A",350.766795186326
+"P431","Month3",47,"Female","Moderate","Stable",316.286650425754
+"P431","Month6",47,"Female","Moderate","Improved",243.510137468576
+"P431","Month12",47,"Female","Moderate","Improved",224.182054784149
+"P432","Initial",46,"Female","Mild","Watchful Waiting",45.8939543133602
+"P432","Month3",46,"Female","Mild","Stable",107.524538692087
+"P432","Month6",46,"Female","Mild","Stable",92.9119503172114
+"P432","Month12",46,"Female","Mild","Improved",82.1644266247749
+"P433","Initial",49,"Male","Mild","Watchful Waiting",49.4623769819736
+"P433","Month3",49,"Male","Mild","Stable",108.515300857835
+"P433","Month6",49,"Male","Mild","Stable",102.237995760515
+"P433","Month12",49,"Male","Mild","Stable",91.3813783414662
+"P434","Initial",38,"Male","Severe","Combination",1404.70632147044
+"P434","Month3",38,"Male","Severe","Improved",581.23181720078
+"P434","Month6",38,"Male","Severe","Improved",558.309400141239
+"P434","Month12",38,"Male","Severe","Stable",716.248949007131
+"P435","Initial",40,"Male","Severe","Medication B",1045.61641381122
+"P435","Month3",40,"Male","Severe","Stable",749.370854850858
+"P435","Month6",40,"Male","Severe","Stable",667.47218478471
+"P435","Month12",40,"Male","Severe","Stable",687.20287187025
+"P436","Initial",73,"Male","Moderate","Medication B",476.965518677607
+"P436","Month3",73,"Male","Moderate","Stable",322.421500403434
+"P436","Month6",73,"Male","Moderate","Worsened",453.500586797018
+"P436","Month12",73,"Male","Moderate","Worsened",434.535661479458
+"P437","Initial",37,"Male","Mild","Watchful Waiting",50.7828914094716
+"P437","Month3",37,"Male","Mild","Improved",77.3420037031174
+"P437","Month6",37,"Male","Mild","Improved",74.5359301790595
+"P437","Month12",37,"Male","Mild","Improved",80.1619807183743
+"P438","Initial",79,"Male","Moderate","Medication A",326.626060472801
+"P438","Month3",79,"Male","Moderate","Improved",222.83894533664
+"P438","Month6",79,"Male","Moderate","Improved",224.252513363957
+"P438","Month12",79,"Male","Moderate","Improved",231.551495399326
+"P439","Initial",34,"Male","Moderate","Medication B",436.821552130859
+"P439","Month3",34,"Male","Moderate","Improved",257.59206289798
+"P439","Month6",34,"Male","Moderate","Stable",291.386359096505
+"P439","Month12",34,"Male","Moderate","Stable",327.042915886268
+"P440","Initial",58,"Female","Moderate","Combination",597.890705745667
+"P440","Month3",58,"Female","Moderate","Stable",322.044901549816
+"P440","Month6",58,"Female","Moderate","Worsened",433.586124912836
+"P440","Month12",58,"Female","Moderate","Worsened",435.192073441576
+"P441","Initial",79,"Male","Mild","Medication A",111.873665263876
+"P441","Month3",79,"Male","Mild","Stable",102.498790519312
+"P441","Month6",79,"Male","Mild","Stable",93.6681831255555
+"P441","Month12",79,"Male","Mild","Stable",100.784565107897
+"P442","Initial",35,"Female","Moderate","Medication B",422.655380351935
+"P442","Month3",35,"Female","Moderate","Stable",276.240612259135
+"P442","Month6",35,"Female","Moderate","Worsened",434.723794804886
+"P442","Month12",35,"Female","Moderate","Worsened",459.141134682577
+"P443","Initial",39,"Female","Moderate","Medication B",467.13680120185
+"P443","Month3",39,"Female","Moderate","Discontinued",84.6879562544636
+"P443","Month6",39,"Female","Moderate","Discontinued",88.4704586081207
+"P443","Month12",39,"Female","Moderate","Discontinued",83.5997465020046
+"P444","Initial",55,"Male","Severe","Combination",1318.11612382531
+"P444","Month3",55,"Male","Severe","Stable",737.230060030706
+"P444","Month6",55,"Male","Severe","Stable",697.427804092877
+"P444","Month12",55,"Male","Severe","Stable",663.529128590599
+"P445","Initial",38,"Male","Mild","Watchful Waiting",52.9640132072382
+"P445","Month3",38,"Male","Mild","Stable",98.8546197488904
+"P445","Month6",38,"Male","Mild","Improved",74.7191970981658
+"P445","Month12",38,"Male","Mild","Improved",74.6415821909904
+"P446","Initial",40,"Female","Moderate","Medication B",492.178457183763
+"P446","Month3",40,"Female","Moderate","Improved",241.070734206587
+"P446","Month6",40,"Female","Moderate","Improved",241.081597097218
+"P446","Month12",40,"Female","Moderate","Improved",249.0606148839
+"P447","Initial",35,"Female","Severe","Combination",1480.66245276481
+"P447","Month3",35,"Female","Severe","Worsened",1090.39517583791
+"P447","Month6",35,"Female","Severe","Stable",753.120230147615
+"P447","Month12",35,"Female","Severe","Stable",649.758147536777
+"P448","Initial",61,"Female","Moderate","Combination",571.829432593659
+"P448","Month3",61,"Female","Moderate","Stable",323.748705578037
+"P448","Month6",61,"Female","Moderate","Stable",291.234627412632
+"P448","Month12",61,"Female","Moderate","Stable",325.936662415043
+"P449","Initial",41,"Female","Mild","Watchful Waiting",48.2712479215115
+"P449","Month3",41,"Female","Mild","Stable",102.907848916948
+"P449","Month6",41,"Female","Mild","Improved",80.3414857909083
+"P449","Month12",41,"Female","Mild","Improved",81.0010646507144
+"P450","Initial",48,"Male","Moderate","Medication A",359.914529649541
+"P450","Month3",48,"Male","Moderate","Improved",241.479581616819
+"P450","Month6",48,"Male","Moderate","Improved",234.390577565879
+"P450","Month12",48,"Male","Moderate","Improved",244.877823628485
+"P451","Initial",56,"Male","Moderate","Medication B",428.686266825534
+"P451","Month3",56,"Male","Moderate","Improved",247.041551727802
+"P451","Month6",56,"Male","Moderate","Improved",247.97066982463
+"P451","Month12",56,"Male","Moderate","Improved",242.611914787441
+"P452","Initial",61,"Female","Severe","Medication B",1009.72443853039
+"P452","Month3",61,"Female","Severe","Improved",587.259358152747
+"P452","Month6",61,"Female","Severe","Stable",748.586967727169
+"P452","Month12",61,"Female","Severe","Stable",681.593178706244
+"P453","Initial",56,"Male","Moderate","Medication A",355.769531730562
+"P453","Month3",56,"Male","Moderate","Improved",257.789943460375
+"P453","Month6",56,"Male","Moderate","Stable",294.530858541839
+"P453","Month12",56,"Male","Moderate","Stable",299.098217482679
+"P454","Initial",59,"Male","Severe","Combination",1401.03933414444
+"P454","Month3",59,"Male","Severe","Discontinued",190.661954121664
+"P454","Month6",59,"Male","Severe","Discontinued",205.601933685131
+"P454","Month12",59,"Male","Severe","Discontinued",208.331892807037
+"P455","Initial",33,"Male","Moderate","Combination",606.831486839801
+"P455","Month3",33,"Male","Moderate","Improved",248.283352945
+"P455","Month6",33,"Male","Moderate","Improved",248.749404419214
+"P455","Month12",33,"Male","Moderate","Improved",258.751554105431
+"P456","Initial",53,"Male","Moderate","Medication B",464.943337608129
+"P456","Month3",53,"Male","Moderate","Worsened",452.160538786557
+"P456","Month6",53,"Male","Moderate","Discontinued",86.5985054913908
+"P456","Month12",53,"Male","Moderate","Discontinued",81.4713416062295
+"P457","Initial",57,"Male","Mild","Medication A",111.120996924117
+"P457","Month3",57,"Male","Mild","Discontinued",30.0115655092523
+"P457","Month6",57,"Male","Mild","Discontinued",30.0655431370251
+"P457","Month12",57,"Male","Mild","Discontinued",27.691336656455
+"P458","Initial",32,"Male","Moderate","Medication B",428.052042787895
+"P458","Month3",32,"Male","Moderate","Worsened",419.805544274859
+"P458","Month6",32,"Male","Moderate","Stable",286.763779046014
+"P458","Month12",32,"Male","Moderate","Stable",279.152022292838
+"P459","Initial",75,"Male","Moderate","Medication A",354.881376955658
+"P459","Month3",75,"Male","Moderate","Stable",282.724765255116
+"P459","Month6",75,"Male","Moderate","Improved",219.743790194392
+"P459","Month12",75,"Male","Moderate","Stable",322.335470351391
+"P460","Initial",69,"Male","Mild","Medication A",113.140259971842
+"P460","Month3",69,"Male","Mild","Improved",75.2453993521631
+"P460","Month6",69,"Male","Mild","Improved",77.0648620165884
+"P460","Month12",69,"Male","Mild","Improved",77.2849284224212
+"P461","Initial",35,"Female","Moderate","Combination",632.307543223724
+"P461","Month3",35,"Female","Moderate","Stable",304.383678724989
+"P461","Month6",35,"Female","Moderate","Stable",279.727084664628
+"P461","Month12",35,"Female","Moderate","Improved",255.0417098701
+"P462","Initial",65,"Female","Mild","Medication A",130.127230016515
+"P462","Month3",65,"Female","Mild","Stable",95.0496058072895
+"P462","Month6",65,"Female","Mild","Improved",84.0229241773486
+"P462","Month12",65,"Female","Mild","Improved",75.2694168537855
+"P463","Initial",71,"Female","Moderate","Medication A",383.705519361421
+"P463","Month3",71,"Female","Moderate","Stable",288.120862268843
+"P463","Month6",71,"Female","Moderate","Worsened",473.994773919694
+"P463","Month12",71,"Female","Moderate","Worsened",415.858950479887
+"P464","Initial",77,"Female","Mild","Watchful Waiting",53.4465137845837
+"P464","Month3",77,"Female","Mild","Stable",106.424446660094
+"P464","Month6",77,"Female","Mild","Worsened",160.616694220807
+"P464","Month12",77,"Female","Mild","Worsened",135.436689367052
+"P465","Initial",59,"Female","Mild","Medication A",108.910225974396
+"P465","Month3",59,"Female","Mild","Worsened",143.965696147643
+"P465","Month6",59,"Female","Mild","Worsened",144.800715115853
+"P465","Month12",59,"Female","Mild","Worsened",137.243176884949
+"P466","Initial",77,"Female","Moderate","Medication B",468.727397499606
+"P466","Month3",77,"Female","Moderate","Stable",271.511183003895
+"P466","Month6",77,"Female","Moderate","Stable",319.443627912551
+"P466","Month12",77,"Female","Moderate","Worsened",451.028826017864
+"P467","Initial",39,"Female","Moderate","Medication B",474.003689854871
+"P467","Month3",39,"Female","Moderate","Stable",326.280270055868
+"P467","Month6",39,"Female","Moderate","Improved",242.014128126204
+"P467","Month12",39,"Female","Moderate","Improved",261.549012813717
+"P468","Initial",54,"Female","Moderate","Medication B",433.52502002148
+"P468","Month3",54,"Female","Moderate","Stable",287.207618267275
+"P468","Month6",54,"Female","Moderate","Stable",328.102837493643
+"P468","Month12",54,"Female","Moderate","Stable",284.574915245175
+"P469","Initial",67,"Male","Severe","Medication B",1112.94426631881
+"P469","Month3",67,"Male","Severe","Improved",537.063565570861
+"P469","Month6",67,"Male","Severe","Improved",582.039987452328
+"P469","Month12",67,"Male","Severe","Improved",589.252396456897
+"P470","Initial",80,"Female","Mild","Medication A",114.56952711381
+"P470","Month3",80,"Female","Mild","Improved",72.0833297632635
+"P470","Month6",80,"Female","Mild","Improved",78.7535990029573
+"P470","Month12",80,"Female","Mild","Improved",81.5650706999004
+"P471","Initial",65,"Female","Mild","Medication A",118.612016933039
+"P471","Month3",65,"Female","Mild","Stable",96.8508033640683
+"P471","Month6",65,"Female","Mild","Stable",100.332927834243
+"P471","Month12",65,"Female","Mild","Worsened",141.853705204558
+"P472","Initial",70,"Female","Moderate","Medication A",344.838238997385
+"P472","Month3",70,"Female","Moderate","Discontinued",81.4035910014063
+"P472","Month6",70,"Female","Moderate","Discontinued",90.5105973612517
+"P472","Month12",70,"Female","Moderate","Discontinued",88.5323385279626
+"P473","Initial",54,"Male","Mild","Medication A",131.395151188597
+"P473","Month3",54,"Male","Mild","Stable",90.991360032931
+"P473","Month6",54,"Male","Mild","Improved",82.2160195969045
+"P473","Month12",54,"Male","Mild","Improved",79.9022926054895
+"P474","Initial",33,"Female","Moderate","Combination",540.564750367776
+"P474","Month3",33,"Female","Moderate","Discontinued",84.3375567980111
+"P474","Month6",33,"Female","Moderate","Discontinued",92.4165163217112
+"P474","Month12",33,"Female","Moderate","Discontinued",90.3325012223795
+"P475","Initial",44,"Male","Mild","Medication A",129.400303373113
+"P475","Month3",44,"Male","Mild","Worsened",155.328064926434
+"P475","Month6",44,"Male","Mild","Worsened",150.41303970851
+"P475","Month12",44,"Male","Mild","Discontinued",28.8433348853141
+"P476","Initial",51,"Female","Severe","Combination",1371.26900965348
+"P476","Month3",51,"Female","Severe","Stable",651.461464362219
+"P476","Month6",51,"Female","Severe","Improved",546.538602165878
+"P476","Month12",51,"Female","Severe","Stable",667.84958192613
+"P477","Initial",78,"Female","Mild","Medication A",130.686954226345
+"P477","Month3",78,"Female","Mild","Stable",95.0452080368996
+"P477","Month6",78,"Female","Mild","Stable",104.714628825895
+"P477","Month12",78,"Female","Mild","Improved",73.0829200297594
+"P478","Initial",53,"Female","Mild","Medication A",116.899415848777
+"P478","Month3",53,"Female","Mild","Improved",75.4802165366709
+"P478","Month6",53,"Female","Mild","Improved",86.0637075304985
+"P478","Month12",53,"Female","Mild","Improved",78.7731335759163
+"P479","Initial",68,"Male","Moderate","Medication B",433.893200147431
+"P479","Month3",68,"Male","Moderate","Stable",294.756666775793
+"P479","Month6",68,"Male","Moderate","Improved",223.507007349283
+"P479","Month12",68,"Male","Moderate","Improved",246.198089752346
+"P480","Initial",76,"Male","Moderate","Medication B",474.245694489218
+"P480","Month3",76,"Male","Moderate","Discontinued",97.2323983171955
+"P480","Month6",76,"Male","Moderate","Discontinued",91.9827047204599
+"P480","Month12",76,"Male","Moderate","Discontinued",92.3523497097194
+"P481","Initial",66,"Male","Mild","Watchful Waiting",51.6206417954527
+"P481","Month3",66,"Male","Mild","Stable",108.599988990463
+"P481","Month6",66,"Male","Mild","Stable",109.844926842488
+"P481","Month12",66,"Male","Mild","Improved",76.1362627707422
+"P482","Initial",75,"Male","Moderate","Medication A",344.940710328519
+"P482","Month3",75,"Male","Moderate","Improved",259.756759811193
+"P482","Month6",75,"Male","Moderate","Improved",233.918746892363
+"P482","Month12",75,"Male","Moderate","Improved",250.730219252408
+"P483","Initial",76,"Female","Mild","Medication A",128.159333797172
+"P483","Month3",76,"Female","Mild","Stable",92.3337540915236
+"P483","Month6",76,"Female","Mild","Stable",106.890909560025
+"P483","Month12",76,"Female","Mild","Improved",82.4995347224176
+"P484","Initial",44,"Female","Moderate","Medication B",405.835261135362
+"P484","Month3",44,"Female","Moderate","Stable",276.474899472669
+"P484","Month6",44,"Female","Moderate","Stable",295.630029961467
+"P484","Month12",44,"Female","Moderate","Stable",319.694362459704
+"P485","Initial",45,"Male","Mild","Medication A",116.046415222809
+"P485","Month3",45,"Male","Mild","Stable",95.8937211241573
+"P485","Month6",45,"Male","Mild","Stable",108.135413252749
+"P485","Month12",45,"Male","Mild","Stable",98.133471715264
+"P486","Initial",48,"Male","Moderate","Medication A",364.871068345383
+"P486","Month3",48,"Male","Moderate","Improved",227.923151995987
+"P486","Month6",48,"Male","Moderate","Improved",222.444768536836
+"P486","Month12",48,"Male","Moderate","Stable",281.823454429395
+"P487","Initial",37,"Female","Moderate","Medication A",362.168225867674
+"P487","Month3",37,"Female","Moderate","Stable",327.338124434464
+"P487","Month6",37,"Female","Moderate","Stable",295.198098449036
+"P487","Month12",37,"Female","Moderate","Improved",256.288970690221
+"P488","Initial",60,"Male","Severe","Medication B",961.736789094284
+"P488","Month3",60,"Male","Severe","Worsened",1102.54825817188
+"P488","Month6",60,"Male","Severe","Stable",667.249871012755
+"P488","Month12",60,"Male","Severe","Stable",704.108105488122
+"P489","Initial",66,"Male","Severe","Combination",1272.62002772652
+"P489","Month3",66,"Male","Severe","Improved",590.154455784708
+"P489","Month6",66,"Male","Severe","Improved",605.979064520448
+"P489","Month12",66,"Male","Severe","Improved",587.5433024019
+"P490","Initial",68,"Male","Moderate","Medication A",331.013671003282
+"P490","Month3",68,"Male","Moderate","Stable",326.735407006927
+"P490","Month6",68,"Male","Moderate","Improved",224.569349750876
+"P490","Month12",68,"Male","Moderate","Improved",254.512728452682
+"P491","Initial",77,"Male","Severe","Combination",1447.95509105548
+"P491","Month3",77,"Male","Severe","Improved",550.852022845298
+"P491","Month6",77,"Male","Severe","Stable",735.491111320444
+"P491","Month12",77,"Male","Severe","Stable",688.089555338956
+"P492","Initial",45,"Male","Moderate","Medication A",366.770271196961
+"P492","Month3",45,"Male","Moderate","Stable",289.191980757751
+"P492","Month6",45,"Male","Moderate","Stable",308.788873278536
+"P492","Month12",45,"Male","Moderate","Stable",291.481597032398
+"P493","Initial",38,"Male","Mild","Medication A",128.924301087856
+"P493","Month3",38,"Male","Mild","Discontinued",29.4387059798464
+"P493","Month6",38,"Male","Mild","Discontinued",29.7349794725887
+"P493","Month12",38,"Male","Mild","Discontinued",32.3358757565729
+"P494","Initial",40,"Male","Mild","Watchful Waiting",51.5208290447481
+"P494","Month3",40,"Male","Mild","Improved",72.1591441594064
+"P494","Month6",40,"Male","Mild","Improved",82.488942053169
+"P494","Month12",40,"Male","Mild","Improved",75.8622024953365
+"P495","Initial",72,"Female","Mild","Medication A",131.173170978203
+"P495","Month3",72,"Female","Mild","Stable",98.9428771659732
+"P495","Month6",72,"Female","Mild","Worsened",155.058932360262
+"P495","Month12",72,"Female","Mild","Worsened",137.991023431532
+"P496","Initial",80,"Male","Mild","Watchful Waiting",47.0672538364306
+"P496","Month3",80,"Male","Mild","Improved",87.1565950661898
+"P496","Month6",80,"Male","Mild","Improved",81.0885131061077
+"P496","Month12",80,"Male","Mild","Improved",78.5202009379864
+"P497","Initial",59,"Female","Mild","Medication A",121.915092252195
+"P497","Month3",59,"Female","Mild","Stable",92.6402933476493
+"P497","Month6",59,"Female","Mild","Stable",99.9593511829153
+"P497","Month12",59,"Female","Mild","Improved",74.9807998500764
+"P498","Initial",39,"Female","Severe","Combination",1327.33925115317
+"P498","Month3",39,"Female","Severe","Improved",594.552400548011
+"P498","Month6",39,"Female","Severe","Improved",579.998245127499
+"P498","Month12",39,"Female","Severe","Improved",612.549195598811
+"P499","Initial",63,"Female","Severe","Combination",1298.76394296996
+"P499","Month3",63,"Female","Severe","Improved",554.461750432849
+"P499","Month6",63,"Female","Severe","Stable",698.539793933742
+"P499","Month12",63,"Female","Severe","Worsened",1058.94955673721
+"P500","Initial",67,"Female","Moderate","Medication B",446.069998454768
+"P500","Month3",67,"Female","Moderate","Improved",224.228571206331
+"P500","Month6",67,"Female","Moderate","Improved",250.312333211303
+"P500","Month12",67,"Female","Moderate","Improved",259.489014342427

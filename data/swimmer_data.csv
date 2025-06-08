@@ -1,0 +1,30 @@
+"patient_id","start_time","event_type","end_time","response_status","on_study","is_marker"
+"PT001",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT001",3,"Dose Reduction",8,"CR",FALSE,TRUE
+"PT001",8,"Treatment Restart",12,"CR",FALSE,TRUE
+"PT001",12,"Follow-up",14,"CR",TRUE,TRUE
+"PT002",0,"Treatment Start",6,"SD",FALSE,TRUE
+"PT002",6,"Dose Reduction",10,"PR",FALSE,TRUE
+"PT002",10,"Follow-up",12,"PR",TRUE,TRUE
+"PT003",0,"Treatment Start",5,"SD",FALSE,TRUE
+"PT003",5,"Adverse Event",9,"PR",FALSE,TRUE
+"PT003",9,"Dose Reduction",14,"CR",FALSE,TRUE
+"PT003",14,"Follow-up",16,"CR",TRUE,TRUE
+"PT004",0,"Treatment Start",7,"PD",FALSE,TRUE
+"PT004",7,"Disease Progression",9,"PD",FALSE,TRUE
+"PT005",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT005",3,"Adverse Event",10,"PR",FALSE,TRUE
+"PT005",10,"Follow-up",12,"CR",TRUE,TRUE
+"PT006",0,"Treatment Start",9,"SD",FALSE,TRUE
+"PT006",9,"Disease Progression",11,"PD",FALSE,TRUE
+"PT007",0,"Treatment Start",3,"SD",FALSE,TRUE
+"PT007",3,"Dose Reduction",6,"PR",FALSE,TRUE
+"PT007",6,"Follow-up",9,"PR",TRUE,TRUE
+"PT008",0,"Treatment Start",4,"PR",FALSE,TRUE
+"PT008",4,"Adverse Event",11,"PR",FALSE,TRUE
+"PT008",11,"Follow-up",14,"CR",TRUE,TRUE
+"PT009",0,"Treatment Start",9,"SD",FALSE,TRUE
+"PT009",9,"Disease Progression",10,"PD",FALSE,TRUE
+"PT010",0,"Treatment Start",3,"PR",FALSE,TRUE
+"PT010",3,"Treatment Restart",12,"CR",FALSE,TRUE
+"PT010",12,"Follow-up",15,"CR",TRUE,TRUE

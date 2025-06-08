@@ -126,10 +126,9 @@ Imports:
     vtree,
     poLCA,
     RColorBrewer,
-    scales
-VignetteBuilder:
-    knitr,
-    tiff
+    scales,
+    reshape2
+VignetteBuilder:knitr, tiff, quarto
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
     gastonstat/arcdiagram,
@@ -141,3 +140,5 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Suggests: 
+    quarto

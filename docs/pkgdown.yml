@@ -1,12 +1,16 @@
 pandoc: '3.4'
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
+  agepyramid: agepyramid.html
   agreement-analysis: agreement-analysis.html
+  alluvial: alluvial.html
+  benford: benford.html
   categorical-plots: categorical-plots.html
   clinicoPathDescriptives-introduction: clinicoPathDescriptives-introduction.html
   continuous-comparisons: continuous-comparisons.html
   correlations-scatterplots: correlations-scatterplots.html
+  crosstable: crosstable.html
   data-preperation: data-preperation.html
   data-summary: data-summary.html
   decisionpanel_advanced: decisionpanel_advanced.html
@@ -23,14 +27,18 @@ articles:
   nogoldstandard: nogoldstandard.html
   pathology_jamovi: pathology_jamovi.html
   pkgnet-report: pkgnet-report.html
+  reportcat: reportcat.html
   roc-analysis: roc-analysis.html
+  summarydata: summarydata.html
+  swimmerplot: swimmerplot.html
+  tableone: tableone.html
   use-ClinicoPathDescriptives-in-R: use-ClinicoPathDescriptives-in-R.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   use-jsurvival-in-R: use-jsurvival-in-R.html
   use-meddecide-in-R: use-meddecide-in-R.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
   visualization: visualization.html
-last_built: 2025-05-31T07:02Z
+last_built: 2025-06-03T20:23Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

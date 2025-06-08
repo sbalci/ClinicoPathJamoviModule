@@ -1,0 +1,55 @@
+---
+title: "Vignette: Checking Data Authenticity with Benford's Law"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Performing a Benford's Law Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+# Create a sample data frame of payment amounts
+# These values are designed to roughly follow Benford's Law.
+set.seed(123)
+payments <- data.frame(
+  amount = rlnorm(500, meanlog = 5, sdlog = 2)
+)
+
+# View the first few rows
+head(payments)
+```
+
+
+```{r}
+# This code simulates how the jamovi module would be called in an R environment.
+# You would need the ClinicoPathDescriptives package installed.
+
+# Load the library
+library(ClinicoPathDescriptives)
+
+# Run the Benford analysis
+results <- benford(
+    data = payments,
+    var = "amount"
+)
+
+# View the results:
+# 1. The main statistical analysis
+print(results$text)
+
+# 2. The list of suspicious data points
+print(results$text2)
+
+# 3. The plot
+print(results$plot)
+```
+

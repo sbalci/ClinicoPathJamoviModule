@@ -1,0 +1,891 @@
+"PatientID","VisitNumber","VisitDate","StudyCenter","AgeGroup","Gender","TreatmentGroup","DiagnosisPrimary","DiseaseStage","ComorbidityCount","BMICategory","SystolicBP","DiastolicBP","HeartRate","Temperature","RespiratoryRate","OxygenSaturation","HbA1c","Creatinine","eGFR","Hemoglobin","WBC","Platelets","TotalCholesterol","LDLCholesterol","HDLCholesterol","Triglycerides","PainScore","QualityOfLife","FunctionalStatus","MedicationAdherence","ClinicalScore"
+"PT001",1,2022-01-01,"Boston Medical Center","46-60","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",142,111,84,36.6,16,98,NA,0.74,89,14.1,NA,238,130,95,41,148,NA,41,91,88,59
+"PT001",2,2022-02-09,"Boston Medical Center","46-60","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",141,103,66,37.9,11,98,9.4,0.6,85,11.5,10,225,NA,136,62,117,NA,58,97,100,55
+"PT001",3,2022-04-12,"Boston Medical Center","46-60","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",143,111,55,36.7,16,94,9,0.46,92,NA,9.1,295,165,132,50,53,1,75,69,97,70
+"PT002",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Overweight",120,96,76,36.8,15,98,6.7,0.73,89,10.6,7.5,254,236,145,36,226,4,53,63,100,50
+"PT002",2,2022-04-18,"Johns Hopkins","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Overweight",118,94,88,37.5,18,100,9.1,1.43,80,13.2,5.7,297,216,136,64,104,7,64,74,87,46
+"PT002",3,2022-05-30,"Johns Hopkins","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Overweight",125,94,72,36.7,27,98,10.4,1.08,81,13.6,NA,181,198,NA,NA,108,2,51,76,88,67
+"PT003",1,2022-01-01,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",2,"Normal",139,101,83,36,12,100,10.3,1.08,84,12.8,NA,186,146,113,50,103,4,65,45,73,47
+"PT003",2,2022-03-03,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",2,"Normal",145,109,101,36.5,20,96,5.9,0.63,NA,NA,NA,141,216,148,41,163,4,61,100,100,40
+"PT003",3,2022-04-06,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",2,"Normal",124,89,66,36.8,14,96,8.8,0.97,94,14.2,3.9,NA,154,146,48,199,3,68,49,69,67
+"PT003",4,2022-05-13,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",2,"Normal",133,106,71,36.8,17,98,NA,NA,87,13.8,4.2,249,192,84,58,NA,NA,87,87,60,46
+"PT003",5,2022-08-04,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",2,"Normal",130,91,80,37.1,18,96,6.1,1.19,67,13.4,9.1,315,166,77,47,NA,4,83,66,81,69
+"PT004",1,2022-01-01,"Mayo Clinic","18-30","Male","Control","Heart Failure","Stage II",0,"Overweight",135,107,63,36.6,20,94,5.6,1.19,67,12.8,6.7,216,183,72,64,167,2,98,73,94,43
+"PT004",2,2022-04-27,"Mayo Clinic","18-30","Male","Control","Heart Failure","Stage II",0,"Overweight",118,84,91,37.5,9,94,6.6,1.22,69,14.5,9.9,256,167,142,64,170,5,68,NA,53,27
+"PT004",3,2022-07-28,"Mayo Clinic","18-30","Male","Control","Heart Failure","Stage II",0,"Overweight",128,104,86,36.5,22,98,5.2,NA,106,12,6,185,225,143,28,217,0,75,76,71,50
+"PT004",4,2022-10-18,"Mayo Clinic","18-30","Male","Control","Heart Failure","Stage II",0,"Overweight",128,97,68,37.2,12,96,6.2,0.24,122,NA,5.3,179,187,101,NA,137,6,54,48,82,37
+"PT005",1,2022-01-01,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage II",5,"Obese",104,88,87,37.5,19,96,7.3,0.99,98,15.4,12.7,209,239,127,68,128,0,75,85,89,56
+"PT005",2,2022-03-22,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage II",5,"Obese",125,93,78,37.1,16,97,7.1,1.15,67,NA,6.7,245,175,116,NA,154,4,73,78,99,57
+"PT005",3,2022-05-17,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage II",5,"Obese",119,94,90,36,15,99,5.3,NA,99,NA,9.4,262,NA,127,42,NA,2,NA,69,70,80
+"PT006",1,2022-01-01,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",167,109,96,37,15,96,6.9,1.51,103,12,10.2,245,149,95,NA,124,7,62,48,95,47
+"PT006",2,2022-03-30,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",131,101,81,36,16,98,4.9,1.55,72,15,6.1,NA,NA,162,77,76,NA,74,52,100,66
+"PT006",3,2022-06-10,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",140,104,69,37,17,98,6.3,1.01,88,13.6,7.6,221,246,NA,57,91,0,54,NA,80,68
+"PT006",4,2022-09-03,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",132,103,65,37.7,18,99,4.9,0.93,NA,13.5,7.3,NA,228,154,NA,171,2,60,84,100,64
+"PT006",5,2022-10-14,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",112,85,79,36.6,17,100,NA,1.58,68,10,7.8,184,146,87,93,142,NA,50,67,63,61
+"PT006",6,2023-02-03,"UCLA Medical","18-30","Male","Treatment B","Heart Failure","Stage III",0,"Overweight",126,99,85,36.7,20,96,6.1,1.22,79,15.5,12.4,347,155,110,NA,NA,3,88,63,73,84
+"PT007",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage IV",4,"Obese",131,102,73,37.1,20,95,9.8,0.58,NA,NA,NA,295,259,168,38,43,7,48,77,77,49
+"PT007",2,2022-03-18,"Cleveland Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage IV",4,"Obese",163,119,104,36.7,14,99,8.8,1.01,62,11.5,2.9,236,233,144,18,NA,7,69,71,96,68
+"PT007",3,2022-04-19,"Cleveland Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage IV",4,"Obese",130,90,61,36.8,19,99,7.4,1.3,NA,11.4,4.8,186,114,71,23,NA,NA,97,86,71,58
+"PT007",4,2022-08-08,"Cleveland Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage IV",4,"Obese",119,91,71,36.7,16,98,8.4,1.02,90,14.6,5.3,190,208,133,69,150,NA,74,99,78,60
+"PT007",5,2022-11-08,"Cleveland Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage IV",4,"Obese",134,105,87,36.9,17,93,6,1.46,85,15,9.3,212,176,NA,62,127,6,66,NA,72,85
+"PT008",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment B","Chronic Kidney Disease","Stage III",0,"Overweight",110,80,78,37,21,97,6.5,1.22,83,NA,8,375,189,120,71,122,2,52,100,76,47
+"PT008",2,2022-02-04,"Cleveland Clinic","46-60","Female","Treatment B","Chronic Kidney Disease","Stage III",0,"Overweight",141,112,57,36.9,13,97,6.4,NA,52,13,8.3,218,235,158,57,205,3,58,56,87,38
+"PT008",3,2022-04-11,"Cleveland Clinic","46-60","Female","Treatment B","Chronic Kidney Disease","Stage III",0,"Overweight",134,97,67,37.4,13,96,5.9,1.95,64,14.1,9.3,229,168,88,NA,181,5,74,61,100,52
+"PT009",1,2022-01-01,"Cleveland Clinic",">75","Female","Treatment A","Coronary Artery Disease","Stage I",1,"Normal",104,75,65,37.4,10,96,NA,0.73,92,11.1,8.1,234,153,114,48,183,4,68,93,73,30
+"PT009",2,2022-04-21,"Cleveland Clinic",">75","Female","Treatment A","Coronary Artery Disease","Stage I",1,"Normal",131,92,75,36.7,16,98,3.6,1.04,78,13.6,9.4,289,219,135,NA,169,NA,NA,81,81,41
+"PT009",3,2022-08-18,"Cleveland Clinic",">75","Female","Treatment A","Coronary Artery Disease","Stage I",1,"Normal",132,95,82,37.2,15,99,7.5,0.94,NA,14.2,12.8,196,220,NA,15,215,6,86,59,79,46
+"PT009",4,2022-12-07,"Cleveland Clinic",">75","Female","Treatment A","Coronary Artery Disease","Stage I",1,"Normal",114,88,43,37.3,13,99,6.1,0.88,80,13.6,11.8,235,126,84,39,NA,6,73,NA,61,43
+"PT010",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A+B","Hypertension","Stage II",4,"Normal",111,86,82,37,20,96,6.2,0.75,102,14.3,9.1,184,228,94,56,209,NA,67,100,69,48
+"PT010",2,2022-04-28,"Cleveland Clinic","18-30","Female","Treatment A+B","Hypertension","Stage II",4,"Normal",131,101,87,36.8,11,96,3.9,0.73,106,15.8,3.8,253,NA,NA,42,NA,5,97,100,65,54
+"PT010",3,2022-06-25,"Cleveland Clinic","18-30","Female","Treatment A+B","Hypertension","Stage II",4,"Normal",141,110,69,36.8,17,96,5.9,0.85,100,12.6,6.3,286,196,136,39,129,6,71,64,80,65
+"PT010",4,2022-10-02,"Cleveland Clinic","18-30","Female","Treatment A+B","Hypertension","Stage II",4,"Normal",117,89,72,37.8,14,99,NA,1.15,NA,16,9.8,237,237,136,51,128,4,82,80,75,61
+"PT010",5,2022-11-21,"Cleveland Clinic","18-30","Female","Treatment A+B","Hypertension","Stage II",4,"Normal",116,100,79,36.2,20,100,NA,1.17,95,12.6,7.3,194,203,128,NA,80,6,56,70,79,78
+"PT011",1,2022-01-01,"Cleveland Clinic","18-30","Female","Control","Coronary Artery Disease","Stage II",4,"Normal",143,108,86,36.6,13,99,5.3,0.85,75,11,7.7,158,247,176,52,181,5,81,84,99,36
+"PT011",2,2022-03-17,"Cleveland Clinic","18-30","Female","Control","Coronary Artery Disease","Stage II",4,"Normal",155,116,75,36.7,16,93,5.8,0.98,80,15.7,3.4,203,184,127,NA,197,6,68,45,90,45
+"PT011",3,2022-04-17,"Cleveland Clinic","18-30","Female","Control","Coronary Artery Disease","Stage II",4,"Normal",121,85,82,36.6,15,97,NA,1.22,75,NA,5.8,NA,176,82,66,NA,6,72,97,99,49
+"PT011",4,2022-06-02,"Cleveland Clinic","18-30","Female","Control","Coronary Artery Disease","Stage II",4,"Normal",154,113,77,36.3,15,97,6.6,1.3,88,16.3,6.6,NA,NA,173,52,163,4,58,84,100,51
+"PT012",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A","Heart Failure","Stage II",2,"Normal",118,84,65,36.5,17,99,9.1,1.39,85,14,5.3,284,266,146,45,182,4,81,71,74,27
+"PT012",2,2022-04-16,"Johns Hopkins","46-60","Female","Treatment A","Heart Failure","Stage II",2,"Normal",126,96,90,38.3,17,98,6.7,NA,78,14.5,NA,232,206,130,70,91,6,72,NA,76,58
+"PT012",3,2022-07-12,"Johns Hopkins","46-60","Female","Treatment A","Heart Failure","Stage II",2,"Normal",141,105,76,36.3,15,98,5.8,0.96,97,13.6,9.8,182,232,151,61,236,4,72,89,66,60
+"PT013",1,2022-01-01,"Mayo Clinic","61-75","Female","Control","Heart Failure","Stage I",2,"Overweight",137,103,81,36.8,14,100,8.8,1.43,74,17.2,5.6,251,242,145,50,168,2,79,95,85,46
+"PT013",2,2022-03-25,"Mayo Clinic","61-75","Female","Control","Heart Failure","Stage I",2,"Overweight",128,87,57,37.1,16,97,3.5,1.1,77,14.5,7.5,246,274,195,NA,199,0,46,87,100,42
+"PT013",3,2022-07-05,"Mayo Clinic","61-75","Female","Control","Heart Failure","Stage I",2,"Overweight",144,104,72,36.1,22,98,5.4,1.5,81,11.8,7.5,306,175,86,NA,173,1,67,50,96,38
+"PT013",4,2022-08-12,"Mayo Clinic","61-75","Female","Control","Heart Failure","Stage I",2,"Overweight",109,90,81,36.8,14,98,5.3,0.96,97,11.1,NA,192,201,119,NA,192,NA,69,100,85,48
+"PT013",5,2022-10-08,"Mayo Clinic","61-75","Female","Control","Heart Failure","Stage I",2,"Overweight",147,112,81,37.2,19,99,5,0.83,94,13.9,5.3,NA,NA,99,51,220,NA,77,73,100,44
+"PT014",1,2022-01-01,"Boston Medical Center","31-45","Female","Treatment A","Diabetes Type 2","Stage IV",3,"Obese",133,102,59,36.9,15,96,NA,0.64,98,14.2,8.5,197,143,95,47,188,8,66,91,80,50
+"PT014",2,2022-03-08,"Boston Medical Center","31-45","Female","Treatment A","Diabetes Type 2","Stage IV",3,"Obese",153,119,65,37.4,16,100,8.2,1.19,100,13.1,7.8,253,199,126,54,175,3,73,31,71,51
+"PT014",3,2022-05-15,"Boston Medical Center","31-45","Female","Treatment A","Diabetes Type 2","Stage IV",3,"Obese",160,109,70,36.6,15,95,9,NA,101,13.5,11.5,NA,257,138,19,206,7,75,55,98,67
+"PT014",4,2022-08-25,"Boston Medical Center","31-45","Female","Treatment A","Diabetes Type 2","Stage IV",3,"Obese",119,99,88,37.4,22,95,NA,1.09,77,11.6,7.5,292,210,113,32,188,6,84,86,84,73
+"PT015",1,2022-01-01,"UCLA Medical","18-30","Female","Control","Hypertension","Stage I",4,"Obese",133,94,80,37.4,15,95,5.5,1.44,86,13.3,4.9,204,204,131,37,213,4,75,84,100,39
+"PT015",2,2022-02-08,"UCLA Medical","18-30","Female","Control","Hypertension","Stage I",4,"Obese",144,99,53,37,18,95,6.2,0.87,96,15.9,10.7,178,NA,156,NA,149,NA,58,74,89,54
+"PT015",3,2022-03-13,"UCLA Medical","18-30","Female","Control","Hypertension","Stage I",4,"Obese",124,93,78,38.2,15,97,8.6,0.7,113,NA,9,193,256,175,NA,244,5,69,83,68,59
+"PT015",4,2022-06-05,"UCLA Medical","18-30","Female","Control","Hypertension","Stage I",4,"Obese",131,105,91,37.5,16,93,6,NA,101,15.7,6.7,210,186,121,NA,85,3,73,82,75,32
+"PT015",5,2022-07-22,"UCLA Medical","18-30","Female","Control","Hypertension","Stage I",4,"Obese",131,88,68,37.3,17,100,8.5,0.28,NA,NA,10,240,174,123,69,232,4,76,24,83,50
+"PT016",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",3,"Overweight",87,67,70,36.8,17,96,5.8,2.23,47,12.3,5.2,282,139,81,62,NA,7,NA,79,100,43
+"PT016",2,2022-03-25,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",3,"Overweight",118,96,77,37.4,16,97,6.8,1.36,85,13.3,8.4,170,274,189,NA,239,7,61,70,92,53
+"PT016",3,2022-05-04,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",3,"Overweight",148,109,80,37.7,15,98,7.4,2.53,46,14.4,7.5,179,145,108,38,166,5,45,63,100,71
+"PT016",4,2022-08-16,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",3,"Overweight",115,95,90,37.8,16,93,6.3,1.99,56,12.2,7.7,261,231,152,58,157,6,48,72,99,62
+"PT016",5,2022-09-19,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",3,"Overweight",137,104,82,37.6,20,96,6.2,1.95,41,12.8,7.2,262,171,144,40,NA,5,76,46,78,59
+"PT017",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment B","Heart Failure","Stage III",1,"Obese",141,109,64,36.2,18,96,5.8,1.61,52,16.1,7.6,138,253,164,15,68,1,45,63,82,71
+"PT017",2,2022-04-08,"Cleveland Clinic","46-60","Female","Treatment B","Heart Failure","Stage III",1,"Obese",123,94,89,37.5,14,99,6.4,NA,102,11.7,9.1,155,176,NA,37,178,4,65,100,66,56
+"PT017",3,2022-05-11,"Cleveland Clinic","46-60","Female","Treatment B","Heart Failure","Stage III",1,"Obese",123,86,76,36.5,13,100,7.1,1.23,86,12.9,8.5,348,214,138,36,60,5,67,78,95,58
+"PT017",4,2022-06-21,"Cleveland Clinic","46-60","Female","Treatment B","Heart Failure","Stage III",1,"Obese",96,81,84,36.9,17,96,5,0.91,107,14.3,NA,214,188,91,33,NA,4,83,NA,92,59
+"PT017",5,2022-09-22,"Cleveland Clinic","46-60","Female","Treatment B","Heart Failure","Stage III",1,"Obese",94,79,74,37.3,14,96,5.9,1.19,NA,NA,NA,263,201,132,49,137,4,89,68,100,85
+"PT018",1,2022-01-01,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",120,88,78,37.3,12,96,9.2,0.81,88,13.9,9.5,271,217,121,39,87,5,39,70,66,62
+"PT018",2,2022-03-17,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",129,98,80,37.8,20,95,NA,1.25,86,12.9,5.6,269,220,131,NA,154,NA,90,76,75,52
+"PT018",3,2022-04-29,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",154,119,72,36.8,20,97,5.7,1.08,103,11.7,NA,165,229,149,56,68,3,NA,100,71,63
+"PT018",4,2022-08-05,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",117,94,74,36.8,17,100,NA,1.79,90,NA,7.1,248,149,113,58,146,NA,72,79,81,73
+"PT018",5,2022-09-12,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",105,87,93,37.6,13,97,7.3,0.97,91,12.4,NA,230,189,143,40,111,3,90,67,95,63
+"PT018",6,2022-11-11,"Mayo Clinic","61-75","Male","Treatment A","Diabetes Type 2","Stage III",3,"Obese",110,100,86,37.2,16,97,5.9,1.5,71,NA,5.9,NA,179,106,69,108,2,71,NA,81,81
+"PT019",1,2022-01-01,"Mayo Clinic","46-60","Female","Treatment B","Hypertension","Stage I",4,"Obese",128,102,72,36.7,18,97,6.1,1.33,74,12.8,3.9,188,169,116,NA,192,5,60,68,57,44
+"PT019",2,2022-03-30,"Mayo Clinic","46-60","Female","Treatment B","Hypertension","Stage I",4,"Obese",143,110,91,37.6,17,98,5.9,0.75,113,16.1,7.7,NA,191,109,56,34,2,67,90,99,65
+"PT019",3,2022-05-07,"Mayo Clinic","46-60","Female","Treatment B","Hypertension","Stage I",4,"Obese",127,92,86,37,15,95,8.1,1.16,87,14.5,8,275,248,NA,40,184,0,58,64,64,54
+"PT019",4,2022-06-23,"Mayo Clinic","46-60","Female","Treatment B","Hypertension","Stage I",4,"Obese",130,103,75,36.6,17,98,2.6,0.67,98,12.2,7.7,NA,188,116,63,NA,6,82,66,81,68
+"PT020",1,2022-01-01,"Mayo Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",113,84,72,37.1,13,98,NA,1.14,79,15.7,8.1,249,200,140,29,127,3,72,81,68,49
+"PT020",2,2022-03-18,"Mayo Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",118,89,60,35.9,22,97,7.7,NA,97,16.7,8.2,163,164,102,NA,124,5,84,82,90,53
+"PT020",3,2022-04-25,"Mayo Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",122,90,63,36.7,11,96,5.8,1.49,80,13.3,9.9,239,171,104,52,163,7,NA,NA,100,39
+"PT020",4,2022-06-04,"Mayo Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",117,86,82,37.2,17,99,5.9,1.51,83,11.3,6.1,187,113,67,48,99,0,NA,65,95,42
+"PT021",1,2022-01-01,"Boston Medical Center",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",139,110,80,37.7,18,95,9.9,0.25,117,NA,6.2,308,240,NA,38,NA,2,69,54,72,70
+"PT021",2,2022-03-02,"Boston Medical Center",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",134,106,78,37.5,17,94,8.2,1.32,77,13.1,9.9,233,239,NA,58,152,5,51,90,95,36
+"PT021",3,2022-06-19,"Boston Medical Center",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",136,102,95,37.3,13,99,7.2,1.36,91,13.3,6.1,249,NA,137,72,NA,2,74,78,100,42
+"PT022",1,2022-01-01,"Mayo Clinic","61-75","Female","Treatment B","Hypertension","Stage II",1,"Normal",135,90,75,37.2,13,97,6.6,1.12,102,11.4,10.5,207,196,134,46,211,6,50,79,85,52
+"PT022",2,2022-03-02,"Mayo Clinic","61-75","Female","Treatment B","Hypertension","Stage II",1,"Normal",130,99,74,36.4,14,98,7,NA,83,14.2,7.7,283,220,139,62,138,7,57,68,77,58
+"PT022",3,2022-05-26,"Mayo Clinic","61-75","Female","Treatment B","Hypertension","Stage II",1,"Normal",114,92,86,36.7,13,96,5.9,1.45,76,13.7,12,251,157,73,65,87,2,70,48,63,60
+"PT023",1,2022-01-01,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",156,111,78,37.2,18,96,4.9,0.6,113,15,4.8,269,168,93,70,162,5,71,100,84,39
+"PT023",2,2022-02-17,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",133,103,80,36.9,14,96,5.3,0.88,NA,13,9,218,190,NA,63,134,6,67,82,100,46
+"PT023",3,2022-04-06,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",154,116,74,37.6,15,99,8.7,1.11,NA,12.2,10.2,225,225,112,71,NA,8,64,81,74,62
+"PT023",4,2022-07-07,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",125,109,95,37,17,98,7.1,NA,87,15,6.7,221,221,87,53,174,6,NA,87,100,80
+"PT023",5,2022-11-01,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",138,104,89,37.5,20,98,5.9,0.87,78,13.3,NA,199,189,157,NA,87,4,77,NA,79,71
+"PT023",6,2022-12-17,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage IV",0,"Normal",114,98,64,37.2,10,95,6.3,0.91,97,13.3,NA,199,NA,116,NA,233,5,86,97,90,79
+"PT024",1,2022-01-01,"UCLA Medical",">75","Female","Control","Diabetes Type 2","Stage I",4,"Overweight",125,93,70,37.6,20,96,10,1.08,90,15.6,3.9,220,225,142,59,89,3,81,55,83,50
+"PT024",2,2022-02-28,"UCLA Medical",">75","Female","Control","Diabetes Type 2","Stage I",4,"Overweight",118,95,65,35.9,18,100,7.7,0.75,108,12.2,8.3,246,141,111,NA,191,3,47,62,81,39
+"PT024",3,2022-05-15,"UCLA Medical",">75","Female","Control","Diabetes Type 2","Stage I",4,"Overweight",132,89,63,36.6,15,97,7.5,0.86,113,10.6,NA,283,168,76,38,81,NA,79,98,77,57
+"PT024",4,2022-06-16,"UCLA Medical",">75","Female","Control","Diabetes Type 2","Stage I",4,"Overweight",118,88,76,36.3,16,97,7.5,0.79,94,12.4,8.9,269,163,106,78,128,3,86,76,100,46
+"PT025",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment B","Hypertension","Stage I",3,"Overweight",141,110,78,37.7,16,99,6.9,0.73,92,17.2,NA,243,169,128,68,154,5,72,63,100,42
+"PT025",2,2022-04-27,"UCLA Medical","46-60","Male","Treatment B","Hypertension","Stage I",3,"Overweight",135,104,62,37.6,13,97,NA,NA,82,12.3,9.5,240,176,123,49,81,4,59,99,85,49
+"PT025",3,2022-06-12,"UCLA Medical","46-60","Male","Treatment B","Hypertension","Stage I",3,"Overweight",128,99,83,37.3,11,98,6.9,1.07,66,13.9,7.8,217,246,180,25,183,3,75,53,80,54
+"PT025",4,2022-09-14,"UCLA Medical","46-60","Male","Treatment B","Hypertension","Stage I",3,"Overweight",130,102,62,37.8,15,96,7,0.54,102,12.2,NA,NA,230,158,NA,NA,5,70,77,75,65
+"PT025",5,2022-10-27,"UCLA Medical","46-60","Male","Treatment B","Hypertension","Stage I",3,"Overweight",130,110,86,37,21,97,7.1,0.16,NA,13.3,NA,251,255,156,47,137,1,66,53,79,47
+"PT026",1,2022-01-01,"Boston Medical Center","61-75","Female","Control","Heart Failure","Stage III",2,"Overweight",149,103,78,36.7,16,95,7,0.77,93,14.3,5.5,NA,200,94,29,301,4,87,87,95,53
+"PT026",2,2022-02-16,"Boston Medical Center","61-75","Female","Control","Heart Failure","Stage III",2,"Overweight",113,85,86,36.1,15,96,7.9,1.08,86,13.9,6.3,237,NA,149,37,130,2,43,51,75,46
+"PT026",3,2022-05-26,"Boston Medical Center","61-75","Female","Control","Heart Failure","Stage III",2,"Overweight",105,87,80,36.9,19,97,7,1.04,79,NA,7.5,182,251,142,60,101,7,63,97,100,51
+"PT027",1,2022-01-01,"Mayo Clinic","46-60","Female","Treatment A","Hypertension","Stage III",2,"Overweight",118,94,100,37.5,20,98,4.9,1.17,91,12.1,7.5,287,99,32,48,199,5,79,48,100,61
+"PT027",2,2022-03-21,"Mayo Clinic","46-60","Female","Treatment A","Hypertension","Stage III",2,"Overweight",128,97,63,36.4,12,99,6.1,1.05,96,13.3,6.3,297,133,104,63,90,4,76,100,85,60
+"PT027",3,2022-05-23,"Mayo Clinic","46-60","Female","Treatment A","Hypertension","Stage III",2,"Overweight",139,122,81,36.7,14,98,7.4,0.75,93,12.3,7.9,NA,170,132,42,134,4,72,100,89,49
+"PT028",1,2022-01-01,"Cleveland Clinic","18-30","Male","Control","Diabetes Type 2","Stage II",2,"Overweight",131,105,67,37,17,97,8,0.46,93,12.2,8.6,NA,179,57,45,217,4,64,79,76,53
+"PT028",2,2022-03-27,"Cleveland Clinic","18-30","Male","Control","Diabetes Type 2","Stage II",2,"Overweight",131,99,72,37.7,14,98,6.1,1.33,92,14.4,6.5,265,214,NA,NA,119,3,79,57,92,49
+"PT028",3,2022-04-27,"Cleveland Clinic","18-30","Male","Control","Diabetes Type 2","Stage II",2,"Overweight",103,83,66,37.7,12,100,NA,NA,92,10.9,9.1,206,213,149,65,122,1,NA,60,99,56
+"PT028",4,2022-08-24,"Cleveland Clinic","18-30","Male","Control","Diabetes Type 2","Stage II",2,"Overweight",120,89,81,36.7,15,97,6.8,0.76,108,12.5,NA,325,159,89,31,NA,NA,53,46,76,34
+"PT029",1,2022-01-01,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",129,93,61,37,16,97,6.5,1,75,13.9,6.4,281,79,16,66,NA,5,NA,96,96,47
+"PT029",2,2022-03-15,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",124,86,77,37.9,15,96,7.8,1.32,78,NA,5.9,156,218,114,68,145,3,79,94,86,49
+"PT029",3,2022-05-16,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",151,109,79,36.9,13,98,4.8,1.08,66,13.6,8.1,250,127,96,43,105,4,52,100,77,58
+"PT029",4,2022-07-01,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",104,91,77,36.6,20,96,6.2,0.93,100,NA,6.3,NA,138,71,63,195,5,75,93,79,53
+"PT029",5,2022-09-15,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",124,111,89,36.1,12,98,4.9,1,108,14.7,8.9,310,179,NA,33,183,1,68,40,96,72
+"PT029",6,2022-10-19,"UCLA Medical",">75","Female","Treatment B","Coronary Artery Disease","Stage II",4,"Obese",145,109,73,36.5,14,98,7,0.63,107,13.1,7.4,295,135,79,30,143,1,49,99,82,82
+"PT030",1,2022-01-01,"Mayo Clinic",">75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",124,96,75,36.6,14,99,7.3,0.72,97,12.5,8.4,227,213,167,55,NA,0,90,54,60,50
+"PT030",2,2022-02-07,"Mayo Clinic",">75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",108,83,75,38.1,11,96,9.5,0.74,NA,NA,NA,311,184,123,59,128,2,60,47,77,57
+"PT030",3,2022-04-13,"Mayo Clinic",">75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",118,99,61,38.3,16,99,8.4,1.2,84,15.2,8.9,216,238,140,30,104,4,87,NA,100,54
+"PT031",1,2022-01-01,"Cleveland Clinic","61-75","Female","Treatment B","Hypertension","Stage III",3,"Obese",129,98,87,37.4,14,99,5.6,0.9,75,13.5,7.6,235,168,122,41,220,3,75,55,80,54
+"PT031",2,2022-04-04,"Cleveland Clinic","61-75","Female","Treatment B","Hypertension","Stage III",3,"Obese",139,104,70,37.2,14,96,3.4,1.24,64,11.6,8.3,249,223,121,51,207,7,55,87,82,56
+"PT031",3,2022-06-16,"Cleveland Clinic","61-75","Female","Treatment B","Hypertension","Stage III",3,"Obese",134,99,81,36.7,12,95,9.2,1.42,94,12.9,4.4,NA,206,112,55,360,NA,65,71,58,74
+"PT032",1,2022-01-01,"Boston Medical Center","46-60","Male","Treatment B","Hypertension","Stage II",2,"Obese",120,101,70,36.9,16,98,7,1.13,81,11.6,NA,307,NA,NA,54,NA,0,98,67,90,49
+"PT032",2,2022-04-29,"Boston Medical Center","46-60","Male","Treatment B","Hypertension","Stage II",2,"Obese",116,90,81,37.5,10,95,6.8,NA,97,15.2,8,241,190,92,69,111,7,48,43,99,50
+"PT032",3,2022-08-10,"Boston Medical Center","46-60","Male","Treatment B","Hypertension","Stage II",2,"Obese",144,111,60,36.8,12,94,4.5,0.5,120,15.2,8.1,196,168,101,53,254,4,70,71,100,54
+"PT032",4,2022-11-07,"Boston Medical Center","46-60","Male","Treatment B","Hypertension","Stage II",2,"Obese",151,119,59,37,18,96,6.5,1.33,NA,NA,8.5,226,205,90,50,234,3,72,NA,94,71
+"PT033",1,2022-01-01,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",111,86,89,37.2,18,100,6,1.78,66,14,9.4,264,280,148,85,130,0,77,35,100,64
+"PT033",2,2022-04-21,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",112,92,69,37.2,17,99,7.5,NA,NA,12.1,5.8,232,NA,161,67,100,3,72,89,93,54
+"PT033",3,2022-06-14,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",140,112,74,36.3,17,93,8.2,NA,71,12.3,9.4,NA,219,135,32,174,8,83,100,93,71
+"PT033",4,2022-08-28,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",150,112,91,36.8,15,95,7.7,2.03,NA,10.5,7.6,205,186,NA,50,162,4,88,66,100,57
+"PT033",5,2022-11-05,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",136,107,83,36.4,21,99,4.5,1.63,81,NA,8.7,275,248,179,51,172,4,NA,100,100,68
+"PT033",6,2023-01-18,"UCLA Medical","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",1,"Obese",113,96,56,35.4,19,98,8.4,1.46,84,13.4,5.4,236,123,NA,37,265,6,72,66,70,80
+"PT034",1,2022-01-01,"Johns Hopkins","31-45","Male","Treatment A","Heart Failure","Stage II",0,"Overweight",108,78,93,37,20,94,6.3,1.02,97,15,7.2,205,315,196,42,111,5,54,60,80,47
+"PT034",2,2022-04-28,"Johns Hopkins","31-45","Male","Treatment A","Heart Failure","Stage II",0,"Overweight",103,84,82,37.6,23,100,4.7,NA,130,12.5,7.7,294,190,110,29,102,2,51,98,82,52
+"PT034",3,2022-07-05,"Johns Hopkins","31-45","Male","Treatment A","Heart Failure","Stage II",0,"Overweight",117,90,76,37.5,16,97,NA,NA,93,14.6,6.8,200,NA,NA,NA,128,3,86,91,100,71
+"PT034",4,2022-08-10,"Johns Hopkins","31-45","Male","Treatment A","Heart Failure","Stage II",0,"Overweight",142,103,87,35.6,13,96,7.8,1.09,92,14.1,5.7,253,211,126,43,104,3,83,78,91,73
+"PT035",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",1,"Overweight",139,104,77,36.9,17,99,7.8,0.83,96,16.1,10.2,218,236,131,49,180,5,90,66,74,46
+"PT035",2,2022-04-26,"Johns Hopkins","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",1,"Overweight",120,89,73,36.9,16,97,NA,0.5,104,16.2,NA,383,215,130,44,193,3,67,77,94,31
+"PT035",3,2022-08-07,"Johns Hopkins","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",1,"Overweight",109,90,71,37.4,18,98,4.9,0.94,105,12.7,3.8,289,164,125,NA,137,4,59,71,83,62
+"PT035",4,2022-10-29,"Johns Hopkins","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",1,"Overweight",148,107,70,37.2,13,97,NA,0.82,100,13.3,7.9,245,NA,163,66,132,6,50,86,99,59
+"PT035",5,2023-01-01,"Johns Hopkins","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",1,"Overweight",144,113,83,37.5,15,98,5.7,0.67,98,10.7,NA,281,NA,140,37,194,4,NA,68,100,61
+"PT036",1,2022-01-01,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",117,89,62,37,13,97,6.6,1.31,61,12.8,7.3,295,NA,117,48,72,4,94,100,84,57
+"PT036",2,2022-03-05,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",142,96,80,38.1,14,97,NA,1.06,84,11.8,9.3,171,183,110,NA,111,8,77,73,77,47
+"PT036",3,2022-05-17,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",109,81,94,37.2,17,100,10,0.91,NA,NA,6.7,277,207,NA,82,117,5,89,87,90,41
+"PT036",4,2022-09-14,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",132,94,81,36.5,16,97,7.6,0.82,85,12.6,6.2,290,260,150,NA,111,1,61,95,76,47
+"PT036",5,2022-12-30,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",138,109,64,36.4,16,99,6.6,1.33,75,13.1,5.9,282,133,28,32,143,5,78,65,67,61
+"PT036",6,2023-03-25,"Mayo Clinic","31-45","Female","Control","Hypertension","Stage I",5,"Overweight",122,88,72,37.5,17,97,6.6,0.73,97,11.8,4.9,214,NA,108,46,NA,5,NA,64,68,57
+"PT037",1,2022-01-01,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",104,82,72,37.3,16,93,8.7,0.51,101,15.6,NA,276,195,127,61,95,7,69,100,65,56
+"PT037",2,2022-04-27,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",115,95,70,36.9,17,94,NA,1.12,83,13.8,10,286,199,118,40,96,7,45,71,92,52
+"PT037",3,2022-07-11,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",145,106,84,38.2,20,99,8.6,0.94,98,11.9,8.4,257,172,112,27,NA,1,65,100,100,55
+"PT037",4,2022-08-12,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",135,97,66,35.8,13,100,10,0.58,NA,14.9,8,NA,295,170,71,127,2,45,81,69,57
+"PT037",5,2022-11-07,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",123,101,54,38.5,16,99,7,0.52,87,12.5,3.9,258,167,72,NA,147,5,NA,61,97,79
+"PT037",6,2023-01-23,"Johns Hopkins","18-30","Female","Treatment B","Diabetes Type 2","Stage III",2,"Overweight",131,103,75,37.2,18,97,8.8,0.78,108,13.5,NA,NA,NA,129,35,216,2,75,57,100,84
+"PT038",1,2022-01-01,"Boston Medical Center",">75","Male","Treatment A+B","Coronary Artery Disease","Stage IV",2,"Obese",155,109,75,36.7,13,100,5.8,1.08,96,13.2,3,199,NA,106,52,137,8,79,83,91,45
+"PT038",2,2022-02-19,"Boston Medical Center",">75","Male","Treatment A+B","Coronary Artery Disease","Stage IV",2,"Obese",145,115,69,37.1,18,93,5.9,0.89,86,15.8,7.2,345,196,176,35,104,7,75,62,80,62
+"PT038",3,2022-04-06,"Boston Medical Center",">75","Male","Treatment A+B","Coronary Artery Disease","Stage IV",2,"Obese",159,122,81,38.1,18,97,5.4,NA,82,14.4,8,157,NA,NA,74,303,5,33,74,72,57
+"PT038",4,2022-05-26,"Boston Medical Center",">75","Male","Treatment A+B","Coronary Artery Disease","Stage IV",2,"Obese",152,116,96,36,22,98,7.4,0.63,102,16,11.2,NA,NA,105,NA,207,NA,59,77,100,69
+"PT039",1,2022-01-01,"UCLA Medical","46-60","Female","Treatment A","Diabetes Type 2","Stage III",2,"Overweight",155,122,69,37.5,19,100,8.1,0.62,NA,14.4,5.6,342,191,94,10,175,9,60,91,93,63
+"PT039",2,2022-03-03,"UCLA Medical","46-60","Female","Treatment A","Diabetes Type 2","Stage III",2,"Overweight",138,106,102,37.4,17,95,8.2,0.96,89,17.5,8.5,221,246,169,92,182,4,74,68,73,59
+"PT039",3,2022-06-06,"UCLA Medical","46-60","Female","Treatment A","Diabetes Type 2","Stage III",2,"Overweight",96,82,75,37.1,20,98,5.8,0.99,84,NA,5.7,157,NA,160,62,NA,3,67,84,100,55
+"PT039",4,2022-08-17,"UCLA Medical","46-60","Female","Treatment A","Diabetes Type 2","Stage III",2,"Overweight",130,99,60,36.9,16,98,7.3,0.96,91,11,8.2,NA,166,100,48,36,7,45,75,83,66
+"PT039",5,2022-10-25,"UCLA Medical","46-60","Female","Treatment A","Diabetes Type 2","Stage III",2,"Overweight",123,99,103,36.6,19,98,NA,0.85,93,13.9,7.3,327,178,144,NA,NA,3,NA,53,86,89
+"PT040",1,2022-01-01,"Cleveland Clinic","46-60","Male","Control","Diabetes Type 2","Stage II",4,"Underweight",138,102,73,37.2,16,96,7.5,0.79,102,14.4,7.3,197,NA,NA,NA,123,3,75,44,68,56
+"PT040",2,2022-03-13,"Cleveland Clinic","46-60","Male","Control","Diabetes Type 2","Stage II",4,"Underweight",114,89,72,36.8,19,97,6.2,0.91,71,13.5,7.4,246,NA,101,35,175,3,46,75,68,61
+"PT040",3,2022-05-21,"Cleveland Clinic","46-60","Male","Control","Diabetes Type 2","Stage II",4,"Underweight",122,94,63,37,18,96,10.1,NA,98,15.1,6.4,314,261,NA,41,54,1,46,51,96,42
+"PT041",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage I",3,"Obese",145,116,73,36.6,14,96,5.7,1.26,88,12.6,7.2,115,207,124,36,138,2,57,82,69,64
+"PT041",2,2022-04-06,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage I",3,"Obese",127,100,103,36.8,18,95,9.2,0.8,104,12.6,6.4,210,283,NA,30,144,5,37,57,99,45
+"PT041",3,2022-07-15,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage I",3,"Obese",118,88,59,36.9,15,95,NA,0.93,89,14.6,7.1,164,223,NA,46,248,4,100,99,100,61
+"PT041",4,2022-09-13,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage I",3,"Obese",97,88,69,36.8,12,98,7.4,0.69,102,13.5,6.7,368,163,121,54,164,NA,76,62,88,68
+"PT042",1,2022-01-01,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",137,102,98,36.9,22,96,NA,1.77,68,NA,NA,184,139,NA,47,91,2,76,48,85,35
+"PT042",2,2022-02-06,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",134,99,78,36.9,20,98,NA,2.01,71,13.6,NA,NA,222,132,NA,158,5,80,71,88,63
+"PT042",3,2022-04-25,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",136,102,71,36.9,14,97,6.4,2.05,42,12.4,6.2,274,138,87,64,211,1,97,89,91,72
+"PT042",4,2022-08-02,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",123,92,64,37.5,21,98,NA,2.26,52,12.9,7.4,240,235,157,48,111,1,82,60,70,53
+"PT042",5,2022-10-14,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",126,101,82,36,11,96,7,2.17,37,14,NA,209,NA,NA,26,105,7,71,32,88,59
+"PT042",6,2022-12-01,"Boston Medical Center","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage III",5,"Normal",109,86,83,36.1,18,95,4.6,1.36,91,13.5,NA,224,225,103,63,148,9,61,44,100,66
+"PT043",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",125,91,83,36.7,18,95,10.3,0.91,82,14,10.3,291,194,162,36,159,3,64,49,99,50
+"PT043",2,2022-02-25,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",118,93,87,37.4,19,94,9,NA,57,11.4,12.3,365,245,164,51,194,6,73,97,61,48
+"PT043",3,2022-06-16,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",111,87,86,37.2,14,96,7.2,0.67,114,13.1,8.8,281,NA,130,46,NA,4,NA,64,88,53
+"PT043",4,2022-10-12,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",108,87,73,37.1,15,100,9.3,1.1,70,13.7,9.6,288,191,93,NA,206,3,74,72,81,65
+"PT043",5,2023-01-14,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",103,80,84,36.8,14,92,7.3,0.56,130,13.6,9.1,227,NA,NA,NA,NA,1,83,NA,93,72
+"PT043",6,2023-04-04,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",2,"Obese",115,102,67,37.3,19,96,7.3,1.17,78,NA,9.2,272,181,73,38,NA,6,52,73,73,71
+"PT044",1,2022-01-01,"Johns Hopkins","31-45","Female","Treatment A","Heart Failure","Stage III",2,"Overweight",162,119,56,36.5,20,98,7.3,1.13,92,14.9,10.3,282,156,103,60,170,5,69,65,92,53
+"PT044",2,2022-04-23,"Johns Hopkins","31-45","Female","Treatment A","Heart Failure","Stage III",2,"Overweight",139,103,89,37.3,19,95,4.9,1.37,NA,14,5.9,NA,262,131,53,130,0,59,56,100,50
+"PT044",3,2022-06-14,"Johns Hopkins","31-45","Female","Treatment A","Heart Failure","Stage III",2,"Overweight",128,99,81,36.7,18,96,6.5,0.73,92,11.1,8.6,251,208,135,74,75,5,75,77,98,58
+"PT045",1,2022-01-01,"Boston Medical Center","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage II",2,"Overweight",159,113,84,37.2,12,95,5.9,1.29,95,12.5,6.7,252,269,155,52,215,6,73,NA,56,45
+"PT045",2,2022-04-21,"Boston Medical Center","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage II",2,"Overweight",117,91,90,37.1,17,98,6.8,1.4,100,16.4,7.8,239,191,119,NA,183,7,90,68,78,46
+"PT045",3,2022-06-01,"Boston Medical Center","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage II",2,"Overweight",84,71,83,36.7,16,96,6.3,2.01,56,14.1,5.1,NA,183,NA,61,132,6,NA,76,100,60
+"PT045",4,2022-09-26,"Boston Medical Center","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage II",2,"Overweight",112,90,81,37.4,16,96,8.6,2.09,NA,14,NA,218,213,132,31,102,2,68,80,72,73
+"PT045",5,2023-01-12,"Boston Medical Center","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage II",2,"Overweight",158,117,73,35.9,13,99,NA,NA,64,12.5,7.5,268,236,NA,61,263,4,NA,51,75,62
+"PT046",1,2022-01-01,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",127,93,65,36.7,18,99,7.5,0.9,99,12.8,10.3,260,291,170,40,NA,6,84,NA,92,43
+"PT046",2,2022-04-14,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",144,113,59,38,19,95,8.6,1.11,90,16,9.5,289,202,68,53,242,6,64,79,89,46
+"PT046",3,2022-07-20,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",154,113,84,36.4,16,94,6.4,0.97,114,13.6,6.1,300,182,123,58,188,9,71,95,91,38
+"PT046",4,2022-10-20,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",151,115,72,37.4,18,97,6.6,1.08,90,13.3,8,NA,NA,148,43,126,5,NA,87,68,62
+"PT046",5,2022-12-15,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",141,109,69,37.4,17,97,NA,1.18,95,13.4,5.1,179,75,49,35,NA,4,69,62,93,64
+"PT046",6,2023-03-29,"Cleveland Clinic",">75","Female","Treatment A","Heart Failure","Stage IV",2,"Obese",141,112,37,36.4,14,94,NA,0.53,109,NA,8.8,190,131,NA,NA,33,6,91,85,81,74
+"PT047",1,2022-01-01,"Boston Medical Center","46-60","Female","Treatment A+B","Diabetes Type 2","Stage I",2,"Obese",126,105,46,37,17,97,7.4,0.72,86,13,8.1,219,303,208,53,185,4,77,75,73,40
+"PT047",2,2022-04-30,"Boston Medical Center","46-60","Female","Treatment A+B","Diabetes Type 2","Stage I",2,"Obese",117,90,85,37.1,16,100,8,0.89,95,15.4,6.4,174,169,106,38,135,4,83,70,90,77
+"PT047",3,2022-07-14,"Boston Medical Center","46-60","Female","Treatment A+B","Diabetes Type 2","Stage I",2,"Obese",135,108,54,36.8,15,99,7.6,0.55,NA,14.4,7.8,255,174,91,71,NA,1,96,60,92,52
+"PT047",4,2022-10-22,"Boston Medical Center","46-60","Female","Treatment A+B","Diabetes Type 2","Stage I",2,"Obese",107,97,77,37.5,11,98,8.2,1.58,68,12.9,8.2,NA,NA,160,55,NA,4,52,76,94,65
+"PT048",1,2022-01-01,"Cleveland Clinic","61-75","Male","Treatment A+B","Heart Failure","Stage II",2,"Underweight",113,93,66,36.7,20,98,6.5,0.83,94,12.7,NA,264,215,139,18,132,4,77,55,100,56
+"PT048",2,2022-03-06,"Cleveland Clinic","61-75","Male","Treatment A+B","Heart Failure","Stage II",2,"Underweight",135,107,47,36.8,20,97,NA,0.98,95,14.2,NA,325,132,71,60,87,5,NA,92,84,51
+"PT048",3,2022-06-05,"Cleveland Clinic","61-75","Male","Treatment A+B","Heart Failure","Stage II",2,"Underweight",125,96,65,36.9,15,96,5.3,1.09,78,13.4,8.1,276,184,145,NA,219,3,64,96,82,45
+"PT048",4,2022-08-20,"Cleveland Clinic","61-75","Male","Treatment A+B","Heart Failure","Stage II",2,"Underweight",153,110,79,37.9,12,95,6.6,0.7,99,9.7,10.1,287,193,NA,64,114,1,33,72,100,54
+"PT048",5,2022-12-12,"Cleveland Clinic","61-75","Male","Treatment A+B","Heart Failure","Stage II",2,"Underweight",116,93,89,36.9,17,97,4.6,0.51,108,NA,NA,264,234,153,47,87,6,70,80,100,85
+"PT049",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",117,94,56,35.6,20,97,5.9,0.87,78,NA,7.8,322,233,158,61,161,3,100,69,74,40
+"PT049",2,2022-03-17,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",107,83,80,36.5,15,96,NA,1.09,77,14,4.6,NA,225,119,63,NA,2,84,78,89,52
+"PT049",3,2022-06-03,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",146,114,84,36.7,16,96,7.2,NA,105,10.1,NA,289,190,98,41,167,5,60,69,90,53
+"PT049",4,2022-09-09,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",118,96,86,37.4,18,95,6.1,NA,66,13.2,4.6,NA,NA,96,67,162,4,92,76,89,50
+"PT049",5,2022-10-10,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",128,100,70,37.7,17,96,NA,0.34,105,12.3,NA,301,NA,170,29,146,NA,79,100,100,66
+"PT049",6,2022-12-14,"Cleveland Clinic","18-30","Female","Treatment A","Hypertension","Stage I",2,"Overweight",128,98,68,37,15,98,4.7,0.86,99,12.7,NA,250,221,114,NA,97,5,64,NA,77,58
+"PT050",1,2022-01-01,"Mayo Clinic",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",3,"Normal",117,93,76,37,16,99,6.8,0.81,92,12.7,5.1,214,149,86,42,211,NA,99,84,74,46
+"PT050",2,2022-04-01,"Mayo Clinic",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",3,"Normal",79,71,97,37,17,96,9,0.72,80,14,8.2,229,267,170,68,114,5,74,87,86,58
+"PT050",3,2022-06-29,"Mayo Clinic",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",3,"Normal",109,87,52,36.2,19,94,8.4,1.35,NA,13.5,5.8,246,187,93,43,188,1,76,NA,72,45
+"PT050",4,2022-08-01,"Mayo Clinic",">75","Female","Treatment A+B","Diabetes Type 2","Stage III",3,"Normal",119,94,82,36.7,20,100,7.3,NA,92,12.7,6.1,219,NA,131,63,NA,6,83,74,100,63
+"PT051",1,2022-01-01,"UCLA Medical","31-45","Female","Treatment A","Hypertension","Stage III",1,"Normal",105,80,80,36.4,19,98,4.5,NA,93,11.3,6.9,316,251,188,55,NA,2,73,100,88,39
+"PT051",2,2022-03-13,"UCLA Medical","31-45","Female","Treatment A","Hypertension","Stage III",1,"Normal",126,98,85,36.3,22,98,NA,0.58,118,13.5,9.1,221,125,81,52,185,0,36,59,84,54
+"PT051",3,2022-04-14,"UCLA Medical","31-45","Female","Treatment A","Hypertension","Stage III",1,"Normal",142,103,60,37.2,9,100,NA,1.46,77,14.4,7.2,NA,230,134,50,115,2,75,65,79,56
+"PT051",4,2022-06-21,"UCLA Medical","31-45","Female","Treatment A","Hypertension","Stage III",1,"Normal",119,98,62,36.7,19,97,6.3,0.61,92,10.7,9.2,172,171,83,52,207,2,59,63,98,57
+"PT052",1,2022-01-01,"Cleveland Clinic","31-45","Male","Control","Diabetes Type 2","Stage III",3,"Underweight",108,85,57,36.5,17,97,9.3,1.39,96,13.7,10,261,236,176,NA,89,4,57,74,100,55
+"PT052",2,2022-02-01,"Cleveland Clinic","31-45","Male","Control","Diabetes Type 2","Stage III",3,"Underweight",130,107,74,36.4,13,100,8.3,1.15,73,13.4,7.1,186,221,133,69,153,7,64,99,100,66
+"PT052",3,2022-04-16,"Cleveland Clinic","31-45","Male","Control","Diabetes Type 2","Stage III",3,"Underweight",133,98,98,37.2,16,97,7.8,1.07,85,12.8,NA,230,218,151,5,NA,6,NA,69,97,43
+"PT052",4,2022-06-01,"Cleveland Clinic","31-45","Male","Control","Diabetes Type 2","Stage III",3,"Underweight",112,93,73,36.6,15,93,7.8,0.79,96,12.2,10.8,256,178,98,70,NA,NA,82,77,71,55
+"PT052",5,2022-08-27,"Cleveland Clinic","31-45","Male","Control","Diabetes Type 2","Stage III",3,"Underweight",140,106,80,36.9,14,95,NA,1.6,77,NA,8.2,NA,211,110,37,143,3,87,60,85,43
+"PT053",1,2022-01-01,"Johns Hopkins","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Overweight",143,104,94,37.1,16,96,6.6,NA,97,13.7,6.8,144,194,140,85,95,6,58,100,100,43
+"PT053",2,2022-04-17,"Johns Hopkins","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Overweight",122,97,70,37.2,17,98,6.8,0.99,105,NA,NA,303,247,175,37,123,5,62,100,75,59
+"PT053",3,2022-06-11,"Johns Hopkins","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Overweight",136,105,56,37.7,17,98,NA,1.08,103,13.6,NA,275,258,181,28,56,2,100,66,100,65
+"PT053",4,2022-07-15,"Johns Hopkins","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Overweight",131,108,59,37,23,99,5.6,1.23,NA,13.9,5.7,203,143,109,53,227,0,71,89,69,73
+"PT054",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment A+B","Hypertension","Stage II",2,"Overweight",121,96,67,36.9,18,97,5.5,0.96,92,14.2,8.5,250,159,97,13,70,3,53,69,75,39
+"PT054",2,2022-04-23,"Cleveland Clinic","46-60","Female","Treatment A+B","Hypertension","Stage II",2,"Overweight",90,78,62,36.3,15,98,NA,1.16,76,12.8,5.9,325,214,149,46,211,4,75,68,90,51
+"PT054",3,2022-08-11,"Cleveland Clinic","46-60","Female","Treatment A+B","Hypertension","Stage II",2,"Overweight",134,104,69,36.4,17,95,5.5,1.22,68,13.8,NA,220,199,85,47,94,3,71,67,100,44
+"PT054",4,2022-10-14,"Cleveland Clinic","46-60","Female","Treatment A+B","Hypertension","Stage II",2,"Overweight",111,86,72,36.3,17,98,7.6,0.83,103,15.1,10.3,161,206,112,NA,87,3,48,67,74,70
+"PT054",5,2023-02-11,"Cleveland Clinic","46-60","Female","Treatment A+B","Hypertension","Stage II",2,"Overweight",139,107,37,36.6,12,97,5.9,0.88,NA,NA,4.6,266,177,NA,46,71,2,78,38,95,64
+"PT055",1,2022-01-01,"Mayo Clinic","31-45","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Obese",141,117,89,37.5,16,94,NA,0.92,104,14.7,8.5,314,164,88,55,NA,NA,85,85,88,35
+"PT055",2,2022-04-08,"Mayo Clinic","31-45","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Obese",110,81,87,37.4,18,96,4.7,1.43,90,12.9,7.6,268,106,64,39,98,5,56,100,88,53
+"PT055",3,2022-05-28,"Mayo Clinic","31-45","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Obese",152,108,57,36.9,16,99,7.9,0.96,93,12.4,3.4,205,NA,124,19,139,3,50,63,70,69
+"PT055",4,2022-07-26,"Mayo Clinic","31-45","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Obese",136,100,78,37,23,100,8.2,NA,NA,12.2,8.9,196,203,175,NA,228,3,NA,81,49,82
+"PT055",5,2022-09-11,"Mayo Clinic","31-45","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Obese",113,86,62,37.2,15,98,7.5,1.22,77,14.2,6,273,266,159,NA,233,NA,NA,66,89,78
+"PT056",1,2022-01-01,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",142,103,70,37.5,16,96,7.9,1.08,91,14.5,9.5,NA,130,NA,57,217,4,67,55,100,50
+"PT056",2,2022-03-05,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",145,101,64,37.2,15,98,5.3,0.15,107,15.8,NA,NA,183,90,57,246,4,36,100,57,57
+"PT056",3,2022-05-21,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",119,96,87,37.3,16,97,9,0.67,85,13.9,NA,235,114,73,NA,103,4,73,85,77,67
+"PT056",4,2022-06-29,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",115,89,76,37.2,18,98,7.1,0.87,NA,12.8,2.4,326,234,104,56,137,5,65,98,86,58
+"PT056",5,2022-08-13,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",128,100,82,36.8,13,97,7.2,NA,57,15.1,8.9,215,NA,173,47,121,5,74,88,73,66
+"PT056",6,2022-09-20,"Boston Medical Center","18-30","Female","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",142,103,78,37.1,13,97,7.5,0.61,83,NA,7.4,NA,185,105,67,167,5,55,70,92,76
+"PT057",1,2022-01-01,"Mayo Clinic",">75","Female","Treatment A+B","Heart Failure","Stage I",0,"Overweight",123,97,77,36.3,14,98,4.4,0.63,107,16.6,4.6,297,163,103,52,121,5,84,68,92,59
+"PT057",2,2022-02-28,"Mayo Clinic",">75","Female","Treatment A+B","Heart Failure","Stage I",0,"Overweight",115,103,69,36.9,19,100,7.3,0.98,86,12.9,5.4,283,145,110,NA,161,5,68,72,83,64
+"PT057",3,2022-06-22,"Mayo Clinic",">75","Female","Treatment A+B","Heart Failure","Stage I",0,"Overweight",115,88,74,36.5,13,99,7.3,0.8,94,13.5,10.9,292,202,108,60,92,NA,61,100,87,52
+"PT058",1,2022-01-01,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",143,114,69,37.2,12,97,7.4,0.93,NA,14.6,7.5,263,254,169,53,162,5,68,54,69,40
+"PT058",2,2022-05-01,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",113,86,74,38.4,12,95,7.8,1.13,80,10.9,7.5,190,190,96,48,171,3,70,100,83,47
+"PT058",3,2022-08-01,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",128,95,67,36.2,19,95,4.5,1.62,82,13.4,6.5,334,206,NA,46,119,2,77,90,90,40
+"PT058",4,2022-10-02,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",150,113,79,36.7,14,96,6.5,0.69,99,14.1,NA,199,NA,NA,73,201,3,57,100,74,56
+"PT058",5,2022-11-20,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",130,101,63,36.9,18,95,5.9,NA,109,NA,9.1,165,278,188,NA,NA,NA,74,80,97,47
+"PT058",6,2023-03-18,"Johns Hopkins","31-45","Male","Control","Heart Failure","Stage III",2,"Normal",136,102,89,37.6,18,94,6,NA,83,NA,5.7,311,258,160,39,226,5,66,71,71,43
+"PT059",1,2022-01-01,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",157,109,52,37.5,19,97,7.5,1.84,83,12.8,8.3,221,109,77,60,179,6,71,96,71,54
+"PT059",2,2022-03-17,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",136,112,68,37.3,15,98,5.1,1.9,NA,14.1,7.9,NA,199,125,55,249,NA,52,68,82,40
+"PT059",3,2022-05-27,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",117,92,86,37.9,19,94,7.6,1.45,83,10.9,5.8,NA,156,87,22,123,3,NA,66,87,62
+"PT059",4,2022-08-04,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",131,96,62,37,14,97,5,1.65,71,14.1,9.4,208,225,122,30,100,5,60,69,84,71
+"PT059",5,2022-11-12,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",132,99,72,37,20,97,NA,1.83,55,12.4,14.6,258,194,144,30,162,3,50,NA,67,55
+"PT059",6,2023-02-22,"UCLA Medical","18-30","Female","Treatment A","Chronic Kidney Disease","Stage II",0,"Underweight",152,116,72,37.7,14,96,6,1.94,NA,12.9,5.8,300,185,109,NA,155,2,89,76,75,71
+"PT060",1,2022-01-01,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",137,95,83,36.7,17,99,8.5,1.98,65,13.6,8.1,244,246,172,18,245,2,68,72,83,63
+"PT060",2,2022-04-10,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",107,88,82,37,12,99,8.6,1.83,57,14,9.9,247,94,80,57,212,4,92,47,100,36
+"PT060",3,2022-06-18,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",149,103,48,37.2,15,96,6.4,1.41,70,9.7,10.5,NA,221,NA,37,186,6,73,65,76,42
+"PT060",4,2022-08-20,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",144,105,78,36.8,10,95,8.4,NA,73,13,9.1,320,203,NA,51,137,NA,NA,43,100,59
+"PT060",5,2022-12-11,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",129,93,77,37.3,14,100,5.3,2,NA,13.8,10.1,290,NA,117,56,173,2,96,98,89,60
+"PT060",6,2023-01-29,"Johns Hopkins",">75","Female","Control","Chronic Kidney Disease","Stage III",4,"Normal",108,77,56,37.9,16,94,6.1,2.17,74,NA,NA,199,173,126,13,96,NA,59,66,93,63
+"PT061",1,2022-01-01,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",2,"Obese",142,114,87,36.5,13,96,6.6,1.01,87,13.6,7.3,308,219,153,35,169,4,53,82,68,56
+"PT061",2,2022-02-02,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",2,"Obese",113,83,88,37.2,13,92,8.1,0.52,77,14.2,8.5,227,222,129,59,169,3,82,100,100,49
+"PT061",3,2022-04-22,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",2,"Obese",129,107,72,36.8,20,97,5,0.91,98,12.5,7.8,309,218,123,NA,110,2,56,NA,67,61
+"PT062",1,2022-01-01,"Boston Medical Center","31-45","Female","Treatment B","Heart Failure","Stage III",4,"Overweight",129,94,79,36.9,17,94,6.5,0.66,NA,12.8,7.4,298,151,NA,NA,88,3,34,68,57,55
+"PT062",2,2022-04-10,"Boston Medical Center","31-45","Female","Treatment B","Heart Failure","Stage III",4,"Overweight",136,107,85,37,15,98,8.3,0.96,NA,14,7.5,NA,179,128,54,108,7,55,100,74,49
+"PT062",3,2022-05-21,"Boston Medical Center","31-45","Female","Treatment B","Heart Failure","Stage III",4,"Overweight",134,96,74,37.4,11,95,NA,1.01,99,11.1,7.1,249,220,99,63,NA,4,67,84,83,60
+"PT063",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment A","Heart Failure","Stage III",1,"Overweight",147,103,83,37.1,14,95,6.8,1.32,94,13.8,6.2,314,194,119,78,97,3,NA,92,70,46
+"PT063",2,2022-03-16,"UCLA Medical","46-60","Male","Treatment A","Heart Failure","Stage III",1,"Overweight",114,96,72,37.7,12,99,7,0.78,100,13.2,8.4,279,260,144,51,211,1,79,83,92,34
+"PT063",3,2022-05-22,"UCLA Medical","46-60","Male","Treatment A","Heart Failure","Stage III",1,"Overweight",120,100,92,37.1,13,95,NA,1.13,80,12.8,7,189,175,120,35,NA,4,56,88,100,52
+"PT063",4,2022-06-26,"UCLA Medical","46-60","Male","Treatment A","Heart Failure","Stage III",1,"Overweight",133,100,86,36.4,20,99,6.9,NA,NA,NA,NA,200,NA,118,45,106,5,55,64,74,76
+"PT064",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Normal",143,101,86,36.8,17,98,6.3,1.3,65,13.2,4.8,331,157,110,28,135,7,50,88,92,60
+"PT064",2,2022-03-06,"Mayo Clinic","31-45","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Normal",121,91,92,37.3,13,99,6.2,1.06,75,14.5,6,185,199,99,24,219,0,95,78,55,64
+"PT064",3,2022-05-03,"Mayo Clinic","31-45","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Normal",143,111,76,37.2,17,97,6.4,NA,94,14,3.1,199,176,106,59,145,1,84,67,98,55
+"PT064",4,2022-08-02,"Mayo Clinic","31-45","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Normal",115,93,61,37,21,98,8.2,NA,81,NA,NA,NA,197,114,21,146,3,62,74,92,72
+"PT065",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",0,"Normal",138,94,61,36.5,15,98,7.8,1.13,86,14.4,7.1,288,148,127,55,98,3,80,38,72,48
+"PT065",2,2022-02-15,"Cleveland Clinic","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",0,"Normal",137,109,97,36.9,20,95,7.8,1.65,84,15.3,9.4,273,178,117,49,104,2,92,28,100,59
+"PT065",3,2022-05-26,"Cleveland Clinic","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",0,"Normal",143,105,73,36.3,17,96,NA,0.87,93,12.5,9.5,NA,191,125,50,196,6,71,73,67,67
+"PT065",4,2022-07-07,"Cleveland Clinic","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",0,"Normal",128,94,78,37.8,16,98,7.1,NA,NA,12,NA,227,210,153,47,89,2,57,69,76,85
+"PT065",5,2022-11-03,"Cleveland Clinic","46-60","Female","Treatment A+B","Diabetes Type 2","Stage II",0,"Normal",128,107,55,37.8,17,98,6.6,NA,96,14.1,5.7,261,267,NA,61,96,4,66,80,93,58
+"PT066",1,2022-01-01,"UCLA Medical","61-75","Female","Treatment A+B","Chronic Kidney Disease","Stage IV",2,"Underweight",160,118,76,36.1,13,97,4.7,NA,80,14.4,4.1,252,213,97,57,NA,NA,89,93,93,43
+"PT066",2,2022-02-11,"UCLA Medical","61-75","Female","Treatment A+B","Chronic Kidney Disease","Stage IV",2,"Underweight",161,121,67,36.5,17,96,8.5,1.77,NA,13,11.3,352,194,152,57,91,7,86,52,100,57
+"PT066",3,2022-06-11,"UCLA Medical","61-75","Female","Treatment A+B","Chronic Kidney Disease","Stage IV",2,"Underweight",139,108,72,37.1,17,96,6.4,1.85,71,15.1,NA,NA,NA,96,44,81,5,78,61,68,67
+"PT066",4,2022-07-14,"UCLA Medical","61-75","Female","Treatment A+B","Chronic Kidney Disease","Stage IV",2,"Underweight",164,121,66,37,17,94,6.9,2.27,51,15.1,5.3,223,203,127,79,196,4,78,67,84,66
+"PT066",5,2022-09-21,"UCLA Medical","61-75","Female","Treatment A+B","Chronic Kidney Disease","Stage IV",2,"Underweight",119,96,57,37.4,18,100,6.3,NA,56,12.5,6,349,190,105,NA,150,8,77,NA,77,94
+"PT067",1,2022-01-01,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",152,110,68,36.8,16,95,6.9,0.99,101,12.1,6.9,209,226,188,42,223,4,NA,92,85,37
+"PT067",2,2022-03-09,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",109,89,70,37.3,21,99,8.4,0.83,76,12.6,7.5,188,181,106,63,109,5,100,96,97,75
+"PT067",3,2022-06-16,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",119,87,72,38,11,99,7.4,NA,99,NA,6.2,333,303,169,52,123,4,62,91,92,55
+"PT067",4,2022-08-21,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",121,95,76,36,10,98,7,1.02,91,14.3,8.1,172,NA,129,42,125,4,80,33,90,73
+"PT067",5,2022-12-05,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",134,101,78,36.9,16,99,5.9,1.23,NA,13.1,7.5,364,215,134,46,149,NA,77,78,66,72
+"PT067",6,2023-02-05,"Cleveland Clinic","31-45","Male","Treatment A","Coronary Artery Disease","Stage III",2,"Normal",90,73,77,36.3,16,95,6.9,2.24,NA,13.3,5.1,333,216,136,25,182,3,78,82,81,70
+"PT068",1,2022-01-01,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",115,88,82,37.1,16,97,7.7,1.11,73,12,9,289,197,NA,45,155,1,71,100,91,53
+"PT068",2,2022-03-04,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",116,88,55,36.2,12,97,8.2,NA,NA,13.8,NA,264,115,82,45,48,3,96,NA,72,45
+"PT068",3,2022-06-15,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",105,93,72,37.1,17,99,7,1.11,85,12.6,9.3,258,242,154,21,NA,5,60,85,94,54
+"PT068",4,2022-07-29,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",110,78,82,36.2,14,98,6.3,1.44,NA,13.8,5.8,322,201,129,57,198,NA,NA,98,69,57
+"PT068",5,2022-10-22,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",119,98,69,36.6,13,97,6.1,0.86,86,NA,6.9,NA,201,NA,55,214,6,61,80,68,65
+"PT068",6,2023-01-06,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage II",4,"Overweight",128,107,66,36.7,15,95,6.6,1.21,NA,NA,5.7,NA,220,144,46,NA,3,NA,57,93,87
+"PT069",1,2022-01-01,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",109,91,75,36,14,98,8,1.24,93,11.3,8.1,243,305,181,30,152,5,50,72,81,63
+"PT069",2,2022-04-17,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",136,99,52,36.8,14,96,6.4,1.31,59,NA,9.9,436,89,61,52,236,4,96,92,95,60
+"PT069",3,2022-07-07,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",118,95,85,36.6,15,99,10.1,1.61,73,14.1,2.4,220,196,105,29,NA,5,64,61,57,41
+"PT069",4,2022-09-11,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",100,84,77,37.3,14,94,8.5,NA,78,15,8.6,184,239,135,53,110,4,66,66,98,59
+"PT069",5,2022-12-28,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",158,118,84,37.7,12,97,NA,1.35,87,13.3,8,NA,210,NA,40,149,4,69,74,82,43
+"PT069",6,2023-04-17,"Johns Hopkins","31-45","Female","Control","Diabetes Type 2","Stage II",2,"Underweight",117,91,71,36.3,19,98,8.6,1.33,81,13.8,7,221,NA,77,69,164,6,43,100,85,37
+"PT070",1,2022-01-01,"Johns Hopkins","61-75","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Normal",138,98,90,37,15,91,7.9,1.03,82,12.2,6.6,167,163,102,42,152,3,60,100,99,48
+"PT070",2,2022-04-18,"Johns Hopkins","61-75","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Normal",136,98,77,36.8,19,96,8.5,1.39,75,NA,7.5,213,98,33,62,238,1,81,73,62,59
+"PT070",3,2022-06-09,"Johns Hopkins","61-75","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Normal",132,106,66,36.1,16,96,7.3,1.34,75,15.2,7.2,NA,243,170,38,140,4,64,52,99,47
+"PT070",4,2022-07-19,"Johns Hopkins","61-75","Female","Treatment A+B","Diabetes Type 2","Stage II",3,"Normal",118,95,74,36.6,16,98,5,0.63,NA,NA,7.2,314,244,169,NA,201,1,NA,NA,68,58
+"PT071",1,2022-01-01,"Mayo Clinic","18-30","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Normal",110,72,85,37.4,20,93,5.8,2.23,67,12.3,NA,214,203,133,36,140,1,75,98,79,39
+"PT071",2,2022-03-20,"Mayo Clinic","18-30","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Normal",132,95,76,36.8,14,99,5.5,1.75,NA,14,5.6,177,222,78,38,53,5,29,NA,64,59
+"PT071",3,2022-06-13,"Mayo Clinic","18-30","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Normal",138,111,78,37.1,14,94,8.1,NA,74,15.4,10.1,300,219,126,46,105,5,72,81,43,59
+"PT071",4,2022-09-25,"Mayo Clinic","18-30","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Normal",123,104,66,37.1,14,93,5.6,1.58,67,13.6,4.8,241,276,139,63,121,7,75,55,57,73
+"PT072",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage I",1,"Normal",138,98,79,37.4,11,99,NA,0.6,101,14,10.9,176,226,169,40,242,NA,58,73,94,56
+"PT072",2,2022-02-17,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage I",1,"Normal",109,93,96,37.4,17,98,4.6,0.85,87,13.6,8.8,185,163,NA,46,99,4,70,69,100,79
+"PT072",3,2022-05-10,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage I",1,"Normal",116,92,65,37.6,13,99,9,1.23,79,13.5,5.2,NA,NA,102,46,179,1,68,100,100,59
+"PT073",1,2022-01-01,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage III",3,"Overweight",151,110,66,36.4,19,93,NA,0.74,118,14.4,7.5,300,168,111,61,NA,4,85,66,98,46
+"PT073",2,2022-02-14,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage III",3,"Overweight",133,101,58,37.2,17,99,5.5,0.95,111,10.8,6.3,NA,262,NA,75,92,3,92,59,100,58
+"PT073",3,2022-05-25,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage III",3,"Overweight",118,94,70,37.7,20,98,5,0.66,101,12.9,5.5,209,NA,NA,87,166,6,NA,69,85,54
+"PT073",4,2022-07-10,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage III",3,"Overweight",137,107,62,37.5,18,97,9.2,NA,NA,15.8,8.9,241,NA,113,66,177,6,57,65,85,75
+"PT073",5,2022-08-12,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage III",3,"Overweight",132,113,73,36.9,15,94,8.4,1.03,NA,14.1,NA,266,124,66,44,220,1,47,NA,100,74
+"PT074",1,2022-01-01,"Mayo Clinic","46-60","Male","Treatment B","Diabetes Type 2","Stage I",0,"Underweight",136,99,74,37.2,16,98,NA,0.82,86,12.4,8.7,258,246,118,29,154,4,86,100,58,59
+"PT074",2,2022-03-30,"Mayo Clinic","46-60","Male","Treatment B","Diabetes Type 2","Stage I",0,"Underweight",135,103,60,37.4,15,98,6,NA,98,13.2,5.3,314,190,NA,62,159,2,64,78,84,67
+"PT074",3,2022-06-30,"Mayo Clinic","46-60","Male","Treatment B","Diabetes Type 2","Stage I",0,"Underweight",109,86,74,36.8,11,96,6.4,0.61,77,11.7,8,241,187,NA,NA,NA,6,100,42,90,63
+"PT074",4,2022-09-24,"Mayo Clinic","46-60","Male","Treatment B","Diabetes Type 2","Stage I",0,"Underweight",134,115,56,37.1,15,98,8.8,0.96,87,12.3,7.2,308,214,94,28,126,NA,65,100,100,69
+"PT074",5,2022-12-01,"Mayo Clinic","46-60","Male","Treatment B","Diabetes Type 2","Stage I",0,"Underweight",131,113,64,36.4,19,100,8.1,1.57,75,14,9.1,310,253,NA,54,184,3,69,78,78,77
+"PT075",1,2022-01-01,"Mayo Clinic","61-75","Male","Control","Hypertension","Stage IV",4,"Normal",167,122,66,37.1,15,98,5.6,0.76,114,13.9,6.3,169,186,117,NA,253,7,65,48,91,46
+"PT075",2,2022-03-02,"Mayo Clinic","61-75","Male","Control","Hypertension","Stage IV",4,"Normal",159,116,70,36.8,17,94,4.6,0.49,104,14.8,NA,NA,193,138,NA,176,3,NA,NA,73,58
+"PT075",3,2022-04-18,"Mayo Clinic","61-75","Male","Control","Hypertension","Stage IV",4,"Normal",144,97,84,36.5,16,96,4.6,0.86,105,NA,8.7,258,NA,125,48,173,8,89,46,100,71
+"PT075",4,2022-06-14,"Mayo Clinic","61-75","Male","Control","Hypertension","Stage IV",4,"Normal",135,108,82,37.5,15,96,5,0.74,84,NA,8,NA,222,123,68,240,NA,74,64,75,53
+"PT076",1,2022-01-01,"Boston Medical Center","31-45","Male","Treatment B","Chronic Kidney Disease","Stage III",2,"Normal",139,109,69,37.2,19,97,6.5,1.78,58,NA,NA,200,164,63,64,190,8,66,90,89,59
+"PT076",2,2022-02-11,"Boston Medical Center","31-45","Male","Treatment B","Chronic Kidney Disease","Stage III",2,"Normal",125,89,69,36.6,14,97,5.8,1.73,60,13.5,6.8,205,135,120,70,235,5,92,81,100,46
+"PT076",3,2022-06-01,"Boston Medical Center","31-45","Male","Treatment B","Chronic Kidney Disease","Stage III",2,"Normal",122,102,63,37,14,97,6.8,2.44,62,15.8,10,204,154,NA,NA,138,1,70,77,95,62
+"PT076",4,2022-09-23,"Boston Medical Center","31-45","Male","Treatment B","Chronic Kidney Disease","Stage III",2,"Normal",124,89,69,37,11,97,5.4,1.74,70,13.6,8.2,305,160,118,53,171,6,NA,88,70,51
+"PT076",5,2023-01-12,"Boston Medical Center","31-45","Male","Treatment B","Chronic Kidney Disease","Stage III",2,"Normal",136,108,74,36.9,14,98,5.3,NA,54,14,8.8,NA,167,122,23,104,1,55,74,100,63
+"PT077",1,2022-01-01,"Johns Hopkins","46-60","Male","Treatment A+B","Hypertension","Stage I",5,"Overweight",123,96,67,36.7,18,97,5.6,0.77,94,14,10.1,177,238,196,17,206,2,46,100,100,38
+"PT077",2,2022-02-28,"Johns Hopkins","46-60","Male","Treatment A+B","Hypertension","Stage I",5,"Overweight",132,98,72,37.9,18,96,6.2,1.29,68,12.9,7.5,211,218,88,61,225,NA,89,55,97,68
+"PT077",3,2022-05-06,"Johns Hopkins","46-60","Male","Treatment A+B","Hypertension","Stage I",5,"Overweight",138,107,71,36.4,13,91,6,0.77,96,16.1,6.8,NA,135,70,40,185,0,36,70,75,59
+"PT077",4,2022-07-11,"Johns Hopkins","46-60","Male","Treatment A+B","Hypertension","Stage I",5,"Overweight",99,83,79,36.3,14,96,6.9,0.6,95,14.9,6.7,254,235,125,62,170,4,99,58,91,67
+"PT077",5,2022-09-17,"Johns Hopkins","46-60","Male","Treatment A+B","Hypertension","Stage I",5,"Overweight",117,99,75,37.6,16,100,5.6,0.75,97,15.5,7.9,213,242,NA,41,187,8,NA,94,83,66
+"PT078",1,2022-01-01,"Boston Medical Center","46-60","Male","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",127,96,71,37.4,12,98,8.3,0.61,112,14.1,7.5,260,192,97,27,191,5,68,79,65,56
+"PT078",2,2022-02-28,"Boston Medical Center","46-60","Male","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",144,112,96,36.6,18,97,NA,1.29,83,12.5,6.3,296,214,133,54,118,4,93,64,96,51
+"PT078",3,2022-04-30,"Boston Medical Center","46-60","Male","Treatment A+B","Coronary Artery Disease","Stage II",3,"Obese",105,94,76,36.6,21,96,NA,NA,102,14.6,7.1,292,122,70,66,NA,4,58,NA,99,47
+"PT079",1,2022-01-01,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",106,68,77,36.6,17,94,NA,NA,83,10.9,8,334,179,NA,28,150,4,61,98,92,50
+"PT079",2,2022-04-29,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",129,100,68,36.4,17,99,8.4,1.34,76,13.8,9.2,NA,240,156,NA,101,5,62,72,100,52
+"PT079",3,2022-07-12,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",89,71,85,38,12,99,NA,0.76,106,13.6,5.6,NA,212,111,34,84,3,53,94,41,63
+"PT079",4,2022-10-28,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",124,109,70,37.1,15,100,7.4,NA,NA,15.2,8.1,287,185,NA,48,116,4,NA,88,82,66
+"PT079",5,2023-02-25,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",122,103,82,36.9,19,98,6.8,1.01,86,11.5,9.9,218,234,196,57,44,8,45,58,78,65
+"PT079",6,2023-04-26,"Boston Medical Center","46-60","Female","Treatment A","Diabetes Type 2","Stage I",0,"Overweight",118,102,69,37.2,17,96,6.8,0.79,NA,12.3,NA,NA,NA,61,42,202,5,97,49,67,72
+"PT080",1,2022-01-01,"Johns Hopkins","61-75","Female","Treatment A+B","Heart Failure","Stage IV",2,"Obese",153,104,65,36.5,12,96,NA,0.67,99,NA,5.7,244,NA,52,41,77,3,63,54,100,54
+"PT080",2,2022-02-06,"Johns Hopkins","61-75","Female","Treatment A+B","Heart Failure","Stage IV",2,"Obese",127,101,86,37.3,18,95,4.8,0.9,118,14.4,4.3,186,195,145,46,NA,7,80,62,91,71
+"PT080",3,2022-04-16,"Johns Hopkins","61-75","Female","Treatment A+B","Heart Failure","Stage IV",2,"Obese",139,107,76,37.3,18,97,7.8,1.41,80,15,6.6,196,176,106,70,204,5,43,64,100,72
+"PT080",4,2022-06-03,"Johns Hopkins","61-75","Female","Treatment A+B","Heart Failure","Stage IV",2,"Obese",141,104,76,36.9,12,97,5.1,1.15,89,NA,8.3,NA,231,117,62,194,5,68,88,98,46
+"PT080",5,2022-07-27,"Johns Hopkins","61-75","Female","Treatment A+B","Heart Failure","Stage IV",2,"Obese",154,119,94,37.3,10,98,5.6,0.9,83,NA,6,239,240,158,42,139,4,87,95,79,68
+"PT081",1,2022-01-01,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",129,93,78,37,9,95,5.2,1.38,68,12.9,5.6,275,217,150,54,73,4,62,69,99,57
+"PT081",2,2022-03-12,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",106,87,57,37.8,17,98,5.5,1.04,90,12.5,11.2,NA,170,114,67,NA,2,89,51,100,54
+"PT081",3,2022-05-09,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",102,85,59,36.2,16,99,7.3,1.19,80,11.6,6.9,297,188,110,NA,96,4,54,53,58,75
+"PT081",4,2022-07-26,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",134,92,86,36.7,15,96,7.7,1.25,NA,14,7.9,268,187,91,44,188,4,94,NA,66,69
+"PT081",5,2022-11-05,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",112,94,82,36.8,22,97,NA,0.77,NA,14.1,NA,NA,185,95,47,146,NA,74,NA,81,69
+"PT081",6,2022-12-28,"Boston Medical Center","31-45","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Obese",100,82,70,37.9,21,99,NA,0.78,95,13.6,9,300,228,NA,41,102,4,80,59,67,64
+"PT082",1,2022-01-01,"Cleveland Clinic","31-45","Female","Control","Diabetes Type 2","Stage IV",3,"Overweight",131,90,58,37.1,15,95,7,1.23,94,13.8,8.2,287,240,144,56,77,NA,92,45,91,47
+"PT082",2,2022-03-01,"Cleveland Clinic","31-45","Female","Control","Diabetes Type 2","Stage IV",3,"Overweight",127,96,74,36.7,16,95,8.2,NA,113,NA,9.2,245,186,104,NA,NA,NA,79,81,91,46
+"PT082",3,2022-04-11,"Cleveland Clinic","31-45","Female","Control","Diabetes Type 2","Stage IV",3,"Overweight",127,101,65,37.8,20,98,8.7,0.66,NA,13.6,7.5,188,146,53,NA,165,7,59,76,99,39
+"PT083",1,2022-01-01,"Boston Medical Center","31-45","Male","Control","Chronic Kidney Disease","Stage I",1,"Obese",109,89,66,37.3,20,96,6.1,1.84,36,14.3,9.3,383,178,100,50,215,3,67,70,59,59
+"PT083",2,2022-03-30,"Boston Medical Center","31-45","Male","Control","Chronic Kidney Disease","Stage I",1,"Obese",147,112,83,37.3,13,100,8.2,1.48,88,12,11,219,239,135,45,NA,NA,44,100,64,50
+"PT083",3,2022-05-19,"Boston Medical Center","31-45","Male","Control","Chronic Kidney Disease","Stage I",1,"Obese",155,116,94,36.5,14,99,4.5,1.33,92,12.2,6,NA,165,87,22,87,NA,NA,83,88,40
+"PT083",4,2022-08-10,"Boston Medical Center","31-45","Male","Control","Chronic Kidney Disease","Stage I",1,"Obese",152,105,65,36.3,12,99,7,1.79,86,NA,8.1,240,NA,NA,45,88,6,71,50,92,59
+"PT084",1,2022-01-01,"UCLA Medical","46-60","Male","Control","Coronary Artery Disease","Stage II",2,"Overweight",116,90,79,37,8,100,5.8,1.21,64,14,8.6,231,144,115,54,171,5,78,71,69,54
+"PT084",2,2022-03-28,"UCLA Medical","46-60","Male","Control","Coronary Artery Disease","Stage II",2,"Overweight",114,87,104,37.3,23,96,5,NA,104,13.8,9.6,NA,237,163,28,208,4,NA,92,73,38
+"PT084",3,2022-06-10,"UCLA Medical","46-60","Male","Control","Coronary Artery Disease","Stage II",2,"Overweight",120,91,60,37.2,17,96,6.6,0.54,106,12.3,6.8,225,NA,NA,51,200,7,90,69,73,36
+"PT085",1,2022-01-01,"UCLA Medical","46-60","Female","Control","Coronary Artery Disease","Stage III",3,"Normal",127,95,64,37.1,16,95,5.4,0.79,100,14.4,NA,151,140,108,47,149,4,79,65,60,55
+"PT085",2,2022-03-23,"UCLA Medical","46-60","Female","Control","Coronary Artery Disease","Stage III",3,"Normal",123,100,68,37.7,17,99,5.4,1.24,89,10.8,7,NA,229,163,55,162,3,NA,89,86,55
+"PT085",3,2022-05-22,"UCLA Medical","46-60","Female","Control","Coronary Artery Disease","Stage III",3,"Normal",123,91,77,37,18,99,NA,0.5,108,13.8,8.2,316,216,120,62,234,5,81,89,93,34
+"PT086",1,2022-01-01,"Mayo Clinic",">75","Male","Treatment A","Hypertension","Stage II",0,"Overweight",132,103,85,36.9,16,96,7.1,1.03,91,12.7,7.8,NA,NA,81,13,129,4,85,89,89,52
+"PT086",2,2022-03-14,"Mayo Clinic",">75","Male","Treatment A","Hypertension","Stage II",0,"Overweight",129,89,70,37.3,20,95,3.5,0.78,85,11.8,9.5,246,227,NA,77,187,3,68,NA,97,40
+"PT086",3,2022-04-22,"Mayo Clinic",">75","Male","Treatment A","Hypertension","Stage II",0,"Overweight",125,99,77,37.1,11,95,7.7,NA,61,13.8,6.5,266,127,69,47,83,0,71,67,100,64
+"PT086",4,2022-08-10,"Mayo Clinic",">75","Male","Treatment A","Hypertension","Stage II",0,"Overweight",111,79,83,36.8,15,98,5.4,NA,106,13.1,11.7,271,120,63,NA,119,5,57,86,81,62
+"PT087",1,2022-01-01,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",134,100,73,37.7,17,97,4.6,0.8,NA,14.6,5.5,219,215,146,47,149,6,71,75,90,53
+"PT087",2,2022-03-31,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",114,95,86,36.2,12,100,5.9,0.29,120,13.1,7,261,198,141,43,187,4,66,77,91,73
+"PT087",3,2022-07-29,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",134,104,68,37.2,14,100,NA,0.85,NA,12,NA,285,NA,140,55,NA,2,73,73,100,53
+"PT087",4,2022-11-03,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",104,85,69,37.7,19,97,5.3,1.13,70,14.2,7.6,194,NA,79,65,101,8,94,64,64,71
+"PT087",5,2023-01-04,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",110,94,53,36.2,19,99,8,1.04,88,12.2,NA,218,182,102,58,154,6,NA,NA,80,65
+"PT087",6,2023-04-22,"Mayo Clinic","31-45","Male","Treatment A","Hypertension","Stage II",2,"Overweight",147,110,67,37.3,14,95,7.4,NA,93,14.6,7.7,213,152,99,64,136,5,92,95,73,80
+"PT088",1,2022-01-01,"UCLA Medical","31-45","Female","Treatment B","Chronic Kidney Disease","Stage III",3,"Overweight",126,102,73,37,15,98,6.3,1.61,66,13.5,NA,268,171,74,34,155,3,82,96,94,58
+"PT088",2,2022-03-21,"UCLA Medical","31-45","Female","Treatment B","Chronic Kidney Disease","Stage III",3,"Overweight",116,85,69,36.8,16,95,6.6,1.28,85,15.5,7.1,224,281,134,63,86,6,69,81,77,41
+"PT088",3,2022-04-26,"UCLA Medical","31-45","Female","Treatment B","Chronic Kidney Disease","Stage III",3,"Overweight",148,110,80,37.5,17,96,4.5,1.44,NA,12.7,6.2,216,206,108,NA,256,NA,NA,81,72,65
+"PT088",4,2022-05-26,"UCLA Medical","31-45","Female","Treatment B","Chronic Kidney Disease","Stage III",3,"Overweight",140,117,65,36.7,14,99,6.1,1.83,65,12.1,NA,204,NA,114,61,199,3,63,NA,96,65
+"PT088",5,2022-08-04,"UCLA Medical","31-45","Female","Treatment B","Chronic Kidney Disease","Stage III",3,"Overweight",125,103,68,36.7,12,99,7.7,NA,NA,13.4,6.1,295,248,187,NA,151,4,72,100,91,76
+"PT089",1,2022-01-01,"Mayo Clinic","31-45","Male","Treatment B","Hypertension","Stage II",3,"Overweight",111,92,84,36.4,10,95,6.1,0.99,99,12.3,7.7,329,222,137,42,225,6,61,65,72,59
+"PT089",2,2022-04-29,"Mayo Clinic","31-45","Male","Treatment B","Hypertension","Stage II",3,"Overweight",119,82,69,36.2,16,95,7.3,0.82,NA,13.2,10.2,218,281,200,37,220,6,78,NA,82,47
+"PT089",3,2022-06-03,"Mayo Clinic","31-45","Male","Treatment B","Hypertension","Stage II",3,"Overweight",113,87,68,37.3,16,100,8.1,1.23,NA,14.6,5.3,268,113,89,54,157,5,77,70,89,61
+"PT089",4,2022-09-20,"Mayo Clinic","31-45","Male","Treatment B","Hypertension","Stage II",3,"Overweight",131,107,71,37.5,14,96,6.1,0.45,130,13.9,10.7,234,171,82,NA,87,4,58,80,63,62
+"PT089",5,2022-11-02,"Mayo Clinic","31-45","Male","Treatment B","Hypertension","Stage II",3,"Overweight",129,102,51,37,12,94,NA,1,92,13.7,7.8,193,217,146,45,123,4,66,69,85,65
+"PT090",1,2022-01-01,"UCLA Medical","46-60","Female","Control","Hypertension","Stage I",2,"Normal",126,84,82,37.2,16,98,5.3,0.91,77,12.7,5.5,322,173,139,87,172,4,80,52,90,38
+"PT090",2,2022-04-22,"UCLA Medical","46-60","Female","Control","Hypertension","Stage I",2,"Normal",133,115,72,36.7,19,93,6.7,1.06,88,15.3,4.3,151,249,172,62,102,1,49,63,100,50
+"PT090",3,2022-08-16,"UCLA Medical","46-60","Female","Control","Hypertension","Stage I",2,"Normal",128,98,80,37.7,16,97,7.4,NA,68,14.5,4.7,NA,208,110,NA,38,3,NA,66,87,55
+"PT091",1,2022-01-01,"Boston Medical Center","18-30","Male","Treatment B","Hypertension","Stage II",2,"Normal",107,88,73,36.2,18,96,6.9,0.84,79,13,6.7,254,173,161,54,184,NA,67,73,100,49
+"PT091",2,2022-02-24,"Boston Medical Center","18-30","Male","Treatment B","Hypertension","Stage II",2,"Normal",158,117,66,37.3,18,96,8.7,1.23,84,11,NA,254,238,131,54,151,6,74,93,72,58
+"PT091",3,2022-03-28,"Boston Medical Center","18-30","Male","Treatment B","Hypertension","Stage II",2,"Normal",132,99,94,37.5,18,96,8.4,NA,78,12.5,4.1,312,190,109,40,190,5,77,100,80,47
+"PT092",1,2022-01-01,"Johns Hopkins","31-45","Male","Treatment B","Hypertension","Stage II",2,"Normal",129,87,74,37.1,14,97,6.1,0.66,85,11.5,9.6,265,NA,163,77,NA,1,71,100,85,35
+"PT092",2,2022-02-23,"Johns Hopkins","31-45","Male","Treatment B","Hypertension","Stage II",2,"Normal",121,102,59,37.1,23,100,6,0.56,95,12.7,8.8,244,188,88,72,218,7,64,86,93,52
+"PT092",3,2022-04-25,"Johns Hopkins","31-45","Male","Treatment B","Hypertension","Stage II",2,"Normal",132,108,82,37.4,16,94,NA,1.21,NA,11.2,6.7,179,220,96,64,136,3,75,NA,71,72
+"PT092",4,2022-08-06,"Johns Hopkins","31-45","Male","Treatment B","Hypertension","Stage II",2,"Normal",118,93,72,37,14,95,6.3,1.24,84,13.7,2.9,300,184,NA,74,NA,2,71,67,78,54
+"PT093",1,2022-01-01,"Johns Hopkins","31-45","Female","Treatment A","Chronic Kidney Disease","Stage III",3,"Overweight",145,107,62,37.4,21,95,7.2,1.85,67,14,9,263,178,71,60,74,9,NA,65,95,39
+"PT093",2,2022-02-25,"Johns Hopkins","31-45","Female","Treatment A","Chronic Kidney Disease","Stage III",3,"Overweight",122,100,76,37.2,26,97,8.1,2.06,59,13.3,9.9,NA,233,NA,83,142,3,90,70,100,63
+"PT093",3,2022-05-16,"Johns Hopkins","31-45","Female","Treatment A","Chronic Kidney Disease","Stage III",3,"Overweight",106,85,91,37,12,96,5.2,1.69,68,14.8,7.1,268,288,170,36,103,0,70,44,93,62
+"PT093",4,2022-07-16,"Johns Hopkins","31-45","Female","Treatment A","Chronic Kidney Disease","Stage III",3,"Overweight",144,108,81,36.8,16,97,7,1.87,70,NA,8.2,248,NA,98,NA,104,3,61,51,80,68
+"PT094",1,2022-01-01,"UCLA Medical","31-45","Male","Treatment A+B","Chronic Kidney Disease","Stage II",4,"Normal",123,93,58,36.6,13,96,5.3,1.79,52,14.4,12.7,237,215,121,50,92,NA,100,51,89,46
+"PT094",2,2022-02-03,"UCLA Medical","31-45","Male","Treatment A+B","Chronic Kidney Disease","Stage II",4,"Normal",125,98,84,37,12,99,6.9,1.82,74,14.7,10.9,307,211,125,46,196,4,52,40,63,74
+"PT094",3,2022-05-12,"UCLA Medical","31-45","Male","Treatment A+B","Chronic Kidney Disease","Stage II",4,"Normal",115,93,73,37.4,13,95,6.5,NA,63,12.5,7.5,241,177,94,NA,54,9,85,81,64,55
+"PT094",4,2022-09-02,"UCLA Medical","31-45","Male","Treatment A+B","Chronic Kidney Disease","Stage II",4,"Normal",135,98,70,37.9,23,95,7.9,1.42,75,12.4,5.8,272,NA,130,29,NA,5,78,59,86,61
+"PT094",5,2022-12-18,"UCLA Medical","31-45","Male","Treatment A+B","Chronic Kidney Disease","Stage II",4,"Normal",128,105,88,37.1,15,99,5.9,NA,63,12.7,9,NA,265,176,37,239,5,92,83,98,70
+"PT095",1,2022-01-01,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",5,"Obese",97,86,62,37.2,15,96,6.8,0.76,83,NA,6.9,310,170,118,48,135,2,NA,89,76,40
+"PT095",2,2022-02-16,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",5,"Obese",146,124,63,37.1,16,97,NA,0.9,102,NA,7.2,271,NA,57,NA,60,4,75,56,76,64
+"PT095",3,2022-06-07,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",5,"Obese",122,90,75,37.7,15,98,7.4,1.15,95,13.9,9.8,232,184,89,37,241,4,45,92,74,64
+"PT096",1,2022-01-01,"UCLA Medical","46-60","Male","Control","Diabetes Type 2","Stage II",0,"Overweight",125,94,79,36.8,13,94,7.4,1.37,92,13.5,8.7,NA,216,114,23,NA,7,73,82,100,52
+"PT096",2,2022-02-08,"UCLA Medical","46-60","Male","Control","Diabetes Type 2","Stage II",0,"Overweight",121,94,64,37.1,15,95,6.3,1.03,106,15.1,6.7,242,199,96,46,209,4,72,65,89,35
+"PT096",3,2022-05-15,"UCLA Medical","46-60","Male","Control","Diabetes Type 2","Stage II",0,"Overweight",122,92,79,37.9,19,96,NA,0.95,102,NA,5.2,267,210,NA,55,193,0,100,55,100,44
+"PT096",4,2022-09-12,"UCLA Medical","46-60","Male","Control","Diabetes Type 2","Stage II",0,"Overweight",136,101,65,36.7,13,100,6.5,1.3,78,12,9.2,248,177,NA,85,188,6,69,81,81,51
+"PT097",1,2022-01-01,"Boston Medical Center","18-30","Female","Treatment B","Coronary Artery Disease","Stage I",4,"Underweight",116,86,68,37.4,14,95,6.5,1.45,72,12.4,NA,325,222,135,72,120,NA,69,52,80,57
+"PT097",2,2022-04-22,"Boston Medical Center","18-30","Female","Treatment B","Coronary Artery Disease","Stage I",4,"Underweight",145,106,81,36.6,19,97,5.6,NA,NA,13.7,NA,241,178,76,69,127,6,77,55,100,31
+"PT097",3,2022-08-07,"Boston Medical Center","18-30","Female","Treatment B","Coronary Artery Disease","Stage I",4,"Underweight",145,113,70,37.8,15,99,6.7,0.77,85,13.4,6.5,188,246,173,NA,112,2,87,100,77,54
+"PT097",4,2022-10-01,"Boston Medical Center","18-30","Female","Treatment B","Coronary Artery Disease","Stage I",4,"Underweight",136,109,70,36.9,14,96,4.3,1.02,70,11.3,10.8,NA,189,128,33,72,3,71,84,100,61
+"PT097",5,2023-01-06,"Boston Medical Center","18-30","Female","Treatment B","Coronary Artery Disease","Stage I",4,"Underweight",105,87,71,37,17,96,NA,NA,98,12.6,9.7,276,NA,120,40,149,2,76,56,100,75
+"PT098",1,2022-01-01,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage III",4,"Underweight",85,68,69,37.3,12,96,5.5,0.84,83,14,10.8,284,205,94,63,184,3,NA,74,88,51
+"PT098",2,2022-03-24,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage III",4,"Underweight",123,99,86,37.1,14,96,6.3,0.89,92,13,9.5,239,192,118,64,169,4,NA,79,59,48
+"PT098",3,2022-06-11,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage III",4,"Underweight",135,105,74,37.5,9,98,5.4,1.03,87,15.4,10.5,223,169,83,31,201,3,49,98,77,61
+"PT099",1,2022-01-01,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",116,86,67,36.7,18,96,6.6,1.32,74,14.7,6.9,299,175,116,28,134,5,56,86,69,58
+"PT099",2,2022-04-06,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",110,86,84,37.4,17,100,6.1,0.83,105,13.2,9.6,263,240,159,60,161,5,72,NA,48,51
+"PT099",3,2022-05-15,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",127,97,84,37.6,22,98,NA,0.75,98,14.9,5.5,227,NA,178,33,246,NA,55,93,100,60
+"PT099",4,2022-08-13,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",127,93,75,36.7,21,100,5,0.61,123,NA,7.4,255,172,94,37,240,0,80,68,81,68
+"PT099",5,2022-11-19,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",118,87,70,37.9,21,98,NA,0.98,NA,13.5,7.9,204,NA,105,61,NA,2,67,83,100,66
+"PT099",6,2023-02-03,"Johns Hopkins","61-75","Male","Treatment A","Hypertension","Stage II",1,"Overweight",135,115,99,37,13,95,7.9,1,73,NA,10.1,245,202,120,65,NA,5,100,80,98,71
+"PT100",1,2022-01-01,"Boston Medical Center",">75","Female","Treatment A+B","Coronary Artery Disease","Stage IV",1,"Overweight",126,101,83,37,16,96,NA,0.47,107,10.5,8.1,242,154,88,41,260,6,NA,77,84,50
+"PT100",2,2022-02-25,"Boston Medical Center",">75","Female","Treatment A+B","Coronary Artery Disease","Stage IV",1,"Overweight",122,94,98,38.1,19,99,6.4,1.49,79,14.1,NA,254,257,168,40,196,6,99,67,79,61
+"PT100",3,2022-05-05,"Boston Medical Center",">75","Female","Treatment A+B","Coronary Artery Disease","Stage IV",1,"Overweight",152,108,70,37,13,99,7.2,0.98,95,11.6,6,230,NA,NA,46,153,3,77,100,99,37
+"PT100",4,2022-08-19,"Boston Medical Center",">75","Female","Treatment A+B","Coronary Artery Disease","Stage IV",1,"Overweight",124,93,70,36.8,16,93,3.9,0.86,97,14.4,9.2,289,263,139,45,103,5,71,23,74,87
+"PT100",5,2022-10-11,"Boston Medical Center",">75","Female","Treatment A+B","Coronary Artery Disease","Stage IV",1,"Overweight",150,115,98,37.3,16,98,5.5,2.01,NA,13.1,7.6,NA,199,116,NA,176,7,68,NA,76,71
+"PT101",1,2022-01-01,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",113,86,74,36.2,14,97,4.3,1.08,95,14.7,6.1,270,NA,110,61,78,7,99,70,90,70
+"PT101",2,2022-02-22,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",114,85,64,37.4,17,99,6.7,0.97,NA,10.4,6.2,NA,194,117,54,236,3,81,41,76,60
+"PT101",3,2022-04-25,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",101,83,64,37.2,18,97,NA,1.72,50,12.5,7,305,206,148,74,65,4,41,100,100,53
+"PT101",4,2022-08-06,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",147,117,73,35.7,23,99,6.1,NA,94,10.5,6.5,283,169,NA,76,156,5,49,76,64,72
+"PT101",5,2022-11-01,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",110,90,86,37.7,16,97,5.5,1.13,90,16,9.3,NA,236,117,NA,200,3,61,76,72,62
+"PT101",6,2023-02-06,"UCLA Medical","46-60","Female","Treatment A+B","Coronary Artery Disease","Stage III",3,"Overweight",132,95,78,36.8,18,94,NA,0.81,102,14.7,6.5,222,235,172,NA,251,5,74,NA,88,91
+"PT102",1,2022-01-01,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",116,89,71,37.2,13,100,7.6,1.04,107,11.9,4.9,341,220,144,58,113,4,35,66,100,48
+"PT102",2,2022-03-20,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",132,97,79,36.5,18,96,7.5,0.76,104,16.3,9,258,NA,143,46,255,5,70,67,100,49
+"PT102",3,2022-06-03,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",158,118,76,36.5,16,100,8.1,NA,81,NA,6.4,288,NA,130,34,167,NA,61,100,81,58
+"PT102",4,2022-07-25,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",128,101,78,37.1,20,94,7,1.2,90,12.9,6.5,232,133,97,NA,174,4,NA,93,100,88
+"PT102",5,2022-08-27,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",109,87,77,37.1,7,99,6.3,0.92,96,14.5,NA,227,225,NA,NA,218,NA,75,NA,65,81
+"PT102",6,2022-12-07,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",4,"Overweight",131,103,68,36.8,13,97,8.2,0.79,107,11.1,NA,260,170,127,74,136,2,78,54,94,67
+"PT103",1,2022-01-01,"UCLA Medical","46-60","Female","Control","Diabetes Type 2","Stage I",2,"Overweight",126,91,82,36.5,14,95,NA,0.87,94,14.9,10.3,NA,215,129,78,112,4,62,70,70,35
+"PT103",2,2022-03-06,"UCLA Medical","46-60","Female","Control","Diabetes Type 2","Stage I",2,"Overweight",123,101,53,37,23,98,7.5,1.08,96,9.8,7.5,248,242,128,66,164,3,78,95,86,38
+"PT103",3,2022-04-21,"UCLA Medical","46-60","Female","Control","Diabetes Type 2","Stage I",2,"Overweight",120,95,73,37.9,19,97,NA,1.24,70,11.7,NA,180,217,167,41,151,3,79,58,57,37
+"PT103",4,2022-05-30,"UCLA Medical","46-60","Female","Control","Diabetes Type 2","Stage I",2,"Overweight",146,115,75,37.1,20,97,7.2,0.45,114,12,7.8,255,233,128,NA,NA,6,61,70,89,59
+"PT104",1,2022-01-01,"Cleveland Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Normal",117,89,67,36.5,20,98,7.1,0.93,93,11.1,9.4,281,256,NA,50,174,8,65,86,89,47
+"PT104",2,2022-03-03,"Cleveland Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Normal",137,104,67,36.7,16,97,NA,0.58,95,NA,9.2,257,189,124,52,203,6,77,99,82,70
+"PT104",3,2022-05-14,"Cleveland Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage I",4,"Normal",101,86,92,37.3,13,98,NA,1.12,105,12.7,6.9,NA,220,119,52,NA,3,65,60,91,65
+"PT105",1,2022-01-01,"UCLA Medical","31-45","Male","Treatment B","Hypertension","Stage IV",5,"Overweight",138,97,68,36.9,15,96,7,0.83,87,13.9,6.2,289,232,NA,NA,89,5,60,60,84,46
+"PT105",2,2022-03-02,"UCLA Medical","31-45","Male","Treatment B","Hypertension","Stage IV",5,"Overweight",139,105,65,36.6,14,93,7.3,1.67,67,13.2,8.5,NA,221,88,59,120,5,76,58,75,55
+"PT105",3,2022-05-04,"UCLA Medical","31-45","Male","Treatment B","Hypertension","Stage IV",5,"Overweight",138,106,82,37.5,14,99,NA,1.1,NA,14.7,5.1,NA,244,125,59,42,3,63,60,90,57
+"PT105",4,2022-08-07,"UCLA Medical","31-45","Male","Treatment B","Hypertension","Stage IV",5,"Overweight",154,113,82,37.4,13,95,5.3,1.02,87,NA,4.6,243,153,68,57,112,7,82,99,93,54
+"PT106",1,2022-01-01,"Johns Hopkins","31-45","Male","Control","Hypertension","Stage IV",2,"Normal",128,94,83,36.6,18,100,5.6,1.13,76,14.3,10,218,172,NA,48,250,7,87,95,93,48
+"PT106",2,2022-02-17,"Johns Hopkins","31-45","Male","Control","Hypertension","Stage IV",2,"Normal",155,108,77,37.1,15,94,5.9,NA,81,10.9,7.5,270,193,95,62,89,3,50,53,99,57
+"PT106",3,2022-05-19,"Johns Hopkins","31-45","Male","Control","Hypertension","Stage IV",2,"Normal",149,112,75,36.5,21,100,NA,0.78,89,14.6,9.9,281,159,NA,60,155,NA,70,NA,100,65
+"PT106",4,2022-08-28,"Johns Hopkins","31-45","Male","Control","Hypertension","Stage IV",2,"Normal",131,94,90,37.2,18,96,6,0.44,105,10.6,9.8,275,135,123,42,232,7,51,82,100,35
+"PT107",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment A","Hypertension","Stage I",1,"Overweight",89,67,86,37.6,17,99,5.9,0.86,108,13.7,NA,289,252,197,73,191,1,82,86,100,54
+"PT107",2,2022-04-03,"UCLA Medical","61-75","Male","Treatment A","Hypertension","Stage I",1,"Overweight",135,102,67,36.9,15,99,6.4,0.91,86,12.9,10.6,226,210,111,73,25,5,53,56,93,60
+"PT107",3,2022-05-26,"UCLA Medical","61-75","Male","Treatment A","Hypertension","Stage I",1,"Overweight",133,95,77,37.5,19,96,6.6,NA,105,12.7,NA,245,253,NA,43,68,2,NA,NA,95,53
+"PT107",4,2022-09-02,"UCLA Medical","61-75","Male","Treatment A","Hypertension","Stage I",1,"Overweight",146,104,67,36.4,18,97,NA,1.08,NA,12.5,6.3,202,176,NA,NA,154,4,NA,NA,90,50
+"PT107",5,2022-10-27,"UCLA Medical","61-75","Male","Treatment A","Hypertension","Stage I",1,"Overweight",153,123,66,36.7,16,95,4.9,0.59,101,NA,11.5,NA,NA,100,NA,160,0,NA,84,63,76
+"PT108",1,2022-01-01,"Cleveland Clinic","31-45","Female","Treatment B","Coronary Artery Disease","Stage I",1,"Normal",129,91,79,37.4,20,97,7.1,0.99,108,12.5,9.9,161,184,107,68,11,4,73,NA,92,33
+"PT108",2,2022-02-20,"Cleveland Clinic","31-45","Female","Treatment B","Coronary Artery Disease","Stage I",1,"Normal",132,106,82,38,22,98,5,0.98,106,11.4,9.2,307,208,98,44,180,10,72,71,68,39
+"PT108",3,2022-06-20,"Cleveland Clinic","31-45","Female","Treatment B","Coronary Artery Disease","Stage I",1,"Normal",115,85,75,37.4,12,98,NA,1.19,87,11.1,6.9,265,NA,104,64,66,6,60,NA,66,45
+"PT109",1,2022-01-01,"Mayo Clinic","61-75","Female","Treatment A","Chronic Kidney Disease","Stage III",2,"Normal",113,85,52,38,18,95,7.4,1.83,72,12.7,4.2,NA,188,108,38,206,0,83,91,74,32
+"PT109",2,2022-02-27,"Mayo Clinic","61-75","Female","Treatment A","Chronic Kidney Disease","Stage III",2,"Normal",138,108,63,37.5,21,99,7,1.63,76,15,6.2,245,NA,114,58,91,5,65,100,100,50
+"PT109",3,2022-04-15,"Mayo Clinic","61-75","Female","Treatment A","Chronic Kidney Disease","Stage III",2,"Normal",121,95,76,37.8,13,98,6.6,1.43,85,10.6,4.8,265,204,104,58,170,6,68,71,78,61
+"PT109",4,2022-08-03,"Mayo Clinic","61-75","Female","Treatment A","Chronic Kidney Disease","Stage III",2,"Normal",108,89,72,36.4,15,100,5.7,2.17,38,12.8,8.7,345,173,120,22,153,5,70,93,88,64
+"PT110",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Normal",142,106,63,37.3,15,97,9.9,0.93,88,14.8,10.1,285,188,NA,61,173,1,38,90,80,58
+"PT110",2,2022-02-08,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Normal",117,89,57,36.1,24,96,7.8,1.22,101,15.7,8.7,257,173,111,40,NA,7,86,77,97,43
+"PT110",3,2022-03-19,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Normal",127,97,62,37.1,13,96,5.9,1.04,97,16.9,5.6,310,266,159,73,214,5,100,73,74,50
+"PT110",4,2022-06-05,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Normal",130,108,69,36.8,17,94,7.6,0.41,107,12.3,NA,230,213,127,NA,NA,5,77,NA,51,66
+"PT110",5,2022-07-17,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Normal",130,98,78,36.3,16,100,NA,NA,85,NA,NA,223,194,NA,59,NA,6,45,93,81,73
+"PT111",1,2022-01-01,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",117,83,94,36.9,17,100,6,1.23,76,12.5,5.7,251,146,NA,64,145,5,69,90,84,63
+"PT111",2,2022-02-13,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",170,129,83,36.7,7,96,4.6,0.94,107,14.4,9.7,216,142,88,71,146,1,79,100,82,57
+"PT111",3,2022-05-21,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",158,111,48,36.6,20,97,7.3,0.47,104,13.7,9.3,198,174,85,65,140,4,67,67,75,53
+"PT111",4,2022-09-16,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",114,90,75,37.5,14,100,6.2,0.57,NA,12.4,8.1,339,186,140,61,166,5,75,61,57,41
+"PT111",5,2022-12-26,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",128,100,79,37.6,18,100,5.7,0.87,NA,13.3,6.3,242,165,108,NA,206,4,88,68,63,52
+"PT111",6,2023-02-10,"Mayo Clinic","46-60","Male","Control","Heart Failure","Stage I",3,"Overweight",136,106,83,36.9,15,95,6.9,1.56,70,NA,NA,290,208,130,20,149,5,64,NA,85,60
+"PT112",1,2022-01-01,"Mayo Clinic","46-60","Male","Treatment A+B","Hypertension","Stage II",4,"Normal",134,100,66,37.5,17,97,5.1,0.13,119,18,6.1,316,207,132,36,34,8,85,92,92,57
+"PT112",2,2022-04-18,"Mayo Clinic","46-60","Male","Treatment A+B","Hypertension","Stage II",4,"Normal",120,99,81,36,14,98,4.9,0.94,93,12.2,8.6,219,190,103,45,120,4,62,55,100,40
+"PT112",3,2022-07-23,"Mayo Clinic","46-60","Male","Treatment A+B","Hypertension","Stage II",4,"Normal",119,94,87,37.4,18,99,7.3,0.68,82,11.7,6.9,257,146,102,35,NA,0,72,100,95,52
+"PT112",4,2022-09-17,"Mayo Clinic","46-60","Male","Treatment A+B","Hypertension","Stage II",4,"Normal",129,107,95,37.8,18,94,6.6,1.18,106,12.4,5.7,266,NA,74,20,56,4,81,100,99,57
+"PT112",5,2022-10-25,"Mayo Clinic","46-60","Male","Treatment A+B","Hypertension","Stage II",4,"Normal",118,101,104,36.4,12,95,5.6,0.71,92,13.6,12.1,178,NA,NA,60,80,6,64,53,87,65
+"PT113",1,2022-01-01,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage IV",2,"Obese",101,85,74,36.5,19,96,5.9,1.03,94,14.7,5.5,NA,199,70,73,152,4,91,56,90,49
+"PT113",2,2022-03-20,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage IV",2,"Obese",113,89,81,36.9,17,99,4.4,1.01,89,12.4,7.4,162,201,119,37,139,10,73,84,100,42
+"PT113",3,2022-04-30,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage IV",2,"Obese",163,127,85,37.2,15,95,6.3,1.24,66,13.2,7,202,257,148,67,141,4,NA,70,100,45
+"PT113",4,2022-08-22,"Johns Hopkins","61-75","Female","Treatment B","Heart Failure","Stage IV",2,"Obese",134,105,71,36.7,21,95,4.9,1.33,99,13.4,5.7,NA,175,128,41,147,5,82,100,82,50
+"PT114",1,2022-01-01,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",126,99,71,37.2,20,94,6.4,1.6,49,12.6,5.5,274,214,132,54,169,7,68,80,97,50
+"PT114",2,2022-02-27,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",136,106,85,37,16,100,6,1.12,80,13.2,11.3,237,171,106,53,119,4,81,100,84,72
+"PT114",3,2022-06-03,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",140,106,68,37.3,14,98,6.9,2.03,NA,14.2,5.6,263,137,56,17,194,4,87,60,81,59
+"PT114",4,2022-07-15,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",130,103,56,36,13,97,NA,NA,55,NA,6.2,NA,178,NA,52,133,2,100,100,32,70
+"PT114",5,2022-10-03,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",134,102,63,36.9,18,98,6,NA,67,10.6,9.8,229,193,131,NA,152,8,74,44,86,53
+"PT114",6,2022-12-29,"UCLA Medical",">75","Female","Control","Chronic Kidney Disease","Stage I",2,"Overweight",140,110,48,37.8,12,100,NA,2.29,28,11.3,5.7,NA,NA,187,71,NA,5,NA,59,81,54
+"PT115",1,2022-01-01,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",139,103,68,37.5,16,97,6.6,0.67,108,14.1,8.6,229,155,110,38,193,5,64,96,87,54
+"PT115",2,2022-04-17,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",105,89,85,36.8,11,97,5,1.41,80,15,9.7,175,191,125,NA,82,5,93,83,100,58
+"PT115",3,2022-07-15,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",142,113,68,36.5,14,99,7.5,1.41,87,12.7,NA,NA,217,118,48,NA,3,71,95,88,42
+"PT115",4,2022-09-28,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",118,102,68,36.7,16,98,7.1,1.37,83,NA,6,246,239,NA,19,216,4,87,77,74,49
+"PT115",5,2022-12-01,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",128,92,96,36.7,13,95,5.2,1.17,83,12.3,9.7,299,204,96,NA,177,2,83,75,93,73
+"PT115",6,2023-01-30,"Johns Hopkins",">75","Female","Treatment A+B","Coronary Artery Disease","Stage III",2,"Normal",115,95,75,37.4,9,97,6.6,0.79,NA,16.4,5.4,268,274,NA,77,208,NA,80,100,85,87
+"PT116",1,2022-01-01,"Cleveland Clinic","61-75","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",109,85,63,37,17,95,7.5,1.87,64,14.6,9.5,246,230,162,40,150,4,74,NA,83,71
+"PT116",2,2022-03-17,"Cleveland Clinic","61-75","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",135,102,84,37.2,12,98,6.3,2.18,46,12.3,5.6,234,203,118,45,187,4,55,46,88,42
+"PT116",3,2022-06-27,"Cleveland Clinic","61-75","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",129,108,56,37.4,18,100,5.2,1.85,66,11,6,304,178,NA,73,68,5,58,54,80,56
+"PT117",1,2022-01-01,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",156,121,47,37.5,15,98,8.1,1.02,92,12.5,6.5,177,116,32,29,241,5,84,72,72,47
+"PT117",2,2022-03-04,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",154,117,65,37.2,16,95,7.5,0.44,100,12.8,5.5,260,115,79,33,NA,5,58,31,70,43
+"PT117",3,2022-05-06,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",157,115,68,37.4,15,100,7.8,1.14,87,12,NA,251,214,121,52,NA,6,NA,66,81,55
+"PT117",4,2022-06-15,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",137,108,104,36.7,19,99,6.3,1.07,83,12.6,7.4,282,275,192,66,180,8,75,43,100,60
+"PT117",5,2022-08-04,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",143,108,74,36.9,15,98,6,1.43,67,12.6,8.9,218,183,84,41,204,8,48,94,100,69
+"PT117",6,2022-11-07,"UCLA Medical","61-75","Female","Treatment A+B","Hypertension","Stage IV",2,"Obese",135,110,62,36.8,19,95,8.7,NA,NA,12.6,7.6,197,220,NA,51,205,3,58,71,78,78
+"PT118",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment B","Hypertension","Stage IV",1,"Overweight",143,98,60,37.6,15,95,NA,0.69,101,14.3,6.9,194,190,106,50,120,NA,59,44,97,38
+"PT118",2,2022-03-11,"Cleveland Clinic","18-30","Female","Treatment B","Hypertension","Stage IV",1,"Overweight",165,117,100,37,12,98,6.1,0.93,NA,15.2,8.5,244,164,99,35,141,5,55,80,71,53
+"PT118",3,2022-07-05,"Cleveland Clinic","18-30","Female","Treatment B","Hypertension","Stage IV",1,"Overweight",141,108,63,36.7,14,97,6.7,0.59,88,14.9,8.1,307,177,99,81,86,5,NA,46,75,67
+"PT119",1,2022-01-01,"Johns Hopkins","31-45","Female","Control","Hypertension","Stage I",1,"Overweight",138,99,86,36.9,14,97,7.3,NA,97,NA,11.5,274,218,128,36,60,5,50,57,87,38
+"PT119",2,2022-03-29,"Johns Hopkins","31-45","Female","Control","Hypertension","Stage I",1,"Overweight",128,103,80,37.8,16,99,6.5,0.46,125,15.4,5.3,251,120,62,51,145,1,66,100,81,54
+"PT119",3,2022-07-24,"Johns Hopkins","31-45","Female","Control","Hypertension","Stage I",1,"Overweight",133,103,65,37.7,16,99,7.1,1.42,73,14,7,350,NA,161,63,180,7,75,66,54,39
+"PT120",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment B","Diabetes Type 2","Stage IV",2,"Overweight",133,101,72,36.5,12,98,7.4,1.02,84,9.9,NA,176,225,NA,26,143,6,56,61,100,51
+"PT120",2,2022-02-14,"Mayo Clinic","31-45","Female","Treatment B","Diabetes Type 2","Stage IV",2,"Overweight",158,111,70,36.7,16,97,7.8,0.78,109,15.9,8.9,351,209,92,67,213,4,75,87,91,59
+"PT120",3,2022-06-01,"Mayo Clinic","31-45","Female","Treatment B","Diabetes Type 2","Stage IV",2,"Overweight",154,113,52,37.1,14,95,8,1.21,95,12.2,9.1,276,225,134,67,192,7,52,97,98,56
+"PT121",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",133,99,79,37.5,19,95,5,1.1,NA,13,7.1,231,210,136,64,163,6,61,50,67,38
+"PT121",2,2022-02-23,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",139,101,88,37.5,13,98,NA,0.95,91,14.5,9,NA,232,144,40,NA,6,96,NA,75,65
+"PT121",3,2022-06-10,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",153,112,72,37.5,11,98,8.4,1.22,92,11.4,9.7,262,135,74,59,189,0,60,100,92,67
+"PT121",4,2022-08-27,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",131,107,79,36.6,16,96,5.2,NA,92,11.2,NA,295,238,122,32,133,6,54,63,96,58
+"PT121",5,2022-10-12,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",134,110,77,36.9,14,95,6,NA,95,13,7.9,213,246,174,60,83,NA,82,89,64,60
+"PT121",6,2023-01-07,"UCLA Medical","46-60","Male","Treatment B","Coronary Artery Disease","Stage II",3,"Normal",109,95,88,37.4,16,97,5.3,NA,90,15.3,8.1,244,194,146,61,152,NA,70,79,100,76
+"PT122",1,2022-01-01,"Mayo Clinic","31-45","Male","Control","Hypertension","Stage II",4,"Obese",118,85,67,36.4,13,99,7,0.97,85,16.7,3.4,NA,189,96,46,47,5,52,55,78,68
+"PT122",2,2022-02-21,"Mayo Clinic","31-45","Male","Control","Hypertension","Stage II",4,"Obese",137,114,69,37.4,13,98,NA,0.82,94,14.7,6.3,343,229,187,55,167,2,43,64,86,57
+"PT122",3,2022-06-02,"Mayo Clinic","31-45","Male","Control","Hypertension","Stage II",4,"Obese",141,109,61,36.9,16,96,8.8,1.15,80,13.9,7.2,NA,245,143,37,173,NA,69,55,71,39
+"PT123",1,2022-01-01,"Johns Hopkins","31-45","Female","Treatment B","Hypertension","Stage III",0,"Normal",96,75,73,37.2,18,98,6,0.94,NA,13.4,9.2,NA,218,134,40,214,2,81,41,84,62
+"PT123",2,2022-03-28,"Johns Hopkins","31-45","Female","Treatment B","Hypertension","Stage III",0,"Normal",134,108,68,36.9,27,97,6.4,0.68,99,10.8,NA,203,200,105,40,243,NA,78,71,68,61
+"PT123",3,2022-07-10,"Johns Hopkins","31-45","Female","Treatment B","Hypertension","Stage III",0,"Normal",123,97,69,36.9,11,100,7.6,0.2,NA,11.9,6.3,301,191,147,NA,93,3,49,82,65,84
+"PT124",1,2022-01-01,"Cleveland Clinic","46-60","Male","Treatment A","Coronary Artery Disease","Stage III",3,"Underweight",135,105,85,37.5,17,98,6.1,1.55,72,13.1,3.8,256,166,115,NA,277,1,77,70,69,55
+"PT124",2,2022-03-22,"Cleveland Clinic","46-60","Male","Treatment A","Coronary Artery Disease","Stage III",3,"Underweight",124,95,81,37.1,19,100,4.3,1.24,100,14.3,4.7,265,NA,122,NA,NA,4,53,34,57,61
+"PT124",3,2022-06-22,"Cleveland Clinic","46-60","Male","Treatment A","Coronary Artery Disease","Stage III",3,"Underweight",132,106,78,36.2,19,95,8.6,0.63,104,12.1,NA,272,215,156,48,220,3,73,55,96,78
+"PT125",1,2022-01-01,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",136,104,76,37,19,100,7.2,1.01,93,15.1,8.1,200,236,170,81,183,7,81,46,57,49
+"PT125",2,2022-03-20,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",132,99,88,37,16,97,7.4,0.85,103,11.9,5.3,220,249,164,49,204,4,72,77,85,58
+"PT125",3,2022-05-28,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",109,92,98,36.2,20,100,5.6,1.12,75,NA,9.7,259,255,148,71,139,3,79,40,62,59
+"PT125",4,2022-07-11,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",137,109,78,37.3,16,99,5.4,1.17,79,NA,7.5,259,160,101,36,112,4,82,74,45,52
+"PT125",5,2022-10-06,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",132,105,89,36.5,20,99,7.8,1.17,88,13.3,8.8,198,169,113,32,132,7,69,64,63,67
+"PT125",6,2022-12-15,"Johns Hopkins","31-45","Female","Treatment A","Hypertension","Stage II",4,"Normal",137,109,83,37.2,16,97,NA,1.08,105,14.4,11.3,242,NA,104,46,151,8,83,69,73,84
+"PT126",1,2022-01-01,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",126,99,87,36.5,13,96,6.3,1.15,87,13.6,5.6,226,242,163,61,106,1,92,77,96,45
+"PT126",2,2022-02-01,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",116,91,58,37.5,17,98,8.8,1.04,89,15.1,9,NA,198,122,40,208,1,50,65,63,63
+"PT126",3,2022-05-29,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",118,96,69,37.1,14,98,NA,NA,133,15.4,7.9,276,169,104,62,234,2,47,63,77,48
+"PT126",4,2022-08-29,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",149,115,75,36.7,13,98,6.3,0.92,116,NA,NA,257,133,69,49,194,7,81,66,93,45
+"PT126",5,2022-12-04,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",148,99,68,37.4,15,100,6.7,0.85,101,12.3,5.1,318,215,NA,35,NA,6,65,60,75,45
+"PT126",6,2023-02-01,"Mayo Clinic","18-30","Female","Control","Hypertension","Stage III",2,"Normal",142,101,70,36.1,17,94,6.6,NA,102,11.2,10.1,264,NA,85,49,167,5,45,85,68,45
+"PT127",1,2022-01-01,"Cleveland Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage II",1,"Normal",137,103,60,37.8,16,97,7.9,0.32,116,13.8,9.2,227,198,124,NA,141,3,51,76,77,48
+"PT127",2,2022-03-29,"Cleveland Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage II",1,"Normal",134,97,80,36,20,98,8.7,1.66,56,12.6,7.4,288,159,NA,16,146,7,59,100,93,46
+"PT127",3,2022-05-13,"Cleveland Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage II",1,"Normal",123,86,69,36.5,18,98,8.6,0.62,103,9.6,7.9,187,207,102,31,NA,4,67,90,100,81
+"PT127",4,2022-08-24,"Cleveland Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage II",1,"Normal",100,82,50,36.5,18,99,9,1.46,NA,16.5,7.5,NA,234,NA,63,NA,2,76,88,100,73
+"PT127",5,2022-10-27,"Cleveland Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage II",1,"Normal",116,99,69,36.3,13,94,7.7,1.22,72,14.2,10.6,222,168,147,38,141,6,66,90,90,84
+"PT128",1,2022-01-01,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",131,88,37,36.4,17,96,NA,0.45,95,12.7,9.7,262,223,NA,42,178,7,96,65,75,53
+"PT128",2,2022-03-27,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",144,101,70,37.2,18,96,9.7,1.11,86,16.2,8.1,265,267,212,16,116,10,68,88,64,49
+"PT128",3,2022-05-18,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",129,97,77,36.8,15,97,6.5,0.8,79,12.9,8.2,254,234,123,61,199,2,74,70,74,42
+"PT128",4,2022-08-30,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",147,103,85,37,13,96,7,1.19,81,12,8.1,161,237,134,46,166,4,68,NA,64,60
+"PT128",5,2022-12-01,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",116,88,80,36.9,16,98,6.1,1.16,NA,15.6,8.2,277,182,138,60,168,4,94,71,84,50
+"PT128",6,2023-01-02,"Cleveland Clinic","31-45","Male","Control","Heart Failure","Stage III",3,"Overweight",155,112,80,37.4,22,96,6.2,1.09,NA,NA,8.2,277,167,143,65,NA,5,NA,83,77,65
+"PT129",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment B","Diabetes Type 2","Stage II",3,"Normal",126,100,75,36.6,20,98,9.6,1.24,66,12.2,5.4,NA,264,NA,56,170,1,67,71,87,36
+"PT129",2,2022-03-25,"UCLA Medical","61-75","Male","Treatment B","Diabetes Type 2","Stage II",3,"Normal",128,111,74,36.5,13,97,9.8,0.85,104,13.7,9,230,177,NA,21,NA,3,66,73,86,50
+"PT129",3,2022-05-06,"UCLA Medical","61-75","Male","Treatment B","Diabetes Type 2","Stage II",3,"Normal",105,88,48,37.5,14,97,7.7,0.73,110,16.2,4.4,142,231,152,36,158,2,68,NA,62,41
+"PT129",4,2022-08-01,"UCLA Medical","61-75","Male","Treatment B","Diabetes Type 2","Stage II",3,"Normal",119,98,75,38.3,10,98,7.2,0.99,84,14,8.9,258,232,162,44,135,1,74,100,80,59
+"PT130",1,2022-01-01,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",147,109,77,38.1,20,96,6.1,0.71,100,12,10.9,287,156,84,51,149,3,NA,65,77,60
+"PT130",2,2022-03-05,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",103,95,84,36.6,18,97,7.9,0.96,77,15.4,6.8,365,277,163,60,248,3,NA,58,100,49
+"PT130",3,2022-06-16,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",146,110,78,36.5,13,100,7.9,1.04,87,13.8,7.6,204,219,98,59,NA,3,NA,100,91,54
+"PT130",4,2022-09-25,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",109,90,62,38.1,16,95,7.4,1.39,NA,14.6,NA,231,190,NA,NA,131,4,61,71,75,60
+"PT130",5,2022-11-17,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",133,106,70,37.7,12,96,8.2,NA,74,NA,7.6,217,141,118,67,67,5,43,99,93,80
+"PT130",6,2023-02-25,"Johns Hopkins","31-45","Male","Treatment A","Diabetes Type 2","Stage II",0,"Underweight",117,93,73,36.8,21,98,7.1,1.66,82,14.7,7.3,216,173,96,57,193,1,60,62,100,79
+"PT131",1,2022-01-01,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",135,100,59,36.6,16,95,7.8,1.36,77,10,8.4,313,186,128,69,219,5,74,87,100,53
+"PT131",2,2022-03-31,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",126,95,63,37.4,16,95,9.9,0.92,97,14.5,7,263,111,43,59,112,2,65,47,100,37
+"PT131",3,2022-06-07,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",121,98,69,38.2,11,99,10,1.43,65,NA,NA,273,191,111,39,144,NA,NA,82,100,65
+"PT131",4,2022-07-20,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",107,90,85,37.6,14,95,7.1,1.17,75,13.5,6.4,237,152,NA,42,172,0,85,68,53,58
+"PT131",5,2022-10-13,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",128,104,74,37,14,97,7.3,1.09,78,NA,7.9,372,168,NA,48,143,3,90,98,79,68
+"PT131",6,2023-01-20,"Boston Medical Center","31-45","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Normal",115,98,80,36.5,21,100,NA,0.74,102,11.8,NA,295,119,NA,42,52,5,69,46,62,68
+"PT132",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage III",4,"Normal",155,116,77,36.7,15,95,6.7,1.47,NA,NA,9.5,235,NA,110,53,152,6,67,94,76,56
+"PT132",2,2022-02-28,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage III",4,"Normal",112,84,79,37.4,17,95,7.9,1.34,71,13.2,6.4,242,188,81,44,149,5,69,90,76,56
+"PT132",3,2022-06-21,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage III",4,"Normal",128,101,80,37,16,94,6.5,0.38,105,12.3,NA,NA,195,137,68,128,5,75,NA,75,41
+"PT132",4,2022-07-26,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage III",4,"Normal",113,92,85,37.1,16,99,6.7,NA,93,15.3,5.8,299,178,79,53,24,2,64,69,100,49
+"PT132",5,2022-09-07,"Johns Hopkins","46-60","Female","Treatment A+B","Hypertension","Stage III",4,"Normal",112,87,69,37.2,14,93,7.6,NA,83,14.2,4.2,186,222,NA,63,NA,6,84,88,62,62
+"PT133",1,2022-01-01,"Johns Hopkins",">75","Male","Treatment B","Diabetes Type 2","Stage II",5,"Obese",136,102,78,36.8,16,93,7.3,1.12,66,12.6,3.8,249,205,NA,32,135,1,51,100,79,51
+"PT133",2,2022-03-02,"Johns Hopkins",">75","Male","Treatment B","Diabetes Type 2","Stage II",5,"Obese",125,99,73,36.7,16,94,8.6,0.82,95,12.7,5.3,303,198,141,50,110,7,61,79,88,54
+"PT133",3,2022-04-04,"Johns Hopkins",">75","Male","Treatment B","Diabetes Type 2","Stage II",5,"Obese",121,101,75,37.4,16,92,7.7,1.13,95,NA,8.5,236,161,NA,49,189,7,82,76,87,52
+"PT133",4,2022-06-12,"Johns Hopkins",">75","Male","Treatment B","Diabetes Type 2","Stage II",5,"Obese",149,113,55,37.6,20,95,11.1,0.75,100,15.6,4.9,294,NA,92,49,191,4,73,66,100,75
+"PT134",1,2022-01-01,"Cleveland Clinic",">75","Female","Treatment A","Hypertension","Stage II",4,"Obese",151,117,74,36.6,15,99,7.9,0.02,134,13.3,10.2,284,167,130,51,133,3,82,83,87,45
+"PT134",2,2022-02-02,"Cleveland Clinic",">75","Female","Treatment A","Hypertension","Stage II",4,"Obese",120,99,86,36.3,15,100,6,0.72,84,15.2,7,264,183,95,43,NA,3,66,74,86,48
+"PT134",3,2022-04-16,"Cleveland Clinic",">75","Female","Treatment A","Hypertension","Stage II",4,"Obese",101,83,84,37.2,12,97,5.9,1.43,77,13.2,NA,157,291,172,49,53,5,85,92,78,62
+"PT134",4,2022-07-30,"Cleveland Clinic",">75","Female","Treatment A","Hypertension","Stage II",4,"Obese",144,110,68,37.1,21,97,6.6,NA,114,NA,4.8,152,216,130,52,201,3,61,75,91,62
+"PT134",5,2022-11-16,"Cleveland Clinic",">75","Female","Treatment A","Hypertension","Stage II",4,"Obese",136,114,63,37.1,17,98,7.2,1.14,93,15,NA,225,189,NA,34,NA,5,NA,67,63,67
+"PT135",1,2022-01-01,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",126,99,72,36.9,18,94,5,1.09,88,9.7,5.6,240,181,122,26,163,1,60,68,100,74
+"PT135",2,2022-02-22,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",140,98,85,37.2,12,97,6.1,0.83,91,NA,7.6,215,256,134,NA,193,5,NA,100,100,65
+"PT135",3,2022-04-01,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",110,83,74,37.9,12,94,7.8,0.76,86,13.7,5.2,210,276,172,NA,129,6,59,78,89,62
+"PT135",4,2022-07-20,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",99,92,80,35.9,14,97,8.9,NA,69,13.3,NA,176,271,167,80,73,2,81,79,78,61
+"PT135",5,2022-09-28,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",124,91,101,37.5,20,97,6.2,0.97,NA,10.8,NA,250,NA,124,43,170,NA,65,99,67,68
+"PT135",6,2022-11-07,"Cleveland Clinic",">75","Male","Treatment B","Coronary Artery Disease","Stage III",4,"Obese",83,73,72,36.9,15,96,6.6,1.23,77,12.7,9.6,235,222,140,34,105,6,41,NA,94,62
+"PT136",1,2022-01-01,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage II",1,"Normal",135,108,90,36.9,17,98,5.2,1.1,103,13.8,6.8,229,179,104,38,145,2,86,91,92,56
+"PT136",2,2022-02-01,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage II",1,"Normal",127,102,72,36.8,14,96,6.3,0.82,84,14.3,8.2,306,134,97,66,152,5,63,76,99,39
+"PT136",3,2022-03-09,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage II",1,"Normal",132,112,76,36.5,20,97,6.1,0.99,106,16.2,6.9,214,240,84,NA,173,4,66,68,74,61
+"PT136",4,2022-05-06,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage II",1,"Normal",129,104,92,36.8,19,95,8.2,1.47,79,14.3,2.7,217,NA,112,NA,227,NA,69,NA,93,63
+"PT136",5,2022-09-02,"UCLA Medical","61-75","Female","Treatment A","Hypertension","Stage II",1,"Normal",136,98,72,37.2,15,97,5.4,0.57,107,11.9,9,266,188,82,31,97,5,80,100,100,66
+"PT137",1,2022-01-01,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",143,109,94,36.8,15,100,6.7,0.99,97,11.6,10,NA,194,87,44,50,9,77,80,89,51
+"PT137",2,2022-03-19,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",107,81,63,36.6,12,97,6.1,1.28,99,NA,7.4,335,221,146,58,159,6,81,99,79,37
+"PT137",3,2022-05-05,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",128,94,57,37.6,17,96,5.9,NA,87,11.6,NA,NA,239,NA,60,109,7,73,68,98,54
+"PT137",4,2022-07-16,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",136,110,73,37.2,16,94,8.9,0.88,100,11.8,NA,203,254,119,40,178,5,NA,78,74,72
+"PT137",5,2022-11-12,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",94,85,66,37,19,92,7.7,NA,NA,NA,8.4,180,176,111,36,NA,5,65,NA,75,75
+"PT137",6,2023-02-27,"UCLA Medical","31-45","Female","Treatment A+B","Hypertension","Stage I",0,"Overweight",105,97,77,36.8,13,100,NA,0.78,94,NA,NA,197,148,104,59,169,3,71,55,93,71
+"PT138",1,2022-01-01,"Mayo Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage II",3,"Normal",124,100,59,37,16,96,6.9,1.29,89,12.5,11.2,257,117,53,75,152,2,57,67,86,56
+"PT138",2,2022-03-01,"Mayo Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage II",3,"Normal",132,99,69,37,23,98,4.9,1.05,87,13.1,NA,287,190,99,45,57,4,46,96,100,47
+"PT138",3,2022-05-21,"Mayo Clinic","61-75","Female","Treatment A","Coronary Artery Disease","Stage II",3,"Normal",137,106,91,37.2,12,98,9,1.25,NA,12.8,8.5,265,201,NA,35,153,NA,56,NA,92,69
+"PT139",1,2022-01-01,"UCLA Medical","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Overweight",153,112,57,36.7,19,100,4.9,1.11,83,11.1,7.2,222,167,90,48,87,8,82,48,77,41
+"PT139",2,2022-04-07,"UCLA Medical","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Overweight",126,101,79,36,19,96,7.5,0.85,97,13.7,6.8,274,226,128,NA,141,4,64,66,100,46
+"PT139",3,2022-07-08,"UCLA Medical","46-60","Female","Treatment A","Coronary Artery Disease","Stage II",2,"Overweight",126,106,72,36.1,14,96,6.2,0.73,101,11.1,9.3,322,206,109,NA,175,NA,62,46,84,66
+"PT140",1,2022-01-01,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",4,"Normal",134,101,75,36.7,13,96,8.2,NA,76,12.3,8.2,246,157,109,60,174,2,64,43,86,61
+"PT140",2,2022-03-22,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",4,"Normal",99,82,61,35.9,21,97,6.3,0.76,98,13.1,5.2,319,227,118,40,148,3,80,59,86,58
+"PT140",3,2022-05-07,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",4,"Normal",136,109,76,37,20,98,7.7,0.51,104,NA,6.6,205,167,NA,72,169,1,84,NA,86,58
+"PT140",4,2022-08-21,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",4,"Normal",130,106,84,37.2,17,98,6.9,0.94,82,14.8,9.1,220,NA,131,33,157,5,77,61,85,74
+"PT140",5,2022-12-03,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",4,"Normal",124,97,70,37.1,17,100,6.5,1.23,83,12.8,12.2,260,236,134,29,95,9,76,64,87,64
+"PT141",1,2022-01-01,"UCLA Medical",">75","Female","Treatment A","Hypertension","Stage II",2,"Overweight",102,87,69,37.2,10,99,NA,0.63,105,14.4,5.3,230,219,140,60,65,3,56,74,100,46
+"PT141",2,2022-04-02,"UCLA Medical",">75","Female","Treatment A","Hypertension","Stage II",2,"Overweight",156,110,51,37.2,12,95,5.9,0.96,107,15.2,7.3,208,202,104,58,173,2,85,82,80,61
+"PT141",3,2022-07-01,"UCLA Medical",">75","Female","Treatment A","Hypertension","Stage II",2,"Overweight",130,110,76,37.3,16,100,7,0.76,95,14.1,9.6,332,181,91,55,102,1,59,NA,84,79
+"PT142",1,2022-01-01,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",174,131,71,36.8,11,97,4.7,1.27,78,12.2,7.6,309,191,119,59,128,4,76,56,95,66
+"PT142",2,2022-03-16,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",145,110,80,37,13,95,8.8,1.04,88,NA,8.3,248,184,131,42,136,3,92,78,100,42
+"PT142",3,2022-05-12,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",113,95,74,37.2,17,98,6.3,0.82,113,12.6,6.8,191,142,120,71,158,8,57,51,48,50
+"PT142",4,2022-08-28,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",140,100,71,37.3,16,95,NA,1.26,NA,14.3,6.5,NA,178,98,32,132,2,71,85,76,63
+"PT142",5,2022-09-28,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",115,86,81,37.6,18,99,NA,NA,101,NA,7.6,206,204,110,NA,180,3,41,63,97,28
+"PT142",6,2023-01-10,"Boston Medical Center","46-60","Male","Control","Hypertension","Stage III",2,"Normal",109,84,65,37.6,18,97,NA,1.16,NA,13.6,6.8,NA,NA,109,NA,127,0,49,89,76,46
+"PT143",1,2022-01-01,"Boston Medical Center","46-60","Female","Treatment B","Chronic Kidney Disease","Stage IV",2,"Overweight",150,106,85,35.5,16,95,7,1.94,61,NA,10.7,296,312,NA,51,182,8,59,70,100,50
+"PT143",2,2022-02-14,"Boston Medical Center","46-60","Female","Treatment B","Chronic Kidney Disease","Stage IV",2,"Overweight",132,101,62,37.7,16,98,7.3,2.27,40,14.7,NA,NA,169,65,66,155,1,68,100,92,62
+"PT143",3,2022-06-11,"Boston Medical Center","46-60","Female","Treatment B","Chronic Kidney Disease","Stage IV",2,"Overweight",131,99,62,37.7,16,98,7.2,1.28,NA,12.7,6.1,340,207,126,61,NA,8,73,NA,100,67
+"PT143",4,2022-08-07,"Boston Medical Center","46-60","Female","Treatment B","Chronic Kidney Disease","Stage IV",2,"Overweight",164,136,72,36.8,11,100,7.3,1.93,60,14.4,NA,248,227,137,57,NA,6,NA,91,69,60
+"PT143",5,2022-10-25,"Boston Medical Center","46-60","Female","Treatment B","Chronic Kidney Disease","Stage IV",2,"Overweight",129,97,55,36.5,17,96,6.5,1.32,72,13.2,6.2,346,NA,130,NA,146,1,NA,72,82,84
+"PT144",1,2022-01-01,"Boston Medical Center",">75","Female","Treatment B","Chronic Kidney Disease","Stage III",2,"Obese",117,90,71,36.8,17,100,5.1,1.6,85,13.9,3.5,169,188,100,44,153,5,83,72,84,63
+"PT144",2,2022-03-31,"Boston Medical Center",">75","Female","Treatment B","Chronic Kidney Disease","Stage III",2,"Obese",132,94,58,37.6,17,95,6,1.95,70,15.4,7.6,198,233,166,51,130,6,95,56,100,67
+"PT144",3,2022-06-19,"Boston Medical Center",">75","Female","Treatment B","Chronic Kidney Disease","Stage III",2,"Obese",123,102,81,37.4,17,99,NA,1.65,62,13.3,5.9,260,160,113,NA,132,4,90,51,67,54
+"PT145",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",124,103,82,37.8,20,97,7.7,1.05,74,11.9,NA,338,268,159,54,212,1,88,100,85,44
+"PT145",2,2022-03-18,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",101,87,93,36.7,17,97,8.2,1.29,67,11.6,7.7,230,NA,137,37,218,2,82,61,60,50
+"PT145",3,2022-06-22,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",126,97,64,37.2,16,93,9.8,1.07,79,14.9,6.1,265,165,94,50,140,5,44,53,100,51
+"PT146",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",124,103,81,37.3,17,96,8.6,0.73,129,13.2,4.2,199,258,165,47,149,3,67,52,100,59
+"PT146",2,2022-02-15,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",136,111,70,36.5,17,95,8.4,1.32,90,13.4,10,190,241,128,48,293,4,50,78,79,65
+"PT146",3,2022-05-11,"UCLA Medical","46-60","Male","Treatment A","Diabetes Type 2","Stage III",4,"Overweight",134,105,68,37.1,12,95,8.5,1.5,80,14.7,7.4,213,250,NA,58,NA,5,83,76,96,49
+"PT147",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",114,106,56,37.6,17,99,5.9,2.01,71,NA,5.5,257,208,109,NA,105,4,74,37,92,55
+"PT147",2,2022-02-19,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",130,97,78,37.5,11,95,8.5,2.04,56,13.3,6.7,238,180,121,54,109,4,75,59,80,44
+"PT147",3,2022-06-06,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",145,104,80,37.1,18,97,6,1.94,68,15.1,11.2,262,NA,117,39,270,NA,70,100,95,51
+"PT147",4,2022-07-30,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",160,115,81,36.6,12,95,NA,2,67,10.6,5.4,NA,200,119,NA,144,1,78,88,60,79
+"PT147",5,2022-09-04,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",156,120,66,36.9,17,96,6.9,2.21,48,13.4,NA,288,159,96,58,154,5,76,73,100,74
+"PT147",6,2022-12-28,"Cleveland Clinic","46-60","Female","Treatment A","Chronic Kidney Disease","Stage III",1,"Normal",120,94,76,36.9,19,99,8.1,NA,69,12.8,9.1,236,215,128,32,156,4,NA,94,100,81
+"PT148",1,2022-01-01,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",100,79,74,37.3,15,95,7.8,0.9,72,12.5,7.2,NA,142,74,62,163,5,84,41,100,53
+"PT148",2,2022-04-08,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",127,95,67,36.9,21,96,5.7,1.21,NA,14.2,8.8,324,NA,124,51,131,4,95,46,88,53
+"PT148",3,2022-06-10,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",92,82,77,37.6,18,95,6.6,1.28,90,12.3,8.9,NA,216,NA,70,149,4,95,NA,85,59
+"PT148",4,2022-08-21,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",120,97,82,37.2,18,98,6.1,1.17,NA,NA,6.8,198,197,NA,71,109,3,67,66,84,80
+"PT148",5,2022-11-28,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",130,107,93,37.1,15,97,7,NA,101,13.5,7.3,283,175,138,60,NA,3,57,NA,66,52
+"PT148",6,2023-02-17,"UCLA Medical",">75","Male","Treatment A","Coronary Artery Disease","Stage III",1,"Normal",108,97,86,36.9,16,92,6.5,0.61,100,15.7,7,283,251,119,48,NA,NA,NA,92,80,86
+"PT149",1,2022-01-01,"Cleveland Clinic",">75","Male","Treatment A","Coronary Artery Disease","Stage II",4,"Normal",141,94,76,37.2,16,94,6,1.21,53,NA,3.9,234,191,109,43,162,3,92,89,54,54
+"PT149",2,2022-02-09,"Cleveland Clinic",">75","Male","Treatment A","Coronary Artery Disease","Stage II",4,"Normal",131,105,66,36.9,17,97,NA,1.7,61,14,9,254,209,121,63,192,7,76,67,93,55
+"PT149",3,2022-04-23,"Cleveland Clinic",">75","Male","Treatment A","Coronary Artery Disease","Stage II",4,"Normal",142,104,72,37.6,15,95,NA,1.19,94,NA,10,NA,NA,135,76,172,4,100,70,94,73
+"PT150",1,2022-01-01,"Mayo Clinic","18-30","Female","Control","Diabetes Type 2","Stage III",4,"Overweight",117,94,77,37.1,15,100,9,0.65,109,12.2,6.9,296,216,118,57,165,8,71,68,66,69
+"PT150",2,2022-02-26,"Mayo Clinic","18-30","Female","Control","Diabetes Type 2","Stage III",4,"Overweight",125,101,60,37.4,18,95,8.2,1.43,71,13.7,4.7,265,180,108,NA,90,4,63,77,100,38
+"PT150",3,2022-06-23,"Mayo Clinic","18-30","Female","Control","Diabetes Type 2","Stage III",4,"Overweight",134,104,59,37.5,13,99,NA,1.52,68,NA,NA,246,176,111,47,228,6,NA,81,89,48
+"PT150",4,2022-08-19,"Mayo Clinic","18-30","Female","Control","Diabetes Type 2","Stage III",4,"Overweight",113,98,100,36.8,20,96,10.1,0.69,102,NA,8.7,269,142,72,52,102,4,NA,93,74,60
+"PT151",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage III",4,"Overweight",132,108,66,37.2,11,96,6,1.3,92,13.6,6,255,158,61,36,147,8,67,100,66,36
+"PT151",2,2022-03-07,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage III",4,"Overweight",95,71,85,36.6,15,100,6,1,118,15.3,8.5,NA,226,161,37,168,4,67,85,75,43
+"PT151",3,2022-04-20,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage III",4,"Overweight",115,88,74,37.1,18,97,6.7,1.07,87,15.8,NA,253,180,149,42,173,7,79,31,83,60
+"PT152",1,2022-01-01,"Mayo Clinic","46-60","Male","Control","Diabetes Type 2","Stage I",5,"Normal",155,113,81,36.5,17,95,9.7,0.75,104,12.9,5.7,250,118,103,39,110,4,86,96,96,31
+"PT152",2,2022-02-20,"Mayo Clinic","46-60","Male","Control","Diabetes Type 2","Stage I",5,"Normal",123,89,63,36.2,22,98,NA,0.51,109,12.3,NA,216,194,NA,91,205,4,67,59,80,58
+"PT152",3,2022-05-03,"Mayo Clinic","46-60","Male","Control","Diabetes Type 2","Stage I",5,"Normal",123,95,101,37.3,19,95,7.4,NA,98,10.4,11.4,290,210,NA,60,140,5,77,86,71,50
+"PT153",1,2022-01-01,"Boston Medical Center","18-30","Male","Treatment A","Diabetes Type 2","Stage III",3,"Normal",147,106,67,36.8,19,98,9.7,NA,74,15.1,8.2,373,178,84,NA,129,7,69,57,65,29
+"PT153",2,2022-04-17,"Boston Medical Center","18-30","Male","Treatment A","Diabetes Type 2","Stage III",3,"Normal",141,109,84,36.9,12,94,6.7,1.18,75,13.7,6.9,235,209,146,42,234,4,92,76,78,41
+"PT153",3,2022-06-22,"Boston Medical Center","18-30","Male","Treatment A","Diabetes Type 2","Stage III",3,"Normal",105,86,50,36.4,16,96,9.6,NA,50,14,9.1,321,221,128,38,230,3,86,77,80,67
+"PT153",4,2022-10-07,"Boston Medical Center","18-30","Male","Treatment A","Diabetes Type 2","Stage III",3,"Normal",134,105,79,36.8,22,99,7.5,1.19,NA,13.6,NA,NA,207,127,26,154,4,32,58,68,67
+"PT154",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",1,"Overweight",147,109,90,38.5,10,98,6.4,1.6,75,13.8,8.7,218,185,109,39,95,6,69,80,100,42
+"PT154",2,2022-02-05,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",1,"Overweight",117,88,74,36.3,17,97,5.2,0.91,85,14,7.7,NA,221,127,44,144,2,92,100,70,55
+"PT154",3,2022-05-31,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",1,"Overweight",111,84,81,37.3,16,100,6,0.9,85,13.8,10.4,185,224,138,54,140,4,58,93,65,71
+"PT154",4,2022-09-02,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",1,"Overweight",143,112,73,37.8,9,98,6.3,0.83,NA,NA,4.9,NA,207,131,70,155,5,75,83,76,50
+"PT155",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Obese",120,89,68,37,16,98,7.3,1.17,80,13.4,7.8,231,222,132,69,205,3,74,88,73,52
+"PT155",2,2022-04-23,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Obese",149,115,87,37,14,95,9.7,0.77,116,14.4,7.3,183,117,46,47,203,7,67,80,89,55
+"PT155",3,2022-07-06,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Obese",151,116,63,37.3,23,97,6.4,1.46,74,15,7.9,234,240,NA,37,168,4,87,100,67,56
+"PT155",4,2022-10-20,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage I",2,"Obese",107,86,66,36.6,16,100,6.1,0.92,101,14.7,9.4,274,230,170,NA,124,3,98,84,66,71
+"PT156",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",3,"Obese",148,103,79,36.3,12,98,7.2,0.56,92,12.5,NA,NA,193,126,45,110,5,86,100,91,41
+"PT156",2,2022-03-10,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",3,"Obese",137,99,61,37.2,18,95,7.8,0.96,94,15.5,NA,264,NA,127,46,145,5,65,52,64,46
+"PT156",3,2022-04-19,"Mayo Clinic","31-45","Female","Treatment B","Heart Failure","Stage III",3,"Obese",101,82,65,37,12,96,5,0.6,NA,14.5,7.1,221,214,129,39,141,NA,49,41,86,50
+"PT157",1,2022-01-01,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",143,101,77,36.4,18,96,NA,1.02,91,13.5,8.2,169,136,114,NA,266,5,45,75,78,81
+"PT157",2,2022-04-23,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",132,103,82,36.7,17,98,6.9,1.18,79,12.4,5.3,328,NA,158,44,144,4,76,60,84,59
+"PT157",3,2022-07-14,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",107,89,80,37.2,14,100,9,1.24,74,13.9,6.6,297,198,NA,NA,187,2,70,55,85,57
+"PT157",4,2022-08-30,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",117,99,72,37.1,20,95,7.2,0.56,99,13.5,10.1,NA,177,111,NA,233,NA,80,83,76,61
+"PT157",5,2022-12-25,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",155,117,69,37.1,16,95,8.4,NA,73,14,10.1,252,223,NA,24,124,5,64,68,94,53
+"PT157",6,2023-03-19,"Johns Hopkins","46-60","Female","Control","Diabetes Type 2","Stage I",3,"Underweight",134,102,73,36.7,15,95,6.1,1.06,83,12.5,6.6,265,140,121,53,131,9,95,94,79,39
+"PT158",1,2022-01-01,"Cleveland Clinic","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage I",3,"Normal",124,90,80,37.8,17,99,6.1,1.06,98,14.1,NA,NA,249,153,50,224,2,NA,52,78,52
+"PT158",2,2022-04-25,"Cleveland Clinic","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage I",3,"Normal",106,81,72,38.1,13,97,6.7,2.04,80,12.9,7.9,239,268,159,60,NA,6,NA,66,88,56
+"PT158",3,2022-07-21,"Cleveland Clinic","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage I",3,"Normal",123,97,62,37.6,12,97,6.2,1.7,68,13,4.5,193,231,159,32,128,8,48,NA,70,62
+"PT158",4,2022-10-02,"Cleveland Clinic","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage I",3,"Normal",135,109,56,36.5,15,96,7.8,1.87,51,13.4,7.7,186,124,48,46,95,6,66,NA,74,80
+"PT159",1,2022-01-01,"Cleveland Clinic","31-45","Female","Control","Heart Failure","Stage I",2,"Overweight",125,87,57,37.1,12,96,8,1.06,71,NA,4.8,210,157,128,63,199,NA,82,26,100,47
+"PT159",2,2022-03-28,"Cleveland Clinic","31-45","Female","Control","Heart Failure","Stage I",2,"Overweight",113,83,82,36.8,15,94,7.5,1.03,103,11.9,5.3,355,220,125,39,146,1,75,NA,97,50
+"PT159",3,2022-06-16,"Cleveland Clinic","31-45","Female","Control","Heart Failure","Stage I",2,"Overweight",112,92,63,37.2,17,96,6.8,NA,107,12.6,4.8,262,117,62,44,62,6,90,79,62,38
+"PT159",4,2022-09-29,"Cleveland Clinic","31-45","Female","Control","Heart Failure","Stage I",2,"Overweight",113,81,53,39,19,95,6.4,NA,90,11.7,6.6,224,183,97,65,NA,NA,72,61,95,41
+"PT160",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A","Chronic Kidney Disease","Stage I",1,"Overweight",118,89,65,36.2,14,100,6.2,1.83,57,14.2,NA,307,NA,198,41,197,6,57,86,63,56
+"PT160",2,2022-02-10,"Johns Hopkins","46-60","Female","Treatment A","Chronic Kidney Disease","Stage I",1,"Overweight",121,92,79,36.2,17,96,8.2,1.32,92,12.5,7.8,262,173,86,29,147,0,77,90,46,78
+"PT160",3,2022-04-15,"Johns Hopkins","46-60","Female","Treatment A","Chronic Kidney Disease","Stage I",1,"Overweight",122,91,74,37.7,21,99,6.5,1.66,80,13.6,5.4,290,254,131,NA,120,4,100,76,100,50
+"PT160",4,2022-06-21,"Johns Hopkins","46-60","Female","Treatment A","Chronic Kidney Disease","Stage I",1,"Overweight",120,98,94,37,14,95,5.5,NA,60,12.3,8.9,238,185,110,26,206,2,76,100,97,59
+"PT160",5,2022-10-02,"Johns Hopkins","46-60","Female","Treatment A","Chronic Kidney Disease","Stage I",1,"Overweight",144,105,92,36.5,21,100,4.3,1.84,70,10.1,NA,219,256,NA,54,142,4,55,83,95,69
+"PT161",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",119,86,67,37.5,15,99,7.4,0.93,79,11.1,0.7,211,135,118,41,84,2,56,93,90,50
+"PT161",2,2022-02-16,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",126,89,76,36.7,17,96,5.2,1.02,101,11.8,5.8,263,189,114,53,208,4,74,37,62,58
+"PT161",3,2022-04-17,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",114,88,58,37.2,18,99,6.5,1.03,98,11.7,9.6,260,157,87,52,165,7,NA,52,90,43
+"PT161",4,2022-08-09,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",152,113,97,37.6,15,96,NA,1.11,83,13.2,5,347,255,161,NA,180,5,54,52,84,68
+"PT161",5,2022-10-03,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",104,87,56,37.2,20,96,6.4,1.6,61,NA,9.1,280,195,147,55,NA,8,69,68,99,55
+"PT161",6,2022-11-12,"Johns Hopkins","46-60","Female","Treatment A","Hypertension","Stage II",2,"Overweight",91,81,82,36.7,14,97,8,0.78,93,NA,12.7,244,NA,NA,48,96,2,75,90,83,71
+"PT162",1,2022-01-01,"Johns Hopkins","46-60","Male","Control","Heart Failure","Stage IV",1,"Overweight",126,83,87,36.7,16,98,NA,1.3,76,13.8,10.4,227,273,157,54,61,8,85,72,88,47
+"PT162",2,2022-04-06,"Johns Hopkins","46-60","Male","Control","Heart Failure","Stage IV",1,"Overweight",152,104,76,37.1,16,95,7.5,1.73,51,NA,9.5,NA,166,109,81,97,9,74,34,85,57
+"PT162",3,2022-07-31,"Johns Hopkins","46-60","Male","Control","Heart Failure","Stage IV",1,"Overweight",153,106,61,37.2,15,95,6.2,1.1,94,14,6.8,255,NA,105,37,175,3,71,77,92,54
+"PT163",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",152,108,70,37.1,17,94,6.1,NA,NA,16.2,5.3,194,260,199,43,NA,3,80,82,89,54
+"PT163",2,2022-02-09,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",131,98,68,36.9,9,97,6.1,1.34,69,13.1,9.1,262,NA,132,38,184,3,60,81,95,61
+"PT163",3,2022-04-10,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",131,108,75,37.4,15,98,7.1,0.99,95,12.6,NA,144,166,109,60,NA,7,57,78,91,58
+"PT164",1,2022-01-01,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",132,101,81,37.2,16,99,4.5,1.5,73,14.6,9.5,NA,141,95,31,81,2,57,99,80,53
+"PT164",2,2022-03-02,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",143,113,71,36.7,19,98,NA,NA,57,17,7.8,207,206,156,69,NA,5,53,86,91,48
+"PT164",3,2022-05-18,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",111,85,72,37,12,92,7.7,2.07,64,16.5,6,NA,243,132,32,179,5,62,90,89,64
+"PT164",4,2022-09-01,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",114,93,67,38,17,95,5.2,1.88,47,12.4,5.9,257,157,NA,44,108,0,NA,67,99,69
+"PT164",5,2022-12-30,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",133,108,94,37.6,19,98,NA,1.67,69,15,7.6,277,NA,194,40,145,4,59,71,78,71
+"PT164",6,2023-04-06,"Johns Hopkins","46-60","Female","Treatment A+B","Chronic Kidney Disease","Stage II",1,"Obese",120,100,76,36.5,16,97,NA,NA,70,13.1,4.6,NA,202,107,NA,128,2,83,53,83,73
+"PT165",1,2022-01-01,"Cleveland Clinic","61-75","Female","Treatment B","Chronic Kidney Disease","Stage II",0,"Obese",128,99,105,37.3,15,96,NA,2.22,71,13.6,7.3,306,167,104,35,195,3,80,98,98,42
+"PT165",2,2022-04-14,"Cleveland Clinic","61-75","Female","Treatment B","Chronic Kidney Disease","Stage II",0,"Obese",123,97,53,36.9,15,97,NA,2.06,60,15.2,5.9,301,NA,85,61,139,4,56,99,59,51
+"PT165",3,2022-06-26,"Cleveland Clinic","61-75","Female","Treatment B","Chronic Kidney Disease","Stage II",0,"Obese",153,110,89,37,14,96,7.9,2.05,64,NA,8.8,292,201,93,37,NA,6,54,62,86,79
+"PT166",1,2022-01-01,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",118,89,85,36.9,13,99,8.6,0.77,85,13.3,9.4,262,250,162,53,188,1,71,97,77,72
+"PT166",2,2022-03-15,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",113,94,65,37.1,11,96,7,0.65,112,11.2,11.3,140,NA,103,41,NA,7,NA,77,65,55
+"PT166",3,2022-05-03,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",138,98,95,36.6,19,98,5.2,NA,99,13,7.6,144,227,125,39,129,5,67,87,95,60
+"PT166",4,2022-06-14,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",125,95,76,36.6,19,98,5.6,0.4,NA,14.4,11.6,288,239,121,58,173,2,86,95,75,58
+"PT166",5,2022-07-15,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",133,97,76,36.8,18,97,6.1,1.17,97,11.5,4.8,200,185,80,67,144,3,53,100,100,71
+"PT166",6,2022-08-20,"Cleveland Clinic","61-75","Male","Treatment B","Hypertension","Stage I",0,"Overweight",118,98,80,37.2,14,98,5.7,1.3,91,11.9,10.2,252,184,118,NA,NA,3,80,46,73,71
+"PT167",1,2022-01-01,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",123,94,85,37,22,97,6.2,NA,92,15.8,10.1,252,82,71,42,161,2,59,100,92,43
+"PT167",2,2022-03-18,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",145,112,74,36.7,17,98,7.7,0.46,106,13.6,7.4,263,190,89,46,121,4,67,92,100,60
+"PT167",3,2022-05-14,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",130,98,67,37,18,98,7.3,1.22,NA,12.9,6.2,127,NA,133,53,152,3,NA,80,77,59
+"PT167",4,2022-07-05,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",113,92,57,38,16,93,7.6,1.06,87,14.6,4.6,NA,218,130,43,184,6,59,91,82,45
+"PT167",5,2022-09-02,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",115,93,78,36.3,18,97,8.3,1.17,NA,17.4,8.3,249,NA,115,67,73,6,NA,95,91,61
+"PT167",6,2022-10-21,"UCLA Medical","61-75","Female","Treatment B","Hypertension","Stage II",2,"Obese",139,116,87,36.1,11,99,5.8,0.81,105,11,NA,200,174,100,52,199,6,NA,67,78,70
+"PT168",1,2022-01-01,"Cleveland Clinic",">75","Female","Control","Diabetes Type 2","Stage II",4,"Obese",109,85,81,36.9,18,97,6.4,0.61,96,13.9,6.7,324,204,122,40,240,7,76,71,82,53
+"PT168",2,2022-04-30,"Cleveland Clinic",">75","Female","Control","Diabetes Type 2","Stage II",4,"Obese",119,90,57,36.2,23,98,10.4,1.46,NA,14.6,NA,237,247,133,38,129,2,68,100,100,51
+"PT168",3,2022-08-02,"Cleveland Clinic",">75","Female","Control","Diabetes Type 2","Stage II",4,"Obese",137,104,97,38.1,6,96,8.6,0.98,86,13.6,8.1,NA,211,161,53,190,4,59,67,85,51
+"PT168",4,2022-10-15,"Cleveland Clinic",">75","Female","Control","Diabetes Type 2","Stage II",4,"Obese",150,104,60,37.1,18,97,7.8,NA,96,NA,9.7,NA,186,142,67,147,0,65,44,96,53
+"PT169",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",122,94,51,37,15,96,7.9,1.02,82,NA,9,272,189,85,118,171,4,74,83,90,43
+"PT169",2,2022-02-21,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",143,98,90,37,14,93,NA,1.06,80,15,NA,183,NA,164,16,102,6,56,87,100,52
+"PT169",3,2022-04-19,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",112,88,63,37.2,12,96,9.6,1.21,89,14.9,8.3,298,215,142,87,153,4,88,38,77,79
+"PT169",4,2022-07-15,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",107,86,50,36.4,18,94,6.8,0.87,89,12.3,8.6,221,95,NA,41,214,4,79,76,89,45
+"PT169",5,2022-09-11,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",2,"Overweight",129,104,88,37.8,20,97,8.9,1.5,59,13.2,9.1,281,104,64,67,134,2,69,76,72,82
+"PT170",1,2022-01-01,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage III",1,"Obese",122,96,59,35.6,15,97,6.7,1.55,NA,NA,8.3,241,159,85,81,99,4,86,NA,64,57
+"PT170",2,2022-03-19,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage III",1,"Obese",119,89,71,37.2,18,98,6.8,1.22,91,NA,8.1,177,200,115,31,117,3,66,58,100,60
+"PT170",3,2022-06-09,"Johns Hopkins","18-30","Male","Treatment B","Hypertension","Stage III",1,"Obese",113,95,78,36.4,16,95,5.4,1.1,79,14.7,7,266,148,112,29,61,6,74,100,70,58
+"PT171",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",129,91,73,36.8,18,99,NA,1.04,70,14.3,8.8,255,214,131,48,158,5,52,72,91,55
+"PT171",2,2022-02-02,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",128,96,76,36.6,16,99,8.5,0.89,80,14.9,9.9,273,193,75,41,NA,6,90,67,90,51
+"PT171",3,2022-04-01,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",123,95,68,36.6,15,94,10.3,1.5,NA,14.2,NA,300,274,208,64,203,4,59,88,100,54
+"PT171",4,2022-05-31,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",116,90,75,37.3,16,95,7.7,NA,86,10.7,8.7,188,215,135,NA,128,2,62,NA,85,68
+"PT171",5,2022-08-10,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",129,102,70,37,19,97,NA,0.76,93,15.4,4.4,157,NA,167,58,161,5,67,NA,86,62
+"PT171",6,2022-09-12,"UCLA Medical","61-75","Male","Treatment A","Diabetes Type 2","Stage II",3,"Normal",105,100,92,37.4,14,100,6.3,1.24,87,14,10.6,164,170,102,16,157,7,96,61,67,69
+"PT172",1,2022-01-01,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",5,"Overweight",143,113,84,37.2,16,94,8.3,1.56,72,14.1,6.5,191,209,NA,64,177,6,67,100,100,40
+"PT172",2,2022-03-31,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",5,"Overweight",131,97,77,38,14,98,6.3,1.01,97,14.8,4.9,253,202,115,55,212,2,53,100,100,49
+"PT172",3,2022-06-25,"Mayo Clinic","31-45","Female","Treatment A+B","Diabetes Type 2","Stage II",5,"Overweight",126,100,66,36.4,13,94,8.6,0.77,93,NA,6.7,333,234,NA,NA,173,7,73,69,86,56
+"PT173",1,2022-01-01,"Cleveland Clinic","46-60","Male","Treatment A","Heart Failure","Stage I",2,"Obese",166,109,61,36.4,16,98,8.7,NA,69,NA,7.8,216,251,157,NA,148,3,80,79,78,60
+"PT173",2,2022-03-15,"Cleveland Clinic","46-60","Male","Treatment A","Heart Failure","Stage I",2,"Obese",126,97,78,37,19,98,7.3,NA,100,14.4,3.6,249,NA,158,48,140,1,88,71,93,57
+"PT173",3,2022-05-23,"Cleveland Clinic","46-60","Male","Treatment A","Heart Failure","Stage I",2,"Obese",143,105,103,37.8,15,94,7.4,0.76,106,12.1,11.6,247,155,102,61,143,5,65,84,75,58
+"PT174",1,2022-01-01,"Cleveland Clinic","18-30","Male","Control","Hypertension","Stage III",0,"Normal",112,91,69,37.5,20,97,9.1,1.41,63,NA,9,322,179,116,35,NA,7,95,81,79,55
+"PT174",2,2022-04-12,"Cleveland Clinic","18-30","Male","Control","Hypertension","Stage III",0,"Normal",134,97,72,35.8,15,96,7.6,0.75,79,12.9,8.5,231,204,133,45,216,4,48,70,75,50
+"PT174",3,2022-05-31,"Cleveland Clinic","18-30","Male","Control","Hypertension","Stage III",0,"Normal",127,107,86,36,13,98,6.5,NA,62,NA,7.6,220,169,103,76,169,1,91,100,100,41
+"PT175",1,2022-01-01,"Johns Hopkins","61-75","Male","Control","Chronic Kidney Disease","Stage IV",2,"Underweight",126,96,79,37.1,17,97,6.2,NA,59,14.9,9.3,200,200,104,59,232,5,52,97,100,55
+"PT175",2,2022-03-17,"Johns Hopkins","61-75","Male","Control","Chronic Kidney Disease","Stage IV",2,"Underweight",148,100,89,37.6,15,99,7.2,1.68,67,17.1,10.6,267,252,151,NA,179,6,71,35,99,55
+"PT175",3,2022-06-27,"Johns Hopkins","61-75","Male","Control","Chronic Kidney Disease","Stage IV",2,"Underweight",162,115,79,37.6,20,99,NA,1.98,70,11.7,8.6,213,180,82,57,146,6,51,45,72,60
+"PT176",1,2022-01-01,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",139,103,74,37,15,100,6.1,2.14,77,15.5,NA,248,140,55,21,142,3,81,45,100,44
+"PT176",2,2022-04-09,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",148,111,82,37,19,100,5.8,NA,50,15.9,NA,224,178,103,55,150,3,NA,59,67,58
+"PT176",3,2022-07-10,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",120,92,84,37.9,17,97,7.5,1.88,70,12.8,NA,187,213,99,60,190,6,NA,NA,83,57
+"PT176",4,2022-08-13,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",125,104,97,36.8,20,98,7.6,1.46,67,14,6.2,227,NA,77,72,187,6,81,85,71,59
+"PT176",5,2022-09-14,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",113,92,86,37.5,18,94,6.2,1.9,64,NA,4.4,NA,144,NA,NA,NA,7,58,75,92,67
+"PT176",6,2022-10-20,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Normal",125,96,92,37,14,97,6.7,1.27,64,15.6,5.8,296,NA,94,NA,131,7,63,93,95,72
+"PT177",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",163,113,65,36.9,17,92,5.9,1.11,88,15.7,0.9,187,259,165,13,151,3,66,89,100,36
+"PT177",2,2022-04-07,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",107,81,72,36.1,19,98,6.1,0.84,103,14.5,4.4,234,259,163,74,79,6,68,77,73,41
+"PT177",3,2022-05-22,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",120,93,75,37.5,15,98,5.5,0.81,98,12.7,NA,337,220,107,71,133,4,55,75,82,58
+"PT177",4,2022-09-18,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",121,94,87,37,17,96,7.3,1.13,87,12.5,6.2,186,274,168,71,NA,5,58,NA,85,64
+"PT177",5,2022-12-21,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",139,113,80,36.2,16,96,NA,0.79,NA,14.4,8.8,184,NA,131,19,262,5,77,62,96,54
+"PT177",6,2023-02-13,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage I",2,"Overweight",106,88,69,36.5,14,93,NA,1.37,78,16.1,NA,213,153,NA,NA,NA,2,49,NA,75,93
+"PT178",1,2022-01-01,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",4,"Overweight",112,93,69,36.4,19,98,4.7,1.56,81,14.7,4.8,298,220,125,41,126,7,80,41,100,44
+"PT178",2,2022-04-11,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",4,"Overweight",138,95,51,36.9,20,96,5.8,2.08,64,14,8.6,NA,196,107,52,148,2,75,72,100,60
+"PT178",3,2022-05-24,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",4,"Overweight",140,102,84,37.2,14,96,7.4,1.74,73,13.1,9.6,216,188,113,25,170,8,78,80,86,78
+"PT178",4,2022-08-08,"Johns Hopkins","46-60","Male","Treatment A+B","Chronic Kidney Disease","Stage III",4,"Overweight",150,113,72,35.8,17,97,7.8,1.67,80,13,5,227,201,NA,51,187,2,NA,54,100,53
+"PT179",1,2022-01-01,"UCLA Medical","31-45","Male","Treatment A+B","Hypertension","Stage II",1,"Normal",143,111,70,36.7,14,98,6.8,NA,98,16.6,9.3,263,NA,114,45,203,4,94,62,100,52
+"PT179",2,2022-02-10,"UCLA Medical","31-45","Male","Treatment A+B","Hypertension","Stage II",1,"Normal",133,104,83,37.7,18,95,4.5,1.17,71,14.7,10.9,228,148,74,31,144,5,100,87,72,48
+"PT179",3,2022-03-12,"UCLA Medical","31-45","Male","Treatment A+B","Hypertension","Stage II",1,"Normal",121,102,80,37.4,21,95,8.7,0.77,96,12.2,5.9,230,213,142,34,125,NA,77,65,63,60
+"PT180",1,2022-01-01,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Normal",139,95,78,37.3,15,93,7.7,0.89,85,13.6,8.7,NA,168,82,62,274,2,84,91,67,55
+"PT180",2,2022-02-04,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Normal",134,102,69,36.2,14,100,7.5,1.07,96,10.7,8.4,261,151,NA,16,277,6,74,65,89,47
+"PT180",3,2022-05-30,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Normal",119,97,86,37.4,21,99,8.1,0.84,90,12.3,10.7,NA,NA,122,NA,137,3,71,100,73,65
+"PT180",4,2022-08-25,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Normal",137,98,65,37.1,21,96,9,1.03,84,NA,8.9,NA,NA,123,80,62,7,96,NA,100,43
+"PT180",5,2022-09-25,"Boston Medical Center","31-45","Male","Treatment B","Diabetes Type 2","Stage I",2,"Normal",122,96,75,36.8,14,98,6.8,0.64,NA,16,5.5,NA,NA,133,79,231,5,67,64,100,73
+"PT181",1,2022-01-01,"UCLA Medical","61-75","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Normal",110,81,86,37.4,15,96,7.2,0.89,105,NA,7.1,297,NA,NA,45,NA,3,62,NA,49,75
+"PT181",2,2022-03-30,"UCLA Medical","61-75","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Normal",115,92,101,36.4,17,94,5.2,1.59,83,13.2,NA,272,158,91,52,183,5,92,96,84,35
+"PT181",3,2022-05-17,"UCLA Medical","61-75","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Normal",110,83,62,36.6,16,98,NA,1.05,83,12.5,9,296,185,74,40,150,5,64,44,91,55
+"PT181",4,2022-09-13,"UCLA Medical","61-75","Male","Treatment A+B","Coronary Artery Disease","Stage II",2,"Normal",122,98,88,37.1,17,98,5.9,0.99,93,14.6,9.3,203,209,109,52,186,3,63,78,89,66
+"PT182",1,2022-01-01,"UCLA Medical","31-45","Male","Control","Heart Failure","Stage II",3,"Obese",156,107,85,37.1,12,97,5.8,0.95,103,12.1,5.2,161,285,195,NA,111,4,62,95,100,58
+"PT182",2,2022-03-12,"UCLA Medical","31-45","Male","Control","Heart Failure","Stage II",3,"Obese",148,113,79,36.8,12,99,NA,NA,83,13.9,7.9,223,219,165,65,101,3,71,63,95,42
+"PT182",3,2022-05-20,"UCLA Medical","31-45","Male","Control","Heart Failure","Stage II",3,"Obese",142,107,67,37.1,11,92,6.5,0.65,103,14.5,6.8,249,216,119,50,131,6,79,100,92,38
+"PT183",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",124,97,77,37.7,15,96,6.1,0.56,110,12.4,7,278,224,154,44,144,5,79,100,98,40
+"PT183",2,2022-04-23,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",129,91,85,37.4,14,100,5.6,0.83,109,12.7,6.5,215,219,101,34,154,NA,95,64,71,61
+"PT183",3,2022-07-21,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",108,86,82,36.9,16,94,6,1.15,84,14.4,11.9,321,NA,94,41,154,4,67,88,81,56
+"PT183",4,2022-10-12,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",136,110,76,37.6,16,97,NA,0.83,NA,13.5,6.1,NA,NA,NA,46,88,4,NA,40,100,77
+"PT183",5,2023-02-08,"Cleveland Clinic","18-30","Female","Treatment A+B","Coronary Artery Disease","Stage II",2,"Overweight",126,116,84,36.3,12,100,NA,1.04,79,NA,8.6,238,265,NA,34,108,2,43,41,87,54
+"PT184",1,2022-01-01,"Boston Medical Center","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Obese",133,103,76,36.7,20,97,8.4,0.93,95,10.6,8.6,205,176,130,34,143,3,84,100,93,38
+"PT184",2,2022-03-17,"Boston Medical Center","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Obese",97,81,61,37.2,19,97,7,NA,78,12.5,4.4,284,149,77,62,NA,3,71,75,78,58
+"PT184",3,2022-04-18,"Boston Medical Center","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Obese",145,115,57,37.1,18,97,7.1,0.53,112,13.8,NA,275,188,107,36,211,0,51,52,86,66
+"PT184",4,2022-05-29,"Boston Medical Center","18-30","Female","Treatment A+B","Diabetes Type 2","Stage III",0,"Obese",99,86,74,36.6,17,96,7.3,1.22,82,12.9,7.7,233,246,174,NA,176,1,75,78,74,68
+"PT185",1,2022-01-01,"Johns Hopkins",">75","Female","Treatment A","Chronic Kidney Disease","Stage II",3,"Underweight",116,88,98,36.8,11,98,7.2,1.66,81,12.7,9.6,239,223,124,55,149,1,53,60,97,65
+"PT185",2,2022-02-28,"Johns Hopkins",">75","Female","Treatment A","Chronic Kidney Disease","Stage II",3,"Underweight",146,104,85,38.1,16,95,6.2,2.11,50,13.9,6.3,246,193,116,78,108,4,62,33,88,58
+"PT185",3,2022-06-06,"Johns Hopkins",">75","Female","Treatment A","Chronic Kidney Disease","Stage II",3,"Underweight",107,90,81,37.4,15,96,NA,1.79,60,13,10.9,265,209,NA,35,140,3,65,63,93,49
+"PT186",1,2022-01-01,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",136,106,81,37.1,18,98,8.6,0.78,87,15.7,8,291,222,156,42,NA,5,57,100,73,48
+"PT186",2,2022-04-20,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",105,85,79,36.8,19,96,9.4,1.3,72,11.5,8,325,206,91,45,165,2,39,55,98,72
+"PT186",3,2022-07-09,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",121,101,82,36.9,13,97,NA,0.89,99,12.1,8.5,226,NA,121,42,48,4,53,76,97,73
+"PT186",4,2022-09-19,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",114,94,75,36.5,16,97,9.5,0.84,77,13,8.7,242,214,NA,38,116,2,54,67,83,62
+"PT186",5,2023-01-13,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",105,90,73,37.5,15,97,5.9,1.19,113,11.6,4.1,258,NA,145,44,132,4,50,74,92,82
+"PT186",6,2023-02-16,"Mayo Clinic","46-60","Female","Treatment A","Diabetes Type 2","Stage II",1,"Overweight",122,109,68,36.9,12,97,NA,NA,80,13.7,4.8,243,NA,NA,32,215,4,NA,64,54,83
+"PT187",1,2022-01-01,"Cleveland Clinic","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",110,92,85,36.7,12,97,NA,1.99,42,NA,NA,305,126,56,25,209,6,36,85,64,42
+"PT187",2,2022-03-18,"Cleveland Clinic","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",133,103,65,37.4,14,100,8.8,2.26,50,15,7.8,189,240,170,41,207,0,65,97,89,66
+"PT187",3,2022-07-04,"Cleveland Clinic","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",144,106,76,36.7,21,96,3.6,1.73,53,NA,8.2,230,NA,201,44,195,4,100,77,82,50
+"PT187",4,2022-08-06,"Cleveland Clinic","31-45","Female","Treatment A+B","Chronic Kidney Disease","Stage III",0,"Overweight",119,98,66,37.1,11,97,4.9,NA,92,14.7,6.7,232,179,103,36,131,4,63,NA,60,81
+"PT188",1,2022-01-01,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",160,122,88,37.7,15,97,6.4,1.61,67,15.8,7.6,238,151,96,43,240,5,57,44,80,62
+"PT188",2,2022-03-12,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",151,115,51,37.4,10,97,7.5,1.48,81,13.7,3.1,264,208,117,74,233,5,100,78,87,77
+"PT188",3,2022-06-27,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",133,105,93,37,16,97,NA,1.91,NA,12.9,NA,230,144,71,66,NA,1,95,84,91,57
+"PT188",4,2022-07-31,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",119,99,83,36.4,17,96,4.9,2.33,58,NA,6.6,283,NA,90,67,189,NA,59,56,89,92
+"PT188",5,2022-11-04,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",130,109,95,37.8,12,98,6.1,NA,53,14.1,NA,244,NA,NA,53,NA,3,NA,75,100,70
+"PT188",6,2022-12-31,"Johns Hopkins","31-45","Male","Treatment A","Chronic Kidney Disease","Stage II",2,"Normal",134,109,58,36,16,96,NA,1.53,NA,16.7,7.6,332,188,124,58,101,NA,72,NA,100,92
+"PT189",1,2022-01-01,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage IV",2,"Overweight",114,90,83,37.2,18,97,4.4,0.96,86,15,7.2,303,228,113,41,NA,9,85,85,95,63
+"PT189",2,2022-04-24,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage IV",2,"Overweight",135,111,72,37.2,18,97,7.7,1.02,111,14.4,NA,237,158,NA,29,107,9,61,88,90,50
+"PT189",3,2022-07-01,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage IV",2,"Overweight",140,100,67,37.2,12,97,6.2,1.17,79,14.4,5.8,268,233,NA,21,158,10,67,63,75,62
+"PT189",4,2022-09-25,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage IV",2,"Overweight",135,109,84,37.4,17,97,NA,1.36,91,12.8,8.1,348,171,109,58,189,6,60,48,72,59
+"PT189",5,2022-11-18,"UCLA Medical","46-60","Male","Treatment A","Hypertension","Stage IV",2,"Overweight",155,115,69,37.8,17,94,5.8,1.07,95,NA,6.9,288,189,110,49,141,7,NA,59,79,78
+"PT190",1,2022-01-01,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",1,"Overweight",142,95,54,36.8,14,94,6.6,0.66,85,14.6,3.5,273,209,127,44,118,6,85,69,58,40
+"PT190",2,2022-04-09,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",1,"Overweight",130,100,48,36.8,12,97,7.1,1.26,54,15.3,9.3,252,NA,145,66,78,NA,58,100,100,58
+"PT190",3,2022-07-18,"Boston Medical Center","61-75","Male","Treatment A+B","Hypertension","Stage III",1,"Overweight",144,109,80,36.9,18,94,5.3,1.1,NA,13.4,7.8,139,78,65,34,203,7,56,NA,93,54
+"PT191",1,2022-01-01,"Mayo Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage III",5,"Obese",156,114,91,37.2,14,93,7.8,0.87,102,14,5.7,274,NA,116,51,80,4,93,74,76,44
+"PT191",2,2022-04-17,"Mayo Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage III",5,"Obese",124,104,79,36.5,13,96,7.8,0.81,105,13.8,8.1,199,NA,167,NA,212,6,70,56,90,59
+"PT191",3,2022-07-30,"Mayo Clinic","31-45","Male","Treatment A+B","Diabetes Type 2","Stage III",5,"Obese",161,116,68,37.3,20,98,8.4,NA,NA,13.4,5.6,191,214,NA,72,213,NA,81,51,68,50
+"PT192",1,2022-01-01,"Boston Medical Center","31-45","Male","Treatment B","Heart Failure","Stage II",2,"Normal",135,99,62,35.9,14,98,8.6,0.84,91,12,8.1,221,262,154,34,109,NA,63,98,81,32
+"PT192",2,2022-04-16,"Boston Medical Center","31-45","Male","Treatment B","Heart Failure","Stage II",2,"Normal",149,104,56,36.7,23,97,4.4,NA,NA,15.7,9,284,257,191,45,NA,2,51,97,100,69
+"PT192",3,2022-08-12,"Boston Medical Center","31-45","Male","Treatment B","Heart Failure","Stage II",2,"Normal",124,94,74,36.5,8,93,NA,NA,95,14.8,7.8,248,188,83,63,155,5,97,87,97,64
+"PT192",4,2022-10-04,"Boston Medical Center","31-45","Male","Treatment B","Heart Failure","Stage II",2,"Normal",148,117,71,37,18,94,7.8,0.87,87,13.8,3.1,220,194,136,35,137,4,63,71,59,44
+"PT192",5,2023-01-16,"Boston Medical Center","31-45","Male","Treatment B","Heart Failure","Stage II",2,"Normal",103,90,72,36.9,14,94,8.4,0.82,91,15.2,7.6,248,116,22,41,130,4,NA,NA,100,89
+"PT193",1,2022-01-01,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",2,"Overweight",129,99,75,36.8,19,96,8.9,1.24,89,12.6,4.1,282,167,82,41,88,5,40,100,79,58
+"PT193",2,2022-03-19,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",2,"Overweight",115,92,89,37.2,15,100,10.1,NA,76,12.2,6.3,374,176,144,48,220,1,70,39,100,64
+"PT193",3,2022-07-13,"Boston Medical Center","61-75","Female","Treatment A","Diabetes Type 2","Stage II",2,"Overweight",127,104,87,37.5,22,95,7.6,1.3,83,13.9,5.6,NA,NA,71,56,109,6,63,56,76,36
+"PT194",1,2022-01-01,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage IV",0,"Obese",138,105,86,36.7,11,95,9,0.63,91,11.4,NA,291,259,126,40,108,7,61,89,97,27
+"PT194",2,2022-03-16,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage IV",0,"Obese",123,92,66,37.2,15,98,7.3,1.57,73,14.7,NA,296,204,137,63,165,NA,69,76,79,75
+"PT194",3,2022-06-15,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage IV",0,"Obese",123,93,69,37,22,95,8.7,1.27,73,15,9.5,193,187,141,69,113,3,76,NA,61,57
+"PT194",4,2022-08-12,"Cleveland Clinic","18-30","Female","Treatment A+B","Diabetes Type 2","Stage IV",0,"Obese",114,93,71,37.6,16,100,NA,1.37,NA,14.9,NA,237,274,NA,NA,304,6,93,94,95,46
+"PT195",1,2022-01-01,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",117,83,84,38.1,14,98,NA,1.19,84,11.1,9.2,176,181,98,33,NA,NA,66,77,93,53
+"PT195",2,2022-02-01,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",138,102,78,36.8,19,98,6.9,1.01,90,15.6,8.5,268,NA,128,59,229,5,77,61,100,45
+"PT195",3,2022-03-27,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",99,82,95,36.6,20,97,7.2,0.81,104,14.3,6,222,259,148,61,223,4,55,83,75,64
+"PT195",4,2022-05-17,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",125,92,70,36.9,13,98,7.6,NA,100,16.2,7.3,170,182,100,25,113,2,NA,69,78,79
+"PT195",5,2022-07-29,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",107,94,113,36.5,15,94,8.5,NA,81,14.9,7.4,190,196,148,NA,159,3,NA,NA,100,62
+"PT195",6,2022-11-09,"Johns Hopkins","61-75","Female","Treatment B","Diabetes Type 2","Stage III",1,"Overweight",94,80,77,37.5,16,94,7.4,1.27,73,16,6.2,320,243,149,37,161,NA,80,100,71,75
+"PT196",1,2022-01-01,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",116,90,91,38,12,96,11.2,0.74,112,14.2,6.2,230,167,78,22,151,6,74,100,66,56
+"PT196",2,2022-03-30,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",123,95,93,37.4,19,95,5.1,0.95,NA,12.7,NA,276,201,148,53,127,7,91,64,88,74
+"PT196",3,2022-07-23,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",120,99,58,37,17,94,3.5,NA,89,15.9,6.2,248,157,108,69,149,7,68,57,66,69
+"PT196",4,2022-09-18,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",110,91,75,36.3,14,97,6.4,1.26,83,12.4,7.8,336,217,122,55,184,2,NA,94,88,74
+"PT196",5,2022-11-07,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",122,95,81,37,17,95,7.8,0.78,79,NA,5,377,195,119,43,119,2,65,53,92,58
+"PT196",6,2023-01-14,"Johns Hopkins","18-30","Female","Treatment B","Hypertension","Stage II",1,"Overweight",89,80,81,37.3,17,94,6.4,NA,86,12.2,NA,384,NA,60,NA,NA,3,55,73,100,57
+"PT197",1,2022-01-01,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",154,106,74,37.6,17,97,6.3,NA,83,13.6,9.1,273,NA,138,40,141,4,65,67,100,35
+"PT197",2,2022-04-14,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",120,94,75,38,16,97,9.4,0.62,115,NA,7.2,293,275,166,41,95,6,66,81,100,62
+"PT197",3,2022-06-03,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",117,100,90,37.8,18,95,NA,0.83,106,16.5,3.7,NA,NA,43,42,110,NA,73,84,84,70
+"PT197",4,2022-07-31,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",131,91,72,37.2,14,99,NA,1.29,67,16,NA,347,247,161,77,118,NA,80,98,86,87
+"PT197",5,2022-10-26,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",143,113,85,37.3,16,96,5.2,NA,107,12.1,9,277,NA,NA,49,57,0,83,77,91,86
+"PT197",6,2023-01-20,"Cleveland Clinic","46-60","Female","Treatment A","Hypertension","Stage II",1,"Overweight",119,99,93,37.7,8,93,4,0.83,97,12.1,NA,214,NA,NA,41,107,NA,49,NA,76,65
+"PT198",1,2022-01-01,"Cleveland Clinic",">75","Male","Control","Coronary Artery Disease","Stage IV",1,"Overweight",168,119,63,37.6,16,97,7.5,0.66,98,13.1,6.4,363,195,150,NA,80,4,70,94,77,57
+"PT198",2,2022-02-16,"Cleveland Clinic",">75","Male","Control","Coronary Artery Disease","Stage IV",1,"Overweight",143,106,70,37.3,11,98,6.2,1.23,101,12,8.7,273,NA,NA,60,NA,6,47,80,79,55
+"PT198",3,2022-05-02,"Cleveland Clinic",">75","Male","Control","Coronary Artery Disease","Stage IV",1,"Overweight",126,93,99,36.9,15,99,NA,1.06,90,13.7,NA,229,144,NA,37,NA,NA,100,75,90,52
+"PT198",4,2022-07-27,"Cleveland Clinic",">75","Male","Control","Coronary Artery Disease","Stage IV",1,"Overweight",161,116,81,37.2,15,98,7.3,0.84,81,14.4,7.2,NA,186,NA,15,NA,9,77,77,89,63
+"PT198",5,2022-10-22,"Cleveland Clinic",">75","Male","Control","Coronary Artery Disease","Stage IV",1,"Overweight",141,100,65,37,19,94,5.3,1.07,72,13.6,NA,266,169,91,62,175,4,NA,80,95,57
+"PT199",1,2022-01-01,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",112,84,68,36.5,10,98,6.6,0.8,105,15,5.1,190,197,142,55,250,5,46,82,62,40
+"PT199",2,2022-02-04,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",111,92,67,36.6,17,99,8.5,1.31,85,10.3,6.3,248,261,191,69,218,3,48,58,88,44
+"PT199",3,2022-03-13,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",107,87,103,37.1,18,93,6.5,0.83,89,14.1,7.1,226,NA,114,47,179,4,55,63,68,52
+"PT199",4,2022-04-29,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",120,97,63,37,14,95,9.3,1.15,88,12.2,NA,247,185,70,40,291,1,51,100,82,69
+"PT199",5,2022-06-16,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",108,90,76,36.9,16,100,NA,NA,100,9.6,6.7,288,205,NA,55,157,9,80,NA,67,100
+"PT199",6,2022-08-24,"Mayo Clinic","46-60","Male","Treatment A+B","Diabetes Type 2","Stage III",4,"Normal",155,109,76,36.4,17,97,6.2,0.63,113,17.1,3.5,285,154,106,45,150,NA,80,88,92,56
+"PT200",1,2022-01-01,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",2,"Overweight",137,96,64,37.7,17,100,NA,0.74,99,16.7,10.8,242,231,142,47,206,4,69,83,78,41
+"PT200",2,2022-03-27,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",2,"Overweight",150,111,44,37.1,19,100,6.6,0.98,86,14.1,9.4,185,193,132,68,122,4,NA,24,75,47
+"PT200",3,2022-06-18,"Mayo Clinic",">75","Male","Treatment A+B","Coronary Artery Disease","Stage III",2,"Overweight",103,87,104,37.9,16,98,4.2,1.44,78,14.2,8,214,209,112,70,214,5,58,91,68,40
