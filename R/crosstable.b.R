@@ -171,7 +171,41 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                     self$results$tablestyle2$setContent(tablefinalfit)
                 } else if (sty == "gtsummary") {
-                    tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
+                    # tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
+
+
+                    tablegtsummary <-
+                    gtsummary::tbl_summary(data = mydata,
+                                           by = mygroup,
+                                           statistic = list(
+                                               gtsummary::all_continuous() ~ "{mean} ({sd})",
+                                               gtsummary::all_categorical() ~ "{n} / {N} ({p}%)"
+                                           ),
+                                           digits = gtsummary::all_continuous() ~ 2,
+                                           missing_text = "(Missing)"
+
+                                           ) %>%
+                    gtsummary::modify_header(
+                        update = gtsummary::all_stat_cols() ~ structure("**{level}** N =  {n} ({style_percent(p)}%)", class = "from_markdown"),
+                        stat_by = gt::md("**{level}** N =  {n} ({style_percent(p)}%)")
+                                                  ) %>%
+                    gtsummary::add_n(x = .) %>%
+                    gtsummary::add_overall() %>%
+                    gtsummary::bold_labels(x = .) %>%
+                    gtsummary::add_p(x = .,
+                                     pvalue_fun =
+                                         purrr::partial(
+                                             gtsummary::style_pvalue,
+                                             digits = 2)
+                                     ) %>%
+                    gtsummary::add_q() %>%
+                    gtsummary::bold_labels() %>%
+                    gtsummary::bold_levels() %>%
+                    gtsummary::bold_p()
+
+
+
+
                     tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
                     self$results$tablestyle3$setContent(tablegtsummary)
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {

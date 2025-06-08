@@ -1,4 +1,19 @@
-# Medical Decision Tree - Clinical Implementation Guide
+---
+title: "Medical Decision Tree - Clinical Implementation Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Medical Decision Tree - Clinical Implementation Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
 
 ## Overview
 The Medical Decision Tree module is specifically designed for pathology and oncology research, providing clinically-relevant decision support tools with appropriate performance metrics and interpretations.

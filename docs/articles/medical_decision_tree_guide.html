@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title> • ClinicoPath</title>
+<title>Medical Decision Tree - Clinical Implementation Guide • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Medical Decision Tree - Clinical Implementation Guide">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.20</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.21</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,15 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+<li><a class="dropdown-item" href="../articles/agepyramid.html">Vignette: Creating an Age Pyramid with ClinicoPathDescriptives</a></li>
+    <li><a class="dropdown-item" href="../articles/agreement-analysis.html">Agreement and Reliability</a></li>
+    <li><a class="dropdown-item" href="../articles/alluvial.html">Vignette: Visualizing Data Flows with Alluvial Diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
     <li><a class="dropdown-item" href="../articles/categorical-plots.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/clinicoPathDescriptives-introduction.html">Getting Started with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/continuous-comparisons.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/correlations-scatterplots.html">Correlations and Scatter Plots</a></li>
+    <li><a class="dropdown-item" href="../articles/crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/data-preperation.html">Data Preperation for Clinicopathology Histopathology Pathology Research</a></li>
     <li><a class="dropdown-item" href="../articles/data-summary.html">Summarising Clinicopathological Data</a></li>
     <li><a class="dropdown-item" href="../articles/decisionpanel_advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
@@ -48,14 +52,18 @@
     <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-introduction.html">Introduction to jjstatsplot</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival.html">Using jsurvival for Survival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">UNKNOWN TITLE</a></li>
-    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-vignettes.html">meddecide: Medical Decision Making in R</a></li>
+    <li><a class="dropdown-item" href="../articles/medical_decision_tree_guide.html">Medical Decision Tree - Clinical Implementation Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module_development_jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/motivation.html">Motivation</a></li>
     <li><a class="dropdown-item" href="../articles/nogoldstandard.html">Analyzing Diagnostic Tests without a Gold Standard</a></li>
     <li><a class="dropdown-item" href="../articles/pathology_jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
+    <li><a class="dropdown-item" href="../articles/reportcat.html">Vignette: Generating Quick Summaries of Categorical Pathology Data</a></li>
     <li><a class="dropdown-item" href="../articles/roc-analysis.html">ROC Curve Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/summarydata.html">Vignette: Descriptive Analysis of Continuous Variables in Clinical Data</a></li>
+    <li><a class="dropdown-item" href="../articles/swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
+    <li><a class="dropdown-item" href="../articles/tableone.html">Vignette: Generating a 'Table 1' with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/use-ClinicoPathDescriptives-in-R.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/use-jsurvival-in-R.html">Use jsurvival in R</a></li>
@@ -82,7 +90,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1></h1>
+      <h1>Medical Decision Tree - Clinical Implementation Guide</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/medical_decision_tree_guide.Rmd" class="external-link"><code>vignettes/medical_decision_tree_guide.Rmd</code></a></small>
@@ -92,22 +100,19 @@
     
     
 <div class="section level2">
-<h2 id="medical-decision-tree---clinical-implementation-guide">Medical Decision Tree - Clinical Implementation Guide<a class="anchor" aria-label="anchor" href="#medical-decision-tree---clinical-implementation-guide"></a>
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<div class="section level3">
-<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h3>
 <p>The Medical Decision Tree module is specifically designed for
 pathology and oncology research, providing clinically-relevant decision
 support tools with appropriate performance metrics and
 interpretations.</p>
 </div>
+<div class="section level2">
+<h2 id="key-features-for-medical-research">Key Features for Medical Research<a class="anchor" aria-label="anchor" href="#key-features-for-medical-research"></a>
+</h2>
 <div class="section level3">
-<h3 id="key-features-for-medical-research">Key Features for Medical Research<a class="anchor" aria-label="anchor" href="#key-features-for-medical-research"></a>
+<h3 id="clinical-performance-metrics">1. <strong>Clinical Performance Metrics</strong><a class="anchor" aria-label="anchor" href="#clinical-performance-metrics"></a>
 </h3>
-<div class="section level4">
-<h4 id="clinical-performance-metrics">1. <strong>Clinical Performance Metrics</strong><a class="anchor" aria-label="anchor" href="#clinical-performance-metrics"></a>
-</h4>
 <ul>
 <li>
 <strong>Sensitivity &amp; Specificity</strong>: Core diagnostic
@@ -125,9 +130,9 @@ metrics</li>
 quantification</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="medical-data-handling">2. <strong>Medical Data Handling</strong><a class="anchor" aria-label="anchor" href="#medical-data-handling"></a>
-</h4>
+<div class="section level3">
+<h3 id="medical-data-handling">2. <strong>Medical Data Handling</strong><a class="anchor" aria-label="anchor" href="#medical-data-handling"></a>
+</h3>
 <ul>
 <li>
 <strong>Missing Data</strong>: Imputation within disease groups</li>
@@ -141,9 +146,9 @@ measurement units</li>
 <strong>Quality Checks</strong>: Validates clinical data ranges</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="clinical-context-awareness">3. <strong>Clinical Context Awareness</strong><a class="anchor" aria-label="anchor" href="#clinical-context-awareness"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-context-awareness">3. <strong>Clinical Context Awareness</strong><a class="anchor" aria-label="anchor" href="#clinical-context-awareness"></a>
+</h3>
 <ul>
 <li>
 <strong>Screening</strong>: High sensitivity prioritized</li>
@@ -158,12 +163,12 @@ measurement units</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="practical-examples">Practical Examples<a class="anchor" aria-label="anchor" href="#practical-examples"></a>
+</h2>
 <div class="section level3">
-<h3 id="practical-examples">Practical Examples<a class="anchor" aria-label="anchor" href="#practical-examples"></a>
+<h3 id="example-1-cancer-biomarker-panel">Example 1: Cancer Biomarker Panel<a class="anchor" aria-label="anchor" href="#example-1-cancer-biomarker-panel"></a>
 </h3>
-<div class="section level4">
-<h4 id="example-1-cancer-biomarker-panel">Example 1: Cancer Biomarker Panel<a class="anchor" aria-label="anchor" href="#example-1-cancer-biomarker-panel"></a>
-</h4>
 <pre><code>Clinical Context: Biomarker Discovery
 Target: Cancer diagnosis (Yes/No)
 Continuous Variables: PSA, CA-125, CEA levels
@@ -177,9 +182,9 @@ Options:
 cutoff values - Individual biomarker importance rankings - Clinical
 performance metrics with CI - Cost-effectiveness analysis</p>
 </div>
-<div class="section level4">
-<h4 id="example-2-pathology-staging-system">Example 2: Pathology Staging System<a class="anchor" aria-label="anchor" href="#example-2-pathology-staging-system"></a>
-</h4>
+<div class="section level3">
+<h3 id="example-2-pathology-staging-system">Example 2: Pathology Staging System<a class="anchor" aria-label="anchor" href="#example-2-pathology-staging-system"></a>
+</h3>
 <pre><code>Clinical Context: Cancer Staging
 Target: Advanced stage (III-IV vs I-II)
 Continuous Variables: Tumor size, Ki-67 index, Mitotic count
@@ -192,9 +197,9 @@ Options:
 Risk group classifications - Treatment recommendations per risk group -
 Validation metrics across cohorts</p>
 </div>
-<div class="section level4">
-<h4 id="example-3-treatment-response-prediction">Example 3: Treatment Response Prediction<a class="anchor" aria-label="anchor" href="#example-3-treatment-response-prediction"></a>
-</h4>
+<div class="section level3">
+<h3 id="example-3-treatment-response-prediction">Example 3: Treatment Response Prediction<a class="anchor" aria-label="anchor" href="#example-3-treatment-response-prediction"></a>
+</h3>
 <pre><code>Clinical Context: Treatment Response
 Target: Complete response (Yes/No)
 Continuous Variables: Baseline tumor markers, Age
@@ -209,12 +214,12 @@ for each patient - Key predictive factors - Clinical decision thresholds
 - Personalized treatment recommendations</p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="clinical-interpretation-guidelines">Clinical Interpretation Guidelines<a class="anchor" aria-label="anchor" href="#clinical-interpretation-guidelines"></a>
+</h2>
 <div class="section level3">
-<h3 id="clinical-interpretation-guidelines">Clinical Interpretation Guidelines<a class="anchor" aria-label="anchor" href="#clinical-interpretation-guidelines"></a>
+<h3 id="performance-thresholds">Performance Thresholds<a class="anchor" aria-label="anchor" href="#performance-thresholds"></a>
 </h3>
-<div class="section level4">
-<h4 id="performance-thresholds">Performance Thresholds<a class="anchor" aria-label="anchor" href="#performance-thresholds"></a>
-</h4>
 <ul>
 <li>
 <strong>Excellent</strong>: Sensitivity/Specificity ≥ 0.90</li>
@@ -226,9 +231,9 @@ for each patient - Key predictive factors - Clinical decision thresholds
 <strong>Poor</strong>: Sensitivity/Specificity &lt; 0.70</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="likelihood-ratio-interpretation">Likelihood Ratio Interpretation<a class="anchor" aria-label="anchor" href="#likelihood-ratio-interpretation"></a>
-</h4>
+<div class="section level3">
+<h3 id="likelihood-ratio-interpretation">Likelihood Ratio Interpretation<a class="anchor" aria-label="anchor" href="#likelihood-ratio-interpretation"></a>
+</h3>
 <ul>
 <li><p><strong>LR+ ≥ 10</strong>: Strong evidence for disease</p></li>
 <li><p><strong>LR+ 5-10</strong>: Moderate evidence for disease</p></li>
@@ -243,12 +248,12 @@ disease</p></li>
 <li><p><strong>LR- &gt; 0.5</strong>: Minimal diagnostic value</p></li>
 </ul>
 </div>
+<div class="section level3">
+<h3 id="clinical-context-recommendations">Clinical Context Recommendations<a class="anchor" aria-label="anchor" href="#clinical-context-recommendations"></a>
+</h3>
 <div class="section level4">
-<h4 id="clinical-context-recommendations">Clinical Context Recommendations<a class="anchor" aria-label="anchor" href="#clinical-context-recommendations"></a>
+<h4 id="cancer-screening">Cancer Screening<a class="anchor" aria-label="anchor" href="#cancer-screening"></a>
 </h4>
-<div class="section level5">
-<h5 id="cancer-screening">Cancer Screening<a class="anchor" aria-label="anchor" href="#cancer-screening"></a>
-</h5>
 <ul>
 <li>
 <strong>Priority</strong>: High sensitivity (≥ 0.90)</li>
@@ -259,9 +264,9 @@ disease</p></li>
 consequences</li>
 </ul>
 </div>
-<div class="section level5">
-<h5 id="diagnostic-confirmation">Diagnostic Confirmation<a class="anchor" aria-label="anchor" href="#diagnostic-confirmation"></a>
-</h5>
+<div class="section level4">
+<h4 id="diagnostic-confirmation">Diagnostic Confirmation<a class="anchor" aria-label="anchor" href="#diagnostic-confirmation"></a>
+</h4>
 <ul>
 <li>
 <strong>Priority</strong>: High specificity (≥ 0.90)</li>
@@ -272,9 +277,9 @@ consequences</li>
 treatments/anxiety</li>
 </ul>
 </div>
-<div class="section level5">
-<h5 id="prognosis-assessment">Prognosis Assessment<a class="anchor" aria-label="anchor" href="#prognosis-assessment"></a>
-</h5>
+<div class="section level4">
+<h4 id="prognosis-assessment">Prognosis Assessment<a class="anchor" aria-label="anchor" href="#prognosis-assessment"></a>
+</h4>
 <ul>
 <li>
 <strong>Priority</strong>: Balanced accuracy</li>
@@ -286,12 +291,12 @@ treatments/anxiety</li>
 </div>
 </div>
 </div>
+<div class="section level2">
+<h2 id="quality-assurance">Quality Assurance<a class="anchor" aria-label="anchor" href="#quality-assurance"></a>
+</h2>
 <div class="section level3">
-<h3 id="quality-assurance">Quality Assurance<a class="anchor" aria-label="anchor" href="#quality-assurance"></a>
+<h3 id="minimum-requirements">Minimum Requirements<a class="anchor" aria-label="anchor" href="#minimum-requirements"></a>
 </h3>
-<div class="section level4">
-<h4 id="minimum-requirements">Minimum Requirements<a class="anchor" aria-label="anchor" href="#minimum-requirements"></a>
-</h4>
 <ul>
 <li>
 <strong>Sample Size</strong>: ≥ 50 cases for reliable trees</li>
@@ -304,9 +309,9 @@ cross-validation</li>
 <strong>Missing Data</strong>: &lt; 20% per variable</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="red-flags">Red Flags<a class="anchor" aria-label="anchor" href="#red-flags"></a>
-</h4>
+<div class="section level3">
+<h3 id="red-flags">Red Flags<a class="anchor" aria-label="anchor" href="#red-flags"></a>
+</h3>
 <ul>
 <li>
 <strong>Very Low Prevalence</strong>: &lt; 5% (consider
@@ -320,12 +325,12 @@ oversampling)</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="implementation-steps">Implementation Steps<a class="anchor" aria-label="anchor" href="#implementation-steps"></a>
+</h2>
 <div class="section level3">
-<h3 id="implementation-steps">Implementation Steps<a class="anchor" aria-label="anchor" href="#implementation-steps"></a>
+<h3 id="data-preparation">1. Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
 </h3>
-<div class="section level4">
-<h4 id="data-preparation">1. Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
-</h4>
 <ul>
 <li>Clean and validate clinical data</li>
 <li>Ensure appropriate coding of outcomes</li>
@@ -333,9 +338,9 @@ oversampling)</li>
 <li>Validate biomarker ranges</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="model-development">2. Model Development<a class="anchor" aria-label="anchor" href="#model-development"></a>
-</h4>
+<div class="section level3">
+<h3 id="model-development">2. Model Development<a class="anchor" aria-label="anchor" href="#model-development"></a>
+</h3>
 <ul>
 <li>Select appropriate clinical context</li>
 <li>Choose relevant performance metrics</li>
@@ -343,9 +348,9 @@ oversampling)</li>
 <li>Consider class imbalance</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="clinical-validation">3. Clinical Validation<a class="anchor" aria-label="anchor" href="#clinical-validation"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-validation">3. Clinical Validation<a class="anchor" aria-label="anchor" href="#clinical-validation"></a>
+</h3>
 <ul>
 <li>Test in independent cohort</li>
 <li>Assess calibration across subgroups</li>
@@ -353,9 +358,9 @@ oversampling)</li>
 <li>Compare with existing methods</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="clinical-implementation">4. Clinical Implementation<a class="anchor" aria-label="anchor" href="#clinical-implementation"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-implementation">4. Clinical Implementation<a class="anchor" aria-label="anchor" href="#clinical-implementation"></a>
+</h3>
 <ul>
 <li>Establish quality control procedures</li>
 <li>Train clinical staff</li>
@@ -364,12 +369,12 @@ oversampling)</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="regulatory-considerations">Regulatory Considerations<a class="anchor" aria-label="anchor" href="#regulatory-considerations"></a>
+</h2>
 <div class="section level3">
-<h3 id="regulatory-considerations">Regulatory Considerations<a class="anchor" aria-label="anchor" href="#regulatory-considerations"></a>
+<h3 id="for-diagnostic-tools">For Diagnostic Tools<a class="anchor" aria-label="anchor" href="#for-diagnostic-tools"></a>
 </h3>
-<div class="section level4">
-<h4 id="for-diagnostic-tools">For Diagnostic Tools<a class="anchor" aria-label="anchor" href="#for-diagnostic-tools"></a>
-</h4>
 <ul>
 <li>FDA guidance for AI/ML-based medical devices</li>
 <li>Clinical validation requirements</li>
@@ -377,9 +382,9 @@ oversampling)</li>
 <li>Documentation standards</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="for-research-applications">For Research Applications<a class="anchor" aria-label="anchor" href="#for-research-applications"></a>
-</h4>
+<div class="section level3">
+<h3 id="for-research-applications">For Research Applications<a class="anchor" aria-label="anchor" href="#for-research-applications"></a>
+</h3>
 <ul>
 <li>IRB approval for retrospective analysis</li>
 <li>Data privacy compliance (HIPAA)</li>
@@ -388,12 +393,12 @@ oversampling)</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
+</h2>
 <div class="section level3">
-<h3 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
+<h3 id="common-issues">Common Issues<a class="anchor" aria-label="anchor" href="#common-issues"></a>
 </h3>
-<div class="section level4">
-<h4 id="common-issues">Common Issues<a class="anchor" aria-label="anchor" href="#common-issues"></a>
-</h4>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Low Performance</strong>: Check data quality, feature
@@ -408,9 +413,9 @@ cases</li>
 sampling/weighting</li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="performance-optimization">Performance Optimization<a class="anchor" aria-label="anchor" href="#performance-optimization"></a>
-</h4>
+<div class="section level3">
+<h3 id="performance-optimization">Performance Optimization<a class="anchor" aria-label="anchor" href="#performance-optimization"></a>
+</h3>
 <ul>
 <li>Feature selection based on clinical relevance</li>
 <li>Cross-validation for hyperparameter tuning</li>
@@ -419,12 +424,12 @@ sampling/weighting</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="advanced-clinical-applications">Advanced Clinical Applications<a class="anchor" aria-label="anchor" href="#advanced-clinical-applications"></a>
+</h2>
 <div class="section level3">
-<h3 id="advanced-clinical-applications">Advanced Clinical Applications<a class="anchor" aria-label="anchor" href="#advanced-clinical-applications"></a>
+<h3 id="precision-medicine-applications">Precision Medicine Applications<a class="anchor" aria-label="anchor" href="#precision-medicine-applications"></a>
 </h3>
-<div class="section level4">
-<h4 id="precision-medicine-applications">Precision Medicine Applications<a class="anchor" aria-label="anchor" href="#precision-medicine-applications"></a>
-</h4>
 <pre><code>Example: Personalized Cancer Treatment Selection
 Target: Treatment Response (Complete/Partial/Progressive)
 Variables: 
@@ -439,9 +444,9 @@ Clinical Impact:
 - Optimize resource allocation
 - Improve patient outcomes</code></pre>
 </div>
-<div class="section level4">
-<h4 id="multi-modal-pathology-integration">Multi-Modal Pathology Integration<a class="anchor" aria-label="anchor" href="#multi-modal-pathology-integration"></a>
-</h4>
+<div class="section level3">
+<h3 id="multi-modal-pathology-integration">Multi-Modal Pathology Integration<a class="anchor" aria-label="anchor" href="#multi-modal-pathology-integration"></a>
+</h3>
 <pre><code>Example: AI-Assisted Pathology Diagnosis
 Target: Histological Diagnosis (Benign/Malignant/Uncertain)
 Variables:
@@ -456,9 +461,9 @@ Benefits:
 - Enhanced diagnostic accuracy
 - Training tool for pathologists</code></pre>
 </div>
-<div class="section level4">
-<h4 id="longitudinal-outcome-prediction">Longitudinal Outcome Prediction<a class="anchor" aria-label="anchor" href="#longitudinal-outcome-prediction"></a>
-</h4>
+<div class="section level3">
+<h3 id="longitudinal-outcome-prediction">Longitudinal Outcome Prediction<a class="anchor" aria-label="anchor" href="#longitudinal-outcome-prediction"></a>
+</h3>
 <pre><code>Example: Disease Progression Monitoring
 Target: 5-year survival (High/Medium/Low risk)
 Variables:
@@ -474,12 +479,12 @@ Applications:
 - Clinical trial stratification</code></pre>
 </div>
 </div>
+<div class="section level2">
+<h2 id="specialized-oncology-applications">Specialized Oncology Applications<a class="anchor" aria-label="anchor" href="#specialized-oncology-applications"></a>
+</h2>
 <div class="section level3">
-<h3 id="specialized-oncology-applications">Specialized Oncology Applications<a class="anchor" aria-label="anchor" href="#specialized-oncology-applications"></a>
+<h3 id="tumor-board-decision-support">Tumor Board Decision Support<a class="anchor" aria-label="anchor" href="#tumor-board-decision-support"></a>
 </h3>
-<div class="section level4">
-<h4 id="tumor-board-decision-support">Tumor Board Decision Support<a class="anchor" aria-label="anchor" href="#tumor-board-decision-support"></a>
-</h4>
 <p>The decision tree can assist multidisciplinary teams by: -
 <strong>Risk Stratification</strong>: Categorize patients by treatment
 urgency - <strong>Treatment Options</strong>: Rank interventions by
@@ -487,18 +492,18 @@ predicted benefit - <strong>Resource Planning</strong>: Allocate
 specialized care appropriately - <strong>Second Opinions</strong>:
 Provide objective analysis framework</p>
 </div>
-<div class="section level4">
-<h4 id="biomarker-development-pipeline">Biomarker Development Pipeline<a class="anchor" aria-label="anchor" href="#biomarker-development-pipeline"></a>
-</h4>
+<div class="section level3">
+<h3 id="biomarker-development-pipeline">Biomarker Development Pipeline<a class="anchor" aria-label="anchor" href="#biomarker-development-pipeline"></a>
+</h3>
 <p>Support translational research through: - <strong>Discovery</strong>:
 Identify promising biomarker combinations - <strong>Validation</strong>:
 Test performance across independent cohorts -
 <strong>Optimization</strong>: Determine optimal cutoff values -
 <strong>Implementation</strong>: Create clinical-ready algorithms</p>
 </div>
-<div class="section level4">
-<h4 id="clinical-trial-design">Clinical Trial Design<a class="anchor" aria-label="anchor" href="#clinical-trial-design"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-trial-design">Clinical Trial Design<a class="anchor" aria-label="anchor" href="#clinical-trial-design"></a>
+</h3>
 <p>Enhance study design with: - <strong>Stratification</strong>: Balance
 treatment arms - <strong>Enrichment</strong>: Select likely responders -
 <strong>Adaptive Designs</strong>: Modify based on interim results -
@@ -506,21 +511,21 @@ treatment arms - <strong>Enrichment</strong>: Select likely responders -
 outcomes</p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="quality-metrics-for-clinical-implementation">Quality Metrics for Clinical Implementation<a class="anchor" aria-label="anchor" href="#quality-metrics-for-clinical-implementation"></a>
+</h2>
 <div class="section level3">
-<h3 id="quality-metrics-for-clinical-implementation">Quality Metrics for Clinical Implementation<a class="anchor" aria-label="anchor" href="#quality-metrics-for-clinical-implementation"></a>
+<h3 id="model-performance-standards">Model Performance Standards<a class="anchor" aria-label="anchor" href="#model-performance-standards"></a>
 </h3>
-<div class="section level4">
-<h4 id="model-performance-standards">Model Performance Standards<a class="anchor" aria-label="anchor" href="#model-performance-standards"></a>
-</h4>
 <pre><code>Minimum Acceptable Performance:
 - Screening Applications: Sensitivity ≥ 0.85, NPV ≥ 0.95
 - Diagnostic Applications: Specificity ≥ 0.85, PPV ≥ 0.80
 - Prognostic Applications: C-index ≥ 0.70, Calibration slope 0.8-1.2
 - Treatment Selection: Clinical utility &gt; standard care</code></pre>
 </div>
-<div class="section level4">
-<h4 id="validation-requirements">Validation Requirements<a class="anchor" aria-label="anchor" href="#validation-requirements"></a>
-</h4>
+<div class="section level3">
+<h3 id="validation-requirements">Validation Requirements<a class="anchor" aria-label="anchor" href="#validation-requirements"></a>
+</h3>
 <pre><code>Internal Validation:
 - Cross-validation (k-fold ≥ 5)
 - Bootstrap validation (≥ 200 iterations)
@@ -532,9 +537,9 @@ External Validation:
 - Prospective cohort
 - Multi-center validation</code></pre>
 </div>
-<div class="section level4">
-<h4 id="performance-monitoring">Performance Monitoring<a class="anchor" aria-label="anchor" href="#performance-monitoring"></a>
-</h4>
+<div class="section level3">
+<h3 id="performance-monitoring">Performance Monitoring<a class="anchor" aria-label="anchor" href="#performance-monitoring"></a>
+</h3>
 <pre><code>Continuous Assessment:
 - Monthly performance reviews
 - Calibration drift detection
@@ -542,12 +547,12 @@ External Validation:
 - Outcome feedback integration</code></pre>
 </div>
 </div>
+<div class="section level2">
+<h2 id="ethical-and-legal-considerations">Ethical and Legal Considerations<a class="anchor" aria-label="anchor" href="#ethical-and-legal-considerations"></a>
+</h2>
 <div class="section level3">
-<h3 id="ethical-and-legal-considerations">Ethical and Legal Considerations<a class="anchor" aria-label="anchor" href="#ethical-and-legal-considerations"></a>
+<h3 id="algorithmic-fairness">Algorithmic Fairness<a class="anchor" aria-label="anchor" href="#algorithmic-fairness"></a>
 </h3>
-<div class="section level4">
-<h4 id="algorithmic-fairness">Algorithmic Fairness<a class="anchor" aria-label="anchor" href="#algorithmic-fairness"></a>
-</h4>
 <ul>
 <li>
 <strong>Bias Assessment</strong>: Test across demographic
@@ -563,9 +568,9 @@ groups</li>
 rationale</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="clinical-responsibility">Clinical Responsibility<a class="anchor" aria-label="anchor" href="#clinical-responsibility"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-responsibility">Clinical Responsibility<a class="anchor" aria-label="anchor" href="#clinical-responsibility"></a>
+</h3>
 <ul>
 <li>
 <strong>Human Oversight</strong>: Maintain physician final decision
@@ -581,9 +586,9 @@ trails</li>
 competency</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="regulatory-compliance">Regulatory Compliance<a class="anchor" aria-label="anchor" href="#regulatory-compliance"></a>
-</h4>
+<div class="section level3">
+<h3 id="regulatory-compliance">Regulatory Compliance<a class="anchor" aria-label="anchor" href="#regulatory-compliance"></a>
+</h3>
 <ul>
 <li>
 <strong>FDA 510(k)</strong>: For diagnostic device applications</li>
@@ -599,12 +604,12 @@ monitoring</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="cost-effectiveness-analysis">Cost-Effectiveness Analysis<a class="anchor" aria-label="anchor" href="#cost-effectiveness-analysis"></a>
+</h2>
 <div class="section level3">
-<h3 id="cost-effectiveness-analysis">Cost-Effectiveness Analysis<a class="anchor" aria-label="anchor" href="#cost-effectiveness-analysis"></a>
+<h3 id="economic-evaluation-framework">Economic Evaluation Framework<a class="anchor" aria-label="anchor" href="#economic-evaluation-framework"></a>
 </h3>
-<div class="section level4">
-<h4 id="economic-evaluation-framework">Economic Evaluation Framework<a class="anchor" aria-label="anchor" href="#economic-evaluation-framework"></a>
-</h4>
 <pre><code>Cost Components:
 - Development and validation costs
 - Implementation and training costs
@@ -618,9 +623,9 @@ Benefit Components:
 - Reduced healthcare utilization
 - Improved patient outcomes</code></pre>
 </div>
-<div class="section level4">
-<h4 id="return-on-investment-metrics">Return on Investment Metrics<a class="anchor" aria-label="anchor" href="#return-on-investment-metrics"></a>
-</h4>
+<div class="section level3">
+<h3 id="return-on-investment-metrics">Return on Investment Metrics<a class="anchor" aria-label="anchor" href="#return-on-investment-metrics"></a>
+</h3>
 <ul>
 <li><strong>Cost per Quality-Adjusted Life Year (QALY)</strong></li>
 <li><strong>Number Needed to Screen/Treat</strong></li>
@@ -629,12 +634,12 @@ Benefit Components:
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="future-directions">Future Directions<a class="anchor" aria-label="anchor" href="#future-directions"></a>
+</h2>
 <div class="section level3">
-<h3 id="future-directions">Future Directions<a class="anchor" aria-label="anchor" href="#future-directions"></a>
+<h3 id="technology-integration">Technology Integration<a class="anchor" aria-label="anchor" href="#technology-integration"></a>
 </h3>
-<div class="section level4">
-<h4 id="technology-integration">Technology Integration<a class="anchor" aria-label="anchor" href="#technology-integration"></a>
-</h4>
 <ul>
 <li>
 <strong>Electronic Health Records</strong>: Seamless clinical
@@ -648,9 +653,9 @@ input</li>
 <strong>Mobile Health</strong>: Point-of-care decision support</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="methodological-advances">Methodological Advances<a class="anchor" aria-label="anchor" href="#methodological-advances"></a>
-</h4>
+<div class="section level3">
+<h3 id="methodological-advances">Methodological Advances<a class="anchor" aria-label="anchor" href="#methodological-advances"></a>
+</h3>
 <ul>
 <li>
 <strong>Federated Learning</strong>: Multi-institutional model
@@ -665,9 +670,9 @@ methods</li>
 estimation</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="clinical-applications-expansion">Clinical Applications Expansion<a class="anchor" aria-label="anchor" href="#clinical-applications-expansion"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-applications-expansion">Clinical Applications Expansion<a class="anchor" aria-label="anchor" href="#clinical-applications-expansion"></a>
+</h3>
 <ul>
 <li>
 <strong>Rare Diseases</strong>: Specialized algorithms for uncommon
@@ -684,12 +689,12 @@ applications</li>
 </ul>
 </div>
 </div>
+<div class="section level2">
+<h2 id="best-practices-summary">Best Practices Summary<a class="anchor" aria-label="anchor" href="#best-practices-summary"></a>
+</h2>
 <div class="section level3">
-<h3 id="best-practices-summary">Best Practices Summary<a class="anchor" aria-label="anchor" href="#best-practices-summary"></a>
+<h3 id="model-development-1">Model Development<a class="anchor" aria-label="anchor" href="#model-development-1"></a>
 </h3>
-<div class="section level4">
-<h4 id="model-development-1">Model Development<a class="anchor" aria-label="anchor" href="#model-development-1"></a>
-</h4>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Clinical Relevance First</strong>: Start with clinical need,
@@ -708,9 +713,9 @@ and cohorts</li>
 trust</li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="implementation-strategy">Implementation Strategy<a class="anchor" aria-label="anchor" href="#implementation-strategy"></a>
-</h4>
+<div class="section level3">
+<h3 id="implementation-strategy">Implementation Strategy<a class="anchor" aria-label="anchor" href="#implementation-strategy"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Pilot Testing</strong>: Start with low-risk
@@ -729,9 +734,9 @@ challenges</li>
 assurance</li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="maintenance-and-evolution">Maintenance and Evolution<a class="anchor" aria-label="anchor" href="#maintenance-and-evolution"></a>
-</h4>
+<div class="section level3">
+<h3 id="maintenance-and-evolution">Maintenance and Evolution<a class="anchor" aria-label="anchor" href="#maintenance-and-evolution"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Regular Updates</strong>: Incorporate new evidence and
@@ -750,9 +755,9 @@ approvals</li>
 </ol>
 </div>
 </div>
-<div class="section level3">
-<h3 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
-</h3>
+<div class="section level2">
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h2>
 <p>The Medical Decision Tree module provides a comprehensive framework
 for developing, validating, and implementing clinical decision support
 tools in pathology and oncology. By focusing on clinically relevant
@@ -766,7 +771,6 @@ ultimate goal is to improve patient outcomes through evidence-based,
 data-driven clinical decision support while maintaining the essential
 human elements of medical care.</p>
 </div>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
@@ -778,7 +782,7 @@ human elements of medical care.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

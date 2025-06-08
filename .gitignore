@@ -45,3 +45,4 @@ temp
 _tododata
 ^docs$
 inst/doc
+**/.quarto/

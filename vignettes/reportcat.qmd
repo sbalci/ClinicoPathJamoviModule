@@ -1,0 +1,64 @@
+---
+title: "Vignette: Generating Quick Summaries of Categorical Pathology Data"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Summarizing Categorical Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+
+```{r}
+# Create a sample data frame for a pathology cohort
+set.seed(42)
+n_cases <- 150
+crc_cases <- data.frame(
+  Histology = factor(sample(
+    c("Adenocarcinoma, NOS", "Mucinous Adenocarcinoma", "Signet Ring Cell Carcinoma"),
+    n_cases, replace = TRUE, prob = c(0.8, 0.15, 0.05)
+  )),
+  Differentiation = factor(sample(
+    c("Well", "Moderate", "Poor"),
+    n_cases, replace = TRUE, prob = c(0.2, 0.6, 0.2)
+  ), ordered = TRUE, levels = c("Well", "Moderate", "Poor")),
+  MMR_Status = factor(sample(
+    c("pMMR", "dMMR", NA), # Include some missing data
+    n_cases, replace = TRUE, prob = c(0.80, 0.15, 0.05)
+  ))
+)
+
+head(crc_cases)
+```
+
+
+```{r}
+# This code simulates how the jamovi module would be called in an R environment.
+# You would need the ClinicoPathDescriptives package installed.
+
+# Load the library
+library(ClinicoPathDescriptives)
+
+# Run the reportcat analysis
+results <- reportcat(
+    data = crc_cases,
+    vars = c("Histology", "Differentiation", "MMR_Status")
+)
+
+# The results are HTML outputs that render directly in jamovi.
+# In R, you would access them like this:
+results$text  # (for the text summary)
+results$text1 # (for the visual summary table)
+```
+
+
+
