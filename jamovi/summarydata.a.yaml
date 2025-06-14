@@ -54,6 +54,16 @@ options:
             a string naming the variables from `data` that contains the
             continuous values used for the report
 
+    - name: date_vars
+      title: Date Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Variables containing date/time data to be analyzed with 
+            date-specific statistics (similar to sumvar's dist_date function)
+
 
     - name: distr
       title: "Distribution Diagnostics"
@@ -64,13 +74,23 @@ options:
           If TRUE, additional distribution diagnostics (Shapiro-Wilk test, skewness, and kurtosis)
           will be computed and explained.
 
+    - name: sumvar_style
+      title: "Enhanced Summary (sumvar style)"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, provides comprehensive summary statistics including quartiles, 
+          confidence intervals, and missing value details in sumvar package style.
 
-#
-#     - name: grvar
-#       title: 'Group'
-#       type: Variable
-#       suggested: [ ordinal, nominal ]
-#       permitted: [ factor ]
+    - name: grvar
+      title: 'Group Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Optional grouping variable to stratify the summary statistics by categories.
 
 
 ...

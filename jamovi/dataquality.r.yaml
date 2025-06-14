@@ -1,0 +1,20 @@
+---
+name: dataquality
+title: Data Quality Assessment
+jrs: '1.1'
+
+items:
+    - name: todo
+      type: Html
+      visible: (vars)
+
+    - name: text
+      title: Data Quality Summary
+      type: Html
+
+    - name: plot
+      title: Data Quality Visualization
+      type: Html
+      visible: (check_duplicates || check_missing)
+
+...

@@ -7,7 +7,10 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             vars = NULL,
-            distr = FALSE, ...) {
+            date_vars = NULL,
+            distr = FALSE,
+            sumvar_style = FALSE,
+            grvar = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -22,20 +25,48 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..date_vars <- jmvcore::OptionVariables$new(
+                "date_vars",
+                date_vars,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..distr <- jmvcore::OptionBool$new(
                 "distr",
                 distr,
                 default=FALSE)
+            private$..sumvar_style <- jmvcore::OptionBool$new(
+                "sumvar_style",
+                sumvar_style,
+                default=FALSE)
+            private$..grvar <- jmvcore::OptionVariable$new(
+                "grvar",
+                grvar,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..date_vars)
             self$.addOption(private$..distr)
+            self$.addOption(private$..sumvar_style)
+            self$.addOption(private$..grvar)
         }),
     active = list(
         vars = function() private$..vars$value,
-        distr = function() private$..distr$value),
+        date_vars = function() private$..date_vars$value,
+        distr = function() private$..distr$value,
+        sumvar_style = function() private$..sumvar_style$value,
+        grvar = function() private$..grvar$value),
     private = list(
         ..vars = NA,
-        ..distr = NA)
+        ..date_vars = NA,
+        ..distr = NA,
+        ..sumvar_style = NA,
+        ..grvar = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -108,8 +139,15 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report
+#' @param date_vars Variables containing date/time data to be analyzed with
+#'   date-specific statistics (similar to sumvar's dist_date function)
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
+#' @param sumvar_style If TRUE, provides comprehensive summary statistics
+#'   including quartiles,  confidence intervals, and missing value details in
+#'   sumvar package style.
+#' @param grvar Optional grouping variable to stratify the summary statistics
+#'   by categories.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -121,21 +159,32 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 summarydata <- function(
     data,
     vars,
-    distr = FALSE) {
+    date_vars,
+    distr = FALSE,
+    sumvar_style = FALSE,
+    grvar) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(date_vars)) date_vars <- jmvcore::resolveQuo(jmvcore::enquo(date_vars))
+    if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(date_vars), date_vars, NULL),
+            `if`( ! missing(grvar), grvar, NULL))
 
+    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- summarydataOptions$new(
         vars = vars,
-        distr = distr)
+        date_vars = date_vars,
+        distr = distr,
+        sumvar_style = sumvar_style,
+        grvar = grvar)
 
     analysis <- summarydataClass$new(
         options = options,

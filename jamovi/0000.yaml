@@ -68,6 +68,19 @@ analyses:
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
     ribbon: analyses
+  - title: Data Quality Assessment
+    name: dataquality
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Data Quality Assessment
+    description: >
+      This module provides data quality assessment including duplicate
+      detection,
+
+      missing value analysis, and data completeness summary (similar to sumvar's
+      dup() function).
+    ribbon: analyses
   - title: Table One
     name: tableone
     ns: ClinicoPath
