@@ -135,7 +135,8 @@ Remotes:
     hrbrmstr/streamgraph,
     jbengler/tidyplots,
     hms-dbmi/UpSetR,
-    CHOP-CGTInformatics/ggswim
+    CHOP-CGTInformatics/ggswim,
+    alstockdale/sumvar
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

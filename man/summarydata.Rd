@@ -4,7 +4,7 @@
 \alias{summarydata}
 \title{Summary of Continuous Variables}
 \usage{
-summarydata(data, vars, distr = FALSE)
+summarydata(data, vars, date_vars, distr = FALSE, sumvar_style = FALSE, grvar)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,8 +12,18 @@ summarydata(data, vars, distr = FALSE)
 \item{vars}{a string naming the variables from \code{data} that contains
 the continuous values used for the report}
 
+\item{date_vars}{Variables containing date/time data to be analyzed with
+date-specific statistics (similar to sumvar's dist_date function)}
+
 \item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.}
+
+\item{sumvar_style}{If TRUE, provides comprehensive summary statistics
+including quartiles,  confidence intervals, and missing value details in
+sumvar package style.}
+
+\item{grvar}{Optional grouping variable to stratify the summary statistics
+by categories.}
 }
 \value{
 A results object containing:

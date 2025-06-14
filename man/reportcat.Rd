@@ -4,7 +4,13 @@
 \alias{reportcat}
 \title{Summary of Categorical Variables}
 \usage{
-reportcat(data, vars)
+reportcat(
+  data,
+  vars,
+  sumvar_style = FALSE,
+  show_proportions = TRUE,
+  sort_by_frequency = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,6 +18,16 @@ reportcat(data, vars)
 \item{vars}{Select the variables from your data frame that you wish to
 summarize. Only categorical variables (nominal, ordinal, or factors) are
 allowed.}
+
+\item{sumvar_style}{If TRUE, provides comprehensive categorical analysis
+similar to  sumvar package's tab1() function with enhanced frequency tables
+and percentage breakdowns.}
+
+\item{show_proportions}{If TRUE, shows proportions alongside counts in the
+summary.}
+
+\item{sort_by_frequency}{If TRUE, categories are sorted by frequency (most
+common first).}
 }
 \value{
 A results object containing:

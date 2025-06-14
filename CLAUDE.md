@@ -163,3 +163,50 @@ Most modules follow this pattern:
 - `man/`: Auto-generated documentation
 - `inst/extdata/`: Additional example data files
 - `vignettes/`: Documentation and tutorials
+
+## Module Update Workflow
+
+### Automated Module Distribution
+
+This project uses `_updateModules.R` script to synchronize code across 4 separate repositories:
+
+- **Main repository**: ClinicoPathJamoviModule (umbrella package)
+- **jjstatsplot**: Statistical plotting functions using ggstatsplot
+- **meddecide**: Medical decision analysis tools
+- **jsurvival**: Survival analysis functions
+- **ClinicoPathDescriptives**: Descriptive statistics and summary tables
+
+The script automatically:
+1. Updates version numbers across all DESCRIPTION and YAML files
+2. Copies module files (`.b.R`, `.a.yaml`, `.u.yaml`, `.r.yaml`) to appropriate repos
+3. Updates documentation and installs modules
+4. Commits changes with consistent commit messages
+
+### Version Management
+
+- Version format: `X.Y.Z.BUILD` (e.g., 0.0.3.22)
+- Date format: `YYYY-MM-DD` 
+- Versions are updated centrally and distributed to all sub-modules
+- Each module maintains 3-part semantic version in `.a.yaml` files
+
+### Module Distribution Strategy
+
+**WIP vs Release Modes:**
+- WIP mode: Limited module sets for testing
+- Release mode: Full module distribution
+- Controlled by `WIP` flag in update script
+
+## Testing and Quality Assurance
+
+### Test Structure
+
+- Unit tests in `tests/testthat/` directory
+- Test data provided in multiple formats (`.csv`, `.omv`, `.rda`)
+- Example analyses embedded in jamovi files (`.omv`)
+- Key test files: `test-decision.R`, `test-roc.R`
+
+### Data Management
+
+- Example datasets in `data/` directory with multiple format support
+- Comprehensive test data generation scripts in `datageneration/`
+- Each sub-module receives relevant subset of example data

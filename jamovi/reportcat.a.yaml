@@ -37,6 +37,32 @@ options:
         Select the variables from your data frame that you wish to summarize.
         Only categorical variables (nominal, ordinal, or factors) are allowed.
 
+  - name: sumvar_style
+    title: "Enhanced Categorical Summary (tab1 style)"
+    type: Bool
+    default: false
+    description:
+      R: >
+        If TRUE, provides comprehensive categorical analysis similar to 
+        sumvar package's tab1() function with enhanced frequency tables 
+        and percentage breakdowns.
+
+  - name: show_proportions
+    title: Show Proportions
+    type: Bool
+    default: true
+    description:
+      R: >
+        If TRUE, shows proportions alongside counts in the summary.
+
+  - name: sort_by_frequency
+    title: Sort by Frequency
+    type: Bool
+    default: false
+    description:
+      R: >
+        If TRUE, categories are sorted by frequency (most common first).
+
 
 
 # Uses report::report() function.

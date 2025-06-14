@@ -54,24 +54,64 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summar <- summary(as.factor(mydata[[myvar]])) %>%
                     as.table() %>%
                     tibble::as_tibble(.name_repair = "unique") %>%
-                    dplyr::filter(.[[1]] != "NA's") %>%
-                    dplyr::arrange(dplyr::desc(n))
+                    dplyr::filter(.[[1]] != "NA's")
+                
+                # Apply sorting if requested
+                if (self$options$sort_by_frequency) {
+                    summar <- summar %>% dplyr::arrange(dplyr::desc(n))
+                } else {
+                    summar <- summar %>% dplyr::arrange(.[[1]])
+                }
+                
                 summar$validtotal <- valid_obs
 
-                # Build a description for each level showing count and percentage.
-                description <- summar %>%
-                    dplyr::mutate(
-                        percent = n / validtotal,
-                        level_description = glue::glue(
-                            "{...1}: n = {n}, {scales::percent(percent)} of valid cases. "
-                        )
-                    ) %>%
-                    dplyr::pull(level_description)
+                # Enhanced sumvar-style output
+                if (self$options$sumvar_style) {
+                    # Create comprehensive frequency table similar to sumvar's tab1()
+                    freq_table <- summar %>%
+                        dplyr::mutate(
+                            percent = round(n / validtotal * 100, 1),
+                            cumulative = cumsum(n),
+                            cum_percent = round(cumulative / validtotal * 100, 1),
+                            table_row = paste0(
+                                .[[1]], ": ", n, " (", percent, "%) ",
+                                if(self$options$show_proportions) paste0("[Cumulative: ", cumulative, " (", cum_percent, "%)]") else ""
+                            )
+                        ) %>%
+                        dplyr::pull(table_row)
+                    
+                    # Create comprehensive summary
+                    header <- paste0("<strong>", myvar, "</strong> - Categorical Variable Summary<br>")
+                    basic_info <- paste0(
+                        "Total observations: ", total_obs, "<br>",
+                        "Valid responses: ", valid_obs, " (", round(valid_obs/total_obs*100, 1), "%)<br>",
+                        "Missing values: ", missing_obs, " (", round(missing_obs/total_obs*100, 1), "%)<br>",
+                        "Number of categories: ", num_levels, "<br><br>"
+                    )
+                    freq_section <- paste0(
+                        "<em>Frequency Distribution:</em><br>",
+                        paste(freq_table, collapse = "<br>")
+                    )
+                    
+                    full_description <- paste0(header, basic_info, freq_section)
+                    
+                } else {
+                    # Original format (preserved for backward compatibility)
+                    description <- summar %>%
+                        dplyr::mutate(
+                            percent = n / validtotal,
+                            level_description = glue::glue(
+                                "{...1}: n = {n}, {scales::percent(percent)} of valid cases. "
+                            )
+                        ) %>%
+                        dplyr::pull(level_description)
 
-                # Create overall summary sentences with HTML tags for styling.
-                sentence1 <- paste0("<strong>", myvar, "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
-                sentence2 <- paste0("Missing values: ", missing_obs, ".")
-                full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
+                    # Create overall summary sentences with HTML tags for styling.
+                    sentence1 <- paste0("<strong>", myvar, "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
+                    sentence2 <- paste0("Missing values: ", missing_obs, ".")
+                    full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
+                }
+                
                 return(full_description)
             }
 

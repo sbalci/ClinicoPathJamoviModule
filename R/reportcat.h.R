@@ -6,7 +6,10 @@ reportcatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL, ...) {
+            vars = NULL,
+            sumvar_style = FALSE,
+            show_proportions = TRUE,
+            sort_by_frequency = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -22,13 +25,34 @@ reportcatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..sumvar_style <- jmvcore::OptionBool$new(
+                "sumvar_style",
+                sumvar_style,
+                default=FALSE)
+            private$..show_proportions <- jmvcore::OptionBool$new(
+                "show_proportions",
+                show_proportions,
+                default=TRUE)
+            private$..sort_by_frequency <- jmvcore::OptionBool$new(
+                "sort_by_frequency",
+                sort_by_frequency,
+                default=FALSE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..sumvar_style)
+            self$.addOption(private$..show_proportions)
+            self$.addOption(private$..sort_by_frequency)
         }),
     active = list(
-        vars = function() private$..vars$value),
+        vars = function() private$..vars$value,
+        sumvar_style = function() private$..sumvar_style$value,
+        show_proportions = function() private$..show_proportions$value,
+        sort_by_frequency = function() private$..sort_by_frequency$value),
     private = list(
-        ..vars = NA)
+        ..vars = NA,
+        ..sumvar_style = NA,
+        ..show_proportions = NA,
+        ..sort_by_frequency = NA)
 )
 
 reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -106,6 +130,13 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param vars Select the variables from your data frame that you wish to
 #'   summarize. Only categorical variables (nominal, ordinal, or factors) are
 #'   allowed.
+#' @param sumvar_style If TRUE, provides comprehensive categorical analysis
+#'   similar to  sumvar package's tab1() function with enhanced frequency tables
+#'   and percentage breakdowns.
+#' @param show_proportions If TRUE, shows proportions alongside counts in the
+#'   summary.
+#' @param sort_by_frequency If TRUE, categories are sorted by frequency (most
+#'   common first).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -116,7 +147,10 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 reportcat <- function(
     data,
-    vars) {
+    vars,
+    sumvar_style = FALSE,
+    show_proportions = TRUE,
+    sort_by_frequency = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("reportcat requires jmvcore to be installed (restart may be required)")
@@ -130,7 +164,10 @@ reportcat <- function(
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- reportcatOptions$new(
-        vars = vars)
+        vars = vars,
+        sumvar_style = sumvar_style,
+        show_proportions = show_proportions,
+        sort_by_frequency = sort_by_frequency)
 
     analysis <- reportcatClass$new(
         options = options,
