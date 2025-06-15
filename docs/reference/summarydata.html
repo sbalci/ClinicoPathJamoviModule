@@ -13,7 +13,7 @@ skewness, and kurtosis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.22</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,7 @@ skewness, and kurtosis.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">summarydata</span><span class="op">(</span><span class="va">data</span>, <span class="va">vars</span>, distr <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">summarydata</span><span class="op">(</span><span class="va">data</span>, <span class="va">vars</span>, <span class="va">date_vars</span>, distr <span class="op">=</span> <span class="cn">FALSE</span>, sumvar_style <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">grvar</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -103,9 +103,25 @@ skewness, and kurtosis.</p>
 the continuous values used for the report</p></dd>
 
 
+<dt id="arg-date-vars">date_vars<a class="anchor" aria-label="anchor" href="#arg-date-vars"></a></dt>
+<dd><p>Variables containing date/time data to be analyzed with
+date-specific statistics (similar to sumvar's dist_date function)</p></dd>
+
+
 <dt id="arg-distr">distr<a class="anchor" aria-label="anchor" href="#arg-distr"></a></dt>
 <dd><p>If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.</p></dd>
+
+
+<dt id="arg-sumvar-style">sumvar_style<a class="anchor" aria-label="anchor" href="#arg-sumvar-style"></a></dt>
+<dd><p>If TRUE, provides comprehensive summary statistics
+including quartiles,  confidence intervals, and missing value details in
+sumvar package style.</p></dd>
+
+
+<dt id="arg-grvar">grvar<a class="anchor" aria-label="anchor" href="#arg-grvar"></a></dt>
+<dd><p>Optional grouping variable to stratify the summary statistics
+by categories.</p></dd>
 
 </dl></div>
     <div class="section level2">
