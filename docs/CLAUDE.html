@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.22</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -287,6 +287,54 @@
 <li>
 <code>vignettes/</code>: Documentation and tutorials</li>
 </ul></div>
+<div class="section level2">
+<h2 id="module-update-workflow">Module Update Workflow<a class="anchor" aria-label="anchor" href="#module-update-workflow"></a></h2>
+<div class="section level3">
+<h3 id="automated-module-distribution">Automated Module Distribution<a class="anchor" aria-label="anchor" href="#automated-module-distribution"></a></h3>
+<p>This project uses <code>_updateModules.R</code> script to synchronize code across 4 separate repositories:</p>
+<ul><li>
+<strong>Main repository</strong>: ClinicoPathJamoviModule (umbrella package)</li>
+<li>
+<strong>jjstatsplot</strong>: Statistical plotting functions using ggstatsplot</li>
+<li>
+<strong>meddecide</strong>: Medical decision analysis tools</li>
+<li>
+<strong>jsurvival</strong>: Survival analysis functions</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Descriptive statistics and summary tables</li>
+</ul><p>The script automatically: 1. Updates version numbers across all DESCRIPTION and YAML files 2. Copies module files (<code>.b.R</code>, <code>.a.yaml</code>, <code>.u.yaml</code>, <code>.r.yaml</code>) to appropriate repos 3. Updates documentation and installs modules 4. Commits changes with consistent commit messages</p>
+</div>
+<div class="section level3">
+<h3 id="version-management">Version Management<a class="anchor" aria-label="anchor" href="#version-management"></a></h3>
+<ul><li>Version format: <code>X.Y.Z.BUILD</code> (e.g., 0.0.3.22)</li>
+<li>Date format: <code>YYYY-MM-DD</code>
+</li>
+<li>Versions are updated centrally and distributed to all sub-modules</li>
+<li>Each module maintains 3-part semantic version in <code>.a.yaml</code> files</li>
+</ul></div>
+<div class="section level3">
+<h3 id="module-distribution-strategy">Module Distribution Strategy<a class="anchor" aria-label="anchor" href="#module-distribution-strategy"></a></h3>
+<p><strong>WIP vs Release Modes:</strong> - WIP mode: Limited module sets for testing - Release mode: Full module distribution - Controlled by <code>WIP</code> flag in update script</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="testing-and-quality-assurance">Testing and Quality Assurance<a class="anchor" aria-label="anchor" href="#testing-and-quality-assurance"></a></h2>
+<div class="section level3">
+<h3 id="test-structure">Test Structure<a class="anchor" aria-label="anchor" href="#test-structure"></a></h3>
+<ul><li>Unit tests in <code>tests/testthat/</code> directory</li>
+<li>Test data provided in multiple formats (<code>.csv</code>, <code>.omv</code>, <code>.rda</code>)</li>
+<li>Example analyses embedded in jamovi files (<code>.omv</code>)</li>
+<li>Key test files: <code>test-decision.R</code>, <code>test-roc.R</code>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-management">Data Management<a class="anchor" aria-label="anchor" href="#data-management"></a></h3>
+<ul><li>Example datasets in <code>data/</code> directory with multiple format support</li>
+<li>Comprehensive test data generation scripts in <code>datageneration/</code>
+</li>
+<li>Each sub-module receives relevant subset of example data</li>
+</ul></div>
+</div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -61,6 +61,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bayesdca_test_data.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/benford.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/benfordClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/biomarkerresponse.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/biomarkerresponseClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bootstrapIDI.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bootstrapNRI.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bootstrap_ci.html</loc></url>
@@ -97,6 +99,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/data_percentage.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/data_raw.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/data_subgroup.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dataquality.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dataqualityClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/date_formats.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dca_test.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dca_test_data.html</loc></url>
@@ -144,6 +148,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjpiestatsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjridgestats.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjridgestatsClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjriverplot.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjriverplotClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjscatterstats.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjscatterstatsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjstreamgraph.html</loc></url>
@@ -213,6 +219,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stagemigrationClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2Class.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/subgroupforest.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/subgroupforestClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/summarydata.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/summarydataClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survival.html</loc></url>
@@ -232,6 +240,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/timeroc.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/toolssummary.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/toolssummaryClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/toxicityprofile.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/toxicityprofileClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/treatmentResponse.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tree.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/treeClass.html</loc></url>

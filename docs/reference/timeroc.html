@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.22</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,7 +89,12 @@
 <span>  bootstrapCI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nboot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  plotROC <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  plotAUC <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  plotAUC <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  timetypeoutput <span class="op">=</span> <span class="st">"months"</span>,</span>
+<span>  showOptimalCutoff <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  showMarkerStats <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  compareBaseline <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  smoothAUC <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -140,10 +145,34 @@
 <dt id="arg-plotauc">plotAUC<a class="anchor" aria-label="anchor" href="#arg-plotauc"></a></dt>
 <dd><p>.</p></dd>
 
+
+<dt id="arg-timetypeoutput">timetypeoutput<a class="anchor" aria-label="anchor" href="#arg-timetypeoutput"></a></dt>
+<dd><p>Time units for display in plots and results.</p></dd>
+
+
+<dt id="arg-showoptimalcutoff">showOptimalCutoff<a class="anchor" aria-label="anchor" href="#arg-showoptimalcutoff"></a></dt>
+<dd><p>Calculate and display optimal cutoff points that
+maximize Youden index.</p></dd>
+
+
+<dt id="arg-showmarkerstats">showMarkerStats<a class="anchor" aria-label="anchor" href="#arg-showmarkerstats"></a></dt>
+<dd><p>Display descriptive statistics for the marker
+variable.</p></dd>
+
+
+<dt id="arg-comparebaseline">compareBaseline<a class="anchor" aria-label="anchor" href="#arg-comparebaseline"></a></dt>
+<dd><p>Compare marker performance to a baseline model (AUC
+= 0.5).</p></dd>
+
+
+<dt id="arg-smoothauc">smoothAUC<a class="anchor" aria-label="anchor" href="#arg-smoothauc"></a></dt>
+<dd><p>Apply smoothing to the AUC over time plot for better
+visualization.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aucTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rocPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$aucPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aucTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rocPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$aucPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$markerStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cutoffTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelComparison</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$aucTable$asDF</code></p>
 <p><code>as.data.frame(results$aucTable)</code></p>
     </div>

@@ -9,7 +9,7 @@ clinical events."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.22</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,7 +96,17 @@ clinical events.</p>
 <span>  referenceLines <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  customReferenceTime <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  useggswim <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  markerSize <span class="op">=</span> <span class="fl">5</span></span>
+<span>  markerSize <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  milestone1Name <span class="op">=</span> <span class="st">"Surgery"</span>,</span>
+<span>  <span class="va">milestone1Date</span>,</span>
+<span>  milestone2Name <span class="op">=</span> <span class="st">"Treatment"</span>,</span>
+<span>  <span class="va">milestone2Date</span>,</span>
+<span>  milestone3Name <span class="op">=</span> <span class="st">"Recurrence"</span>,</span>
+<span>  <span class="va">milestone3Date</span>,</span>
+<span>  milestone4Name <span class="op">=</span> <span class="st">"Remission"</span>,</span>
+<span>  <span class="va">milestone4Date</span>,</span>
+<span>  milestone5Name <span class="op">=</span> <span class="st">"Death"</span>,</span>
+<span>  <span class="va">milestone5Date</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -164,6 +174,46 @@ absolute start times</p></dd>
 <dt id="arg-markersize">markerSize<a class="anchor" aria-label="anchor" href="#arg-markersize"></a></dt>
 <dd><p>Size of event markers on the plot</p></dd>
 
+
+<dt id="arg-milestone-name">milestone1Name<a class="anchor" aria-label="anchor" href="#arg-milestone-name"></a></dt>
+<dd><p>Name for the first milestone event (e.g., Surgery)</p></dd>
+
+
+<dt id="arg-milestone-date">milestone1Date<a class="anchor" aria-label="anchor" href="#arg-milestone-date"></a></dt>
+<dd><p>Date/time when milestone 1 occurred</p></dd>
+
+
+<dt id="arg-milestone-name">milestone2Name<a class="anchor" aria-label="anchor" href="#arg-milestone-name"></a></dt>
+<dd><p>Name for the second milestone event (e.g., Treatment)</p></dd>
+
+
+<dt id="arg-milestone-date">milestone2Date<a class="anchor" aria-label="anchor" href="#arg-milestone-date"></a></dt>
+<dd><p>Date/time when milestone 2 occurred</p></dd>
+
+
+<dt id="arg-milestone-name">milestone3Name<a class="anchor" aria-label="anchor" href="#arg-milestone-name"></a></dt>
+<dd><p>Name for the third milestone event (e.g., Recurrence)</p></dd>
+
+
+<dt id="arg-milestone-date">milestone3Date<a class="anchor" aria-label="anchor" href="#arg-milestone-date"></a></dt>
+<dd><p>Date/time when milestone 3 occurred</p></dd>
+
+
+<dt id="arg-milestone-name">milestone4Name<a class="anchor" aria-label="anchor" href="#arg-milestone-name"></a></dt>
+<dd><p>Name for the fourth milestone event (e.g., Remission)</p></dd>
+
+
+<dt id="arg-milestone-date">milestone4Date<a class="anchor" aria-label="anchor" href="#arg-milestone-date"></a></dt>
+<dd><p>Date/time when milestone 4 occurred</p></dd>
+
+
+<dt id="arg-milestone-name">milestone5Name<a class="anchor" aria-label="anchor" href="#arg-milestone-name"></a></dt>
+<dd><p>Name for the fifth milestone event (e.g., Death)</p></dd>
+
+
+<dt id="arg-milestone-date">milestone5Date<a class="anchor" aria-label="anchor" href="#arg-milestone-date"></a></dt>
+<dd><p>Date/time when milestone 5 occurred</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -192,7 +242,7 @@ absolute start times</p></dd>
 <span class="r-in"><span>    milestone1Name <span class="op">=</span> <span class="st">"Surgery"</span>,</span></span>
 <span class="r-in"><span>    milestone1Date <span class="op">=</span> <span class="st">"Surgery"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in swimmerplot(data = data, patientID = "PatientID", start = "StartTime",     end = "EndTime", event = "Event", milestone1Name = "Surgery",     milestone1Date = "Surgery"):</span> unused arguments (milestone1Name = "Surgery", milestone1Date = "Surgery")</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in swimmerplot(data = data, patientID = "PatientID", start = "StartTime",     end = "EndTime", event = "Event", milestone1Name = "Surgery",     milestone1Date = "Surgery"):</span> argument "sortVariable" is missing, with no default</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
