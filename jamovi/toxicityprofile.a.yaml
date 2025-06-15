@@ -1,0 +1,183 @@
+---
+name: toxicityprofile
+title: Treatment Toxicity Profile
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Safety Analysis
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: patientID
+      title: Patient ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Variable containing patient identifiers.
+
+    - name: adverseEvent
+      title: Adverse Event
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable containing adverse event names or categories.
+
+    - name: grade
+      title: Toxicity Grade
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            CTCAE grade or severity level (1-5 or equivalent scale).
+
+    - name: treatment
+      title: Treatment Group
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Treatment or study arm for comparison (optional).
+
+    - name: systemOrganClass
+      title: System Organ Class
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            System organ class (SOC) for grouping adverse events.
+
+    - name: timeToEvent
+      title: Time to Event
+      type: Variable
+      suggested: [continuous]
+      description:
+          R: >
+            Time from treatment start to adverse event occurrence.
+
+    - name: plotType
+      title: Primary Plot Type
+      type: List
+      options:
+        - title: Stacked Bar Chart (by Grade)
+          name: stacked_bar
+        - title: Dot Plot (Incidence Comparison)
+          name: dot_plot
+        - title: Heatmap (Event x Grade)
+          name: heatmap
+        - title: Time-to-Event Plot
+          name: time_to_event
+      default: stacked_bar
+      description:
+          R: >
+            Primary visualization method for toxicity profile.
+
+    - name: sortBy
+      title: Sort Events By
+      type: List
+      options:
+        - title: Overall Frequency
+          name: frequency
+        - title: High Grade Frequency (≥3)
+          name: high_grade
+        - title: Alphabetical
+          name: alphabetical
+        - title: System Organ Class
+          name: soc
+      default: frequency
+      description:
+          R: >
+            Method for ordering adverse events in the plot.
+
+    - name: showHighGradeOnly
+      title: Show High Grade Only (≥3)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display only grade 3+ adverse events.
+
+    - name: minIncidence
+      title: Minimum Incidence (%)
+      type: Number
+      default: 5
+      min: 0
+      max: 100
+      description:
+          R: >
+            Minimum incidence percentage for events to be displayed.
+
+    - name: gradeColors
+      title: Grade Color Scheme
+      type: List
+      options:
+        - title: CTCAE Standard
+          name: ctcae
+        - title: Traffic Light
+          name: traffic
+        - title: Viridis
+          name: viridis
+        - title: Custom
+          name: custom
+      default: ctcae
+      description:
+          R: >
+            Color scheme for toxicity grades.
+
+    - name: showPercentages
+      title: Show Percentages
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display percentages on the plot.
+
+    - name: showConfidenceIntervals
+      title: Show Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display confidence intervals for incidence rates.
+
+    - name: groupComparison
+      title: Compare Between Groups
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical comparison between treatment groups.
+
+    - name: cumulativeIncidence
+      title: Show Cumulative Incidence
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display cumulative incidence over time (requires time variable).
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: List
+      options:
+        - title: 95%
+          name: "0.95"
+        - title: 90%
+          name: "0.90"
+        - title: 99%
+          name: "0.99"
+      default: "0.95"
+      description:
+          R: >
+            Confidence level for intervals and tests.

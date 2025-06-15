@@ -1,0 +1,130 @@
+---
+name: toxicityprofile
+title: Treatment Toxicity Profile
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      
+    - name: plot
+      title: Toxicity Profile Plot
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      
+    - name: summary
+      title: Adverse Event Summary
+      type: Table
+      columns:
+        - name: adverse_event
+          title: "Adverse Event"
+          type: text
+        - name: n_patients
+          title: "N Patients"
+          type: integer
+        - name: n_events
+          title: "N Events"
+          type: integer
+        - name: incidence
+          title: "Incidence (%)"
+          type: number
+          format: zto
+        - name: grade_1_2
+          title: "Grade 1-2 (%)"
+          type: number
+          format: zto
+        - name: grade_3_plus
+          title: "Grade 3+ (%)"
+          type: number
+          format: zto
+        - name: median_time
+          title: "Median Time (days)"
+          type: number
+          format: zto
+          
+    - name: gradeDistribution
+      title: Grade Distribution
+      type: Table
+      columns:
+        - name: adverse_event
+          title: "Adverse Event"
+          type: text
+        - name: grade_1
+          title: "Grade 1"
+          type: integer
+        - name: grade_2
+          title: "Grade 2"
+          type: integer
+        - name: grade_3
+          title: "Grade 3"
+          type: integer
+        - name: grade_4
+          title: "Grade 4"
+          type: integer
+        - name: grade_5
+          title: "Grade 5"
+          type: integer
+
+    - name: groupComparison
+      title: Treatment Group Comparison
+      type: Table
+      columns:
+        - name: adverse_event
+          title: "Adverse Event"
+          type: text
+        - name: group1_incidence
+          title: "Group 1 (%)"
+          type: number
+          format: zto
+        - name: group2_incidence
+          title: "Group 2 (%)"
+          type: number
+          format: zto
+        - name: risk_ratio
+          title: "Risk Ratio"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+
+    - name: socSummary
+      title: System Organ Class Summary
+      type: Table
+      columns:
+        - name: soc
+          title: "System Organ Class"
+          type: text
+        - name: n_events
+          title: "N Events"
+          type: integer
+        - name: n_patients
+          title: "N Patients"
+          type: integer
+        - name: incidence
+          title: "Incidence (%)"
+          type: number
+          format: zto
+        - name: high_grade_incidence
+          title: "High Grade (%)"
+          type: number
+          format: zto
+
+refs:
+    - ggplot2
+    - dplyr
+    - survival
+    - RColorBrewer
+    - ClinicoPathJamoviModule

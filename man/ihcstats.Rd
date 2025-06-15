@@ -13,7 +13,12 @@ ihcstats(
   nClusters = 3,
   showDendrogram = FALSE,
   showHeatmap = FALSE,
-  showScoreDist = FALSE
+  showScoreDist = FALSE,
+  pcaAnalysis = FALSE,
+  standardizeData = TRUE,
+  showPCAPlot = FALSE,
+  showClusterValidation = FALSE,
+  optimalKMethod = "elbow"
 )
 }
 \arguments{
@@ -34,6 +39,16 @@ ihcstats(
 \item{showHeatmap}{.}
 
 \item{showScoreDist}{.}
+
+\item{pcaAnalysis}{.}
+
+\item{standardizeData}{.}
+
+\item{showPCAPlot}{.}
+
+\item{showClusterValidation}{.}
+
+\item{optimalKMethod}{.}
 }
 \value{
 A results object containing:

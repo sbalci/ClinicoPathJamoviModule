@@ -1,8 +1,8 @@
 ---
 name:  ciSingle
-title: Confidence interval for a mean
-menuGroup: ExplorationD
-menuSubgroup: PUBH5018
+title: Confidence Intervals for Mean Values
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
 version: '0.0.3'
 jas: '1.2'
 
@@ -32,4 +32,48 @@ options:
       default: 95
       min: 50
       max: 99.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    - name: method
+      title: CI Method
+      type: List
+      options:
+        - name: t
+          title: t-distribution (default)
+        - name: bootstrap
+          title: Bootstrap
+        - name: normal
+          title: Normal approximation
+      default: t
+      description:
+          R: >
+            Method for calculating confidence intervals.
+
+    - name: showPlot
+      title: Show CI Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display confidence interval visualization.
+
+    - name: bootstrapSamples
+      title: Bootstrap Samples
+      type: Number
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples (when using bootstrap method).
+
+    - name: showDiagnostics
+      title: Show Diagnostic Information
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display normality tests and other diagnostic information.
 ...

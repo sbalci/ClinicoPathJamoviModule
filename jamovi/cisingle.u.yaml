@@ -1,4 +1,4 @@
-title: Confidence interval for a mean
+title: Confidence Intervals for Mean Values
 name: ciSingle
 jus: '3.0'
 stage: 0
@@ -27,3 +27,24 @@ children:
       - type: TextBox
         name: ciWidth
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showPlot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showDiagnostics

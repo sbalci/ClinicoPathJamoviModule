@@ -15,7 +15,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrapCI = FALSE,
             nboot = 100,
             plotROC = TRUE,
-            plotAUC = TRUE, ...) {
+            plotAUC = TRUE,
+            timetypeoutput = "months",
+            showOptimalCutoff = TRUE,
+            showMarkerStats = TRUE,
+            compareBaseline = FALSE,
+            smoothAUC = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -81,6 +86,31 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotAUC",
                 plotAUC,
                 default=TRUE)
+            private$..timetypeoutput <- jmvcore::OptionList$new(
+                "timetypeoutput",
+                timetypeoutput,
+                options=list(
+                    "days",
+                    "weeks",
+                    "months",
+                    "years"),
+                default="months")
+            private$..showOptimalCutoff <- jmvcore::OptionBool$new(
+                "showOptimalCutoff",
+                showOptimalCutoff,
+                default=TRUE)
+            private$..showMarkerStats <- jmvcore::OptionBool$new(
+                "showMarkerStats",
+                showMarkerStats,
+                default=TRUE)
+            private$..compareBaseline <- jmvcore::OptionBool$new(
+                "compareBaseline",
+                compareBaseline,
+                default=FALSE)
+            private$..smoothAUC <- jmvcore::OptionBool$new(
+                "smoothAUC",
+                smoothAUC,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..outcome)
@@ -92,6 +122,11 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nboot)
             self$.addOption(private$..plotROC)
             self$.addOption(private$..plotAUC)
+            self$.addOption(private$..timetypeoutput)
+            self$.addOption(private$..showOptimalCutoff)
+            self$.addOption(private$..showMarkerStats)
+            self$.addOption(private$..compareBaseline)
+            self$.addOption(private$..smoothAUC)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -103,7 +138,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapCI = function() private$..bootstrapCI$value,
         nboot = function() private$..nboot$value,
         plotROC = function() private$..plotROC$value,
-        plotAUC = function() private$..plotAUC$value),
+        plotAUC = function() private$..plotAUC$value,
+        timetypeoutput = function() private$..timetypeoutput$value,
+        showOptimalCutoff = function() private$..showOptimalCutoff$value,
+        showMarkerStats = function() private$..showMarkerStats$value,
+        compareBaseline = function() private$..compareBaseline$value,
+        smoothAUC = function() private$..smoothAUC$value),
     private = list(
         ..elapsedtime = NA,
         ..outcome = NA,
@@ -114,7 +154,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrapCI = NA,
         ..nboot = NA,
         ..plotROC = NA,
-        ..plotAUC = NA)
+        ..plotAUC = NA,
+        ..timetypeoutput = NA,
+        ..showOptimalCutoff = NA,
+        ..showMarkerStats = NA,
+        ..compareBaseline = NA,
+        ..smoothAUC = NA)
 )
 
 timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -124,7 +169,11 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         aucTable = function() private$.items[["aucTable"]],
         rocPlot = function() private$.items[["rocPlot"]],
-        aucPlot = function() private$.items[["aucPlot"]]),
+        aucPlot = function() private$.items[["aucPlot"]],
+        markerStats = function() private$.items[["markerStats"]],
+        cutoffTable = function() private$.items[["cutoffTable"]],
+        modelComparison = function() private$.items[["modelComparison"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -177,7 +226,58 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotAUC",
-                visible="(plotAUC)"))}))
+                visible="(plotAUC)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerStats",
+                title="Marker Variable Statistics",
+                visible="(showMarkerStats)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cutoffTable",
+                title="Optimal Cutoff Values",
+                visible="(showOptimalCutoff)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="timepoint", 
+                        `title`="Timepoint", 
+                        `type`="integer"),
+                    list(
+                        `name`="cutoff", 
+                        `title`="Optimal Cutoff", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden Index", 
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelComparison",
+                title="Model Performance Comparison",
+                visible="(compareBaseline)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Clinical Interpretation"))}))
 
 timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timerocBase",
@@ -214,12 +314,25 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nboot .
 #' @param plotROC .
 #' @param plotAUC .
+#' @param timetypeoutput Time units for display in plots and results.
+#' @param showOptimalCutoff Calculate and display optimal cutoff points that
+#'   maximize Youden index.
+#' @param showMarkerStats Display descriptive statistics for the marker
+#'   variable.
+#' @param compareBaseline Compare marker performance to a baseline model (AUC
+#'   = 0.5).
+#' @param smoothAUC Apply smoothing to the AUC over time plot for better
+#'   visualization.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aucTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$aucPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$markerStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cutoffTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -240,7 +353,12 @@ timeroc <- function(
     bootstrapCI = FALSE,
     nboot = 100,
     plotROC = TRUE,
-    plotAUC = TRUE) {
+    plotAUC = TRUE,
+    timetypeoutput = "months",
+    showOptimalCutoff = TRUE,
+    showMarkerStats = TRUE,
+    compareBaseline = FALSE,
+    smoothAUC = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeroc requires jmvcore to be installed (restart may be required)")
@@ -266,7 +384,12 @@ timeroc <- function(
         bootstrapCI = bootstrapCI,
         nboot = nboot,
         plotROC = plotROC,
-        plotAUC = plotAUC)
+        plotAUC = plotAUC,
+        timetypeoutput = timetypeoutput,
+        showOptimalCutoff = showOptimalCutoff,
+        showMarkerStats = showMarkerStats,
+        compareBaseline = compareBaseline,
+        smoothAUC = smoothAUC)
 
     analysis <- timerocClass$new(
         options = options,

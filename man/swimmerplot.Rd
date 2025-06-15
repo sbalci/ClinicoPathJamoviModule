@@ -19,7 +19,17 @@ swimmerplot(
   referenceLines = "none",
   customReferenceTime = 12,
   useggswim = FALSE,
-  markerSize = 5
+  markerSize = 5,
+  milestone1Name = "Surgery",
+  milestone1Date,
+  milestone2Name = "Treatment",
+  milestone2Date,
+  milestone3Name = "Recurrence",
+  milestone3Date,
+  milestone4Name = "Remission",
+  milestone4Date,
+  milestone5Name = "Death",
+  milestone5Date
 )
 }
 \arguments{
@@ -53,6 +63,26 @@ absolute start times}
 \item{useggswim}{.}
 
 \item{markerSize}{Size of event markers on the plot}
+
+\item{milestone1Name}{Name for the first milestone event (e.g., Surgery)}
+
+\item{milestone1Date}{Date/time when milestone 1 occurred}
+
+\item{milestone2Name}{Name for the second milestone event (e.g., Treatment)}
+
+\item{milestone2Date}{Date/time when milestone 2 occurred}
+
+\item{milestone3Name}{Name for the third milestone event (e.g., Recurrence)}
+
+\item{milestone3Date}{Date/time when milestone 3 occurred}
+
+\item{milestone4Name}{Name for the fourth milestone event (e.g., Remission)}
+
+\item{milestone4Date}{Date/time when milestone 4 occurred}
+
+\item{milestone5Name}{Name for the fifth milestone event (e.g., Death)}
+
+\item{milestone5Date}{Date/time when milestone 5 occurred}
 }
 \value{
 A results object containing:

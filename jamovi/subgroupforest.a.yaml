@@ -1,0 +1,159 @@
+---
+name: subgroupforest
+title: Subgroup Analysis Forest Plot
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Clinical Plots
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      description:
+          R: >
+            Primary outcome variable (time-to-event, binary, or continuous).
+
+    - name: treatment
+      title: Treatment Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Treatment or exposure variable (binary factor).
+
+    - name: subgroups
+      title: Subgroup Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variables defining patient subgroups for analysis.
+
+    - name: time
+      title: Time Variable (for survival)
+      type: Variable
+      suggested: [continuous]
+      description:
+          R: >
+            Time variable for survival analysis (required if outcome is survival time).
+
+    - name: event
+      title: Event Variable (for survival)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Event indicator for survival analysis (1=event, 0=censored).
+
+    - name: outcomeType
+      title: Outcome Type
+      type: List
+      options:
+        - title: Survival (Time-to-Event)
+          name: survival
+        - title: Binary (Yes/No)
+          name: binary
+        - title: Continuous
+          name: continuous
+      default: survival
+      description:
+          R: >
+            Type of outcome variable for appropriate statistical analysis.
+
+    - name: effectMeasure
+      title: Effect Measure
+      type: List
+      options:
+        - title: Hazard Ratio (HR)
+          name: hr
+        - title: Odds Ratio (OR)
+          name: or
+        - title: Risk Ratio (RR)
+          name: rr
+        - title: Mean Difference
+          name: md
+      default: hr
+      description:
+          R: >
+            Statistical measure for treatment effect.
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: List
+      options:
+        - title: 95%
+          name: "0.95"
+        - title: 90%
+          name: "0.90"
+        - title: 99%
+          name: "0.99"
+      default: "0.95"
+      description:
+          R: >
+            Confidence level for intervals.
+
+    - name: showOverall
+      title: Show Overall Effect
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display overall treatment effect across all patients.
+
+    - name: showInteraction
+      title: Test Subgroup Interactions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform statistical tests for subgroup interactions.
+
+    - name: sortBy
+      title: Sort Subgroups By
+      type: List
+      options:
+        - title: Effect Size
+          name: effect
+        - title: Sample Size
+          name: n
+        - title: Alphabetical
+          name: alpha
+      default: effect
+      description:
+          R: >
+            Method for ordering subgroups in the plot.
+
+    - name: showSampleSizes
+      title: Show Sample Sizes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display sample sizes for each subgroup.
+
+    - name: logScale
+      title: Use Log Scale
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display effects on log scale (appropriate for ratios).
+
+    - name: nullLine
+      title: Null Effect Line
+      type: Number
+      default: 1
+      description:
+          R: >
+            Value for null effect reference line (1 for ratios, 0 for differences).

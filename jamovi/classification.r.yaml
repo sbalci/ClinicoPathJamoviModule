@@ -39,6 +39,29 @@ items:
           - name: value
             title: 'Value'
             type: number
+      - name: clinicalMetrics
+        title: Clinical Performance Metrics
+        visible: (reportClinicalMetrics)
+        type: Table
+        rows: 0
+        columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+            format: zto
+          - name: ci_lower
+            title: '95% CI Lower'
+            type: number
+            format: zto
+            visible: (reportConfidenceIntervals)
+          - name: ci_upper
+            title: '95% CI Upper'
+            type: number
+            format: zto
+            visible: (reportConfidenceIntervals)
       - name: class
         title: 'Per class'
         type: Table

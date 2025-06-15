@@ -135,50 +135,50 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         },
 
         # Process milestone data with validation and formatting
-        # .processMilestone = function(milestone_name, milestone_dates, original_start_dates) {
-        #     # Skip if no data
-        #     if (is.null(milestone_dates) || all(is.na(milestone_dates)))
-        #         return(NULL)
-        #
-        #     # Process dates according to time type
-        #     if (self$options$timetype == "datetime") {
-        #         milestone_dates <- private$.parseDates(
-        #             as.character(milestone_dates),
-        #             self$options$timetypedata
-        #         )
-        #     } else {
-        #         milestone_dates <- jmvcore::toNumeric(milestone_dates)
-        #     }
-        #
-        #     # For relative start, adjust milestone dates
-        #     if (self$options$startType == "relative") {
-        #         if (self$options$timetype == "datetime") {
-        #             # Calculate time difference between start date and milestone
-        #             adjusted_dates <- numeric(length(milestone_dates))
-        #             for (i in 1:length(milestone_dates)) {
-        #                 if (!is.na(milestone_dates[i]) && !is.na(original_start_dates[i])) {
-        #                     interval <- lubridate::interval(
-        #                         original_start_dates[i],
-        #                         milestone_dates[i]
-        #                     )
-        #                     adjusted_dates[i] <- lubridate::time_length(
-        #                         interval,
-        #                         unit = self$options$timetypeoutput
-        #                     )
-        #                 } else {
-        #                     adjusted_dates[i] <- NA
-        #                 }
-        #             }
-        #             return(adjusted_dates)
-        #         } else {
-        #             # For raw numeric data, simply subtract start times
-        #             return(milestone_dates - original_start_dates)
-        #         }
-        #     } else {
-        #         # For absolute time display, return original dates
-        #         return(milestone_dates)
-        #     }
-        # },
+        .processMilestone = function(milestone_name, milestone_dates, original_start_dates) {
+            # Skip if no data
+            if (is.null(milestone_dates) || all(is.na(milestone_dates)))
+                return(NULL)
+
+            # Process dates according to time type
+            if (self$options$timetype == "datetime") {
+                milestone_dates <- private$.parseDates(
+                    as.character(milestone_dates),
+                    self$options$timetypedata
+                )
+            } else {
+                milestone_dates <- jmvcore::toNumeric(milestone_dates)
+            }
+
+            # For relative start, adjust milestone dates
+            if (self$options$startType == "relative") {
+                if (self$options$timetype == "datetime") {
+                    # Calculate time difference between start date and milestone
+                    adjusted_dates <- numeric(length(milestone_dates))
+                    for (i in 1:length(milestone_dates)) {
+                        if (!is.na(milestone_dates[i]) && !is.na(original_start_dates[i])) {
+                            interval <- lubridate::interval(
+                                original_start_dates[i],
+                                milestone_dates[i]
+                            )
+                            adjusted_dates[i] <- lubridate::time_length(
+                                interval,
+                                unit = self$options$timetypeoutput
+                            )
+                        } else {
+                            adjusted_dates[i] <- NA
+                        }
+                    }
+                    return(adjusted_dates)
+                } else {
+                    # For raw numeric data, simply subtract start times
+                    return(milestone_dates - original_start_dates)
+                }
+            } else {
+                # For absolute time display, return original dates
+                return(milestone_dates)
+            }
+        },
 
         .calculatePersonTimeMetrics = function(df, event_data = NULL) {
             # Calculate total person-time across all subjects
@@ -343,49 +343,7 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
 
 
-            # Collect milestone data
-            # milestones <- list()
-
-            # Process each potential milestone (1-5)
-            # for (i in 1:5) {
-            #     milestone_name_opt <- paste0("milestone", i, "Name")
-            #     milestone_date_opt <- paste0("milestone", i, "Date")
-
-                # Only process if the date variable is provided
-                # if (!is.null(self$options[[milestone_date_opt]])) {
-                #     milestone_name <- self$options[[milestone_name_opt]]
-                #     milestone_dates <- self$data[[self$options[[milestone_date_opt]]]]
-
-                    # Skip if all NA
-                    # if (all(is.na(milestone_dates)))
-                    #     next
-
-                    # Process milestone dates
-                    # adjusted_dates <- private$.processMilestone(
-                    #     milestone_name,
-                    #     milestone_dates,
-                    #     original_start_times
-                    # )
-
-                    # Add to milestones list if valid
-                    # if (!is.null(adjusted_dates)) {
-                    #     milestones[[milestone_name]] <- data.frame(
-                    #         Patient = df$Patient,
-                    #         PlotDate = adjusted_dates,
-                    #         Type = milestone_name,
-                    #         stringsAsFactors = FALSE
-                    #     )
-                    # }
-                # }
-            # }
-
-            # Combine all milestone data
-            # milestone_data <- NULL
-            # if (length(milestones) > 0) {
-            #     milestone_data <- do.call(rbind, milestones)
-            #     # Remove NA dates
-            #     milestone_data <- milestone_data[!is.na(milestone_data$Date), ]
-            # }
+            # Milestone data will be processed during plotting for efficiency
 
             # Update the summary table result.
             self$results$summary$addRow(rowKey = 1, values = list(
@@ -470,7 +428,7 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             plotData <- list(
                 data = df,
                 markers_data = markers_data,
-                # milestone_data = milestone_data,
+                original_start_times = original_start_times,
                 options = list(
                     timeUnit = self$options$timetypeoutput,
                     barHeight = self$options$barHeight,
@@ -492,7 +450,7 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
             df <- plotData$data
             markers_data <- plotData$markers_data
-            # milestone_data <- plotData$milestone_data
+            original_start_times <- plotData$original_start_times
             opts <- plotData$options
             stats <- plotData$stats
             person_time <- plotData$person_time
@@ -654,42 +612,123 @@ swimmerplotClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
 
 
+            # Process multiple milestone variables during plotting
+            milestone_data <- data.frame()
+            
+            # Check for each milestone (1-5) and add if it exists
+            for (i in 1:5) {
+                milestone_name_opt <- paste0("milestone", i, "Name")
+                milestone_date_opt <- paste0("milestone", i, "Date")
+                
+                # Only process if the date variable is provided
+                if (!is.null(self$options[[milestone_date_opt]])) {
+                    milestone_name <- self$options[[milestone_name_opt]]
+                    
+                    # Skip if milestone name is empty
+                    if (is.null(milestone_name) || milestone_name == "")
+                        next
+                        
+                    milestone_dates <- self$data[[self$options[[milestone_date_opt]]]]
+                    
+                    # Skip if all NA
+                    if (all(is.na(milestone_dates)))
+                        next
+                        
+                    # Process dates according to time type
+                    if (self$options$timetype == "datetime") {
+                        milestone_dates <- private$.parseDates(
+                            as.character(milestone_dates),
+                            self$options$timetypedata
+                        )
+                    } else {
+                        milestone_dates <- jmvcore::toNumeric(milestone_dates)
+                    }
+                    
+                    # Create temporary data frame for this milestone
+                    temp_df <- data.frame(
+                        Patient = df$Patient,
+                        Date = milestone_dates,
+                        Type = milestone_name,
+                        stringsAsFactors = FALSE
+                    )
+                    
+                    # Append to milestone data
+                    milestone_data <- rbind(milestone_data, temp_df)
+                }
+            }
+            
             # Add milestone markers if we have any valid data
-            # if (!is.null(milestone_data) && nrow(milestone_data) > 0) {
-            #     # Define the milestone shape and color mappings
-            #     milestone_types <- unique(milestone_data$Type)
-            #
-            #     # Clinical milestone shapes and colors
-            #     milestone_shapes <- 15:(15 + length(milestone_types) - 1)
-            #     names(milestone_shapes) <- milestone_types
-            #
-            #     # Create a clinically relevant color palette for milestones
-            #     milestone_colors <- RColorBrewer::brewer.pal(
-            #         min(length(milestone_types), 8),
-            #         "Dark2"  # Using Dark2 for milestones to distinguish from events
-            #     )
-            #     names(milestone_colors) <- milestone_types
-            #
-            #     p <- p +
-            #         ggplot2::geom_point(
-            #             data = milestone_data,
-            #             mapping = ggplot2::aes(
-            #                 x = PlotDate,
-            #                 y = Patient,
-            #                 color = Type,
-            #                 shape = Type
-            #             ),
-            #             size = 4
-            #         ) +
-            #         ggplot2::scale_shape_manual(
-            #             name = "Clinical Milestones",
-            #             values = milestone_shapes
-            #         ) +
-            #         ggplot2::scale_color_manual(
-            #             name = "Clinical Milestones",
-            #             values = milestone_colors
-            #         )
-            # }
+            if (nrow(milestone_data) > 0) {
+                # Remove NA dates
+                milestone_data <- milestone_data[!is.na(milestone_data$Date), ]
+                
+                if (nrow(milestone_data) > 0) {
+                    # For relative start, adjust milestone dates
+                    if (self$options$startType == "relative" && self$options$timetype == "datetime") {
+                        # Get the earliest start date for each patient
+                        patient_start_dates <- tapply(
+                            as.Date(self$data[[self$options$start]]), 
+                            self$data[[self$options$patientID]], 
+                            min, na.rm = TRUE
+                        )
+                        
+                        # For each row in milestone_data, calculate the relative time
+                        milestone_data$RelativeDate <- numeric(nrow(milestone_data))
+                        
+                        for (j in 1:nrow(milestone_data)) {
+                            patient_id <- as.character(milestone_data$Patient[j])
+                            if (patient_id %in% names(patient_start_dates)) {
+                                start_date <- patient_start_dates[patient_id]
+                                milestone_date <- milestone_data$Date[j]
+                                
+                                # Calculate time difference in the specified output unit
+                                interval <- lubridate::interval(start_date, milestone_date)
+                                milestone_data$RelativeDate[j] <- lubridate::time_length(
+                                    interval, 
+                                    unit = self$options$timetypeoutput
+                                )
+                            }
+                        }
+                        
+                        # Use the relative dates for plotting
+                        milestone_data$PlotDate <- milestone_data$RelativeDate
+                    } else {
+                        # For absolute start or raw data, use original dates
+                        milestone_data$PlotDate <- milestone_data$Date
+                    }
+                    
+                    # Add milestone markers to plot
+                    unique_types <- unique(milestone_data$Type)
+                    milestone_shapes <- c(15, 16, 17, 18, 19)[1:length(unique_types)]
+                    names(milestone_shapes) <- unique_types
+                    
+                    milestone_colors <- RColorBrewer::brewer.pal(
+                        max(3, min(length(unique_types), 8)),
+                        "Set2"
+                    )
+                    names(milestone_colors) <- unique_types
+                    
+                    p <- p + 
+                        ggplot2::geom_point(
+                            data = milestone_data,
+                            mapping = ggplot2::aes(
+                                x = PlotDate,
+                                y = Patient,
+                                color = Type,
+                                shape = Type
+                            ),
+                            size = 4
+                        ) +
+                        ggplot2::scale_color_manual(
+                            name = "Milestones",
+                            values = milestone_colors
+                        ) +
+                        ggplot2::scale_shape_manual(
+                            name = "Milestones",
+                            values = milestone_shapes
+                        )
+                }
+            }
 
             # Add reference lines based on selected option
             if (!is.null(opts$referenceLines) && opts$referenceLines != "none") {

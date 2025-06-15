@@ -29,7 +29,13 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             plotDecisionTree = FALSE,
             predictedFreq = FALSE,
             printRandForest = FALSE,
-            predictedFreqRF = FALSE, ...) {
+            predictedFreqRF = FALSE,
+            balancingMethod = "none",
+            clinicalCutoff = 0.5,
+            validateMethod = "holdout",
+            bootstrapSamples = 1000,
+            reportClinicalMetrics = TRUE,
+            reportConfidenceIntervals = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -150,6 +156,43 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "predictedFreqRF",
                 predictedFreqRF,
                 default=FALSE)
+            private$..balancingMethod <- jmvcore::OptionList$new(
+                "balancingMethod",
+                balancingMethod,
+                options=list(
+                    "none",
+                    "upsample",
+                    "downsample",
+                    "smote"),
+                default="none")
+            private$..clinicalCutoff <- jmvcore::OptionNumber$new(
+                "clinicalCutoff",
+                clinicalCutoff,
+                min=0,
+                max=1,
+                default=0.5)
+            private$..validateMethod <- jmvcore::OptionList$new(
+                "validateMethod",
+                validateMethod,
+                options=list(
+                    "holdout",
+                    "bootstrap",
+                    "cv"),
+                default="holdout")
+            private$..bootstrapSamples <- jmvcore::OptionNumber$new(
+                "bootstrapSamples",
+                bootstrapSamples,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..reportClinicalMetrics <- jmvcore::OptionBool$new(
+                "reportClinicalMetrics",
+                reportClinicalMetrics,
+                default=TRUE)
+            private$..reportConfidenceIntervals <- jmvcore::OptionBool$new(
+                "reportConfidenceIntervals",
+                reportConfidenceIntervals,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..indep)
@@ -174,6 +217,12 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..predictedFreq)
             self$.addOption(private$..printRandForest)
             self$.addOption(private$..predictedFreqRF)
+            self$.addOption(private$..balancingMethod)
+            self$.addOption(private$..clinicalCutoff)
+            self$.addOption(private$..validateMethod)
+            self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..reportClinicalMetrics)
+            self$.addOption(private$..reportConfidenceIntervals)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -198,7 +247,13 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         plotDecisionTree = function() private$..plotDecisionTree$value,
         predictedFreq = function() private$..predictedFreq$value,
         printRandForest = function() private$..printRandForest$value,
-        predictedFreqRF = function() private$..predictedFreqRF$value),
+        predictedFreqRF = function() private$..predictedFreqRF$value,
+        balancingMethod = function() private$..balancingMethod$value,
+        clinicalCutoff = function() private$..clinicalCutoff$value,
+        validateMethod = function() private$..validateMethod$value,
+        bootstrapSamples = function() private$..bootstrapSamples$value,
+        reportClinicalMetrics = function() private$..reportClinicalMetrics$value,
+        reportConfidenceIntervals = function() private$..reportConfidenceIntervals$value),
     private = list(
         ..dep = NA,
         ..indep = NA,
@@ -222,7 +277,13 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..plotDecisionTree = NA,
         ..predictedFreq = NA,
         ..printRandForest = NA,
-        ..predictedFreqRF = NA)
+        ..predictedFreqRF = NA,
+        ..balancingMethod = NA,
+        ..clinicalCutoff = NA,
+        ..validateMethod = NA,
+        ..bootstrapSamples = NA,
+        ..reportClinicalMetrics = NA,
+        ..reportConfidenceIntervals = NA)
 )
 
 classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -274,6 +335,7 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 inherit = jmvcore::Group,
                 active = list(
                     general = function() private$.items[["general"]],
+                    clinicalMetrics = function() private$.items[["clinicalMetrics"]],
                     class = function() private$.items[["class"]]),
                 private = list(),
                 public=list(
@@ -297,6 +359,34 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `name`="value", 
                                     `title`="Value", 
                                     `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="clinicalMetrics",
+                            title="Clinical Performance Metrics",
+                            visible="(reportClinicalMetrics)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(reportConfidenceIntervals)"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(reportConfidenceIntervals)"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="class",
@@ -404,7 +494,7 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 weightsSupport = 'auto')
         }))
 
-#' Decision tree
+#' Clinical Classification
 #'
 #' 
 #' @param data .
@@ -431,11 +521,22 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param predictedFreq .
 #' @param printRandForest .
 #' @param predictedFreqRF .
+#' @param balancingMethod Method for handling class imbalance in medical
+#'   datasets.
+#' @param clinicalCutoff Probability threshold for clinical decision making.
+#' @param validateMethod Validation method for clinical model assessment.
+#' @param bootstrapSamples Number of bootstrap samples for confidence
+#'   intervals.
+#' @param reportClinicalMetrics Report sensitivity, specificity, PPV, NPV, and
+#'   likelihood ratios.
+#' @param reportConfidenceIntervals Include 95\% confidence intervals for
+#'   clinical metrics.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$classificationMetrics$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$class} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rocCurvePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr
@@ -470,7 +571,13 @@ classification <- function(
     plotDecisionTree = FALSE,
     predictedFreq = FALSE,
     printRandForest = FALSE,
-    predictedFreqRF = FALSE) {
+    predictedFreqRF = FALSE,
+    balancingMethod = "none",
+    clinicalCutoff = 0.5,
+    validateMethod = "holdout",
+    bootstrapSamples = 1000,
+    reportClinicalMetrics = TRUE,
+    reportConfidenceIntervals = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("classification requires jmvcore to be installed (restart may be required)")
@@ -508,7 +615,13 @@ classification <- function(
         plotDecisionTree = plotDecisionTree,
         predictedFreq = predictedFreq,
         printRandForest = printRandForest,
-        predictedFreqRF = predictedFreqRF)
+        predictedFreqRF = predictedFreqRF,
+        balancingMethod = balancingMethod,
+        clinicalCutoff = clinicalCutoff,
+        validateMethod = validateMethod,
+        bootstrapSamples = bootstrapSamples,
+        reportClinicalMetrics = reportClinicalMetrics,
+        reportConfidenceIntervals = reportConfidenceIntervals)
 
     analysis <- classificationClass$new(
         options = options,

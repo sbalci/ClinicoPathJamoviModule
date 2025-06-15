@@ -6,7 +6,11 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL, ...) {
+            var = NULL,
+            showOutliers = TRUE,
+            showDistribution = TRUE,
+            showDuplicates = TRUE,
+            showPatterns = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -14,66 +18,167 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
+            private$..var <- jmvcore::OptionVariable$new(
+                "var",
+                var)
+            private$..showOutliers <- jmvcore::OptionBool$new(
+                "showOutliers",
+                showOutliers,
+                default=TRUE)
+            private$..showDistribution <- jmvcore::OptionBool$new(
+                "showDistribution",
+                showDistribution,
+                default=TRUE)
+            private$..showDuplicates <- jmvcore::OptionBool$new(
+                "showDuplicates",
+                showDuplicates,
+                default=TRUE)
+            private$..showPatterns <- jmvcore::OptionBool$new(
+                "showPatterns",
+                showPatterns,
+                default=FALSE)
 
-            self$.addOption(private$..dep)
+            self$.addOption(private$..var)
+            self$.addOption(private$..showOutliers)
+            self$.addOption(private$..showDistribution)
+            self$.addOption(private$..showDuplicates)
+            self$.addOption(private$..showPatterns)
         }),
     active = list(
-        dep = function() private$..dep$value),
+        var = function() private$..var$value,
+        showOutliers = function() private$..showOutliers$value,
+        showDistribution = function() private$..showDistribution$value,
+        showDuplicates = function() private$..showDuplicates$value,
+        showPatterns = function() private$..showPatterns$value),
     private = list(
-        ..dep = NA)
+        ..var = NA,
+        ..showOutliers = NA,
+        ..showDistribution = NA,
+        ..showDuplicates = NA,
+        ..showPatterns = NA)
 )
 
 checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "checkdataResults",
     inherit = jmvcore::Group,
     active = list(
-        missingvals = function() private$.items[["missingvals"]],
-        minvals = function() private$.items[["minvals"]],
-        maxvals = function() private$.items[["maxvals"]]),
+        qualityText = function() private$.items[["qualityText"]],
+        missingVals = function() private$.items[["missingVals"]],
+        outliers = function() private$.items[["outliers"]],
+        distribution = function() private$.items[["distribution"]],
+        duplicates = function() private$.items[["duplicates"]],
+        patterns = function() private$.items[["patterns"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Checking data",
+                title="Data Quality Assessment",
                 refs=list(
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="missingvals",
-                title="Missing data"))
+                name="qualityText",
+                title="Quality Assessment Summary"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="minvals",
-                title="Minimum values",
-                rows=5,
+                name="missingVals",
+                title="Missing Data Analysis",
+                rows=0,
                 columns=list(
                     list(
-                        `name`="minRowNumber", 
-                        `title`="Row numbers", 
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outliers",
+                title="Outlier Detection (Z-Score > 3)",
+                visible="(showOutliers)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="rowNumber", 
+                        `title`="Row", 
                         `type`="integer"),
                     list(
-                        `name`="minvalues", 
-                        `title`="Values", 
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="zscore", 
+                        `title`="Z-Score", 
+                        `type`="number"),
+                    list(
+                        `name`="severity", 
+                        `title`="Severity", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="distribution",
+                title="Distribution Analysis",
+                visible="(showDistribution)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="duplicates",
+                title="Duplicate Values",
+                visible="(showDuplicates)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="% of Data", 
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="maxvals",
-                title="Maximum values",
-                rows=5,
+                name="patterns",
+                title="Data Patterns",
+                visible="(showPatterns)",
+                rows=0,
                 columns=list(
                     list(
-                        `name`="maxRowNumber", 
-                        `title`="Row numbers", 
-                        `type`="integer"),
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
                     list(
-                        `name`="maxvalues", 
-                        `title`="Values", 
-                        `type`="number"))))}))
+                        `name`="description", 
+                        `title`="Description", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))}))
 
 checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "checkdataBase",
@@ -96,41 +201,59 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Checking data
+#' Data Quality Assessment
 #'
 #' 
 #' @param data .
-#' @param dep .
+#' @param var .
+#' @param showOutliers Detect and display potential outliers using z-score
+#'   method (|z| > 3).
+#' @param showDistribution Display descriptive statistics and distribution
+#'   characteristics.
+#' @param showDuplicates Identify and count duplicate values in the dataset.
+#' @param showPatterns Analyze patterns in missing data and value
+#'   distributions.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$missingvals} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$minvals} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$maxvals} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$outliers} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$patterns} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$minvals$asDF}
+#' \code{results$missingVals$asDF}
 #'
-#' \code{as.data.frame(results$minvals)}
+#' \code{as.data.frame(results$missingVals)}
 #'
 #' @export
 checkdata <- function(
     data,
-    dep) {
+    var,
+    showOutliers = TRUE,
+    showDistribution = TRUE,
+    showDuplicates = TRUE,
+    showPatterns = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("checkdata requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
+    if ( ! missing(var)) var <- jmvcore::resolveQuo(jmvcore::enquo(var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL))
+            `if`( ! missing(var), var, NULL))
 
 
     options <- checkdataOptions$new(
-        dep = dep)
+        var = var,
+        showOutliers = showOutliers,
+        showDistribution = showDistribution,
+        showDuplicates = showDuplicates,
+        showPatterns = showPatterns)
 
     analysis <- checkdataClass$new(
         options = options,

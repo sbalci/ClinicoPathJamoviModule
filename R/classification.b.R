@@ -2,8 +2,11 @@
 # @import mlr3measures
 # @import mlr3learners
 # @import mlr3viz
+# @importFrom caret sensitivity specificity posPredValue negPredValue
+# @importFrom pROC roc auc ci.auc
+# @importFrom boot boot boot.ci
 
-# from https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
+# Enhanced for clinical applications - based on https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
 classificationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 "classificationClass",
@@ -22,11 +25,180 @@ private = list(
 
         data <- as.data.table(self$data)
 
-        task <- TaskClassif$new(id = "task", backend = data[complete.cases(data),], target = self$options$dep)
+        task <- TaskClassif$new(id = "clinical_task", backend = data[complete.cases(data),], target = self$options$dep)
+
+        # Handle class imbalance if specified
+        task <- private$.handleClassImbalance(task)
 
         learner <- private$.initLearner()
 
+        # Set clinical cutoff if specified
+        learner$param_set$values$cutoff <- self$options$clinicalCutoff
+
         private$.trainModel(task, learner)
+    },
+
+    .handleClassImbalance = function(task) {
+        if (self$options$balancingMethod == "upsample") {
+            # Implement upsampling
+            task_data <- task$data()
+            target_col <- task$target_names
+            minority_class <- names(sort(table(task_data[[target_col]])))[1]
+            majority_count <- max(table(task_data[[target_col]]))
+            
+            # Simple upsampling by replication
+            minority_indices <- which(task_data[[target_col]] == minority_class)
+            n_replicate <- majority_count - length(minority_indices)
+            
+            if (n_replicate > 0) {
+                replicated_indices <- sample(minority_indices, n_replicate, replace = TRUE)
+                upsampled_data <- rbind(task_data, task_data[replicated_indices, ])
+                task <- TaskClassif$new(id = task$id, backend = upsampled_data, target = target_col)
+            }
+        } else if (self$options$balancingMethod == "downsample") {
+            # Implement downsampling
+            task_data <- task$data()
+            target_col <- task$target_names
+            minority_count <- min(table(task_data[[target_col]]))
+            
+            balanced_data <- data.table()
+            for (class in unique(task_data[[target_col]])) {
+                class_data <- task_data[task_data[[target_col]] == class, ]
+                sampled_data <- class_data[sample(nrow(class_data), minority_count), ]
+                balanced_data <- rbind(balanced_data, sampled_data)
+            }
+            task <- TaskClassif$new(id = task$id, backend = balanced_data, target = target_col)
+        }
+        # Note: SMOTE would require additional packages like smotefamily
+        return(task)
+    },
+
+    .calculateClinicalMetrics = function(predictions, truth) {
+        # Convert to factors if needed
+        pred_response <- as.factor(predictions)
+        truth_factor <- as.factor(truth)
+        
+        # Ensure binary classification for clinical metrics
+        if (length(levels(truth_factor)) != 2) {
+            return(list())
+        }
+        
+        # Calculate clinical metrics using caret functions
+        tryCatch({
+            sens <- caret::sensitivity(pred_response, truth_factor, positive = levels(truth_factor)[2])
+            spec <- caret::specificity(pred_response, truth_factor, negative = levels(truth_factor)[1])
+            ppv <- caret::posPredValue(pred_response, truth_factor, positive = levels(truth_factor)[2])
+            npv <- caret::negPredValue(pred_response, truth_factor, negative = levels(truth_factor)[1])
+            
+            # Calculate likelihood ratios
+            pos_lr <- sens / (1 - spec)
+            neg_lr <- (1 - sens) / spec
+            
+            # Calculate prevalence
+            prevalence <- sum(truth_factor == levels(truth_factor)[2]) / length(truth_factor)
+            
+            # Calculate Number Needed to Treat (if applicable)
+            nnt <- if (ppv > prevalence) 1 / (ppv - prevalence) else NA
+            
+            metrics <- list(
+                sensitivity = sens,
+                specificity = spec,
+                ppv = ppv,
+                npv = npv,
+                positive_lr = pos_lr,
+                negative_lr = neg_lr,
+                prevalence = prevalence,
+                nnt = nnt
+            )
+            
+            # Add bootstrap confidence intervals if requested
+            if (self$options$reportConfidenceIntervals) {
+                boot_func <- function(data, indices) {
+                    boot_pred <- pred_response[indices]
+                    boot_truth <- truth_factor[indices]
+                    return(c(
+                        caret::sensitivity(boot_pred, boot_truth, positive = levels(truth_factor)[2]),
+                        caret::specificity(boot_pred, boot_truth, negative = levels(truth_factor)[1]),
+                        caret::posPredValue(boot_pred, boot_truth, positive = levels(truth_factor)[2]),
+                        caret::negPredValue(boot_pred, boot_truth, negative = levels(truth_factor)[1])
+                    ))
+                }
+                
+                boot_results <- boot::boot(data = 1:length(predictions), statistic = boot_func, R = self$options$bootstrapSamples)
+                
+                # Extract confidence intervals
+                for (i in 1:4) {
+                    ci <- boot::boot.ci(boot_results, index = i, type = "perc")
+                    metric_name <- c("sensitivity", "specificity", "ppv", "npv")[i]
+                    metrics[[paste0(metric_name, "_ci_lower")]] <- ci$percent[4]
+                    metrics[[paste0(metric_name, "_ci_upper")]] <- ci$percent[5]
+                }
+            }
+            
+            return(metrics)
+        }, error = function(e) {
+            return(list())
+        })
+    },
+
+    .validateModel = function(task, learner) {
+        if (self$options$validateMethod == "bootstrap") {
+            # Bootstrap validation
+            resampling <- rsmp("bootstrap", ratio = 0.632, repeats = min(self$options$bootstrapSamples, 200))
+        } else if (self$options$validateMethod == "cv") {
+            # Cross-validation
+            resampling <- rsmp("cv", folds = self$options$noOfFolds)
+        } else {
+            # Holdout validation
+            resampling <- rsmp("holdout", ratio = 1 - self$options$testSize)
+        }
+        
+        resampling$instantiate(task)
+        return(resample(task, learner, resampling))
+    },
+
+    .populateClinicalMetrics = function(clinical_metrics) {
+        if (self$options$reportClinicalMetrics && length(clinical_metrics) > 0) {
+            metric_names <- c("Sensitivity", "Specificity", "Positive Predictive Value", 
+                            "Negative Predictive Value", "Positive Likelihood Ratio", 
+                            "Negative Likelihood Ratio", "Prevalence")
+            metric_keys <- c("sensitivity", "specificity", "ppv", "npv", 
+                           "positive_lr", "negative_lr", "prevalence")
+            
+            for (i in seq_along(metric_names)) {
+                key <- metric_keys[i]
+                if (key %in% names(clinical_metrics)) {
+                    row_data <- list(
+                        metric = metric_names[i],
+                        value = clinical_metrics[[key]]
+                    )
+                    
+                    # Add confidence intervals if available
+                    if (self$options$reportConfidenceIntervals) {
+                        ci_lower_key <- paste0(key, "_ci_lower")
+                        ci_upper_key <- paste0(key, "_ci_upper")
+                        
+                        if (ci_lower_key %in% names(clinical_metrics)) {
+                            row_data$ci_lower <- clinical_metrics[[ci_lower_key]]
+                            row_data$ci_upper <- clinical_metrics[[ci_upper_key]]
+                        }
+                    }
+                    
+                    self$results$classificationMetrics$clinicalMetrics$addRow(rowKey = key, values = row_data)
+                }
+            }
+            
+            # Add NNT if available and valid
+            if ("nnt" %in% names(clinical_metrics) && !is.na(clinical_metrics$nnt) && clinical_metrics$nnt > 0) {
+                self$results$classificationMetrics$clinicalMetrics$addRow(
+                    rowKey = "nnt", 
+                    values = list(
+                        metric = "Number Needed to Treat",
+                        value = clinical_metrics$nnt
+                    )
+                )
+            }
+        }
     },
 
     .initLearner = function() {
@@ -155,6 +327,12 @@ private = list(
 
         if(self$options$printRandForest == TRUE & classifier == 'randomForest') {
             private$.printRandomForestModel(model)
+        }
+
+        # Calculate and populate clinical metrics if requested
+        if (self$options$reportClinicalMetrics) {
+            clinical_metrics <- private$.calculateClinicalMetrics(predictions$response, predictions$truth)
+            private$.populateClinicalMetrics(clinical_metrics)
         }
     },
 

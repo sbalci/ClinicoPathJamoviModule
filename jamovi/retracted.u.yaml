@@ -9,16 +9,22 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Select DOI Variable
+        label: DOI Variable
         children:
           - type: VariablesListBox
             name: doi
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Options
+    collapsed: true
     children:
-      - type: Output
-        name: resids
-      - type: Output
-        name: resids2
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: database
+          - type: CheckBox
+            name: pmid
+          - type: Output
+            name: resids

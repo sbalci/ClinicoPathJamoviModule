@@ -6,37 +6,55 @@
 \usage{
 flowchart(
   data,
-  title = "Study Flow Diagram",
   nodes,
   counts,
-  direction = "tb",
-  style = "simple",
-  showCounts = TRUE
+  direction = "TB",
+  nodeWidth = 2.5,
+  nodeHeight = 1,
+  fontSize = 10,
+  showPercentages = TRUE,
+  showExclusions = TRUE,
+  nodeColor = "blue",
+  includeTitle = TRUE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{title}{.}
-
-\item{nodes}{Variables containing node labels/descriptions}
+\item{nodes}{Variables containing node descriptions/labels}
 
 \item{counts}{Variables containing counts for each node}
 
-\item{direction}{.}
+\item{direction}{Direction of flowchart flow}
 
-\item{style}{.}
+\item{nodeWidth}{.}
 
-\item{showCounts}{.}
+\item{nodeHeight}{.}
+
+\item{fontSize}{.}
+
+\item{showPercentages}{Show percentage of initial participants at each step}
+
+\item{showExclusions}{Show exclusion counts on edge labels}
+
+\item{nodeColor}{Color scheme for nodes}
+
+\item{includeTitle}{Include automatic title with flow statistics}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$diagram} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagramCode} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$nodeData} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$nodeData$asDF}
+
+\code{as.data.frame(results$nodeData)}
 }
 \description{
-Study Flowchart
+Creates CONSORT-style flowcharts showing participant flow through studies
 }

@@ -67,3 +67,19 @@ children:
         name: plotROC
       - type: CheckBox
         name: plotAUC
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timetypeoutput
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showOptimalCutoff
+      - type: CheckBox
+        name: showMarkerStats
+      - type: CheckBox
+        name: compareBaseline
+      - type: CheckBox
+        name: smoothAUC

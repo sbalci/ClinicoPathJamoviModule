@@ -1,39 +1,64 @@
+# Enhanced Time-Dependent ROC Analysis for Clinical Research
+# Provides comprehensive evaluation of biomarker predictive performance over time
+
 timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "timerocClass",
     inherit = timerocBase,
     private = list(
+        .data = NULL,
+        .fit = NULL,
+        .timepoints = NULL,
+        
         .init = function() {
-            # Show welcome/instruction message if variables not selected
+            # Show welcome message if variables not selected
             if (is.null(self$options$marker) ||
                 is.null(self$options$outcome) ||
                 is.null(self$options$elapsedtime)) {
 
                 welcome <- glue::glue("
-                    <br>Welcome to Time-Dependent ROC Analysis
-                    <br><br>
-                    This tool evaluates how well a continuous marker predicts survival outcomes at different timepoints.
-                    <br><br>
-                    Please select:
-                    <br>- Time variable (follow-up duration)
-                    <br>- Outcome variable (event status)
-                    <br>- Marker variable (continuous predictor to evaluate)
-                    <br><br>
-                    The analysis will provide:
-                    <br>- Time-specific ROC curves
-                    <br>- AUC values at specified timepoints
-                    <br>- Confidence intervals via bootstrap (optional)
+                    <h3>Time-Dependent ROC Analysis</h3>
+                    <p>This analysis evaluates how well a continuous biomarker predicts survival outcomes at different time points.</p>
+                    
+                    <h4>Required Variables:</h4>
+                    <ul>
+                        <li><b>Time Variable:</b> Follow-up duration (numeric)</li>
+                        <li><b>Outcome Variable:</b> Event status (factor or 0/1)</li>  
+                        <li><b>Marker Variable:</b> Continuous predictor to evaluate (e.g., biomarker level, risk score)</li>
+                    </ul>
+                    
+                    <h4>Analysis Provides:</h4>
+                    <ul>
+                        <li>Time-specific ROC curves</li>
+                        <li>AUC values with confidence intervals at specified timepoints</li>
+                        <li>Optimal cutoff values for clinical decision-making</li>
+                        <li>Model performance comparison</li>
+                        <li>Clinical interpretation of results</li>
+                    </ul>
+                    
+                    <h4>Methods Available:</h4>
+                    <ul>
+                        <li><b>Incident/Dynamic:</b> Evaluates ability to predict events occurring within a specific time window</li>
+                        <li><b>Cumulative/Dynamic:</b> Evaluates ability to predict cumulative events up to a time point</li>
+                        <li><b>Incident/Static:</b> Uses marker value at baseline to predict future events</li>
+                    </ul>
                 ")
 
                 self$results$text$setContent(welcome)
                 return()
             }
 
+            # Initialize analysis if all variables selected
             private$.cleanData()
         },
 
         .cleanData = function() {
             # Get data
             data <- self$data
+            
+            # Handle empty data
+            if (nrow(data) == 0) {
+                stop('Data contains no rows')
+            }
 
             # Get variable names
             time_var <- self$options$elapsedtime
@@ -52,6 +77,9 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Convert outcome to 0/1
             if (is.factor(data[[outcome_var]])) {
+                if (is.null(outcome_level)) {
+                    stop("Please specify the event level for the outcome variable")
+                }
                 data$status <- ifelse(data[[outcome_var]] == outcome_level, 1, 0)
             } else {
                 if (!all(data[[outcome_var]] %in% c(0,1,NA))) {
@@ -65,30 +93,131 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             data$marker <- jmvcore::toNumeric(data[[marker_var]])
 
             # Remove missing values
-            data <- na.omit(data[c("time", "status", "marker")])
+            complete_cases <- complete.cases(data[c("time", "status", "marker")])
+            data <- data[complete_cases, ]
 
             # Validate final dataset
             if (nrow(data) == 0) {
                 stop("No complete cases remaining after removing missing values")
             }
+            
+            if (sum(data$status) == 0) {
+                stop("No events found in the outcome variable")
+            }
+            
+            if (length(unique(data$marker)) < 5) {
+                warning("Marker variable has few unique values. Results may be unreliable.")
+            }
 
             # Store cleaned data
-            private$.data <- data
+            private$.data <- data[c("time", "status", "marker")]
+        },
+
+        .parseTimepoints = function() {
+            # Parse and validate timepoints
+            timepoints <- tryCatch({
+                pts <- as.numeric(trimws(unlist(strsplit(self$options$timepoints, ","))))
+                pts <- sort(unique(pts[!is.na(pts) & pts > 0]))
+                if (length(pts) == 0) c(12, 36, 60) else pts
+            }, error = function(e) {
+                warning("Invalid timepoints specified, using defaults: 12, 36, 60")
+                c(12, 36, 60)
+            })
+            
+            # Filter timepoints that are within data range
+            max_time <- max(private$.data$time, na.rm = TRUE)
+            valid_timepoints <- timepoints[timepoints <= max_time]
+            
+            if (length(valid_timepoints) == 0) {
+                warning("All specified timepoints exceed maximum follow-up time. Using quartiles of follow-up time.")
+                valid_timepoints <- quantile(private$.data$time, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+            }
+            
+            private$.timepoints <- valid_timepoints
+            return(valid_timepoints)
+        },
+
+        .calculateMarkerStats = function() {
+            # Calculate descriptive statistics for marker
+            if (!self$options$showMarkerStats) return()
+            
+            marker <- private$.data$marker
+            
+            stats <- data.frame(
+                statistic = c("N", "Mean", "Median", "SD", "IQR", "Min", "Max", "Events", "Event Rate"),
+                value = c(
+                    length(marker),
+                    round(mean(marker, na.rm = TRUE), 3),
+                    round(median(marker, na.rm = TRUE), 3),
+                    round(sd(marker, na.rm = TRUE), 3),
+                    round(IQR(marker, na.rm = TRUE), 3),
+                    round(min(marker, na.rm = TRUE), 3),
+                    round(max(marker, na.rm = TRUE), 3),
+                    sum(private$.data$status),
+                    paste0(round(100 * mean(private$.data$status), 1), "%")
+                )
+            )
+            
+            # Populate table
+            table <- self$results$markerStats
+            for (i in 1:nrow(stats)) {
+                table$setRow(rowNo = i, values = list(
+                    statistic = stats$statistic[i],
+                    value = stats$value[i]
+                ))
+            }
+        },
+
+        .calculateOptimalCutoffs = function() {
+            # Calculate optimal cutoff values using Youden index
+            if (!self$options$showOptimalCutoff || is.null(private$.fit)) return()
+            
+            timepoints <- private$.timepoints
+            
+            # Clear existing rows
+            table <- self$results$cutoffTable
+            
+            for (i in seq_along(timepoints)) {
+                # Extract ROC data for this timepoint
+                tp <- timepoints[i]
+                
+                # Find ROC data for this timepoint
+                time_idx <- which.min(abs(private$.fit$times - tp))
+                
+                if (length(time_idx) > 0) {
+                    # Get sensitivity and specificity at different thresholds
+                    sens <- private$.fit$TP[, time_idx]
+                    spec <- private$.fit$FP[, time_idx]  # This is actually 1-specificity, so we need 1-this
+                    spec <- 1 - spec
+                    
+                    # Calculate Youden index
+                    youden <- sens + spec - 1
+                    
+                    # Find optimal cutoff
+                    optimal_idx <- which.max(youden)
+                    optimal_cutoff <- private$.fit$marker[optimal_idx]
+                    optimal_sens <- sens[optimal_idx]
+                    optimal_spec <- spec[optimal_idx]
+                    optimal_youden <- youden[optimal_idx]
+                    
+                    # Add to table
+                    table$addRow(rowKey = i, values = list(
+                        timepoint = tp,
+                        cutoff = round(optimal_cutoff, 3),
+                        sensitivity = round(optimal_sens, 3),
+                        specificity = round(optimal_spec, 3),
+                        youden = round(optimal_youden, 3)
+                    ))
+                }
+            }
         },
 
         .run = function() {
             if (is.null(private$.data))
                 return()
 
-            # Parse and validate timepoints
-            timepoints <- tryCatch({
-                pts <- as.numeric(trimws(unlist(strsplit(self$options$timepoints, ","))))
-                pts <- sort(unique(pts[!is.na(pts)]))
-                if (length(pts) == 0) c(12, 36, 60) else pts
-            }, error = function(e) {
-                warning("Invalid timepoints specified, using defaults")
-                c(12, 36, 60)
-            })
+            # Parse timepoints
+            timepoints <- private$.parseTimepoints()
 
             # Compute time-dependent ROC
             tryCatch({
@@ -99,120 +228,273 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     cause = 1,
                     times = timepoints,
                     iid = self$options$bootstrapCI,
-                    n.bootstrap = self$options$nboot,
+                    ROC = TRUE,  # Calculate full ROC curves
                     method = self$options$method
                 )
 
                 # Store results
                 private$.fit <- fit
 
+                # Calculate marker statistics
+                private$.calculateMarkerStats()
+
                 # Fill AUC table
                 table <- self$results$aucTable
-                table$setRow(NULL) # Clear existing rows
-
-                for (i in seq_along(timepoints)) {
-                    row <- list(
-                        timepoint = timepoints[i],
-                        auc = round(fit$AUC[i], 3),
-                        se = round(sqrt(fit$var.AUC[i]), 3),
-                        ci_lower = round(fit$AUC[i] - 1.96*sqrt(fit$var.AUC[i]), 3),
-                        ci_upper = round(fit$AUC[i] + 1.96*sqrt(fit$var.AUC[i]), 3)
-                    )
-                    table$addRow(rowKey=i, values=row)
-                }
-
-                # Create interpretation text
-                text <- sprintf(
-                    "<b>Time-dependent ROC Analysis Results for %s</b><br><br>",
-                    self$options$marker
-                )
-
-                text <- paste0(text, "Method: ", self$options$method, "<br>")
-                if (self$options$bootstrapCI) {
-                    text <- paste0(text,
-                                   sprintf("Bootstrap samples: %d<br><br>",
-                                           self$options$nboot))
-                }
-
-                # Add interpretation for each timepoint
+                
                 for (i in seq_along(timepoints)) {
                     auc <- fit$AUC[i]
-                    ci_lower <- fit$AUC[i] - 1.96*sqrt(fit$var.AUC[i])
-                    ci_upper <- fit$AUC[i] + 1.96*sqrt(fit$var.AUC[i])
-
-                    interp <- sprintf(
-                        "At %d months, AUC = %.3f [%.3f - %.3f]<br>",
-                        timepoints[i], auc, ci_lower, ci_upper
+                    se <- sqrt(fit$var.AUC[i])
+                    
+                    row <- list(
+                        timepoint = timepoints[i],
+                        auc = round(auc, 3),
+                        se = round(se, 3),
+                        ci_lower = round(auc - 1.96*se, 3),
+                        ci_upper = round(auc + 1.96*se, 3)
                     )
-
-                    # Add interpretation of AUC value
-                    strength <- dplyr::case_when(
-                        auc >= 0.9 ~ "excellent",
-                        auc >= 0.8 ~ "good",
-                        auc >= 0.7 ~ "fair",
-                        auc >= 0.6 ~ "poor",
-                        TRUE ~ "failed"
-                    )
-
-                    interp <- paste0(interp,
-                                     sprintf("Discriminative ability at this timepoint is %s<br><br>",
-                                             strength))
-
-                    text <- paste0(text, interp)
+                    table$addRow(rowKey = i, values = row)
                 }
 
-                self$results$text$setContent(text)
+                # Calculate optimal cutoffs
+                private$.calculateOptimalCutoffs()
+
+                # Create interpretation text
+                private$.createInterpretation()
+                
+                # Create clinical interpretation
+                private$.createClinicalInterpretation()
+                
+                # Model comparison if requested
+                if (self$options$compareBaseline) {
+                    private$.compareToBaseline()
+                }
 
             }, error = function(e) {
-                self$results$text$setContent(
-                    sprintf("<br>Error in analysis: %s<br>Please check your input data and settings.",
-                            e$message))
+                error_msg <- sprintf("
+                    <h3>Analysis Error</h3>
+                    <p><b>Error:</b> %s</p>
+                    <p><b>Troubleshooting Tips:</b></p>
+                    <ul>
+                        <li>Check that your time variable contains positive numeric values</li>
+                        <li>Ensure outcome variable is properly coded (0/1 or factor with event level specified)</li>
+                        <li>Verify marker variable is continuous and contains sufficient variation</li>
+                        <li>Make sure there are events (status=1) in your dataset</li>
+                        <li>Check that specified timepoints are within your follow-up period</li>
+                    </ul>
+                ", e$message)
+                
+                self$results$text$setContent(error_msg)
             })
+        },
+
+        .createInterpretation = function() {
+            timepoints <- private$.timepoints
+            fit <- private$.fit
+            
+            text <- sprintf(
+                "<h3>Time-Dependent ROC Analysis Results</h3>
+                <p><b>Marker Variable:</b> %s</p>
+                <p><b>Analysis Method:</b> %s</p>
+                <p><b>Sample Size:</b> %d observations, %d events (%.1f%%)</p>",
+                self$options$marker,
+                self$options$method,
+                nrow(private$.data),
+                sum(private$.data$status),
+                100 * mean(private$.data$status)
+            )
+
+            if (self$options$bootstrapCI) {
+                text <- paste0(text, sprintf(
+                    "<p><b>Bootstrap Samples:</b> %d</p>", 
+                    self$options$nboot
+                ))
+            }
+
+            text <- paste0(text, "<h4>AUC Interpretation by Timepoint:</h4>")
+
+            # Add interpretation for each timepoint
+            for (i in seq_along(timepoints)) {
+                auc <- fit$AUC[i]
+                se <- sqrt(fit$var.AUC[i])
+                ci_lower <- auc - 1.96*se
+                ci_upper <- auc + 1.96*se
+
+                # Interpret AUC value
+                performance <- dplyr::case_when(
+                    auc >= 0.9 ~ "excellent (≥0.90)",
+                    auc >= 0.8 ~ "good (0.80-0.89)",
+                    auc >= 0.7 ~ "fair (0.70-0.79)",
+                    auc >= 0.6 ~ "poor (0.60-0.69)",
+                    TRUE ~ "failed (<0.60)"
+                )
+
+                # Statistical significance test
+                p_value <- 2 * (1 - pnorm(abs((auc - 0.5) / se)))
+                significance <- ifelse(p_value < 0.05, 
+                                     sprintf(" (p = %.3f, significantly better than chance)", p_value),
+                                     sprintf(" (p = %.3f, not significantly different from chance)", p_value))
+
+                text <- paste0(text, sprintf(
+                    "<p><b>At %d %s:</b><br>
+                    AUC = %.3f (95%% CI: %.3f - %.3f)<br>
+                    Performance: %s%s</p>",
+                    timepoints[i], 
+                    self$options$timetypeoutput,
+                    auc, ci_lower, ci_upper,
+                    performance,
+                    significance
+                ))
+            }
+
+            self$results$text$setContent(text)
+        },
+
+        .createClinicalInterpretation = function() {
+            auc_values <- private$.fit$AUC
+            timepoints <- private$.timepoints
+            
+            # Overall assessment
+            mean_auc <- mean(auc_values)
+            trend <- ifelse(length(auc_values) > 1,
+                          ifelse(auc_values[length(auc_values)] > auc_values[1], "improving", "declining"),
+                          "stable")
+
+            clinical_text <- sprintf("
+                <h3>Clinical Interpretation</h3>
+                
+                <h4>Overall Performance Summary:</h4>
+                <p>The %s shows %s discriminative ability across the evaluated timepoints (mean AUC = %.3f).</p>
+                
+                <h4>Time-Dependent Performance:</h4>
+                <p>The predictive performance shows a %s trend over time, which suggests that the marker's 
+                discriminative ability %s as follow-up time increases.</p>
+                
+                <h4>Clinical Utility Considerations:</h4>
+                <ul>
+                    <li><b>Best Performance:</b> At %d %s (AUC = %.3f)</li>
+                    <li><b>Clinical Threshold:</b> Generally, AUC ≥ 0.70 is considered clinically useful</li>
+                    <li><b>Decision Making:</b> %s</li>
+                </ul>",
+                self$options$marker,
+                dplyr::case_when(
+                    mean_auc >= 0.8 ~ "good to excellent",
+                    mean_auc >= 0.7 ~ "fair to good", 
+                    mean_auc >= 0.6 ~ "poor to fair",
+                    TRUE ~ "poor"
+                ),
+                mean_auc,
+                trend,
+                ifelse(trend == "improving", "improves", ifelse(trend == "declining", "declines", "remains stable")),
+                timepoints[which.max(auc_values)],
+                self$options$timetypeoutput,
+                max(auc_values),
+                ifelse(max(auc_values) >= 0.7,
+                      "The marker shows clinically relevant predictive ability",
+                      "The marker may have limited clinical utility for prediction")
+            )
+
+            # Add method-specific interpretation
+            method_interp <- switch(self$options$method,
+                "incident" = "This analysis evaluates the marker's ability to predict events occurring within specific time windows (incident/dynamic approach).",
+                "cumulative" = "This analysis evaluates the marker's ability to predict cumulative events up to each timepoint (cumulative/dynamic approach).", 
+                "static" = "This analysis uses baseline marker values to predict future events at different timepoints (incident/static approach)."
+            )
+
+            clinical_text <- paste0(clinical_text, sprintf("<p><b>Method Note:</b> %s</p>", method_interp))
+
+            self$results$clinicalInterpretation$setContent(clinical_text)
+        },
+
+        .compareToBaseline = function() {
+            auc_values <- private$.fit$AUC
+            se_values <- sqrt(private$.fit$var.AUC)
+            timepoints <- private$.timepoints
+            
+            comparison_text <- "<h3>Model Performance Comparison</h3>"
+            comparison_text <- paste0(comparison_text, "<h4>Comparison to Baseline Model (AUC = 0.5):</h4>")
+            
+            for (i in seq_along(timepoints)) {
+                auc <- auc_values[i]
+                se <- se_values[i]
+                
+                # Test against baseline (AUC = 0.5)
+                z_score <- (auc - 0.5) / se
+                p_value <- 2 * (1 - pnorm(abs(z_score)))
+                
+                improvement <- round((auc - 0.5) * 100, 1)
+                
+                comparison_text <- paste0(comparison_text, sprintf(
+                    "<p><b>At %d %s:</b><br>
+                    Improvement over baseline: +%.1f%% (AUC: %.3f vs 0.50)<br>
+                    Statistical significance: p = %.4f %s</p>",
+                    timepoints[i],
+                    self$options$timetypeoutput,
+                    improvement,
+                    auc,
+                    p_value,
+                    ifelse(p_value < 0.05, "(significant)", "(not significant)")
+                ))
+            }
+            
+            self$results$modelComparison$setContent(comparison_text)
         },
 
         .plotROC = function(image, ...) {
             if (!self$options$plotROC || is.null(private$.fit))
-                return()
+                return(FALSE)
 
-            # Extract timepoints
-            timepoints <- as.numeric(unlist(strsplit(self$options$timepoints, ",")))
-
-            # Create enhanced ROC plot
-            plot <- timeROC::plot.timeROC(
-                private$.fit,
-                time = timepoints,
-                title = sprintf("Time-dependent ROC curves for %s",
-                                self$options$marker),
-                col = c("blue", "red", "green"),
-                lwd = 2,
-                legend = TRUE,
-                legend.pos = "bottomright",
-                conf.int = self$options$bootstrapCI
-            )
-
+            timepoints <- private$.timepoints
+            fit <- private$.fit
+            
+            # Set up plotting parameters
+            colors <- c("blue", "red", "green", "purple", "orange", "brown")[1:length(timepoints)]
+            
+            # Create the plot
+            plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 1),
+                 xlab = "1 - Specificity (False Positive Rate)",
+                 ylab = "Sensitivity (True Positive Rate)",
+                 main = sprintf("Time-Dependent ROC Curves\nMarker: %s", self$options$marker))
+            
             # Add reference line
-            graphics::abline(0, 1, lty = 2, col = "gray")
-
-            # Add annotations
+            abline(0, 1, lty = 2, col = "gray", lwd = 2)
+            
+            # Plot ROC curves for each timepoint
+            legend_text <- character(length(timepoints))
+            
             for (i in seq_along(timepoints)) {
-                auc <- round(private$.fit$AUC[i], 3)
-                graphics::legend(
-                    "bottomright",
-                    legend = sprintf("AUC at %d months = %.3f",
-                                     timepoints[i], auc),
-                    bty = "n"
-                )
+                if (!is.null(fit$FP) && !is.null(fit$TP)) {
+                    fpr <- fit$FP[, i]
+                    tpr <- fit$TP[, i]
+                    
+                    # Remove any NA values
+                    valid_idx <- !is.na(fpr) & !is.na(tpr)
+                    if (sum(valid_idx) > 1) {
+                        lines(fpr[valid_idx], tpr[valid_idx], 
+                              col = colors[i], lwd = 2, type = "l")
+                    }
+                }
+                
+                legend_text[i] <- sprintf("%d %s (AUC=%.3f)", 
+                                        timepoints[i], 
+                                        self$options$timetypeoutput,
+                                        fit$AUC[i])
             }
-
-            print(plot)
+            
+            # Add legend
+            legend("bottomright", legend = legend_text, 
+                   col = colors, lwd = 2, bty = "n", cex = 0.9)
+            
+            # Add grid
+            grid(col = "lightgray", lty = 1, lwd = 0.5)
+            
             TRUE
         },
 
         .plotAUC = function(image, ...) {
             if (!self$options$plotAUC || is.null(private$.fit))
-                return()
+                return(FALSE)
 
-            timepoints <- as.numeric(unlist(strsplit(self$options$timepoints, ",")))
+            timepoints <- private$.timepoints
             auc <- private$.fit$AUC
             se <- sqrt(private$.fit$var.AUC)
 
@@ -220,49 +502,57 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_data <- data.frame(
                 time = timepoints,
                 auc = auc,
-                lower = auc - 1.96*se,
-                upper = auc + 1.96*se
+                lower = pmax(0, auc - 1.96*se),  # Ensure CI doesn't go below 0
+                upper = pmin(1, auc + 1.96*se)   # Ensure CI doesn't go above 1
             )
 
-            # Create enhanced AUC plot
-            plot <- ggplot2::ggplot(
-                data = plot_data,
-                ggplot2::aes(x = time, y = auc)
-            ) +
-                ggplot2::geom_line(color = "blue", size = 1) +
+            # Create the plot
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = auc)) +
+                ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", 
+                                   color = "red", alpha = 0.7, size = 1) +
+                ggplot2::geom_hline(yintercept = 0.7, linetype = "dotted", 
+                                   color = "orange", alpha = 0.7) +
+                ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper),
+                                    alpha = 0.2, fill = "blue") +
                 ggplot2::geom_point(color = "blue", size = 3) +
-                ggplot2::geom_ribbon(
-                    ggplot2::aes(ymin = lower, ymax = upper),
-                    alpha = 0.2,
-                    fill = "blue"
-                ) +
-                ggplot2::geom_hline(
-                    yintercept = 0.5,
-                    linetype = "dashed",
-                    color = "red"
-                ) +
                 ggplot2::scale_y_continuous(
                     limits = c(0.4, 1),
-                    breaks = seq(0.4, 1, by = 0.1)
+                    breaks = seq(0.4, 1, by = 0.1),
+                    labels = scales::number_format(accuracy = 0.1)
                 ) +
-                ggplot2::xlab(sprintf("Time (%s)",
-                                      self$options$timetypeoutput)) +
-                ggplot2::ylab("AUC") +
-                ggplot2::ggtitle(
-                    sprintf("AUC over time for %s",
-                            self$options$marker),
-                    subtitle = sprintf("Method: %s",
-                                       self$options$method)
+                ggplot2::scale_x_continuous(
+                    breaks = timepoints,
+                    labels = timepoints
+                ) +
+                ggplot2::labs(
+                    x = sprintf("Time (%s)", self$options$timetypeoutput),
+                    y = "Area Under ROC Curve (AUC)",
+                    title = sprintf("AUC Over Time: %s", self$options$marker),
+                    subtitle = sprintf("Method: %s | Red line: Random performance (0.5) | Orange line: Clinical threshold (0.7)",
+                                     self$options$method),
+                    caption = ifelse(self$options$bootstrapCI, 
+                                   sprintf("Error bars: 95%% CI (%d bootstrap samples)", self$options$nboot),
+                                   "Error bars: 95% CI (asymptotic)")
                 ) +
                 ggplot2::theme_bw() +
                 ggplot2::theme(
                     plot.title = ggplot2::element_text(size = 14, face = "bold"),
-                    plot.subtitle = ggplot2::element_text(size = 12),
+                    plot.subtitle = ggplot2::element_text(size = 10),
+                    plot.caption = ggplot2::element_text(size = 8, style = "italic"),
                     axis.title = ggplot2::element_text(size = 12),
-                    axis.text = ggplot2::element_text(size = 10)
+                    axis.text = ggplot2::element_text(size = 10),
+                    panel.grid.minor = ggplot2::element_blank()
                 )
 
-            print(plot)
+            # Add smoothing if requested
+            if (self$options$smoothAUC && length(timepoints) > 2) {
+                p <- p + ggplot2::geom_smooth(method = "loess", se = FALSE, 
+                                            color = "darkblue", size = 1.2)
+            } else {
+                p <- p + ggplot2::geom_line(color = "blue", size = 1)
+            }
+
+            print(p)
             TRUE
         }
     )

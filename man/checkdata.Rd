@@ -2,29 +2,50 @@
 % Please edit documentation in R/checkdata.h.R
 \name{checkdata}
 \alias{checkdata}
-\title{Checking data}
+\title{Data Quality Assessment}
 \usage{
-checkdata(data, dep)
+checkdata(
+  data,
+  var,
+  showOutliers = TRUE,
+  showDistribution = TRUE,
+  showDuplicates = TRUE,
+  showPatterns = FALSE
+)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
+\item{var}{.}
+
+\item{showOutliers}{Detect and display potential outliers using z-score
+method (|z| > 3).}
+
+\item{showDistribution}{Display descriptive statistics and distribution
+characteristics.}
+
+\item{showDuplicates}{Identify and count duplicate values in the dataset.}
+
+\item{showPatterns}{Analyze patterns in missing data and value
+distributions.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$missingvals} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$minvals} \tab \tab \tab \tab \tab a table \cr
-\code{results$maxvals} \tab \tab \tab \tab \tab a table \cr
+\code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
+\code{results$outliers} \tab \tab \tab \tab \tab a table \cr
+\code{results$distribution} \tab \tab \tab \tab \tab a table \cr
+\code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
+\code{results$patterns} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$minvals$asDF}
+\code{results$missingVals$asDF}
 
-\code{as.data.frame(results$minvals)}
+\code{as.data.frame(results$missingVals)}
 }
 \description{
-Checking data
+Data Quality Assessment
 }

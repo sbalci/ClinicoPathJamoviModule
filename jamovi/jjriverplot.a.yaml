@@ -1,0 +1,174 @@
+---
+name:  jjriverplot
+title: River Plots
+menuGroup: JJStatsPlot
+menuSubgroup: 'Categorical Over Time'
+menuSubtitle: 'Flow and Transition Visualization'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        'Function for generating river plots (alluvial diagrams) to visualize
+        flows and transitions over time or between categories.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: id
+      title: ID Variable (optional)
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      default: NULL
+      description:
+          R: >
+            Optional identifier for individual entities in the data.
+
+    - name: time
+      title: Time/Sequence Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Variable representing time points or sequential stages.
+
+    - name: strata
+      title: Strata Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Variables containing the categories that change over time.
+
+    - name: weight
+      title: Weight Variable (optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Optional numerical variable to determine stream width.
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - title: Alluvial
+          name: alluvial
+        - title: Sankey
+          name: sankey
+        - title: Stream
+          name: stream
+      default: alluvial
+      description:
+          R: >
+            Type of river plot to generate.
+
+    - name: fillType
+      title: Fill Pattern
+      type: List
+      options:
+        - title: By First Variable
+          name: first
+        - title: By Last Variable
+          name: last
+        - title: By Frequency
+          name: frequency
+      default: first
+      description:
+          R: >
+            Determines how colors are assigned to flows.
+
+    - name: sortStreams
+      title: Sort Streams
+      type: Bool
+      default: true
+      description:
+          R: >
+            Sort alluvial streams by frequency.
+
+    - name: labelNodes
+      title: Label Nodes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add labels to nodes.
+
+    - name: curveType
+      title: Curve Type
+      type: List
+      options:
+        - title: Linear
+          name: linear
+        - title: Cardinal
+          name: cardinal
+        - title: Basis
+          name: basis
+        - title: Step
+          name: step
+      default: cardinal
+      description:
+          R: >
+            Type of curve to use for stream paths.
+
+    - name: showCounts
+      title: Show Counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display counts on the diagram.
+
+    - name: showLegend
+      title: Show Legend
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display color legend.
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Title for the plot.
+
+    - name: xtitle
+      title: X-Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Label for the x-axis.
+
+    - name: ytitle
+      title: Y-Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Label for the y-axis.
+
+    - name: originaltheme
+      title: Use ggStatsPlot Theme
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use the ggStatsPlot theme instead of the default theme.
+
+...

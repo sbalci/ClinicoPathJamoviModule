@@ -579,6 +579,61 @@ items:
       type: Html
       visible: (showNomogram)
 
+# Survival Decision Tree ----
+    - name: tree_summary
+      title: 'Survival Decision Tree Summary'
+      type: Html
+      visible: (use_tree)
+      clearWith:
+          - use_tree
+          - min_node
+          - complexity
+          - max_depth
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+
+    - name: tree_plot
+      title: 'Survival Decision Tree'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotTree
+      requiresData: true
+      visible: (use_tree)
+      clearWith:
+          - use_tree
+          - min_node
+          - complexity
+          - max_depth
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+
+    - name: node_survival_plots
+      title: 'Survival Curves for Terminal Nodes'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotNodeSurvival
+      requiresData: true
+      visible: (use_tree && show_terminal_nodes)
+      clearWith:
+          - use_tree
+          - min_node
+          - complexity
+          - max_depth
+          - show_terminal_nodes
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+
 
 
     - name:  mydataview_modelselection

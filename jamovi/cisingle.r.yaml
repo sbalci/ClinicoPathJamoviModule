@@ -1,6 +1,6 @@
 ---
 name:  ciSingle
-title: Confidence interval for a mean
+title: Confidence Intervals for Mean Values
 jrs:   '1.1'
 
 items:
@@ -9,21 +9,69 @@ items:
       type: Preformatted
     
     - name:  citable
-      title: Confidence interval for a mean
+      title: Confidence Intervals for Mean Values
       type:  Table
       rows: (deps)
       columns:
         - name: var
-          title: ""
+          title: "Variable"
           type: text
+        - name: n
+          title: "N"
+          type: integer
         - name: mean
           title: "Mean"
           type: number
+          format: zto
+        - name: sd
+          title: "Std. Dev"
+          type: number
+          format: zto
+        - name: se
+          title: "Std. Error"
+          type: number
+          format: zto
         - name: lb
-          title: "Lower bound"
+          title: "Lower Bound"
           type: number
+          format: zto
         - name: ub
-          title: "Upper bound"
+          title: "Upper Bound"
           type: number
+          format: zto
+        - name: width
+          title: "CI Width"
+          type: number
+          format: zto
+
+    - name: diagnostics
+      title: Diagnostic Information
+      type: Table
+      visible: (showDiagnostics)
+      rows: (deps)
+      columns:
+        - name: var
+          title: "Variable"
+          type: text
+        - name: shapiro_p
+          title: "Shapiro-Wilk p"
+          type: number
+          format: zto,pvalue
+        - name: normality
+          title: "Normality"
+          type: text
+        - name: method_used
+          title: "Method Used"
+          type: text
+        - name: assumption_met
+          title: "Assumptions"
+          type: text
+
+    - name: plot
+      title: Confidence Interval Plot
+      type: Image
+      width: 500
+      height: 400
+      visible: (showPlot)
 
 ...

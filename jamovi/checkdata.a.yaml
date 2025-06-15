@@ -1,16 +1,48 @@
 ---
 name:  checkdata
-title: Checking data
-menuGroup: ExplorationD
-menuSubgroup: PUBH5018
+title: Data Quality Assessment
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
 version: '0.0.3'
 jas: '1.2'
 
 options:
     - name: data
       type: Data
-
-    - name: dep
-      title: Variable to check
+      
+    - name: var
+      title: Variable to Check
       type: Variable
+
+    - name: showOutliers
+      title: Show Outlier Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Detect and display potential outliers using z-score method (|z| > 3).
+
+    - name: showDistribution
+      title: Show Distribution Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display descriptive statistics and distribution characteristics.
+
+    - name: showDuplicates
+      title: Show Duplicate Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify and count duplicate values in the dataset.
+
+    - name: showPatterns
+      title: Show Data Patterns
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze patterns in missing data and value distributions.
 ...

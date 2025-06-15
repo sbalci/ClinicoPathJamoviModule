@@ -7,7 +7,13 @@ pairchi2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             row = NULL,
-            col = NULL, ...) {
+            col = NULL,
+            adjust = "bonferroni",
+            showAssumptions = TRUE,
+            showExpected = FALSE,
+            showStdRes = TRUE,
+            plots = FALSE,
+            effectSize = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,31 +23,95 @@ pairchi2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..row <- jmvcore::OptionVariable$new(
                 "row",
-                row)
+                row,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..col <- jmvcore::OptionVariable$new(
                 "col",
-                col)
+                col,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..adjust <- jmvcore::OptionList$new(
+                "adjust",
+                adjust,
+                options=list(
+                    "bonferroni",
+                    "fdr",
+                    "holm",
+                    "BH",
+                    "none"),
+                default="bonferroni")
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=TRUE)
+            private$..showExpected <- jmvcore::OptionBool$new(
+                "showExpected",
+                showExpected,
+                default=FALSE)
+            private$..showStdRes <- jmvcore::OptionBool$new(
+                "showStdRes",
+                showStdRes,
+                default=TRUE)
+            private$..plots <- jmvcore::OptionBool$new(
+                "plots",
+                plots,
+                default=FALSE)
+            private$..effectSize <- jmvcore::OptionBool$new(
+                "effectSize",
+                effectSize,
+                default=TRUE)
 
             self$.addOption(private$..row)
             self$.addOption(private$..col)
+            self$.addOption(private$..adjust)
+            self$.addOption(private$..showAssumptions)
+            self$.addOption(private$..showExpected)
+            self$.addOption(private$..showStdRes)
+            self$.addOption(private$..plots)
+            self$.addOption(private$..effectSize)
         }),
     active = list(
         row = function() private$..row$value,
-        col = function() private$..col$value),
+        col = function() private$..col$value,
+        adjust = function() private$..adjust$value,
+        showAssumptions = function() private$..showAssumptions$value,
+        showExpected = function() private$..showExpected$value,
+        showStdRes = function() private$..showStdRes$value,
+        plots = function() private$..plots$value,
+        effectSize = function() private$..effectSize$value),
     private = list(
         ..row = NA,
-        ..col = NA)
+        ..col = NA,
+        ..adjust = NA,
+        ..showAssumptions = NA,
+        ..showExpected = NA,
+        ..showStdRes = NA,
+        ..plots = NA,
+        ..effectSize = NA)
 )
 
 pairchi2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pairchi2Results",
     inherit = jmvcore::Group,
     active = list(
+        todo = function() private$.items[["todo"]],
+        assumptions = function() private$.items[["assumptions"]],
         conftable = function() private$.items[["conftable"]],
+        expected = function() private$.items[["expected"]],
         chi2test = function() private$.items[["chi2test"]],
+        effectsize = function() private$.items[["effectsize"]],
         pairwise1 = function() private$.items[["pairwise1"]],
-        pairwise2 = function() private$.items[["pairwise2"]],
-        pairwise3 = function() private$.items[["pairwise3"]]),
+        pairwiseTables = function() private$.items[["pairwiseTables"]],
+        bonferroniExplanation = function() private$.items[["bonferroniExplanation"]],
+        stdres = function() private$.items[["stdres"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -50,30 +120,148 @@ pairchi2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Pairwise Chi-Square Test",
                 refs=list(
-                    "rmngb",
-                    "RVAideMemoire",
                     "chisq.posthoc.test",
-                    "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+                    "vcd",
+                    "ClinicoPathJamoviModule"),
+                clearWith=list(
+                    "row",
+                    "col",
+                    "adjust",
+                    "showAssumptions",
+                    "showExpected",
+                    "showStdRes",
+                    "plots",
+                    "effectSize"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="assumptions",
+                title="Test Assumptions",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="assumption", 
+                        `title`="Assumption", 
+                        `type`="text"),
+                    list(
+                        `name`="result", 
+                        `title`="Check", 
+                        `type`="text")),
+                visible="(showAssumptions)"))
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="conftable",
-                title="Confusion Table"))
-            self$add(jmvcore::Preformatted$new(
+                title="Contingency Table",
+                rows=0,
+                columns=list()))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="expected",
+                title="Expected Frequencies",
+                rows=0,
+                columns=list(),
+                visible="(showExpected)"))
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="chi2test",
-                title="Chi-Square Test"))
-            self$add(jmvcore::Preformatted$new(
+                title="Overall Chi-Square Test",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effectsize",
+                title="Effect Size Measures",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                visible="(effectSize)"))
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="pairwise1",
-                title="Pairwise Chi-Square Test 1"))
-            self$add(jmvcore::Preformatted$new(
+                title="Pairwise Comparisons Summary",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="chi_square", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_adj", 
+                        `title`="Adjusted p (Bonferroni)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="n", 
+                        `title`="n", 
+                        `type`="integer"),
+                    list(
+                        `name`="significance", 
+                        `title`="Result", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="pairwise2",
-                title="Pairwise Chi-Square Test 2"))
-            self$add(jmvcore::Preformatted$new(
+                name="pairwiseTables",
+                title="Individual 2\u00D72 Contingency Tables"))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="pairwise3",
-                title="Pairwise Chi-Square Test 3"))}))
+                name="bonferroniExplanation",
+                title="Multiple Testing Correction Explanation"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stdres",
+                title="Standardized Residuals",
+                rows=0,
+                columns=list(),
+                visible="(showStdRes)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Association Plot",
+                width=600,
+                height=400,
+                renderFun=".plot",
+                visible="(plots)"))}))
 
 pairchi2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pairchi2Base",
@@ -83,7 +271,7 @@ pairchi2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "pairchi2",
-                version = c(0,0,3),
+                version = c(1,0,0),
                 options = options,
                 results = pairchi2Results$new(options=options),
                 data = data,
@@ -98,24 +286,59 @@ pairchi2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Pairwise Chi-Square Test
 #'
+#' Performs post-hoc pairwise chi-square tests following a significant
+#' overall chi-square test of independence. Includes multiple testing
+#' correction and standardized residuals analysis.
 #' 
-#' @param data .
-#' @param row .
-#' @param col .
+#'
+#' @examples
+#' \donttest{
+#' # Example usage will be provided
+#'}
+#' @param data The data as a data frame.
+#' @param row The row variable for the contingency table (categorical).
+#' @param col The column variable for the contingency table (categorical).
+#' @param adjust Method for adjusting p-values for multiple comparisons.
+#'   Bonferroni is recommended for conservative control of Type I error.
+#' @param showAssumptions Display checks for chi-square test assumptions.
+#' @param showExpected Display expected frequencies for each cell.
+#' @param showStdRes Display standardized residuals to identify which cells
+#'   contribute most to the chi-square statistic.
+#' @param plots Display association plots and mosaic plots.
+#' @param effectSize Calculate and display effect size measures (Cramér's V,
+#'   Phi coefficient).
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$conftable} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$chi2test} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$pairwise1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$pairwise2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$pairwise3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$conftable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$expected} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$chi2test} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effectsize} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairwise1} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairwiseTables} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$bonferroniExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stdres} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$assumptions$asDF}
+#'
+#' \code{as.data.frame(results$assumptions)}
 #'
 #' @export
 pairchi2 <- function(
     data,
     row,
-    col) {
+    col,
+    adjust = "bonferroni",
+    showAssumptions = TRUE,
+    showExpected = FALSE,
+    showStdRes = TRUE,
+    plots = FALSE,
+    effectSize = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pairchi2 requires jmvcore to be installed (restart may be required)")
@@ -128,10 +351,18 @@ pairchi2 <- function(
             `if`( ! missing(row), row, NULL),
             `if`( ! missing(col), col, NULL))
 
+    for (v in row) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in col) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- pairchi2Options$new(
         row = row,
-        col = col)
+        col = col,
+        adjust = adjust,
+        showAssumptions = showAssumptions,
+        showExpected = showExpected,
+        showStdRes = showStdRes,
+        plots = plots,
+        effectSize = effectSize)
 
     analysis <- pairchi2Class$new(
         options = options,

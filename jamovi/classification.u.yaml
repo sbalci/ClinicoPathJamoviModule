@@ -1,4 +1,4 @@
-title: Decision tree
+title: Clinical Classification
 name: classification
 jus: '3.0'
 stage: 2
@@ -192,3 +192,25 @@ children:
           - type: CheckBox
             name: predictedFreqRF
             enable: (classifier_randomForest)
+  - type: CollapseBox
+    label: Clinical Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: balancingMethod
+          - type: TextBox
+            name: clinicalCutoff
+            format: number
+          - type: ComboBox
+            name: validateMethod
+          - type: TextBox
+            name: bootstrapSamples
+            format: number
+            enable: (validateMethod:bootstrap)
+          - type: CheckBox
+            name: reportClinicalMetrics
+          - type: CheckBox
+            name: reportConfidenceIntervals

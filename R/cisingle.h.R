@@ -8,7 +8,11 @@ ciSingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             deps = NULL,
             splitBy = NULL,
-            ciWidth = 95, ...) {
+            ciWidth = 95,
+            method = "t",
+            showPlot = FALSE,
+            bootstrapSamples = 1000,
+            showDiagnostics = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -36,19 +40,53 @@ ciSingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=95,
                 min=50,
                 max=99.99)
+            private$..method <- jmvcore::OptionList$new(
+                "method",
+                method,
+                options=list(
+                    "t",
+                    "bootstrap",
+                    "normal"),
+                default="t")
+            private$..showPlot <- jmvcore::OptionBool$new(
+                "showPlot",
+                showPlot,
+                default=FALSE)
+            private$..bootstrapSamples <- jmvcore::OptionNumber$new(
+                "bootstrapSamples",
+                bootstrapSamples,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..showDiagnostics <- jmvcore::OptionBool$new(
+                "showDiagnostics",
+                showDiagnostics,
+                default=FALSE)
 
             self$.addOption(private$..deps)
             self$.addOption(private$..splitBy)
             self$.addOption(private$..ciWidth)
+            self$.addOption(private$..method)
+            self$.addOption(private$..showPlot)
+            self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..showDiagnostics)
         }),
     active = list(
         deps = function() private$..deps$value,
         splitBy = function() private$..splitBy$value,
-        ciWidth = function() private$..ciWidth$value),
+        ciWidth = function() private$..ciWidth$value,
+        method = function() private$..method$value,
+        showPlot = function() private$..showPlot$value,
+        bootstrapSamples = function() private$..bootstrapSamples$value,
+        showDiagnostics = function() private$..showDiagnostics$value),
     private = list(
         ..deps = NA,
         ..splitBy = NA,
-        ..ciWidth = NA)
+        ..ciWidth = NA,
+        ..method = NA,
+        ..showPlot = NA,
+        ..bootstrapSamples = NA,
+        ..showDiagnostics = NA)
 )
 
 ciSingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -56,14 +94,16 @@ ciSingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         conflevel = function() private$.items[["conflevel"]],
-        citable = function() private$.items[["citable"]]),
+        citable = function() private$.items[["citable"]],
+        diagnostics = function() private$.items[["diagnostics"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Confidence interval for a mean")
+                title="Confidence Intervals for Mean Values")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="conflevel",
@@ -71,25 +111,82 @@ ciSingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="citable",
-                title="Confidence interval for a mean",
+                title="Confidence Intervals for Mean Values",
                 rows="(deps)",
                 columns=list(
                     list(
                         `name`="var", 
-                        `title`="", 
+                        `title`="Variable", 
                         `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
                     list(
                         `name`="mean", 
                         `title`="Mean", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sd", 
+                        `title`="Std. Dev", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="Std. Error", 
+                        `type`="number", 
+                        `format`="zto"),
                     list(
                         `name`="lb", 
-                        `title`="Lower bound", 
-                        `type`="number"),
+                        `title`="Lower Bound", 
+                        `type`="number", 
+                        `format`="zto"),
                     list(
                         `name`="ub", 
-                        `title`="Upper bound", 
-                        `type`="number"))))}))
+                        `title`="Upper Bound", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="width", 
+                        `title`="CI Width", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diagnostics",
+                title="Diagnostic Information",
+                visible="(showDiagnostics)",
+                rows="(deps)",
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="shapiro_p", 
+                        `title`="Shapiro-Wilk p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="normality", 
+                        `title`="Normality", 
+                        `type`="text"),
+                    list(
+                        `name`="method_used", 
+                        `title`="Method Used", 
+                        `type`="text"),
+                    list(
+                        `name`="assumption_met", 
+                        `title`="Assumptions", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Confidence Interval Plot",
+                width=500,
+                height=400,
+                visible="(showPlot)"))}))
 
 ciSingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ciSingleBase",
@@ -112,17 +209,25 @@ ciSingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Confidence interval for a mean
+#' Confidence Intervals for Mean Values
 #'
 #' 
 #' @param data .
 #' @param deps .
 #' @param splitBy .
-#' @param ciWidth .
+#' @param ciWidth Confidence level for interval estimation.
+#' @param method Method for calculating confidence intervals.
+#' @param showPlot Display confidence interval visualization.
+#' @param bootstrapSamples Number of bootstrap samples (when using bootstrap
+#'   method).
+#' @param showDiagnostics Display normality tests and other diagnostic
+#'   information.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$conflevel} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$citable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diagnostics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -136,7 +241,11 @@ ciSingle <- function(
     data,
     deps,
     splitBy,
-    ciWidth = 95) {
+    ciWidth = 95,
+    method = "t",
+    showPlot = FALSE,
+    bootstrapSamples = 1000,
+    showDiagnostics = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ciSingle requires jmvcore to be installed (restart may be required)")
@@ -154,7 +263,11 @@ ciSingle <- function(
     options <- ciSingleOptions$new(
         deps = deps,
         splitBy = splitBy,
-        ciWidth = ciWidth)
+        ciWidth = ciWidth,
+        method = method,
+        showPlot = showPlot,
+        bootstrapSamples = bootstrapSamples,
+        showDiagnostics = showDiagnostics)
 
     analysis <- ciSingleClass$new(
         options = options,

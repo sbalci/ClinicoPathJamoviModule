@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
 # Define the new version and date ----
-new_version <- "0.0.3.22"
-new_date <- "2024-06-08"
+new_version <- "0.0.3.24"
+new_date <- "2024-06-15"
 
 # Define WIP, check, extended status ----
 check <- FALSE
