@@ -1,36 +1,36 @@
 ---
-name:  retracted
+name: retracted
 title: Find Retracted Papers from DOI
-jrs:   '1.1'
+jrs: '1.1'
 
 items:
-    # - name:  text
-    #   title: Find Retracted Papers from DOI
-    #   type:  Preformatted
+    - name: todo
+      title: Instructions
+      type: Html
+      
+    - name: summary
+      title: Results Summary 
+      type: Table
+      columns:
+        - name: doi
+          title: "DOI"
+          type: text
+        - name: status 
+          title: "Status"
+          type: text
+        - name: pmid
+          title: "PMID"
+          type: text
+          
+    - name: details
+      title: Retraction Details
+      type: Html
 
-    # - name:  text2
-    #   title: 'Find Retracted Papers from DOI'
-    #   type:  Html
-
-
-    # - name:  text3
-    #   title: 'GetBibEntryWithDOI'
-    #   type:  Html
-
-
-    - name:  text4
-      title: 'id convert'
-      type:  Html
-
-
-    - name:  text5
-      title: 'text5'
-      type:  Preformatted
-
+    - name: pmids
+      title: PubMed IDs
+      type: Preformatted
 
 refs:
+    - retractcheck
+    - rcrossref
     - ClinicoPathJamoviModule
-
-
-
-...

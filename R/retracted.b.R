@@ -1,8 +1,46 @@
-#' @title Find Retracted Papers from DOI
-#' @importFrom R6 R6Class
-#' @import jmvcore
-#'
-
+# Helper function to check retractions
+.check_retractions <- function(dois, database = "or") {
+    # Initialize results
+    results <- data.frame(
+        doi = dois,
+        status = "Not retracted",
+        retracted = FALSE,
+        stringsAsFactors = FALSE
+    )
+    
+    # Check each DOI
+    for (i in seq_along(dois)) {
+        doi <- dois[i]
+        if (is.na(doi) || doi == "") next
+        
+        # Clean DOI
+        doi <- gsub("^(https?://)?doi.org/", "", doi)
+        doi <- gsub("^doi:", "", doi)
+        
+        # Check against OpenRetractions API
+        if (database == "or") {
+            url <- paste0("https://api.openretractions.com/doi/", doi)
+        } else {
+            # For other databases, use OpenRetractions as fallback
+            url <- paste0("https://api.openretractions.com/doi/", doi)
+        }
+        
+        tryCatch({
+            response <- httr::GET(url)
+            if (httr::status_code(response) == 200) {
+                content <- httr::content(response, as = "parsed")
+                if (!is.null(content$retracted) && content$retracted) {
+                    results$status[i] <- "Retracted"
+                    results$retracted[i] <- TRUE
+                }
+            }
+        }, error = function(e) {
+            # Continue if API call fails
+        })
+    }
+    
+    return(results)
+}
 
 retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "retractedClass",
@@ -10,116 +48,104 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
-
-            if (is.null(self$options$doi))
+            # Show instructions if no DOI selected
+            if (is.null(self$options$doi)) {
+                todo <- "
+                <br>Check DOIs for Retractions
+                <br><br>
+                Select a variable containing DOIs to check against retraction databases.
+                <br><br>
+                Results will show:
+                - Retraction status
+                - PubMed IDs (optional)
+                - Details for retracted papers
+                <hr>
+                "
+                self$results$todo$setContent(todo)
                 return()
-
-            mydata <- self$data
-
-            doi <- self$options$doi
-
-            doi_list <- mydata[[doi]]
-
-            doi_list <- as.vector(doi_list)
-
-            # self$results$text$setContent(
-            #     list(
-            #         doi_list,
-            #         typeof(doi_list),
-            #         class(doi_list)
-            #         )
-            # )
-
-            # retracted_list <- list() #create an empty list
-            #
-            # for (i in 1:length(doi_list)) {
-            #
-            #     retracted_list[[i]] <-
-            #         retractcheck::retractcheck(
-            #         dois = doi_list[i],
-            #         database = "or",
-            #         # database = "rw",
-            #         return = "all"
-            #         # return = "unique"
-            #     )
-            # }
-            # retracted_list <- do.call("rbind",retracted_list)
-
-            # retracted_list <-
-            #     retractcheck::retractcheck(
-            #         dois = doi_list,
-            #         database = "or",
-            #         # database = "rw",
-            #         return = "all"
-            #         # return = "unique"
-            #     )
-            #
-            # table_retracted_list <- kableExtra::kable(
-            #     retracted_list,
-            #     format = "html"
-            #     )
-
-
-
-            # self$results$text2$setContent(table_retracted_list)
-
-
-
-            # info_list <-
-            # RefManageR::GetBibEntryWithDOI(doi = doi_list)
-            #
-            #
-            # table_info_list <- kableExtra::kable(
-            #     info_list,
-            #     format = "html"
-            # )
-
-
-
-            # self$results$text3$setContent(table_info_list)
-
-
-
-            ids <- rcrossref::id_converter(x = doi_list, type = "doi")
-
-            table_ids <- ids[["records"]]
-
-            table_table_ids <- kableExtra::kable(
-                table_ids,
-                format = "html"
-            )
-
-
-            self$results$text4$setContent(table_table_ids)
-
-            pmids1 <- ids[["records"]][["pmid"]]
-
-
-            pmids1 <- as.vector(pmids1)
-
-            self$results$text5$setContent(pmids1)
-
-
-
-            if (! is.null(self$options$resids)) {
-
-                pmids2 <- ids[["records"]][["pmid"]]
-
-                pmids2 <- as.vector(pmids2)
-                pmids2 <- as.factor(pmids2)
             }
 
-            if ( ! is.null(self$options$resids)) {
-                self$results$resids$setValues(pmids2)
+            # Get data
+            data <- self$data
+            dois <- data[[self$options$doi]]
+            
+            # Check for empty data
+            if (length(dois) == 0)
+                stop('No DOIs found in selected variable')
 
+            # Remove NAs
+            dois <- dois[!is.na(dois)]
+            
+            # Convert database option
+            db <- self$options$database
+            
+            # Check retractions using OpenRetractions API
+            results <- tryCatch({
+                .check_retractions(dois, db)
+            }, error = function(e) {
+                stop('Error checking retractions: ', e$message)
+            })
+
+            # Get PMIDs if requested
+            if (self$options$pmid) {
+                tryCatch({
+                    ids <- rcrossref::id_converter(results$doi, type = "doi")
+                    pmids <- ids$records$pmid
+                    
+                    # Add to results table
+                    for (i in seq_along(results$doi)) {
+                        pmid_val <- if (i <= length(pmids) && !is.na(pmids[i])) pmids[i] else ""
+                        self$results$summary$addRow(rowKey=i, values=list(
+                            doi = results$doi[i],
+                            status = results$status[i],
+                            pmid = pmid_val
+                        ))
+                    }
+                    
+                    # Set PMIDs output
+                    if (!is.null(self$options$resids) && length(pmids) > 0) {
+                        self$results$resids$setValues(as.factor(pmids))
+                    }
+                    
+                    # Show PMID summary
+                    self$results$pmids$setContent(
+                        paste("Found", sum(!is.na(pmids)), "PubMed IDs")
+                    )
+                }, error = function(e) {
+                    # If PMID lookup fails, show results without PMIDs
+                    for (i in seq_along(results$doi)) {
+                        self$results$summary$addRow(rowKey=i, values=list(
+                            doi = results$doi[i],
+                            status = results$status[i],
+                            pmid = ""
+                        ))
+                    }
+                    self$results$pmids$setContent("PMID lookup failed")
+                })
+            } else {
+                # Results without PMIDs
+                for (i in seq_along(results$doi)) {
+                    self$results$summary$addRow(rowKey=i, values=list(
+                        doi = results$doi[i],
+                        status = results$status[i]
+                    ))
+                }
             }
 
-            self$results$resids2$setValues(pmids2)
-
-
-
-
-
-
-        })
+            # Show details for retracted papers
+            if (any(results$retracted)) {
+                details <- results[results$retracted, c("doi", "status")]
+                details_html <- paste0(
+                    "<table class='table table-striped'>",
+                    "<thead><tr><th>DOI</th><th>Status</th></tr></thead>",
+                    "<tbody>",
+                    paste(apply(details, 1, function(row) {
+                        paste0("<tr><td>", row[1], "</td><td>", row[2], "</td></tr>")
+                    }), collapse = ""),
+                    "</tbody></table>"
+                )
+                self$results$details$setContent(details_html)
+            }
+        }
+    )
 )

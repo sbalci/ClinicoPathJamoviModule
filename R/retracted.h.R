@@ -6,7 +6,9 @@ retractedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            doi = NULL, ...) {
+            doi = NULL,
+            database = "or",
+            pmid = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,31 +19,45 @@ retractedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..doi <- jmvcore::OptionVariable$new(
                 "doi",
                 doi)
+            private$..database <- jmvcore::OptionList$new(
+                "database",
+                database,
+                options=list(
+                    "or",
+                    "rw"),
+                default="or")
+            private$..pmid <- jmvcore::OptionBool$new(
+                "pmid",
+                pmid,
+                default=FALSE)
             private$..resids <- jmvcore::OptionOutput$new(
                 "resids")
-            private$..resids2 <- jmvcore::OptionOutput$new(
-                "resids2")
 
             self$.addOption(private$..doi)
+            self$.addOption(private$..database)
+            self$.addOption(private$..pmid)
             self$.addOption(private$..resids)
-            self$.addOption(private$..resids2)
         }),
     active = list(
         doi = function() private$..doi$value,
-        resids = function() private$..resids$value,
-        resids2 = function() private$..resids2$value),
+        database = function() private$..database$value,
+        pmid = function() private$..pmid$value,
+        resids = function() private$..resids$value),
     private = list(
         ..doi = NA,
-        ..resids = NA,
-        ..resids2 = NA)
+        ..database = NA,
+        ..pmid = NA,
+        ..resids = NA)
 )
 
 retractedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "retractedResults",
     inherit = jmvcore::Group,
     active = list(
-        text4 = function() private$.items[["text4"]],
-        text5 = function() private$.items[["text5"]]),
+        todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        details = function() private$.items[["details"]],
+        pmids = function() private$.items[["pmids"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -50,15 +66,38 @@ retractedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Find Retracted Papers from DOI",
                 refs=list(
+                    "retractcheck",
+                    "rcrossref",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="text4",
-                title="id convert"))
+                name="todo",
+                title="Instructions"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Results Summary",
+                columns=list(
+                    list(
+                        `name`="doi", 
+                        `title`="DOI", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="pmid", 
+                        `title`="PMID", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="details",
+                title="Retraction Details"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text5",
-                title="text5"))}))
+                name="pmids",
+                title="PubMed IDs"))}))
 
 retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "retractedBase",
@@ -68,7 +107,7 @@ retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "retracted",
-                version = c(0,0,3),
+                version = c(1,0,0),
                 options = options,
                 results = retractedResults$new(options=options),
                 data = data,
@@ -84,18 +123,30 @@ retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Find Retracted Papers from DOI
 #'
 #' 
-#' @param data .
-#' @param doi .
+#' @param data The data as a data frame.
+#' @param doi Column containing DOI strings.
+#' @param database Database to check for retractions.
+#' @param pmid Add corresponding PubMed IDs to dataset.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$details} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pmids} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 retracted <- function(
     data,
-    doi) {
+    doi,
+    database = "or",
+    pmid = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("retracted requires jmvcore to be installed (restart may be required)")
@@ -108,7 +159,9 @@ retracted <- function(
 
 
     options <- retractedOptions$new(
-        doi = doi)
+        doi = doi,
+        database = database,
+        pmid = pmid)
 
     analysis <- retractedClass$new(
         options = options,

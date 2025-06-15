@@ -1,4 +1,4 @@
-title: Checking data
+title: Data Quality Assessment
 name: checkdata
 jus: '3.0'
 stage: 0
@@ -9,9 +9,20 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variable to check
+        label: Variable to Check
         children:
           - type: VariablesListBox
-            name: dep
+            name: var
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showOutliers
+      - type: CheckBox
+        name: showDistribution
+      - type: CheckBox
+        name: showDuplicates
+      - type: CheckBox
+        name: showPatterns

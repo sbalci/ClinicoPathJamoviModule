@@ -1,38 +1,96 @@
 ---
-name:  checkdata
-title: Checking data
-jrs:   '1.1'
+name: checkdata
+title: Data Quality Assessment
+jrs: '1.1'
 
 items:
-    - name: missingvals
-      title: Missing data
+    - name: qualityText
+      title: Quality Assessment Summary
       type: Preformatted
-    
-    - name:  minvals
-      title: Minimum values
-      type:  Table
-      rows: 5
+
+    - name: missingVals
+      title: Missing Data Analysis
+      type: Table
+      rows: 0
       columns:
-        - name: minRowNumber
-          title: "Row numbers"
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: outliers
+      title: Outlier Detection (Z-Score > 3)
+      type: Table 
+      visible: (showOutliers)
+      rows: 0
+      columns:
+        - name: rowNumber
+          title: "Row"
           type: integer
-        - name: minvalues
-          title: "Values"
+        - name: value
+          title: "Value"  
           type: number
-          
-    - name:  maxvals
-      title: Maximum values
-      type:  Table
-      rows: 5
+        - name: zscore
+          title: "Z-Score"
+          type: number
+        - name: severity
+          title: "Severity"
+          type: text
+
+    - name: distribution
+      title: Distribution Analysis
+      type: Table
+      visible: (showDistribution)
+      rows: 0
       columns:
-        - name: maxRowNumber
-          title: "Row numbers"
+        - name: metric
+          title: "Metric"
+          type: text  
+        - name: value
+          title: "Value"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: duplicates
+      title: Duplicate Values
+      type: Table
+      visible: (showDuplicates)
+      rows: 0
+      columns:
+        - name: value
+          title: "Value"  
+          type: text
+        - name: count
+          title: "Count"
           type: integer
-        - name: maxvalues
-          title: "Values"
+        - name: percentage
+          title: "% of Data"
           type: number
 
-refs:
+    - name: patterns
+      title: Data Patterns
+      type: Table
+      visible: (showPatterns)
+      rows: 0
+      columns:
+        - name: pattern
+          title: "Pattern"
+          type: text
+        - name: description
+          title: "Description"
+          type: text
+        - name: recommendation
+          title: "Recommendation"
+          type: text
+
+refs: 
     - ClinicoPathJamoviModule
 
 

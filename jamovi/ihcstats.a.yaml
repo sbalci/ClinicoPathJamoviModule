@@ -35,6 +35,10 @@ options:
           name: hierarchical
         - title: PAM (Medoids)
           name: pam
+        - title: K-means
+          name: kmeans
+        - title: PCA + K-means
+          name: pca_kmeans
       default: hierarchical
 
     - name: distanceMetric
@@ -68,6 +72,38 @@ options:
       title: Show Score Distribution
       type: Bool
       default: false
+
+    - name: pcaAnalysis
+      title: Perform PCA Analysis
+      type: Bool
+      default: false
+
+    - name: standardizeData
+      title: Standardize Data (Zero Mean, Unit Variance)
+      type: Bool
+      default: true
+
+    - name: showPCAPlot
+      title: Show PCA Biplot
+      type: Bool
+      default: false
+
+    - name: showClusterValidation
+      title: Show Cluster Validation
+      type: Bool
+      default: false
+
+    - name: optimalKMethod
+      title: Optimal K Selection Method
+      type: List
+      options:
+        - title: Elbow Method
+          name: elbow
+        - title: Silhouette Method
+          name: silhouette
+        - title: Gap Statistic
+          name: gap
+      default: elbow
 
 ...
 

@@ -870,9 +870,29 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.nomogram(cox_model)
         }
 
-
-
-
+        ## Survival Decision Tree ----
+        
+        if (self$options$use_tree) {
+          private$.checkpoint()
+          tree <- private$.survivalTree(cleaneddata)
+          
+          # Prepare data for tree plots
+          if (!is.null(tree)) {
+            image_tree <- self$results$tree_plot
+            image_tree$setState(list(
+              "results" = cleaneddata,
+              "tree" = tree
+            ))
+            
+            if (self$options$show_terminal_nodes) {
+              image_node_survival <- self$results$node_survival_plots
+              image_node_survival$setState(list(
+                "results" = cleaneddata,
+                "tree" = tree
+              ))
+            }
+          }
+        }
 
         # Prepare Data For Plots ----
 
@@ -4157,6 +4177,187 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     ))
   })
 }
+
+      # Survival Decision Tree Function ----
+      ,
+      .survivalTree = function(results) {
+        # Skip if tree analysis not requested
+        if (!self$options$use_tree) {
+          return(NULL)
+        }
+
+        # Get cleaned data
+        cleanData <- results$cleanData
+        mytime <- results$name1time
+        myoutcome <- results$name2outcome
+        
+        # Get explanatory variables
+        expl_vars <- NULL
+        if (!is.null(self$options$explanatory)) {
+          expl_vars <- c(expl_vars, as.vector(results$myexplanatory_labelled))
+        }
+        if (!is.null(self$options$contexpl)) {
+          expl_vars <- c(expl_vars, as.vector(results$mycontexpl_labelled))
+        }
+        
+        # Check for explanatory variables
+        if (length(expl_vars) == 0) {
+          self$results$tree_summary$setContent(
+            "<p>Error: At least one explanatory variable is required for decision tree analysis.</p>"
+          )
+          return(NULL)
+        }
+
+        private$.checkpoint()
+        
+        # Create formula for rpart
+        formula <- paste("survival::Surv(", mytime, ",", myoutcome, ") ~ ", 
+                         paste(expl_vars, collapse = " + "))
+        formula <- as.formula(formula)
+        
+        # Fit survival tree using rpart
+        tree <- rpart::rpart(
+          formula = formula,
+          data = cleanData,
+          method = "exp",  # exponential survival model
+          control = rpart::rpart.control(
+            minsplit = 2 * self$options$min_node, 
+            minbucket = self$options$min_node,
+            cp = self$options$complexity,
+            maxdepth = self$options$max_depth
+          )
+        )
+        
+        # Create summary text
+        if (is.null(tree)) {
+          tree_text <- "The survival tree could not be built with the current parameters."
+        } else {
+          # Get variable importance
+          var_imp <- tree$variable.importance
+          if (!is.null(var_imp)) {
+            var_imp_df <- data.frame(
+              Variable = names(var_imp),
+              Importance = var_imp
+            )
+            var_imp_df <- var_imp_df[order(-var_imp_df$Importance), ]
+            
+            var_imp_html <- paste(
+              "<tr>",
+              "<td>", var_imp_df$Variable, "</td>",
+              "<td>", round(var_imp_df$Importance, 2), "</td>",
+              "</tr>", 
+              collapse = ""
+            )
+            
+            var_imp_table <- paste0(
+              "<table class='jmv-results-table'>",
+              "<thead><tr><th>Variable</th><th>Importance</th></tr></thead>",
+              "<tbody>", var_imp_html, "</tbody>",
+              "</table>"
+            )
+          } else {
+            var_imp_table <- "<p>No variable importance measures available.</p>"
+          }
+          
+          # Get tree statistics
+          n_terminal <- sum(tree$frame$var == "<leaf>")
+          
+          tree_text <- paste0(
+            "<h3>Survival Decision Tree Results</h3>",
+            "<p>The decision tree identified ", n_terminal, " terminal nodes based on the input variables.</p>",
+            "<p>Complexity parameter: ", self$options$complexity, "</p>",
+            "<p>Minimum node size: ", self$options$min_node, "</p>",
+            "<p>Maximum depth: ", self$options$max_depth, "</p>",
+            "<h4>Variable Importance</h4>",
+            var_imp_table,
+            "<p><i>Note: The decision tree plot visualizes how the variables split the data into groups with different survival outcomes.</i></p>"
+          )
+        }
+        
+        self$results$tree_summary$setContent(tree_text)
+        
+        # Store tree for plotting
+        return(tree)
+      }
+
+      # Plot Tree ----
+      ,
+      .plotTree = function(image, ggtheme, theme, ...) {
+        # Skip if tree analysis not requested
+        if (!self$options$use_tree) {
+          return(FALSE)
+        }
+        
+        # Get results and tree
+        results <- private$.cleandata()
+        tree <- private$.survivalTree(results)
+        
+        if (is.null(tree)) {
+          return(FALSE)
+        }
+        
+        # Plot tree
+        rpart.plot::rpart.plot(
+          tree,
+          main = "Survival Decision Tree",
+          extra = 101,  # show fitted risk and percentage of observations
+          box.palette = "auto",  # color by fitted risk
+          shadow.col = "gray",  # add shadows to the boxes
+          nn = TRUE,  # show node numbers
+          fallen.leaves = TRUE,  # align leaf nodes
+          roundint = FALSE  # don't round integers
+        )
+        
+        return(TRUE)
+      }
+
+      # Plot Node Survival ----
+      ,
+      .plotNodeSurvival = function(image, ggtheme, theme, ...) {
+        # Skip if not requested
+        if (!self$options$use_tree || !self$options$show_terminal_nodes) {
+          return(FALSE)
+        }
+        
+        # Get results and tree
+        results <- private$.cleandata()
+        tree <- private$.survivalTree(results)
+        
+        if (is.null(tree)) {
+          return(FALSE)
+        }
+        
+        # Get cleaned data
+        cleanData <- results$cleanData
+        mytime <- results$name1time
+        myoutcome <- results$name2outcome
+        
+        # Get terminal node assignments for each observation
+        node_assignments <- tree$where
+        cleanData$node <- paste("Node", node_assignments)
+        
+        # Plot survival curves for each terminal node
+        formula <- paste("survival::Surv(", mytime, ",", myoutcome, ") ~ node")
+        formula <- as.formula(formula)
+        
+        fit <- survival::survfit(formula, data = cleanData)
+        
+        plot <- survminer::ggsurvplot(
+          fit,
+          data = cleanData,
+          risk.table = TRUE,
+          pval = TRUE,
+          conf.int = TRUE,
+          xlab = paste0("Time (", self$options$timetypeoutput, ")"),
+          ylab = "Survival probability",
+          title = "Survival by Terminal Node",
+          legend.title = "Terminal Node",
+          risk.table.height = 0.25
+        )
+        
+        print(plot)
+        return(TRUE)
+      }
 
 
 

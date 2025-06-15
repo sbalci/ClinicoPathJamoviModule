@@ -45,4 +45,48 @@ items:
       renderFun: .plotAUC
       visible: (plotAUC)
 
+    - name: markerStats
+      title: Marker Variable Statistics
+      type: Table
+      visible: (showMarkerStats)
+      rows: 1
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+
+    - name: cutoffTable
+      title: Optimal Cutoff Values
+      type: Table
+      visible: (showOptimalCutoff)
+      rows: 0
+      columns:
+        - name: timepoint
+          title: "Timepoint"
+          type: integer
+        - name: cutoff
+          title: "Optimal Cutoff"
+          type: number
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+        - name: specificity
+          title: "Specificity"
+          type: number
+        - name: youden
+          title: "Youden Index"
+          type: number
+
+    - name: modelComparison
+      title: Model Performance Comparison
+      type: Html
+      visible: (compareBaseline)
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+
 ...

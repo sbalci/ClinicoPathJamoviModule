@@ -2,7 +2,7 @@
 % Please edit documentation in R/classification.h.R
 \name{classification}
 \alias{classification}
-\title{Decision tree}
+\title{Clinical Classification}
 \usage{
 classification(
   data,
@@ -28,7 +28,13 @@ classification(
   plotDecisionTree = FALSE,
   predictedFreq = FALSE,
   printRandForest = FALSE,
-  predictedFreqRF = FALSE
+  predictedFreqRF = FALSE,
+  balancingMethod = "none",
+  clinicalCutoff = 0.5,
+  validateMethod = "holdout",
+  bootstrapSamples = 1000,
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE
 )
 }
 \arguments{
@@ -79,6 +85,22 @@ classification(
 \item{printRandForest}{.}
 
 \item{predictedFreqRF}{.}
+
+\item{balancingMethod}{Method for handling class imbalance in medical
+datasets.}
+
+\item{clinicalCutoff}{Probability threshold for clinical decision making.}
+
+\item{validateMethod}{Validation method for clinical model assessment.}
+
+\item{bootstrapSamples}{Number of bootstrap samples for confidence
+intervals.}
+
+\item{reportClinicalMetrics}{Report sensitivity, specificity, PPV, NPV, and
+likelihood ratios.}
+
+\item{reportConfidenceIntervals}{Include 95\\% confidence intervals for
+clinical metrics.}
 }
 \value{
 A results object containing:
@@ -86,6 +108,7 @@ A results object containing:
 \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
 \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
+\code{results$classificationMetrics$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$class} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocCurvePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr
@@ -95,5 +118,5 @@ A results object containing:
 }
 }
 \description{
-Decision tree
+Clinical Classification
 }

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.22
+version: 0.0.3.24
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-06-08'
+date: '2024-06-15'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -99,7 +99,47 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
+  - title: Subgroup Analysis Forest Plot
+    name: subgroupforest
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Clinical Plots
+    menuTitle: Subgroup Analysis Forest Plot
+    description: >-
+      Creates forest plots for subgroup analysis showing treatment effects
+      across patient subgroups.
     ribbon: analyses
+  - title: Biomarker Response Association
+    name: biomarkerresponse
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Biomarker Analysis
+    menuTitle: Biomarker Response Association
+    description: >-
+      Analyzes relationships between biomarker levels and treatment responses
+      with visualization and statistical tests.
+    ribbon: analyses
+  - title: Treatment Toxicity Profile
+    name: toxicityprofile
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Safety Analysis
+    menuTitle: Treatment Toxicity Profile
+    description: >-
+      Creates comprehensive visualizations of adverse event profiles showing
+      frequency and severity.
+    ribbon: analyses
+  - title: Clinical Classification
+    name: classification
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Predictions
+    menuTitle: Clinical Classification
+    description: >-
+      Enhanced classification analysis with clinical performance metrics, class
+      imbalance handling, and validation methods for medical research.
+    ribbon: analyses
+    menuSubtitle: Classification Analysis
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
@@ -187,8 +227,8 @@ analyses:
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuSubgroup: Drafts
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Bibliometrics
     menuTitle: Find Retracted Papers from DOI
     menuSubtitle: Bibliometrics
     ribbon: analyses
@@ -210,19 +250,19 @@ analyses:
       'Wrapper Function for ggstatsplot::gghistostats and
       ggstatsplot::grouped_gghistostats to generate Histogram.'
     ribbon: analyses
-  - title: Checking data
+  - title: Data Quality Assessment
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuTitle: Checking data
-    menuSubgroup: PUBH5018
+    menuGroup: Exploration
+    menuTitle: Data Quality Assessment
+    menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
-  - title: Confidence interval for a mean
+  - title: Confidence Intervals for Mean Values
     name: ciSingle
     ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuTitle: Confidence interval for a mean
-    menuSubgroup: PUBH5018
+    menuGroup: Exploration
+    menuTitle: Confidence Intervals for Mean Values
+    menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
   - title: Decision tree
     name: classification
@@ -411,11 +451,15 @@ analyses:
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuTitle: Pairwise Chi-Square Test
-    menuSubgroup: Drafts
+    menuSubgroup: ClinicoPath Comparisons
     menuSubtitle: Association
     ribbon: analyses
+    description: |
+      Performs post-hoc pairwise chi-square tests following a significant
+      overall chi-square test of independence. Includes multiple testing
+      correction and standardized residuals analysis.
   - title: Parallel Plot
     name: parallelplot
     ns: ClinicoPath
@@ -543,10 +587,11 @@ analyses:
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Reports
     menuTitle: Study Flowchart
     ribbon: analyses
+    description: Creates CONSORT-style flowcharts showing participant flow through studies
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
@@ -657,9 +702,9 @@ analyses:
       changes in prognostic performance.
     ribbon: analyses
   - title: River Plots
-    name: riverplot
+    name: jjriverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuTitle: River Plots
     menuSubgroup: Categorical Over Time
     menuSubtitle: Flow and Transition Visualization
@@ -849,6 +894,16 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     description: Group data by categorical variables and calculate summary statistics
     ribbon: analyses
+  - title: River Plots
+    name: riverplot
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuSubgroup: Categorical Over Time
+    menuTitle: River Plots
+    menuSubtitle: Flow and Transition Visualization
+    description: |
+      'Function for generating river plots (alluvial diagrams) to visualize
+      flows and transitions over time or between categories.'
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

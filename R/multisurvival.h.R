@@ -52,7 +52,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             stratvar = NULL,
             person_time = FALSE,
             time_intervals = "12, 36, 60",
-            rate_multiplier = 100, ...) {
+            rate_multiplier = 100,
+            use_tree = FALSE,
+            min_node = 20,
+            complexity = 0.01,
+            max_depth = 5,
+            show_terminal_nodes = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -328,6 +333,32 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..use_tree <- jmvcore::OptionBool$new(
+                "use_tree",
+                use_tree,
+                default=FALSE)
+            private$..min_node <- jmvcore::OptionInteger$new(
+                "min_node",
+                min_node,
+                min=5,
+                max=100,
+                default=20)
+            private$..complexity <- jmvcore::OptionNumber$new(
+                "complexity",
+                complexity,
+                min=0.001,
+                max=0.1,
+                default=0.01)
+            private$..max_depth <- jmvcore::OptionInteger$new(
+                "max_depth",
+                max_depth,
+                min=1,
+                max=10,
+                default=5)
+            private$..show_terminal_nodes <- jmvcore::OptionBool$new(
+                "show_terminal_nodes",
+                show_terminal_nodes,
+                default=TRUE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -380,6 +411,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..use_tree)
+            self$.addOption(private$..min_node)
+            self$.addOption(private$..complexity)
+            self$.addOption(private$..max_depth)
+            self$.addOption(private$..show_terminal_nodes)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -432,7 +468,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         stratvar = function() private$..stratvar$value,
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
-        rate_multiplier = function() private$..rate_multiplier$value),
+        rate_multiplier = function() private$..rate_multiplier$value,
+        use_tree = function() private$..use_tree$value,
+        min_node = function() private$..min_node$value,
+        complexity = function() private$..complexity$value,
+        max_depth = function() private$..max_depth$value,
+        show_terminal_nodes = function() private$..show_terminal_nodes$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -484,7 +525,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..stratvar = NA,
         ..person_time = NA,
         ..time_intervals = NA,
-        ..rate_multiplier = NA)
+        ..rate_multiplier = NA,
+        ..use_tree = NA,
+        ..min_node = NA,
+        ..complexity = NA,
+        ..max_depth = NA,
+        ..show_terminal_nodes = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -514,6 +560,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plot_adj = function() private$.items[["plot_adj"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
+        tree_summary = function() private$.items[["tree_summary"]],
+        tree_plot = function() private$.items[["tree_plot"]],
+        node_survival_plots = function() private$.items[["node_survival_plots"]],
         mydataview_modelselection = function() private$.items[["mydataview_modelselection"]],
         text_model_selection = function() private$.items[["text_model_selection"]],
         selection_method = function() private$.items[["selection_method"]],
@@ -973,6 +1022,60 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="nomogram_display",
                 title="Nomogram Scoring Guide",
                 visible="(showNomogram)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tree_summary",
+                title="Survival Decision Tree Summary",
+                visible="(use_tree)",
+                clearWith=list(
+                    "use_tree",
+                    "min_node",
+                    "complexity",
+                    "max_depth",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="tree_plot",
+                title="Survival Decision Tree",
+                width=800,
+                height=600,
+                renderFun=".plotTree",
+                requiresData=TRUE,
+                visible="(use_tree)",
+                clearWith=list(
+                    "use_tree",
+                    "min_node",
+                    "complexity",
+                    "max_depth",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="node_survival_plots",
+                title="Survival Curves for Terminal Nodes",
+                width=800,
+                height=600,
+                renderFun=".plotNodeSurvival",
+                requiresData=TRUE,
+                visible="(use_tree && show_terminal_nodes)",
+                clearWith=list(
+                    "use_tree",
+                    "min_node",
+                    "complexity",
+                    "max_depth",
+                    "show_terminal_nodes",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="mydataview_modelselection",
@@ -1181,6 +1284,19 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param use_tree If true, fits a survival decision tree to identify
+#'   subgroups with different survival outcomes. Decision trees provide an
+#'   intuitive alternative to Cox regression for identifying risk factors.
+#' @param min_node The minimum number of observations required in a terminal
+#'   node. Larger values create simpler trees that may be more generalizable but
+#'   potentially miss important subgroups.
+#' @param complexity The complexity parameter for tree pruning. Higher values
+#'   result in smaller trees. This parameter controls the trade-off between tree
+#'   size and goodness of fit.
+#' @param max_depth The maximum depth of the decision tree. Limits the
+#'   complexity of the tree to avoid overfitting.
+#' @param show_terminal_nodes If true, displays Kaplan-Meier survival curves
+#'   for each terminal node of the decision tree.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1206,6 +1322,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$mydataview_modelselection} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
@@ -1267,7 +1386,12 @@ multisurvival <- function(
     stratvar,
     person_time = FALSE,
     time_intervals = "12, 36, 60",
-    rate_multiplier = 100) {
+    rate_multiplier = 100,
+    use_tree = FALSE,
+    min_node = 20,
+    complexity = 0.01,
+    max_depth = 5,
+    show_terminal_nodes = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1343,7 +1467,12 @@ multisurvival <- function(
         stratvar = stratvar,
         person_time = person_time,
         time_intervals = time_intervals,
-        rate_multiplier = rate_multiplier)
+        rate_multiplier = rate_multiplier,
+        use_tree = use_tree,
+        min_node = min_node,
+        complexity = complexity,
+        max_depth = max_depth,
+        show_terminal_nodes = show_terminal_nodes)
 
     analysis <- multisurvivalClass$new(
         options = options,

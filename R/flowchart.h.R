@@ -6,12 +6,16 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            title = "Study Flow Diagram",
             nodes = NULL,
             counts = NULL,
-            direction = "tb",
-            style = "simple",
-            showCounts = TRUE, ...) {
+            direction = "TB",
+            nodeWidth = 2.5,
+            nodeHeight = 1,
+            fontSize = 10,
+            showPercentages = TRUE,
+            showExclusions = TRUE,
+            nodeColor = "blue",
+            includeTitle = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -19,10 +23,6 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..title <- jmvcore::OptionString$new(
-                "title",
-                title,
-                default="Study Flow Diagram")
             private$..nodes <- jmvcore::OptionVariables$new(
                 "nodes",
                 nodes,
@@ -41,42 +41,81 @@ flowchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "direction",
                 direction,
                 options=list(
-                    "tb",
-                    "lr"),
-                default="tb")
-            private$..style <- jmvcore::OptionList$new(
-                "style",
-                style,
+                    "TB",
+                    "LR"),
+                default="TB")
+            private$..nodeWidth <- jmvcore::OptionNumber$new(
+                "nodeWidth",
+                nodeWidth,
+                min=1,
+                max=5,
+                default=2.5)
+            private$..nodeHeight <- jmvcore::OptionNumber$new(
+                "nodeHeight",
+                nodeHeight,
+                min=0.5,
+                max=3,
+                default=1)
+            private$..fontSize <- jmvcore::OptionNumber$new(
+                "fontSize",
+                fontSize,
+                min=8,
+                max=16,
+                default=10)
+            private$..showPercentages <- jmvcore::OptionBool$new(
+                "showPercentages",
+                showPercentages,
+                default=TRUE)
+            private$..showExclusions <- jmvcore::OptionBool$new(
+                "showExclusions",
+                showExclusions,
+                default=TRUE)
+            private$..nodeColor <- jmvcore::OptionList$new(
+                "nodeColor",
+                nodeColor,
                 options=list(
-                    "simple",
-                    "detailed"),
-                default="simple")
-            private$..showCounts <- jmvcore::OptionBool$new(
-                "showCounts",
-                showCounts,
+                    "blue",
+                    "gray",
+                    "green"),
+                default="blue")
+            private$..includeTitle <- jmvcore::OptionBool$new(
+                "includeTitle",
+                includeTitle,
                 default=TRUE)
 
-            self$.addOption(private$..title)
             self$.addOption(private$..nodes)
             self$.addOption(private$..counts)
             self$.addOption(private$..direction)
-            self$.addOption(private$..style)
-            self$.addOption(private$..showCounts)
+            self$.addOption(private$..nodeWidth)
+            self$.addOption(private$..nodeHeight)
+            self$.addOption(private$..fontSize)
+            self$.addOption(private$..showPercentages)
+            self$.addOption(private$..showExclusions)
+            self$.addOption(private$..nodeColor)
+            self$.addOption(private$..includeTitle)
         }),
     active = list(
-        title = function() private$..title$value,
         nodes = function() private$..nodes$value,
         counts = function() private$..counts$value,
         direction = function() private$..direction$value,
-        style = function() private$..style$value,
-        showCounts = function() private$..showCounts$value),
+        nodeWidth = function() private$..nodeWidth$value,
+        nodeHeight = function() private$..nodeHeight$value,
+        fontSize = function() private$..fontSize$value,
+        showPercentages = function() private$..showPercentages$value,
+        showExclusions = function() private$..showExclusions$value,
+        nodeColor = function() private$..nodeColor$value,
+        includeTitle = function() private$..includeTitle$value),
     private = list(
-        ..title = NA,
         ..nodes = NA,
         ..counts = NA,
         ..direction = NA,
-        ..style = NA,
-        ..showCounts = NA)
+        ..nodeWidth = NA,
+        ..nodeHeight = NA,
+        ..fontSize = NA,
+        ..showPercentages = NA,
+        ..showExclusions = NA,
+        ..nodeColor = NA,
+        ..includeTitle = NA)
 )
 
 flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -85,7 +124,7 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         diagram = function() private$.items[["diagram"]],
-        diagramCode = function() private$.items[["diagramCode"]]),
+        nodeData = function() private$.items[["nodeData"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -104,20 +143,36 @@ flowchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="diagram",
                 title="Flowchart Diagram",
                 width=800,
-                height=600,
+                height=1000,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
                     "nodes",
                     "counts",
                     "direction",
-                    "style",
-                    "showCounts")))
-            self$add(jmvcore::Preformatted$new(
+                    "nodeWidth",
+                    "nodeHeight",
+                    "fontSize",
+                    "showPercentages",
+                    "showExclusions",
+                    "nodeColor",
+                    "includeTitle")))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="diagramCode",
-                title="Diagram Code",
-                visible=FALSE))}))
+                name="nodeData",
+                title="Node Data Summary",
+                columns=list(
+                    list(
+                        `name`="node", 
+                        `title`="Node", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer")),
+                clearWith=list(
+                    "nodes",
+                    "counts")))}))
 
 flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "flowchartBase",
@@ -142,30 +197,44 @@ flowchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Study Flowchart
 #'
-#' 
+#' Creates CONSORT-style flowcharts showing participant flow through studies
 #' @param data The data as a data frame.
-#' @param title .
-#' @param nodes Variables containing node labels/descriptions
+#' @param nodes Variables containing node descriptions/labels
 #' @param counts Variables containing counts for each node
-#' @param direction .
-#' @param style .
-#' @param showCounts .
+#' @param direction Direction of flowchart flow
+#' @param nodeWidth .
+#' @param nodeHeight .
+#' @param fontSize .
+#' @param showPercentages Show percentage of initial participants at each step
+#' @param showExclusions Show exclusion counts on edge labels
+#' @param nodeColor Color scheme for nodes
+#' @param includeTitle Include automatic title with flow statistics
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$diagram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$diagramCode} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$nodeData} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$nodeData$asDF}
+#'
+#' \code{as.data.frame(results$nodeData)}
 #'
 #' @export
 flowchart <- function(
     data,
-    title = "Study Flow Diagram",
     nodes,
     counts,
-    direction = "tb",
-    style = "simple",
-    showCounts = TRUE) {
+    direction = "TB",
+    nodeWidth = 2.5,
+    nodeHeight = 1,
+    fontSize = 10,
+    showPercentages = TRUE,
+    showExclusions = TRUE,
+    nodeColor = "blue",
+    includeTitle = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("flowchart requires jmvcore to be installed (restart may be required)")
@@ -181,12 +250,16 @@ flowchart <- function(
     for (v in nodes) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- flowchartOptions$new(
-        title = title,
         nodes = nodes,
         counts = counts,
         direction = direction,
-        style = style,
-        showCounts = showCounts)
+        nodeWidth = nodeWidth,
+        nodeHeight = nodeHeight,
+        fontSize = fontSize,
+        showPercentages = showPercentages,
+        showExclusions = showExclusions,
+        nodeColor = nodeColor,
+        includeTitle = includeTitle)
 
     analysis <- flowchartClass$new(
         options = options,

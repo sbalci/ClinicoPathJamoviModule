@@ -4,19 +4,31 @@
 \alias{retracted}
 \title{Find Retracted Papers from DOI}
 \usage{
-retracted(data, doi)
+retracted(data, doi, database = "or", pmid = FALSE)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{doi}{.}
+\item{doi}{Column containing DOI strings.}
+
+\item{database}{Database to check for retractions.}
+
+\item{pmid}{Add corresponding PubMed IDs to dataset.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text4} \tab \tab \tab \tab \tab a html \cr
-\code{results$text5} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$details} \tab \tab \tab \tab \tab a html \cr
+\code{results$pmids} \tab \tab \tab \tab \tab a preformatted \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
 Find Retracted Papers from DOI

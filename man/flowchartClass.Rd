@@ -4,9 +4,7 @@
 \alias{flowchartClass}
 \title{Study Flowchart}
 \description{
-Study Flowchart
-
-Study Flowchart
+Creates CONSORT-style flowcharts for clinical studies and research workflows
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::flowchartBase} -> \code{flowchartClass}

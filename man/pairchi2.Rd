@@ -4,25 +4,69 @@
 \alias{pairchi2}
 \title{Pairwise Chi-Square Test}
 \usage{
-pairchi2(data, row, col)
+pairchi2(
+  data,
+  row,
+  col,
+  adjust = "bonferroni",
+  showAssumptions = TRUE,
+  showExpected = FALSE,
+  showStdRes = TRUE,
+  plots = FALSE,
+  effectSize = TRUE
+)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{row}{.}
+\item{row}{The row variable for the contingency table (categorical).}
 
-\item{col}{.}
+\item{col}{The column variable for the contingency table (categorical).}
+
+\item{adjust}{Method for adjusting p-values for multiple comparisons.
+Bonferroni is recommended for conservative control of Type I error.}
+
+\item{showAssumptions}{Display checks for chi-square test assumptions.}
+
+\item{showExpected}{Display expected frequencies for each cell.}
+
+\item{showStdRes}{Display standardized residuals to identify which cells
+contribute most to the chi-square statistic.}
+
+\item{plots}{Display association plots and mosaic plots.}
+
+\item{effectSize}{Calculate and display effect size measures (Cramér's V,
+Phi coefficient).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$conftable} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$chi2test} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$pairwise1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$pairwise2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$pairwise3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
+\code{results$conftable} \tab \tab \tab \tab \tab a table \cr
+\code{results$expected} \tab \tab \tab \tab \tab a table \cr
+\code{results$chi2test} \tab \tab \tab \tab \tab a table \cr
+\code{results$effectsize} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwise1} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwiseTables} \tab \tab \tab \tab \tab a html \cr
+\code{results$bonferroniExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stdres} \tab \tab \tab \tab \tab a table \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$assumptions$asDF}
+
+\code{as.data.frame(results$assumptions)}
 }
 \description{
-Pairwise Chi-Square Test
+Performs post-hoc pairwise chi-square tests following a significant
+overall chi-square test of independence. Includes multiple testing
+correction and standardized residuals analysis.
+}
+\examples{
+\donttest{
+# Example usage will be provided
+}
 }

@@ -1,0 +1,91 @@
+---
+name: subgroupforest
+title: Subgroup Analysis Forest Plot
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      
+    - name: plot
+      title: Forest Plot
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      
+    - name: summary
+      title: Subgroup Analysis Summary
+      type: Table
+      columns:
+        - name: subgroup
+          title: "Subgroup"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: events
+          title: "Events"
+          type: integer
+        - name: estimate
+          title: "Effect"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+          
+    - name: interactions
+      title: Interaction Tests
+      type: Table
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: pvalue
+          title: "Interaction P-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: overall
+      title: Overall Treatment Effect
+      type: Table
+      columns:
+        - name: measure
+          title: "Measure"
+          type: text
+        - name: estimate
+          title: "Effect"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+
+refs:
+    - survival
+    - forestplot
+    - meta
+    - ClinicoPathJamoviModule

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.22
-Date: 2024-06-08
+Version: 0.0.3.24
+Date: 2024-06-15
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -10,11 +10,11 @@ Authors@R:
            email = "drserdarbalci@gmail.com",
            comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <drserdarbalci@gmail.com>
-Description: Analysis for Clinicopathological Research ClinicoPath help
+Description: Analysis for Clinicopathological Research. ClinicoPath helps
     researchers to generate natural language summaries of their dataset,
     generate cross tables with statistical tests, and survival analysis
     with survival tables, survival plots, and natural language summaries.
-License: GPL-3
+License: GPL-2
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://github.com/sbalci/ClinicoPathJamoviModule/,
     https://github.com/sbalci/ClinicoPathDescriptives/,
@@ -25,7 +25,7 @@ URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:
     R (>= 4.1.0)
-Imports: 
+Imports:
     magrittr,
     checkmate,
     pammtools,
@@ -127,8 +127,13 @@ Imports:
     poLCA,
     RColorBrewer,
     scales,
-    reshape2
-VignetteBuilder:knitr, tiff, quarto
+    reshape2,
+    rcrossref,
+    httr
+VignetteBuilder: 
+    knitr, 
+    tiff, 
+    quarto
 Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
     gastonstat/arcdiagram,
@@ -136,10 +141,11 @@ Remotes:
     jbengler/tidyplots,
     hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
-    alstockdale/sumvar
+    alstockdale/sumvar,
+    libscie/retractcheck
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Suggests: 
+Suggests:
     quarto

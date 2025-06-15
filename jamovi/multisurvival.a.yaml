@@ -709,6 +709,56 @@ options:
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
 
+# Decision Tree Options ----
+    - name: use_tree
+      title: Use Survival Decision Tree
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, fits a survival decision tree to identify subgroups with different survival outcomes.
+          Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
+
+    - name: min_node
+      title: Minimum Node Size
+      type: Integer
+      min: 5
+      max: 100
+      default: 20
+      description:
+        R: >
+          The minimum number of observations required in a terminal node. Larger values create
+          simpler trees that may be more generalizable but potentially miss important subgroups.
+
+    - name: complexity
+      title: Complexity Parameter
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.01
+      description:
+        R: >
+          The complexity parameter for tree pruning. Higher values result in smaller trees.
+          This parameter controls the trade-off between tree size and goodness of fit.
+
+    - name: max_depth
+      title: Maximum Tree Depth
+      type: Integer
+      min: 1
+      max: 10
+      default: 5
+      description:
+        R: >
+          The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
+
+    - name: show_terminal_nodes
+      title: Show Survival Curves for Terminal Nodes
+      type: Bool
+      default: true
+      description:
+        R: >
+          If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
+
 
 
 

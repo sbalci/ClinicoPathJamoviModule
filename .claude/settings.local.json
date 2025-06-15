@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:alstockdale.github.io)"
+      "WebFetch(domain:alstockdale.github.io)",
+      "Bash(Rscript:*)"
     ],
     "deny": []
   }

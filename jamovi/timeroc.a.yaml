@@ -73,4 +73,53 @@ options:
       type: Bool
       default: true
 
+    - name: timetypeoutput
+      title: Time Units
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks  
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+        R: >
+          Time units for display in plots and results.
+
+    - name: showOptimalCutoff
+      title: Show Optimal Cutoff Values
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate and display optimal cutoff points that maximize Youden index.
+
+    - name: showMarkerStats
+      title: Show Marker Statistics
+      type: Bool  
+      default: true
+      description:
+        R: >
+          Display descriptive statistics for the marker variable.
+
+    - name: compareBaseline
+      title: Compare to Baseline Model
+      type: Bool
+      default: false
+      description:
+        R: >
+          Compare marker performance to a baseline model (AUC = 0.5).
+
+    - name: smoothAUC
+      title: Smooth AUC Curve
+      type: Bool
+      default: false
+      description:
+        R: >
+          Apply smoothing to the AUC over time plot for better visualization.
+
 ...

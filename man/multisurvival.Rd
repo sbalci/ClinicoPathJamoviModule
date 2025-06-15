@@ -52,7 +52,12 @@ multisurvival(
   stratvar,
   person_time = FALSE,
   time_intervals = "12, 36, 60",
-  rate_multiplier = 100
+  rate_multiplier = 100,
+  use_tree = FALSE,
+  min_node = 20,
+  complexity = 0.01,
+  max_depth = 5,
+  show_terminal_nodes = TRUE
 )
 }
 \arguments{
@@ -214,6 +219,24 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+
+\item{use_tree}{If true, fits a survival decision tree to identify
+subgroups with different survival outcomes. Decision trees provide an
+intuitive alternative to Cox regression for identifying risk factors.}
+
+\item{min_node}{The minimum number of observations required in a terminal
+node. Larger values create simpler trees that may be more generalizable but
+potentially miss important subgroups.}
+
+\item{complexity}{The complexity parameter for tree pruning. Higher values
+result in smaller trees. This parameter controls the trade-off between tree
+size and goodness of fit.}
+
+\item{max_depth}{The maximum depth of the decision tree. Limits the
+complexity of the tree to avoid overfitting.}
+
+\item{show_terminal_nodes}{If true, displays Kaplan-Meier survival curves
+for each terminal node of the decision tree.}
 }
 \value{
 A results object containing:
@@ -241,6 +264,9 @@ A results object containing:
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+\code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
 \code{results$mydataview_modelselection} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr

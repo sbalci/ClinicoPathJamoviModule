@@ -2,11 +2,11 @@
 % Please edit documentation in R/pairchi2.b.R
 \name{pairchi2Class}
 \alias{pairchi2Class}
-\title{Title}
+\title{Pairwise Chi-Square Analysis}
 \description{
-Title
+Pairwise Chi-Square Analysis
 
-Title
+Pairwise Chi-Square Analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::pairchi2Base} -> \code{pairchi2Class}

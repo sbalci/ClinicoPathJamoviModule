@@ -2,9 +2,18 @@
 % Please edit documentation in R/cisingle.h.R
 \name{ciSingle}
 \alias{ciSingle}
-\title{Confidence interval for a mean}
+\title{Confidence Intervals for Mean Values}
 \usage{
-ciSingle(data, deps, splitBy, ciWidth = 95)
+ciSingle(
+  data,
+  deps,
+  splitBy,
+  ciWidth = 95,
+  method = "t",
+  showPlot = FALSE,
+  bootstrapSamples = 1000,
+  showDiagnostics = FALSE
+)
 }
 \arguments{
 \item{data}{.}
@@ -13,13 +22,25 @@ ciSingle(data, deps, splitBy, ciWidth = 95)
 
 \item{splitBy}{.}
 
-\item{ciWidth}{.}
+\item{ciWidth}{Confidence level for interval estimation.}
+
+\item{method}{Method for calculating confidence intervals.}
+
+\item{showPlot}{Display confidence interval visualization.}
+
+\item{bootstrapSamples}{Number of bootstrap samples (when using bootstrap
+method).}
+
+\item{showDiagnostics}{Display normality tests and other diagnostic
+information.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$conflevel} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$citable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnostics} \tab \tab \tab \tab \tab a table \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -29,5 +50,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$citable)}
 }
 \description{
-Confidence interval for a mean
+Confidence Intervals for Mean Values
 }

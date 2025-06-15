@@ -13,7 +13,12 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nClusters = 3,
             showDendrogram = FALSE,
             showHeatmap = FALSE,
-            showScoreDist = FALSE, ...) {
+            showScoreDist = FALSE,
+            pcaAnalysis = FALSE,
+            standardizeData = TRUE,
+            showPCAPlot = FALSE,
+            showClusterValidation = FALSE,
+            optimalKMethod = "elbow", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -38,7 +43,9 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clusterMethod,
                 options=list(
                     "hierarchical",
-                    "pam"),
+                    "pam",
+                    "kmeans",
+                    "pca_kmeans"),
                 default="hierarchical")
             private$..distanceMetric <- jmvcore::OptionList$new(
                 "distanceMetric",
@@ -65,6 +72,30 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showScoreDist",
                 showScoreDist,
                 default=FALSE)
+            private$..pcaAnalysis <- jmvcore::OptionBool$new(
+                "pcaAnalysis",
+                pcaAnalysis,
+                default=FALSE)
+            private$..standardizeData <- jmvcore::OptionBool$new(
+                "standardizeData",
+                standardizeData,
+                default=TRUE)
+            private$..showPCAPlot <- jmvcore::OptionBool$new(
+                "showPCAPlot",
+                showPCAPlot,
+                default=FALSE)
+            private$..showClusterValidation <- jmvcore::OptionBool$new(
+                "showClusterValidation",
+                showClusterValidation,
+                default=FALSE)
+            private$..optimalKMethod <- jmvcore::OptionList$new(
+                "optimalKMethod",
+                optimalKMethod,
+                options=list(
+                    "elbow",
+                    "silhouette",
+                    "gap"),
+                default="elbow")
 
             self$.addOption(private$..markers)
             self$.addOption(private$..computeHScore)
@@ -74,6 +105,11 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showDendrogram)
             self$.addOption(private$..showHeatmap)
             self$.addOption(private$..showScoreDist)
+            self$.addOption(private$..pcaAnalysis)
+            self$.addOption(private$..standardizeData)
+            self$.addOption(private$..showPCAPlot)
+            self$.addOption(private$..showClusterValidation)
+            self$.addOption(private$..optimalKMethod)
         }),
     active = list(
         markers = function() private$..markers$value,
@@ -83,7 +119,12 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nClusters = function() private$..nClusters$value,
         showDendrogram = function() private$..showDendrogram$value,
         showHeatmap = function() private$..showHeatmap$value,
-        showScoreDist = function() private$..showScoreDist$value),
+        showScoreDist = function() private$..showScoreDist$value,
+        pcaAnalysis = function() private$..pcaAnalysis$value,
+        standardizeData = function() private$..standardizeData$value,
+        showPCAPlot = function() private$..showPCAPlot$value,
+        showClusterValidation = function() private$..showClusterValidation$value,
+        optimalKMethod = function() private$..optimalKMethod$value),
     private = list(
         ..markers = NA,
         ..computeHScore = NA,
@@ -92,7 +133,12 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nClusters = NA,
         ..showDendrogram = NA,
         ..showHeatmap = NA,
-        ..showScoreDist = NA)
+        ..showScoreDist = NA,
+        ..pcaAnalysis = NA,
+        ..standardizeData = NA,
+        ..showPCAPlot = NA,
+        ..showClusterValidation = NA,
+        ..optimalKMethod = NA)
 )
 
 ihcstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -208,6 +254,11 @@ ihcstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showDendrogram .
 #' @param showHeatmap .
 #' @param showScoreDist .
+#' @param pcaAnalysis .
+#' @param standardizeData .
+#' @param showPCAPlot .
+#' @param showClusterValidation .
+#' @param optimalKMethod .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -234,7 +285,12 @@ ihcstats <- function(
     nClusters = 3,
     showDendrogram = FALSE,
     showHeatmap = FALSE,
-    showScoreDist = FALSE) {
+    showScoreDist = FALSE,
+    pcaAnalysis = FALSE,
+    standardizeData = TRUE,
+    showPCAPlot = FALSE,
+    showClusterValidation = FALSE,
+    optimalKMethod = "elbow") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcstats requires jmvcore to be installed (restart may be required)")
@@ -255,7 +311,12 @@ ihcstats <- function(
         nClusters = nClusters,
         showDendrogram = showDendrogram,
         showHeatmap = showHeatmap,
-        showScoreDist = showScoreDist)
+        showScoreDist = showScoreDist,
+        pcaAnalysis = pcaAnalysis,
+        standardizeData = standardizeData,
+        showPCAPlot = showPCAPlot,
+        showClusterValidation = showClusterValidation,
+        optimalKMethod = optimalKMethod)
 
     analysis <- ihcstatsClass$new(
         options = options,

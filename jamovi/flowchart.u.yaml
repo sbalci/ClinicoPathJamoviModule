@@ -15,24 +15,41 @@ children:
             name: nodes
             isTarget: true
       - type: TargetLayoutBox
-        label: Node Counts
+        label: Node Counts  
         children:
           - type: VariablesListBox
             name: counts
             isTarget: true
   - type: CollapseBox
-    label: Options
+    label: Layout Options
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: TextBox
-            name: title
-            format: string
           - type: ComboBox
             name: direction
-          - type: ComboBox
-            name: style
+          - type: TextBox
+            name: nodeWidth
+            format: number
+          - type: TextBox  
+            name: nodeHeight
+            format: number
+          - type: TextBox
+            name: fontSize
+            format: number
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
           - type: CheckBox
-            name: showCounts
+            name: showPercentages
+          - type: CheckBox
+            name: showExclusions
+          - type: CheckBox
+            name: includeTitle
+          - type: ComboBox
+            name: nodeColor

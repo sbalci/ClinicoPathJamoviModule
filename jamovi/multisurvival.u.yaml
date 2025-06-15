@@ -397,3 +397,35 @@ children:
                 format: number
                 label: Removal Significance (p-value)
                 enable: (use_modelSelection)
+
+  - type: CollapseBox
+    label: Survival Decision Tree
+    collapsed: true
+    children:
+      - type: Label
+        label: Decision Tree Analysis
+        children:
+          - type: CheckBox
+            name: use_tree
+            fitToGrid: true
+          - type: Label
+            label: Tree Parameters
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: TextBox
+                    name: min_node
+                    format: number
+                    enable: (use_tree)
+                  - type: TextBox
+                    name: complexity
+                    format: number
+                    enable: (use_tree)
+                  - type: TextBox
+                    name: max_depth
+                    format: number
+                    enable: (use_tree)
+                  - type: CheckBox
+                    name: show_terminal_nodes
+                    enable: (use_tree)

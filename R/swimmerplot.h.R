@@ -19,7 +19,17 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             referenceLines = "none",
             customReferenceTime = 12,
             useggswim = FALSE,
-            markerSize = 5, ...) {
+            markerSize = 5,
+            milestone1Name = "Surgery",
+            milestone1Date = NULL,
+            milestone2Name = "Treatment",
+            milestone2Date = NULL,
+            milestone3Name = "Recurrence",
+            milestone3Date = NULL,
+            milestone4Name = "Remission",
+            milestone4Date = NULL,
+            milestone5Name = "Death",
+            milestone5Date = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -119,6 +129,66 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 min=1,
                 max=10,
                 default=5)
+            private$..milestone1Name <- jmvcore::OptionString$new(
+                "milestone1Name",
+                milestone1Name,
+                default="Surgery")
+            private$..milestone1Date <- jmvcore::OptionVariable$new(
+                "milestone1Date",
+                milestone1Date,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                required=FALSE)
+            private$..milestone2Name <- jmvcore::OptionString$new(
+                "milestone2Name",
+                milestone2Name,
+                default="Treatment")
+            private$..milestone2Date <- jmvcore::OptionVariable$new(
+                "milestone2Date",
+                milestone2Date,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                required=FALSE)
+            private$..milestone3Name <- jmvcore::OptionString$new(
+                "milestone3Name",
+                milestone3Name,
+                default="Recurrence")
+            private$..milestone3Date <- jmvcore::OptionVariable$new(
+                "milestone3Date",
+                milestone3Date,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                required=FALSE)
+            private$..milestone4Name <- jmvcore::OptionString$new(
+                "milestone4Name",
+                milestone4Name,
+                default="Remission")
+            private$..milestone4Date <- jmvcore::OptionVariable$new(
+                "milestone4Date",
+                milestone4Date,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                required=FALSE)
+            private$..milestone5Name <- jmvcore::OptionString$new(
+                "milestone5Name",
+                milestone5Name,
+                default="Death")
+            private$..milestone5Date <- jmvcore::OptionVariable$new(
+                "milestone5Date",
+                milestone5Date,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                required=FALSE)
 
             self$.addOption(private$..patientID)
             self$.addOption(private$..start)
@@ -134,6 +204,16 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..customReferenceTime)
             self$.addOption(private$..useggswim)
             self$.addOption(private$..markerSize)
+            self$.addOption(private$..milestone1Name)
+            self$.addOption(private$..milestone1Date)
+            self$.addOption(private$..milestone2Name)
+            self$.addOption(private$..milestone2Date)
+            self$.addOption(private$..milestone3Name)
+            self$.addOption(private$..milestone3Date)
+            self$.addOption(private$..milestone4Name)
+            self$.addOption(private$..milestone4Date)
+            self$.addOption(private$..milestone5Name)
+            self$.addOption(private$..milestone5Date)
         }),
     active = list(
         patientID = function() private$..patientID$value,
@@ -149,7 +229,17 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         referenceLines = function() private$..referenceLines$value,
         customReferenceTime = function() private$..customReferenceTime$value,
         useggswim = function() private$..useggswim$value,
-        markerSize = function() private$..markerSize$value),
+        markerSize = function() private$..markerSize$value,
+        milestone1Name = function() private$..milestone1Name$value,
+        milestone1Date = function() private$..milestone1Date$value,
+        milestone2Name = function() private$..milestone2Name$value,
+        milestone2Date = function() private$..milestone2Date$value,
+        milestone3Name = function() private$..milestone3Name$value,
+        milestone3Date = function() private$..milestone3Date$value,
+        milestone4Name = function() private$..milestone4Name$value,
+        milestone4Date = function() private$..milestone4Date$value,
+        milestone5Name = function() private$..milestone5Name$value,
+        milestone5Date = function() private$..milestone5Date$value),
     private = list(
         ..patientID = NA,
         ..start = NA,
@@ -164,7 +254,17 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..referenceLines = NA,
         ..customReferenceTime = NA,
         ..useggswim = NA,
-        ..markerSize = NA)
+        ..markerSize = NA,
+        ..milestone1Name = NA,
+        ..milestone1Date = NA,
+        ..milestone2Name = NA,
+        ..milestone2Date = NA,
+        ..milestone3Name = NA,
+        ..milestone3Date = NA,
+        ..milestone4Name = NA,
+        ..milestone4Date = NA,
+        ..milestone5Name = NA,
+        ..milestone5Date = NA)
 )
 
 swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -299,6 +399,16 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param customReferenceTime Custom time point to mark with a reference line
 #' @param useggswim .
 #' @param markerSize Size of event markers on the plot
+#' @param milestone1Name Name for the first milestone event (e.g., Surgery)
+#' @param milestone1Date Date/time when milestone 1 occurred
+#' @param milestone2Name Name for the second milestone event (e.g., Treatment)
+#' @param milestone2Date Date/time when milestone 2 occurred
+#' @param milestone3Name Name for the third milestone event (e.g., Recurrence)
+#' @param milestone3Date Date/time when milestone 3 occurred
+#' @param milestone4Name Name for the fourth milestone event (e.g., Remission)
+#' @param milestone4Date Date/time when milestone 4 occurred
+#' @param milestone5Name Name for the fifth milestone event (e.g., Death)
+#' @param milestone5Date Date/time when milestone 5 occurred
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -328,7 +438,17 @@ swimmerplot <- function(
     referenceLines = "none",
     customReferenceTime = 12,
     useggswim = FALSE,
-    markerSize = 5) {
+    markerSize = 5,
+    milestone1Name = "Surgery",
+    milestone1Date,
+    milestone2Name = "Treatment",
+    milestone2Date,
+    milestone3Name = "Recurrence",
+    milestone3Date,
+    milestone4Name = "Remission",
+    milestone4Date,
+    milestone5Name = "Death",
+    milestone5Date) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("swimmerplot requires jmvcore to be installed (restart may be required)")
@@ -338,6 +458,11 @@ swimmerplot <- function(
     if ( ! missing(end)) end <- jmvcore::resolveQuo(jmvcore::enquo(end))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
     if ( ! missing(sortVariable)) sortVariable <- jmvcore::resolveQuo(jmvcore::enquo(sortVariable))
+    if ( ! missing(milestone1Date)) milestone1Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone1Date))
+    if ( ! missing(milestone2Date)) milestone2Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone2Date))
+    if ( ! missing(milestone3Date)) milestone3Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone3Date))
+    if ( ! missing(milestone4Date)) milestone4Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone4Date))
+    if ( ! missing(milestone5Date)) milestone5Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone5Date))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -345,7 +470,12 @@ swimmerplot <- function(
             `if`( ! missing(start), start, NULL),
             `if`( ! missing(end), end, NULL),
             `if`( ! missing(event), event, NULL),
-            `if`( ! missing(sortVariable), sortVariable, NULL))
+            `if`( ! missing(sortVariable), sortVariable, NULL),
+            `if`( ! missing(milestone1Date), milestone1Date, NULL),
+            `if`( ! missing(milestone2Date), milestone2Date, NULL),
+            `if`( ! missing(milestone3Date), milestone3Date, NULL),
+            `if`( ! missing(milestone4Date), milestone4Date, NULL),
+            `if`( ! missing(milestone5Date), milestone5Date, NULL))
 
     for (v in event) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -363,7 +493,17 @@ swimmerplot <- function(
         referenceLines = referenceLines,
         customReferenceTime = customReferenceTime,
         useggswim = useggswim,
-        markerSize = markerSize)
+        markerSize = markerSize,
+        milestone1Name = milestone1Name,
+        milestone1Date = milestone1Date,
+        milestone2Name = milestone2Name,
+        milestone2Date = milestone2Date,
+        milestone3Name = milestone3Name,
+        milestone3Date = milestone3Date,
+        milestone4Name = milestone4Name,
+        milestone4Date = milestone4Date,
+        milestone5Name = milestone5Name,
+        milestone5Date = milestone5Date)
 
     analysis <- swimmerplotClass$new(
         options = options,

@@ -15,7 +15,12 @@ timeroc(
   bootstrapCI = FALSE,
   nboot = 100,
   plotROC = TRUE,
-  plotAUC = TRUE
+  plotAUC = TRUE,
+  timetypeoutput = "months",
+  showOptimalCutoff = TRUE,
+  showMarkerStats = TRUE,
+  compareBaseline = FALSE,
+  smoothAUC = FALSE
 )
 }
 \arguments{
@@ -40,6 +45,20 @@ timeroc(
 \item{plotROC}{.}
 
 \item{plotAUC}{.}
+
+\item{timetypeoutput}{Time units for display in plots and results.}
+
+\item{showOptimalCutoff}{Calculate and display optimal cutoff points that
+maximize Youden index.}
+
+\item{showMarkerStats}{Display descriptive statistics for the marker
+variable.}
+
+\item{compareBaseline}{Compare marker performance to a baseline model (AUC
+= 0.5).}
+
+\item{smoothAUC}{Apply smoothing to the AUC over time plot for better
+visualization.}
 }
 \value{
 A results object containing:
@@ -48,6 +67,10 @@ A results object containing:
 \code{results$aucTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$aucPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$markerStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$cutoffTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

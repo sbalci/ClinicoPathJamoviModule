@@ -12,22 +12,34 @@ items:
       title: 'Flowchart Diagram'
       type: Image
       width: 800
-      height: 600
+      height: 1000
       renderFun: .plot
       requiresData: true
       clearWith:
         - nodes
         - counts
         - direction
-        - style
-        - showCounts
+        - nodeWidth
+        - nodeHeight
+        - fontSize
+        - showPercentages
+        - showExclusions
+        - nodeColor
+        - includeTitle
 
-    - name: diagramCode
-      title: 'Diagram Code'
-      type: Preformatted
-      visible: false
+    - name: nodeData
+      title: Node Data Summary
+      type: Table
+      columns:
+        - name: node
+          title: "Node"
+          type: text
+        - name: count
+          title: "Count" 
+          type: integer
+      clearWith:
+        - nodes
+        - counts
 
 refs:
     - ClinicoPathJamoviModule
-
-...

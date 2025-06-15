@@ -1,0 +1,429 @@
+#' @title Biomarker Response Association
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @import ggplot2
+#' @importFrom dplyr group_by summarise mutate
+#' @importFrom pROC roc auc ci.auc coords
+#' @description Analyzes and visualizes relationships between biomarker levels and treatment responses
+
+biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
+    "biomarkerresponseClass",
+    inherit = biomarkerresponseBase,
+    private = list(
+        
+        # Determine optimal threshold using ROC analysis
+        .calculateOptimalThreshold = function(biomarker_values, response_binary) {
+            tryCatch({
+                roc_obj <- pROC::roc(response_binary, biomarker_values)
+                coords_obj <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
+                
+                return(list(
+                    threshold = coords_obj$threshold,
+                    sensitivity = coords_obj$sensitivity,
+                    specificity = coords_obj$specificity,
+                    auc = as.numeric(pROC::auc(roc_obj))
+                ))
+            }, error = function(e) {
+                return(list(threshold = median(biomarker_values, na.rm = TRUE), 
+                          sensitivity = NA, specificity = NA, auc = NA))
+            })
+        },
+        
+        # Calculate threshold performance metrics
+        .calculateThresholdMetrics = function(biomarker_values, response_binary, threshold) {
+            biomarker_positive <- biomarker_values >= threshold
+            
+            tp <- sum(biomarker_positive & response_binary, na.rm = TRUE)
+            tn <- sum(!biomarker_positive & !response_binary, na.rm = TRUE)
+            fp <- sum(biomarker_positive & !response_binary, na.rm = TRUE)
+            fn <- sum(!biomarker_positive & response_binary, na.rm = TRUE)
+            
+            sensitivity <- tp / (tp + fn)
+            specificity <- tn / (tn + fp)
+            ppv <- tp / (tp + fp)
+            npv <- tn / (tn + fn)
+            
+            # Calculate AUC
+            tryCatch({
+                roc_obj <- pROC::roc(response_binary, biomarker_values)
+                auc_val <- as.numeric(pROC::auc(roc_obj))
+            }, error = function(e) {
+                auc_val <- NA
+            })
+            
+            return(list(
+                threshold = threshold,
+                sensitivity = sensitivity,
+                specificity = specificity,
+                ppv = ppv,
+                npv = npv,
+                auc = auc_val
+            ))
+        },
+        
+        # Perform statistical tests based on response type
+        .performStatisticalTests = function(biomarker_values, response_values, response_type, conf_level) {
+            tests <- list()
+            
+            if (response_type == "binary" || response_type == "categorical") {
+                # Convert to factor if needed
+                response_factor <- as.factor(response_values)
+                
+                if (length(levels(response_factor)) == 2) {
+                    # T-test for binary response
+                    tryCatch({
+                        t_test <- t.test(biomarker_values ~ response_factor, conf.level = conf_level)
+                        tests[["t_test"]] <- list(
+                            test = "Two-sample t-test",
+                            statistic = t_test$statistic,
+                            pvalue = t_test$p.value,
+                            interpretation = ifelse(t_test$p.value < 0.05, 
+                                                   "Significant difference between groups", 
+                                                   "No significant difference")
+                        )
+                    }, error = function(e) {})
+                    
+                    # Wilcoxon test as non-parametric alternative
+                    tryCatch({
+                        wilcox_test <- wilcox.test(biomarker_values ~ response_factor, conf.level = conf_level)
+                        tests[["wilcox_test"]] <- list(
+                            test = "Wilcoxon rank-sum test",
+                            statistic = wilcox_test$statistic,
+                            pvalue = wilcox_test$p.value,
+                            interpretation = ifelse(wilcox_test$p.value < 0.05, 
+                                                   "Significant difference between groups", 
+                                                   "No significant difference")
+                        )
+                    }, error = function(e) {})
+                    
+                } else if (length(levels(response_factor)) > 2) {
+                    # ANOVA for multiple groups
+                    tryCatch({
+                        anova_test <- aov(biomarker_values ~ response_factor)
+                        anova_summary <- summary(anova_test)
+                        tests[["anova"]] <- list(
+                            test = "One-way ANOVA",
+                            statistic = anova_summary[[1]][["F value"]][1],
+                            pvalue = anova_summary[[1]][["Pr(>F)"]][1],
+                            interpretation = ifelse(anova_summary[[1]][["Pr(>F)"]][1] < 0.05, 
+                                                   "Significant difference between groups", 
+                                                   "No significant difference")
+                        )
+                    }, error = function(e) {})
+                    
+                    # Kruskal-Wallis test
+                    tryCatch({
+                        kw_test <- kruskal.test(biomarker_values ~ response_factor)
+                        tests[["kruskal"]] <- list(
+                            test = "Kruskal-Wallis test",
+                            statistic = kw_test$statistic,
+                            pvalue = kw_test$p.value,
+                            interpretation = ifelse(kw_test$p.value < 0.05, 
+                                                   "Significant difference between groups", 
+                                                   "No significant difference")
+                        )
+                    }, error = function(e) {})
+                }
+                
+            } else if (response_type == "continuous") {
+                # Correlation tests for continuous response
+                tryCatch({
+                    pearson_test <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
+                    tests[["pearson"]] <- list(
+                        test = "Pearson correlation",
+                        statistic = pearson_test$statistic,
+                        pvalue = pearson_test$p.value,
+                        interpretation = ifelse(pearson_test$p.value < 0.05, 
+                                               paste("Significant correlation (r =", round(pearson_test$estimate, 3), ")"), 
+                                               "No significant correlation")
+                    )
+                }, error = function(e) {})
+                
+                tryCatch({
+                    spearman_test <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
+                    tests[["spearman"]] <- list(
+                        test = "Spearman correlation",
+                        statistic = spearman_test$statistic,
+                        pvalue = spearman_test$p.value,
+                        interpretation = ifelse(spearman_test$p.value < 0.05, 
+                                               paste("Significant correlation (rho =", round(spearman_test$estimate, 3), ")"), 
+                                               "No significant correlation")
+                    )
+                }, error = function(e) {})
+            }
+            
+            return(tests)
+        },
+        
+        .run = function() {
+            # Check required variables
+            if (is.null(self$options$biomarker) || is.null(self$options$response)) {
+                todo <- "
+                <br>Welcome to ClinicoPath Biomarker Response Analysis
+                <br><br>
+                This tool analyzes relationships between biomarker levels and treatment responses.
+                <br><br>
+                <b>Required variables:</b>
+                <br>- Biomarker Variable: Continuous biomarker measurement
+                <br>- Response Variable: Treatment response (binary, categorical, or continuous)
+                <br><br>
+                <b>Optional variables:</b>
+                <br>- Grouping Variable: For stratified analysis (e.g., treatment arm)
+                <br><br>
+                <b>Analysis features:</b>
+                <br>- Multiple visualization options (box plots, scatter plots, violin plots)
+                <br>- Threshold analysis with ROC curve optimization
+                <br>- Statistical tests appropriate for data types
+                <br>- Correlation analysis for continuous responses
+                <br><br>
+                <b>Clinical applications:</b>
+                <br>- Identify predictive biomarkers
+                <br>- Determine optimal cutoff values
+                <br>- Assess biomarker performance
+                <hr>
+                "
+                self$results$todo$setContent(todo)
+                return()
+            }
+            
+            if (nrow(self$data) == 0)
+                stop("Data contains no (complete) rows")
+            
+            data <- self$data
+            biomarker_var <- self$options$biomarker
+            response_var <- self$options$response
+            response_type <- self$options$responseType
+            conf_level <- as.numeric(self$options$confidenceLevel)
+            
+            # Get data vectors
+            biomarker_values <- data[[biomarker_var]]
+            response_values <- data[[response_var]]
+            
+            # Apply log transformation if requested
+            if (self$options$logTransform) {
+                biomarker_values <- log(biomarker_values + 1)  # Add 1 to handle zeros
+            }
+            
+            # Handle outliers if requested
+            if (self$options$outlierHandling == "remove") {
+                q1 <- quantile(biomarker_values, 0.25, na.rm = TRUE)
+                q3 <- quantile(biomarker_values, 0.75, na.rm = TRUE)
+                iqr <- q3 - q1
+                lower_bound <- q1 - 1.5 * iqr
+                upper_bound <- q3 + 1.5 * iqr
+                
+                outliers <- biomarker_values < lower_bound | biomarker_values > upper_bound
+                biomarker_values[outliers] <- NA
+                response_values[outliers] <- NA
+            }
+            
+            # Remove rows with missing values
+            complete_cases <- !is.na(biomarker_values) & !is.na(response_values)
+            biomarker_values <- biomarker_values[complete_cases]
+            response_values <- response_values[complete_cases]
+            
+            if (length(biomarker_values) == 0) {
+                stop("No complete cases found after removing missing values and outliers")
+            }
+            
+            # Determine threshold
+            threshold_value <- NULL
+            if (self$options$showThreshold) {
+                if (self$options$thresholdMethod == "manual" && !is.null(self$options$thresholdValue)) {
+                    threshold_value <- self$options$thresholdValue
+                } else if (self$options$thresholdMethod == "median") {
+                    threshold_value <- median(biomarker_values, na.rm = TRUE)
+                } else if (self$options$thresholdMethod == "q75") {
+                    threshold_value <- quantile(biomarker_values, 0.75, na.rm = TRUE)
+                } else if (self$options$thresholdMethod == "optimal" && response_type == "binary") {
+                    # Convert response to binary if needed
+                    response_binary <- as.numeric(as.factor(response_values)) - 1
+                    optimal_result <- private$.calculateOptimalThreshold(biomarker_values, response_binary)
+                    threshold_value <- optimal_result$threshold
+                }
+                
+                # Calculate threshold metrics if binary response
+                if (!is.null(threshold_value) && response_type == "binary") {
+                    response_binary <- as.numeric(as.factor(response_values)) - 1
+                    threshold_metrics <- private$.calculateThresholdMetrics(biomarker_values, response_binary, threshold_value)
+                    
+                    self$results$threshold$addRow(rowKey = 1, values = list(
+                        threshold = threshold_metrics$threshold,
+                        sensitivity = threshold_metrics$sensitivity,
+                        specificity = threshold_metrics$specificity,
+                        ppv = threshold_metrics$ppv,
+                        npv = threshold_metrics$npv,
+                        auc = threshold_metrics$auc
+                    ))
+                }
+            }
+            
+            # Group comparison statistics
+            if (response_type %in% c("binary", "categorical")) {
+                response_factor <- as.factor(response_values)
+                group_stats <- data.frame(
+                    response_group = levels(response_factor),
+                    n = as.numeric(table(response_factor)),
+                    mean = tapply(biomarker_values, response_factor, mean, na.rm = TRUE),
+                    sd = tapply(biomarker_values, response_factor, sd, na.rm = TRUE),
+                    median = tapply(biomarker_values, response_factor, median, na.rm = TRUE),
+                    q1 = tapply(biomarker_values, response_factor, quantile, 0.25, na.rm = TRUE),
+                    q3 = tapply(biomarker_values, response_factor, quantile, 0.75, na.rm = TRUE)
+                )
+                
+                for (i in 1:nrow(group_stats)) {
+                    self$results$groupComparison$addRow(rowKey = i, values = list(
+                        response_group = group_stats$response_group[i],
+                        n = group_stats$n[i],
+                        mean = group_stats$mean[i],
+                        sd = group_stats$sd[i],
+                        median = group_stats$median[i],
+                        iqr = paste0(round(group_stats$q1[i], 2), " - ", round(group_stats$q3[i], 2))
+                    ))
+                }
+            }
+            
+            # Correlation analysis for continuous response
+            if (self$options$showCorrelation && response_type == "continuous") {
+                tryCatch({
+                    pearson_cor <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
+                    self$results$correlation$addRow(rowKey = 1, values = list(
+                        method = "Pearson",
+                        correlation = pearson_cor$estimate,
+                        pvalue = pearson_cor$p.value,
+                        ci_lower = pearson_cor$conf.int[1],
+                        ci_upper = pearson_cor$conf.int[2]
+                    ))
+                }, error = function(e) {})
+                
+                tryCatch({
+                    spearman_cor <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
+                    self$results$correlation$addRow(rowKey = 2, values = list(
+                        method = "Spearman",
+                        correlation = spearman_cor$estimate,
+                        pvalue = spearman_cor$p.value,
+                        ci_lower = NA,  # Spearman CI not always available
+                        ci_upper = NA
+                    ))
+                }, error = function(e) {})
+            }
+            
+            # Statistical tests
+            if (self$options$performTests) {
+                test_results <- private$.performStatisticalTests(biomarker_values, response_values, response_type, conf_level)
+                
+                for (test_name in names(test_results)) {
+                    test <- test_results[[test_name]]
+                    self$results$statisticalTests$addRow(rowKey = test_name, values = list(
+                        test = test$test,
+                        statistic = test$statistic,
+                        pvalue = test$pvalue,
+                        interpretation = test$interpretation
+                    ))
+                }
+            }
+            
+            # Prepare plot data
+            plot_data <- list(
+                biomarker = biomarker_values,
+                response = response_values,
+                response_type = response_type,
+                plot_type = self$options$plotType,
+                threshold = threshold_value,
+                show_threshold = self$options$showThreshold,
+                add_trend_line = self$options$addTrendLine,
+                trend_method = self$options$trendMethod,
+                outlier_handling = self$options$outlierHandling,
+                group_variable = if (!is.null(self$options$groupVariable)) data[[self$options$groupVariable]][complete_cases] else NULL,
+                biomarker_name = biomarker_var,
+                response_name = response_var
+            )
+            
+            self$results$plot$setState(plot_data)
+        },
+        
+        .plot = function(image, ggtheme, theme, ...) {
+            plot_data <- image$state
+            if (is.null(plot_data)) return()
+            
+            biomarker <- plot_data$biomarker
+            response <- plot_data$response
+            response_type <- plot_data$response_type
+            plot_type <- plot_data$plot_type
+            
+            # Create base data frame
+            df <- data.frame(
+                biomarker = biomarker,
+                response = response
+            )
+            
+            # Add grouping variable if present
+            if (!is.null(plot_data$group_variable)) {
+                df$group <- plot_data$group_variable
+            }
+            
+            # Create different plot types
+            if (plot_type == "boxplot" && response_type %in% c("binary", "categorical")) {
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
+                    ggplot2::geom_boxplot() +
+                    ggplot2::geom_jitter(width = 0.2, alpha = 0.6)
+                
+            } else if (plot_type == "violin" && response_type %in% c("binary", "categorical")) {
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
+                    ggplot2::geom_violin() +
+                    ggplot2::geom_boxplot(width = 0.1, fill = "white", alpha = 0.7)
+                
+            } else if (plot_type == "scatter" || response_type == "continuous") {
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
+                    ggplot2::geom_point(alpha = 0.6)
+                
+                # Add trend line if requested
+                if (plot_data$add_trend_line) {
+                    if (plot_data$trend_method == "lm") {
+                        p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE)
+                    } else if (plot_data$trend_method == "loess") {
+                        p <- p + ggplot2::geom_smooth(method = "loess", se = TRUE)
+                    } else if (plot_data$trend_method == "gam") {
+                        p <- p + ggplot2::geom_smooth(method = "gam", se = TRUE)
+                    }
+                }
+                
+            } else {
+                # Default to scatter plot
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
+                    ggplot2::geom_point(alpha = 0.6)
+            }
+            
+            # Add threshold line if requested
+            if (plot_data$show_threshold && !is.null(plot_data$threshold)) {
+                if (plot_type == "scatter" || response_type == "continuous") {
+                    p <- p + ggplot2::geom_vline(xintercept = plot_data$threshold, 
+                                                linetype = "dashed", color = "red")
+                } else {
+                    p <- p + ggplot2::geom_hline(yintercept = plot_data$threshold, 
+                                                linetype = "dashed", color = "red")
+                }
+            }
+            
+            # Add grouping colors if group variable is present
+            if (!is.null(plot_data$group_variable)) {
+                p <- p + ggplot2::aes(color = group)
+            }
+            
+            # Labels and theme
+            p <- p + ggplot2::labs(
+                x = plot_data$biomarker_name,
+                y = plot_data$response_name,
+                title = "Biomarker-Response Association",
+                subtitle = paste("Analysis type:", response_type)
+            ) +
+                ggtheme +
+                ggplot2::theme(
+                    legend.position = "right"
+                )
+            
+            print(p)
+            TRUE
+        }
+    )
+)

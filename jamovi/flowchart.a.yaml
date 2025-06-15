@@ -1,63 +1,104 @@
 ---
 name: flowchart
-title: Study Flowchart
-menuGroup: ExplorationD
-menuSubgroup: ClinicoPath Descriptive Plots
+title: Study Flowchart 
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Reports
 version: '1.0.0'
 jas: '1.2'
+
+description:
+    main: Creates CONSORT-style flowcharts showing participant flow through studies
 
 options:
     - name: data
       type: Data
       description:
-          R: >
-            The data as a data frame.
-
-    - name: title
-      title: Flowchart Title
-      type: String
-      default: "Study Flow Diagram"
+          R: The data as a data frame.
 
     - name: nodes
       title: Node Data
       type: Variables
-      suggested: [nominal]
-      permitted: [factor]
+      suggested: [ nominal ]
+      permitted: [ factor ]
       description:
-          R: >
-            Variables containing node labels/descriptions
+          R: Variables containing node descriptions/labels
 
-    - name: counts
+    - name: counts 
       title: Node Counts
       type: Variables
-      suggested: [continuous]
-      permitted: [numeric]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
       description:
-          R: >
-            Variables containing counts for each node
-
+          R: Variables containing counts for each node
+          
     - name: direction
       title: Direction
       type: List
       options:
         - title: Top to Bottom
-          name: tb
-        - title: Left to Right
-          name: lr
-      default: tb
+          name: TB
+        - title: Left to Right  
+          name: LR
+      default: TB
+      description:
+          R: Direction of flowchart flow
 
-    - name: style
-      title: Style
-      type: List
-      options:
-        - title: Simple
-          name: simple
-        - title: Detailed
-          name: detailed
-      default: simple
+    - name: nodeWidth
+      title: Node Width
+      type: Number
+      min: 1
+      max: 5
+      default: 2.5
 
-    - name: showCounts
-      title: Show Counts
+    - name: nodeHeight  
+      title: Node Height
+      type: Number
+      min: 0.5
+      max: 3
+      default: 1
+
+    - name: fontSize
+      title: Font Size
+      type: Number
+      min: 8
+      max: 16
+      default: 10
+
+    - name: showPercentages
+      title: Show Percentages
       type: Bool
       default: true
-...
+      description:
+          R: >
+            Show percentage of initial participants at each step
+
+    - name: showExclusions
+      title: Show Exclusions
+      type: Bool  
+      default: true
+      description:
+          R: >
+            Show exclusion counts on edge labels
+
+    - name: nodeColor
+      title: Node Color Scheme
+      type: List
+      options:
+        - title: Blue (Clinical)
+          name: blue
+        - title: Gray (Professional)
+          name: gray
+        - title: Green (Success)
+          name: green
+      default: blue
+      description:
+          R: >
+            Color scheme for nodes
+
+    - name: includeTitle
+      title: Include Title
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include automatic title with flow statistics
