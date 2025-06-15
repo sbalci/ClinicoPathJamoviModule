@@ -141,8 +141,7 @@ Remotes:
     jbengler/tidyplots,
     hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
-    alstockdale/sumvar,
-    libscie/retractcheck
+    alstockdale/sumvar
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
