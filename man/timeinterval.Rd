@@ -36,10 +36,27 @@ timeinterval(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
 }
 \description{
-Time Interval Calculator
+Calculates time intervals between dates or from pre-calculated values. Time
+intervals form the basis of person-time follow-up calculations in survival
+analysis. Person-time follows the accumulated time that participants
+contribute to a study while being at risk for the event of interest,
+accounting for varying entry times and censoring. Person-time is typically
+expressed in person-days, person-months,  or person-years depending on the
+study duration and outcome frequency.
+}
+\examples{
+# Calculate time intervals for person-time analysis:
+# timeinterval(
+#   data = study_data,
+#   dx_date = "diagnosis_date",
+#   fu_date = "followup_date",
+#   output_unit = "months"
+# )
+
 }

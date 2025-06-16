@@ -2,15 +2,10 @@
 % Please edit documentation in R/agreement.b.R
 \name{agreementClass}
 \alias{agreementClass}
-\title{Interrater Reliability Analysis}
-\value{
-Table
-}
+\title{Comprehensive Interrater Reliability Analysis}
 \description{
-This function calculates interrater reliability for ordinal or categorical data.
-}
-\details{
-The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
+Comprehensive interrater reliability analysis designed for pathology applications.
+Includes Cohen's kappa, Fleiss' kappa, ICC, Krippendorff's alpha, and pathology-specific metrics.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agreementBase} -> \code{agreementClass}

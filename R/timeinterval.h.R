@@ -91,6 +91,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        personTimeInfo = function() private$.items[["personTimeInfo"]],
         summary = function() private$.items[["summary"]],
         calculated_time = function() private$.items[["calculated_time"]]),
     private = list(),
@@ -104,6 +105,11 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="todo",
                 title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeInfo",
+                title="About Person-Time Follow-Up",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -137,7 +143,23 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Time Interval Calculator
 #'
-#' 
+#' Calculates time intervals between dates or from pre-calculated values. Time 
+#' intervals form the basis of person-time follow-up calculations in survival 
+#' analysis. Person-time follows the accumulated time that participants 
+#' contribute to a study while being at risk for the event of interest, 
+#' accounting for varying entry times and censoring. Person-time is typically 
+#' expressed in person-days, person-months,  or person-years depending on the 
+#' study duration and outcome frequency.
+#'
+#' @examples
+#' # Calculate time intervals for person-time analysis:
+#' # timeinterval(
+#' #   data = study_data,
+#' #   dx_date = "diagnosis_date",
+#' #   fu_date = "followup_date",
+#' #   output_unit = "months"
+#' # )
+#'
 #' @param data The data as a data frame.
 #' @param dx_date Column containing start dates
 #' @param fu_date Column containing end dates
@@ -149,6 +171,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 #' }

@@ -1,0 +1,286 @@
+---
+title: "Quick Guide: Diagnostic Style Clustering in jamovi"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output: 
+  html_vignette:
+    toc: true
+    fig_width: 7
+    fig_height: 5
+vignette: >
+  %\VignetteIndexEntry{Quick Guide: Diagnostic Style Clustering in jamovi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# 🚀 Quick Start: 5-Minute Diagnostic Style Analysis
+
+## Step 1: Prepare Your Data
+
+**Required columns:**
+- **Rater columns**: Each pathologist's diagnoses (e.g., Path_01, Path_02, etc.)
+- **Case ID**: Unique identifier for each case
+
+**Optional columns:**
+- **Experience**: Years of experience or level (Junior/Senior)
+- **Training**: Training institution
+- **Institution**: Current practice location
+- **Specialty**: Subspecialty focus
+- **True diagnosis**: Gold standard (for accuracy analysis)
+
+## Step 2: Load Data in jamovi
+
+1. Open jamovi
+2. Import your CSV file
+3. Ensure rater columns are set as **Factor** (nominal/ordinal)
+
+## Step 3: Run Basic Analysis
+
+1. Go to **meddecide** → **Agreement** → **Interrater Reliability**
+2. Move rater columns to **Raters/Observers** box
+3. Click **Run**
+
+**✅ Check:** Overall agreement should be 40-90% for meaningful style analysis
+
+## Step 4: Enable Diagnostic Style Clustering
+
+1. Check **✓ Diagnostic Style Clustering (Usubutun Method)**
+2. Accept defaults:
+   - Method: Ward's Linkage
+   - Distance: Percentage Agreement  
+   - Groups: 3
+
+**✅ Expected:** See Style Groups (1, 2, 3) assigned to each pathologist
+
+## Step 5: Add Pathologist Characteristics
+
+1. Check **✓ Include Rater Characteristics**
+2. Select your characteristic variables:
+   - Experience Variable → your experience column
+   - Training Institution → your training column
+   - Current Institution → your institution column
+   - Specialty → your specialty column
+
+**✅ Expected:** Style groups correlate with characteristics
+
+## Step 6: Identify Problem Cases
+
+1. Check **✓ Identify Discordant Cases**
+
+**✅ Expected:** List of cases causing style-based disagreement
+
+---
+
+# 📊 Interpreting Results
+
+## Diagnostic Style Table
+
+| Rater | Style Group | Within-Group Agreement | Experience | Training |
+|-------|-------------|----------------------|------------|----------|
+| Path_01 | Style 1 | 85% | Senior | Academic |
+| Path_02 | Style 1 | 83% | Senior | Academic |
+| Path_03 | Style 2 | 78% | Junior | Community |
+
+**🔍 What to look for:**
+- **High within-group agreement** (>80%): Strong style membership
+- **Similar characteristics within groups**: Validates clustering
+- **Clear separation between groups**: Distinct diagnostic approaches
+
+## Style Summary Table
+
+| Style Group | Members | Avg Agreement | Predominant Training |
+|-------------|---------|---------------|-------------------|
+| Style 1 | 6 | 84% | Academic_Eastern |
+| Style 2 | 5 | 79% | Community |
+| Style 3 | 4 | 87% | Academic_Western |
+
+**🔍 Interpretation:**
+- **Style 1**: Conservative academics
+- **Style 2**: Moderate community pathologists  
+- **Style 3**: Aggressive specialists
+
+## Discordant Cases
+
+| Case | Discord Score | Style 1 Diagnosis | Style 2 Diagnosis | Style 3 Diagnosis |
+|------|---------------|------------------|------------------|------------------|
+| Case_042 | 0.85 | Benign | Atypical | Atypical |
+| Case_067 | 0.78 | Atypical | DCIS | DCIS |
+
+**🔍 Meaning:**
+- **High discord** (>0.7): Cases revealing diagnostic philosophy differences
+- **Pattern**: Conservative vs. aggressive diagnostic tendencies
+
+---
+
+# 🎯 Common Applications
+
+## Quality Assurance
+
+**Goal**: Identify diagnostic outliers
+
+**Setup:**
+- Include all department pathologists
+- Use routine sign-out cases
+- Focus on challenging diagnoses
+
+**Action Items:**
+- Pathologists with unusual styles → additional training
+- Cases with high discord → consensus review
+- Style patterns → standardized protocols
+
+## Training Evaluation
+
+**Goal**: Assess resident diagnostic development
+
+**Setup:**
+- Compare residents vs. attendings
+- Track individual residents over time
+- Include mentor information
+
+**Action Items:**
+- Residents clustering with wrong style → mentor reassignment
+- Persistent style differences → targeted education
+- Mentor influence patterns → faculty development
+
+## Consensus Development
+
+**Goal**: Improve diagnostic guidelines
+
+**Setup:**
+- Select expert panel representing different styles
+- Include cases showing style disagreements
+- Document reasoning for style differences
+
+**Action Items:**
+- Style-specific guidelines → comprehensive protocols
+- High-discord cases → educational materials
+- Expert disagreements → research priorities
+
+---
+
+# ⚙️ Advanced Settings
+
+## Distance Metrics
+
+**Percentage Agreement (Default)**
+- ✅ Use for: Most categorical diagnoses
+- 📊 Measures: Direct diagnostic concordance
+
+**Correlation**
+- ✅ Use for: Ordinal scales (grades, stages)
+- 📊 Measures: Linear relationship patterns
+
+**Euclidean**
+- ✅ Use for: Quantitative scores
+- 📊 Measures: Geometric distance
+
+## Clustering Methods
+
+**Ward's Linkage (Default)**
+- ✅ Use for: Compact, similar-sized groups
+- 🎯 Creates: Tight, meaningful clusters
+
+**Complete Linkage**
+- ✅ Use for: Well-separated distinct groups
+- 🎯 Creates: Very tight clusters
+
+**Average Linkage**
+- ✅ Use for: Moderate separation
+- 🎯 Creates: Balanced clusters
+
+## Number of Groups
+
+**2 Groups**: Conservative vs. Aggressive
+**3 Groups**: Conservative, Moderate, Aggressive (Usubutun standard)
+**4+ Groups**: Subspecialty-specific approaches
+
+---
+
+# 🔧 Troubleshooting
+
+## Problem: All pathologists in one group
+
+**Causes:**
+- Too few pathologists (<6)
+- Very high agreement
+- Cases too easy/difficult
+
+**Solutions:**
+- Add more pathologists
+- Include challenging cases
+- Reduce groups to 2
+
+## Problem: Groups don't match characteristics
+
+**Causes:**
+- Characteristics don't influence style
+- Small sample size
+- Hidden confounders
+
+**Solutions:**
+- Add more characteristic variables
+- Increase case numbers
+- Consider interaction effects
+
+## Problem: Poor within-group agreement
+
+**Causes:**
+- Wrong number of groups
+- High random error
+- Inappropriate cases
+
+**Solutions:**
+- Adjust group number
+- Focus on moderate difficulty cases
+- Exclude technical failures
+
+---
+
+# 📚 Test Datasets
+
+ClinicoPath includes three test datasets:
+
+## Endometrial Pathology
+- **File**: `endometrial_diagnostic_styles.csv`
+- **Cases**: 80 endometrial biopsies
+- **Pathologists**: 15 (various backgrounds)
+- **Categories**: Benign, EIN, Carcinoma
+- **Expected Styles**: 3 groups correlating with training
+
+## Breast Pathology  
+- **File**: `breast_diagnostic_styles.csv`
+- **Cases**: 60 breast biopsies
+- **Pathologists**: 12 (breast specialists vs. generalists)
+- **Categories**: Benign, Atypical, DCIS, Invasive
+- **Expected Styles**: Conservative, Moderate, Aggressive
+
+## Lymphoma Classification
+- **File**: `lymphoma_diagnostic_styles.csv`  
+- **Cases**: 45 lymphoid lesions
+- **Pathologists**: 10 hematopathologists
+- **Categories**: Reactive, DLBCL, Follicular, Marginal Zone, Mantle Cell
+- **Expected Styles**: WHO-strict, Molecular-heavy, Morphology-first
+
+---
+
+# 📖 Key References
+
+## Primary Diagnostic Style Literature
+
+1. **Usubutun A, Mutter GL, Saglam A, Dolgun A, Ozkan EA, Ince T, Akyol A, Bulbul HD, Calay Z, Eren F, Gumurdulu D, Haberal AN, Ilvan S, Karaveli S, Koyuncuoglu M, Muezzinoglu B, Muftuoglu KH, Ozdemir N, Ozen O, Baykara S, Pestereli E, Ulukus EC, Zekioglu O.** (2012). Reproducibility of endometrial intraepithelial neoplasia diagnosis is good, but influenced by the diagnostic style of pathologists. *Modern Pathology*, 25(6), 877-884. doi: 10.1038/modpathol.2011.220. PMID: 22301705.
+
+2. **Elmore JG, et al.** (2015). Diagnostic concordance among pathologists interpreting breast biopsy specimens. *JAMA*, 313(11), 1122-1132.
+
+## IHC Clustering Methods (Related to ihcstats function)
+
+3. **Sterlacci W, Fiegl M, Juskevicius D, Tzankov A.** (2020). Cluster Analysis According to Immunohistochemistry is a Robust Tool for Non-Small Cell Lung Cancer and Reveals a Distinct, Immune Signature-defined Subgroup. *Applied Immunohistochemistry & Molecular Morphology*, 28(4), 274-283. PMID: 31058655.
+
+4. **Olsen SH, Thomas DG, Lucas DR.** (2006). Cluster analysis of immunohistochemical profiles in synovial sarcoma, malignant peripheral nerve sheath tumor, and Ewing sarcoma. *Modern Pathology*, 19(5), 659-668. PMID: 16528378.
+
+5. **Matsuoka T, Mitomi H, Fukui N, Kanazawa H, Saito T, Hayashi T, Yao T.** (2011). Cluster analysis of claudin-1 and -4, E-cadherin, and β-catenin expression in colorectal cancers. *Journal of Surgical Oncology*, 103(7), 674-686. PMID: 21360533.
+
+6. **Carvalho JC, Wasco MJ, Kunju LP, Thomas DG, Shah RB.** (2011). Cluster analysis of immunohistochemical profiles delineates CK7, vimentin, S100A1 and C-kit (CD117) as an optimal panel in the differential diagnosis of renal oncocytoma from its mimics. *Histopathology*, 58(2), 169-179. PMID: 21323945.
+
+---
+
+*💡 **Tip**: Start with the test datasets to learn the interface, then apply to your own data. The diagnostic style clustering reveals hidden patterns in pathologist decision-making that traditional agreement statistics miss.*

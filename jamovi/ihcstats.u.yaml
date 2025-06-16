@@ -14,6 +14,7 @@ children:
           - type: VariablesListBox
             name: markers
             isTarget: true
+
   - type: CollapseBox
     label: Analysis Options
     collapsed: true
@@ -23,12 +24,9 @@ children:
         children:
           - type: Label
             label: H-Score Analysis
-            children: []
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: computeHScore
+          - type: CheckBox
+            name: computeHScore
+
   - type: CollapseBox
     label: Clustering Options
     collapsed: true
@@ -37,13 +35,51 @@ children:
         margin: large
         children:
           - type: Label
-            label: Method
-            children: []
-  - type: LayoutBox
-    margin: large
+            label: Clustering Method
+          - type: ComboBox
+            name: clusterMethod
+          - type: Label
+            label: Distance Metric
+          - type: ComboBox
+            name: distanceMetric
+          - type: Label
+            label: Linkage Method
+          - type: ComboBox
+            name: linkageMethod
+          - type: Label
+            label: Number of Clusters
+          - type: TextBox
+            name: nClusters
+            format: number
+          - type: Label
+            label: IHC Scoring Scale
+          - type: ComboBox
+            name: scoringScale
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
     children:
-      - type: ComboBox
-        name: clusterMethod
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: standardizeData
+          - type: CheckBox
+            name: pcaAnalysis
+          - type: CheckBox
+            name: iterativeClustering
+          - type: CheckBox
+            name: showClusterValidation
+          - type: CheckBox
+            name: tumorRegionAnalysis
+          - type: CheckBox
+            name: prognosticClustering
+          - type: Label
+            label: Optimal K Method
+          - type: ComboBox
+            name: optimalKMethod
+
   - type: CollapseBox
     label: Visualization Options
     collapsed: true
@@ -51,39 +87,129 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: showDendrogram
+          - type: CheckBox
+            name: showHeatmap
+          - type: CheckBox
+            name: showPCAPlot
+          - type: CheckBox
+            name: showScoreDist
+          - type: CheckBox
+            name: showDiagnostics
+
+  - type: CollapseBox
+    label: Grouping Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TargetLayoutBox
+            label: Grouping Variable (for Diagnostics)
+            children:
+              - type: VariablesListBox
+                name: groupVariable
+                isTarget: true
+                maxItemCount: 1
+
+  - type: CollapseBox
+    label: Multi-Region Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TargetLayoutBox
+            label: Central Region Variable
+            children:
+              - type: VariablesListBox
+                name: centralRegionVar
+                isTarget: true
+                maxItemCount: 1
+          - type: TargetLayoutBox
+            label: Invasive Region Variable
+            children:
+              - type: VariablesListBox
+                name: invasiveRegionVar
+                isTarget: true
+                maxItemCount: 1
+
+  - type: CollapseBox
+    label: Survival Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TargetLayoutBox
+            label: Survival Time Variable
+            children:
+              - type: VariablesListBox
+                name: survivalTimeVar
+                isTarget: true
+                maxItemCount: 1
+          - type: TargetLayoutBox
+            label: Survival Event Variable
+            children:
+              - type: VariablesListBox
+                name: survivalEventVar
+                isTarget: true
+                maxItemCount: 1
+
+  - type: CollapseBox
+    label: Differential Diagnosis (Olsen Method)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: differentialDiagnosis
+          - type: TargetLayoutBox
+            label: Tumor Type Variable (for validation)
+            children:
+              - type: VariablesListBox
+                name: tumorTypeVar
+                isTarget: true
+                maxItemCount: 1
+          - type: CheckBox
+            name: antibodyOptimization
+          - type: CheckBox
+            name: calculateDiagnosticMetrics
+          - type: CheckBox
+            name: olsenVisualization
           - type: Label
-            label: Plots
-            children: []
-  - type: LayoutBox
-    margin: large
+            label: Cluster Cut Height
+          - type: TextBox
+            name: clusterCutHeight
+            format: number
+
+  - type: CollapseBox
+    label: Sterlacci TIL Analysis
+    collapsed: true
     children:
-      - type: ComboBox
-        name: distanceMetric
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nClusters
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showDendrogram
-      - type: CheckBox
-        name: showHeatmap
-      - type: CheckBox
-        name: showScoreDist
-      - type: CheckBox
-        name: pcaAnalysis
-      - type: CheckBox
-        name: standardizeData
-      - type: CheckBox
-        name: showPCAPlot
-      - type: CheckBox
-        name: showClusterValidation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: optimalKMethod
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sterlacciAnalysis
+          - type: CheckBox
+            name: supervisedClustering
+          - type: CheckBox
+            name: reproductibilityTesting
+          - type: CheckBox
+            name: immuneSignatureFocus
+          - type: Label
+            label: TIL Analysis Mode
+          - type: ComboBox
+            name: tilAnalysisMode
+          - type: Label
+            label: Multiple Testing Correction
+          - type: ComboBox
+            name: multipleTesting
+          - type: Label
+            label: Significance Threshold
+          - type: TextBox
+            name: significanceThreshold
+            format: number

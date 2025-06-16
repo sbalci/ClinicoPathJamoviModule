@@ -44,9 +44,10 @@ singlearm(
 \item{data}{The data as a data frame.}
 
 \item{elapsedtime}{The time-to-event or follow-up duration for each
-patient. Should be numeric and continuous, measured in consistent units
-(e.g., months or years). Can be calculated automatically from dates if
-using the date options below.}
+patient. The sum of these values represents the total person-time follow-up
+in the study, which serves as the denominator for calculating event rates
+and is fundamental for Kaplan-Meier estimates. Should be numeric and
+continuous, measured in consistent units (e.g., months or years).}
 
 \item{tint}{Enable this option if you want to calculate survival time from
 dates in your data. This is useful when you have separate columns for
@@ -206,11 +207,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Performs survival analysis for a single cohort of patients without group
-comparisons. Use this when you want to analyze overall survival
-characteristics of your entire study population - for example, to determine
-median survival time or 1/3/5-year survival rates for all patients
-collectively. This differs from regular survival analysis which compares
-survival between groups.
+comparisons. The analysis calculates total person-time follow-up (the sum
+of all individual  observation periods) and uses this to derive accurate
+survival estimates that account  for varying follow-up durations. Use this
+when you want to analyze overall survival  characteristics of your entire
+study population - for example, to determine median  survival time or
+1/3/5-year survival rates for all patients collectively.
 }
 \examples{
 \donttest{

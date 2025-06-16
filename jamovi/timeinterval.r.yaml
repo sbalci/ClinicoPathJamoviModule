@@ -8,6 +8,11 @@ items:
       title: ''
       type: Html
 
+    - name: personTimeInfo
+      title: About Person-Time Follow-Up
+      type: Html
+      visible: true
+
     - name: summary
       title: Summary Statistics
       type: Html
