@@ -1,0 +1,63 @@
+---
+title: "Vignette: Visualizing Co-occurrence with Venn & Upset Plots"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Venn and Upset Plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6
+)
+```
+
+```{r setup}
+# For vignette demonstration, ensure 'histopathology' is available.
+if (!exists("histopathology")) {
+  set.seed(123)
+  histopathology <- data.frame(
+    LVI = factor(sample(c("Present", "Absent", NA), 150, replace = TRUE, prob = c(0.3, 0.6, 0.1))),
+    PNI = factor(sample(c("Present", "Absent"), 150, replace = TRUE, prob = c(0.2, 0.8))),
+    PreinvasiveComponent = factor(sample(c("Yes", "No"), 150, replace = TRUE, prob = c(0.4, 0.6)))
+  )
+}
+head(histopathology)
+```
+
+
+```{r}
+library(ClinicoPathDescriptives)
+# data(histopathology, package="ClinicoPathDescriptives") # if needed
+
+results_venn <- ClinicoPathDescriptives::venn(
+  data = histopathology,
+  var1 = "LVI",
+  var1true = "Present",
+  var2 = "PNI",
+  var2true = "Present",
+  var3 = "PreinvasiveComponent",
+  var3true = "Yes",
+  var4 = NULL,      # Explicitly NULL for unused variable
+  var4true = NULL   # Explicitly NULL for unused true level
+)
+
+```
+
+```{r}
+results_venn$plot
+```
+
+
+
+```{r}
+results_venn$plot2
+```
+
+

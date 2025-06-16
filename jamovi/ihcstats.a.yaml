@@ -105,6 +105,176 @@ options:
           name: gap
       default: elbow
 
+    - name: iterativeClustering
+      title: Iterative Marker Selection
+      type: Bool
+      default: false
+
+    - name: linkageMethod
+      title: Linkage Method
+      type: List
+      options:
+        - title: Average
+          name: average
+        - title: Complete
+          name: complete
+        - title: Ward
+          name: ward.D2
+        - title: Single
+          name: single
+      default: average
+
+    - name: showDiagnostics
+      title: Show Diagnostic Performance
+      type: Bool
+      default: false
+
+    - name: groupVariable
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      default: NULL
+
+    - name: scoringScale
+      title: IHC Scoring Scale
+      type: List
+      options:
+        - title: 0-1 Binary
+          name: binary
+        - title: 0-2 Carvalho Scale
+          name: carvalho
+        - title: 0-3 Standard IHC
+          name: standard
+        - title: H-Score (0-300)
+          name: hscore
+        - title: Matsuoka 3-tier (Mild/Moderate/Marked)
+          name: matsuoka
+      default: standard
+
+    - name: tumorRegionAnalysis
+      title: Multi-Region Tumor Analysis
+      type: Bool
+      default: false
+
+    - name: centralRegionVar
+      title: Central Region Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+
+    - name: invasiveRegionVar
+      title: Invasive Region Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+
+    - name: prognosticClustering
+      title: Prognostic Clustering (Ward's Method)
+      type: Bool
+      default: false
+
+    - name: survivalTimeVar
+      title: Survival Time Variable (Optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+
+    - name: survivalEventVar
+      title: Survival Event Variable (Optional)
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      default: NULL
+
+    - name: differentialDiagnosis
+      title: Differential Diagnosis Mode (Olsen Method)
+      type: Bool
+      default: false
+
+    - name: tumorTypeVar
+      title: Tumor Type Variable (for validation)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      default: NULL
+
+    - name: antibodyOptimization
+      title: Antibody Panel Optimization
+      type: Bool
+      default: false
+
+    - name: calculateDiagnosticMetrics
+      title: Calculate Sensitivity/Specificity
+      type: Bool
+      default: false
+
+    - name: olsenVisualization
+      title: Olsen-style Cluster Heatmap
+      type: Bool
+      default: false
+
+    - name: clusterCutHeight
+      title: Cluster Cut Height (0-1)
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+
+    - name: sterlacciAnalysis
+      title: Sterlacci TIL Signature Analysis
+      type: Bool
+      default: false
+
+    - name: supervisedClustering
+      title: Supervised Clustering (by Histotype)
+      type: Bool
+      default: false
+
+    - name: reproductibilityTesting
+      title: Reproducibility Testing (Cohen Kappa)
+      type: Bool
+      default: false
+
+    - name: immuneSignatureFocus
+      title: Focus on Immune Signature Markers
+      type: Bool
+      default: false
+
+    - name: tilAnalysisMode
+      title: TIL Analysis Mode
+      type: List
+      options:
+        - title: CD4/CD8 Ratio Analysis
+          name: cd4cd8_ratio
+        - title: Granzyme B+ TIL Count
+          name: granzyme_til
+        - title: Combined TIL Signature
+          name: combined_til
+        - title: All TIL Markers
+          name: all_til
+      default: combined_til
+
+    - name: multipleTesting
+      title: Multiple Testing Correction
+      type: List
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: None
+          name: none
+      default: bonferroni
+
+    - name: significanceThreshold
+      title: Significance Threshold
+      type: Number
+      min: 0.001
+      max: 0.05
+      default: 0.000055
+
 ...
 
 

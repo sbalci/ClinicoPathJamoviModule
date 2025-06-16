@@ -174,7 +174,13 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$medianTable)}
 }
 \description{
-Function for Generating Summaries for Survival Analysis.
+Performs univariate survival analysis comparing survival between groups.
+This analysis  calculates person-time follow-up for each group and uses
+this to derive accurate  survival estimates and incidence rates that
+account for varying follow-up durations  across groups. The Cox
+proportional hazards model incorporates person-time by modeling  the hazard
+function, which represents the instantaneous event rate per unit of
+person-time.
 }
 \examples{
 # example will be added

@@ -38,19 +38,364 @@ items:
           title: "Expression Pattern"
           type: text
 
-    - name: clusterPlot
-      title: Expression Pattern Clustering
+    - name: pcaTable
+      title: Principal Component Analysis
+      type: Table
+      visible: (pcaAnalysis)
+      columns:
+        - name: component
+          title: "Component"
+          type: text
+        - name: eigenvalue
+          title: "Eigenvalue"
+          type: number
+          format: zto
+        - name: variance_explained
+          title: "Variance %"
+          type: number
+          format: zto
+        - name: cumulative_variance
+          title: "Cumulative %"
+          type: number
+          format: zto
+
+    - name: silhouetteTable
+      title: Clustering Quality Assessment
+      type: Table
+      visible: (silhouetteAnalysis)
+      columns:
+        - name: method
+          title: "Method"
+          type: text
+        - name: clusters
+          title: "Clusters"
+          type: integer
+        - name: avg_silhouette
+          title: "Avg Silhouette Width"
+          type: number
+          format: zto
+
+    - name: diagnosticTable
+      title: Diagnostic Performance Analysis
+      type: Table
+      visible: (showDiagnostics)
+      columns:
+        - name: marker
+          title: "Marker"
+          type: text
+        - name: group
+          title: "Group"
+          type: text
+        - name: sensitivity
+          title: "Sensitivity %"
+          type: number
+          format: zto
+        - name: specificity
+          title: "Specificity %"
+          type: number
+          format: zto
+        - name: ppv
+          title: "PPV %"
+          type: number
+          format: zto
+        - name: npv
+          title: "NPV %"
+          type: number
+          format: zto
+
+    - name: optimalMarkersTable
+      title: Optimal Marker Panel
+      type: Table
+      visible: (iterativeClustering)
+      columns:
+        - name: marker
+          title: "Marker"
+          type: text
+        - name: separation_score
+          title: "Separation Score"
+          type: number
+          format: zto
+        - name: status
+          title: "Status"
+          type: text
+
+    - name: regionalTable
+      title: Multi-Region Analysis (Central vs Invasive)
+      type: Table
+      visible: (tumorRegionAnalysis)
+      columns:
+        - name: marker
+          title: "Marker"
+          type: text
+        - name: central_mean
+          title: "Central Mean"
+          type: number
+          format: zto
+        - name: invasive_mean
+          title: "Invasive Mean"
+          type: number
+          format: zto
+        - name: correlation
+          title: "Correlation"
+          type: number
+          format: zto
+        - name: p_value
+          title: "P-value"
+          type: text
+        - name: significance
+          title: "Significance"
+          type: text
+
+    - name: prognosticTable
+      title: Prognostic Clustering Results
+      type: Table
+      visible: (prognosticClustering)
+      columns:
+        - name: group
+          title: "Group"
+          type: integer
+        - name: label
+          title: "Prognosis"
+          type: text
+        - name: size
+          title: "Size"
+          type: integer
+        - name: percentage
+          title: "Percentage %"
+          type: number
+          format: zto
+        - name: pattern
+          title: "Expression Pattern"
+          type: text
+
+    - name: survivalTable
+      title: Survival Analysis (Cox Regression)
+      type: Table
+      visible: (prognosticClustering)
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: hazard_ratio
+          title: "Hazard Ratio"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto
+        - name: significance
+          title: "Significance"
+          type: text
+
+    - name: differentialTable
+      title: Differential Diagnosis Results (Olsen Method)
+      type: Table
+      visible: (differentialDiagnosis)
+      columns:
+        - name: tumor_type
+          title: "Tumor Type"
+          type: text
+        - name: predicted_group
+          title: "Predicted Group"
+          type: integer
+        - name: confidence
+          title: "Confidence %"
+          type: number
+          format: zto
+        - name: outlier_status
+          title: "Outlier Status"
+          type: text
+
+    - name: antibodyPerformanceTable
+      title: Antibody Performance Analysis
+      type: Table
+      visible: (antibodyOptimization)
+      columns:
+        - name: antibody
+          title: "Antibody"
+          type: text
+        - name: sensitivity
+          title: "Sensitivity %"
+          type: number
+          format: zto
+        - name: specificity
+          title: "Specificity %"
+          type: number
+          format: zto
+        - name: ppv
+          title: "PPV %"
+          type: number
+          format: zto
+        - name: npv
+          title: "NPV %"
+          type: number
+          format: zto
+        - name: diagnostic_utility
+          title: "Diagnostic Utility"
+          type: text
+
+    - name: optimalPanelTable
+      title: Optimal Antibody Panel Combinations
+      type: Table
+      visible: (antibodyOptimization)
+      columns:
+        - name: combination
+          title: "Antibody Combination"
+          type: text
+        - name: target_tumor
+          title: "Target Tumor Type"
+          type: text
+        - name: combined_sensitivity
+          title: "Combined Sensitivity %"
+          type: number
+          format: zto
+        - name: combined_specificity
+          title: "Combined Specificity %"
+          type: number
+          format: zto
+        - name: recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: sterlacciTable
+      title: Sterlacci TIL Signature Analysis
+      type: Table
+      visible: (sterlacciAnalysis)
+      columns:
+        - name: cluster
+          title: "Cluster"
+          type: integer
+        - name: cluster_type
+          title: "Cluster Type"
+          type: text
+        - name: size
+          title: "Size"
+          type: integer
+        - name: cd4_cd8_ratio
+          title: "CD4/CD8 Ratio"
+          type: number
+          format: zto
+        - name: cd8_til_count
+          title: "CD8+ TIL Count"
+          type: number
+          format: zto
+        - name: granzyme_b_til
+          title: "Granzyme B+ TIL"
+          type: number
+          format: zto
+        - name: immune_signature
+          title: "Immune Signature"
+          type: text
+
+    - name: reproductibilityTable
+      title: Cluster Reproducibility Analysis
+      type: Table
+      visible: (reproductibilityTesting)
+      columns:
+        - name: cluster
+          title: "Cluster"
+          type: integer
+        - name: cohen_kappa
+          title: "Cohen's κ"
+          type: number
+          format: zto
+        - name: reproducibility
+          title: "Reproducibility"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: supervisedResultsTable
+      title: Supervised Clustering Results
+      type: Table
+      visible: (supervisedClustering)
+      columns:
+        - name: histotype
+          title: "Histotype"
+          type: text
+        - name: cluster
+          title: "Cluster"
+          type: integer
+        - name: size
+          title: "Size"
+          type: integer
+        - name: percentage
+          title: "Percentage %"
+          type: number
+          format: zto
+        - name: defining_markers
+          title: "Defining Markers"
+          type: text
+
+    - name: tilSignatureTable
+      title: TIL Signature Characterization
+      type: Table
+      visible: (sterlacciAnalysis)
+      columns:
+        - name: marker
+          title: "TIL Marker"
+          type: text
+        - name: cluster_1
+          title: "Cluster 1 Mean"
+          type: number
+          format: zto
+        - name: cluster_2
+          title: "Cluster 2 Mean"
+          type: number
+          format: zto
+        - name: cluster_3
+          title: "Cluster 3 Mean"
+          type: number
+          format: zto
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto
+        - name: significance
+          title: "Significance"
+          type: text
+
+    - name: dendrogramPlot
+      title: Expression Pattern Dendrogram
       type: Image
-      renderFun: .clusterPlot
-      width: 600
-      height: 400
+      visible: (showDendrogram)
+      renderFun: .visualizeDendrogram
+      width: 800
+      height: 600
 
     - name: heatmapPlot
-      title: Expression Heatmap
+      title: IHC Expression Heatmap
       type: Image
-      renderFun: .heatmapPlot
-      width: 600
-      height: 400
+      visible: (showHeatmap)
+      renderFun: .visualizeClusterHeatmap
+      width: 800
+      height: 600
+
+    - name: pcaPlot
+      title: PCA Biplot with Clusters
+      type: Image
+      visible: (showPCAPlot)
+      renderFun: .visualizePCABiplot
+      width: 800
+      height: 600
+
+    - name: validationPlot
+      title: Cluster Validation
+      type: Image
+      visible: (showClusterValidation)
+      renderFun: .visualizeClusterValidation
+      width: 700
+      height: 500
 
     - name: scoreDist
       title: Score Distribution
@@ -59,6 +404,13 @@ items:
       renderFun: .scoreDistPlot
       width: 600
       height: 400
+
+refs:
+    - sterlacci2020
+    - olsen2006  
+    - matsuoka2011
+    - carvalho2011
+    - laas2019
 ...
 
 # ---

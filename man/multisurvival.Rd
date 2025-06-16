@@ -280,7 +280,14 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$personTimeTable)}
 }
 \description{
-Function for Multivariable Survival Analysis using Cox-regression.
+Performs multivariable survival analysis using Cox proportional hazards
+regression. In multivariable survival analysis, person-time follow-up is
+crucial for properly adjusting for covariates while accounting for varying
+observation periods. The Cox proportional hazards model incorporates
+person-time by modeling the hazard function, which represents the
+instantaneous event rate per unit of person-time. When stratifying analyses
+or examining multiple predictors, the model accounts for how these factors
+influence event rates relative to the person-time at risk in each subgroup.
 }
 \examples{
 \donttest{

@@ -1,0 +1,67 @@
+---
+title: "Vignette: Creating Waterfall Plots to Show Patient Response to Therapy"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Creating Waterfall Plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r}
+# For vignette demonstration, ensure 'treatmentResponse' is available.
+# This data is part of the ClinicoPathDescriptives package.
+data(treatmentResponse, package = "ClinicoPathDescriptives")
+if (!exists("treatmentResponse")) {
+  set.seed(123)
+  
+  # Step 1: Create the data frame with the first two columns.
+  treatmentResponse <- data.frame(
+    patientID = 1:50,
+    change = round(c(rnorm(25, -40, 20), rnorm(25, 20, 25)))
+  )
+  
+  # Step 2: Now that 'treatmentResponse$change' exists, create the responseCategory column.
+  treatmentResponse$responseCategory <- factor(
+    ifelse(treatmentResponse$change <= -30, "Partial Response",
+      ifelse(treatmentResponse$change >= 20, "Progressive Disease", "Stable Disease")
+    )
+  )
+}
+head(treatmentResponse)
+```
+
+
+```{r}
+library(ClinicoPathDescriptives)
+# data(treatmentResponse, package = "ClinicoPathDescriptives") # if needed
+
+results_waterfall <- ClinicoPathDescriptives::waterfall(
+  data = treatmentResponse,
+  patientID = "patientID",
+  change = "change",
+  group = "responseCategory",
+  sline1 = TRUE, # Show line at +20%
+  sline2 = TRUE  # Show line at -30%
+)
+
+# To render in Quarto/R Markdown:
+# The results_waterfall$plot object is a ggplot, so it should print directly.
+# print(results_waterfall$plot)
+```
+
+
+```{r}
+print(results_waterfall$plot)
+```
+
+

@@ -105,6 +105,32 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$calculated_time$setValues(calculated_times)
             }
 
+            # Generate person-time information
+            person_time_info <- glue::glue("
+                <p><b>Person-Time Follow-Up</b> represents the total observation time contributed by all
+                participants in a study. Unlike simple participant counts, person-time captures both the number
+                of subjects and their observation duration. This is essential for calculating accurate incidence
+                rates and properly accounting for varying follow-up periods.</p>
+                
+                <p><b>Key Concepts:</b></p>
+                <ul>
+                    <li><b>Total Person-Time:</b> Sum of all individual follow-up periods</li>
+                    <li><b>Incidence Rate:</b> Number of events ÷ Total person-time</li>
+                    <li><b>Time Units:</b> Typically expressed as person-{self$options$output_unit}</li>
+                    <li><b>Censoring:</b> Accounts for participants leaving the study early</li>
+                </ul>
+                
+                <p><b>Applications:</b></p>
+                <ul>
+                    <li>Calculate event rates in epidemiological studies</li>
+                    <li>Compare incidence between different populations</li>
+                    <li>Adjust for varying follow-up periods in survival analysis</li>
+                    <li>Provide accurate denominators for rate calculations</li>
+                </ul>
+            ")
+            
+            self$results$personTimeInfo$setContent(person_time_info)
+
             # Generate summary statistics
             if (!is.null(calculated_times)) {
                 summary_stats <- list(
@@ -115,7 +141,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     min = min(calculated_times, na.rm = TRUE),
                     max = max(calculated_times, na.rm = TRUE),
                     missing = sum(is.na(calculated_times)),
-                    negative = sum(calculated_times < 0, na.rm = TRUE)
+                    negative = sum(calculated_times < 0, na.rm = TRUE),
+                    total_person_time = sum(calculated_times, na.rm = TRUE)
                 )
 
                 # if (any(time_data$time < 0, na.rm = TRUE)) {
@@ -145,10 +172,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                # Create summary text
+                # Create summary text with person-time metrics
                 summary_text <- glue::glue("
                     <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
                     Number of observations: {summary_stats$n}<br>
+                    Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
                     Mean time: {round(summary_stats$mean, 2)}<br>
                     Median time: {round(summary_stats$median, 2)}<br>
                     Standard deviation: {round(summary_stats$sd, 2)}<br>

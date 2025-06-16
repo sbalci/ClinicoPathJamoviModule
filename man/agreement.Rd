@@ -8,64 +8,161 @@ agreement(
   data,
   vars,
   sft = FALSE,
-  heatmap = FALSE,
+  heatmap = TRUE,
   heatmapDetails = FALSE,
   wght = "unweighted",
   exct = FALSE,
   kripp = FALSE,
   krippMethod = "nominal",
-  bootstrap = FALSE
+  bootstrap = FALSE,
+  icc = FALSE,
+  iccType = "ICC2",
+  pathologyContext = FALSE,
+  diagnosisVar = NULL,
+  confidenceLevel = 0.95,
+  minAgreement = 0.6,
+  showInterpretation = TRUE,
+  outlierAnalysis = FALSE,
+  pairwiseAnalysis = FALSE,
+  categoryAnalysis = FALSE,
+  diagnosticStyleAnalysis = FALSE,
+  styleClusterMethod = "ward",
+  styleDistanceMetric = "agreement",
+  numberOfStyleGroups = 3,
+  identifyDiscordantCases = FALSE,
+  raterCharacteristics = FALSE,
+  experienceVar = NULL,
+  trainingVar = NULL,
+  institutionVar = NULL,
+  specialtyVar = NULL
 )
 }
 \arguments{
-\item{data}{The data as a data frame. The data should be in long format,
-where each row is a unique observation.}
+\item{data}{The data as a data frame. Each row represents a case/subject,
+and columns represent different raters/observers.}
 
-\item{vars}{A string naming the variable from \code{data} that contains the
-diagnosis given by the observer, variable can be categorical or ordinal.}
+\item{vars}{Variables representing different raters/observers. Each
+variable should contain the ratings/diagnoses  given by each observer for
+the same set of cases.}
 
-\item{sft}{Boolean selection whether to show frequency table. Default is
-'false'. If 'true', the function will show frequency table for each
-observer.}
+\item{sft}{Show frequency tables for each rater and cross-tabulation tables
+for pairwise comparisons.}
 
-\item{heatmap}{Boolean selection whether to show agreement heatmap. Default
-is 'true'.}
+\item{heatmap}{Show agreement heatmap visualization with color-coded
+agreement levels.}
 
-\item{heatmapDetails}{Boolean selection whether to show detailed heatmap
-with kappa values. Default is 'false'.}
+\item{heatmapDetails}{Show detailed heatmap with kappa values and
+confidence intervals for all rater pairs.}
 
-\item{wght}{A list for the argument weight (wght), for weighted kappa
-analysis. Default is 'unweighted'. 'squared' or 'equal' should be selected
-only with ordinal variables. The function gives error if the variable type
-is not ordinal. The default is 'unweighted'.}
+\item{wght}{Weighting scheme for kappa analysis. Use 'squared' or 'equal'
+only with ordinal variables. Weighted kappa accounts for the degree of
+disagreement.}
 
-\item{exct}{Boolean selection whether to use exact kappa. Effects only more
-than 3 observers. Default is 'false'.}
+\item{exct}{Use exact method for Fleiss' kappa calculation with 3 or more
+raters. More accurate but computationally intensive.}
 
-\item{kripp}{Boolean selection whether to calculate Krippendorff's alpha.
-Default is 'false'.}
+\item{kripp}{Calculate Krippendorff's alpha, a generalized measure of
+reliability for any number of observers and data types.}
 
-\item{krippMethod}{Specifies the measurement level for Krippendorff's alpha
-calculation.}
+\item{krippMethod}{Measurement level for Krippendorff's alpha calculation.
+Choose based on your data type.}
 
 \item{bootstrap}{Calculate bootstrap confidence intervals for
-Krippendorff's alpha.}
+Krippendorff's alpha (1000 bootstrap samples).}
+
+\item{icc}{Calculate ICC for continuous or ordinal data. Appropriate for
+quantitative measurements.}
+
+\item{iccType}{Type of ICC to calculate. Choose based on your study design
+and measurement model.}
+
+\item{pathologyContext}{Enable pathology-specific analysis including
+diagnostic accuracy metrics and clinical interpretation.}
+
+\item{diagnosisVar}{Gold standard or consensus diagnosis for calculating
+diagnostic accuracy of individual raters.}
+
+\item{confidenceLevel}{Confidence level for confidence intervals (default
+95\\%).}
+
+\item{minAgreement}{Minimum kappa value considered acceptable agreement
+(default 0.6).}
+
+\item{showInterpretation}{Display interpretation guidelines for kappa
+values and ICC coefficients.}
+
+\item{outlierAnalysis}{Identify cases with consistently poor agreement
+across raters.}
+
+\item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
+raters.}
+
+\item{categoryAnalysis}{Analysis of agreement for each diagnostic category
+separately.}
+
+\item{diagnosticStyleAnalysis}{Identify diagnostic "schools" or "styles"
+among pathologists using hierarchical clustering  based on diagnostic
+patterns. This reveals whether pathologists cluster by experience,
+training, geographic region, or diagnostic philosophy.}
+
+\item{styleClusterMethod}{Hierarchical clustering method for identifying
+diagnostic styles. Ward's linkage  was used in the original Usubutun et al.
+2012 study.}
+
+\item{styleDistanceMetric}{Distance metric for style clustering. Percentage
+agreement was used in original study.}
+
+\item{numberOfStyleGroups}{Number of diagnostic style groups to identify.
+Original study found 3 distinct styles.}
+
+\item{identifyDiscordantCases}{Identify specific cases that distinguish
+different diagnostic style groups.}
+
+\item{raterCharacteristics}{Include analysis of rater characteristics
+(experience, training, institution)  in relation to diagnostic styles.}
+
+\item{experienceVar}{Variable indicating years of experience or experience
+level of each rater.}
+
+\item{trainingVar}{Variable indicating training institution or background
+of each rater.}
+
+\item{institutionVar}{Variable indicating current practice institution of
+each rater.}
+
+\item{specialtyVar}{Variable indicating specialty (e.g., generalist vs
+specialist) of each rater.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
-\code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$text2} \tab \tab \tab \tab \tab a html \cr
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$categoryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$outlierTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticAccuracyTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$pairwisePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$categoryPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticStyleTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$styleSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$discordantCasesTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$frequencyTables} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$irrtable$asDF}
+\code{results$overviewTable$asDF}
 
-\code{as.data.frame(results$irrtable)}
+\code{as.data.frame(results$overviewTable)}
 }
 \description{
 Function for Interrater Reliability.

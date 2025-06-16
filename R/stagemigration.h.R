@@ -132,10 +132,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Stage Migration Analysis",
                 refs=list(
+                    "willrogers1985",
+                    "stagemigration2009",
+                    "tnmstaging2017",
+                    "stagingbias2004",
                     "survival",
                     "survminer",
-                    "ggalluvial",
-                    "willrogers"))
+                    "ggalluvial"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

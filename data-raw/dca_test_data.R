@@ -1,14 +1,38 @@
-# ============================================================================
-# DECISION CURVE ANALYSIS TEST DATA GENERATOR
-# ============================================================================
-# This script creates comprehensive test data for the Decision Curve Analysis module
-# with multiple prediction models of varying performance characteristics
+# =============================================================================
+# Decision Curve Analysis Test Data Generation
+# =============================================================================
+# 
+# Description: Creates comprehensive test data for the Decision Curve Analysis 
+#              module with multiple prediction models of varying performance
+# 
+# Author: ClinicoPath Development Team
+# Created: 2024
+# 
+# Data includes:
+# - Cardiac event prediction scenario with 800 patients
+# - 5 prediction models with different performance characteristics
+# - Patient demographics and clinical risk factors
+# - Biomarker measurements and outcomes
+# 
+# =============================================================================
 
-library(dplyr)
-library(ggplot2)
+# Load required libraries with error checking
+required_packages <- c("here", "dplyr", "pROC")
+for (pkg in required_packages) {
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    stop(paste("Package", pkg, "is required but not installed. Please install it with: install.packages('", pkg, "')", sep = ""))
+  }
+}
 
 # Set seed for reproducibility
 set.seed(12345)
+
+# Create output directory if it doesn't exist
+data_dir <- here::here("data")
+if (!dir.exists(data_dir)) {
+  dir.create(data_dir, recursive = TRUE)
+  cat("Created data directory:", data_dir, "\n")
+}
 
 # ============================================================================
 # SCENARIO: PREDICTING CARDIAC EVENTS IN HIGH-RISK PATIENTS
@@ -207,14 +231,15 @@ for (model_name in c("basic_model", "enhanced_model", "biomarker_model", "miscal
 # ============================================================================
 
 # Save as CSV for jamovi import
-write.csv(dca_test_data, "./data/dca_test_data.csv", row.names = FALSE)
+output_csv <- file.path(data_dir, "dca_test_data.csv")
+output_rda <- file.path(data_dir, "dca_test_data.rda")
 
-# Save as RData for direct R use
-save(dca_test_data, file = "./data/dca_test_data.RData")
+write.csv(dca_test_data, output_csv, row.names = FALSE)
+save(dca_test_data, file = output_rda)
 
 cat("\nTest data saved as:\n")
-cat("- dca_test_data.csv (for jamovi)\n")
-cat("- dca_test_data.RData (for R)\n")
+cat("- CSV file:", output_csv, "\n")
+cat("- RDA file:", output_rda, "\n")
 
 # ============================================================================
 # EXAMPLE USAGE SCENARIOS

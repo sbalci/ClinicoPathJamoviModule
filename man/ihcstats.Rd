@@ -18,7 +18,31 @@ ihcstats(
   standardizeData = TRUE,
   showPCAPlot = FALSE,
   showClusterValidation = FALSE,
-  optimalKMethod = "elbow"
+  optimalKMethod = "elbow",
+  iterativeClustering = FALSE,
+  linkageMethod = "average",
+  showDiagnostics = FALSE,
+  groupVariable = NULL,
+  scoringScale = "standard",
+  tumorRegionAnalysis = FALSE,
+  centralRegionVar = NULL,
+  invasiveRegionVar = NULL,
+  prognosticClustering = FALSE,
+  survivalTimeVar = NULL,
+  survivalEventVar = NULL,
+  differentialDiagnosis = FALSE,
+  tumorTypeVar = NULL,
+  antibodyOptimization = FALSE,
+  calculateDiagnosticMetrics = FALSE,
+  olsenVisualization = FALSE,
+  clusterCutHeight = 0.5,
+  sterlacciAnalysis = FALSE,
+  supervisedClustering = FALSE,
+  reproductibilityTesting = FALSE,
+  immuneSignatureFocus = FALSE,
+  tilAnalysisMode = "combined_til",
+  multipleTesting = "bonferroni",
+  significanceThreshold = 5.5e-05
 )
 }
 \arguments{
@@ -49,6 +73,54 @@ ihcstats(
 \item{showClusterValidation}{.}
 
 \item{optimalKMethod}{.}
+
+\item{iterativeClustering}{.}
+
+\item{linkageMethod}{.}
+
+\item{showDiagnostics}{.}
+
+\item{groupVariable}{.}
+
+\item{scoringScale}{.}
+
+\item{tumorRegionAnalysis}{.}
+
+\item{centralRegionVar}{.}
+
+\item{invasiveRegionVar}{.}
+
+\item{prognosticClustering}{.}
+
+\item{survivalTimeVar}{.}
+
+\item{survivalEventVar}{.}
+
+\item{differentialDiagnosis}{.}
+
+\item{tumorTypeVar}{.}
+
+\item{antibodyOptimization}{.}
+
+\item{calculateDiagnosticMetrics}{.}
+
+\item{olsenVisualization}{.}
+
+\item{clusterCutHeight}{.}
+
+\item{sterlacciAnalysis}{.}
+
+\item{supervisedClustering}{.}
+
+\item{reproductibilityTesting}{.}
+
+\item{immuneSignatureFocus}{.}
+
+\item{tilAnalysisMode}{.}
+
+\item{multipleTesting}{.}
+
+\item{significanceThreshold}{.}
 }
 \value{
 A results object containing:
@@ -56,8 +128,24 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$hscoreTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$pcaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$silhouetteTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimalMarkersTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$regionalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$prognosticTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$differentialTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$antibodyPerformanceTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimalPanelTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$sterlacciTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$reproductibilityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$supervisedResultsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$tilSignatureTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$dendrogramPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$pcaPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$validationPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$scoreDist} \tab \tab \tab \tab \tab an image \cr
 }
 

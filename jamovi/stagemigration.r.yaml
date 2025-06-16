@@ -182,9 +182,12 @@ items:
           - plotMigration
 
 refs:
+    - willrogers1985
+    - stagemigration2009
+    - tnmstaging2017
+    - stagingbias2004
     - survival
     - survminer
     - ggalluvial
-    - willrogers
 
 ...

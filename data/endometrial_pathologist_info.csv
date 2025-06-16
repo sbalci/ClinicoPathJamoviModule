@@ -1,0 +1,16 @@
+"pathologist_id","experience_years","experience_level","training_institution","current_institution","specialty_focus","conservative_tendency","specialist_training"
+"Path_01",5,"Junior","Harvard","Academic_A","Gynecologic",0.2,TRUE
+"Path_02",8,"Junior","Johns Hopkins","Academic_A","Gynecologic",0.3,TRUE
+"Path_03",12,"Mid-level","Mayo","Academic_B","Gynecologic",0.1,TRUE
+"Path_04",25,"Senior","Harvard","Academic_A","Gynecologic",0.2,TRUE
+"Path_05",30,"Senior","Johns Hopkins","Academic_A","Gynecologic",0.3,TRUE
+"Path_06",35,"Senior","Mayo","Academic_B","Gynecologic",0.1,TRUE
+"Path_07",3,"Junior","Stanford","Community_West","General",0.6,FALSE
+"Path_08",6,"Junior","UCSF","Community_West","General",0.7,FALSE
+"Path_09",15,"Mid-level","Columbia","Community_East","General",0.4,FALSE
+"Path_10",20,"Mid-level","Stanford","Community_West","General",0.6,FALSE
+"Path_11",28,"Senior","UCSF","Community_West","General",0.7,FALSE
+"Path_12",32,"Senior","Columbia","Community_East","General",0.4,FALSE
+"Path_13",7,"Junior","European_School","International","Gynecologic",0.3,TRUE
+"Path_14",18,"Mid-level","European_School","International","Gynecologic",0.2,TRUE
+"Path_15",22,"Senior","Asian_School","International","General",0.5,TRUE
