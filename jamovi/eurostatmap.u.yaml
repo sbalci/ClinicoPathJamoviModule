@@ -1,0 +1,70 @@
+title: Eurostat Map
+name: eurostatmap
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Data Source
+        children:
+          - type: CheckBox
+            name: use_local_data
+          - type: CheckBox
+            name: cache_data
+            enable: (use_local_data == false)
+          - type: CheckBox
+            name: add_to_data
+            enable: (use_local_data == false)
+      - type: TextBox
+        name: dataset_id
+        format: string
+        enable: (use_local_data == false)
+      - type: VariableSupplier
+        name: indicatorSupplier
+        populate: auto
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: indicator
+                maxItemCount: 1
+                isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Geographic Options
+        children:
+          - type: ComboBox
+            name: geo_level
+          - type: TextBox
+            name: year
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Map Appearance
+        children:
+          - type: ComboBox
+            name: map_type
+          - type: ComboBox
+            name: color_palette
+          - type: TextBox
+            name: map_title
+            format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Data Classification
+        children:
+          - type: ComboBox
+            name: classification_method
+          - type: TextBox
+            name: n_classes
+            format: number

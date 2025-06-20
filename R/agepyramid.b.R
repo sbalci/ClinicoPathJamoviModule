@@ -1,10 +1,10 @@
 #' @title Age Pyramid
-#' @description Generates an age pyramid plot from the provided data.
-#' The function allows customization of bin width (age group granularity) and plot title.
+#' @description Generates an age pyramid plot from the provided data using ggcharts::pyramid_chart.
+#' The function allows customization of bin width (age group granularity), plot title, and bar colors.
 #' It creates a visually appealing plot showing the distribution of age by gender.
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @import ggcharts
 #' @import dplyr
 #' @import tidyr
 #' @import tibble
@@ -109,30 +109,23 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Set plot title (using user option if provided)
             plot_title <- if (!is.null(self$options$plot_title)) self$options$plot_title else "Age Pyramid"
+            
+            # Get bar colors from options
+            bar_colors <- c(
+                self$options$color1 %||% "#1F77B4",
+                self$options$color2 %||% "#FF7F0E"
+            )
 
-            # Create a visually appealing age pyramid plot ----
-            plot <- ggplot2::ggplot(data = plotData,
-                                    mapping = ggplot2::aes(
-                                        x = Pop,
-                                        y = ifelse(Gender == "Female", -n, n),
-                                        fill = Gender
-                                    )) +
-                ggplot2::geom_col(width = 0.7, color = "black", show.legend = TRUE) +  # Added border for clarity
-                ggplot2::coord_flip() +
-                ggplot2::scale_y_continuous(labels = abs,
-                                            limits = c(-max(plotData$n, na.rm = TRUE), max(plotData$n, na.rm = TRUE))
-                ) +
-                ggplot2::labs(x = "Age Group",
-                              y = "Population Count",
-                              title = plot_title,
-                              fill = "Gender") +
-                ggplot2::theme_minimal() +  # Clean minimal theme for improved visuals
-                ggplot2::theme(
-                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                    axis.text = ggplot2::element_text(size = 10),
-                    axis.title = ggplot2::element_text(size = 12),
-                    legend.position = "bottom"
-                )
+            # Create age pyramid plot using ggcharts ----
+            plot <- ggcharts::pyramid_chart(
+                data = plotData,
+                x = Pop,
+                y = n,
+                group = Gender,
+                bar_colors = bar_colors,
+                title = plot_title,
+                xlab = "Population Count"
+            )
 
             # Apply any additional theme modifications passed via ggtheme
             plot <- plot + ggtheme

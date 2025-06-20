@@ -74,6 +74,26 @@ options:
           jamovi: >
             The title displayed on the age pyramid plot.
 
+    - name: color1
+      title: First Color
+      type: String
+      default: "#1F77B4"
+      description:
+          R: >
+            First color for the pyramid chart bars.
+          jamovi: >
+            First color for the pyramid chart bars.
+
+    - name: color2
+      title: Second Color
+      type: String
+      default: "#FF7F0E"
+      description:
+          R: >
+            Second color for the pyramid chart bars.
+          jamovi: >
+            Second color for the pyramid chart bars.
+
 
 
 ...

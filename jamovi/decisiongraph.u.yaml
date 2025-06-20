@@ -1,0 +1,166 @@
+title: Decision Tree Graph
+name: decisiongraph
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+    permitted:
+      - numeric
+      - factor
+    populate: manual
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: decisions
+            maxItemCount: 10
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: probabilities
+            maxItemCount: 20
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: costs
+            maxItemCount: 20
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: utilities
+            maxItemCount: 20
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: outcomes
+            maxItemCount: 20
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: healthStates
+            maxItemCount: 10
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: transitionProbs
+            maxItemCount: 50
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Tree Structure
+        children:
+          - type: ComboBox
+            name: treeType
+
+      - type: Label
+        label: Tree Layout
+        children:
+          - type: ComboBox
+            name: layout
+
+      - type: Label
+        label: Markov Options
+        children:
+          - type: TextBox
+            name: cycleLength
+            format: number
+            suffix: ' years'
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: nodeShapes
+
+          - type: CheckBox
+            name: showProbabilities
+
+          - type: CheckBox
+            name: showCosts
+
+          - type: CheckBox
+            name: showUtilities
+
+          - type: CheckBox
+            name: nodeLabels
+
+          - type: CheckBox
+            name: branchLabels
+
+          - type: Label
+            label: Color Scheme
+            children:
+              - type: ComboBox
+                name: colorScheme
+
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: calculateExpectedValues
+
+          - type: CheckBox
+            name: sensitivityAnalysis
+
+          - type: TextBox
+            name: discountRate
+            format: number
+            suffix: '%'
+
+          - type: TextBox
+            name: timeHorizon
+            format: number
+            suffix: ' years'
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: summaryTable
+
+          - type: CheckBox
+            name: tornado

@@ -1,0 +1,183 @@
+---
+name: decisiongraph
+title: Decision Tree Graph
+jrs: '1.1'
+
+items:
+    - name: treeplot
+      title: Decision Tree
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .treeplot
+      description: Decision tree visualization with nodes and branches
+
+    - name: summaryTable
+      title: Expected Values Summary
+      type: Table
+      visible: (summaryTable)
+      rows: 0
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: expectedCost
+          title: Expected Cost
+          type: number
+          format: currency
+        - name: expectedUtility
+          title: Expected Utility
+          type: number
+          format: zto3
+        - name: icer
+          title: ICER
+          type: number
+          format: currency
+        - name: netBenefit
+          title: Net Benefit
+          type: number
+          format: currency
+
+    - name: nodeTable
+      title: Node Details
+      type: Table
+      rows: 0
+      columns:
+        - name: nodeId
+          title: Node ID
+          type: text
+        - name: nodeType
+          title: Type
+          type: text
+        - name: nodeLabel
+          title: Label
+          type: text
+        - name: probability
+          title: Probability
+          type: number
+          format: zto3
+        - name: cost
+          title: Cost
+          type: number
+          format: currency
+        - name: utility
+          title: Utility
+          type: number
+          format: zto3
+
+    - name: tornadoplot
+      title: Tornado Diagram
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .tornadoplot
+      visible: (tornado)
+      description: Sensitivity analysis tornado diagram
+
+    - name: sensitivityTable
+      title: Sensitivity Analysis
+      type: Table
+      visible: (sensitivityAnalysis)
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: baseValue
+          title: Base Value
+          type: number
+          format: zto3
+        - name: lowValue
+          title: Low Value
+          type: number
+          format: zto3
+        - name: highValue
+          title: High Value
+          type: number
+          format: zto3
+        - name: lowResult
+          title: Low Result
+          type: number
+          format: currency
+        - name: highResult
+          title: High Result
+          type: number
+          format: currency
+        - name: range
+          title: Range
+          type: number
+          format: currency
+
+    - name: text1
+      title: Tree Structure
+      type: Html
+      visible: false
+
+    - name: text2
+      title: Calculations
+      type: Html
+      visible: false
+
+    - name: markovTable
+      title: Markov Transition Matrix
+      type: Table
+      visible: (treeType:markov)
+      rows: 0
+      columns:
+        - name: fromState
+          title: From State
+          type: text
+        - name: toState
+          title: To State
+          type: text
+        - name: transitionProb
+          title: Transition Probability
+          type: number
+          format: zto3
+        - name: annualCost
+          title: Annual Cost
+          type: number
+          format: currency
+        - name: annualUtility
+          title: Annual Utility
+          type: number
+          format: zto3
+
+    - name: markovCohortTable
+      title: Markov Cohort Analysis
+      type: Table
+      visible: (treeType:markov)
+      rows: 0
+      columns:
+        - name: cycle
+          title: Cycle
+          type: integer
+        - name: healthyProp
+          title: Healthy %
+          type: number
+          format: pc
+        - name: sickProp
+          title: Sick %
+          type: number
+          format: pc
+        - name: deadProp
+          title: Dead %
+          type: number
+          format: pc
+        - name: cumulativeCost
+          title: Cumulative Cost
+          type: number
+          format: currency
+        - name: cumulativeUtility
+          title: Cumulative Utility
+          type: number
+          format: zto3
+
+    - name: markovPlot
+      title: Markov State Transitions
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .markovPlot
+      visible: (treeType:markov)
+      description: Markov state transition diagram

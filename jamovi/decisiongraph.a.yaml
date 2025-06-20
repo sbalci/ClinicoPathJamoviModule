@@ -1,0 +1,299 @@
+---
+name: decisiongraph
+title: Decision Tree Graph
+menuGroup: meddecide
+menuSubgroup: Decision
+menuSubtitle: Cost-Effectiveness Decision Tree Visualization
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >
+        Creates decision tree graphs for cost-effectiveness analysis with typical
+        decision nodes, chance nodes, and terminal nodes. Supports visualization
+        of treatment pathways, probabilities, costs, and outcomes.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame containing decision tree parameters.
+
+    # Tree Structure Options
+    - name: treeType
+      title: Tree Type
+      type: List
+      options:
+        - name: simple
+          title: Simple Decision Tree
+        - name: markov
+          title: Markov Model Tree
+        - name: costeffectiveness
+          title: Cost-Effectiveness Tree
+      default: costeffectiveness
+      description:
+          ui: >
+            Type of decision tree to create.
+          R: >
+            Type of decision tree to create.
+
+    # Node Definition Options
+    - name: decisions
+      title: Decision Nodes
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Variables representing decision nodes (treatment options).
+          R: >
+            Variables representing decision nodes (treatment options).
+
+    # Markov Model Specific Options
+    - name: healthStates
+      title: Health States
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Variables defining health states for Markov model (e.g., Healthy, Sick, Dead).
+          R: >
+            Variables defining health states for Markov model.
+
+    - name: transitionProbs
+      title: Transition Probabilities
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables containing transition probabilities between health states.
+          R: >
+            Variables containing transition probabilities between health states.
+
+    - name: cycleLength
+      title: Cycle Length
+      type: Number
+      default: 1
+      min: 0.1
+      max: 10
+      description:
+          ui: >
+            Length of each Markov cycle in years (e.g., 1 = annual cycles).
+          R: >
+            Length of each Markov cycle in years.
+
+    - name: probabilities
+      title: Probability Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables containing probability values for chance nodes.
+          R: >
+            Variables containing probability values for chance nodes.
+
+    - name: costs
+      title: Cost Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables containing cost values for terminal nodes.
+          R: >
+            Variables containing cost values for terminal nodes.
+
+    - name: utilities
+      title: Utility Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables containing utility/effectiveness values.
+          R: >
+            Variables containing utility/effectiveness values.
+
+    - name: outcomes
+      title: Outcome Variables
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Variables representing clinical outcomes.
+          R: >
+            Variables representing clinical outcomes.
+
+    # Visualization Options
+    - name: layout
+      title: Tree Layout
+      type: List
+      options:
+        - name: horizontal
+          title: Horizontal (Left to Right)
+        - name: vertical
+          title: Vertical (Top to Bottom)
+        - name: radial
+          title: Radial
+      default: horizontal
+      description:
+          ui: >
+            Layout orientation for the decision tree.
+          R: >
+            Layout orientation for the decision tree.
+
+    - name: nodeShapes
+      title: Show Node Shapes
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Use different shapes for different node types (squares for decisions, circles for chance nodes, triangles for outcomes).
+          R: >
+            Use different shapes for different node types.
+
+    - name: showProbabilities
+      title: Show Probabilities
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display probability values on tree branches.
+          R: >
+            Display probability values on tree branches.
+
+    - name: showCosts
+      title: Show Costs
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display cost values at terminal nodes.
+          R: >
+            Display cost values at terminal nodes.
+
+    - name: showUtilities
+      title: Show Utilities
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display utility/effectiveness values.
+          R: >
+            Display utility/effectiveness values.
+
+    # Analysis Options
+    - name: calculateExpectedValues
+      title: Calculate Expected Values
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate and display expected costs and utilities.
+          R: >
+            Calculate and display expected costs and utilities.
+
+    - name: sensitivityAnalysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform one-way sensitivity analysis on key parameters.
+          R: >
+            Perform one-way sensitivity analysis on key parameters.
+
+    - name: discountRate
+      title: Discount Rate
+      type: Number
+      default: 0.03
+      min: 0
+      max: 0.20
+      description:
+          ui: >
+            Annual discount rate for future costs and benefits (0-20%).
+          R: >
+            Annual discount rate for future costs and benefits.
+
+    - name: timeHorizon
+      title: Time Horizon (years)
+      type: Number
+      default: 10
+      min: 1
+      max: 100
+      description:
+          ui: >
+            Time horizon for the analysis in years.
+          R: >
+            Time horizon for the analysis in years.
+
+    # Display Options
+    - name: nodeLabels
+      title: Show Node Labels
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display descriptive labels for nodes.
+          R: >
+            Display descriptive labels for nodes.
+
+    - name: branchLabels
+      title: Show Branch Labels
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display labels on tree branches.
+          R: >
+            Display labels on tree branches.
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: colorblind
+          title: Colorblind Friendly
+        - name: medical
+          title: Medical Theme
+        - name: economic
+          title: Economic Theme
+      default: medical
+      description:
+          ui: >
+            Color scheme for the decision tree visualization.
+          R: >
+            Color scheme for the decision tree visualization.
+
+    # Output Options
+    - name: summaryTable
+      title: Summary Table
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show summary table with expected values and cost-effectiveness ratios.
+          R: >
+            Show summary table with expected values and cost-effectiveness ratios.
+
+    - name: tornado
+      title: Tornado Diagram
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Create tornado diagram for sensitivity analysis.
+          R: >
+            Create tornado diagram for sensitivity analysis.
+
+...

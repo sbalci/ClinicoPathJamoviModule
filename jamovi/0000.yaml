@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.24
+version: 0.0.3.25
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-06-15'
+date: '2024-06-20'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -18,6 +18,13 @@ analyses:
     ns: ClinicoPath
     menuGroup: Exploration
     menuTitle: Age Pyramid
+    menuSubgroup: ClinicoPath Descriptive Plots
+    ribbon: analyses
+  - title: Eurostat Map
+    name: eurostatmap
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuTitle: Eurostat Map
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
   - title: Alluvial Diagrams
@@ -889,6 +896,18 @@ analyses:
     menuTitle: Bayesian Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
+    ribbon: analyses
+  - title: Decision Tree Graph
+    name: decisiongraph
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuTitle: Decision Tree Graph
+    menuSubgroup: Decision
+    menuSubtitle: Cost-Effectiveness Decision Tree Visualization
+    description: >
+      Creates decision tree graphs for cost-effectiveness analysis with typical
+      decision nodes, chance nodes, and terminal nodes. Supports visualization
+      of treatment pathways, probabilities, costs, and outcomes.
     ribbon: analyses
   - title: Decision Panel Optimization
     name: decisionpanel

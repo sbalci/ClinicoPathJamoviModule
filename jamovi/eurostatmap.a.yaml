@@ -1,0 +1,175 @@
+---
+name: eurostatmap
+title: Eurostat Map
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: dataset_id
+      title: Eurostat Dataset ID
+      type: String
+      default: "demo_r_pjangrp3"
+      description:
+          R: >
+            The Eurostat dataset identifier to retrieve data from.
+          jamovi: >
+            The Eurostat dataset identifier to retrieve data from.
+
+    - name: indicator
+      title: Indicator Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            The variable containing the indicator values to map.
+          jamovi: >
+            The variable containing the indicator values to map.
+
+    - name: geo_level
+      title: Geographic Level
+      type: List
+      options:
+        - name: nuts0
+          title: Countries (NUTS 0)
+        - name: nuts1  
+          title: Major Regions (NUTS 1)
+        - name: nuts2
+          title: Basic Regions (NUTS 2)
+        - name: nuts3
+          title: Small Regions (NUTS 3)
+      default: nuts2
+      description:
+          R: >
+            The geographic level for mapping.
+          jamovi: >
+            The geographic level for mapping.
+
+    - name: year
+      title: Year
+      type: Number
+      default: 2022
+      description:
+          R: >
+            The year for which to display data.
+          jamovi: >
+            The year for which to display data.
+
+    - name: map_type
+      title: Map Type
+      type: List
+      options:
+        - name: static
+          title: Static Map
+        - name: interactive
+          title: Interactive Map
+      default: static
+      description:
+          R: >
+            Choose between static or interactive map visualization.
+          jamovi: >
+            Choose between static or interactive map visualization.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - name: viridis
+          title: Viridis
+        - name: plasma
+          title: Plasma
+        - name: blues
+          title: Blues
+        - name: reds
+          title: Reds
+        - name: greens
+          title: Greens
+      default: viridis
+      description:
+          R: >
+            Color palette for the choropleth map.
+          jamovi: >
+            Color palette for the choropleth map.
+
+    - name: map_title
+      title: Map Title
+      type: String
+      default: "Eurostat Map"
+      description:
+          R: >
+            The title displayed on the map.
+          jamovi: >
+            The title displayed on the map.
+
+    - name: use_local_data
+      title: Use Local Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use local data instead of downloading from Eurostat.
+          jamovi: >
+            Use local data instead of downloading from Eurostat.
+
+    - name: classification_method
+      title: Classification Method
+      type: List
+      options:
+        - name: quantile
+          title: Quantile
+        - name: equal
+          title: Equal Intervals
+        - name: jenks
+          title: Natural Breaks (Jenks)
+        - name: pretty
+          title: Pretty Breaks
+      default: quantile
+      description:
+          R: >
+            Method for classifying data into color categories.
+          jamovi: >
+            Method for classifying data into color categories.
+
+    - name: n_classes
+      title: Number of Classes
+      type: Number
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of classes for data classification.
+          jamovi: >
+            Number of classes for data classification.
+
+    - name: cache_data
+      title: Cache Downloaded Data
+      type: Bool
+      default: true
+      description:
+          R: >
+            Cache downloaded Eurostat data to avoid repeated downloads.
+          jamovi: >
+            Cache downloaded Eurostat data to avoid repeated downloads.
+
+    - name: add_to_data
+      title: Add Downloaded Data to Spreadsheet
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add the downloaded Eurostat data to jamovi's data spreadsheet.
+          jamovi: >
+            Add the downloaded Eurostat data to jamovi's data spreadsheet.
+
+...
