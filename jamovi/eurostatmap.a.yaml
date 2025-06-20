@@ -18,7 +18,7 @@ options:
     - name: dataset_id
       title: Eurostat Dataset ID
       type: String
-      default: "demo_r_pjangrp3"
+      default: "demo_r_gind3"
       description:
           R: >
             The Eurostat dataset identifier to retrieve data from.

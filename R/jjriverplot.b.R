@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @importFrom ggalluvial geom_alluvium geom_stratum geom_text scale_x_discrete
+#' @importFrom ggalluvial geom_alluvium geom_stratum
 #' @importFrom dplyr group_by summarize n %>% mutate
 #' @importFrom rlang sym !!
 #' @export

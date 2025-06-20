@@ -6,7 +6,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dataset_id = "demo_r_pjangrp3",
+            dataset_id = "demo_r_gind3",
             indicator = NULL,
             geo_level = "nuts2",
             year = 2022,
@@ -28,7 +28,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..dataset_id <- jmvcore::OptionString$new(
                 "dataset_id",
                 dataset_id,
-                default="demo_r_pjangrp3")
+                default="demo_r_gind3")
             private$..indicator <- jmvcore::OptionVariable$new(
                 "indicator",
                 indicator,
@@ -284,7 +284,7 @@ eurostatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 eurostatmap <- function(
     data,
-    dataset_id = "demo_r_pjangrp3",
+    dataset_id = "demo_r_gind3",
     indicator,
     geo_level = "nuts2",
     year = 2022,

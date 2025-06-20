@@ -6,7 +6,7 @@
 \usage{
 eurostatmap(
   data,
-  dataset_id = "demo_r_pjangrp3",
+  dataset_id = "demo_r_gind3",
   indicator,
   geo_level = "nuts2",
   year = 2022,
