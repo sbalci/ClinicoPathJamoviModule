@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom stats chisq.test p.adjust
-#' @importFrom vcd assocplot
+#' @import vcd
 #' @export
 
 pairchi2Class <- if (requireNamespace('jmvcore')) R6::R6Class(

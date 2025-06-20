@@ -52,31 +52,59 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                     if (is.null(cached_data)) {
-                        # Download data
-                        message("Downloading data from Eurostat...")
-                        plotData <- eurostat::get_eurostat(dataset_id, time_format = "num", cache = self$options$cache_data)
+                        # Download data with progress indication
+                        self$results$.setStatus("Downloading data from Eurostat...")
+                        
+                        # Set timeout for download (default is 60 seconds)
+                        options(timeout = 120)
+                        
+                        start_time <- Sys.time()
+                        plotData <- eurostat::get_eurostat(
+                            id = dataset_id, 
+                            time_format = "num", 
+                            cache = self$options$cache_data,
+                            update_cache = FALSE
+                        )
+                        end_time <- Sys.time()
+                        
+                        download_time <- round(as.numeric(end_time - start_time, units = "secs"), 1)
+                        message(paste("Downloaded", nrow(plotData), "rows in", download_time, "seconds"))
                         
                         # Filter by year if specified
                         if (!is.null(self$options$year)) {
+                            # Filter by TIME_PERIOD column (the actual column name in eurostat data)
                             plotData <- plotData %>%
-                                dplyr::filter(time == self$options$year)
+                                dplyr::filter(TIME_PERIOD == self$options$year)
                         }
                         
-                        # Cache the data if caching is enabled
-                        if (self$options$cache_data) {
+                        # Cache the filtered data if caching is enabled
+                        if (self$options$cache_data && nrow(plotData) > 0) {
                             cache_env <- get(".eurostat_cache", envir = .GlobalEnv)
                             cache_env[[cache_key]] <- plotData
                             assign(".eurostat_cache", cache_env, envir = .GlobalEnv)
+                            message("Data cached for future use")
                         }
                     } else {
                         plotData <- cached_data
+                        message("Using cached data")
                     }
                     
                     # Use 'values' as the indicator variable for Eurostat data
                     indicator_var <- "values"
                     
                 }, error = function(e) {
-                    self$results$.setError(paste("Error downloading data:", e$message))
+                    error_msg <- paste("Error downloading Eurostat data:", e$message)
+                    
+                    # Provide helpful error messages for common issues
+                    if (grepl("timeout", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste(error_msg, "\n\nSuggestion: The dataset may be large. Try enabling caching or use a smaller dataset.")
+                    } else if (grepl("not found", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste(error_msg, "\n\nSuggestion: Check if the dataset ID is correct. Use eurostat::get_eurostat_toc() to find valid IDs.")
+                    } else if (grepl("network", e$message, ignore.case = TRUE)) {
+                        error_msg <- paste(error_msg, "\n\nSuggestion: Check your internet connection.")
+                    }
+                    
+                    self$results$.setError(error_msg)
                     return()
                 })
             }
