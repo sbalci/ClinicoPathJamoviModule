@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.24
-Date: 2024-06-15
+Version: 0.0.3.25
+Date: 2024-06-20
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -129,7 +129,12 @@ Imports:
     scales,
     reshape2,
     rcrossref,
-    httr
+    httr,
+    ggcharts,
+    eurostat,
+    tmap,
+    sf,
+    giscoR
 VignetteBuilder: 
     knitr, 
     tiff, 

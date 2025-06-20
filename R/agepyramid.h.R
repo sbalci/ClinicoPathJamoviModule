@@ -10,7 +10,9 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             gender = NULL,
             female = NULL,
             bin_width = 5,
-            plot_title = "Age Pyramid", ...) {
+            plot_title = "Age Pyramid",
+            color1 = "#1F77B4",
+            color2 = "#FF7F0E", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -45,25 +47,39 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plot_title",
                 plot_title,
                 default="Age Pyramid")
+            private$..color1 <- jmvcore::OptionString$new(
+                "color1",
+                color1,
+                default="#1F77B4")
+            private$..color2 <- jmvcore::OptionString$new(
+                "color2",
+                color2,
+                default="#FF7F0E")
 
             self$.addOption(private$..age)
             self$.addOption(private$..gender)
             self$.addOption(private$..female)
             self$.addOption(private$..bin_width)
             self$.addOption(private$..plot_title)
+            self$.addOption(private$..color1)
+            self$.addOption(private$..color2)
         }),
     active = list(
         age = function() private$..age$value,
         gender = function() private$..gender$value,
         female = function() private$..female$value,
         bin_width = function() private$..bin_width$value,
-        plot_title = function() private$..plot_title$value),
+        plot_title = function() private$..plot_title$value,
+        color1 = function() private$..color1$value,
+        color2 = function() private$..color2$value),
     private = list(
         ..age = NA,
         ..gender = NA,
         ..female = NA,
         ..bin_width = NA,
-        ..plot_title = NA)
+        ..plot_title = NA,
+        ..color1 = NA,
+        ..color2 = NA)
 )
 
 agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -150,6 +166,8 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bin_width The width of the age bins in years. Adjust this to change
 #'   the granularity of the age groups.
 #' @param plot_title The title displayed on the age pyramid plot.
+#' @param color1 First color for the pyramid chart bars.
+#' @param color2 Second color for the pyramid chart bars.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
@@ -169,7 +187,9 @@ agepyramid <- function(
     gender,
     female,
     bin_width = 5,
-    plot_title = "Age Pyramid") {
+    plot_title = "Age Pyramid",
+    color1 = "#1F77B4",
+    color2 = "#FF7F0E") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agepyramid requires jmvcore to be installed (restart may be required)")
@@ -189,7 +209,9 @@ agepyramid <- function(
         gender = gender,
         female = female,
         bin_width = bin_width,
-        plot_title = plot_title)
+        plot_title = plot_title,
+        color1 = color1,
+        color2 = color2)
 
     analysis <- agepyramidClass$new(
         options = options,
