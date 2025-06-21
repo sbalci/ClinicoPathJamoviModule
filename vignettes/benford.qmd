@@ -34,7 +34,7 @@ head(payments)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the Benford analysis
 results <- benford(

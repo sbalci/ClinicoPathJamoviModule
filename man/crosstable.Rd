@@ -49,7 +49,7 @@ Function for making Cross Tables.
 \donttest{
 # Example usage:
 # dat <- as.data.frame(your_data)
-# ClinicoPathDescriptives::crosstable(
+# ClinicoPath::crosstable(
 #   data = dat,
 #   vars = vars(YourRowVariable),
 #   group = "YourGroupingVariable",

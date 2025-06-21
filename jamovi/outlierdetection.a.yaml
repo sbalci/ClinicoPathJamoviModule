@@ -1,0 +1,185 @@
+---
+name: outlierdetection
+title: Advanced Outlier Detection
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Advanced outlier detection using multiple statistical methods from the easystats performance package.
+    This module provides comprehensive outlier detection through univariate methods (Z-scores, IQR, confidence intervals),
+    multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and composite scoring across multiple algorithms.
+    Complements existing data quality assessment modules with state-of-the-art outlier detection capabilities.
+    Perfect for clinical research data quality control and preprocessing.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select variables for outlier detection analysis.
+      # 2. Choose detection methods (univariate, multivariate, or composite).
+      # 3. Configure thresholds and visualization options.
+      # 4. Review outlier results and exclusion recommendations.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables for Analysis
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Continuous variables to analyze for outliers. The module will detect outliers
+            based on the selected variables using the chosen detection methods.
+
+    - name: method_category
+      title: Detection Method Category
+      type: List
+      options:
+        - title: "Univariate Methods"
+          name: univariate
+        - title: "Multivariate Methods"  
+          name: multivariate
+        - title: "Composite (Multiple Methods)"
+          name: composite
+        - title: "All Methods"
+          name: all
+      default: composite
+      description:
+          R: >
+            Category of outlier detection methods to use. Univariate methods analyze each variable
+            separately, multivariate methods consider relationships between variables, and composite
+            combines multiple methods for robust detection.
+
+    - name: univariate_methods
+      title: Univariate Methods
+      type: List
+      options:
+        - title: "Robust Z-Score (MAD-based)"
+          name: zscore_robust
+        - title: "Standard Z-Score"
+          name: zscore
+        - title: "Interquartile Range (IQR)"
+          name: iqr
+        - title: "Equal-Tailed Interval"
+          name: eti
+        - title: "Highest Density Interval"
+          name: hdi
+      default: zscore_robust
+      description:
+          R: >
+            Specific univariate method for outlier detection when univariate category is selected.
+
+    - name: multivariate_methods
+      title: Multivariate Methods
+      type: List
+      options:
+        - title: "Mahalanobis Distance"
+          name: mahalanobis
+        - title: "Robust Mahalanobis Distance"
+          name: mahalanobis_robust
+        - title: "Minimum Covariance Determinant (MCD)"
+          name: mcd
+        - title: "OPTICS Clustering"
+          name: optics
+        - title: "Local Outlier Factor (LOF)"
+          name: lof
+      default: mahalanobis
+      description:
+          R: >
+            Specific multivariate method for outlier detection when multivariate category is selected.
+
+    - name: composite_threshold
+      title: Composite Score Threshold
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+      description:
+          R: >
+            Threshold for composite outlier score (0.1-1.0). Default 0.5 means observations 
+            classified as outliers by at least half of the methods are considered outliers.
+
+    - name: zscore_threshold
+      title: Z-Score Threshold
+      type: Number
+      min: 1.0
+      max: 5.0
+      default: 3.29
+      description:
+          R: >
+            Threshold for Z-score based methods. Default 3.29 corresponds to 99.9% confidence
+            interval (approximately 0.1% extreme observations).
+
+    - name: iqr_multiplier
+      title: IQR Multiplier
+      type: Number
+      min: 1.0
+      max: 3.0
+      default: 1.7
+      description:
+          R: >
+            Multiplier for IQR-based outlier detection. Default 1.7 is more conservative
+            than Tukey's 1.5, reducing false positive detection.
+
+    - name: confidence_level
+      title: Confidence Level for Intervals
+      type: Number
+      min: 0.90
+      max: 0.999
+      default: 0.999
+      description:
+          R: >
+            Confidence level for interval-based methods (ETI, HDI). Default 99.9% identifies
+            the most extreme observations.
+
+    - name: show_outlier_table
+      title: Show Outlier Summary Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display a comprehensive table of outlier detection results including
+            outlier scores, distances, and classification for each observation.
+
+    - name: show_method_comparison
+      title: Show Method Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare results across different detection methods when using composite approach.
+
+    - name: show_exclusion_summary
+      title: Show Exclusion Recommendations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide summary of observations recommended for exclusion and impact analysis.
+
+    - name: show_visualization
+      title: Show Outlier Visualization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate plots showing outlier detection results and distribution of outlier scores.
+
+    - name: show_interpretation
+      title: Show Analysis Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed interpretation of outlier detection results and methodological notes.

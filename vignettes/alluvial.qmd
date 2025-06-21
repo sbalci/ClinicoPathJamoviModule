@@ -38,7 +38,7 @@ head(patient_flow)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the alluvial analysis
 results <- alluvial(

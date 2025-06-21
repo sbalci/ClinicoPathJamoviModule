@@ -147,7 +147,13 @@ Imports:
     ggprism,
     ggflowchart,
     tinytable,
-    ggrain
+    ggrain,
+    performance,
+    datefixR,
+    anytime,
+    TidyDensity,
+    stringr,
+    ggmice
 VignetteBuilder: 
     knitr, 
     tiff, 

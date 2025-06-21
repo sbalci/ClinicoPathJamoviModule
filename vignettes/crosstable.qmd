@@ -42,7 +42,7 @@ head(cancer_trial)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the crosstable analysis with NEJM style
 results <- crosstable(

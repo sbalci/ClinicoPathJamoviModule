@@ -36,7 +36,7 @@ head(brca_data)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the summarydata analysis with distribution diagnostics enabled
 results <- summarydata(

@@ -1,7 +1,7 @@
 ---
 name: toxicityprofile
 title: Treatment Toxicity Profile
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Safety Analysis
 version: '0.0.3'
 jas: '1.2'

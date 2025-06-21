@@ -1,7 +1,7 @@
 ---
 name:  pairchi2
 title: Pairwise Chi-Square Test
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Comparisons
 menuSubtitle: Association
 version: '1.0.0'

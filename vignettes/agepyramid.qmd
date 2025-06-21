@@ -35,7 +35,7 @@ head(cohort_data)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the age pyramid analysis
 results <- agepyramid(

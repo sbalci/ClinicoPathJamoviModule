@@ -42,10 +42,10 @@ head(treatmentResponse)
 
 
 ```{r}
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 # data(treatmentResponse, package = "ClinicoPathDescriptives") # if needed
 
-results_waterfall <- ClinicoPathDescriptives::waterfall(
+results_waterfall <- ClinicoPath::waterfall(
   data = treatmentResponse,
   patientID = "patientID",
   change = "change",

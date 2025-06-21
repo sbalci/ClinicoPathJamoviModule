@@ -23,7 +23,7 @@ analyses:
   - title: Eurostat Map
     name: eurostatmap
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Eurostat Map
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -57,7 +57,7 @@ analyses:
   - title: Enhanced Cross Tables (Pivot)
     name: crosstablepivot
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Enhanced Cross Tables (Pivot)
     description: >
@@ -69,7 +69,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -95,7 +95,7 @@ analyses:
   - title: Automated Exploratory Data Analysis
     name: autoeda
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Automated Exploratory Data Analysis
     description: >
@@ -114,7 +114,7 @@ analyses:
   - title: Data Quality Assessment
     name: dataquality
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Data Quality Assessment
     description: >
@@ -123,6 +123,65 @@ analyses:
 
       missing value analysis, and data completeness summary (similar to sumvar's
       dup() function).
+    ribbon: analyses
+  - title: Advanced Outlier Detection
+    name: outlierdetection
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Advanced Outlier Detection
+    menuSubtitle: easystats Performance Package
+    description: >
+      Advanced outlier detection using multiple statistical methods from the
+      easystats performance package.
+
+      This module provides comprehensive outlier detection through univariate
+      methods (Z-scores, IQR, confidence intervals),
+
+      multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and
+      composite scoring across multiple algorithms.
+
+      Complements existing data quality assessment modules with state-of-the-art
+      outlier detection capabilities.
+
+      Perfect for clinical research data quality control and preprocessing.
+    ribbon: analyses
+  - title: Date Field Correction
+    name: datecorrection
+    ns: ClinicoPath
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Date Field Correction
+    menuSubtitle: Multi-Package Date Standardization
+    description: >
+      Comprehensive date field correction and standardization using multiple R
+      packages (datefixR, anytime, lubridate). This module handles messy date
+      formats commonly found in clinical databases: different separators, month
+      representations, missing components, and ambiguous formats. Provides
+      standardized date outputs with detailed correction reports and quality
+      assessment. Perfect for clinical research data preprocessing and database
+      standardization workflows.
+    ribbon: analyses
+  - title: Statistical Distribution Generator
+    name: tidydensity
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Statistical Distribution Generator
+    menuSubtitle: TidyDensity - Distribution Analysis & Simulation
+    description: >
+      Statistical distribution generator and analyzer using TidyDensity package.
+
+      Generate random data from various statistical distributions with
+      comprehensive 
+
+      visualization and analysis capabilities. Create density plots, quantile
+      plots, 
+
+      probability plots, and Q-Q plots. Perfect for simulation studies, power
+      analysis,
+
+      distribution comparison, and statistical education in clinical research.
     ribbon: analyses
   - title: Table One
     name: tableone
@@ -138,7 +197,7 @@ analyses:
   - title: Modern Table Formatting
     name: tinytable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Modern Table Formatting
     menuSubtitle: TinyTable - Zero Dependencies
@@ -160,7 +219,7 @@ analyses:
   - title: Subgroup Analysis Forest Plot
     name: subgroupforest
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Clinical Plots
     menuTitle: Subgroup Analysis Forest Plot
     description: >-
@@ -170,7 +229,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -180,7 +239,7 @@ analyses:
   - title: Treatment Toxicity Profile
     name: toxicityprofile
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Safety Analysis
     menuTitle: Treatment Toxicity Profile
     description: >-
@@ -190,7 +249,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -201,7 +260,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -220,7 +279,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -245,7 +304,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: JJStatsPlotD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
@@ -261,7 +320,7 @@ analyses:
   - title: GraphPad Prism Style Plots
     name: ggprism
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: GraphPad Prism Style Plots
     menuSubtitle: Publication-Ready Scientific Visualization
@@ -318,7 +377,7 @@ analyses:
   - title: Grouped Hazard Forest Plot
     name: groupedforest
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Grouped Hazard Forest Plot
     menuSubtitle: Subgroup Analysis, Treatment vs Control by Variants
@@ -408,7 +467,7 @@ analyses:
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Bibliometrics
     menuTitle: Find Retracted Papers from DOI
     menuSubtitle: Bibliometrics
@@ -434,14 +493,14 @@ analyses:
   - title: Data Quality Assessment
     name: checkdata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Data Quality Assessment
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
   - title: Confidence Intervals for Mean Values
     name: ciSingle
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Confidence Intervals for Mean Values
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
@@ -632,7 +691,7 @@ analyses:
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Pairwise Chi-Square Test
     menuSubgroup: ClinicoPath Comparisons
     menuSubtitle: Association
@@ -769,7 +828,7 @@ analyses:
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Reports
     menuTitle: Study Flowchart
     ribbon: analyses
@@ -777,7 +836,7 @@ analyses:
   - title: ggFlowchart
     name: ggflowchart
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Reports
     menuTitle: ggFlowchart
     menuSubtitle: Modern ggplot2 Flowcharts
@@ -837,7 +896,7 @@ analyses:
       'Creates treemap visualizations for categorical data'
     ribbon: analyses
   - title: Waffle Charts
-    name: waffle
+    name: jwaffle
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuSubgroup: Distribution
@@ -848,7 +907,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideD
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -918,7 +977,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: meddecide
     menuTitle: Compare Medical Decision Tests
-    menuSubgroup: Decision
+    menuSubgroup: DecisionD
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
     description: >
       Function for comparing multiple Medical Decision Tests. Compares
@@ -1079,7 +1138,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: meddecide
     menuTitle: Decision Tree Graph
-    menuSubgroup: Decision
+    menuSubgroup: DecisionD
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
     description: >
       Creates decision tree graphs for cost-effectiveness analysis with typical
@@ -1125,6 +1184,30 @@ analyses:
     description: |
       'Function for generating river plots (alluvial diagrams) to visualize
       flows and transitions over time or between categories.'
+  - title: Missing Data Analysis and Imputation
+    name: missingdata
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Missing Data Analysis and Imputation
+    menuSubtitle: mice & ggmice - Multiple Imputation
+    description: >
+      Comprehensive missing data analysis and multiple imputation using mice and
+      ggmice packages.
+
+      Analyze missing data patterns, perform multiple imputation by chained
+      equations (MICE),
+
+      and visualize imputation results. Includes diagnostic plots for
+      convergence assessment,
+
+      comparison of observed vs imputed data, and quality evaluation. Perfect
+      for clinical
+
+      research data preprocessing where missing data is common and proper
+      handling is critical
+
+      for valid statistical inference.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

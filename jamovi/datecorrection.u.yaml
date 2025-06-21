@@ -1,0 +1,16 @@
+title: Date Field Correction
+name: datecorrection
+jus: '3.0'
+stage: 0
+compilerMode: aggresive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Date Variables to Correct
+        children:
+          - type: VariablesListBox
+            name: date_vars
+            isTarget: true

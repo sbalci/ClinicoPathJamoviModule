@@ -10,7 +10,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 library(dplyr)
-library(jjstatsplot)
+library(ClinicoPath)
 library(ggstatsplot)
 data(mtcars)
 

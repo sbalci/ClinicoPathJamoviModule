@@ -40,7 +40,7 @@ Some of the available variables are:
 
 ```{r load-data, eval=FALSE}
 # load the included data
-library(jsurvival)
+library(ClinicoPath)
 data(histopathology)
 head(histopathology)
 ```

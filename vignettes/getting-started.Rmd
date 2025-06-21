@@ -1,0 +1,270 @@
+---
+title: "Getting Started with ClinicoPathDescriptives"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with ClinicoPathDescriptives}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+ClinicoPathDescriptives is a comprehensive R package designed for descriptive analysis in clinicopathological research. It provides both programmatic R functions and a graphical user interface through jamovi, making advanced statistical analysis accessible to researchers with varying levels of programming experience.
+
+### Key Features
+
+- **Descriptive Statistics**: Generate comprehensive "Table One" summaries
+- **Cross-tabulations**: Create contingency tables with appropriate statistical tests  
+- **Visualization Tools**: Age pyramids, alluvial diagrams, Venn diagrams, and more
+- **Treatment Response Analysis**: Waterfall and swimmer plots for oncology research
+- **Data Quality Assessment**: Benford's law analysis for fraud detection
+- **Dual Interface**: Use in R or through jamovi's point-and-click interface
+
+## Installation
+
+### Install from GitHub
+
+```{r eval=FALSE}
+# Install development version
+if (!require("remotes")) install.packages("remotes")
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
+### Install as jamovi Module
+
+Download the `.jmo` file from [Releases](https://github.com/sbalci/ClinicoPathDescriptives/releases) and install in jamovi via: `jamovi menu > Modules > Install from file`
+
+## Loading the Package
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)    # For data manipulation
+library(ggplot2)  # For additional plotting
+```
+
+## Example Dataset
+
+The package includes a comprehensive histopathology dataset with 250 cancer patients and 38 variables including demographics, pathological features, biomarkers, and outcomes.
+
+```{r}
+# Load the example dataset
+data(histopathology)
+
+# Examine the structure
+str(histopathology, give.attr = FALSE)
+```
+
+```{r}
+# Quick overview of key variables
+histopathology %>%
+  select(Age, Sex, Grade, TStage, Group, Outcome, OverallTime) %>%
+  head(10)
+```
+
+## Basic Descriptive Analysis
+
+### Table One
+
+Generate a comprehensive descriptive summary table - the cornerstone of clinical research manuscripts:
+
+```{r}
+# Basic Table One
+tableone(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI"),
+  group = "Group"
+)
+```
+
+### Continuous Variables Summary
+
+Generate detailed summaries for continuous variables:
+
+```{r}
+summarydata(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "MeasurementA"),
+  group = "Grade"
+)
+```
+
+### Categorical Variables Summary
+
+Analyze categorical variables with counts and percentages:
+
+```{r}
+reportcat(
+  data = histopathology,
+  vars = c("Sex", "Grade", "TStage", "LVI", "PNI"),
+  group = "Group"
+)
+```
+
+## Cross-tabulation Analysis
+
+Create contingency tables with appropriate statistical tests:
+
+```{r}
+crosstable(
+  data = histopathology,
+  rows = "Grade",
+  cols = "Group",
+  total = TRUE,
+  expected = TRUE,
+  percentages = "row"
+)
+```
+
+```{r}
+# Multiple variables cross-tabulation
+crosstable(
+  data = histopathology,
+  rows = c("Grade", "TStage"),
+  cols = "LymphNodeMetastasis",
+  total = TRUE,
+  percentages = "column"
+)
+```
+
+## Data Visualization
+
+### Age Pyramid
+
+Visualize age and sex distribution:
+
+```{r}
+agepyramid(
+  data = histopathology,
+  age = "Age",
+  sex = "Sex",
+  group = "Group"
+)
+```
+
+### Alluvial Diagrams
+
+Show relationships between categorical variables:
+
+```{r}
+alluvial(
+  data = histopathology,
+  vars = c("Grade", "TStage", "LymphNodeMetastasis", "Outcome")
+)
+```
+
+### Venn Diagrams
+
+Analyze overlap between sets:
+
+```{r}
+# Create binary indicators for Venn diagram
+histopathology_venn <- histopathology %>%
+  mutate(
+    LVI_present = ifelse(LVI == "Present", 1, 0),
+    PNI_present = ifelse(PNI == "Present", 1, 0),
+    LN_positive = ifelse(LymphNodeMetastasis == "Present", 1, 0)
+  )
+
+venn(
+  data = histopathology_venn,
+  vars = c("LVI_present", "PNI_present", "LN_positive"),
+  names = c("LVI", "PNI", "LN Metastasis")
+)
+```
+
+## Data Quality Assessment
+
+### Benford's Law Analysis
+
+Assess data quality using Benford's law - useful for detecting fabricated data:
+
+```{r}
+# Analyze first digits of continuous measurements
+benford(
+  data = histopathology,
+  var = "MeasurementA"
+)
+```
+
+### Variable Tree Summary
+
+Get a hierarchical overview of your dataset:
+
+```{r}
+vartree(
+  data = histopathology,
+  vars = c("Grade", "TStage", "LVI", "PNI", "LymphNodeMetastasis")
+)
+```
+
+## Working with Treatment Response Data
+
+Load the treatment response dataset for oncology-specific analyses:
+
+```{r}
+# Load treatment response data
+data(treatmentResponse)
+head(treatmentResponse)
+```
+
+### Waterfall Plot
+
+Visualize individual patient treatment responses:
+
+```{r}
+waterfall(
+  data = treatmentResponse,
+  patient_id = "PatientID",
+  response = "ResponseValue"
+)
+```
+
+## Integration with jamovi
+
+All functions in this package are also available through jamovi's graphical interface:
+
+1. **Install the module** in jamovi
+2. **Navigate to**: `Exploration > ClinicoPath Descriptives`
+3. **Select your analysis** function
+4. **Configure options** through the GUI
+5. **Generate results** with point-and-click ease
+
+### jamovi Advantages
+
+- No programming required
+- Interactive parameter adjustment
+- Real-time result updates
+- Export capabilities for reports
+- Accessible to non-programmers
+
+## Next Steps
+
+This vignette covered the basic functionality of ClinicoPathDescriptives. For more advanced usage, see:
+
+- **Clinical Workflow Vignette**: Complete analysis workflows for clinical research
+- **Treatment Response Analysis**: Advanced oncology analysis techniques  
+- **Data Quality and Exploration**: Comprehensive data assessment methods
+- **Visualization Gallery**: Advanced plotting techniques and customization
+
+## Citation
+
+```{r eval=FALSE}
+citation("ClinicoPathDescriptives")
+```
+
+## Support
+
+- 📖 [Documentation](https://www.serdarbalci.com/ClinicoPathDescriptives/)
+- 🐛 [Report Issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
+- 🌐 [jamovi Module Hub](https://sbalci.github.io/ClinicoPathJamoviModule/)

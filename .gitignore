@@ -47,3 +47,4 @@ _tododata
 inst/doc
 **/.quarto/
 /.claude
+.venv/

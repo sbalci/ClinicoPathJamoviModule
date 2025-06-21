@@ -1,0 +1,130 @@
+---
+name: missingdata
+title: Missing Data Analysis and Imputation
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: pattern_plot
+      title: Missing Data Pattern
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_pattern
+      visible: (show_pattern_plot)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+
+    - name: pattern_table
+      title: Missing Data Pattern Table
+      type: Html
+      visible: (show_pattern_table)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+
+    - name: correlation_plot
+      title: Variable Correlations
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot_correlation
+      visible: (show_correlation_plot)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+
+    - name: flux_plot
+      title: Influx/Outflux Analysis
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_flux
+      visible: (show_flux_plot)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+
+    - name: trace_plot
+      title: Convergence Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_trace
+      visible: (show_trace_plot && analysis_type:imputation || analysis_type:complete)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+        - n_imputations
+        - max_iterations
+        - imputation_method
+        - seed_value
+
+    - name: density_plot
+      title: Observed vs Imputed Distributions
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_density
+      visible: (show_density_plot && analysis_type:imputation || analysis_type:complete)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+        - n_imputations
+        - max_iterations
+        - imputation_method
+        - seed_value
+
+    - name: stripplot
+      title: Strip Plot Comparison
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_strip
+      visible: (show_stripplot && analysis_type:imputation || analysis_type:complete)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+        - n_imputations
+        - max_iterations
+        - imputation_method
+        - seed_value
+
+    - name: scatterplot
+      title: Scatter Plot Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_scatter
+      visible: (show_scatterplot && analysis_type:imputation || analysis_type:complete)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+        - n_imputations
+        - max_iterations
+        - imputation_method
+        - seed_value
+
+    - name: imputation_summary
+      title: Imputation Summary
+      type: Html
+      visible: (show_imputation_summary && analysis_type:imputation || analysis_type:complete)
+      clearWith:
+        - analysis_vars
+        - analysis_type
+        - n_imputations
+        - max_iterations
+        - imputation_method
+        - seed_value
+
+    - name: interpretation
+      title: Usage Guide
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+        - analysis_type

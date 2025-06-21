@@ -33,10 +33,10 @@ head(histopathology)
 
 
 ```{r}
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 # data(histopathology, package="ClinicoPathDescriptives") # if needed
 
-results_venn <- ClinicoPathDescriptives::venn(
+results_venn <- ClinicoPath::venn(
   data = histopathology,
   var1 = "LVI",
   var1true = "Present",

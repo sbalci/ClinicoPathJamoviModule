@@ -26,9 +26,9 @@
 #'
 #'
 
-waffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "waffleClass",
-    inherit = waffleBase,
+jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "jwaffleClass",
+    inherit = jwaffleBase,
     private = list(
         .init = function() {
             self$results$plot$setSize(600, 500)

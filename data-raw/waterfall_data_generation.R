@@ -15,7 +15,7 @@ print(data_percentage)
 write.csv(data_percentage, "./data/data_percentage.csv", row.names = FALSE)
 
 # Example usage with the waterfall function:
-# ClinicoPathDescriptives::waterfall(
+# ClinicoPath::waterfall(
 #     data = data_percentage,
 #     patientID = "PatientID",
 #     responseVar = "Response",
@@ -45,7 +45,7 @@ write.csv(data_raw, "./data/data_raw.csv", row.names = FALSE)
 
 
 # Example usage with the waterfall function:
-# ClinicoPathDescriptives::waterfall(
+# ClinicoPath::waterfall(
 #     data = data_raw,
 #     patientID = "PatientID",
 #     responseVar = "Measurement",
@@ -69,7 +69,7 @@ write.csv(data_subgroup, "./data/data_subgroup.csv", row.names = FALSE)
 
 
 # Example usage with subgroup analysis:
-# ClinicoPathDescriptives::waterfall(
+# ClinicoPath::waterfall(
 #     data = data_subgroup,
 #     patientID = "PatientID",
 #     responseVar = "Response",
@@ -102,7 +102,7 @@ write.csv(data_longitudinal, "./data/data_longitudinal.csv", row.names = FALSE)
 
 
 # Example usage with additional metrics enabled:
-# ClinicoPathDescriptives::waterfall(
+# ClinicoPath::waterfall(
 #     data = data_longitudinal,
 #     patientID = "PatientID",
 #     responseVar = "Measurement",

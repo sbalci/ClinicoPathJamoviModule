@@ -38,7 +38,7 @@ head(histopathology)
 # You would need the ClinicoPathDescriptives package installed and dplyr for vars().
 # Alternatively, pass variables as a character vector: c("Age", "Sex", "Grade", "TumorSize", "LVI")
 
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 library(dplyr) # For the vars() helper, not strictly needed if using character vector
 
 # Ensure the data is available (e.g., from the package or your own)

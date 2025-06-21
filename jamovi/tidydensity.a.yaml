@@ -1,0 +1,374 @@
+---
+name: tidydensity
+title: Statistical Distribution Generator
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: TidyDensity - Distribution Analysis & Simulation
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Statistical distribution generator and analyzer using TidyDensity package.
+    Generate random data from various statistical distributions with comprehensive 
+    visualization and analysis capabilities. Create density plots, quantile plots, 
+    probability plots, and Q-Q plots. Perfect for simulation studies, power analysis,
+    distribution comparison, and statistical education in clinical research.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select distribution type (Normal, Gamma, Beta, etc.)
+      # 2. Configure distribution parameters (mean, sd, etc.)
+      # 3. Set number of observations and simulations
+      # 4. Choose visualization options and analysis type
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: distribution_type
+      title: Distribution Type
+      type: List
+      options:
+        - title: "Normal (Gaussian)"
+          name: normal
+        - title: "Beta"
+          name: beta
+        - title: "Gamma"
+          name: gamma
+        - title: "Exponential"
+          name: exponential
+        - title: "Uniform"
+          name: uniform
+        - title: "Chi-Square"
+          name: chisquare
+        - title: "Student's t"
+          name: t
+        - title: "F Distribution"
+          name: f
+        - title: "Binomial"
+          name: binomial
+        - title: "Poisson"
+          name: poisson
+        - title: "Weibull"
+          name: weibull
+        - title: "Log-Normal"
+          name: lognormal
+        - title: "Logistic"
+          name: logistic
+        - title: "Cauchy"
+          name: cauchy
+      default: normal
+      description:
+          R: >
+            Type of statistical distribution to generate. Each distribution has
+            specific parameters that can be configured.
+
+    - name: n_observations
+      title: Number of Observations
+      type: Number
+      min: 10
+      max: 10000
+      default: 100
+      description:
+          R: >
+            Number of random observations to generate from the selected distribution.
+
+    - name: n_simulations
+      title: Number of Simulations
+      type: Number
+      min: 1
+      max: 20
+      default: 1
+      description:
+          R: >
+            Number of simulation runs. Multiple simulations allow comparison
+            of sampling variability.
+
+    # Normal Distribution Parameters
+    - name: normal_mean
+      title: Mean (μ)
+      type: Number
+      default: 0
+      description:
+          R: >
+            Mean parameter for Normal distribution.
+
+    - name: normal_sd
+      title: Standard Deviation (σ)
+      type: Number
+      min: 0.01
+      default: 1
+      description:
+          R: >
+            Standard deviation parameter for Normal distribution.
+
+    # Beta Distribution Parameters
+    - name: beta_shape1
+      title: Shape 1 (α)
+      type: Number
+      min: 0.1
+      default: 2
+      description:
+          R: >
+            First shape parameter for Beta distribution.
+
+    - name: beta_shape2
+      title: Shape 2 (β)
+      type: Number
+      min: 0.1
+      default: 5
+      description:
+          R: >
+            Second shape parameter for Beta distribution.
+
+    # Gamma Distribution Parameters
+    - name: gamma_shape
+      title: Shape (k)
+      type: Number
+      min: 0.1
+      default: 2
+      description:
+          R: >
+            Shape parameter for Gamma distribution.
+
+    - name: gamma_scale
+      title: Scale (θ)
+      type: Number
+      min: 0.1
+      default: 1
+      description:
+          R: >
+            Scale parameter for Gamma distribution.
+
+    # Exponential Distribution Parameters
+    - name: exponential_rate
+      title: Rate (λ)
+      type: Number
+      min: 0.01
+      default: 1
+      description:
+          R: >
+            Rate parameter for Exponential distribution.
+
+    # Uniform Distribution Parameters
+    - name: uniform_min
+      title: Minimum
+      type: Number
+      default: 0
+      description:
+          R: >
+            Minimum value for Uniform distribution.
+
+    - name: uniform_max
+      title: Maximum
+      type: Number
+      default: 1
+      description:
+          R: >
+            Maximum value for Uniform distribution.
+
+    # Chi-Square Distribution Parameters
+    - name: chisq_df
+      title: Degrees of Freedom
+      type: Number
+      min: 1
+      default: 3
+      description:
+          R: >
+            Degrees of freedom for Chi-Square distribution.
+
+    # t Distribution Parameters
+    - name: t_df
+      title: Degrees of Freedom
+      type: Number
+      min: 1
+      default: 5
+      description:
+          R: >
+            Degrees of freedom for Student's t distribution.
+
+    # F Distribution Parameters
+    - name: f_df1
+      title: Numerator DF
+      type: Number
+      min: 1
+      default: 5
+      description:
+          R: >
+            Numerator degrees of freedom for F distribution.
+
+    - name: f_df2
+      title: Denominator DF
+      type: Number
+      min: 1
+      default: 10
+      description:
+          R: >
+            Denominator degrees of freedom for F distribution.
+
+    # Binomial Distribution Parameters
+    - name: binomial_size
+      title: Number of Trials (n)
+      type: Number
+      min: 1
+      default: 10
+      description:
+          R: >
+            Number of trials for Binomial distribution.
+
+    - name: binomial_prob
+      title: Success Probability (p)
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.5
+      description:
+          R: >
+            Probability of success for Binomial distribution.
+
+    # Poisson Distribution Parameters
+    - name: poisson_lambda
+      title: Rate (λ)
+      type: Number
+      min: 0.1
+      default: 3
+      description:
+          R: >
+            Rate parameter for Poisson distribution.
+
+    # Weibull Distribution Parameters
+    - name: weibull_shape
+      title: Shape (k)
+      type: Number
+      min: 0.1
+      default: 2
+      description:
+          R: >
+            Shape parameter for Weibull distribution.
+
+    - name: weibull_scale
+      title: Scale (λ)
+      type: Number
+      min: 0.1
+      default: 1
+      description:
+          R: >
+            Scale parameter for Weibull distribution.
+
+    # Log-Normal Distribution Parameters
+    - name: lognormal_meanlog
+      title: Mean of Log
+      type: Number
+      default: 0
+      description:
+          R: >
+            Mean of the logarithm for Log-Normal distribution.
+
+    - name: lognormal_sdlog
+      title: SD of Log
+      type: Number
+      min: 0.01
+      default: 1
+      description:
+          R: >
+            Standard deviation of the logarithm for Log-Normal distribution.
+
+    # Logistic Distribution Parameters
+    - name: logistic_location
+      title: Location
+      type: Number
+      default: 0
+      description:
+          R: >
+            Location parameter for Logistic distribution.
+
+    - name: logistic_scale
+      title: Scale
+      type: Number
+      min: 0.01
+      default: 1
+      description:
+          R: >
+            Scale parameter for Logistic distribution.
+
+    # Cauchy Distribution Parameters
+    - name: cauchy_location
+      title: Location
+      type: Number
+      default: 0
+      description:
+          R: >
+            Location parameter for Cauchy distribution.
+
+    - name: cauchy_scale
+      title: Scale
+      type: Number
+      min: 0.01
+      default: 1
+      description:
+          R: >
+            Scale parameter for Cauchy distribution.
+
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+        - title: "Density Plot"
+          name: density
+        - title: "Quantile Plot"
+          name: quantile
+        - title: "Probability Plot"
+          name: probability
+        - title: "Q-Q Plot"
+          name: qq
+      default: density
+      description:
+          R: >
+            Type of visualization to generate for the distribution data.
+
+    - name: plot_enhancements
+      title: Plot Enhancements
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add enhanced plot features like points, rug plots, and smooth lines.
+
+    - name: show_statistics
+      title: Show Distribution Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive statistics for the generated distribution.
+
+    - name: show_summary_table
+      title: Show Summary Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary table of generated data with key statistics.
+
+    - name: show_parameter_info
+      title: Show Parameter Information
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display information about distribution parameters and their effects.
+
+    - name: show_interpretation
+      title: Show Usage Guide
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display guidance on statistical distributions and their applications
+            in clinical research.
