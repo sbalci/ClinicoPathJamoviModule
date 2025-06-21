@@ -1,0 +1,297 @@
+---
+name: ggprism
+title: GraphPad Prism Style Plots
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates publication-ready plots with GraphPad Prism styling using ggprism package.
+    This module provides Prism-style themes, color palettes, and statistical annotations
+    to create professional scientific visualizations. Perfect for clinical research 
+    publications, biostatistics, and academic presentations. Supports various plot 
+    types including violin plots, box plots, scatter plots, and dose-response curves
+    with seamless ggplot2 integration and Prism-style aesthetics.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame with continuous and categorical variables.
+      # 2. Select variables for X and Y axes.
+      # 3. Choose grouping variables for statistical comparisons.
+      # 4. Customize with Prism-style themes and color palettes.
+      # 5. Add statistical annotations and publication formatting.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: x_var
+      title: X-Axis Variable
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variable for the X-axis. Can be continuous or categorical.
+
+    - name: y_var
+      title: Y-Axis Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Continuous variable for the Y-axis.
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional categorical variable for grouping and statistical comparisons.
+
+    - name: facet_var
+      title: Faceting Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional variable for creating separate panels in a grid layout.
+
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+        - title: "Violin Plot"
+          name: violin
+        - title: "Box Plot"
+          name: boxplot
+        - title: "Scatter Plot"
+          name: scatter
+        - title: "Column Plot"
+          name: column
+        - title: "Line Plot"
+          name: line
+      default: violin
+      description:
+        R: >
+          Type of plot to create with Prism styling.
+
+    - name: prism_theme
+      title: Prism Theme
+      type: List
+      options:
+        - title: "Default Prism"
+          name: default
+        - title: "Prism White"
+          name: white
+        - title: "Prism Minimal"
+          name: minimal
+        - title: "Prism Publication"
+          name: publication
+      default: default
+      description:
+        R: >
+          GraphPad Prism theme variant to apply.
+
+    - name: prism_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: "Floral"
+          name: floral
+        - title: "Candy Bright"
+          name: candy_bright
+        - title: "Neon"
+          name: neon
+        - title: "Starry"
+          name: starry
+        - title: "Flames"
+          name: flames
+        - title: "Pastels"
+          name: pastels
+        - title: "Pearl"
+          name: pearl
+        - title: "Viridis"
+          name: viridis
+      default: floral
+      description:
+        R: >
+          Prism-style color palette for different groups.
+
+    - name: show_points
+      title: Show Data Points
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, overlays individual data points on the plot.
+
+    - name: point_size
+      title: Point Size
+      type: Number
+      min: 0.1
+      max: 5
+      default: 1.5
+      description:
+        R: >
+          Size of individual data points.
+
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.6
+      description:
+        R: >
+          Transparency level for data points (0 = transparent, 1 = opaque).
+
+    - name: show_statistics
+      title: Show Statistical Comparisons
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, performs statistical tests and adds p-value annotations.
+
+    - name: stats_method
+      title: Statistical Test Method
+      type: List
+      options:
+        - title: "Automatic"
+          name: auto
+        - title: "t-test"
+          name: ttest
+        - title: "Wilcoxon"
+          name: wilcoxon
+        - title: "ANOVA"
+          name: anova
+        - title: "Kruskal-Wallis"
+          name: kruskal
+      default: auto
+      description:
+        R: >
+          Statistical test method for group comparisons.
+
+    - name: pvalue_format
+      title: P-value Format
+      type: List
+      options:
+        - title: "p = 0.001"
+          name: exact
+        - title: "p < 0.001"
+          name: scientific
+        - title: "*** / ** / *"
+          name: stars
+        - title: "ns / * / ** / ***"
+          name: symbols
+      default: exact
+      description:
+        R: >
+          Format for displaying p-values in statistical annotations.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "GraphPad Prism Style Plot"
+      description:
+        R: >
+          Custom title for the plot.
+
+    - name: x_label
+      title: X-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for X-axis. If empty, uses variable name.
+
+    - name: y_label
+      title: Y-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for Y-axis. If empty, uses variable name.
+
+    - name: legend_position
+      title: Legend Position
+      type: List
+      options:
+        - title: "Right"
+          name: right
+        - title: "Left"
+          name: left
+        - title: "Top"
+          name: top
+        - title: "Bottom"
+          name: bottom
+        - title: "None"
+          name: none
+      default: right
+      description:
+        R: >
+          Position of the legend in the plot.
+
+    - name: base_size
+      title: Base Font Size
+      type: Number
+      min: 8
+      max: 24
+      default: 12
+      description:
+        R: >
+          Base font size for all text elements in the plot.
+
+    - name: show_summary
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays summary statistics table.
+
+    - name: error_bars
+      title: Error Bar Type
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Standard Error"
+          name: se
+        - title: "Standard Deviation"
+          name: sd
+        - title: "95% CI"
+          name: ci
+      default: se
+      description:
+        R: >
+          Type of error bars to display (for applicable plot types).
+
+...

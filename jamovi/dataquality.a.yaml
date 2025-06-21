@@ -60,4 +60,50 @@ options:
         R: >
           If TRUE, analyzes completeness across all selected variables simultaneously.
 
+    - name: visual_analysis
+      title: "Visual Data Exploration (visdat)"
+      type: Bool
+      default: true
+      description:
+        R: >
+          Enable visual data exploration using visdat package integration.
+          Provides visual summaries of data types and missing patterns.
+
+    - name: visdat_type
+      title: "Visual Analysis Type"
+      type: List
+      options:
+        - title: "Data Overview (vis_dat)"
+          name: vis_dat
+        - title: "Missing Patterns (vis_miss)"
+          name: vis_miss
+        - title: "Data Types (vis_guess)"
+          name: vis_guess
+        - title: "Value Expectations (vis_expect)"
+          name: vis_expect
+        - title: "All Visual Analyses"
+          name: all_visual
+      default: vis_dat
+      description:
+        R: >
+          Choose the type of visual analysis to perform using visdat.
+
+    - name: missing_threshold_visual
+      title: "Missing Data Highlight Threshold (%)"
+      type: Number
+      min: 0
+      max: 100
+      default: 10
+      description:
+        R: >
+          Threshold percentage for highlighting variables with missing values in visual analysis.
+
+    - name: export_plots
+      title: "Enable Plot Export"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Enable export functionality for visual data quality plots.
+
 ...

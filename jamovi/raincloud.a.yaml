@@ -1,0 +1,320 @@
+---
+name: raincloud
+title: Raincloud Plot
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates Raincloud plots to visualize data distributions using ggdist package.
+    Raincloud plots combine three visualization techniques: half-violin plots showing 
+    distribution density, box plots showing summary statistics, and dot plots showing 
+    individual data points. This provides a comprehensive view of data distribution 
+    that reveals patterns traditional box plots might miss, including multimodality
+    and distribution shape. Based on the ggdist R-Bloggers tutorial.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame with continuous and categorical variables.
+      # 2. Select a continuous variable for distribution analysis.
+      # 3. Choose a grouping variable for comparison across categories.
+      # 4. Customize raincloud appearance and statistical options.
+      # 5. Run the raincloud plot to visualize distribution patterns.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: dep_var
+      title: Dependent Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Continuous variable whose distribution will be visualized in the raincloud plot.
+
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Categorical variable for grouping. Each group will have its own raincloud visualization.
+
+    - name: facet_var
+      title: Faceting Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional variable for creating separate panels. Creates multiple raincloud plots 
+          in a grid layout.
+
+    - name: color_var
+      title: Color Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional variable for coloring different elements. If not specified, uses grouping variable.
+
+    - name: show_violin
+      title: Show Half-Violin (Density)
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays half-violin plot showing probability density distribution.
+
+    - name: show_boxplot
+      title: Show Box Plot
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays box plot with median, quartiles, and outliers.
+
+    - name: show_dots
+      title: Show Data Points
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays individual data points as dots.
+
+    - name: dots_side
+      title: Dots Position
+      type: List
+      options:
+        - title: "Left"
+          name: left
+        - title: "Right"
+          name: right
+        - title: "Both"
+          name: both
+      default: left
+      description:
+        R: >
+          Position of data point dots relative to the violin plot.
+
+    - name: violin_width
+      title: Violin Width
+      type: Number
+      min: 0.1
+      max: 2
+      default: 0.7
+      description:
+        R: >
+          Width scaling factor for the violin plot component.
+
+    - name: box_width
+      title: Box Plot Width
+      type: Number
+      min: 0.05
+      max: 1
+      default: 0.2
+      description:
+        R: >
+          Width of the box plot component.
+
+    - name: dots_size
+      title: Dots Size
+      type: Number
+      min: 0.1
+      max: 5
+      default: 1.2
+      description:
+        R: >
+          Size of individual data point dots.
+
+    - name: alpha_violin
+      title: Violin Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.7
+      description:
+        R: >
+          Transparency level for violin plot (0 = transparent, 1 = opaque).
+
+    - name: alpha_dots
+      title: Dots Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.8
+      description:
+        R: >
+          Transparency level for data point dots.
+
+    - name: orientation
+      title: Plot Orientation
+      type: List
+      options:
+        - title: "Vertical"
+          name: vertical
+        - title: "Horizontal (Raincloud)"
+          name: horizontal
+      default: horizontal
+      description:
+        R: >
+          Orientation of the plot. Horizontal creates the classic "raincloud" appearance.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Viridis"
+          name: viridis
+        - title: "Set1"
+          name: set1
+        - title: "Set2"
+          name: set2
+        - title: "Dark2"
+          name: dark2
+        - title: "Clinical"
+          name: clinical
+        - title: "Pastel"
+          name: pastel
+      default: clinical
+      description:
+        R: >
+          Color palette for different groups.
+
+    - name: plot_theme
+      title: Plot Theme
+      type: List
+      options:
+        - title: "Clinical"
+          name: clinical
+        - title: "Minimal"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "Publication"
+          name: publication
+        - title: "TidyQuant"
+          name: tidyquant
+      default: clinical
+      description:
+        R: >
+          Overall visual theme for the plot.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Raincloud Plot - Distribution Visualization"
+      description:
+        R: >
+          Custom title for the raincloud plot.
+
+    - name: x_label
+      title: X-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for X-axis. If empty, uses variable name.
+
+    - name: y_label
+      title: Y-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for Y-axis. If empty, uses variable name.
+
+    - name: show_statistics
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays summary statistics table for each group.
+
+    - name: show_outliers
+      title: Highlight Outliers
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, identifies and highlights outliers in the visualization.
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - title: "IQR Method"
+          name: iqr
+        - title: "Z-Score"
+          name: zscore
+        - title: "Modified Z-Score"
+          name: modified_zscore
+      default: iqr
+      description:
+        R: >
+          Method for detecting outliers when highlight outliers is enabled.
+
+    - name: normality_test
+      title: Test for Normality
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, performs normality tests (Shapiro-Wilk) for each group.
+
+    - name: comparison_test
+      title: Group Comparison Test
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, performs statistical tests to compare groups.
+
+    - name: comparison_method
+      title: Comparison Method
+      type: List
+      options:
+        - title: "Automatic"
+          name: auto
+        - title: "t-test"
+          name: ttest
+        - title: "Wilcoxon"
+          name: wilcoxon
+        - title: "ANOVA"
+          name: anova
+        - title: "Kruskal-Wallis"
+          name: kruskal
+      default: auto
+      description:
+        R: >
+          Statistical test method for comparing groups.
+
+...

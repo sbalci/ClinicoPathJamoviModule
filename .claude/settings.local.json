@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:alstockdale.github.io)",
-      "Bash(Rscript:*)"
+      "Bash(Rscript:*)",
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(pdftotext:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(ls:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "WebFetch(domain:cran.r-project.org)"
     ],
     "deny": []
   }

@@ -250,6 +250,10 @@ eurostatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Eurostat Map
 #'
+#' Creates choropleth maps using Eurostat data. You can either use sample 
+#' datasets by providing a Eurostat dataset ID, or import your own Eurostat 
+#' CSV data.  For local data, ensure it contains a 'geo' column with NUTS 
+#' geographic codes.
 #' 
 #' @param data The data as a data frame.
 #' @param dataset_id The Eurostat dataset identifier to retrieve data from.

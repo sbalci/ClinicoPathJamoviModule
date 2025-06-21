@@ -46,3 +46,4 @@ _tododata
 ^docs$
 inst/doc
 **/.quarto/
+/.claude

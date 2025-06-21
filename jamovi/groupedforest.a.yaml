@@ -1,0 +1,229 @@
+---
+name: groupedforest
+title: Grouped Hazard Forest Plot
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates grouped hazard regression forest plots to show treatment vs control comparisons
+    across different variants or subgroups. This module performs Cox proportional hazards
+    regression separately for each subgroup defined by a grouping variable and presents
+    the hazard ratios in a single forest plot. Perfect for showing treatment effects
+    across patient variants, genetic subtypes, or clinical subgroups.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load survival data with time, event, treatment, and subgroup variables.
+      # 2. Select time variable (follow-up duration).
+      # 3. Select event variable (outcome/death indicator).
+      # 4. Select treatment variable (treatment vs control).
+      # 5. Select grouping variable (variants/subgroups for comparison).
+      # 6. Run grouped forest plot analysis to compare treatment effects across groups.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame containing survival variables.
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Numeric variable representing follow-up time until the event or last observation.
+
+    - name: event_var
+      title: Event Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Variable indicating whether the event occurred (1) or was censored (0).
+
+    - name: treatment_var
+      title: Treatment Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Treatment variable (e.g., treatment vs control). This will be the primary
+          variable for which hazard ratios are calculated within each subgroup.
+
+    - name: grouping_var
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Variable defining subgroups/variants for separate Cox regression analyses.
+          Each level will have its own hazard ratio calculation.
+
+    - name: covariates
+      title: Covariates (Optional)
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Optional covariates to include in the Cox regression models for adjustment.
+
+    - name: reference_treatment
+      title: Reference Treatment Level
+      type: String
+      default: ""
+      description:
+        R: >
+          Specify the reference level for treatment variable. If empty, will use the first level.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Grouped Hazard Forest Plot"
+      description:
+        R: >
+          Custom title for the forest plot.
+
+    - name: show_overall
+      title: Show Overall Analysis
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, includes an overall analysis (all groups combined) in the forest plot.
+
+    - name: show_statistics
+      title: Show Statistics Table
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays a detailed statistics table with hazard ratios, confidence intervals, and p-values.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+        R: >
+          Confidence level for confidence intervals (e.g., 0.95 for 95% CI).
+
+    - name: sort_by_hr
+      title: Sort by Hazard Ratio
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, sorts subgroups by hazard ratio magnitude in the forest plot.
+
+    - name: show_counts
+      title: Show Sample Sizes
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays sample sizes for each subgroup in the forest plot.
+
+    - name: plot_theme
+      title: Plot Theme
+      type: List
+      options:
+        - title: "Clinical (Default)"
+          name: clinical
+        - title: "Minimal"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "Publication"
+          name: publication
+      default: clinical
+      description:
+        R: >
+          Visual theme for the forest plot.
+
+    - name: hr_range
+      title: HR Range Display
+      type: List
+      options:
+        - title: "Auto"
+          name: auto
+        - title: "0.1 to 10"
+          name: wide
+        - title: "0.5 to 2"
+          name: narrow
+        - title: "Custom"
+          name: custom
+      default: auto
+      description:
+        R: >
+          Range for displaying hazard ratios on the x-axis.
+
+    - name: custom_hr_min
+      title: Custom HR Minimum
+      type: Number
+      min: 0.01
+      max: 1
+      default: 0.1
+      description:
+        R: >
+          Custom minimum hazard ratio for x-axis (when HR Range = Custom).
+
+    - name: custom_hr_max
+      title: Custom HR Maximum  
+      type: Number
+      min: 1
+      max: 100
+      default: 10
+      description:
+        R: >
+          Custom maximum hazard ratio for x-axis (when HR Range = Custom).
+
+    - name: interaction_test
+      title: Test for Interaction
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, performs a test for interaction between treatment and grouping variable.
+
+    - name: export_data
+      title: Export Results Data
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, makes forest plot data available for export.
+
+...

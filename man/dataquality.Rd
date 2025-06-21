@@ -9,7 +9,11 @@ dataquality(
   vars,
   check_duplicates = TRUE,
   check_missing = TRUE,
-  complete_cases_only = FALSE
+  complete_cases_only = FALSE,
+  visual_analysis = TRUE,
+  visdat_type = "vis_dat",
+  missing_threshold_visual = 10,
+  export_plots = FALSE
 )
 }
 \arguments{
@@ -26,6 +30,18 @@ and patterns.}
 
 \item{complete_cases_only}{If TRUE, analyzes completeness across all
 selected variables simultaneously.}
+
+\item{visual_analysis}{Enable visual data exploration using visdat package
+integration. Provides visual summaries of data types and missing patterns.}
+
+\item{visdat_type}{Choose the type of visual analysis to perform using
+visdat.}
+
+\item{missing_threshold_visual}{Threshold percentage for highlighting
+variables with missing values in visual analysis.}
+
+\item{export_plots}{Enable export functionality for visual data quality
+plots.}
 }
 \value{
 A results object containing:

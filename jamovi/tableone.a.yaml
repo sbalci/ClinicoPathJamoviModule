@@ -52,6 +52,8 @@ options:
         name: t3
       - title: "janitor"
         name: t4
+      - title: "pivottabler (Enhanced)"
+        name: t5
     default: t1
     description:
       R: >
@@ -68,4 +70,41 @@ options:
         Boolean option to exclude missing values (NA) from the analysis. Note: Exclusion may remove entire cases.
       jamovi: >
         Check to exclude missing values.
+
+  - name: pivot_format
+    title: "Pivot Format Style"
+    type: List
+    options:
+      - title: "Clinical Research"
+        name: clinical
+      - title: "Publication Ready"
+        name: publication
+      - title: "Detailed Analysis"
+        name: detailed
+    default: clinical
+    description:
+      R: >
+        Formatting style for pivottabler enhanced tables.
+      jamovi: >
+        Choose the pivot table formatting style.
+
+  - name: include_statistics
+    title: "Include Advanced Statistics"
+    type: Bool
+    default: true
+    description:
+      R: >
+        Include advanced statistical summaries in pivot format.
+      jamovi: >
+        Include enhanced statistics for pivot tables.
+
+  - name: group_comparisons
+    title: "Group Comparisons"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Enable group comparison features in pivot table.
+      jamovi: >
+        Enable group comparison analysis.
 ...

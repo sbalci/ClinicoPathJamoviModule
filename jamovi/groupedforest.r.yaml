@@ -1,0 +1,43 @@
+---
+name: groupedforest
+title: Grouped Hazard Forest Plot
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: forest_plot
+      title: Grouped Forest Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_forest
+
+    - name: statistics_table
+      title: Hazard Ratios by Group
+      type: Html
+      visible: (show_statistics)
+
+    - name: overall_stats
+      title: Overall Analysis
+      type: Html
+      visible: (show_overall)
+
+    - name: interaction_test
+      title: Interaction Test
+      type: Html
+      visible: (interaction_test)
+
+    - name: sample_sizes
+      title: Sample Sizes by Group
+      type: Html
+      visible: (show_counts)
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+
+...

@@ -46,11 +46,13 @@ crosstableClass <- R6::R6Class(
 The `decisiongraph` module supports both traditional decision trees and advanced Markov chain models:
 
 **Decision Trees**: One-time decisions with immediate outcomes
+
 - Acute medical conditions (surgery vs. conservative treatment)
 - Emergency decisions with clear cost/utility trade-offs
 - Point-in-time cost-effectiveness analysis
 
 **Markov Chain Models**: Long-term disease progression modeling
+
 - Chronic disease management with multiple health states
 - Transition probability matrices for state changes over time
 - Cohort trace analysis with discounted cost-effectiveness calculations
@@ -95,6 +97,37 @@ Rscript -e "jmvtools::install()"
 # Install module in jamovi for testing
 # Copy .jmo file to jamovi modules directory
 ```
+
+### Adding a new function
+
+```r
+Rscript -e "jmvtools::addAnalysis(name = '<newfunctionname>')"
+# This will create the necessary .b.R, .a.yaml, .u.yaml, and .r.yaml files
+# and update the module structure accordingly.
+# Then update these files.
+```
+
+### .u.yaml File Structure
+
+The `.u.yaml` file defines the user interface for the analysis module. It includes:
+
+- **title**: The name of the analysis module
+- **description**: A brief description of the analysis
+- **options**: List of user-configurable options (e.g., variables, statistical tests)
+- **results**: Output definitions, including tables and plots
+
+`compilerMode:` is either `aggressive`or `tame`. If aggressive it generates automatically from the `.a.yaml` file, if tame it uses specific changes and organisation defined by the user in the `.u.yaml` file.
+
+### .a.yaml File Structure
+
+The `.a.yaml` file defines the analysis parameters and options. It includes:
+
+- **name**: Unique identifier for the analysis
+- **title**: Display name in the jamovi interface
+- **description**: Detailed description of the analysis
+- **options**: List of parameters that users can configure (e.g., variables, statistical methods)
+
+# TODO add more details about the .a.yaml options, permitted suggested
 
 ## Key Dependencies and Patterns
 
@@ -194,6 +227,7 @@ This project uses `_updateModules.R` script to synchronize code across 4 separat
 - **ClinicoPathDescriptives**: Descriptive statistics and summary tables
 
 The script automatically:
+
 1. Updates version numbers across all DESCRIPTION and YAML files
 2. Copies module files (`.b.R`, `.a.yaml`, `.u.yaml`, `.r.yaml`) to appropriate repos
 3. Updates documentation and installs modules
@@ -202,13 +236,14 @@ The script automatically:
 ### Version Management
 
 - Version format: `X.Y.Z.BUILD` (e.g., 0.0.3.24)
-- Date format: `YYYY-MM-DD` 
+- Date format: `YYYY-MM-DD`
 - Versions are updated centrally and distributed to all sub-modules
 - Each module maintains 3-part semantic version in `.a.yaml` files
 
 ### Module Distribution Strategy
 
 **WIP vs Release Modes:**
+
 - WIP mode: Limited module sets for testing
 - Release mode: Full module distribution
 - Controlled by `WIP` flag in update script
@@ -221,7 +256,7 @@ The script automatically:
 - Edge case testing data for robust validation
 - Specialized datasets for decision analysis:
   - Medical treatment comparisons (acute conditions)
-  - Pharmaceutical cost-effectiveness studies 
+  - Pharmaceutical cost-effectiveness studies
   - Disease progression modeling (chronic conditions)
   - Screening program evaluations
 
@@ -287,12 +322,14 @@ When working on decision tree or Markov chain analyses:
 ### Module Synchronization Workflow
 
 Use `_updateModules.R` script for coordinated updates across repositories:
+
 ```bash
 # Update version and synchronize all modules
 Rscript _updateModules.R
 ```
 
 This script:
+
 - Updates version numbers across all DESCRIPTION and YAML files
 - Distributes module files to appropriate sub-repositories
 - Handles WIP vs release mode configurations
@@ -301,6 +338,7 @@ This script:
 ### Example Analysis Development
 
 The `examples/` directory contains comprehensive demonstrations:
+
 - `decision_tree_examples.R`: Complete comparison of decision trees vs Markov chains
 - `analysis_interpretation_guide.md`: Clinical interpretation guide
 - `jamovi_workflow_example.R`: Step-by-step jamovi usage instructions
@@ -308,12 +346,14 @@ The `examples/` directory contains comprehensive demonstrations:
 ### Testing Complex Modules
 
 For computationally intensive modules (like Markov models):
+
 1. Use manual testing scripts when unit tests are insufficient
 2. Validate mathematical properties (e.g., matrix properties, discounting)
 3. Test with multiple realistic datasets
 4. Performance profiling for large models
 
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.

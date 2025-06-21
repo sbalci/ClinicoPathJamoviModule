@@ -1,0 +1,240 @@
+---
+name: hullplot
+title: Hull Plot
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates Hull plots to visualize clusters and groups in scatter plots using ggforce.
+    Hull plots draw polygonal boundaries around data points grouped by categorical variables,
+    making it easy to identify customer segments, group membership, and data clusters.
+    Based on the geom_mark_hull() function from ggforce package.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame with continuous variables for x and y axes.
+      # 2. Select x and y variables for the scatter plot.
+      # 3. Choose a grouping variable to define hull boundaries.
+      # 4. Customize hull appearance and plot aesthetics.
+      # 5. Run the hull plot to visualize group clusters.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: x_var
+      title: X-Axis Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Continuous variable for the X-axis of the scatter plot.
+
+    - name: y_var
+      title: Y-Axis Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Continuous variable for the Y-axis of the scatter plot.
+
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Categorical variable that defines the groups for hull boundaries.
+          Each group will have its own hull polygon.
+
+    - name: color_var
+      title: Color Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional variable for coloring points. If not specified, uses the grouping variable.
+
+    - name: size_var
+      title: Size Variable (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Optional continuous variable for sizing points based on values.
+
+    - name: hull_concavity
+      title: Hull Concavity
+      type: Number
+      min: 0
+      max: 2
+      default: 2
+      description:
+        R: >
+          Controls the concavity of hull polygons. Lower values create more concave hulls,
+          higher values create more convex hulls. Range: 0-2, default: 2.
+
+    - name: hull_alpha
+      title: Hull Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.3
+      description:
+        R: >
+          Transparency level for hull polygons. 0 = completely transparent, 1 = opaque.
+
+    - name: show_labels
+      title: Show Group Labels
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays group labels inside hull regions.
+
+    - name: point_size
+      title: Point Size
+      type: Number
+      min: 0.5
+      max: 10
+      default: 2
+      description:
+        R: >
+          Size of scatter plot points.
+
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.7
+      description:
+        R: >
+          Transparency level for scatter plot points.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Viridis"
+          name: viridis
+        - title: "Set1"
+          name: set1
+        - title: "Set2"
+          name: set2
+        - title: "Dark2"
+          name: dark2
+        - title: "Clinical (Custom)"
+          name: clinical
+      default: default
+      description:
+        R: >
+          Color palette for hulls and points.
+
+    - name: plot_theme
+      title: Plot Theme
+      type: List
+      options:
+        - title: "Default (theme_minimal)"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "Light"
+          name: light
+        - title: "Dark"
+          name: dark
+        - title: "Clinical"
+          name: clinical
+      default: minimal
+      description:
+        R: >
+          Overall visual theme for the plot.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Hull Plot - Group Visualization"
+      description:
+        R: >
+          Custom title for the hull plot.
+
+    - name: x_label
+      title: X-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for X-axis. If empty, uses variable name.
+
+    - name: y_label
+      title: Y-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for Y-axis. If empty, uses variable name.
+
+    - name: hull_expand
+      title: Hull Boundary Expansion
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+        R: >
+          Amount to expand hull boundaries beyond data points. Higher values create larger hulls.
+
+    - name: show_statistics
+      title: Show Group Statistics
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, displays summary statistics for each group in the output.
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, identifies and highlights potential outliers within groups.
+
+    - name: confidence_ellipses
+      title: Add Confidence Ellipses
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, adds confidence ellipses in addition to hull polygons.
+
+...

@@ -23,3 +23,21 @@ children:
         name: check_missing
       - type: CheckBox
         name: complete_cases_only
+      - type: CheckBox
+        name: visual_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: visdat_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: missing_threshold_visual
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: export_plots

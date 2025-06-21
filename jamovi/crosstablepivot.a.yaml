@@ -1,0 +1,92 @@
+---
+name: crosstablepivot
+title: Enhanced Cross Tables (Pivot)
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Comparisons
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: >
+        Enhanced cross tables using pivottabler for flexible clinical data analysis.
+        Provides pivot-style layouts with advanced statistics and professional formatting.
+        Non-breaking addition to existing crosstable functionality.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables (Rows)
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric, id]
+      description:
+          R: >
+            The variables to be placed in table rows.
+          jamovi: >
+            The variables to be placed in table rows.
+
+    - name: group
+      title: Grouping Variable (Columns)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric, id]
+      description:
+          R: >
+            The variable used for grouping (table columns).
+          jamovi: >
+            The variable used for grouping (table columns).
+
+    - name: statistics
+      title: Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include count and percentage statistics.
+          jamovi: >
+            Include count and percentage statistics.
+
+    - name: show_totals
+      title: Show Totals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include row and column totals.
+          jamovi: >
+            Include row and column totals.
+
+    - name: format_style
+      title: Table Format
+      type: List
+      options:
+        - name: standard
+          title: Standard
+        - name: clinical
+          title: Clinical
+        - name: publication
+          title: Publication
+      default: clinical
+      description:
+          R: >
+            Table formatting style.
+          jamovi: >
+            Table formatting style.
+
+    - name: export_excel
+      title: Export to Excel
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable Excel export functionality.
+          jamovi: >
+            Enable Excel export functionality.
+
+...

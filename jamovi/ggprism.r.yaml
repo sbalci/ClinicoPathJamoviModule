@@ -1,0 +1,33 @@
+---
+name: ggprism
+title: GraphPad Prism Style Plots
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: plot
+      title: Prism Style Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: summary
+      title: Summary Statistics
+      type: Html
+      visible: (show_summary)
+
+    - name: statistics
+      title: Statistical Tests
+      type: Html
+      visible: (show_statistics)
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+
+...

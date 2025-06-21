@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.27
+version: 0.0.3.28
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-06-20'
+date: '2024-06-21'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -27,6 +27,11 @@ analyses:
     menuTitle: Eurostat Map
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
+    description: >
+      Creates choropleth maps using Eurostat data. You can either use sample
+      datasets by providing a Eurostat dataset ID, or import your own Eurostat
+      CSV data.  For local data, ensure it contains a 'geo' column with NUTS
+      geographic codes.
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
@@ -48,6 +53,18 @@ analyses:
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
+    ribbon: analyses
+  - title: Enhanced Cross Tables (Pivot)
+    name: crosstablepivot
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Comparisons
+    menuTitle: Enhanced Cross Tables (Pivot)
+    description: >
+      Enhanced cross tables using pivottabler for flexible clinical data
+      analysis. Provides pivot-style layouts with advanced statistics and
+      professional formatting. Non-breaking addition to existing crosstable
+      functionality.
     ribbon: analyses
   - title: Summary of Categorical Variables
     name: reportcat
@@ -75,6 +92,25 @@ analyses:
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
     ribbon: analyses
+  - title: Automated Exploratory Data Analysis
+    name: autoeda
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Automated Exploratory Data Analysis
+    description: >
+      Automated Exploratory Data Analysis using DataExplorer package
+      integration.
+
+      This module provides comprehensive automated EDA capabilities including
+      dataset overview,
+
+      missing value analysis, correlation matrices, PCA visualization, and
+      automated reporting.
+
+      Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
+    menuSubtitle: DataExplorer AutoEDA Integration
+    ribbon: analyses
   - title: Data Quality Assessment
     name: dataquality
     ns: ClinicoPath
@@ -98,6 +134,21 @@ analyses:
       This function generates a "Table One", a descriptive summary table
       frequently used in  clinicopathological research manuscripts. It supports
       multiple output styles for flexible formatting.
+    ribbon: analyses
+  - title: Modern Table Formatting
+    name: tinytable
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Modern Table Formatting
+    menuSubtitle: TinyTable - Zero Dependencies
+    description: |
+      Creates modern, publication-ready tables using the tinytable package.
+      This module provides lightweight, zero-dependency table formatting with 
+      multiple output formats including HTML, LaTeX, PDF, and Word. Designed
+      to complement existing ClinicoPath table modules with modern styling,
+      flexible formatting, and clean aesthetics. Perfect for enhancing data
+      presentation in clinical research publications and reports.
     ribbon: analyses
   - title: Variable Tree
     name: vartree
@@ -147,6 +198,91 @@ analyses:
       imbalance handling, and validation methods for medical research.
     ribbon: analyses
     menuSubtitle: Classification Analysis
+  - title: Hull Plot
+    name: hullplot
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Hull Plot
+    menuSubtitle: Cluster Visualization with ggforce
+    description: >
+      Creates Hull plots to visualize clusters and groups in scatter plots using
+      ggforce.
+
+      Hull plots draw polygonal boundaries around data points grouped by
+      categorical variables,
+
+      making it easy to identify customer segments, group membership, and data
+      clusters.
+
+      Based on the geom_mark_hull() function from ggforce package.
+    ribbon: analyses
+  - title: Raincloud Plot
+    name: raincloud
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Raincloud Plot
+    menuSubtitle: Distribution Visualization with ggdist
+    description: >
+      Creates Raincloud plots to visualize data distributions using ggdist
+      package.
+
+      Raincloud plots combine three visualization techniques: half-violin plots
+      showing 
+
+      distribution density, box plots showing summary statistics, and dot plots
+      showing 
+
+      individual data points. This provides a comprehensive view of data
+      distribution 
+
+      that reveals patterns traditional box plots might miss, including
+      multimodality
+
+      and distribution shape. Based on the ggdist R-Bloggers tutorial.
+    ribbon: analyses
+  - title: Advanced Raincloud Plot
+    name: advancedraincloud
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Advanced Raincloud Plot
+    menuSubtitle: Longitudinal & Likert Support with ggrain
+    description: >
+      Creates advanced raincloud plots with longitudinal connections using
+      ggrain package. This module complements the existing Raincloud Plot module
+      by providing advanced  features including longitudinal data connections,
+      Likert scale support, and flexible raincloud positioning. Perfect for
+      repeated measures data, survey analysis, and  complex distribution
+      visualization in clinical research. Uses the ggrain package for enhanced
+      customization and connectivity features.
+    ribbon: analyses
+  - title: GraphPad Prism Style Plots
+    name: ggprism
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: GraphPad Prism Style Plots
+    menuSubtitle: Publication-Ready Scientific Visualization
+    description: >
+      Creates publication-ready plots with GraphPad Prism styling using ggprism
+      package.
+
+      This module provides Prism-style themes, color palettes, and statistical
+      annotations
+
+      to create professional scientific visualizations. Perfect for clinical
+      research 
+
+      publications, biostatistics, and academic presentations. Supports various
+      plot 
+
+      types including violin plots, box plots, scatter plots, and dose-response
+      curves
+
+      with seamless ggplot2 integration and Prism-style aesthetics.
+    ribbon: analyses
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
@@ -178,6 +314,28 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
+    ribbon: analyses
+  - title: Grouped Hazard Forest Plot
+    name: groupedforest
+    ns: ClinicoPath
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Grouped Hazard Forest Plot
+    menuSubtitle: Subgroup Analysis, Treatment vs Control by Variants
+    description: >
+      Creates grouped hazard regression forest plots to show treatment vs
+      control comparisons
+
+      across different variants or subgroups. This module performs Cox
+      proportional hazards
+
+      regression separately for each subgroup defined by a grouping variable and
+      presents
+
+      the hazard ratios in a single forest plot. Perfect for showing treatment
+      effects
+
+      across patient variants, genetic subtypes, or clinical subgroups.
     ribbon: analyses
   - title: Multivariable Survival Analysis
     name: multisurvival
@@ -616,6 +774,25 @@ analyses:
     menuTitle: Study Flowchart
     ribbon: analyses
     description: Creates CONSORT-style flowcharts showing participant flow through studies
+  - title: ggFlowchart
+    name: ggflowchart
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Reports
+    menuTitle: ggFlowchart
+    menuSubtitle: Modern ggplot2 Flowcharts
+    description: >
+      Creates modern flowcharts using ggflowchart package with ggplot2 styling.
+
+      This module provides an alternative flowchart approach using the
+      ggflowchart 
+
+      package for creating publication-ready flowcharts with ggplot2 aesthetics.
+
+      Complements the existing DiagrammeR-based flowchart module with modern 
+
+      ggplot2 integration and customizable styling options.
+    ribbon: analyses
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath

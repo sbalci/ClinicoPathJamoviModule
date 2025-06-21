@@ -66,5 +66,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$info)}
 }
 \description{
-Eurostat Map
+Creates choropleth maps using Eurostat data. You can either use sample
+datasets by providing a Eurostat dataset ID, or import your own Eurostat
+CSV data.  For local data, ensure it contains a 'geo' column with NUTS
+geographic codes.
 }

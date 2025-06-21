@@ -1,0 +1,239 @@
+---
+name: advancedraincloud
+title: Advanced Raincloud Plot
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+
+# description:
+  # main: |
+  #   Creates advanced raincloud plots with longitudinal connections using ggrain package.
+  #   This module complements the existing Raincloud Plot module by providing advanced 
+  #   features including longitudinal data connections, Likert scale support, and flexible
+  #   raincloud positioning. Perfect for repeated measures data, survey analysis, and 
+  #   complex distribution visualization in clinical research. Uses the ggrain package
+  #   for enhanced customization and connectivity features.
+  # R:
+  #   dontrun: true
+  #   usage: |
+  #     # Example:
+  #     # 1. Select continuous variable for distribution analysis.
+  #     # 2. Choose grouping variable for comparisons.
+  #     # 3. Optionally add longitudinal ID variable for connections.
+  #     # 4. Configure advanced raincloud features and positioning.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: y_var
+      title: Y-Axis Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        R: >
+          Continuous variable for distribution visualization on Y-axis.
+
+    - name: x_var
+      title: X-Axis Variable (Grouping)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Grouping variable for X-axis categories.
+
+    - name: fill_var
+      title: Fill Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+        R: >
+          Optional variable for color filling different groups.
+
+    - name: id_var
+      title: Longitudinal ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+        - id
+      description:
+        R: >
+          Optional ID variable for connecting longitudinal observations across groups.
+
+    - name: cov_var
+      title: Point Color Variable (Optional)
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Optional variable for remapping point colors based on covariate values.
+
+    - name: rain_side
+      title: Raincloud Position
+      type: List
+      options:
+        - title: "Left"
+          name: l
+        - title: "Right"
+          name: r
+        - title: "Flanking (Both Sides)"
+          name: f
+      default: l
+      description:
+        R: >
+          Position of the raincloud relative to the data points.
+
+    - name: likert_mode
+      title: Likert Scale Mode
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, adds Y-axis jittering for Likert scale or ordinal data.
+
+    - name: show_longitudinal
+      title: Show Longitudinal Connections
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, connects repeated observations using the ID variable.
+
+    - name: point_size
+      title: Point Size
+      type: Number
+      min: 0.1
+      max: 5
+      default: 1.5
+      description:
+        R: >
+          Size of individual data points.
+
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.7
+      description:
+        R: >
+          Transparency level for data points.
+
+    - name: violin_alpha
+      title: Violin Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.7
+      description:
+        R: >
+          Transparency level for violin plots.
+
+    - name: boxplot_width
+      title: Boxplot Width
+      type: Number
+      min: 0.1
+      max: 1
+      default: 0.1
+      description:
+        R: >
+          Width of the boxplot component.
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: "Clinical"
+          name: clinical
+        - title: "Viridis"
+          name: viridis
+        - title: "Set1"
+          name: set1
+        - title: "Set2"
+          name: set2
+        - title: "Pastel"
+          name: pastel
+        - title: "Dark2"
+          name: dark2
+      default: clinical
+      description:
+        R: >
+          Color palette for different groups.
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Advanced Raincloud Plot"
+      description:
+        R: >
+          Title for the raincloud plot.
+
+    - name: x_label
+      title: X-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for X-axis. If empty, uses variable name.
+
+    - name: y_label
+      title: Y-Axis Label
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom label for Y-axis. If empty, uses variable name.
+
+    - name: show_statistics
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays summary statistics table.
+
+    - name: show_comparisons
+      title: Show Group Comparisons
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, performs statistical tests between groups.
+
+    - name: show_interpretation
+      title: Show Usage Guide
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays interpretation and feature guide.
+
+...

@@ -8,6 +8,15 @@ children:
     margin: large
     children:
       - type: Label
+        label: "How to Use Eurostat Maps"
+        children:
+          - type: Label
+            label: "Option 1: Use sample data (keep 'Use Local Data' unchecked)"
+          - type: Label  
+            label: "Option 2: Import your CSV file, check 'Use Local Data', select indicator"
+          - type: Label
+            label: "Required: Data must have 'geo' column with codes like DE, FR, ES"
+      - type: Label
         label: Data Source
         children:
           - type: CheckBox
