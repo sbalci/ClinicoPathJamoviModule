@@ -1,0 +1,77 @@
+---
+name: outlierdetection
+title: Advanced Outlier Detection
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: plot
+      title: Outlier Detection Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      visible: (show_visualization)
+      clearWith:
+        - vars
+        - method_category
+        - univariate_methods
+        - multivariate_methods
+        - composite_threshold
+        - zscore_threshold
+        - iqr_multiplier
+        - confidence_level
+
+    - name: outlier_table
+      title: Outlier Detection Results
+      type: Html
+      visible: (show_outlier_table)
+      clearWith:
+        - vars
+        - method_category
+        - univariate_methods
+        - multivariate_methods
+        - composite_threshold
+        - zscore_threshold
+        - iqr_multiplier
+        - confidence_level
+
+    - name: method_comparison
+      title: Method Comparison
+      type: Html
+      visible: (show_method_comparison)
+      clearWith:
+        - vars
+        - method_category
+        - composite_threshold
+        - zscore_threshold
+        - iqr_multiplier
+        - confidence_level
+
+    - name: exclusion_summary
+      title: Exclusion Recommendations
+      type: Html
+      visible: (show_exclusion_summary)
+      clearWith:
+        - vars
+        - method_category
+        - univariate_methods
+        - multivariate_methods
+        - composite_threshold
+        - zscore_threshold
+        - iqr_multiplier
+        - confidence_level
+
+    - name: interpretation
+      title: Analysis Interpretation
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+        - vars
+        - method_category
+        - univariate_methods
+        - multivariate_methods

@@ -1,0 +1,198 @@
+---
+name: missingdata
+title: Missing Data Analysis and Imputation
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: mice & ggmice - Multiple Imputation
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Comprehensive missing data analysis and multiple imputation using mice and ggmice packages.
+    Analyze missing data patterns, perform multiple imputation by chained equations (MICE),
+    and visualize imputation results. Includes diagnostic plots for convergence assessment,
+    comparison of observed vs imputed data, and quality evaluation. Perfect for clinical
+    research data preprocessing where missing data is common and proper handling is critical
+    for valid statistical inference.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select variables for missing data analysis
+      # 2. Explore missing data patterns and correlations
+      # 3. Configure imputation methods and parameters
+      # 4. Run multiple imputation and evaluate convergence
+      # 5. Compare observed vs imputed data distributions
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: analysis_vars
+      title: Variables for Analysis
+      type: Variables
+      description:
+          R: >
+            Variables to include in the missing data analysis and imputation.
+            Can include numeric, factor, and ID variables.
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - title: "Missing Data Pattern Analysis"
+          name: pattern
+        - title: "Multiple Imputation"
+          name: imputation
+        - title: "Complete Analysis (Pattern + Imputation)"
+          name: complete
+      default: pattern
+      description:
+          R: >
+            Type of missing data analysis to perform. Pattern analysis explores
+            missing data structure, imputation performs MICE, complete does both.
+
+    - name: n_imputations
+      title: Number of Imputations
+      type: Number
+      min: 1
+      max: 50
+      default: 5
+      description:
+          R: >
+            Number of imputed datasets to generate using MICE algorithm.
+            Typically 5-20 imputations are sufficient for most applications.
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 1
+      max: 100
+      default: 5
+      description:
+          R: >
+            Maximum number of MICE iterations per imputation.
+            Default is 5, increase if convergence issues occur.
+
+    - name: imputation_method
+      title: Default Imputation Method
+      type: List
+      options:
+        - title: "Predictive Mean Matching (PMM)"
+          name: pmm
+        - title: "Normal Bayesian Regression"
+          name: norm
+        - title: "Logistic Regression"
+          name: logreg
+        - title: "Polytomous Regression"
+          name: polyreg
+        - title: "Auto-select (recommended)"
+          name: auto
+      default: auto
+      description:
+          R: >
+            Default imputation method. Auto-select chooses appropriate methods
+            based on variable types. PMM is robust for continuous variables.
+
+    - name: seed_value
+      title: Random Seed
+      type: Number
+      default: 123
+      description:
+          R: >
+            Random seed for reproducible imputation results.
+
+    - name: convergence_check
+      title: Check Convergence
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform convergence diagnostics to ensure MICE algorithm stability.
+
+    - name: show_pattern_plot
+      title: Show Missing Pattern Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display visual representation of missing data patterns.
+
+    - name: show_pattern_table
+      title: Show Missing Pattern Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display tabular summary of missing data patterns.
+
+    - name: show_correlation_plot
+      title: Show Correlation Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display correlation matrix between incomplete variables.
+
+    - name: show_flux_plot
+      title: Show Influx/Outflux Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display influx and outflux of missing data patterns.
+
+    - name: show_trace_plot
+      title: Show Trace Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display convergence trace plots for imputation diagnostics.
+
+    - name: show_density_plot
+      title: Show Density Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare distributions of observed vs imputed data.
+
+    - name: show_stripplot
+      title: Show Strip Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display strip plots comparing observed and imputed values.
+
+    - name: show_scatterplot
+      title: Show Scatter Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display scatter plots of observed vs imputed data relationships.
+
+    - name: show_imputation_summary
+      title: Show Imputation Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary statistics and information about the imputation process.
+
+    - name: show_interpretation
+      title: Show Usage Guide
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display guidance on missing data analysis and imputation best practices
+            for clinical research.
+            

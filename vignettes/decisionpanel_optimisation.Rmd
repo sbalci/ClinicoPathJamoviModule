@@ -64,7 +64,7 @@ devtools::install_github("ClinicoPath/meddecide")
 
 ```{r loading}
 # Load required packages
-library(meddecide)
+library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 library(rpart)

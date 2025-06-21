@@ -40,7 +40,7 @@ head(melanoma_study)
 # You would need the ClinicoPathDescriptives package installed.
 
 # Load the library
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Run the swimmer plot analysis using the new, correct arguments
 results <- swimmerplot(

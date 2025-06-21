@@ -1,0 +1,195 @@
+---
+name: datecorrection
+title: Date Field Correction
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+# description:
+#   main: |
+#     Comprehensive date field correction and standardization using multiple R packages (datefixR, anytime, lubridate).
+#     This module handles messy date formats commonly found in clinical databases: different separators, 
+#     month representations, missing components, and ambiguous formats. Provides standardized date outputs
+#     with detailed correction reports and quality assessment. Perfect for clinical research data preprocessing
+#     and database standardization workflows.
+#   R:
+#     dontrun: true
+#     usage: |
+#       # Example:
+#       # 1. Select variables containing date information that need correction.
+#       # 2. Choose correction method (automatic detection or specific format).
+#       # 3. Configure missing value imputation settings.
+#       # 4. Review correction results and quality assessment.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: date_vars
+      title: Date Variables to Correct
+      type: Variables
+      # suggested:
+      #   - nominal
+      #   - ordinal
+      # permitted:
+      #   - numeric
+      #   - id
+      description:
+          R: >
+            Variables containing date information in various formats that need correction and standardization.
+            Can handle character strings, numeric values, factors with date representations.
+
+    # - name: correction_method
+    #   title: Correction Method
+    #   type: List
+    #   options:
+    #     - title: "Automatic Detection (datefixR)"
+    #       name: datefixr
+    #     - title: "Flexible Parsing (anytime)"
+    #       name: anytime
+    #     - title: "Format-Specific (lubridate)"
+    #       name: lubridate
+    #     - title: "Multi-Method Consensus"
+    #       name: consensus
+    #   default: datefixr
+    #   description:
+    #       R: >
+    #         Method for date correction. datefixR provides robust format detection,
+    #         anytime offers flexible parsing, lubridate allows format specification,
+    #         and consensus combines methods for maximum reliability.
+
+    # - name: date_format
+    #   title: Expected Date Format
+    #   type: List
+    #   options:
+    #     - title: "Day-Month-Year (DMY)"
+    #       name: dmy
+    #     - title: "Month-Day-Year (MDY)"
+    #       name: mdy
+    #     - title: "Year-Month-Day (YMD)"
+    #       name: ymd
+    #     - title: "Auto-detect"
+    #       name: auto
+    #   default: auto
+    #   description:
+    #       R: >
+    #         Expected date format for ambiguous cases. Auto-detect tries to determine
+    #         the most likely format based on the data patterns.
+
+    # - name: day_impute
+    #   title: Missing Day Imputation
+    #   type: Number
+    #   min: 1
+    #   max: 31
+    #   default: 1
+    #   description:
+    #       R: >
+    #         Day of month to impute when day is missing (1-31). Default is 1st of month.
+    #         If value exceeds days in month, last day of month will be used.
+
+    # - name: month_impute
+    #   title: Missing Month Imputation
+    #   type: Number
+    #   min: 1
+    #   max: 12
+    #   default: 7
+    #   description:
+    #       R: >
+    #         Month to impute when month is missing (1-12). Default is 7 (July).
+    #         Commonly used middle-year value for clinical research.
+
+    # - name: year_threshold
+    #   title: Two-Digit Year Threshold
+    #   type: Number
+    #   min: 0
+    #   max: 99
+    #   default: 30
+    #   description:
+    #       R: >
+    #         Threshold for interpreting two-digit years. Years above threshold
+    #         are interpreted as 19xx, below as 20xx. Default 30 means 31-99 = 1931-1999,
+    #         00-30 = 2000-2030.
+
+    # - name: handle_excel
+    #   title: Handle Excel Date Numbers
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Whether to convert Excel numeric date values (days since 1900-01-01).
+    #         Useful for data exported from Excel spreadsheets.
+
+    # - name: timezone
+    #   title: Output Timezone
+    #   type: String
+    #   default: "UTC"
+    #   description:
+    #       R: >
+    #         Timezone for output dates. Use UTC for standardization, or local timezone
+    #         if time-of-day information is critical.
+
+    # - name: create_new_columns
+    #   title: Create New Corrected Columns
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Whether to create new columns with corrected dates (recommended) or
+    #         overwrite original columns.
+
+    # - name: column_suffix
+    #   title: New Column Suffix
+    #   type: String
+    #   default: "_corrected"
+    #   description:
+    #       R: >
+    #         Suffix to add to new corrected date columns when create_new_columns is enabled.
+
+    # - name: show_correction_table
+    #   title: Show Correction Results Table
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Display detailed table showing original values, corrected values, and
+    #         correction status for each observation.
+
+    # - name: show_quality_assessment
+    #   title: Show Quality Assessment
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Provide quality assessment including success rates, common problems,
+    #         and recommendations for further correction.
+
+    # - name: show_format_analysis
+    #   title: Show Format Analysis
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Analyze detected date formats and patterns in the original data.
+
+    # - name: show_correction_summary
+    #   title: Show Correction Summary
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Summary statistics of the correction process including before/after
+    #         comparison and data quality metrics.
+
+    # - name: show_interpretation
+    #   title: Show Usage Guide
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         Display guidance on date correction methods, best practices, and
+    #         recommendations for clinical research data.

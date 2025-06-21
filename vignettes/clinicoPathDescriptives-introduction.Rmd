@@ -18,7 +18,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ```{r load-package, eval=FALSE}
 # install.packages("ClinicoPathDescriptives")
-library(ClinicoPathDescriptives)
+library(ClinicoPath)
 
 # Example data
 data(histopathology)

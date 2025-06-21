@@ -24,7 +24,7 @@ This vignette covers advanced features of the Decision Panel Optimization module
 
 ```{r loading}
 # Load required packages
-library(meddecide)
+library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 library(rpart)

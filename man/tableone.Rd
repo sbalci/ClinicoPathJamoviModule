@@ -54,7 +54,7 @@ multiple output styles for flexible formatting.
 # Example usage:
 # data('histopathology')
 # dat <- as.data.frame(histopathology)
-# ClinicoPathDescriptives::tableone(
+# ClinicoPath::tableone(
 #   data = dat,
 #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
 #   sty = "t3",

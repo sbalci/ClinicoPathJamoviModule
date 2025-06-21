@@ -35,7 +35,7 @@ ROC (Receiver Operating Characteristic) analysis is fundamental in evaluating di
 ### Basic Usage
 
 ```r
-library(meddecide)
+library(ClinicoPath)
 
 # Load example data
 data(cancer_biomarker)  # Hypothetical dataset

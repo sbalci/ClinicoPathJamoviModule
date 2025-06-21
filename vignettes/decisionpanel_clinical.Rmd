@@ -28,7 +28,7 @@ This vignette demonstrates real-world clinical applications of the Decision Pane
 
 ```{r loading}
 # Load required packages
-library(meddecide)
+library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 library(rpart)

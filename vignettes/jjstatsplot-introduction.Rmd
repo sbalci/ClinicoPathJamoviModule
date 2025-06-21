@@ -37,7 +37,7 @@ the wrappers from R.
 We will use the built-in `mtcars` data set for the examples below.
 
 ```{r}
-library(jjstatsplot)
+library(ClinicoPath)
 data(mtcars)
 head(mtcars)
 ```

@@ -1,0 +1,395 @@
+---
+title: "Clinical Research Examples with jsurvival"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Clinical Research Examples with jsurvival}
+  %\VignetteEngine{rmarkdown::html_vignette}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Overview
+
+This vignette provides practical examples of using jsurvival for common clinical research scenarios. Each example demonstrates a complete workflow from data preparation to interpretation of results.
+
+# Example 1: Cancer Treatment Comparison Study
+
+## Background
+
+A clinical trial comparing two cancer treatments (Treatment A vs. Treatment B) with overall survival as the primary endpoint.
+
+## Research Question
+
+Is there a significant difference in overall survival between Treatment A and Treatment B?
+
+## Data Structure
+
+```{r cancer-data}
+# Example data structure
+cancer_data <- data.frame(
+  PatientID = 1:200,
+  Treatment = rep(c("Treatment A", "Treatment B"), each = 100),
+  OS_months = c(rnorm(100, 24, 8), rnorm(100, 30, 10)),
+  Death = rbinom(200, 1, 0.6),
+  Age = rnorm(200, 65, 10),
+  Stage = sample(c("I", "II", "III", "IV"), 200, replace = TRUE),
+  ECOG = sample(0:2, 200, replace = TRUE)
+)
+```
+
+## Analysis Steps
+
+### Step 1: Single Arm Analysis (Overall Population)
+
+```{r cancer-singlearm}
+# First, examine overall survival characteristics
+singlearm_result <- singlearm(
+  data = cancer_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  cutp = "12, 24, 36",
+  timetypeoutput = "months"
+)
+```
+
+**Interpretation**: 
+- Median overall survival for the entire cohort
+- 1, 2, and 3-year survival rates
+- 95% confidence intervals for all estimates
+
+### Step 2: Treatment Comparison
+
+```{r cancer-treatment}
+# Compare survival between treatments
+survival_result <- survival(
+  data = cancer_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Treatment,
+  analysistype = "overall",
+  ph_cox = TRUE,
+  ci95 = TRUE,
+  risktable = TRUE
+)
+```
+
+**Key Outputs**:
+- Log-rank test p-value for treatment difference
+- Hazard ratio comparing Treatment B vs. Treatment A
+- Kaplan-Meier curves with risk tables
+- Median survival times by treatment group
+
+### Step 3: Multivariable Analysis
+
+```{r cancer-multivariable}
+# Adjust for potential confounders
+multi_result <- multisurvival(
+  data = cancer_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = c(Treatment, Age, Stage, ECOG)
+)
+```
+
+**Interpretation**:
+- Adjusted hazard ratio for treatment effect
+- Independent prognostic factors
+- Model fit statistics (concordance index)
+
+## Clinical Interpretation
+
+**If HR = 0.75 (95% CI: 0.60-0.95), p = 0.02**:
+- Treatment B reduces the risk of death by 25% compared to Treatment A
+- This result is statistically significant
+- The confidence interval excludes 1.0, supporting the treatment benefit
+
+# Example 2: Biomarker Cut-point Analysis
+
+## Background
+
+Investigating whether a continuous biomarker can predict patient outcomes and finding the optimal threshold for clinical decision-making.
+
+## Research Question
+
+What is the optimal cut-point for Biomarker X to predict overall survival?
+
+## Analysis Workflow
+
+### Step 1: Continuous Variable Analysis
+
+```{r biomarker-continuous}
+# Find optimal cut-point for biomarker
+biomarker_result <- survivalcont(
+  data = biomarker_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  contexpl = Biomarker_X,
+  findcut = TRUE,
+  cutp = "12, 36, 60"
+)
+```
+
+**Outputs**:
+- Optimal cut-point value
+- Hazard ratio for high vs. low biomarker groups
+- ROC analysis for cut-point validation
+- Sensitivity and specificity at optimal cut-point
+
+### Step 2: Validation Analysis
+
+```{r biomarker-validation}
+# Validate cut-point using dichotomized variable
+# (Assuming cut-point = 15.2 was identified)
+biomarker_data$Biomarker_High <- ifelse(biomarker_data$Biomarker_X >= 15.2, "High", "Low")
+
+validation_result <- survival(
+  data = biomarker_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Biomarker_High,
+  ph_cox = TRUE
+)
+```
+
+## Clinical Translation
+
+**If optimal cut-point = 15.2 ng/mL, HR = 2.1 (95% CI: 1.4-3.2)**:
+- Patients with biomarker ≥15.2 ng/mL have 2.1 times higher risk of death
+- This threshold could be used for treatment stratification
+- Consider validation in independent cohort
+
+# Example 3: Time-to-Event Analysis with Competing Risks
+
+## Background
+
+Studying cancer-specific mortality while accounting for deaths from other causes.
+
+## Research Question
+
+What factors predict cancer-specific death, considering other-cause mortality as a competing risk?
+
+## Analysis Approach
+
+```{r competing-risks}
+# For competing risks, use cause-specific outcomes
+# Death_cancer: 1 = cancer death, 0 = alive or other death
+# Death_other: 1 = other death, 0 = alive or cancer death
+
+# Cancer-specific survival analysis
+cancer_specific <- survival(
+  data = competing_data,
+  elapsedtime = OS_months,
+  outcome = Death_cancer,
+  outcomeLevel = "1",
+  explanatory = Treatment,
+  analysistype = "overall",
+  ph_cox = TRUE
+)
+
+# Other-cause mortality analysis
+other_cause <- survival(
+  data = competing_data,
+  elapsedtime = OS_months,
+  outcome = Death_other,
+  outcomeLevel = "1",
+  explanatory = Treatment,
+  analysistype = "overall",
+  ph_cox = TRUE
+)
+```
+
+**Interpretation**:
+- Separate hazard ratios for cancer-specific and other-cause mortality
+- Treatment effects may differ between competing outcomes
+- Consider cumulative incidence functions for formal competing risk analysis
+
+# Example 4: Landmark Analysis
+
+## Background
+
+Addressing guarantee-time bias when analyzing post-treatment biomarkers or response markers.
+
+## Research Question
+
+Does tumor response at 3 months predict long-term survival?
+
+## Analysis Strategy
+
+```{r landmark-analysis}
+# Create landmark dataset (patients alive at 3 months)
+landmark_data <- subset(original_data, OS_months > 3 | (OS_months <= 3 & Death == 0))
+
+# Adjust survival times for landmark point
+landmark_data$OS_months_landmark <- landmark_data$OS_months - 3
+landmark_data$OS_months_landmark[landmark_data$OS_months_landmark < 0] <- 0
+
+# Analyze survival from landmark time
+landmark_result <- survival(
+  data = landmark_data,
+  elapsedtime = OS_months_landmark,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Response_3month,
+  uselandmark = TRUE,
+  landmark = 3
+)
+```
+
+**Key Points**:
+- Only includes patients who survived to landmark time
+- Eliminates guarantee-time bias
+- Useful for post-treatment predictors
+
+# Example 5: Dose-Response Analysis
+
+## Background
+
+Evaluating survival outcomes across different dose levels of a treatment.
+
+## Research Question
+
+Is there a dose-response relationship for treatment efficacy?
+
+## Analysis Steps
+
+### Step 1: Categorical Dose Analysis
+
+```{r dose-categorical}
+# Treat dose as categorical variable
+dose_categorical <- survival(
+  data = dose_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Dose_category,  # Low, Medium, High
+  analysistype = "pairwise",
+  padjustmethod = "holm"
+)
+```
+
+### Step 2: Trend Analysis
+
+```{r dose-trend}
+# Test for linear trend across dose levels
+# Create ordinal dose variable (1, 2, 3)
+dose_data$Dose_ordinal <- as.numeric(factor(dose_data$Dose_category, 
+                                           levels = c("Low", "Medium", "High")))
+
+trend_result <- survival(
+  data = dose_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Dose_ordinal,
+  ph_cox = TRUE
+)
+```
+
+**Interpretation**:
+- Test for overall dose effect (3-group comparison)
+- Test for linear trend (ordinal dose variable)
+- HR per dose level increase
+
+# Example 6: Propensity Score Matching
+
+## Background
+
+Comparing treatments in observational data while controlling for selection bias.
+
+## Research Question
+
+What is the treatment effect after accounting for baseline differences between groups?
+
+## Analysis Workflow
+
+```{r propensity-matching}
+# Step 1: Create matched dataset (outside jsurvival)
+# matched_data <- created using propensity score matching
+
+# Step 2: Analyze matched cohort
+matched_result <- survival(
+  data = matched_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = Treatment,
+  analysistype = "overall",
+  ph_cox = TRUE
+)
+
+# Step 3: Sensitivity analysis with additional adjustment
+sensitivity_result <- multisurvival(
+  data = matched_data,
+  elapsedtime = OS_months,
+  outcome = Death,
+  outcomeLevel = "1",
+  explanatory = c(Treatment, remaining_confounders)
+)
+```
+
+# Reporting Guidelines
+
+## Essential Elements
+
+1. **Study Design**: Clearly describe cohort and follow-up
+2. **Sample Size**: Total patients, events, median follow-up
+3. **Statistical Methods**: Analysis approach and software used
+4. **Results Presentation**:
+   - Median survival with 95% CI
+   - Hazard ratios with 95% CI
+   - P-values and statistical tests used
+   - Kaplan-Meier curves with risk tables
+
+## Example Results Section
+
+> "Among 200 patients (Treatment A: n=100, Treatment B: n=100), there were 120 deaths during a median follow-up of 18.5 months (IQR: 12.2-24.8). Median overall survival was 22.1 months (95% CI: 18.5-25.8) for Treatment A versus 28.4 months (95% CI: 24.1-32.7) for Treatment B. Treatment B was associated with a 25% reduction in the risk of death compared to Treatment A (HR=0.75, 95% CI: 0.60-0.95, p=0.02). The 2-year survival rates were 45% (95% CI: 35-55%) and 60% (95% CI: 50-70%) for Treatment A and B, respectively."
+
+## Figure Legends
+
+> "Figure 1. Kaplan-Meier survival curves comparing Treatment A versus Treatment B. The table below shows the number of patients at risk at each time point. P-value from log-rank test. HR: hazard ratio, CI: confidence interval."
+
+# Common Pitfalls and Solutions
+
+## Pitfall 1: Immortal Time Bias
+
+**Problem**: Including post-baseline events as baseline predictors
+**Solution**: Use landmark analysis or time-dependent covariates
+
+## Pitfall 2: Multiple Testing
+
+**Problem**: Testing multiple endpoints without adjustment
+**Solution**: Use appropriate p-value correction methods
+
+## Pitfall 3: Proportional Hazards Violation
+
+**Problem**: HR changes over time
+**Solution**: Use stratified Cox models or time-dependent effects
+
+## Pitfall 4: Insufficient Follow-up
+
+**Problem**: High censoring rates affect reliability
+**Solution**: Report median follow-up and censoring patterns
+
+# Conclusion
+
+These examples demonstrate the versatility of jsurvival for clinical research applications. The key to successful survival analysis is:
+
+1. **Clear research questions** with appropriate study design
+2. **Careful data preparation** and quality control
+3. **Appropriate statistical methods** for the research context
+4. **Comprehensive reporting** following established guidelines
+5. **Clinical interpretation** that considers both statistical and practical significance
+
+For additional support and examples, visit the [jsurvival website](https://www.serdarbalci.com/jsurvival/) and [ClinicoPath documentation](https://sbalci.github.io/ClinicoPathJamoviModule/).

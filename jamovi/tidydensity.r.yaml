@@ -1,0 +1,127 @@
+---
+name: tidydensity
+title: Statistical Distribution Generator
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: main_plot
+      title: Distribution Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      clearWith:
+        - distribution_type
+        - n_observations
+        - n_simulations
+        - plot_type
+        - plot_enhancements
+        - normal_mean
+        - normal_sd
+        - beta_shape1
+        - beta_shape2
+        - gamma_shape
+        - gamma_scale
+        - exponential_rate
+        - uniform_min
+        - uniform_max
+        - chisq_df
+        - t_df
+        - f_df1
+        - f_df2
+        - binomial_size
+        - binomial_prob
+        - poisson_lambda
+        - weibull_shape
+        - weibull_scale
+        - lognormal_meanlog
+        - lognormal_sdlog
+        - logistic_location
+        - logistic_scale
+        - cauchy_location
+        - cauchy_scale
+
+    - name: distribution_statistics
+      title: Distribution Statistics
+      type: Html
+      visible: (show_statistics)
+      clearWith:
+        - distribution_type
+        - n_observations
+        - n_simulations
+        - normal_mean
+        - normal_sd
+        - beta_shape1
+        - beta_shape2
+        - gamma_shape
+        - gamma_scale
+        - exponential_rate
+        - uniform_min
+        - uniform_max
+        - chisq_df
+        - t_df
+        - f_df1
+        - f_df2
+        - binomial_size
+        - binomial_prob
+        - poisson_lambda
+        - weibull_shape
+        - weibull_scale
+        - lognormal_meanlog
+        - lognormal_sdlog
+        - logistic_location
+        - logistic_scale
+        - cauchy_location
+        - cauchy_scale
+
+    - name: summary_table
+      title: Summary Statistics Table
+      type: Html
+      visible: (show_summary_table)
+      clearWith:
+        - distribution_type
+        - n_observations
+        - n_simulations
+        - normal_mean
+        - normal_sd
+        - beta_shape1
+        - beta_shape2
+        - gamma_shape
+        - gamma_scale
+        - exponential_rate
+        - uniform_min
+        - uniform_max
+        - chisq_df
+        - t_df
+        - f_df1
+        - f_df2
+        - binomial_size
+        - binomial_prob
+        - poisson_lambda
+        - weibull_shape
+        - weibull_scale
+        - lognormal_meanlog
+        - lognormal_sdlog
+        - logistic_location
+        - logistic_scale
+        - cauchy_location
+        - cauchy_scale
+
+    - name: parameter_info
+      title: Distribution Parameters
+      type: Html
+      visible: (show_parameter_info)
+      clearWith:
+        - distribution_type
+
+    - name: interpretation
+      title: Usage Guide
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+        - distribution_type

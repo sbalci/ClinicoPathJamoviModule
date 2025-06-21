@@ -181,7 +181,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # Example usage:
 #' # data('histopathology')
 #' # dat <- as.data.frame(histopathology)
-#' # ClinicoPathDescriptives::tableone(
+#' # ClinicoPath::tableone(
 #' #   data = dat,
 #' #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
 #' #   sty = "t3",
