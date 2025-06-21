@@ -1,0 +1,81 @@
+---
+name: enhancedcrosstable
+title: "Enhanced Cross Tables with danchaltiel/crosstable"
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: "Instructions"
+    type: Html
+    visible: true
+
+  - name: crosstable_main
+    title: "Enhanced Cross Table"
+    type: Html
+    visible: (vars && by_var)
+    clearWith:
+      - vars
+      - by_var
+      - percent_pattern
+      - show_total
+      - show_total_row
+      - funs_arg
+      - digits
+      - margin
+      - export_format
+
+  - name: statistics_table
+    title: "Statistical Tests"
+    type: Html
+    visible: (vars && by_var && test_auto)
+    clearWith:
+      - vars
+      - by_var
+      - test_auto
+      - effect_size
+      - cor_method
+
+  - name: effect_sizes
+    title: "Effect Sizes"
+    type: Html
+    visible: (vars && by_var && effect_size)
+    clearWith:
+      - vars
+      - by_var
+      - effect_size
+
+  - name: interpretation
+    title: "Statistical Interpretation"
+    type: Html
+    visible: (vars && by_var && show_interpretation)
+    clearWith:
+      - vars
+      - by_var
+      - test_auto
+      - effect_size
+      - show_interpretation
+
+  - name: export_data
+    title: "Export Data"
+    type: Html
+    visible: (vars && by_var && export_format:csv)
+    clearWith:
+      - vars
+      - by_var
+      - export_format
+
+  - name: summary_stats
+    title: "Summary Statistics"
+    type: Html
+    visible: (vars && by_var)
+    clearWith:
+      - vars
+      - by_var
+      - funs_arg
+      - digits
+      - exclude_missing
+
+refs:
+  - crosstable
+  - officer
+...

@@ -708,7 +708,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 medianSummary <- c(km_fit_median_definition,
                                    "The median survival time is when 50% of subjects have experienced the event.",
-                                   "This means that 50% of subjects in this group survived longer than this time period."
+                                   "This means that 50% of subjects in this group survived longer than this time period.",
+                                   "Note: Confidence intervals are calculated using the log-log transformation method for improved accuracy with censored data (not plain Greenwood formula)."
                                    )
 
                 self$results$medianSummary$setContent(medianSummary)
@@ -982,7 +983,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> survTableSummary
 
-                self$results$survTableSummary$setContent(survTableSummary)
+                survTableSummaryWithNote <- c(survTableSummary,
+                                              "Note: Confidence intervals for survival probabilities are calculated using the log-log transformation method rather than the plain Greenwood formula for better performance with censored survival data.")
+                
+                self$results$survTableSummary$setContent(survTableSummaryWithNote)
 
             }
 

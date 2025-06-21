@@ -1201,14 +1201,36 @@ analyses:
 - Missing clearWith specifications for dynamic results
 - Inconsistent option types between .a.yaml and .u.yaml
 
-### Adding a new function
+### Proper Jamovi Module Development Workflow
 
-```r
-Rscript -e "jmvtools::addAnalysis(name = '<newfunctionname>')"
-# This will create the necessary .b.R, .a.yaml, .u.yaml, and .r.yaml files
-# and update the module structure accordingly.
-# Then update these files.
-```
+**IMPORTANT**: Always use this exact workflow when adding new analyses:
+
+1. **Start with template generation:**
+   ```r
+   Rscript -e "jmvtools::addAnalysis(name = 'functionName')"
+   ```
+   This creates initial template files with `.u.yaml` in aggressive compiler mode.
+
+2. **Fill in the analysis definition:**
+   - Edit `.a.yaml` (analysis definition with options/parameters)
+   - Edit `.b.R` (backend R6 implementation)
+
+3. **Auto-populate the UI:**
+   ```r
+   Rscript -e "jmvtools::prepare()"
+   ```
+   This auto-populates the `.u.yaml` file based on the analysis definition.
+
+4. **Make UI customizations (if needed):**
+   - After auto-generation, make any necessary UI changes to `.u.yaml`
+   - The UI file will now be properly synchronized with the analysis definition
+
+5. **Verify compilation:**
+   ```r
+   Rscript -e "devtools::document()"
+   ```
+
+This workflow ensures proper synchronization between analysis definition and UI components, and prevents compilation issues.
 
 ### .u.yaml File Structure
 

@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.28
+Version: 0.0.3.29
 Date: 2024-06-21
 Authors@R: 
     person(given = "Serdar",
@@ -153,7 +153,14 @@ Imports:
     anytime,
     TidyDensity,
     stringr,
-    ggmice
+    mice,
+    ggmice,
+    party,
+    randomForest,
+    grafify,
+    emmeans,
+    crosstable,
+    officer
 VignetteBuilder: 
     knitr, 
     tiff, 

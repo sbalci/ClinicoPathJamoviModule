@@ -1,0 +1,118 @@
+---
+name: grafify
+title: Scientific Visualization with Grafify
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: main_plot
+      title: Grafify Scientific Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_main
+      visible: true
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - plot_type
+        - color_palette
+        - error_type
+
+    - name: summary_stats
+      title: Summary Statistics
+      type: Html
+      visible: (show_summary_stats)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - summary_function
+
+    - name: statistical_analysis
+      title: Statistical Analysis Results
+      type: Html
+      visible: (add_statistics)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - stat_method
+        - experimental_design
+
+    - name: posthoc_results
+      title: Post-hoc Comparisons
+      type: Html
+      visible: (posthoc_comparisons && add_statistics)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - comparison_method
+        - alpha_level
+
+    - name: diagnostic_plots
+      title: Model Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_diagnostics
+      visible: (show_model_diagnostics && add_statistics)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - stat_method
+
+    - name: qqplot
+      title: Q-Q Plot for Normality
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot_qq
+      visible: (show_model_diagnostics && add_statistics)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups
+        - stat_method
+
+    - name: palette_preview
+      title: Color Palette Preview
+      type: Image
+      width: 600
+      height: 200
+      renderFun: .plot_palette
+      visible: true
+      clearWith:
+        - color_palette
+        - reverse_palette
+
+    - name: plot_interpretation
+      title: Plot Interpretation Guide
+      type: Html
+      visible: true
+      clearWith:
+        - plot_type
+        - experimental_design
+
+    - name: export_info
+      title: Data Export Information
+      type: Html
+      visible: (export_data)
+      clearWith:
+        - vars
+        - x_var
+        - y_var
+        - groups

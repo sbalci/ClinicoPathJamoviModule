@@ -1,0 +1,11 @@
+---
+name:  coxdiagnostics
+title: coxdiagnostics
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: coxdiagnostics
+      type:  Preformatted
+
+...

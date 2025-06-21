@@ -9,15 +9,14 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.28"
+new_version <- "0.0.3.29"
 new_date <- "2024-06-21"
 
 # Define WIP, check, extended status ----
 check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
 extended <- FALSE # Set to TRUE if you want to document and install submodules
 webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
-WIP <- FALSE # Set to TRUE if this is a work-in-progress update
-
+WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
 
 # Load required packages ----
 library(xfun)
@@ -839,7 +838,3 @@ if (!WIP) {
     pkgdown::build_site()
   }
 }
-
-
-# "This is the jjhistostats function in jjstatsplot module of jamovi. Suggest improvements to be more useful for end users. Suggest improvements for R and yaml files. Improve documentation for R and yaml files, also for DESCRIPTION and data files. Make the function more user friendly and explanatory for the end user. Add new features as necessary. When adding new features also consider original library function arguments. Improve the interface and output. Make it more visually appealing. Do not add or change color plates. Do not suggest changes for export. Give the new codes separately with explanatory texts. Then give me complete codes with recommended suggestions. Use comments for changes. Do not make breaking changes."
-
