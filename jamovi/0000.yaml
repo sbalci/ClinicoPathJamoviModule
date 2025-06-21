@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.28
+version: 0.0.3.29
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -1208,6 +1208,65 @@ analyses:
       handling is critical
 
       for valid statistical inference.
+  - title: Advanced Decision Tree Analysis
+    name: advancedtree
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Advanced Decision Tree Analysis
+    menuSubtitle: Modern Tree Algorithms for Clinical Research
+    description: >
+      Advanced decision tree analysis using modern algorithms for clinical
+      research and medical decision making.
+
+      Extends basic decision tree functionality with gradient boosting,
+      conditional inference trees, 
+
+      ensemble methods, and enhanced interpretability. Provides comprehensive
+      performance evaluation,
+
+      feature importance analysis, and clinical-focused visualizations.
+      Complements existing
+
+      ClinicoPath decision tree modules with state-of-the-art algorithms.
+    ribbon: analyses
+  - title: Scientific Visualization with Grafify
+    name: grafify
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: ClinicoPath Scientific Plots
+    menuTitle: Scientific Visualization with Grafify
+    menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
+    description: >
+      Scientific data visualization using the grafify R package for easy and
+      accessible plotting.
+
+      Provides quick exploration graphs with few lines of code, color-blind
+      friendly palettes,
+
+      and integrated statistical analysis. Perfect for clinical research,
+      experimental data,
+
+      and scientific publications. Features scatter plots with error bars,
+      distribution plots,
+
+      before-after comparisons, and factorial designs with professional styling.
+    ribbon: analyses
+  - title: Enhanced Cross Tables with danchaltiel/crosstable
+    name: enhancedcrosstable
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuTitle: Enhanced Cross Tables with danchaltiel/crosstable
+    menuSubgroup: ClinicoPath Comparisons
+    menuSubtitle: Advanced Tidyselect & Automated Reporting
+    description: >-
+      Enhanced cross-tabulation analysis using the danchaltiel/crosstable
+      package for advanced clinical research functionality.
+  - title: coxdiagnostics
+    name: coxdiagnostics
+    ns: ClinicoPath
+    menuGroup: ClinicoPathJamoviModule
+    menuTitle: coxdiagnostics
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

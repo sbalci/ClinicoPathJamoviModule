@@ -1,0 +1,216 @@
+title: Scientific Visualization with Grafify
+name: grafify
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables for Plotting
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: groups
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Blocking/Pairing Variable
+        children:
+          - type: VariablesListBox
+            name: blocks
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Faceting Variable
+        children:
+          - type: VariablesListBox
+            name: facet_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: plot_type
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: X-axis Variable
+        children:
+          - type: VariablesListBox
+            name: x_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Y-axis Variable
+        children:
+          - type: VariablesListBox
+            name: y_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: error_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: summary_function
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: color_palette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: reverse_palette
+      - type: CheckBox
+        name: use_grafify_theme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: jitter_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: transparency
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: point_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: line_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: log_transform
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: add_statistics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: stat_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: posthoc_comparisons
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: comparison_method
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Before-After Shape Variable
+        children:
+          - type: VariablesListBox
+            name: befafter_shape_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Subject ID Variable
+        children:
+          - type: VariablesListBox
+            name: befafter_id_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_individual_points
+      - type: CheckBox
+        name: show_summary_stats
+      - type: CheckBox
+        name: show_model_diagnostics
+      - type: CheckBox
+        name: export_data
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: title_text
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: x_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: y_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: legend_position
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: experimental_design
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Random Effects Variables
+        children:
+          - type: VariablesListBox
+            name: random_effects
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number

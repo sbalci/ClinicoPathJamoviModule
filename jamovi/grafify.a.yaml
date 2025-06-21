@@ -1,0 +1,478 @@
+---
+name: grafify
+title: Scientific Visualization with Grafify
+menuGroup: JJStatsPlot
+menuSubgroup: ClinicoPath Scientific Plots
+menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Scientific data visualization using the grafify R package for easy and accessible plotting.
+        Provides quick exploration graphs with few lines of code, color-blind friendly palettes,
+        and integrated statistical analysis. Perfect for clinical research, experimental data,
+        and scientific publications. Features scatter plots with error bars, distribution plots,
+        before-after comparisons, and factorial designs with professional styling.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Scientific scatter plot with error bars
+            data(clinical_data)
+            grafify(
+                data = clinical_data,
+                vars = c("biomarker1", "biomarker2"),
+                groups = "treatment_group",
+                plot_type = "scatterbar",
+                error_type = "sd",
+                color_palette = "vibrant"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame containing scientific or clinical variables
+            for professional visualization with grafify.
+
+    # Core variables
+    - name: vars
+      title: Variables for Plotting
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+                  Continuous variables for plotting. Can be used as X, Y variables
+                  or multiple variables for distribution analysis.
+
+    - name: groups
+      title: Grouping Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >
+                  Categorical variable for grouping data in plots.
+                  Creates different colors, shapes, or panels for each group.
+
+    - name: blocks
+      title: Blocking/Pairing Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >
+                  Variable for blocking or pairing observations.
+                  Used in randomized block designs or before-after comparisons.
+
+    - name: facet_var
+      title: Faceting Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >
+                  Variable for creating multiple panels (facets).
+                  Useful for complex experimental designs with multiple factors.
+
+    # Plot configuration
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+        - title: "Scatter with Error Bars"
+          name: scatterbar
+        - title: "Scatter with Box Plots"
+          name: scatterbox
+        - title: "Scatter with Violin Plots"
+          name: scatterviolin
+        - title: "Dot Plot with Error Bars"
+          name: dotbar
+        - title: "Dot Plot with Box Plots"
+          name: dotbox
+        - title: "Dot Plot with Violin Plots"
+          name: dotviolin
+        - title: "Before-After Box Plots"
+          name: befafter_box
+        - title: "Before-After with Colors"
+          name: befafter_colors
+        - title: "3D Scatter (X, Y, Group)"
+          name: scatter_3d
+        - title: "4D Scatter (X, Y, Group, Facet)"
+          name: scatter_4d
+        - title: "Density Plot"
+          name: density
+        - title: "Histogram"
+          name: histogram
+        - title: "XY Scatter (Categorical Groups)"
+          name: xy_catgroup
+        - title: "XY Scatter (Numeric Groups)"
+          name: xy_numgroup
+      default: scatterbar
+      description: >
+                  Type of plot to create. Each type is optimized for different
+                  data structures and research questions.
+
+    - name: x_var
+      title: X-axis Variable
+      type: Variable
+      suggested: [continuous, ordinal]
+      permitted: [numeric, factor]
+      description: >
+                  Variable for X-axis. Can be continuous or categorical
+                  depending on the plot type selected.
+
+    - name: y_var
+      title: Y-axis Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+                  Variable for Y-axis. Should be continuous for most plot types.
+
+    # Error bar and summary options
+    - name: error_type
+      title: Error Bar Type
+      type: List
+      options:
+        - title: "Standard Deviation (SD)"
+          name: sd
+        - title: "Standard Error of Mean (SEM)"
+          name: sem
+        - title: "95% Confidence Interval"
+          name: ci95
+        - title: "None"
+          name: none
+      default: sd
+      description: >
+                  Type of error bars to display. SD shows data spread,
+                  SEM shows precision of mean, CI95 shows statistical confidence.
+
+    - name: summary_function
+      title: Summary Function
+      type: List
+      options:
+        - title: "Mean"
+          name: mean
+        - title: "Median"
+          name: median
+        - title: "Geometric Mean"
+          name: geomean
+      default: mean
+      description: >
+                  Function used to summarize data for central tendency.
+                  Geometric mean is useful for log-scaled or ratio data.
+
+    # Color and styling options
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: "Default Grafify"
+          name: default
+        - title: "Vibrant"
+          name: vibrant
+        - title: "Contrast"
+          name: contrast
+        - title: "Bright"
+          name: bright
+        - title: "Pale"
+          name: pale
+        - title: "Dark"
+          name: dark
+        - title: "Earth"
+          name: earth
+        - title: "Spring"
+          name: spring
+        - title: "Summer"
+          name: summer
+        - title: "Autumn"
+          name: autumn
+        - title: "Winter"
+          name: winter
+        - title: "Fishy"
+          name: fishy
+      default: default
+      description: >
+                  Color palette for the plot. All palettes are color-blind friendly
+                  and designed for scientific publications.
+
+    - name: reverse_palette
+      title: Reverse Color Palette
+      type: Bool
+      default: false
+      description: >
+                  Reverse the order of colors in the selected palette.
+                  Useful for adjusting color assignments to groups.
+
+    - name: use_grafify_theme
+      title: Use Grafify Theme
+      type: Bool
+      default: true
+      description: >
+                  Apply the grafify theme for classic-style scientific plots.
+                  Provides clean, publication-ready styling.
+
+    # Advanced plotting options
+    - name: jitter_width
+      title: Jitter Width
+      type: Number
+      default: 0.3
+      min: 0
+      max: 1
+      description: >
+                  Amount of horizontal jittering for data points.
+                  Helps avoid overlapping points in categorical plots.
+
+    - name: transparency
+      title: Point Transparency
+      type: Number
+      default: 0.7
+      min: 0.1
+      max: 1
+      description: >
+                  Transparency level for data points (alpha value).
+                  Lower values make points more transparent.
+
+    - name: point_size
+      title: Point Size
+      type: Number
+      default: 3
+      min: 0.5
+      max: 10
+      description: >
+                  Size of data points in the plot.
+
+    - name: line_size
+      title: Line Size
+      type: Number
+      default: 1
+      min: 0.1
+      max: 3
+      description: >
+                  Thickness of lines (error bars, connecting lines).
+
+    # Log scale options
+    - name: log_transform
+      title: Log Scale Transformation
+      type: List
+      options:
+        - title: "No Transformation"
+          name: none
+        - title: "Log10 Y-axis"
+          name: log10_y
+        - title: "Log10 X-axis"
+          name: log10_x
+        - title: "Log10 Both Axes"
+          name: log10_both
+        - title: "Natural Log Y-axis"
+          name: ln_y
+        - title: "Natural Log X-axis"
+          name: ln_x
+        - title: "Natural Log Both Axes"
+          name: ln_both
+      default: none
+      description: >
+                  Apply logarithmic transformation to axes.
+                  Useful for data spanning multiple orders of magnitude.
+
+    # Statistical analysis integration
+    - name: add_statistics
+      title: Add Statistical Analysis
+      type: Bool
+      default: false
+      description: >
+                  Perform and display statistical analysis on the plot.
+                  Integrates with grafify's built-in statistical functions.
+
+    - name: stat_method
+      title: Statistical Method
+      type: List
+      options:
+        - title: "One-way ANOVA"
+          name: anova_1way
+        - title: "Two-way ANOVA"
+          name: anova_2way
+        - title: "Mixed Effects Model"
+          name: mixed_model
+        - title: "t-test"
+          name: ttest
+        - title: "Correlation"
+          name: correlation
+      default: anova_1way
+      description: >
+                  Statistical method to apply. Results will be displayed
+                  as text annotations or in separate output sections.
+
+    - name: posthoc_comparisons
+      title: Post-hoc Comparisons
+      type: Bool
+      default: false
+      description: >
+                  Perform post-hoc pairwise comparisons after ANOVA.
+                  Uses emmeans for estimated marginal means and contrasts.
+
+    - name: comparison_method
+      title: Post-hoc Method
+      type: List
+      options:
+        - title: "Pairwise Comparisons"
+          name: pairwise
+        - title: "vs Reference Group"
+          name: vs_ref
+        - title: "Trend Analysis"
+          name: trends
+        - title: "Levelwise Comparisons"
+          name: levelwise
+      default: pairwise
+      description: >
+                  Method for post-hoc comparisons. Pairwise compares all groups,
+                  vs reference compares to control group, trends test for patterns.
+
+    # Before-after specific options
+    - name: befafter_shape_var
+      title: Before-After Shape Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >
+                  Variable defining before/after or timepoint for paired data.
+                  Used in before-after plot types.
+
+    - name: befafter_id_var
+      title: Subject ID Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      description: >
+                  Variable identifying individual subjects or experimental units.
+                  Used to connect paired observations in before-after plots.
+
+    # Output options
+    - name: show_individual_points
+      title: Show Individual Data Points
+      type: Bool
+      default: true
+      description: >
+                  Display individual data points on the plot.
+                  Recommended for transparency and data exploration.
+
+    - name: show_summary_stats
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+      description: >
+                  Display summary statistics table with means, SD, SEM, and sample sizes.
+
+    - name: show_model_diagnostics
+      title: Show Model Diagnostics
+      type: Bool
+      default: false
+      description: >
+                  Display model diagnostic plots (Q-Q plots, residuals)
+                  when statistical analysis is performed.
+
+    - name: export_data
+      title: Export Processed Data
+      type: Bool
+      default: false
+      description: >
+                  Export the processed data used for plotting.
+                  Includes summary statistics and model results.
+
+    # Plot dimensions and layout
+    - name: plot_width
+      title: Plot Width
+      type: Number
+      default: 8
+      min: 4
+      max: 16
+      description: >
+                  Width of the plot in inches for optimal display and export.
+
+    - name: plot_height
+      title: Plot Height
+      type: Number
+      default: 6
+      min: 3
+      max: 12
+      description: >
+                  Height of the plot in inches for optimal display and export.
+
+    - name: title_text
+      title: Plot Title
+      type: String
+      default: ""
+      description: >
+                  Custom title for the plot. Leave empty for automatic title
+                  based on variables and analysis type.
+
+    - name: x_label
+      title: X-axis Label
+      type: String
+      default: ""
+      description: >
+                  Custom label for X-axis. Leave empty to use variable name.
+
+    - name: y_label
+      title: Y-axis Label
+      type: String
+      default: ""
+      description: >
+                  Custom label for Y-axis. Leave empty to use variable name.
+
+    - name: legend_position
+      title: Legend Position
+      type: List
+      options:
+        - title: "Right"
+          name: right
+        - title: "Left"
+          name: left
+        - title: "Top"
+          name: top
+        - title: "Bottom"
+          name: bottom
+        - title: "None"
+          name: none
+      default: right
+      description: >
+                  Position of the plot legend.
+
+    # Advanced experimental design options
+    - name: experimental_design
+      title: Experimental Design
+      type: List
+      options:
+        - title: "Completely Randomized"
+          name: crd
+        - title: "Randomized Block"
+          name: rbd
+        - title: "Repeated Measures"
+          name: repeated
+        - title: "Factorial"
+          name: factorial
+        - title: "Before-After"
+          name: before_after
+      default: crd
+      description: >
+                  Type of experimental design for appropriate statistical analysis.
+                  Affects model specification and interpretation.
+
+    - name: random_effects
+      title: Random Effects Variables
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor, id]
+      description: >
+                  Variables to include as random effects in mixed models.
+                  Typically subjects, blocks, or experimental units.
+
+    - name: alpha_level
+      title: Significance Level (α)
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.1
+      description: >
+                  Significance level for statistical tests and confidence intervals.
+
+...

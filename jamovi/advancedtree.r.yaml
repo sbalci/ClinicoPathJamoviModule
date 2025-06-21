@@ -1,0 +1,237 @@
+---
+name: advancedtree
+title: Advanced Decision Tree Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: tree_plot
+      title: Decision Tree Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_tree
+      visible: (show_tree_plot && algorithm:rpart || algorithm:ctree)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - max_depth
+        - min_samples_split
+        - min_samples_leaf
+
+    - name: importance_plot
+      title: Feature Importance
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_importance
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - importance_method
+
+    - name: performance_table
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance_metrics)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: dp:3
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: dp:3
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: roc_plot
+      title: ROC Curve Analysis
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot_roc
+      visible: (show_roc_curve)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: validation_curves
+      title: Validation Performance
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plot_validation
+      visible: (show_validation_curves)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+        - cv_folds
+
+    - name: confusion_matrix
+      title: Confusion Matrix
+      type: Html
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: calibration_plot
+      title: Probability Calibration
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot_calibration
+      visible: (show_calibration_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: shap_plot
+      title: SHAP Value Analysis
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_shap
+      visible: (shap_analysis && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: partial_dependence_plot
+      title: Partial Dependence Plots
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .plot_partial_dependence
+      visible: (partial_dependence && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: interaction_plot
+      title: Feature Interactions
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plot_interactions
+      visible: (interaction_analysis && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: hyperparameter_results
+      title: Hyperparameter Optimization Results
+      type: Html
+      visible: (hyperparameter_tuning)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - tuning_method
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation Guide
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - clinical_context
+        - algorithm
+        - target
+
+    - name: feature_selection_results
+      title: Feature Selection Results
+      type: Html
+      visible: (feature_selection)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: bootstrap_intervals
+      title: Bootstrap Confidence Intervals
+      type: Html
+      visible: (bootstrap_confidence)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - n_bootstrap
+
+    - name: model_export
+      title: Model Export Information
+      type: Html
+      visible: (export_model)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm

@@ -1,0 +1,226 @@
+---
+name: enhancedcrosstable
+title: "Enhanced Cross Tables with danchaltiel/crosstable"
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Comparisons
+menuSubtitle: "Advanced Tidyselect & Automated Reporting"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Enhanced cross-tabulation analysis using the danchaltiel/crosstable package for advanced clinical research functionality.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(crosstable)
+            # Enhanced crosstable with tidyselect
+            crosstable(data, c(var1, var2), by = group_var)
+            # Formula interface
+            crosstable(data, c(age_group = age > 65), by = treatment)
+
+options:
+  - name: data
+    type: Data
+    description:
+      R: The data as a data frame.
+      jamovi: The dataset for cross-tabulation analysis.
+
+  - name: vars
+    title: "Variables for Cross-tabulation"
+    type: Variables
+    suggested: [continuous, nominal, ordinal]
+    permitted: [numeric, factor]
+    description:
+      R: Variables to include in the cross-tabulation (table rows).
+      jamovi: Select variables to display as rows in the cross-table.
+      ui: Variables that will be analyzed and displayed as table rows.
+
+  - name: by_var
+    title: "Grouping Variable (Columns)"
+    type: Variable
+    suggested: [nominal, ordinal]
+    permitted: [factor]
+    description:
+      R: The grouping variable for cross-tabulation (table columns).
+      jamovi: Variable used to create table columns for comparison.
+      ui: Grouping variable that defines the table columns.
+
+  - name: percent_pattern
+    title: "Percentage Display Pattern"
+    type: List
+    options:
+      - title: "{n} ({p_col})"
+        name: col_percent
+      - title: "{n} ({p_row})"
+        name: row_percent
+      - title: "{n} ({p_tot})"
+        name: total_percent
+      - title: "{n} only"
+        name: count_only
+      - title: "{p_col} only"
+        name: percent_only
+    default: col_percent
+    description:
+      R: Pattern for displaying counts and percentages.
+      jamovi: Choose how to display counts and percentages in cells.
+
+  - name: show_total
+    title: "Show Total Column"
+    type: Bool
+    default: true
+    description:
+      R: Whether to include a total column.
+      jamovi: Add a total column to the cross-table.
+
+  - name: show_total_row
+    title: "Show Total Row"
+    type: Bool
+    default: true
+    description:
+      R: Whether to include a total row.
+      jamovi: Add a total row to the cross-table.
+
+  - name: test_auto
+    title: "Automatic Statistical Tests"
+    type: Bool
+    default: true
+    description:
+      R: Whether to automatically select and perform statistical tests.
+      jamovi: Automatically choose appropriate statistical tests (chi-square, Fisher, etc.).
+
+  - name: effect_size
+    title: "Calculate Effect Sizes"
+    type: Bool
+    default: false
+    description:
+      R: Whether to calculate effect sizes (Cramer's V, odds ratios, etc.).
+      jamovi: Include effect size calculations in the analysis.
+
+  - name: funs_arg
+    title: "Summary Function"
+    type: List
+    options:
+      - title: "Mean (SD)"
+        name: mean_sd
+      - title: "Median [Q1-Q3]"
+        name: median_q1q3
+      - title: "Mean ± SD"
+        name: mean_pm_sd
+      - title: "N only"
+        name: n_only
+    default: mean_sd
+    description:
+      R: Function for summarizing continuous variables.
+      jamovi: How to summarize continuous variables in the table.
+
+  - name: digits
+    title: "Decimal Places"
+    type: Number
+    min: 0
+    max: 5
+    default: 2
+    description:
+      R: Number of decimal places for numeric results.
+      jamovi: Number of decimal places to display.
+
+  - name: use_labels
+    title: "Use Variable Labels"
+    type: Bool
+    default: true
+    description:
+      R: Whether to use variable labels if available.
+      jamovi: Use descriptive variable labels instead of variable names.
+
+  - name: exclude_missing
+    title: "Exclude Missing Values"
+    type: Bool
+    default: true
+    description:
+      R: Whether to exclude missing values from calculations.
+      jamovi: Exclude missing values from analysis and percentages.
+
+  - name: show_n_col
+    title: "Show Column Sample Sizes"
+    type: Bool
+    default: true
+    description:
+      R: Whether to show sample sizes for each column.
+      jamovi: Display sample size (N) for each group column.
+
+  - name: margin
+    title: "Margin for Percentages"
+    type: List
+    options:
+      - title: "Column percentages"
+        name: column
+      - title: "Row percentages"  
+        name: row
+      - title: "Total percentages"
+        name: table
+    default: column
+    description:
+      R: Margin for calculating percentages.
+      jamovi: Calculate percentages within columns, rows, or total table.
+
+  - name: cor_method
+    title: "Correlation Method (for continuous)"
+    type: List
+    options:
+      - title: "Pearson"
+        name: pearson
+      - title: "Spearman"
+        name: spearman
+      - title: "Kendall"
+        name: kendall
+    default: pearson
+    description:
+      R: Correlation method for continuous variables.
+      jamovi: Method for calculating correlations between continuous variables.
+
+  - name: showNA
+    title: "Show Missing Values"
+    type: List
+    options:
+      - title: "No"
+        name: no
+      - title: "If any"
+        name: ifany
+      - title: "Always"
+        name: always
+    default: no
+    description:
+      R: Whether and when to show missing values in the table.
+      jamovi: Control display of missing value information.
+
+  - name: compact
+    title: "Compact Output"
+    type: Bool
+    default: false
+    description:
+      R: Whether to use compact table formatting.
+      jamovi: Use compact formatting to reduce table size.
+
+  - name: export_format
+    title: "Export Format"
+    type: List
+    options:
+      - title: "HTML Table"
+        name: html
+      - title: "Flextable for Word"
+        name: flextable
+      - title: "CSV Export"
+        name: csv
+    default: html
+    description:
+      R: Format for table export and display.
+      jamovi: Choose output format for the cross-table.
+
+  - name: show_interpretation
+    title: "Show Statistical Interpretation"
+    type: Bool
+    default: true
+    description:
+      R: Whether to include interpretation of statistical results.
+      jamovi: Include natural language interpretation of statistical tests.
+...
