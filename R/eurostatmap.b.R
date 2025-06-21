@@ -23,14 +23,27 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data based on user choice
             if (self$options$use_local_data) {
                 if (is.null(self$options$indicator) || nrow(self$data) == 0) {
+                    self$results$.setStatus("Please import your Eurostat data and select an indicator variable")
                     return()
                 }
+                
+                # Check if geo column exists
+                if (!"geo" %in% names(self$data)) {
+                    self$results$.setError("Your data must contain a 'geo' column with NUTS geographic codes (e.g., 'DE', 'FR', 'ES'). Please check your data format.")
+                    return()
+                }
+                
                 plotData <- self$data
                 indicator_var <- self$options$indicator
+                
+                # Provide feedback about local data
+                self$results$.setStatus(paste("Using local data with", nrow(plotData), "observations"))
+                
             } else {
                 # Download from Eurostat
                 dataset_id <- self$options$dataset_id
                 if (is.null(dataset_id) || dataset_id == "") {
+                    self$results$.setStatus("Please enter a Eurostat dataset ID (e.g., 'demo_r_gind3' for population density)")
                     return()
                 }
                 

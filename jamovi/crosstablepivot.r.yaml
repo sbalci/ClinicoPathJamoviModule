@@ -1,0 +1,53 @@
+---
+name: crosstablepivot
+jrs: '1.1'
+title: Enhanced Cross Tables (Pivot)
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: (vars && group)
+
+    - name: pivot_table
+      title: Pivot Cross Table
+      type: Table
+      visible: (vars && group)
+      clearWith:
+        - vars
+        - group
+        - statistics
+        - show_totals
+        - format_style
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+    - name: summary_stats
+      title: Summary Statistics
+      type: Table
+      visible: (vars && group && statistics)
+      clearWith:
+        - vars
+        - group
+        - statistics
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: statistic
+          title: Statistic  
+          type: text
+        - name: value
+          title: Value
+          type: number
+
+    - name: export_info
+      title: Export Information
+      type: Html
+      visible: (export_excel)
+
+...

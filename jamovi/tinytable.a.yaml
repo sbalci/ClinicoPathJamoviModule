@@ -1,0 +1,225 @@
+---
+name: tinytable
+title: Modern Table Formatting
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates modern, publication-ready tables using the tinytable package.
+    This module provides lightweight, zero-dependency table formatting with 
+    multiple output formats including HTML, LaTeX, PDF, and Word. Designed
+    to complement existing ClinicoPath table modules with modern styling,
+    flexible formatting, and clean aesthetics. Perfect for enhancing data
+    presentation in clinical research publications and reports.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select variables for table display.
+      # 2. Choose grouping variables for organized presentation.
+      # 3. Customize styling, themes, and formatting options.
+      # 4. Generate publication-ready tables in multiple formats.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables to Display
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variables to include in the table display.
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+        R: >
+          Optional variable for grouping rows or creating summary tables.
+
+    - name: table_type
+      title: Table Type
+      type: List
+      options:
+        - title: "Data Summary"
+          name: summary
+        - title: "Descriptive Statistics"
+          name: descriptive
+        - title: "Grouped Summary"
+          name: grouped
+        - title: "Raw Data Display"
+          name: raw
+        - title: "Custom Format"
+          name: custom
+      default: summary
+      description:
+        R: >
+          Type of table to generate with appropriate formatting.
+
+    - name: show_statistics
+      title: Include Statistics
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, includes statistical summaries (mean, SD, etc.) for numeric variables.
+
+    - name: show_counts
+      title: Show Counts and Percentages
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, shows counts and percentages for categorical variables.
+
+    - name: show_missing
+      title: Show Missing Values
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, includes information about missing values.
+
+    - name: table_theme
+      title: Table Theme
+      type: List
+      options:
+        - title: "Clinical"
+          name: clinical
+        - title: "Modern"
+          name: modern
+        - title: "Publication"
+          name: publication
+        - title: "Minimal"
+          name: minimal
+        - title: "Bootstrap"
+          name: bootstrap
+      default: clinical
+      description:
+        R: >
+          Visual theme for table styling and appearance.
+
+    - name: table_title
+      title: Table Title
+      type: String
+      default: "Data Summary Table"
+      description:
+        R: >
+          Title for the table.
+
+    - name: table_notes
+      title: Table Notes
+      type: String
+      default: ""
+      description:
+        R: >
+          Optional notes to display below the table.
+
+    - name: output_format
+      title: Primary Output Format
+      type: List
+      options:
+        - title: "HTML"
+          name: html
+        - title: "PDF Ready"
+          name: pdf
+        - title: "Word Compatible"
+          name: word
+        - title: "LaTeX"
+          name: latex
+        - title: "Markdown"
+          name: markdown
+      default: html
+      description:
+        R: >
+          Primary output format for the table.
+
+    - name: column_width
+      title: Table Width (proportion)
+      type: Number
+      min: 0.3
+      max: 1.0
+      default: 0.8
+      description:
+        R: >
+          Width of the table as proportion of available space.
+
+    - name: precision_digits
+      title: Decimal Precision
+      type: Number
+      min: 0
+      max: 5
+      default: 2
+      description:
+        R: >
+          Number of decimal places for numeric values.
+
+    - name: style_alternating
+      title: Alternating Row Colors
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, applies alternating row background colors.
+
+    - name: style_borders
+      title: Table Borders
+      type: List
+      options:
+        - title: "All Borders"
+          name: all
+        - title: "Horizontal Only"
+          name: horizontal
+        - title: "Minimal"
+          name: minimal
+        - title: "None"
+          name: none
+      default: all
+      description:
+        R: >
+          Border style for the table.
+
+    - name: font_size
+      title: Font Size
+      type: List
+      options:
+        - title: "Small"
+          name: small
+        - title: "Normal"
+          name: normal
+        - title: "Large"
+          name: large
+      default: normal
+      description:
+        R: >
+          Font size for table text.
+
+    - name: show_interpretation
+      title: Show Usage Guide
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays interpretation and usage guidelines.
+
+...

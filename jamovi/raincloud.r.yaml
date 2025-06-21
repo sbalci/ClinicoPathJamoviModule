@@ -1,0 +1,43 @@
+---
+name: raincloud
+title: Raincloud Plot
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: plot
+      title: Raincloud Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: statistics
+      title: Summary Statistics
+      type: Html
+      visible: (show_statistics)
+
+    - name: outliers
+      title: Outlier Analysis
+      type: Html
+      visible: (show_outliers)
+
+    - name: normality
+      title: Normality Tests
+      type: Html
+      visible: (normality_test)
+
+    - name: comparison
+      title: Group Comparisons
+      type: Html
+      visible: (comparison_test)
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+
+...

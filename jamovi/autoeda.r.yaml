@@ -1,0 +1,58 @@
+---
+name: autoeda
+title: Automated Exploratory Data Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      description: Welcome message and instructions
+      visible: false
+
+    - name: overview
+      title: Dataset Overview
+      type: Html
+      description: Comprehensive dataset introduction and summary
+
+    - name: missing_analysis
+      title: Missing Value Analysis
+      type: Html
+      description: Missing value patterns and recommendations
+
+    - name: distributions
+      title: Variable Distributions
+      type: Html
+      description: Univariate distribution analysis and plots
+
+    - name: correlation_analysis
+      title: Correlation Analysis
+      type: Html
+      description: Correlation matrices and relationship analysis
+
+    - name: pca_analysis
+      title: Principal Component Analysis
+      type: Html
+      description: PCA results and component visualization
+
+    - name: target_analysis
+      title: Target Variable Analysis
+      type: Html
+      description: Target vs predictors relationship analysis
+
+    - name: comprehensive_report
+      title: Comprehensive EDA Report
+      type: Html
+      description: Complete automated exploratory data analysis report
+
+    - name: plots
+      title: Automated Visualizations
+      type: Html
+      description: Collection of automated plots and charts
+
+    - name: recommendations
+      title: Analysis Recommendations
+      type: Html
+      description: Automated recommendations for further analysis
+
+...

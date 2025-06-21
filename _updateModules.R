@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 
 # Define the new version and date ----
-new_version <- "0.0.3.27"
-new_date <- "2024-06-20"
+new_version <- "0.0.3.28"
+new_date <- "2024-06-21"
 
 # Define WIP, check, extended status ----
-check <- FALSE
-extended <- FALSE
-webpage <- FALSE
+check <- TRUE
+extended <- TRUE
+webpage <- TRUE
 WIP <- FALSE
 # WIP <- FALSE  # Set to TRUE if this is a work-in-progress update
 

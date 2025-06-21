@@ -1,0 +1,34 @@
+---
+name: advancedraincloud
+title: Advanced Raincloud Plot
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: plot
+      title: Advanced Raincloud Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: statistics
+      title: Summary Statistics
+      type: Html
+      visible: (show_statistics)
+
+    - name: comparisons
+      title: Group Comparisons
+      type: Html
+      visible: (show_comparisons)
+
+    - name: interpretation
+      title: Feature Guide
+      type: Html
+      visible: (show_interpretation)
+
+...

@@ -4,7 +4,15 @@
 \alias{tableone}
 \title{Table One}
 \usage{
-tableone(data, vars, sty = "t1", excl = FALSE)
+tableone(
+  data,
+  vars,
+  sty = "t1",
+  excl = FALSE,
+  pivot_format = "clinical",
+  include_statistics = TRUE,
+  group_comparisons = FALSE
+)
 }
 \arguments{
 \item{data}{The input data as a data frame.}
@@ -17,6 +25,13 @@ different package for formatting.}
 
 \item{excl}{Boolean option to exclude missing values (NA) from the
 analysis. Note: Exclusion may remove entire cases.}
+
+\item{pivot_format}{Formatting style for pivottabler enhanced tables.}
+
+\item{include_statistics}{Include advanced statistical summaries in pivot
+format.}
+
+\item{group_comparisons}{Enable group comparison features in pivot table.}
 }
 \value{
 A results object containing:
@@ -26,6 +41,7 @@ A results object containing:
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+\code{results$tablestyle5} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

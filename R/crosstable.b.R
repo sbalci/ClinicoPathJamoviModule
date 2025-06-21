@@ -28,6 +28,10 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
+#' @importFrom gt md
+#' @importFrom purrr partial
+#' @import magrittr
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore'))
@@ -183,17 +187,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                                            ),
                                            digits = gtsummary::all_continuous() ~ 2,
                                            missing_text = "(Missing)"
-
                                            ) %>%
                     gtsummary::modify_header(
-                        update = gtsummary::all_stat_cols() ~ structure("**{level}** N =  {n} ({style_percent(p)}%)", class = "from_markdown"),
-                        stat_by = gt::md("**{level}** N =  {n} ({style_percent(p)}%)")
-                                                  ) %>%
-                    gtsummary::add_n(x = .) %>%
+                        gtsummary::all_stat_cols() ~ "**{level}** N = {n} ({style_percent(p)}%)"
+                    ) %>%
+                    gtsummary::add_n() %>%
                     gtsummary::add_overall() %>%
-                    gtsummary::bold_labels(x = .) %>%
-                    gtsummary::add_p(x = .,
-                                     pvalue_fun =
+                    gtsummary::bold_labels() %>%
+                    gtsummary::add_p(pvalue_fun = 
                                          purrr::partial(
                                              gtsummary::style_pvalue,
                                              digits = 2)

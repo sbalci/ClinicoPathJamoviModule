@@ -26,5 +26,20 @@ children:
     children:
       - type: CheckBox
         name: excl
-        label: "Exclude Missing Values (NA)"  
+        label: "Exclude Missing Values (NA)"
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: "Enhanced Pivot Options"
+        children:
+          - type: ComboBox
+            name: pivot_format
+            enable: (sty:t5)
+          - type: CheckBox
+            name: include_statistics
+            enable: (sty:t5)
+          - type: CheckBox
+            name: group_comparisons
+            enable: (sty:t5)
 ...

@@ -1,0 +1,197 @@
+---
+name: autoeda
+title: Automated Exploratory Data Analysis
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Automated Exploratory Data Analysis using DataExplorer package integration.
+    This module provides comprehensive automated EDA capabilities including dataset overview,
+    missing value analysis, correlation matrices, PCA visualization, and automated reporting.
+    Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame.
+      # 2. Select variables for analysis.
+      # 3. Choose analysis type (overview, missing, correlation, etc.)
+      # 4. Configure output options.
+      # 5. Run autoeda module for comprehensive automated analysis.
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables for Analysis
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables to include in the automated exploratory data analysis.
+            All variable types are supported.
+
+    - name: analysis_type
+      title: "Analysis Type"
+      type: List
+      options:
+        - title: "Dataset Overview (introduce)"
+          name: overview
+        - title: "Missing Value Analysis" 
+          name: missing
+        - title: "Variable Distributions"
+          name: distributions
+        - title: "Correlation Analysis"
+          name: correlation
+        - title: "PCA Analysis"
+          name: pca
+        - title: "Target Analysis"
+          name: target
+        - title: "Comprehensive Report"
+          name: comprehensive
+      default: overview
+      description:
+        R: >
+          Choose the type of automated EDA analysis to perform.
+        jamovi: >
+          Select the automated analysis type.
+
+    - name: target_var
+      title: 'Target Variable'
+      type: Variable
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+        R: >
+          Optional target variable for supervised EDA analysis.
+          Used for target vs predictors analysis.
+
+    - name: include_plots
+      title: "Include Visualizations"
+      type: Bool
+      default: true
+      description:
+        R: >
+          Include automated plots and visualizations in the output.
+        jamovi: >
+          Add plots to the analysis.
+
+    - name: missing_threshold
+      title: "Missing Value Threshold (%)"
+      type: Number
+      min: 0
+      max: 100
+      default: 5
+      description:
+        R: >
+          Threshold percentage for highlighting variables with missing values.
+        jamovi: >
+          Highlight variables with missing values above this threshold.
+
+    - name: correlation_method
+      title: "Correlation Method"
+      type: List
+      options:
+        - title: "Pearson"
+          name: pearson
+        - title: "Spearman"
+          name: spearman
+        - title: "Kendall"
+          name: kendall
+      default: pearson
+      description:
+        R: >
+          Method for correlation analysis.
+        jamovi: >
+          Choose correlation calculation method.
+
+    - name: pca_components
+      title: "PCA Components to Show"
+      type: Integer
+      min: 2
+      max: 10
+      default: 5
+      description:
+        R: >
+          Number of principal components to display in PCA analysis.
+        jamovi: >
+          Number of PCA components to analyze.
+
+    - name: plot_theme
+      title: "Plot Theme"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Minimal"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "Clinical"
+          name: clinical
+      default: clinical
+      description:
+        R: >
+          Visual theme for automated plots.
+        jamovi: >
+          Choose the plot appearance style.
+
+    - name: output_format
+      title: "Output Format"
+      type: List
+      options:
+        - title: "Interactive HTML"
+          name: html
+        - title: "Summary Tables"
+          name: tables
+        - title: "Combined"
+          name: combined
+      default: combined
+      description:
+        R: >
+          Format for the automated EDA output.
+        jamovi: >
+          Choose output presentation format.
+
+    - name: advanced_options
+      title: "Advanced Analysis Options"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Enable advanced DataExplorer features and detailed analysis.
+        jamovi: >
+          Enable advanced automated analysis features.
+
+    - name: categorical_limit
+      title: "Categorical Variable Limit"
+      type: Integer
+      min: 5
+      max: 50
+      default: 15
+      description:
+        R: >
+          Maximum number of levels for categorical variables to include in analysis.
+        jamovi: >
+          Limit for categorical variable complexity.
+
+    - name: generate_report
+      title: "Generate Comprehensive Report"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate a comprehensive automated EDA report with all analyses.
+        jamovi: >
+          Create complete automated analysis report.
+
+...

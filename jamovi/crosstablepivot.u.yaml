@@ -1,0 +1,53 @@
+title: Enhanced Cross Tables (Pivot)
+name: crosstablepivot
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: "Enhanced Cross Tables with Pivot Functionality"
+        children:
+          - type: Label
+            label: "Professional clinical tables using pivottabler library"
+          - type: Label  
+            label: "Advanced formatting, statistics, and Excel export capabilities"
+          - type: Label
+            label: "Non-breaking addition to existing crosstable module"
+      - type: Label
+        label: Variables
+        children:
+          - type: VariableSupplier
+            name: variableSupplier
+            populate: auto
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: "Variables (Rows)"
+                children:
+                  - type: VariablesListBox
+                    name: vars
+                    isTarget: true
+              - type: TargetLayoutBox
+                label: "Grouping Variable (Columns)"
+                children:
+                  - type: VariablesListBox
+                    name: group
+                    maxItemCount: 1
+                    isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Options
+        children:
+          - type: CheckBox
+            name: statistics
+          - type: CheckBox
+            name: show_totals
+          - type: ComboBox
+            name: format_style
+          - type: CheckBox
+            name: export_excel

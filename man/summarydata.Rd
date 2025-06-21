@@ -4,7 +4,20 @@
 \alias{summarydata}
 \title{Summary of Continuous Variables}
 \usage{
-summarydata(data, vars, date_vars, distr = FALSE, sumvar_style = FALSE, grvar)
+summarydata(
+  data,
+  vars,
+  date_vars,
+  distr = FALSE,
+  summary_format = "standard",
+  grvar,
+  pivot_layout = "clinical",
+  include_confidence = TRUE,
+  advanced_metrics = FALSE,
+  pivot_export = FALSE,
+  summarytools_graphs = TRUE,
+  summarytools_round_digits = 2
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -18,12 +31,28 @@ date-specific statistics (similar to sumvar's dist_date function)}
 \item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.}
 
-\item{sumvar_style}{If TRUE, provides comprehensive summary statistics
-including quartiles,  confidence intervals, and missing value details in
-sumvar package style.}
+\item{summary_format}{Choose the format for summary statistics display. New
+summarytools options provide publication-ready automated EDA summaries with
+embedded visualizations.}
 
 \item{grvar}{Optional grouping variable to stratify the summary statistics
 by categories.}
+
+\item{pivot_layout}{Layout style for pivottabler enhanced summaries.}
+
+\item{include_confidence}{Include confidence intervals in pivot summary
+tables.}
+
+\item{advanced_metrics}{Include advanced metrics like IQR, MAD, and robust
+statistics.}
+
+\item{pivot_export}{Enable enhanced export capabilities for pivot tables.}
+
+\item{summarytools_graphs}{Include histograms and bar charts in
+summarytools dfSummary output.}
+
+\item{summarytools_round_digits}{Number of decimal places for summarytools
+output.}
 }
 \value{
 A results object containing:
@@ -31,6 +60,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
+\code{results$pivot_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$pivot_export_info} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

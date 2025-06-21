@@ -1,0 +1,21 @@
+---
+name: tinytable
+title: Modern Table Formatting
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: table
+      title: Modern Table
+      type: Html
+      
+    - name: interpretation
+      title: Usage Guide
+      type: Html
+      visible: (show_interpretation)
+
+...
