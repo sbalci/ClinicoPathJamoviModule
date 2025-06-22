@@ -1,11 +1,134 @@
 ---
-name:  coxdiagnostics
-title: coxdiagnostics
-jrs:   '1.1'
+name: coxdiagnostics
+title: "Cox Proportional Hazards Model Diagnostics"
+jrs: '1.1'
 
 items:
-    - name:  text
-      title: coxdiagnostics
-      type:  Preformatted
+  - name: instructions
+    title: "Instructions"
+    type: Html
+    visible: true
 
+  - name: model_summary
+    title: "Cox Model Summary"
+    type: Html
+    visible: (time && event && covariates && show_model_summary)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - exclude_missing
+
+  - name: ph_test_results
+    title: "Proportional Hazards Test"
+    type: Html
+    visible: (time && event && covariates && show_ph_test)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - confidence_level
+
+  - name: martingale_plot
+    title: "Martingale Residuals"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_martingale
+    visible: (time && event && covariates && show_martingale)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - ox_scale
+      - add_smooth
+      - add_reference
+      - point_size
+      - alpha_level
+
+  - name: deviance_plot
+    title: "Deviance Residuals"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_deviance
+    visible: (time && event && covariates && show_deviance)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - ox_scale
+      - add_smooth
+      - add_reference
+      - point_size
+      - alpha_level
+
+  - name: score_plot
+    title: "Score Residuals"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_score
+    visible: (time && event && covariates && show_score)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - ox_scale
+      - add_smooth
+      - add_reference
+      - point_size
+      - alpha_level
+
+  - name: schoenfeld_plot
+    title: "Schoenfeld Residuals"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_schoenfeld
+    visible: (time && event && covariates && show_schoenfeld)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - ox_scale
+      - add_smooth
+      - add_reference
+      - point_size
+      - alpha_level
+
+  - name: dfbeta_plot
+    title: "DFBeta Influence Diagnostics"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_dfbeta
+    visible: (time && event && covariates && show_dfbeta)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - ox_scale
+      - add_smooth
+      - add_reference
+      - point_size
+      - alpha_level
+
+  - name: interpretation
+    title: "Diagnostic Interpretation Guide"
+    type: Html
+    visible: (time && event && covariates && show_interpretation)
+    clearWith:
+      - show_interpretation
+
+refs:
+  - survival
+  - survminer
 ...

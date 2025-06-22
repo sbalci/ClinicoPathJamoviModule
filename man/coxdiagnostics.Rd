@@ -2,27 +2,102 @@
 % Please edit documentation in R/coxdiagnostics.h.R
 \name{coxdiagnostics}
 \alias{coxdiagnostics}
-\title{coxdiagnostics}
+\title{Cox Proportional Hazards Model Diagnostics}
 \usage{
-coxdiagnostics(data, dep, group, alt = "notequal", varEq = TRUE)
+coxdiagnostics(
+  data,
+  time,
+  event,
+  covariates,
+  strata_var,
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_score = FALSE,
+  show_schoenfeld = FALSE,
+  show_dfbeta = FALSE,
+  ox_scale = "linear.predictions",
+  add_smooth = TRUE,
+  add_reference = TRUE,
+  point_size = 1,
+  alpha_level = 0.6,
+  show_ph_test = TRUE,
+  show_model_summary = TRUE,
+  show_interpretation = TRUE,
+  exclude_missing = TRUE,
+  confidence_level = 0.95
+)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{time}{The time-to-event variable for survival analysis.}
 
-\item{group}{.}
+\item{event}{The event indicator variable (1=event, 0=censored).}
 
-\item{alt}{.}
+\item{covariates}{Variables to include as covariates in the Cox model.}
 
-\item{varEq}{.}
+\item{strata_var}{Optional variable for stratified Cox regression.}
+
+\item{show_martingale}{Whether to show martingale residual plots.}
+
+\item{show_deviance}{Whether to show deviance residual plots.}
+
+\item{show_score}{Whether to show score residual plots.}
+
+\item{show_schoenfeld}{Whether to show Schoenfeld residual plots.}
+
+\item{show_dfbeta}{Whether to show DFBeta influence diagnostic plots.}
+
+\item{ox_scale}{Scale for the x-axis in residual plots.}
+
+\item{add_smooth}{Whether to add a smooth line to residual plots.}
+
+\item{add_reference}{Whether to add a reference line at y=0.}
+
+\item{point_size}{Size of points in diagnostic plots.}
+
+\item{alpha_level}{Transparency level for points in plots.}
+
+\item{show_ph_test}{Whether to display results of proportional hazards
+test.}
+
+\item{show_model_summary}{Whether to display Cox regression model summary.}
+
+\item{show_interpretation}{Whether to include interpretation of diagnostic
+results.}
+
+\item{exclude_missing}{Whether to exclude observations with missing values.}
+
+\item{confidence_level}{Confidence level for statistical tests and
+intervals.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$ph_test_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$martingale_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$deviance_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$score_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$schoenfeld_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$dfbeta_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
-coxdiagnostics
+Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from
+survminer package for comprehensive model validation.
+}
+\examples{
+\donttest{
+# Example usage:
+library(survival)
+library(survminer)
+# Fit Cox model
+cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
+# Generate diagnostic plots
+ggcoxdiagnostics(cox_model, type = "martingale")
+ggcoxdiagnostics(cox_model, type = "deviance")
+}
 }

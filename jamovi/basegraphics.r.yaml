@@ -1,0 +1,54 @@
+---
+name: basegraphics
+title: "Base Graphics Visualization"
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: "Instructions"
+    type: Html
+    visible: true
+
+  - name: plot_description
+    title: "Plot Description"
+    type: Html
+    visible: (x_var && plot_type)
+    clearWith:
+      - plot_type
+      - x_var
+      - y_var
+      - group_var
+
+  - name: base_plot
+    title: "Base R Graphics Plot"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_base
+    visible: (x_var && plot_type)
+    clearWith:
+      - plot_type
+      - x_var
+      - y_var
+      - group_var
+      - main_title
+      - x_label
+      - y_label
+      - point_type
+      - point_size
+      - color_scheme
+      - add_grid
+      - add_legend
+      - bins
+      - show_statistics
+      - custom_limits
+      - x_min
+      - x_max
+      - y_min
+      - y_max
+
+refs:
+  - base
+  - graphics
+  - grDevices
+...

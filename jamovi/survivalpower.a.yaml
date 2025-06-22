@@ -1,0 +1,237 @@
+---
+name: survivalpower
+title: "Survival Analysis Power & Sample Size"
+menuGroup: Survival
+menuSubgroup: Design and Analysis
+menuSubtitle: "Power Analysis for Survival Studies"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Power analysis and sample size calculation for survival studies using Lachin-Foulkes and Schoenfeld methods from gsDesign package.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(gsDesign)
+            # Sample size for survival study
+            nSurvival(lambda1 = 0.2, lambda2 = 0.1, Ts = 24, Tr = 12)
+            # Number of events required
+            nEvents(hr = 0.6, alpha = 0.025, beta = 0.1)
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame (optional for power calculations).
+        jamovi: Optional dataset for survival power analysis.
+
+    - name: calculation_type
+      title: "Calculation Type"
+      type: List
+      options:
+        - title: "Sample Size from Power"
+          name: sample_size
+        - title: "Power from Sample Size"
+          name: power
+        - title: "Number of Events Required"
+          name: events
+        - title: "Hazard Ratio Detection"
+          name: hazard_ratio
+      default: sample_size
+      description:
+        R: Type of power calculation to perform.
+        jamovi: Choose what to calculate (sample size, power, events, or hazard ratio).
+
+    - name: method
+      title: "Calculation Method"
+      type: List
+      options:
+        - title: "Lachin-Foulkes (Full Study Design)"
+          name: lachin_foulkes
+        - title: "Schoenfeld (Events-Based)"
+          name: schoenfeld
+      default: lachin_foulkes
+      description:
+        R: Method for power/sample size calculation.
+        jamovi: Choose calculation method (Lachin-Foulkes for full design, Schoenfeld for events-based).
+
+    - name: hazard_control
+      title: "Control Group Hazard Rate"
+      type: Number
+      min: 0.001
+      max: 10
+      default: 0.083
+      description:
+        R: Event hazard rate for control group (events per person-time unit).
+        jamovi: Hazard rate for control group (e.g., 0.083 = 1/12 events per month).
+
+    - name: hazard_treatment
+      title: "Treatment Group Hazard Rate"
+      type: Number
+      min: 0.001
+      max: 10
+      default: 0.042
+      description:
+        R: Event hazard rate for treatment group (events per person-time unit).
+        jamovi: Hazard rate for treatment group (e.g., 0.042 = 1/24 events per month).
+
+    - name: hazard_ratio
+      title: "Hazard Ratio"
+      type: Number
+      min: 0.1
+      max: 10
+      default: 0.6
+      description:
+        R: Hazard ratio (treatment/control) for Schoenfeld method.
+        jamovi: Expected hazard ratio (treatment vs control).
+
+    - name: study_duration
+      title: "Total Study Duration (Ts)"
+      type: Number
+      min: 1
+      max: 120
+      default: 24
+      description:
+        R: Maximum study duration (months or years).
+        jamovi: Total study duration including accrual and follow-up.
+
+    - name: accrual_duration
+      title: "Accrual Duration (Tr)"
+      type: Number
+      min: 1
+      max: 60
+      default: 12
+      description:
+        R: Patient accrual (recruitment) duration.
+        jamovi: Duration for patient recruitment/enrollment.
+
+    - name: dropout_rate
+      title: "Dropout Hazard Rate"
+      type: Number
+      min: 0
+      max: 1
+      default: 0
+      description:
+        R: Equal dropout hazard rate for both groups.
+        jamovi: Rate of patient dropout/loss to follow-up.
+
+    - name: allocation_ratio
+      title: "Allocation Ratio"
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+      description:
+        R: Randomization ratio (treatment:control).
+        jamovi: Ratio of treatment to control group sizes (1 = balanced).
+
+    - name: alpha
+      title: "Type I Error Rate (α)"
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.025
+      description:
+        R: Type I error rate (significance level).
+        jamovi: Probability of false positive (usually 0.025 for one-sided).
+
+    - name: beta
+      title: "Type II Error Rate (β)"
+      type: Number
+      min: 0.01
+      max: 0.5
+      default: 0.1
+      description:
+        R: Type II error rate (1 - power).
+        jamovi: Probability of false negative (0.1 = 90% power).
+
+    - name: power
+      title: "Statistical Power"
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.9
+      description:
+        R: Statistical power (1 - beta).
+        jamovi: Desired statistical power (probability of detecting true effect).
+
+    - name: sided
+      title: "Test Type"
+      type: List
+      options:
+        - title: "One-sided"
+          name: "1"
+        - title: "Two-sided"
+          name: "2"
+      default: "1"
+      description:
+        R: One-sided or two-sided statistical test.
+        jamovi: Type of statistical test (one-sided more common in survival).
+
+    - name: entry_type
+      title: "Patient Entry Pattern"
+      type: List
+      options:
+        - title: "Uniform Entry"
+          name: unif
+        - title: "Exponential Entry"
+          name: expo
+      default: unif
+      description:
+        R: Pattern of patient entry into the study.
+        jamovi: How patients enter the study over time.
+
+    - name: gamma
+      title: "Exponential Entry Parameter"
+      type: Number
+      min: -5
+      max: 5
+      default: 0
+      description:
+        R: Rate parameter for exponential entry (0 if uniform entry).
+        jamovi: Shape parameter for exponential entry (positive = convex, negative = concave).
+
+    - name: sample_size_input
+      title: "Sample Size (for Power Calculation)"
+      type: Number
+      min: 10
+      max: 10000
+      default: 100
+      description:
+        R: Total sample size when calculating power.
+        jamovi: Enter sample size to calculate corresponding power.
+
+    - name: events_input
+      title: "Number of Events (for Power Calculation)"
+      type: Number
+      min: 5
+      max: 1000
+      default: 50
+      description:
+        R: Number of events when calculating power with Schoenfeld method.
+        jamovi: Enter number of events to calculate corresponding power.
+
+    - name: show_summary
+      title: "Show Study Design Summary"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display comprehensive study design summary.
+        jamovi: Display detailed summary of study design and assumptions.
+
+    - name: show_formulas
+      title: "Show Mathematical Formulas"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display mathematical formulas used.
+        jamovi: Show the mathematical formulas and equations used in calculations.
+
+    - name: show_interpretation
+      title: "Show Clinical Interpretation"
+      type: Bool
+      default: true
+      description:
+        R: Whether to include clinical interpretation of results.
+        jamovi: Include practical interpretation for clinical research planning.

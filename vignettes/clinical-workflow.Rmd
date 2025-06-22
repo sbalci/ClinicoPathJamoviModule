@@ -85,7 +85,16 @@ cat("Treatment Groups:", table(clinical_data$Group), "\n")
 vartree(
   data = clinical_data,
   vars = c("Group", "Sex", "Age_Group", "Grade", "TStage", 
-           "LVI", "PNI", "LymphNodeMetastasis", "Outcome_Status")
+           "LVI", "PNI", "LymphNodeMetastasis", "Outcome_Status"),
+  percvar = NULL,
+  percvarLevel = NULL,
+  prunebelow = NULL,
+  follow = NULL,
+  summaryvar = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 ```
 

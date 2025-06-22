@@ -1,36 +1,203 @@
 ---
-name:  coxdiagnostics
-title: coxdiagnostics
-menuGroup: ClinicoPathJamoviModule
-version: '1.0.0'
+name: coxdiagnostics
+title: "Cox Proportional Hazards Model Diagnostics"
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: "Model Validation & Residual Analysis"
+version: '0.0.3'
 jas: '1.2'
 
+description:
+    main: Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from survminer package for comprehensive model validation.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(survival)
+            library(survminer)
+            # Fit Cox model
+            cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
+            # Generate diagnostic plots
+            ggcoxdiagnostics(cox_model, type = "martingale")
+            ggcoxdiagnostics(cox_model, type = "deviance")
+
 options:
-    - name: data
-      type: Data
+  - name: data
+    type: Data
+    description:
+      R: The data as a data frame.
+      jamovi: The dataset for Cox regression diagnostics.
 
-    - name: dep
-      title: Dependent Variable
-      type: Variable
+  - name: time
+    title: "Time Variable"
+    type: Variable
+    suggested: [continuous]
+    permitted: [numeric]
+    description:
+      R: The time-to-event variable for survival analysis.
+      jamovi: Variable containing time to event or censoring.
+      ui: Time variable (numeric, representing survival time).
 
-    - name: group
-      title: Grouping Variable
-      type: Variable
+  - name: event
+    title: "Event Variable"
+    type: Variable
+    suggested: [nominal, ordinal]
+    permitted: [factor, numeric]
+    description:
+      R: The event indicator variable (1=event, 0=censored).
+      jamovi: Variable indicating whether event occurred (1) or was censored (0).
+      ui: Event indicator (1=event occurred, 0=censored).
 
-    - name: alt
-      title: Alternative hypothesis
-      type: List
-      options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
+  - name: covariates
+    title: "Covariates"
+    type: Variables
+    suggested: [continuous, nominal, ordinal]
+    permitted: [numeric, factor]
+    description:
+      R: Variables to include as covariates in the Cox model.
+      jamovi: Select variables to include as predictors in the Cox regression model.
+      ui: Variables to include as covariates in the Cox model.
 
-    - name: varEq
-      title: Assume equal variances
-      type: Bool
-      default: true
+  - name: strata_var
+    title: "Stratification Variable (Optional)"
+    type: Variable
+    suggested: [nominal, ordinal]
+    permitted: [factor]
+    description:
+      R: Optional variable for stratified Cox regression.
+      jamovi: Variable to use for stratification in Cox model (optional).
+      ui: Optional stratification variable for Cox model.
+
+  - name: show_martingale
+    title: "Show Martingale Residuals"
+    type: Bool
+    default: true
+    description:
+      R: Whether to show martingale residual plots.
+      jamovi: Display martingale residuals for detecting non-linear effects and outliers.
+
+  - name: show_deviance
+    title: "Show Deviance Residuals"
+    type: Bool
+    default: true
+    description:
+      R: Whether to show deviance residual plots.
+      jamovi: Display deviance residuals for identifying poorly fitted observations.
+
+  - name: show_score
+    title: "Show Score Residuals"
+    type: Bool
+    default: false
+    description:
+      R: Whether to show score residual plots.
+      jamovi: Display score residuals for detecting influential observations.
+
+  - name: show_schoenfeld
+    title: "Show Schoenfeld Residuals"
+    type: Bool
+    default: false
+    description:
+      R: Whether to show Schoenfeld residual plots.
+      jamovi: Display Schoenfeld residuals for testing proportional hazards assumption.
+
+  - name: show_dfbeta
+    title: "Show DFBeta Plots"
+    type: Bool
+    default: false
+    description:
+      R: Whether to show DFBeta influence diagnostic plots.
+      jamovi: Display DFBeta plots for assessing influence of individual observations.
+
+  - name: ox_scale
+    title: "X-axis Scale"
+    type: List
+    options:
+      - title: "Linear Predictions"
+        name: linear.predictions
+      - title: "Observation ID"
+        name: observation.id
+      - title: "Time"
+        name: time
+    default: linear.predictions
+    description:
+      R: Scale for the x-axis in residual plots.
+      jamovi: Choose the scale for the x-axis in diagnostic plots.
+
+  - name: add_smooth
+    title: "Add Smooth Line"
+    type: Bool
+    default: true
+    description:
+      R: Whether to add a smooth line to residual plots.
+      jamovi: Add a smooth line to help identify patterns in residuals.
+
+  - name: add_reference
+    title: "Add Reference Line"
+    type: Bool
+    default: true
+    description:
+      R: Whether to add a reference line at y=0.
+      jamovi: Add a horizontal reference line at y=0 for residual plots.
+
+  - name: point_size
+    title: "Point Size"
+    type: Number
+    min: 0.5
+    max: 3.0
+    default: 1.0
+    description:
+      R: Size of points in diagnostic plots.
+      jamovi: Adjust the size of points in the diagnostic plots.
+
+  - name: alpha_level
+    title: "Transparency"
+    type: Number
+    min: 0.1
+    max: 1.0
+    default: 0.6
+    description:
+      R: Transparency level for points in plots.
+      jamovi: Adjust transparency of points (lower values = more transparent).
+
+  - name: show_ph_test
+    title: "Show Proportional Hazards Test"
+    type: Bool
+    default: true
+    description:
+      R: Whether to display results of proportional hazards test.
+      jamovi: Show statistical test results for proportional hazards assumption.
+
+  - name: show_model_summary
+    title: "Show Cox Model Summary"
+    type: Bool
+    default: true
+    description:
+      R: Whether to display Cox regression model summary.
+      jamovi: Display summary statistics for the fitted Cox model.
+
+  - name: show_interpretation
+    title: "Show Diagnostic Interpretation"
+    type: Bool
+    default: true
+    description:
+      R: Whether to include interpretation of diagnostic results.
+      jamovi: Include clinical interpretation guide for diagnostic plots.
+
+  - name: exclude_missing
+    title: "Exclude Missing Values"
+    type: Bool
+    default: true
+    description:
+      R: Whether to exclude observations with missing values.
+      jamovi: Exclude cases with missing values from the analysis.
+
+  - name: confidence_level
+    title: "Confidence Level"
+    type: Number
+    min: 0.80
+    max: 0.99
+    default: 0.95
+    description:
+      R: Confidence level for statistical tests and intervals.
+      jamovi: Confidence level for proportional hazards test and model statistics.
 ...

@@ -1,0 +1,58 @@
+---
+name: survivalpower
+title: "Survival Analysis Power & Sample Size"
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: "Instructions"
+    type: Html
+    visible: true
+
+  - name: power_results
+    title: "Power Analysis Results"
+    type: Html
+    visible: (calculation_type && method)
+    clearWith:
+      - calculation_type
+      - method
+      - hazard_control
+      - hazard_treatment
+      - hazard_ratio
+      - study_duration
+      - accrual_duration
+      - alpha
+      - beta
+      - power
+      - allocation_ratio
+      - sample_size_input
+      - events_input
+
+  - name: formulas
+    title: "Mathematical Formulas"
+    type: Html
+    visible: (calculation_type && method && show_formulas)
+    clearWith:
+      - calculation_type
+      - method
+      - show_formulas
+
+  - name: interpretation
+    title: "Clinical Interpretation"
+    type: Html
+    visible: (calculation_type && method && show_interpretation)
+    clearWith:
+      - calculation_type
+      - method
+      - show_interpretation
+      - hazard_control
+      - hazard_treatment
+      - hazard_ratio
+      - alpha
+      - beta
+      - power
+
+refs:
+  - gsDesign
+  - survival
+...

@@ -6,10 +6,25 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            time = NULL,
+            event = NULL,
+            covariates = NULL,
+            strata_var = NULL,
+            show_martingale = TRUE,
+            show_deviance = TRUE,
+            show_score = FALSE,
+            show_schoenfeld = FALSE,
+            show_dfbeta = FALSE,
+            ox_scale = "linear.predictions",
+            add_smooth = TRUE,
+            add_reference = TRUE,
+            point_size = 1,
+            alpha_level = 0.6,
+            show_ph_test = TRUE,
+            show_model_summary = TRUE,
+            show_interpretation = TRUE,
+            exclude_missing = TRUE,
+            confidence_level = 0.95, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,58 +32,320 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
-                options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+            private$..time <- jmvcore::OptionVariable$new(
+                "time",
+                time,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..event <- jmvcore::OptionVariable$new(
+                "event",
+                event,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..covariates <- jmvcore::OptionVariables$new(
+                "covariates",
+                covariates,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
+            private$..strata_var <- jmvcore::OptionVariable$new(
+                "strata_var",
+                strata_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..show_martingale <- jmvcore::OptionBool$new(
+                "show_martingale",
+                show_martingale,
                 default=TRUE)
+            private$..show_deviance <- jmvcore::OptionBool$new(
+                "show_deviance",
+                show_deviance,
+                default=TRUE)
+            private$..show_score <- jmvcore::OptionBool$new(
+                "show_score",
+                show_score,
+                default=FALSE)
+            private$..show_schoenfeld <- jmvcore::OptionBool$new(
+                "show_schoenfeld",
+                show_schoenfeld,
+                default=FALSE)
+            private$..show_dfbeta <- jmvcore::OptionBool$new(
+                "show_dfbeta",
+                show_dfbeta,
+                default=FALSE)
+            private$..ox_scale <- jmvcore::OptionList$new(
+                "ox_scale",
+                ox_scale,
+                options=list(
+                    "linear.predictions",
+                    "observation.id",
+                    "time"),
+                default="linear.predictions")
+            private$..add_smooth <- jmvcore::OptionBool$new(
+                "add_smooth",
+                add_smooth,
+                default=TRUE)
+            private$..add_reference <- jmvcore::OptionBool$new(
+                "add_reference",
+                add_reference,
+                default=TRUE)
+            private$..point_size <- jmvcore::OptionNumber$new(
+                "point_size",
+                point_size,
+                min=0.5,
+                max=3,
+                default=1)
+            private$..alpha_level <- jmvcore::OptionNumber$new(
+                "alpha_level",
+                alpha_level,
+                min=0.1,
+                max=1,
+                default=0.6)
+            private$..show_ph_test <- jmvcore::OptionBool$new(
+                "show_ph_test",
+                show_ph_test,
+                default=TRUE)
+            private$..show_model_summary <- jmvcore::OptionBool$new(
+                "show_model_summary",
+                show_model_summary,
+                default=TRUE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=TRUE)
+            private$..exclude_missing <- jmvcore::OptionBool$new(
+                "exclude_missing",
+                exclude_missing,
+                default=TRUE)
+            private$..confidence_level <- jmvcore::OptionNumber$new(
+                "confidence_level",
+                confidence_level,
+                min=0.8,
+                max=0.99,
+                default=0.95)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..time)
+            self$.addOption(private$..event)
+            self$.addOption(private$..covariates)
+            self$.addOption(private$..strata_var)
+            self$.addOption(private$..show_martingale)
+            self$.addOption(private$..show_deviance)
+            self$.addOption(private$..show_score)
+            self$.addOption(private$..show_schoenfeld)
+            self$.addOption(private$..show_dfbeta)
+            self$.addOption(private$..ox_scale)
+            self$.addOption(private$..add_smooth)
+            self$.addOption(private$..add_reference)
+            self$.addOption(private$..point_size)
+            self$.addOption(private$..alpha_level)
+            self$.addOption(private$..show_ph_test)
+            self$.addOption(private$..show_model_summary)
+            self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..exclude_missing)
+            self$.addOption(private$..confidence_level)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        time = function() private$..time$value,
+        event = function() private$..event$value,
+        covariates = function() private$..covariates$value,
+        strata_var = function() private$..strata_var$value,
+        show_martingale = function() private$..show_martingale$value,
+        show_deviance = function() private$..show_deviance$value,
+        show_score = function() private$..show_score$value,
+        show_schoenfeld = function() private$..show_schoenfeld$value,
+        show_dfbeta = function() private$..show_dfbeta$value,
+        ox_scale = function() private$..ox_scale$value,
+        add_smooth = function() private$..add_smooth$value,
+        add_reference = function() private$..add_reference$value,
+        point_size = function() private$..point_size$value,
+        alpha_level = function() private$..alpha_level$value,
+        show_ph_test = function() private$..show_ph_test$value,
+        show_model_summary = function() private$..show_model_summary$value,
+        show_interpretation = function() private$..show_interpretation$value,
+        exclude_missing = function() private$..exclude_missing$value,
+        confidence_level = function() private$..confidence_level$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..time = NA,
+        ..event = NA,
+        ..covariates = NA,
+        ..strata_var = NA,
+        ..show_martingale = NA,
+        ..show_deviance = NA,
+        ..show_score = NA,
+        ..show_schoenfeld = NA,
+        ..show_dfbeta = NA,
+        ..ox_scale = NA,
+        ..add_smooth = NA,
+        ..add_reference = NA,
+        ..point_size = NA,
+        ..alpha_level = NA,
+        ..show_ph_test = NA,
+        ..show_model_summary = NA,
+        ..show_interpretation = NA,
+        ..exclude_missing = NA,
+        ..confidence_level = NA)
 )
 
 coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "coxdiagnosticsResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        model_summary = function() private$.items[["model_summary"]],
+        ph_test_results = function() private$.items[["ph_test_results"]],
+        martingale_plot = function() private$.items[["martingale_plot"]],
+        deviance_plot = function() private$.items[["deviance_plot"]],
+        score_plot = function() private$.items[["score_plot"]],
+        schoenfeld_plot = function() private$.items[["schoenfeld_plot"]],
+        dfbeta_plot = function() private$.items[["dfbeta_plot"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="coxdiagnostics")
-            self$add(jmvcore::Preformatted$new(
+                title="Cox Proportional Hazards Model Diagnostics",
+                refs=list(
+                    "survival",
+                    "survminer"))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="coxdiagnostics"))}))
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="model_summary",
+                title="Cox Model Summary",
+                visible="(time && event && covariates && show_model_summary)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "exclude_missing")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ph_test_results",
+                title="Proportional Hazards Test",
+                visible="(time && event && covariates && show_ph_test)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "confidence_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="martingale_plot",
+                title="Martingale Residuals",
+                width=700,
+                height=500,
+                renderFun=".plot_martingale",
+                visible="(time && event && covariates && show_martingale)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "ox_scale",
+                    "add_smooth",
+                    "add_reference",
+                    "point_size",
+                    "alpha_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="deviance_plot",
+                title="Deviance Residuals",
+                width=700,
+                height=500,
+                renderFun=".plot_deviance",
+                visible="(time && event && covariates && show_deviance)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "ox_scale",
+                    "add_smooth",
+                    "add_reference",
+                    "point_size",
+                    "alpha_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="score_plot",
+                title="Score Residuals",
+                width=700,
+                height=500,
+                renderFun=".plot_score",
+                visible="(time && event && covariates && show_score)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "ox_scale",
+                    "add_smooth",
+                    "add_reference",
+                    "point_size",
+                    "alpha_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="schoenfeld_plot",
+                title="Schoenfeld Residuals",
+                width=700,
+                height=500,
+                renderFun=".plot_schoenfeld",
+                visible="(time && event && covariates && show_schoenfeld)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "ox_scale",
+                    "add_smooth",
+                    "add_reference",
+                    "point_size",
+                    "alpha_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="dfbeta_plot",
+                title="DFBeta Influence Diagnostics",
+                width=700,
+                height=500,
+                renderFun=".plot_dfbeta",
+                visible="(time && event && covariates && show_dfbeta)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "ox_scale",
+                    "add_smooth",
+                    "add_reference",
+                    "point_size",
+                    "alpha_level")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Diagnostic Interpretation Guide",
+                visible="(time && event && covariates && show_interpretation)",
+                clearWith=list(
+                    "show_interpretation")))}))
 
 coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "coxdiagnosticsBase",
@@ -78,7 +355,7 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "coxdiagnostics",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = coxdiagnosticsResults$new(options=options),
                 data = data,
@@ -91,44 +368,118 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 weightsSupport = 'auto')
         }))
 
-#' coxdiagnostics
+#' Cox Proportional Hazards Model Diagnostics
 #'
-#' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from 
+#' survminer package for comprehensive model validation.
+#'
+#' @examples
+#' \donttest{
+#' # Example usage:
+#' library(survival)
+#' library(survminer)
+#' # Fit Cox model
+#' cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
+#' # Generate diagnostic plots
+#' ggcoxdiagnostics(cox_model, type = "martingale")
+#' ggcoxdiagnostics(cox_model, type = "deviance")
+#'}
+#' @param data The data as a data frame.
+#' @param time The time-to-event variable for survival analysis.
+#' @param event The event indicator variable (1=event, 0=censored).
+#' @param covariates Variables to include as covariates in the Cox model.
+#' @param strata_var Optional variable for stratified Cox regression.
+#' @param show_martingale Whether to show martingale residual plots.
+#' @param show_deviance Whether to show deviance residual plots.
+#' @param show_score Whether to show score residual plots.
+#' @param show_schoenfeld Whether to show Schoenfeld residual plots.
+#' @param show_dfbeta Whether to show DFBeta influence diagnostic plots.
+#' @param ox_scale Scale for the x-axis in residual plots.
+#' @param add_smooth Whether to add a smooth line to residual plots.
+#' @param add_reference Whether to add a reference line at y=0.
+#' @param point_size Size of points in diagnostic plots.
+#' @param alpha_level Transparency level for points in plots.
+#' @param show_ph_test Whether to display results of proportional hazards
+#'   test.
+#' @param show_model_summary Whether to display Cox regression model summary.
+#' @param show_interpretation Whether to include interpretation of diagnostic
+#'   results.
+#' @param exclude_missing Whether to exclude observations with missing values.
+#' @param confidence_level Confidence level for statistical tests and
+#'   intervals.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ph_test_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$martingale_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$deviance_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$score_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$schoenfeld_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$dfbeta_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
 coxdiagnostics <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    time,
+    event,
+    covariates,
+    strata_var,
+    show_martingale = TRUE,
+    show_deviance = TRUE,
+    show_score = FALSE,
+    show_schoenfeld = FALSE,
+    show_dfbeta = FALSE,
+    ox_scale = "linear.predictions",
+    add_smooth = TRUE,
+    add_reference = TRUE,
+    point_size = 1,
+    alpha_level = 0.6,
+    show_ph_test = TRUE,
+    show_model_summary = TRUE,
+    show_interpretation = TRUE,
+    exclude_missing = TRUE,
+    confidence_level = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("coxdiagnostics requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
+    if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
+    if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
+    if ( ! missing(strata_var)) strata_var <- jmvcore::resolveQuo(jmvcore::enquo(strata_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(time), time, NULL),
+            `if`( ! missing(event), event, NULL),
+            `if`( ! missing(covariates), covariates, NULL),
+            `if`( ! missing(strata_var), strata_var, NULL))
 
+    for (v in strata_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- coxdiagnosticsOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        time = time,
+        event = event,
+        covariates = covariates,
+        strata_var = strata_var,
+        show_martingale = show_martingale,
+        show_deviance = show_deviance,
+        show_score = show_score,
+        show_schoenfeld = show_schoenfeld,
+        show_dfbeta = show_dfbeta,
+        ox_scale = ox_scale,
+        add_smooth = add_smooth,
+        add_reference = add_reference,
+        point_size = point_size,
+        alpha_level = alpha_level,
+        show_ph_test = show_ph_test,
+        show_model_summary = show_model_summary,
+        show_interpretation = show_interpretation,
+        exclude_missing = exclude_missing,
+        confidence_level = confidence_level)
 
     analysis <- coxdiagnosticsClass$new(
         options = options,

@@ -1,0 +1,11 @@
+---
+name:  jiwillsurvive
+title: Survival
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Survival
+      type:  Preformatted
+
+...

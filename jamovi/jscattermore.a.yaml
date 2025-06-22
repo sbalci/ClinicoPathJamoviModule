@@ -1,0 +1,268 @@
+---
+name: jscattermore
+title: "High-Performance Scatter Plots"
+menuGroup: JJStatsPlot
+menuSubgroup: Continuous vs Continuous
+menuSubtitle: "Fast Scatter Plots for Large Datasets"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: High-performance scatter plots using the scattermore package for plotting millions of points efficiently with advanced customization options.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(scattermore)
+            # Fast scatter plot
+            scattermoreplot(x, y)
+            # ggplot2 integration
+            ggplot(data) + geom_scattermore(aes(x = x, y = y))
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for scatter plot visualization.
+
+    - name: x_var
+      title: "X Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Variable for the X-axis.
+        jamovi: Variable to plot on the X-axis.
+
+    - name: y_var
+      title: "Y Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Variable for the Y-axis.
+        jamovi: Variable to plot on the Y-axis.
+
+    - name: color_var
+      title: "Color Variable"
+      type: Variable
+      suggested: [nominal, ordinal, continuous]
+      permitted: [factor, numeric]
+      description:
+        R: Variable for color mapping.
+        jamovi: Variable to map to point colors (optional).
+
+    - name: size_var
+      title: "Size Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Variable for size mapping.
+        jamovi: Variable to map to point sizes (optional).
+
+    - name: plot_type
+      title: "Plot Type"
+      type: List
+      options:
+        - title: "Base R (scattermoreplot)"
+          name: base_r
+        - title: "ggplot2 (geom_scattermore)"
+          name: ggplot2
+        - title: "ggplot2 Optimized (geom_scattermost)"
+          name: ggplot2_opt
+      default: ggplot2
+      description:
+        R: Type of scatter plot to generate.
+        jamovi: Choose the plotting backend for optimal performance.
+
+    - name: point_size
+      title: "Point Size"
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 5.0
+      description:
+        R: Size of the points in the scatter plot.
+        jamovi: Adjust the size of plotted points.
+
+    - name: alpha
+      title: "Transparency (Alpha)"
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 1.0
+      description:
+        R: Transparency level of points (0 = fully transparent, 1 = opaque).
+        jamovi: Set point transparency to handle overplotting.
+
+    - name: pixels
+      title: "Raster Resolution (pixels)"
+      type: Integer
+      default: 512
+      min: 64
+      max: 2048
+      description:
+        R: Resolution of the raster graphics in pixels.
+        jamovi: Higher values give better quality but slower rendering.
+
+    - name: pointsize
+      title: "Raster Point Size"
+      type: Number
+      default: 0
+      min: 0
+      max: 10
+      description:
+        R: Point size for raster graphics (0 = automatic).
+        jamovi: Size of points in raster mode (0 for automatic sizing).
+
+    - name: interpolate
+      title: "Interpolate Raster"
+      type: Bool
+      default: true
+      description:
+        R: Whether to interpolate the raster graphics.
+        jamovi: Smooth raster graphics for better visual quality.
+
+    - name: color_palette
+      title: "Color Palette"
+      type: List
+      options:
+        - title: "Viridis"
+          name: viridis
+        - title: "Plasma"
+          name: plasma
+        - title: "Inferno"
+          name: inferno
+        - title: "Magma"
+          name: magma
+        - title: "Cividis"
+          name: cividis
+        - title: "Rainbow"
+          name: rainbow
+        - title: "Heat Colors"
+          name: heat
+        - title: "Terrain Colors"
+          name: terrain
+      default: viridis
+      description:
+        R: Color palette for continuous color mapping.
+        jamovi: Choose color scheme for gradient coloring.
+
+    - name: show_smooth
+      title: "Add Smooth Line"
+      type: Bool
+      default: false
+      description:
+        R: Whether to add a smooth regression line.
+        jamovi: Add a smooth trend line to the scatter plot.
+
+    - name: smooth_method
+      title: "Smooth Method"
+      type: List
+      options:
+        - title: "Linear Model (lm)"
+          name: lm
+        - title: "LOESS"
+          name: loess
+        - title: "GAM"
+          name: gam
+      default: loess
+      description:
+        R: Method for smooth line fitting.
+        jamovi: Choose the smoothing method for trend line.
+
+    - name: show_density
+      title: "Show Density Contours"
+      type: Bool
+      default: false
+      description:
+        R: Whether to overlay density contours.
+        jamovi: Add 2D density contours to show data concentration.
+
+    - name: facet_var
+      title: "Facet Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Variable for creating multiple panels.
+        jamovi: Variable to create separate plots for each level.
+
+    - name: log_transform_x
+      title: "Log Transform X"
+      type: Bool
+      default: false
+      description:
+        R: Whether to apply log transformation to X variable.
+        jamovi: Transform X-axis to logarithmic scale.
+
+    - name: log_transform_y
+      title: "Log Transform Y"
+      type: Bool
+      default: false
+      description:
+        R: Whether to apply log transformation to Y variable.
+        jamovi: Transform Y-axis to logarithmic scale.
+
+    - name: x_label
+      title: "X-Axis Label"
+      type: String
+      default: ""
+      description:
+        R: Custom label for X-axis.
+        jamovi: Enter custom label for X-axis.
+
+    - name: y_label
+      title: "Y-Axis Label"
+      type: String
+      default: ""
+      description:
+        R: Custom label for Y-axis.
+        jamovi: Enter custom label for Y-axis.
+
+    - name: plot_title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Title for the plot.
+        jamovi: Enter a title for the scatter plot.
+
+    - name: show_correlation
+      title: "Show Correlation"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display correlation coefficient.
+        jamovi: Add correlation coefficient to the plot.
+
+    - name: show_performance
+      title: "Show Performance Info"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display rendering performance information.
+        jamovi: Show timing and performance details.
+
+    - name: theme_style
+      title: "Theme"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Minimal"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "Dark"
+          name: dark
+        - title: "Clean"
+          name: clean
+      default: default
+      description:
+        R: Visual theme for the plot.
+        jamovi: Choose the visual style theme.
+
+...

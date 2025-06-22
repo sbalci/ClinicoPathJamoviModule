@@ -1316,6 +1316,21 @@ Most modules follow this pattern:
 3. Implement R6 class inheriting from auto-generated base
 4. Add to appropriate menu group/subgroup
 
+### Function Naming Convention
+
+**IMPORTANT**: When integrating external R packages, avoid using identical function names that may cause confusion in the R environment.
+
+**Naming Strategy**:
+- Add 'j' suffix to distinguish jamovi wrapper functions from original package functions
+- Example: `visr()` → `jvisr()`, `estimate_KM()` → `jestimate_KM()`
+- This prevents namespace conflicts and makes it clear which functions are jamovi-specific wrappers
+
+**Rationale**:
+- Prevents confusion between original package functions and jamovi wrappers
+- Maintains clear separation of concerns
+- Avoids potential conflicts in R environment
+- Makes debugging easier by clearly identifying function origins
+
 ### Testing Strategy
 
 - Unit tests in `tests/testthat/`

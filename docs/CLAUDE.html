@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.28</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.29</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1202,11 +1202,34 @@
 <li>Inconsistent option types between .a.yaml and .u.yaml</li>
 </ul></div>
 <div class="section level3">
-<h3 id="adding-a-new-function">Adding a new function<a class="anchor" aria-label="anchor" href="#adding-a-new-function"></a></h3>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">"jmvtools::addAnalysis(name = '&lt;newfunctionname&gt;')"</span></span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="co"># This will create the necessary .b.R, .a.yaml, .u.yaml, and .r.yaml files</span></span>
-<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a><span class="co"># and update the module structure accordingly.</span></span>
-<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a><span class="co"># Then update these files.</span></span></code></pre></div>
+<h3 id="proper-jamovi-module-development-workflow">Proper Jamovi Module Development Workflow<a class="anchor" aria-label="anchor" href="#proper-jamovi-module-development-workflow"></a></h3>
+<p><strong>IMPORTANT</strong>: Always use this exact workflow when adding new analyses:</p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Start with template generation:</strong></p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">"jmvtools::addAnalysis(name = 'functionName')"</span></span></code></pre></div>
+<p>This creates initial template files with <code>.u.yaml</code> in aggressive compiler mode.</p>
+</li>
+<li>
+<p><strong>Fill in the analysis definition:</strong></p>
+<ul><li>Edit <code>.a.yaml</code> (analysis definition with options/parameters)</li>
+<li>Edit <code>.b.R</code> (backend R6 implementation)</li>
+</ul></li>
+<li>
+<p><strong>Auto-populate the UI:</strong></p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">"jmvtools::prepare()"</span></span></code></pre></div>
+<p>This auto-populates the <code>.u.yaml</code> file based on the analysis definition.</p>
+</li>
+<li>
+<p><strong>Make UI customizations (if needed):</strong></p>
+<ul><li>After auto-generation, make any necessary UI changes to <code>.u.yaml</code>
+</li>
+<li>The UI file will now be properly synchronized with the analysis definition</li>
+</ul></li>
+<li>
+<p><strong>Verify compilation:</strong></p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">"devtools::document()"</span></span></code></pre></div>
+</li>
+</ol><p>This workflow ensures proper synchronization between analysis definition and UI components, and prevents compilation issues.</p>
 </div>
 <div class="section level3">
 <h3 id="uyaml-file-structure">.u.yaml File Structure<a class="anchor" aria-label="anchor" href="#uyaml-file-structure"></a></h3>
@@ -1504,8 +1527,8 @@
 <div class="section level3">
 <h3 id="module-synchronization-workflow">Module Synchronization Workflow<a class="anchor" aria-label="anchor" href="#module-synchronization-workflow"></a></h3>
 <p>Use <code>_updateModules.R</code> script for coordinated updates across repositories:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Update version and synchronize all modules</span></span>
-<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a><span class="ex">Rscript</span> _updateModules.R</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="co"># Update version and synchronize all modules</span></span>
+<span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a><span class="ex">Rscript</span> _updateModules.R</span></code></pre></div>
 <p>This script:</p>
 <ul><li>Updates version numbers across all DESCRIPTION and YAML files</li>
 <li>Distributes module files to appropriate sub-repositories</li>

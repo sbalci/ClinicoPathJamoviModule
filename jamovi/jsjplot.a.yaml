@@ -1,0 +1,328 @@
+---
+name: jsjplot
+title: "Social Science Statistical Visualization"
+menuGroup: JJStatsPlot
+menuSubgroup: Statistical Models
+menuSubtitle: "sjPlot Integration for Social Science Research"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Social science statistical visualization using the sjPlot package for regression tables, model plots, and interaction visualizations.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(sjPlot)
+            # Regression table
+            tab_model(lm_model)
+            # Coefficient plot
+            plot_model(lm_model)
+            # Interaction plot
+            plot_model(lm_model, type = "int")
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for statistical visualization.
+
+    - name: analysis_type
+      title: "Analysis Type"
+      type: List
+      options:
+        - title: "Regression Table"
+          name: regression_table
+        - title: "Coefficient Plot"
+          name: coefficient_plot
+        - title: "Interaction Plot"
+          name: interaction_plot
+        - title: "Marginal Effects"
+          name: marginal_effects
+        - title: "Frequency Table"
+          name: frequency_table
+        - title: "Correlation Matrix"
+          name: correlation_matrix
+        - title: "PCA Visualization"
+          name: pca_plot
+      default: coefficient_plot
+      description:
+        R: Type of statistical visualization to generate.
+        jamovi: Choose the type of social science visualization.
+
+    - name: dependent_var
+      title: "Dependent Variable"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+        R: Dependent/outcome variable for analysis.
+        jamovi: Variable to predict or explain.
+
+    - name: independent_vars
+      title: "Independent Variables"
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+        R: Independent/predictor variables for analysis.
+        jamovi: Variables used as predictors in the model.
+
+    - name: grouping_var
+      title: "Grouping Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Variable for grouping or stratification.
+        jamovi: Variable to group analysis by (optional).
+
+    - name: interaction_vars
+      title: "Interaction Variables"
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+        R: Variables for interaction analysis.
+        jamovi: Variables to test for interaction effects (max 2).
+
+    - name: model_type
+      title: "Model Type"
+      type: List
+      options:
+        - title: "Linear Model (lm)"
+          name: lm
+        - title: "Generalized Linear Model (glm)"
+          name: glm
+        - title: "Mixed Effects Model (lmer)"
+          name: lmer
+        - title: "Logistic Regression"
+          name: logistic
+        - title: "Poisson Regression"
+          name: poisson
+      default: lm
+      description:
+        R: Type of statistical model to fit.
+        jamovi: Choose the appropriate statistical model.
+
+    - name: family
+      title: "GLM Family"
+      type: List
+      options:
+        - title: "Gaussian (normal)"
+          name: gaussian
+        - title: "Binomial (logistic)"
+          name: binomial
+        - title: "Poisson"
+          name: poisson
+        - title: "Gamma"
+          name: gamma
+      default: gaussian
+      description:
+        R: Error distribution family for GLM.
+        jamovi: Choose error distribution for generalized linear models.
+
+    - name: plot_type
+      title: "Plot Type"
+      type: List
+      options:
+        - title: "Estimates (Coefficients)"
+          name: est
+        - title: "Predicted Values"
+          name: pred
+        - title: "Marginal Effects"
+          name: eff
+        - title: "Interactions"
+          name: int
+        - title: "Diagnostics"
+          name: diag
+      default: est
+      description:
+        R: Type of model plot to generate.
+        jamovi: Choose what aspect of the model to visualize.
+
+    - name: confidence_level
+      title: "Confidence Level"
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+        R: Confidence level for intervals.
+        jamovi: Confidence level for confidence intervals.
+
+    - name: standardized
+      title: "Standardized Coefficients"
+      type: Bool
+      default: false
+      description:
+        R: Whether to show standardized coefficients.
+        jamovi: Display standardized (beta) coefficients.
+
+    - name: show_values
+      title: "Show Values"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display coefficient values on plot.
+        jamovi: Add coefficient values to the plot.
+
+    - name: show_p_values
+      title: "Show P-values"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display p-values.
+        jamovi: Include p-values in output.
+
+    - name: sort_estimates
+      title: "Sort Estimates"
+      type: Bool
+      default: false
+      description:
+        R: Whether to sort coefficients by effect size.
+        jamovi: Sort coefficients from largest to smallest effect.
+
+    - name: remove_intercept
+      title: "Remove Intercept"
+      type: Bool
+      default: true
+      description:
+        R: Whether to exclude intercept from plots.
+        jamovi: Hide intercept term from coefficient plots.
+
+    - name: grid_breaks
+      title: "Grid Breaks"
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 2.0
+      description:
+        R: Spacing for grid lines in plots.
+        jamovi: Control spacing of grid lines.
+
+    - name: dot_size
+      title: "Dot Size"
+      type: Number
+      default: 3
+      min: 1
+      max: 8
+      description:
+        R: Size of points in coefficient plots.
+        jamovi: Adjust size of coefficient points.
+
+    - name: line_size
+      title: "Line Size"
+      type: Number
+      default: 0.8
+      min: 0.2
+      max: 3.0
+      description:
+        R: Thickness of confidence interval lines.
+        jamovi: Adjust thickness of confidence interval lines.
+
+    - name: colors
+      title: "Color Scheme"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Colorblind Safe"
+          name: colorblind
+        - title: "Black & White"
+          name: bw
+        - title: "Viridis"
+          name: viridis
+        - title: "Metro"
+          name: metro
+      default: default
+      description:
+        R: Color scheme for plots.
+        jamovi: Choose color palette for visualizations.
+
+    - name: theme_style
+      title: "Theme"
+      type: List
+      options:
+        - title: "sjPlot Default"
+          name: sjplot
+        - title: "Minimal"
+          name: minimal
+        - title: "Classic"
+          name: classic
+        - title: "APA Style"
+          name: apa
+        - title: "Black & White"
+          name: bw
+      default: sjplot
+      description:
+        R: Visual theme for plots.
+        jamovi: Choose the visual style theme.
+
+    - name: title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Custom title for the plot.
+        jamovi: Enter a title for the visualization.
+
+    - name: axis_labels
+      title: "Custom Axis Labels"
+      type: String
+      default: ""
+      description:
+        R: Custom labels for axes (comma-separated).
+        jamovi: Enter custom axis labels separated by commas.
+
+    - name: transform_axis
+      title: "Transform Axis"
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Log"
+          name: log
+        - title: "Square Root"
+          name: sqrt
+        - title: "Inverse"
+          name: inverse
+      default: none
+      description:
+        R: Transformation to apply to axis scale.
+        jamovi: Apply mathematical transformation to axis.
+
+    - name: show_data
+      title: "Show Raw Data"
+      type: Bool
+      default: false
+      description:
+        R: Whether to overlay raw data points.
+        jamovi: Add raw data points to the plot.
+
+    - name: show_statistics
+      title: "Show Model Statistics"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display model fit statistics.
+        jamovi: Include model statistics in output.
+
+    - name: show_summary
+      title: "Show Model Summary"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display detailed model summary.
+        jamovi: Include comprehensive model summary.
+
+    - name: html_output
+      title: "HTML Output"
+      type: Bool
+      default: true
+      description:
+        R: Whether to generate HTML formatted output.
+        jamovi: Format output as HTML for better presentation.
+
+...
