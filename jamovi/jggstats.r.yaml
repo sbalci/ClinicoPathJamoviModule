@@ -1,0 +1,59 @@
+---
+name: jggstats
+title: Enhanced Statistical Visualization
+jrs: '1.1'
+
+items:
+    - name: plot
+      title: Statistical Plot
+      type: Image
+      width: 650
+      height: 450
+      renderFun: .plot
+
+    - name: modeltab
+      title: Model Results
+      type: Table
+      rows: 0
+      visible: (output_format:model_table || output_format:both)
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: std_error
+          title: Std. Error
+          type: number
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: conf_low
+          title: CI Lower
+          type: number
+        - name: conf_high
+          title: CI Upper
+          type: number
+
+    - name: summary
+      title: Model Summary
+      type: Table
+      rows: 0
+      visible: (show_model_summary)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+    - name: interpretation
+      title: Statistical Interpretation
+      type: Html
+      visible: (show_interpretation)

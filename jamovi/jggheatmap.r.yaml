@@ -1,0 +1,48 @@
+---
+name: jggheatmap
+title: Advanced Heatmap Visualization
+jrs: '1.1'
+
+items:
+    - name: plot
+      title: Heatmap Visualization
+      type: Image
+      width: 650
+      height: 650
+      renderFun: .plot
+
+    - name: matrixtab
+      title: Data Matrix
+      type: Table
+      rows: 0
+      visible: (output_format:data_matrix || output_format:both)
+      columns:
+        - name: row_name
+          title: Row
+          type: text
+        - name: col_name
+          title: Column
+          type: text
+        - name: value
+          title: Value
+          type: number
+
+    - name: clustertab
+      title: Clustering Results
+      type: Table
+      rows: 0
+      visible: (cluster_rows || cluster_cols)
+      columns:
+        - name: item
+          title: Item
+          type: text
+        - name: cluster
+          title: Cluster
+          type: integer
+        - name: height
+          title: Height
+          type: number
+
+    - name: interpretation
+      title: Heatmap Interpretation
+      type: Html

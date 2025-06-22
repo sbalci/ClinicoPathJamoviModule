@@ -6,10 +6,30 @@ jggsankeyfierOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            diagram_type = "sankey",
+            value_var = NULL,
+            source_var = NULL,
+            target_var = NULL,
+            node_vars = NULL,
+            grouping_var = NULL,
+            time_var = NULL,
+            node_width = 0.5,
+            node_spacing = 0.1,
+            edge_alpha = 0.6,
+            color_palette = "default",
+            show_labels = TRUE,
+            label_size = 10,
+            iterations = 32,
+            show_values = TRUE,
+            value_format = "raw",
+            sort_nodes = "original",
+            flow_direction = "left_right",
+            plot_title = "",
+            plot_subtitle = "",
+            theme_style = "default",
+            show_statistics = FALSE,
+            show_interpretation = TRUE,
+            output_format = "plot_only", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,58 +37,283 @@ jggsankeyfierOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+            private$..diagram_type <- jmvcore::OptionList$new(
+                "diagram_type",
+                diagram_type,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+                    "sankey",
+                    "alluvial",
+                    "parallel_sets"),
+                default="sankey")
+            private$..value_var <- jmvcore::OptionVariable$new(
+                "value_var",
+                value_var)
+            private$..source_var <- jmvcore::OptionVariable$new(
+                "source_var",
+                source_var)
+            private$..target_var <- jmvcore::OptionVariable$new(
+                "target_var",
+                target_var)
+            private$..node_vars <- jmvcore::OptionVariables$new(
+                "node_vars",
+                node_vars)
+            private$..grouping_var <- jmvcore::OptionVariable$new(
+                "grouping_var",
+                grouping_var)
+            private$..time_var <- jmvcore::OptionVariable$new(
+                "time_var",
+                time_var)
+            private$..node_width <- jmvcore::OptionNumber$new(
+                "node_width",
+                node_width,
+                min=0.1,
+                max=2,
+                default=0.5)
+            private$..node_spacing <- jmvcore::OptionNumber$new(
+                "node_spacing",
+                node_spacing,
+                min=0.1,
+                max=2,
+                default=0.1)
+            private$..edge_alpha <- jmvcore::OptionNumber$new(
+                "edge_alpha",
+                edge_alpha,
+                min=0.1,
+                max=1,
+                default=0.6)
+            private$..color_palette <- jmvcore::OptionList$new(
+                "color_palette",
+                color_palette,
+                options=list(
+                    "default",
+                    "viridis",
+                    "plasma",
+                    "set3",
+                    "pastel1",
+                    "dark2"),
+                default="default")
+            private$..show_labels <- jmvcore::OptionBool$new(
+                "show_labels",
+                show_labels,
                 default=TRUE)
+            private$..label_size <- jmvcore::OptionNumber$new(
+                "label_size",
+                label_size,
+                min=6,
+                max=20,
+                default=10)
+            private$..iterations <- jmvcore::OptionNumber$new(
+                "iterations",
+                iterations,
+                min=1,
+                max=100,
+                default=32)
+            private$..show_values <- jmvcore::OptionBool$new(
+                "show_values",
+                show_values,
+                default=TRUE)
+            private$..value_format <- jmvcore::OptionList$new(
+                "value_format",
+                value_format,
+                options=list(
+                    "raw",
+                    "percent",
+                    "rounded"),
+                default="raw")
+            private$..sort_nodes <- jmvcore::OptionList$new(
+                "sort_nodes",
+                sort_nodes,
+                options=list(
+                    "alphabetical",
+                    "by_value",
+                    "original"),
+                default="original")
+            private$..flow_direction <- jmvcore::OptionList$new(
+                "flow_direction",
+                flow_direction,
+                options=list(
+                    "left_right",
+                    "top_bottom",
+                    "right_left",
+                    "bottom_top"),
+                default="left_right")
+            private$..plot_title <- jmvcore::OptionString$new(
+                "plot_title",
+                plot_title,
+                default="")
+            private$..plot_subtitle <- jmvcore::OptionString$new(
+                "plot_subtitle",
+                plot_subtitle,
+                default="")
+            private$..theme_style <- jmvcore::OptionList$new(
+                "theme_style",
+                theme_style,
+                options=list(
+                    "default",
+                    "minimal",
+                    "classic",
+                    "void"),
+                default="default")
+            private$..show_statistics <- jmvcore::OptionBool$new(
+                "show_statistics",
+                show_statistics,
+                default=FALSE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=TRUE)
+            private$..output_format <- jmvcore::OptionList$new(
+                "output_format",
+                output_format,
+                options=list(
+                    "plot_only",
+                    "data_table",
+                    "both"),
+                default="plot_only")
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..diagram_type)
+            self$.addOption(private$..value_var)
+            self$.addOption(private$..source_var)
+            self$.addOption(private$..target_var)
+            self$.addOption(private$..node_vars)
+            self$.addOption(private$..grouping_var)
+            self$.addOption(private$..time_var)
+            self$.addOption(private$..node_width)
+            self$.addOption(private$..node_spacing)
+            self$.addOption(private$..edge_alpha)
+            self$.addOption(private$..color_palette)
+            self$.addOption(private$..show_labels)
+            self$.addOption(private$..label_size)
+            self$.addOption(private$..iterations)
+            self$.addOption(private$..show_values)
+            self$.addOption(private$..value_format)
+            self$.addOption(private$..sort_nodes)
+            self$.addOption(private$..flow_direction)
+            self$.addOption(private$..plot_title)
+            self$.addOption(private$..plot_subtitle)
+            self$.addOption(private$..theme_style)
+            self$.addOption(private$..show_statistics)
+            self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..output_format)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        diagram_type = function() private$..diagram_type$value,
+        value_var = function() private$..value_var$value,
+        source_var = function() private$..source_var$value,
+        target_var = function() private$..target_var$value,
+        node_vars = function() private$..node_vars$value,
+        grouping_var = function() private$..grouping_var$value,
+        time_var = function() private$..time_var$value,
+        node_width = function() private$..node_width$value,
+        node_spacing = function() private$..node_spacing$value,
+        edge_alpha = function() private$..edge_alpha$value,
+        color_palette = function() private$..color_palette$value,
+        show_labels = function() private$..show_labels$value,
+        label_size = function() private$..label_size$value,
+        iterations = function() private$..iterations$value,
+        show_values = function() private$..show_values$value,
+        value_format = function() private$..value_format$value,
+        sort_nodes = function() private$..sort_nodes$value,
+        flow_direction = function() private$..flow_direction$value,
+        plot_title = function() private$..plot_title$value,
+        plot_subtitle = function() private$..plot_subtitle$value,
+        theme_style = function() private$..theme_style$value,
+        show_statistics = function() private$..show_statistics$value,
+        show_interpretation = function() private$..show_interpretation$value,
+        output_format = function() private$..output_format$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..diagram_type = NA,
+        ..value_var = NA,
+        ..source_var = NA,
+        ..target_var = NA,
+        ..node_vars = NA,
+        ..grouping_var = NA,
+        ..time_var = NA,
+        ..node_width = NA,
+        ..node_spacing = NA,
+        ..edge_alpha = NA,
+        ..color_palette = NA,
+        ..show_labels = NA,
+        ..label_size = NA,
+        ..iterations = NA,
+        ..show_values = NA,
+        ..value_format = NA,
+        ..sort_nodes = NA,
+        ..flow_direction = NA,
+        ..plot_title = NA,
+        ..plot_subtitle = NA,
+        ..theme_style = NA,
+        ..show_statistics = NA,
+        ..show_interpretation = NA,
+        ..output_format = NA)
 )
 
 jggsankeyfierResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jggsankeyfierResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        plot = function() private$.items[["plot"]],
+        datatab = function() private$.items[["datatab"]],
+        stats = function() private$.items[["stats"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="JJStatsPlot")
-            self$add(jmvcore::Preformatted$new(
+                title="Sankey & Alluvial Diagrams")
+            self$add(jmvcore::Image$new(
                 options=options,
-                name="text",
-                title="JJStatsPlot"))}))
+                name="plot",
+                title="Sankey/Alluvial Diagram",
+                width=650,
+                height=450,
+                renderFun=".plot"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="datatab",
+                title="Flow Data",
+                rows=0,
+                visible="(output_format:data_table || output_format:both)",
+                columns=list(
+                    list(
+                        `name`="source", 
+                        `title`="Source", 
+                        `type`="text"),
+                    list(
+                        `name`="target", 
+                        `title`="Target", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Flow Value", 
+                        `type`="number"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stats",
+                title="Flow Statistics",
+                rows=0,
+                visible="(show_statistics)",
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Interpretation",
+                visible="(show_interpretation)"))}))
 
 jggsankeyfierBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jggsankeyfierBase",
@@ -91,44 +336,121 @@ jggsankeyfierBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' JJStatsPlot
+#' Sankey & Alluvial Diagrams
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param diagram_type .
+#' @param value_var Variable containing flow values/weights
+#' @param source_var Variable defining source nodes
+#' @param target_var Variable defining target nodes
+#' @param node_vars Variables for multi-level node definitions
+#' @param grouping_var Variable for grouping flows
+#' @param time_var Variable for temporal flow analysis
+#' @param node_width Width of nodes in the diagram
+#' @param node_spacing Spacing between nodes
+#' @param edge_alpha Transparency level for edges
+#' @param color_palette .
+#' @param show_labels .
+#' @param label_size .
+#' @param iterations Number of iterations for layout optimization
+#' @param show_values .
+#' @param value_format .
+#' @param sort_nodes .
+#' @param flow_direction .
+#' @param plot_title .
+#' @param plot_subtitle .
+#' @param theme_style .
+#' @param show_statistics .
+#' @param show_interpretation .
+#' @param output_format .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$datatab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$datatab$asDF}
+#'
+#' \code{as.data.frame(results$datatab)}
 #'
 #' @export
 jggsankeyfier <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    diagram_type = "sankey",
+    value_var,
+    source_var,
+    target_var,
+    node_vars,
+    grouping_var,
+    time_var,
+    node_width = 0.5,
+    node_spacing = 0.1,
+    edge_alpha = 0.6,
+    color_palette = "default",
+    show_labels = TRUE,
+    label_size = 10,
+    iterations = 32,
+    show_values = TRUE,
+    value_format = "raw",
+    sort_nodes = "original",
+    flow_direction = "left_right",
+    plot_title = "",
+    plot_subtitle = "",
+    theme_style = "default",
+    show_statistics = FALSE,
+    show_interpretation = TRUE,
+    output_format = "plot_only") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jggsankeyfier requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(value_var)) value_var <- jmvcore::resolveQuo(jmvcore::enquo(value_var))
+    if ( ! missing(source_var)) source_var <- jmvcore::resolveQuo(jmvcore::enquo(source_var))
+    if ( ! missing(target_var)) target_var <- jmvcore::resolveQuo(jmvcore::enquo(target_var))
+    if ( ! missing(node_vars)) node_vars <- jmvcore::resolveQuo(jmvcore::enquo(node_vars))
+    if ( ! missing(grouping_var)) grouping_var <- jmvcore::resolveQuo(jmvcore::enquo(grouping_var))
+    if ( ! missing(time_var)) time_var <- jmvcore::resolveQuo(jmvcore::enquo(time_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(value_var), value_var, NULL),
+            `if`( ! missing(source_var), source_var, NULL),
+            `if`( ! missing(target_var), target_var, NULL),
+            `if`( ! missing(node_vars), node_vars, NULL),
+            `if`( ! missing(grouping_var), grouping_var, NULL),
+            `if`( ! missing(time_var), time_var, NULL))
 
 
     options <- jggsankeyfierOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        diagram_type = diagram_type,
+        value_var = value_var,
+        source_var = source_var,
+        target_var = target_var,
+        node_vars = node_vars,
+        grouping_var = grouping_var,
+        time_var = time_var,
+        node_width = node_width,
+        node_spacing = node_spacing,
+        edge_alpha = edge_alpha,
+        color_palette = color_palette,
+        show_labels = show_labels,
+        label_size = label_size,
+        iterations = iterations,
+        show_values = show_values,
+        value_format = value_format,
+        sort_nodes = sort_nodes,
+        flow_direction = flow_direction,
+        plot_title = plot_title,
+        plot_subtitle = plot_subtitle,
+        theme_style = theme_style,
+        show_statistics = show_statistics,
+        show_interpretation = show_interpretation,
+        output_format = output_format)
 
     analysis <- jggsankeyfierClass$new(
         options = options,

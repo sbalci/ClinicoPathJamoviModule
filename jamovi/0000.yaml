@@ -904,6 +904,17 @@ analyses:
     description: |
       'Creates waffle charts to visualize distributions and proportions'
     ribbon: analyses
+  - title: Ridge Plot Visualization
+    name: jggridges
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Distribution
+    menuTitle: Ridge Plot Visualization
+    description: >
+      Creates ridge plots (joy plots) for visualizing distributions across
+      groups. Ridge plots are particularly useful for comparing distributions of
+      continuous variables across multiple categories or time periods.
+    ribbon: analyses
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
@@ -1348,8 +1359,44 @@ analyses:
       Extract detailed statistical information from ggstatsplot analyses using
       statsExpressions package for comprehensive data frame outputs.
     ribbon: analyses
-  - title: JJStatsPlot
+  - title: Sankey & Alluvial Diagrams
     name: jggsankeyfier
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical Over Time
+    menuTitle: Sankey & Alluvial Diagrams
+    menuSubtitle: Flow Visualization with ggsankeyfier
+    description: >-
+      Creates Sankey and Alluvial diagrams for visualizing flows and transitions
+      using the ggsankey package with ggplot2 integration for categorical data
+      flow analysis.
+    ribbon: analyses
+  - title: Enhanced Statistical Visualization
+    name: jggstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Advanced Statistical Plots
+    menuTitle: Enhanced Statistical Visualization
+    menuSubtitle: ggstats Integration for Advanced Statistical Graphics
+    description: >-
+      Enhanced statistical visualization using the ggstats package for advanced
+      coefficient plotting, survey analysis, Likert scales, and specialized
+      statistical graphics with ggplot2 integration.
+    ribbon: analyses
+  - title: Advanced Heatmap Visualization
+    name: jggheatmap
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Matrix Visualization
+    menuTitle: Advanced Heatmap Visualization
+    menuSubtitle: ggheatmap Integration for Matrix Data
+    description: >-
+      Advanced heatmap visualization using the ggheatmap package with
+      hierarchical clustering, multiple color schemes, and flexible matrix data
+      handling for clinical research.
+    ribbon: analyses
+  - title: JJStatsPlot
+    name: jggridges
     ns: ClinicoPath
     menuGroup: ClinicoPathJamoviModule
     menuTitle: JJStatsPlot

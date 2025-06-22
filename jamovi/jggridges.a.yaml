@@ -1,0 +1,216 @@
+---
+name: jggridges
+title: Ridge Plot Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Distribution
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description: R object to use
+    
+    - name: x_var
+      title: X Variable (Continuous)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: Continuous variable for distribution visualization
+    
+    - name: y_var
+      title: Y Variable (Grouping)
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: Grouping variable for separate ridges
+    
+    - name: color_var
+      title: Color Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: Variable for color mapping
+    
+    - name: facet_var
+      title: Facet Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: Variable for facetting plots
+    
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+        - name: ridgeline
+          title: Basic Ridgeline
+        - name: density_ridges
+          title: Density Ridges
+        - name: density_ridges_gradient
+          title: Gradient Density Ridges
+        - name: violin_ridges
+          title: Violin Ridges
+      default: density_ridges
+      description: Type of ridge plot to create
+    
+    - name: scale
+      title: Scale
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 5.0
+      description: Scaling factor for ridge heights
+    
+    - name: rel_min_height
+      title: Relative Minimum Height
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.1
+      description: Minimum height of ridges relative to overall scale
+    
+    - name: alpha
+      title: Transparency
+      type: Number
+      default: 0.8
+      min: 0.0
+      max: 1.0
+      description: Transparency level for ridges
+    
+    - name: bandwidth
+      title: Bandwidth
+      type: List
+      options:
+        - name: nrd0
+          title: Default (nrd0)
+        - name: nrd
+          title: Normal Reference (nrd)
+        - name: ucv
+          title: Unbiased Cross-Validation
+        - name: bcv
+          title: Biased Cross-Validation
+        - name: SJ
+          title: Sheather-Jones
+      default: nrd0
+      description: Bandwidth selection method for density estimation
+    
+    - name: quantile_lines
+      title: Show Quantile Lines
+      type: Bool
+      default: false
+      description: Add quantile lines to ridges
+    
+    - name: quantiles
+      title: Quantiles
+      type: String
+      default: '0.25, 0.5, 0.75'
+      description: Quantiles to display as lines (comma-separated)
+    
+    - name: jittered_points
+      title: Show Jittered Points
+      type: Bool
+      default: false
+      description: Add jittered points below ridges
+    
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      default: 0.5
+      min: 0.0
+      max: 1.0
+      description: Transparency for jittered points
+    
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - name: viridis
+          title: Viridis
+        - name: plasma
+          title: Plasma
+        - name: inferno
+          title: Inferno
+        - name: magma
+          title: Magma
+        - name: Set1
+          title: Set1
+        - name: Set2
+          title: Set2
+        - name: Dark2
+          title: Dark2
+        - name: Paired
+          title: Paired
+      default: viridis
+      description: Color palette for ridges
+    
+    - name: reverse_order
+      title: Reverse Y Order
+      type: Bool
+      default: false
+      description: Reverse the order of groups on Y axis
+    
+    - name: expand_panel
+      title: Expand Panel
+      type: Bool
+      default: true
+      description: Remove space around plot area
+    
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - name: theme_ridges
+          title: Ridge Theme
+        - name: theme_minimal
+          title: Minimal
+        - name: theme_classic
+          title: Classic
+        - name: theme_gray
+          title: Gray
+        - name: theme_bw
+          title: Black & White
+      default: theme_ridges
+      description: ggplot2 theme style
+    
+    - name: x_label
+      title: X Axis Label
+      type: String
+      default: ''
+      description: Custom label for X axis
+    
+    - name: y_label
+      title: Y Axis Label
+      type: String
+      default: ''
+      description: Custom label for Y axis
+    
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ''
+      description: Title for the plot
+    
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description: Subtitle for the plot
+    
+    - name: show_mean
+      title: Show Mean Lines
+      type: Bool
+      default: false
+      description: Add vertical lines at group means
+    
+    - name: show_statistics
+      title: Show Statistics
+      type: Bool
+      default: true
+      description: Display summary statistics
+    
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description: Display result interpretation

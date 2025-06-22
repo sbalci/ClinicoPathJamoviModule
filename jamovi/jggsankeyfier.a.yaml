@@ -1,7 +1,8 @@
 ---
-name:  jggsankeyfier
-title: JJStatsPlot
-menuGroup: ClinicoPathJamoviModule
+name: jggsankeyfier
+title: Sankey & Alluvial Diagrams
+menuGroup: JJStatsPlot
+menuSubgroup: Categorical Over Time
 version: '1.0.0'
 jas: '1.2'
 
@@ -9,28 +10,196 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
-      type: Variable
-
-    - name: group
-      title: Grouping Variable
-      type: Variable
-
-    - name: alt
-      title: Alternative hypothesis
+    - name: diagram_type
+      title: Diagram Type
       type: List
       options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
+        - title: Sankey Diagram
+          name: sankey
+        - title: Alluvial Diagram
+          name: alluvial
+        - title: Parallel Sets
+          name: parallel_sets
+      default: sankey
 
-    - name: varEq
-      title: Assume equal variances
+    - name: value_var
+      title: Value Variable
+      type: Variable
+      description: "Variable containing flow values/weights"
+
+    - name: source_var
+      title: Source Variable
+      type: Variable
+      description: "Variable defining source nodes"
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      description: "Variable defining target nodes"
+
+    - name: node_vars
+      title: Node Variables
+      type: Variables
+      description: "Variables for multi-level node definitions"
+
+    - name: grouping_var
+      title: Grouping Variable
+      type: Variable
+      description: "Variable for grouping flows"
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      description: "Variable for temporal flow analysis"
+
+    - name: node_width
+      title: Node Width
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.5
+      description: "Width of nodes in the diagram"
+
+    - name: node_spacing
+      title: Node Spacing
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.1
+      description: "Spacing between nodes"
+
+    - name: edge_alpha
+      title: Edge Transparency
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.6
+      description: "Transparency level for edges"
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Set3
+          name: set3
+        - title: Pastel1
+          name: pastel1
+        - title: Dark2
+          name: dark2
+      default: default
+
+    - name: show_labels
+      title: Show Node Labels
       type: Bool
       default: true
+
+    - name: label_size
+      title: Label Size
+      type: Number
+      min: 6
+      max: 20
+      default: 10
+
+    - name: iterations
+      title: Layout Iterations
+      type: Number
+      min: 1
+      max: 100
+      default: 32
+      description: "Number of iterations for layout optimization"
+
+    - name: show_values
+      title: Show Flow Values
+      type: Bool
+      default: true
+
+    - name: value_format
+      title: Value Format
+      type: List
+      options:
+        - title: Raw Numbers
+          name: raw
+        - title: Percentages
+          name: percent
+        - title: Rounded
+          name: rounded
+      default: raw
+
+    - name: sort_nodes
+      title: Sort Nodes
+      type: List
+      options:
+        - title: Alphabetical
+          name: alphabetical
+        - title: By Value
+          name: by_value
+        - title: Original Order
+          name: original
+      default: original
+
+    - name: flow_direction
+      title: Flow Direction
+      type: List
+      options:
+        - title: Left to Right
+          name: left_right
+        - title: Top to Bottom
+          name: top_bottom
+        - title: Right to Left
+          name: right_left
+        - title: Bottom to Top
+          name: bottom_top
+      default: left_right
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ""
+
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ""
+
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Void
+          name: void
+      default: default
+
+    - name: show_statistics
+      title: Show Flow Statistics
+      type: Bool
+      default: false
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - title: Plot Only
+          name: plot_only
+        - title: Data Table
+          name: data_table
+        - title: Both
+          name: both
+      default: plot_only
 ...
