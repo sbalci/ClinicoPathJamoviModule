@@ -1,0 +1,259 @@
+---
+name: jggheatmap
+title: Advanced Heatmap Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Matrix Visualization
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: matrix_vars
+      title: Matrix Variables
+      type: Variables
+      description: "Variables to include in the heatmap matrix"
+
+    - name: row_var
+      title: Row Variable
+      type: Variable
+      description: "Variable defining row groupings"
+
+    - name: col_var
+      title: Column Variable
+      type: Variable
+      description: "Variable defining column groupings"
+
+    - name: value_var
+      title: Value Variable
+      type: Variable
+      description: "Variable containing matrix values"
+
+    - name: cluster_rows
+      title: Cluster Rows
+      type: Bool
+      default: true
+      description: "Perform hierarchical clustering on rows"
+
+    - name: cluster_cols
+      title: Cluster Columns
+      type: Bool
+      default: true
+      description: "Perform hierarchical clustering on columns"
+
+    - name: clustering_method
+      title: Clustering Method
+      type: List
+      options:
+        - title: Complete
+          name: complete
+        - title: Average
+          name: average
+        - title: Single
+          name: single
+        - title: Ward D2
+          name: ward.D2
+        - title: UPGMA
+          name: mcquitty
+      default: complete
+
+    - name: distance_method
+      title: Distance Method
+      type: List
+      options:
+        - title: Euclidean
+          name: euclidean
+        - title: Manhattan
+          name: manhattan
+        - title: Pearson Correlation
+          name: pearson
+        - title: Spearman Correlation
+          name: spearman
+        - title: Maximum
+          name: maximum
+      default: euclidean
+
+    - name: scaling
+      title: Data Scaling
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Row (Z-score)
+          name: row
+        - title: Column
+          name: column
+        - title: Global
+          name: global
+      default: none
+
+    - name: color_scheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Blue-Red
+          name: blue_red
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: RdYlBu
+          name: rdylbu
+        - title: Spectral
+          name: spectral
+        - title: Custom
+          name: custom
+      default: blue_red
+
+    - name: cell_shape
+      title: Cell Shape
+      type: List
+      options:
+        - title: Square
+          name: square
+        - title: Circle
+          name: circle
+        - title: Triangle
+          name: triangle
+      default: square
+
+    - name: show_values
+      title: Show Cell Values
+      type: Bool
+      default: false
+      description: "Display numeric values in cells"
+
+    - name: value_format
+      title: Value Format
+      type: List
+      options:
+        - title: Auto
+          name: auto
+        - title: Integer
+          name: integer
+        - title: Decimal (1)
+          name: decimal1
+        - title: Decimal (2)
+          name: decimal2
+        - title: Scientific
+          name: scientific
+      default: auto
+
+    - name: text_size
+      title: Text Size
+      type: Number
+      min: 6
+      max: 20
+      default: 8
+      description: "Size of text in cells"
+
+    - name: show_row_labels
+      title: Show Row Labels
+      type: Bool
+      default: true
+
+    - name: show_col_labels
+      title: Show Column Labels
+      type: Bool
+      default: true
+
+    - name: row_label_size
+      title: Row Label Size
+      type: Number
+      min: 6
+      max: 16
+      default: 10
+
+    - name: col_label_size
+      title: Column Label Size
+      type: Number
+      min: 6
+      max: 16
+      default: 10
+
+    - name: show_dendrograms
+      title: Show Dendrograms
+      type: Bool
+      default: true
+      description: "Display clustering dendrograms"
+
+    - name: dendrogram_height
+      title: Dendrogram Height
+      type: Number
+      min: 0.1
+      max: 0.5
+      default: 0.2
+      description: "Height of dendrogram relative to plot"
+
+    - name: annotation_var
+      title: Annotation Variable
+      type: Variable
+      description: "Variable for row/column annotations"
+
+    - name: annotation_colors
+      title: Annotation Colors
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Set1
+          name: set1
+        - title: Dark2
+          name: dark2
+        - title: Paired
+          name: paired
+      default: default
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ""
+
+    - name: plot_width
+      title: Plot Width
+      type: Number
+      min: 400
+      max: 1200
+      default: 600
+
+    - name: plot_height
+      title: Plot Height
+      type: Number
+      min: 400
+      max: 1200
+      default: 600
+
+    - name: show_colorbar
+      title: Show Color Bar
+      type: Bool
+      default: true
+      description: "Display color scale legend"
+
+    - name: colorbar_title
+      title: Color Bar Title
+      type: String
+      default: "Value"
+
+    - name: border_color
+      title: Cell Border Color
+      type: String
+      default: "white"
+
+    - name: na_color
+      title: Missing Value Color
+      type: String
+      default: "grey90"
+
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - title: Plot Only
+          name: plot_only
+        - title: Data Matrix
+          name: data_matrix
+        - title: Both
+          name: both
+      default: plot_only
+...

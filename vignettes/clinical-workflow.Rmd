@@ -82,7 +82,7 @@ cat("Treatment Groups:", table(clinical_data$Group), "\n")
 
 ```{r}
 # Generate variable tree for data structure overview
-result1 <- vartree(
+results <- vartree(
   data = clinical_data,
   vars = c("Group", "Sex", "Age_Group", "Grade", "TStage", 
            "LVI", "PNI", "LymphNodeMetastasis", "Outcome_Status"),
@@ -98,7 +98,132 @@ result1 <- vartree(
 )
 
 
+results1 <- results$asString()
+
+writeLines(results1, "./vignettes/output/vartree_output_raw_results_asstring.txt")
+
+```
+
+
+```{r}
+clean_vartree_html <- function(vartree_result, filepath = "vartree_final_clean.html") {
+  raw <- vartree_result$asString()
+
+  # Remove noise
+  raw <- gsub("VARIABLE TREE", "", raw, fixed = TRUE)
+  raw <- gsub("character\\(0\\)", "", raw, fixed = TRUE)
+  raw <- gsub("<div[^>]*>", "", raw)
+  raw <- gsub("</div>", "", raw)
+  raw <- gsub("<\\?xml[^>]*\\?>", "", raw)
+  raw <- gsub("<!DOCTYPE svg[^>]*>", "", raw)
+  raw <- gsub("#myDIV\\s*\\{[^}]*\\}", "", raw, perl = TRUE)
+
+  # ❗ REMOVE illegal SVG text
+  raw <- gsub("(?<=<g[^>]*>)\\s*vtree\\s*(?=<g|<polygon)", "", raw, perl = TRUE)
+
+  # Find actual SVG start
+  svg_start <- regexpr("<svg[\\s\\S]*", raw, perl = TRUE)
+  svg_raw <- regmatches(raw, svg_start)
+
+  if (length(svg_raw) == 0 || svg_raw == "") {
+    message("❌ SVG tag not found.")
+    return(invisible(NULL))
+  }
+
+  # Final HTML
+  html <- paste0(
+    "<!DOCTYPE html>\n<html>\n<head>\n",
+    "<meta charset='UTF-8'>\n",
+    "<style>#myDIV {width: 1000px; height: 850px; overflow: auto;}</style>\n",
+    "</head>\n<body>\n<div id='myDIV'>\n",
+    svg_raw,
+    "\n</div>\n</body>\n</html>"
+  )
+
+  writeLines(html, filepath)
+  message("✅ Final cleaned SVG written to: ", filepath)
+  return(invisible(html))
+}
+
+
+# Usage
+clean_vartree_html(results, "./vignettes/output/vartree_clean.html")
+```
+
+
+```{r}
+clean_vartree_html <- function(vartree_output, filepath = "vartree_output_clean.html") {
+  raw <- vartree_output$asString()
+
+  # Remove console clutter and any outer <div id="myDIV"> ... </div>
+  lines <- unlist(strsplit(raw, "\n"))
+
+  # Filter out unwanted lines
+  cleaned <- lines[!grepl("^\\s*(VARIABLE TREE|character\\(0\\)|<div id=\\\"myDIV\\\"|</div>|#myDIV)", lines)]
+
+  # Collapse cleaned lines back to a single string
+  cleaned_svg <- paste(cleaned, collapse = "\n")
+
+  # Wrap cleaned SVG in minimal valid HTML
+  html_output <- paste0(
+    "<!DOCTYPE html>\n<html>\n<head>\n",
+    "<meta charset='UTF-8'>\n",
+    "<style>#myDIV {width: 1000px; height: 850px; overflow: auto;}</style>\n",
+    "</head>\n<body>\n",
+    "<div id='myDIV'>\n",
+    cleaned_svg,
+    "\n</div>\n</body>\n</html>"
+  )
+
+  writeLines(html_output, filepath)
+  browseURL(filepath)
+}
+
+# Run the function
+clean_vartree_html(result1, "./vignettes/output/vartree_output_clean.html")
+
+
+
+# Wrap the raw SVG+HTML fragment into a full HTML document
+html_corrected <- paste0(
+  "<!DOCTYPE html>\n<html>\n<head>\n",
+  "<meta charset='UTF-8'>\n",
+  "<style>#myDIV {width: 1000px; height: 850px; overflow: auto;}</style>\n",
+  "</head>\n<body>\n",
+  "<div id='myDIV'>\n",
+  result2,
+  "\n</div>\n</body>\n</html>"
+)
+
+
+
+writeLines(html_corrected, "./vignettes/output/vartree_output.html")
+
+
+
+result3 <- DiagrammeRsvg::export_svg(gv = result2)
+
+
 # Export SVG to file or view in RStudio
+result1 <- result1$asString()
+
+# result1 <- base::sub('width=\"[[:digit:]pt\"]+',
+#                                   ifelse(horizontal == TRUE, 'width=400pt ', 'width=1000pt '),
+#                                   result1)
+
+result1 <- paste0('<html><head><style>
+                               #myDIV {width: 610px; height: 850px; overflow: auto;}
+                               </style></head><body><div id="myDIV">',
+                               result1,
+                               '</div></script></body></html>')
+
+writeLines(result1, "./vignettes/output/vartree_output.html")
+
+
+```
+
+
+```{r}
 svg_text <- DiagrammeRsvg::export_svg(result1)
 svg_parsed <- xml2::read_xml(svg_text)
 
@@ -114,7 +239,7 @@ writeLines(html_output, "vartree_output.html")
 browseURL("vartree_output.html")
 
 
-result1 <- result1$asString()
+
 
 result1 <- capture.output(cat(result1))
 

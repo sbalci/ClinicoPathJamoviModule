@@ -1,0 +1,227 @@
+---
+name: jggstats
+title: Enhanced Statistical Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Advanced Statistical Plots
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - title: Model Coefficients
+          name: ggcoef_model
+        - title: Compare Models
+          name: ggcoef_compare
+        - title: Likert Plots
+          name: gglikert
+        - title: Survey Analysis
+          name: ggsurvey
+        - title: Proportion Analysis
+          name: stat_prop
+        - title: Cross Tabulation
+          name: stat_cross
+        - title: Weighted Means
+          name: stat_weighted_mean
+        - title: Cascade Plot
+          name: ggcascade
+      default: ggcoef_model
+
+    - name: dependent_var
+      title: Dependent Variable
+      type: Variable
+      description: "Main outcome variable for analysis"
+
+    - name: independent_vars
+      title: Independent Variables
+      type: Variables
+      description: "Predictor variables for model"
+
+    - name: grouping_var
+      title: Grouping Variable
+      type: Variable
+      description: "Variable for grouping/stratification"
+
+    - name: weight_var
+      title: Weight Variable
+      type: Variable
+      description: "Variable containing survey weights"
+
+    - name: model_formula
+      title: Model Formula
+      type: String
+      default: ""
+      description: "Custom model formula (optional)"
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - title: Linear Model (lm)
+          name: lm
+        - title: Logistic Regression (glm)
+          name: glm
+        - title: Cox Regression
+          name: coxph
+        - title: Mixed Effects (lmer)
+          name: lmer
+        - title: Generalized Mixed (glmer)
+          name: glmer
+      default: lm
+
+    - name: family
+      title: GLM Family
+      type: List
+      options:
+        - title: Gaussian
+          name: gaussian
+        - title: Binomial
+          name: binomial
+        - title: Poisson
+          name: poisson
+        - title: Gamma
+          name: gamma
+      default: gaussian
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description: "Confidence level for intervals"
+
+    - name: likert_levels
+      title: Likert Scale Levels
+      type: Integer
+      min: 3
+      max: 10
+      default: 5
+      description: "Number of levels in Likert scale"
+
+    - name: show_intercept
+      title: Show Intercept
+      type: Bool
+      default: false
+      description: "Include intercept in coefficient plots"
+
+    - name: sort_coefficients
+      title: Sort Coefficients
+      type: Bool
+      default: true
+      description: "Sort coefficients by magnitude"
+
+    - name: standardized
+      title: Standardized Coefficients
+      type: Bool
+      default: false
+      description: "Display standardized coefficients"
+
+    - name: show_statistics
+      title: Show Statistics
+      type: Bool
+      default: true
+      description: "Display statistical values"
+
+    - name: show_significance
+      title: Show Significance Stars
+      type: Bool
+      default: true
+      description: "Add significance stars to plot"
+
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Set1
+          name: set1
+        - title: Dark2
+          name: dark2
+        - title: Paired
+          name: paired
+      default: default
+
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Light
+          name: light
+        - title: Dark
+          name: dark
+      default: default
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ""
+
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ""
+
+    - name: x_label
+      title: X-axis Label
+      type: String
+      default: ""
+
+    - name: y_label
+      title: Y-axis Label
+      type: String
+      default: ""
+
+    - name: facet_var
+      title: Facet Variable
+      type: Variable
+      description: "Variable for creating plot facets"
+
+    - name: facet_type
+      title: Facet Type
+      type: List
+      options:
+        - title: Wrap
+          name: wrap
+        - title: Grid
+          name: grid
+      default: wrap
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description: "Display model fit statistics"
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description: "Generate interpretation text"
+
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - title: Plot Only
+          name: plot_only
+        - title: Model Table
+          name: model_table
+        - title: Both
+          name: both
+      default: plot_only
+...

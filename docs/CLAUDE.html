@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.29</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.30</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1361,6 +1361,12 @@
 <li>Implement R6 class inheriting from auto-generated base</li>
 <li>Add to appropriate menu group/subgroup</li>
 </ol></div>
+<div class="section level3">
+<h3 id="function-naming-convention">Function Naming Convention<a class="anchor" aria-label="anchor" href="#function-naming-convention"></a></h3>
+<p><strong>IMPORTANT</strong>: When integrating external R packages, avoid using identical function names that may cause confusion in the R environment.</p>
+<p><strong>Naming Strategy</strong>: - Add ‘j’ suffix to distinguish jamovi wrapper functions from original package functions - Example: <code><a href="reference/visr.html">visr()</a></code> → <code><a href="reference/jvisr.html">jvisr()</a></code>, <code>estimate_KM()</code> → <code>jestimate_KM()</code> - This prevents namespace conflicts and makes it clear which functions are jamovi-specific wrappers</p>
+<p><strong>Rationale</strong>: - Prevents confusion between original package functions and jamovi wrappers - Maintains clear separation of concerns - Avoids potential conflicts in R environment - Makes debugging easier by clearly identifying function origins</p>
+</div>
 <div class="section level3">
 <h3 id="testing-strategy">Testing Strategy<a class="anchor" aria-label="anchor" href="#testing-strategy"></a></h3>
 <ul><li>Unit tests in <code>tests/testthat/</code>
