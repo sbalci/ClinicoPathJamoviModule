@@ -1,0 +1,228 @@
+---
+name: jcomplexupset
+title: Complex UpSet Plot Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Set Visualization
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description: R object to use
+    
+    - name: set_vars
+      title: Set Variables
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: Variables representing set membership (binary columns)
+    
+    - name: value_var
+      title: Value Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: Optional variable for weighting intersections
+    
+    - name: min_size
+      title: Minimum Intersection Size
+      type: Number
+      default: 0
+      min: 0
+      description: Minimum size for intersections to be displayed
+    
+    - name: max_degree
+      title: Maximum Set Degree
+      type: Number
+      default: 4
+      min: 1
+      max: 10
+      description: Maximum number of sets in intersection
+    
+    - name: sort_by
+      title: Sort Intersections By
+      type: List
+      options:
+        - name: size
+          title: Intersection Size
+        - name: degree
+          title: Set Degree
+        - name: ratio
+          title: Size/Union Ratio
+      default: size
+      description: Method for sorting intersections
+    
+    - name: sort_order
+      title: Sort Order
+      type: List
+      options:
+        - name: descending
+          title: Descending
+        - name: ascending
+          title: Ascending
+      default: descending
+      description: Order for sorting intersections
+    
+    - name: keep_empty_groups
+      title: Keep Empty Intersections
+      type: Bool
+      default: false
+      description: Show intersections with zero size
+    
+    - name: set_size_show
+      title: Show Set Sizes
+      type: Bool
+      default: true
+      description: Display individual set sizes
+    
+    - name: intersection_size_show
+      title: Show Intersection Sizes
+      type: Bool
+      default: true
+      description: Display intersection size values
+    
+    - name: show_percentages
+      title: Show Percentages
+      type: Bool
+      default: false
+      description: Display percentages instead of counts
+    
+    - name: annotations
+      title: Annotations
+      type: List
+      options:
+        - name: none
+          title: None
+        - name: intersection_size
+          title: Intersection Size
+        - name: intersection_ratio
+          title: Size/Union Ratio
+        - name: union_size
+          title: Union Size
+      default: intersection_size
+      description: Type of annotation to add
+    
+    - name: base_annotations_height
+      title: Base Annotations Height
+      type: Number
+      default: 2
+      min: 0.5
+      max: 5
+      description: Height of annotation panels
+    
+    - name: intersections_height
+      title: Intersections Height
+      type: Number
+      default: 3
+      min: 1
+      max: 8
+      description: Height of intersections panel
+    
+    - name: sets_width
+      title: Sets Width
+      type: Number
+      default: 2
+      min: 0.5
+      max: 5
+      description: Width of sets panel
+    
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - name: viridis
+          title: Viridis
+        - name: plasma
+          title: Plasma
+        - name: inferno
+          title: Inferno
+        - name: magma
+          title: Magma
+        - name: Set1
+          title: Set1
+        - name: Set2
+          title: Set2
+        - name: Dark2
+          title: Dark2
+        - name: Paired
+          title: Paired
+      default: Set2
+      description: Color palette for visualization
+    
+    - name: theme_style
+      title: Theme Style
+      type: List
+      options:
+        - name: theme_minimal
+          title: Minimal
+        - name: theme_classic
+          title: Classic
+        - name: theme_gray
+          title: Gray
+        - name: theme_bw
+          title: Black & White
+        - name: theme_void
+          title: Void
+      default: theme_minimal
+      description: ggplot2 theme style
+    
+    - name: matrix_color
+      title: Matrix Color
+      type: String
+      default: 'black'
+      description: Color for intersection matrix dots
+    
+    - name: bar_color
+      title: Bar Color
+      type: String
+      default: 'steelblue'
+      description: Color for bars in plots
+    
+    - name: text_size
+      title: Text Size
+      type: Number
+      default: 12
+      min: 8
+      max: 20
+      description: Size of text elements
+    
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ''
+      description: Title for the plot
+    
+    - name: plot_subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description: Subtitle for the plot
+    
+    - name: show_statistics
+      title: Show Statistics
+      type: Bool
+      default: true
+      description: Display summary statistics
+    
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description: Display result interpretation
+    
+    - name: width_ratio
+      title: Width Ratio
+      type: Number
+      default: 0.3
+      min: 0.1
+      max: 0.9
+      description: Ratio of sets width to total width
+    
+    - name: height_ratio
+      title: Height Ratio
+      type: Number
+      default: 0.7
+      min: 0.1
+      max: 0.9
+      description: Ratio of intersections height to total height

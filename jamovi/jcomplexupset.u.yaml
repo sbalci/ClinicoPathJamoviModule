@@ -1,0 +1,138 @@
+title: Complex UpSet Plot Visualization
+name: jcomplexupset
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Set Variables
+        children:
+          - type: VariablesListBox
+            name: set_vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Value Variable
+        children:
+          - type: VariablesListBox
+            name: value_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_degree
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sort_by
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sort_order
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: keep_empty_groups
+      - type: CheckBox
+        name: set_size_show
+      - type: CheckBox
+        name: intersection_size_show
+      - type: CheckBox
+        name: show_percentages
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: annotations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: base_annotations_height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: intersections_height
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: sets_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: color_palette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: theme_style
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: matrix_color
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bar_color
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: text_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_subtitle
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_statistics
+      - type: CheckBox
+        name: show_interpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: width_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: height_ratio
+        format: number
