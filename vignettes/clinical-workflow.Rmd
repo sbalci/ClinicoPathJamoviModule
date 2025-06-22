@@ -82,7 +82,7 @@ cat("Treatment Groups:", table(clinical_data$Group), "\n")
 
 ```{r}
 # Generate variable tree for data structure overview
-vartree(
+result1 <- vartree(
   data = clinical_data,
   vars = c("Group", "Sex", "Age_Group", "Grade", "TStage", 
            "LVI", "PNI", "LymphNodeMetastasis", "Outcome_Status"),
@@ -96,6 +96,42 @@ vartree(
   followLevel1 = NULL,
   followLevel2 = NULL
 )
+
+
+# Export SVG to file or view in RStudio
+svg_text <- DiagrammeRsvg::export_svg(result1)
+svg_parsed <- xml2::read_xml(svg_text)
+
+# View in Viewer pane (if supported) or save
+html_output <- paste0('<html><head><style>
+                      #myDIV {width: 1000px; height: 850px; overflow: auto;}
+                      </style></head><body><div id="myDIV">',
+                      svg_text,
+                      '</div></body></html>')
+
+# Save to HTML file to view in browser
+writeLines(html_output, "vartree_output.html")
+browseURL("vartree_output.html")
+
+
+result1 <- result1$asString()
+
+result1 <- capture.output(cat(result1))
+
+results1 <- DiagrammeRsvg::export_svg(gv = result1)
+
+results1 <- base::sub('width=\"[[:digit:]pt\"]+',
+                                  ifelse(horizontal == TRUE, 'width=400pt ', 'width=1000pt '),
+                                  results1)
+
+            results1 <- paste0('<html><head><style>
+                               #myDIV {width: 610px; height: 850px; overflow: auto;}
+                               </style></head><body><div id="myDIV">',
+                               results1,
+                               '</div></script></body></html>')
+
+            self$results$text1$setContent(results1)
+
 ```
 
 ### Demographic and Clinical Characteristics
