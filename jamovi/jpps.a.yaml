@@ -1,0 +1,188 @@
+---
+name: jpps
+title: Predictive Power Score Analysis
+menuGroup: JJStatsPlot
+menuSubgroup: Correlation & Association
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Predictive Power Score (PPS) analysis provides an asymmetric, data-type-agnostic
+        score that can detect linear or non-linear relationships between variables.
+        PPS ranges from 0 (no predictive power) to 1 (perfect predictive power).
+
+options:
+    - name: data
+      type: Data
+      description: Dataset for PPS analysis
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - title: Single Predictor vs Target
+          name: single
+        - title: All Predictors vs Target
+          name: predictors
+        - title: All Variables (Full Matrix)
+          name: matrix
+        - title: Compare with Correlation
+          name: compare
+      default: predictors
+      description: Type of PPS analysis to perform
+
+    - name: target_var
+      title: Target Variable
+      type: Variable
+      description: Target variable to predict (for single/predictors analysis)
+
+    - name: predictor_var
+      title: Predictor Variable
+      type: Variable
+      description: Single predictor variable (for single analysis)
+
+    - name: predictor_vars
+      title: Predictor Variables
+      type: Variables
+      description: Multiple predictor variables (for predictors analysis)
+
+    - name: matrix_vars
+      title: Variables for Matrix
+      type: Variables
+      description: Variables to include in full PPS matrix
+
+    - name: algorithm
+      title: Algorithm
+      type: List
+      options:
+        - title: Decision Tree
+          name: tree
+        - title: Random Forest
+          name: forest
+        - title: Auto (Default)
+          name: auto
+      default: auto
+      description: Machine learning algorithm for PPS calculation
+
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      min: 2
+      max: 20
+      default: 4
+      description: Number of cross-validation folds
+
+    - name: sample_size
+      title: Sample Size Limit
+      type: Integer
+      min: 100
+      max: 10000
+      default: 5000
+      description: Maximum sample size for analysis (0 = no limit)
+
+    - name: show_heatmap
+      title: Show PPS Heatmap
+      type: Bool
+      default: true
+      description: Display PPS results as heatmap
+
+    - name: show_barplot
+      title: Show PPS Barplot
+      type: Bool
+      default: true
+      description: Display PPS scores as barplot
+
+    - name: show_correlation_comparison
+      title: Show Correlation Comparison
+      type: Bool
+      default: false
+      description: Compare PPS with Pearson correlation
+
+    - name: correlation_method
+      title: Correlation Method
+      type: List
+      options:
+        - title: Pearson
+          name: pearson
+        - title: Spearman
+          name: spearman
+        - title: Kendall
+          name: kendall
+      default: pearson
+      description: Correlation method for comparison
+
+    - name: min_pps_threshold
+      title: Minimum PPS Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0
+      description: Minimum PPS score to display in results
+
+    - name: sort_results
+      title: Sort Results
+      type: List
+      options:
+        - title: By PPS Score (Descending)
+          name: pps_desc
+        - title: By PPS Score (Ascending)
+          name: pps_asc
+        - title: By Variable Name
+          name: alphabetical
+        - title: No Sorting
+          name: none
+      default: pps_desc
+      description: How to sort the results
+
+    - name: color_scheme
+      title: Plot Color Scheme
+      type: List
+      options:
+        - title: Viridis
+          name: viridis
+        - title: Blues
+          name: blues
+        - title: Reds
+          name: reds
+        - title: Greens
+          name: greens
+        - title: Custom
+          name: custom
+      default: viridis
+      description: Color scheme for visualizations
+
+    - name: custom_color_low
+      title: Low Value Color
+      type: String
+      default: "#FFFFFF"
+      description: Color for low PPS values (hex code)
+
+    - name: custom_color_high
+      title: High Value Color
+      type: String
+      default: "#FF0000"
+      description: Color for high PPS values (hex code)
+
+    - name: show_values_on_plot
+      title: Show Values on Plot
+      type: Bool
+      default: true
+      description: Display PPS values on heatmap/barplot
+
+    - name: plot_title
+      title: Custom Plot Title
+      type: String
+      default: ""
+      description: Custom title for plots (auto-generated if empty)
+
+    - name: show_summary
+      title: Show Analysis Summary
+      type: Bool
+      default: true
+      description: Display summary of PPS analysis
+
+    - name: show_interpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: true
+      description: Provide interpretation guidance for PPS results

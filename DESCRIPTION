@@ -161,7 +161,9 @@ Imports:
     emmeans,
     crosstable,
     officer,
-    gsDesign
+    gsDesign,
+    censored,
+    dials    
 VignetteBuilder: 
     knitr, 
     tiff, 

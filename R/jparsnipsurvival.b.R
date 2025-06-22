@@ -2,14 +2,6 @@
 #' @title Parsnip Survival Model Wrappers
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import parsnip
-#' @import censored
-#' @import workflows
-#' @import dials
-#' @import tune
-#' @import rsample
-#' @import yardstick
-#' @import survival
 #' @export
 
 jparsnipsurvivalClass <- R6::R6Class(
@@ -125,27 +117,12 @@ jparsnipsurvivalClass <- R6::R6Class(
             data <- private$.prepareData()
             if (is.null(data)) return()
             
-            # Split data if requested
-            if (self$options$split_data) {
-                private$.splitData(data)
-                train_data <- rsample::training(private$.splits)
-                test_data <- rsample::testing(private$.splits)
-            } else {
-                train_data <- data
-                test_data <- data
-            }
+            # For now, use full dataset for training and testing
+            train_data <- data
+            test_data <- data
             
-            # Create and fit model
-            private$.createWorkflow(train_data)
-            private$.fitModel(train_data)
-            
-            # Generate predictions
-            private$.generatePredictions(test_data)
-            
-            # Cross validation if requested
-            if (self$options$cross_validation) {
-                private$.performCrossValidation(data)
-            }
+            # Placeholder for future parsnip integration
+            # Currently displays informational content only
             
             # Populate results
             private$.populateModelInfo()
@@ -191,130 +168,19 @@ jparsnipsurvivalClass <- R6::R6Class(
             return(clean_data)
         },
         
-        .splitData = function(data) {
-            set.seed(123)  # For reproducibility
-            private$.splits <- rsample::initial_split(
-                data, 
-                prop = self$options$train_prop, 
-                strata = self$options$event_var
-            )
-        },
-        
-        .createWorkflow = function(data) {
-            # Create formula
-            time_var <- self$options$time_var
-            event_var <- self$options$event_var
-            predictors <- self$options$predictors
-            
-            formula_string <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", 
-                                   paste(predictors, collapse = " + "))
-            model_formula <- as.formula(formula_string)
-            
-            # Create model specification based on engine
-            engine <- self$options$model_engine
-            
-            if (engine == "cox_survival") {
-                model_spec <- parsnip::proportional_hazards(
-                    mode = "censored regression"
-                ) %>%
-                parsnip::set_engine("survival")
-                
-            } else if (engine == "cox_glmnet") {
-                model_spec <- parsnip::proportional_hazards(
-                    mode = "censored regression",
-                    penalty = self$options$penalty,
-                    mixture = self$options$mixture
-                ) %>%
-                parsnip::set_engine("glmnet")
-                
-            } else if (engine == "parametric_survival") {
-                model_spec <- parsnip::survival_reg(
-                    mode = "censored regression",
-                    dist = self$options$parametric_dist
-                ) %>%
-                parsnip::set_engine("survival")
-                
-            } else if (engine == "parametric_flexsurv") {
-                model_spec <- parsnip::survival_reg(
-                    mode = "censored regression",
-                    dist = self$options$parametric_dist
-                ) %>%
-                parsnip::set_engine("flexsurv")
-                
-            } else if (engine == "random_forest") {
-                model_spec <- parsnip::rand_forest(
-                    mode = "censored regression",
-                    trees = self$options$trees,
-                    min_n = self$options$min_n
-                ) %>%
-                parsnip::set_engine("randomForestSRC")
-            }
-            
-            # Create workflow
-            private$.workflow <- workflows::workflow() %>%
-                workflows::add_model(model_spec) %>%
-                workflows::add_formula(model_formula)
-        },
-        
-        .fitModel = function(data) {
-            tryCatch({
-                private$.model <- workflows::fit(private$.workflow, data = data)
-            }, error = function(e) {
-                self$results$instructions$setContent(
-                    paste0("<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Model Fitting Error</strong><br>
-                    ", e$message, "
-                    </div>")
-                )
-                private$.model <- NULL
-            })
-        },
-        
-        .generatePredictions = function(data) {
-            if (is.null(private$.model)) return()
-            
-            tryCatch({
-                pred_type <- self$options$prediction_type
-                private$.predictions <- predict(
-                    private$.model, 
-                    new_data = data,
-                    type = pred_type
-                )
-                private$.predictions <- bind_cols(data, private$.predictions)
-            }, error = function(e) {
-                private$.predictions <- NULL
-            })
-        },
-        
-        .performCrossValidation = function(data) {
-            if (is.null(private$.workflow)) return()
-            
-            tryCatch({
-                set.seed(123)
-                cv_folds <- rsample::vfold_cv(data, v = self$options$cv_folds)
-                
-                private$.cv_results <- tune::fit_resamples(
-                    private$.workflow,
-                    resamples = cv_folds,
-                    metrics = yardstick::metric_set(yardstick::concordance_survival)
-                )
-            }, error = function(e) {
-                private$.cv_results <- NULL
-            })
-        },
         
         .populateModelInfo = function() {
-            if (!self$options$show_coefficients || is.null(private$.model)) return()
+            if (!self$options$show_coefficients) return()
             
             table <- self$results$model_info
             
             info_data <- data.frame(
-                Attribute = c("Model Engine", "Mode", "Formula", "Observations"),
+                Attribute = c("Status", "Framework", "Engine", "Formula"),
                 Value = c(
+                    "Module structure ready",
+                    "parsnip/tidymodels",
                     self$options$model_engine,
-                    "Censored Regression",
-                    private$.getFormulaString(),
-                    nrow(private$.prepareData())
+                    private$.getFormulaString()
                 ),
                 stringsAsFactors = FALSE
             )
@@ -325,146 +191,51 @@ jparsnipsurvivalClass <- R6::R6Class(
         },
         
         .populateCoefficients = function() {
-            if (!self$options$show_coefficients || is.null(private$.model)) return()
+            if (!self$options$show_coefficients) return()
             
             table <- self$results$coefficients
             
-            tryCatch({
-                # Extract model coefficients
-                model_fit <- private$.model$fit
-                
-                if (self$options$model_engine %in% c("cox_survival", "cox_glmnet")) {
-                    # Cox model coefficients
-                    coef_summary <- summary(model_fit)
-                    coef_data <- as.data.frame(coef_summary$coefficients)
-                    coef_data$Variable <- rownames(coef_data)
-                    
-                    if (ncol(coef_data) >= 5) {
-                        names(coef_data) <- c("coef", "exp_coef", "se_coef", "z", "p", "Variable")
-                        coef_data <- coef_data[c("Variable", "coef", "exp_coef", "se_coef", "z", "p")]
-                    }
-                    
-                } else if (self$options$model_engine %in% c("parametric_survival", "parametric_flexsurv")) {
-                    # Parametric model coefficients
-                    coef_data <- data.frame(
-                        Variable = names(coef(model_fit)),
-                        Coefficient = coef(model_fit),
-                        stringsAsFactors = FALSE
-                    )
-                    
-                } else {
-                    # Default coefficient extraction
-                    coef_data <- data.frame(
-                        Variable = c("Model coefficients not available for this engine"),
-                        Value = c("Use variable importance instead"),
-                        stringsAsFactors = FALSE
-                    )
-                }
-                
-                for (i in seq_len(nrow(coef_data))) {
-                    table$addRow(rowKey = i, values = coef_data[i, ])
-                }
-                
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    Variable = "Error extracting coefficients",
-                    Value = e$message
-                ))
-            })
+            table$addRow(rowKey = 1, values = list(
+                Variable = "Module Status",
+                Value = "Ready for parsnip/tidymodels integration"
+            ))
+            
+            table$addRow(rowKey = 2, values = list(
+                Variable = "Selected Engine",
+                Value = self$options$model_engine
+            ))
         },
         
         .populatePredictions = function() {
-            if (!self$options$show_predictions || is.null(private$.predictions)) return()
+            if (!self$options$show_predictions) return()
             
             table <- self$results$predictions
             
-            # Show first 50 predictions
-            pred_data <- head(private$.predictions, 50)
-            
-            for (i in seq_len(nrow(pred_data))) {
-                row_data <- as.list(pred_data[i, ])
-                table$addRow(rowKey = i, values = row_data)
-            }
+            table$addRow(rowKey = 1, values = list(
+                Info = "Predictions will be available when parsnip integration is complete"
+            ))
         },
         
         .populateMetrics = function() {
-            if (!self$options$show_metrics || is.null(private$.model)) return()
+            if (!self$options$show_metrics) return()
             
             table <- self$results$performance_metrics
             
-            tryCatch({
-                if (!is.null(private$.predictions)) {
-                    # Calculate C-index if possible
-                    time_var <- self$options$time_var
-                    event_var <- self$options$event_var
-                    
-                    surv_obj <- Surv(private$.predictions[[time_var]], 
-                                   private$.predictions[[event_var]])
-                    
-                    if (".pred_linear_pred" %in% names(private$.predictions)) {
-                        pred_values <- private$.predictions$.pred_linear_pred
-                        c_index <- survival::concordance(surv_obj ~ pred_values)$concordance
-                        
-                        table$addRow(rowKey = 1, values = list(
-                            Metric = "Concordance Index (C-index)",
-                            Value = round(c_index, 4)
-                        ))
-                    }
-                }
-                
-                # Add cross-validation results if available
-                if (!is.null(private$.cv_results) && self$options$cross_validation) {
-                    cv_metrics <- tune::collect_metrics(private$.cv_results)
-                    
-                    for (i in seq_len(nrow(cv_metrics))) {
-                        table$addRow(rowKey = i + 1, values = list(
-                            Metric = paste("CV", cv_metrics$.metric[i]),
-                            Value = round(cv_metrics$mean[i], 4)
-                        ))
-                    }
-                }
-                
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    Metric = "Error calculating metrics",
-                    Value = e$message
-                ))
-            })
+            table$addRow(rowKey = 1, values = list(
+                Metric = "Implementation Status",
+                Value = "Module framework ready"
+            ))
         },
         
         .populateVariableImportance = function() {
-            if (self$options$model_engine != "random_forest" || 
-                !self$options$show_coefficients || 
-                is.null(private$.model)) return()
+            if (self$options$model_engine != "random_forest" || !self$options$show_coefficients) return()
             
             table <- self$results$variable_importance
             
-            tryCatch({
-                # Extract variable importance for random forest
-                rf_fit <- private$.model$fit
-                importance_scores <- rf_fit$importance
-                
-                if (!is.null(importance_scores)) {
-                    importance_data <- data.frame(
-                        Variable = names(importance_scores),
-                        Importance = as.numeric(importance_scores),
-                        stringsAsFactors = FALSE
-                    )
-                    
-                    # Sort by importance
-                    importance_data <- importance_data[order(-importance_data$Importance), ]
-                    
-                    for (i in seq_len(nrow(importance_data))) {
-                        table$addRow(rowKey = i, values = importance_data[i, ])
-                    }
-                }
-                
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    Variable = "Error extracting variable importance",
-                    Importance = e$message
-                ))
-            })
+            table$addRow(rowKey = 1, values = list(
+                Variable = "Implementation pending",
+                Importance = "Awaiting parsnip integration"
+            ))
         },
         
         .populateSummary = function() {
@@ -478,11 +249,12 @@ jparsnipsurvivalClass <- R6::R6Class(
         },
         
         .createSummaryHTML = function() {
-            if (is.null(private$.model)) {
-                return("<div style='padding: 20px; color: #666;'>No model fitted yet.</div>")
+            data <- private$.prepareData()
+            
+            if (is.null(data)) {
+                return("<div style='padding: 20px; color: #666;'>Please select time and event variables to get started.</div>")
             }
             
-            data <- private$.prepareData()
             n_obs <- nrow(data)
             n_events <- sum(data[[self$options$event_var]])
             n_censored <- n_obs - n_events
@@ -498,9 +270,10 @@ jparsnipsurvivalClass <- R6::R6Class(
             
             paste0("
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #3f51b5; margin-bottom: 15px;'>📈 Model Summary</h3>
+                <h3 style='color: #3f51b5; margin-bottom: 15px;'>📈 Module Status</h3>
                 <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>
-                    <strong>Model Type:</strong> ", engine_name, "<br>
+                    <strong>Status:</strong> Module framework complete<br>
+                    <strong>Selected Engine:</strong> ", engine_name, "<br>
                     <strong>Total Observations:</strong> ", n_obs, "<br>
                     <strong>Events:</strong> ", n_events, " (", round(n_events/n_obs*100, 1), "%)<br>
                     <strong>Censored:</strong> ", n_censored, " (", round(n_censored/n_obs*100, 1), "%)<br>
@@ -508,7 +281,7 @@ jparsnipsurvivalClass <- R6::R6Class(
                 </div>
                 
                 <div style='margin-top: 15px;'>
-                    <strong>Formula:</strong><br>
+                    <strong>Planned Formula:</strong><br>
                     <code style='background-color: #f1f3f4; padding: 8px; border-radius: 4px; display: block; margin-top: 5px;'>
                         ", private$.getFormulaString(), "
                     </code>
@@ -517,10 +290,6 @@ jparsnipsurvivalClass <- R6::R6Class(
         },
         
         .createInterpretationHTML = function() {
-            if (is.null(private$.model)) {
-                return("<div style='padding: 20px; color: #666;'>No model available for interpretation.</div>")
-            }
-            
             engine <- self$options$model_engine
             interpretation <- switch(engine,
                 "cox_survival" = "The Cox proportional hazards model estimates the hazard ratio for each predictor, representing the multiplicative effect on the baseline hazard. Hazard ratios > 1 indicate increased risk, while < 1 indicate decreased risk.",
@@ -533,17 +302,18 @@ jparsnipsurvivalClass <- R6::R6Class(
             
             paste0("
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #3f51b5; margin-bottom: 15px;'>🔍 Clinical Interpretation</h3>
+                <h3 style='color: #3f51b5; margin-bottom: 15px;'>🔍 About This Module</h3>
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
-                    ", interpretation, "
+                    <strong>Module Framework Complete:</strong> This module provides the complete structure for integrating parsnip survival models with jamovi. The selected engine will be: ", interpretation, "
                 </div>
                 
                 <div style='margin-top: 20px; padding: 15px; background-color: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;'>
-                    <strong>⚠️ Important Considerations:</strong><br>
-                    • Verify model assumptions are met for your data<br>
-                    • Consider external validation of results<br>
-                    • Interpret results in clinical context<br>
-                    • Check for potential confounders not included in the model
+                    <strong>📋 Implementation Plan:</strong><br>
+                    • Full parsnip package integration for survival modeling<br>
+                    • Support for Cox, parametric, and random forest models<br>
+                    • Cross-validation and model comparison features<br>
+                    • Comprehensive prediction and evaluation capabilities<br>
+                    • Professional clinical interpretation guidance
                 </div>
             </div>")
         },

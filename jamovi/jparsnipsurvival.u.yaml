@@ -4,11 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: aggressive
 children:
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: model_engine
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -37,6 +32,11 @@ children:
     margin: large
     children:
       - type: ComboBox
+        name: model_engine
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
         name: parametric_dist
   - type: LayoutBox
     margin: large
@@ -49,6 +49,9 @@ children:
       - type: TextBox
         name: penalty
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: mixture
         format: number
@@ -58,6 +61,9 @@ children:
       - type: TextBox
         name: trees
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: min_n
         format: number
@@ -66,6 +72,9 @@ children:
     children:
       - type: CheckBox
         name: split_data
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: train_prop
         format: number
@@ -74,6 +83,9 @@ children:
     children:
       - type: CheckBox
         name: cross_validation
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: cv_folds
         format: number
@@ -86,12 +98,6 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: confidence_level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
       - type: CheckBox
         name: show_predictions
       - type: CheckBox
@@ -100,3 +106,9 @@ children:
         name: show_coefficients
       - type: CheckBox
         name: show_residuals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number

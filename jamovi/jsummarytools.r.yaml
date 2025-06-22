@@ -1,0 +1,173 @@
+---
+name: jsummarytools
+title: Summary Statistics with summarytools
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: summary_output
+      title: Summary Statistics Output
+      type: Html
+      visible: true
+      clearWith:
+        - analysis_type
+        - vars
+        - group_var
+        - weights_var
+        - cross_var1
+        - cross_var2
+        - show_labels
+        - show_graphs
+        - round_digits
+
+    - name: data_summary_table
+      title: Data Summary
+      type: Table
+      visible: (analysis_type:dfsummary)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: type
+          title: Type
+          type: text
+        - name: label
+          title: Label
+          type: text
+        - name: stats
+          title: Statistics/Values
+          type: text
+        - name: freqs
+          title: Frequencies
+          type: text
+        - name: valid
+          title: Valid
+          type: text
+        - name: missing
+          title: Missing
+          type: text
+      clearWith:
+        - vars
+        - show_labels
+        - round_digits
+
+    - name: frequency_table
+      title: Frequency Table
+      type: Table
+      visible: (analysis_type:freq)
+      columns:
+        - name: value
+          title: Value
+          type: text
+        - name: freq
+          title: Frequency
+          type: integer
+        - name: pct_valid
+          title: % Valid
+          type: number
+          format: zto,dp:2
+        - name: pct_total
+          title: % Total
+          type: number
+          format: zto,dp:2
+        - name: pct_cum
+          title: % Cumulative
+          type: number
+          format: zto,dp:2
+      clearWith:
+        - vars
+        - include_cumulative
+        - report_missing
+
+    - name: descriptive_stats
+      title: Descriptive Statistics
+      type: Table
+      visible: (analysis_type:descr)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: mean
+          title: Mean
+          type: number
+          format: zto,dp:3
+        - name: std_dev
+          title: Std.Dev
+          type: number
+          format: zto,dp:3
+        - name: min
+          title: Min
+          type: number
+          format: zto,dp:3
+        - name: q1
+          title: Q1
+          type: number
+          format: zto,dp:3
+        - name: median
+          title: Median
+          type: number
+          format: zto,dp:3
+        - name: q3
+          title: Q3
+          type: number
+          format: zto,dp:3
+        - name: max
+          title: Max
+          type: number
+          format: zto,dp:3
+        - name: mad
+          title: MAD
+          type: number
+          format: zto,dp:3
+        - name: iqr
+          title: IQR
+          type: number
+          format: zto,dp:3
+        - name: cv
+          title: CV
+          type: number
+          format: zto,dp:3
+        - name: skewness
+          title: Skewness
+          type: number
+          format: zto,dp:3
+        - name: se_skewness
+          title: SE.Skewness
+          type: number
+          format: zto,dp:3
+        - name: kurtosis
+          title: Kurtosis
+          type: number
+          format: zto,dp:3
+        - name: n_valid
+          title: N.Valid
+          type: integer
+        - name: pct_valid
+          title: Pct.Valid
+          type: number
+          format: zto,dp:1
+      clearWith:
+        - vars
+        - stats_to_include
+        - round_digits
+
+    - name: crosstab_output
+      title: Cross-tabulation
+      type: Html
+      visible: (analysis_type:ctable)
+      clearWith:
+        - cross_var1
+        - cross_var2
+        - cross_proportions
+        - weights_var
+
+    - name: interpretation
+      title: Output Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...

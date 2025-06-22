@@ -14,7 +14,9 @@
       "WebFetch(domain:cran.r-project.org)",
       "Bash(find:*)",
       "Bash(mv:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "WebFetch(domain:rdrr.io)",
+      "Bash(gh repo view:*)"
     ],
     "deny": []
   }

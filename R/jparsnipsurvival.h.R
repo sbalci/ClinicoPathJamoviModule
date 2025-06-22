@@ -6,10 +6,26 @@ jparsnipsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            time_var = NULL,
+            event_var = NULL,
+            predictors = NULL,
+            model_engine = "cox_survival",
+            parametric_dist = "weibull",
+            prediction_type = "linear_pred",
+            penalty = 0.01,
+            mixture = 1,
+            trees = 500,
+            min_n = 10,
+            split_data = FALSE,
+            train_prop = 0.8,
+            cross_validation = FALSE,
+            cv_folds = 5,
+            bootstrap_resamples = 100,
+            show_predictions = TRUE,
+            show_metrics = TRUE,
+            show_coefficients = TRUE,
+            show_residuals = FALSE,
+            confidence_level = 0.95, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,58 +33,376 @@ jparsnipsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+            private$..time_var <- jmvcore::OptionVariable$new(
+                "time_var",
+                time_var,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..event_var <- jmvcore::OptionVariable$new(
+                "event_var",
+                event_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..predictors <- jmvcore::OptionVariables$new(
+                "predictors",
+                predictors)
+            private$..model_engine <- jmvcore::OptionList$new(
+                "model_engine",
+                model_engine,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+                    "cox_survival",
+                    "cox_glmnet",
+                    "parametric_flexsurv",
+                    "parametric_survival",
+                    "random_forest"),
+                default="cox_survival")
+            private$..parametric_dist <- jmvcore::OptionList$new(
+                "parametric_dist",
+                parametric_dist,
+                options=list(
+                    "weibull",
+                    "exponential",
+                    "lognormal",
+                    "loglogistic",
+                    "gamma",
+                    "gengamma"),
+                default="weibull")
+            private$..prediction_type <- jmvcore::OptionList$new(
+                "prediction_type",
+                prediction_type,
+                options=list(
+                    "linear_pred",
+                    "time",
+                    "survival",
+                    "hazard"),
+                default="linear_pred")
+            private$..penalty <- jmvcore::OptionNumber$new(
+                "penalty",
+                penalty,
+                min=0,
+                max=1,
+                default=0.01)
+            private$..mixture <- jmvcore::OptionNumber$new(
+                "mixture",
+                mixture,
+                min=0,
+                max=1,
+                default=1)
+            private$..trees <- jmvcore::OptionInteger$new(
+                "trees",
+                trees,
+                min=1,
+                max=5000,
+                default=500)
+            private$..min_n <- jmvcore::OptionInteger$new(
+                "min_n",
+                min_n,
+                min=1,
+                max=100,
+                default=10)
+            private$..split_data <- jmvcore::OptionBool$new(
+                "split_data",
+                split_data,
+                default=FALSE)
+            private$..train_prop <- jmvcore::OptionNumber$new(
+                "train_prop",
+                train_prop,
+                min=0.1,
+                max=0.9,
+                default=0.8)
+            private$..cross_validation <- jmvcore::OptionBool$new(
+                "cross_validation",
+                cross_validation,
+                default=FALSE)
+            private$..cv_folds <- jmvcore::OptionInteger$new(
+                "cv_folds",
+                cv_folds,
+                min=3,
+                max=20,
+                default=5)
+            private$..bootstrap_resamples <- jmvcore::OptionInteger$new(
+                "bootstrap_resamples",
+                bootstrap_resamples,
+                min=10,
+                max=1000,
+                default=100)
+            private$..show_predictions <- jmvcore::OptionBool$new(
+                "show_predictions",
+                show_predictions,
                 default=TRUE)
+            private$..show_metrics <- jmvcore::OptionBool$new(
+                "show_metrics",
+                show_metrics,
+                default=TRUE)
+            private$..show_coefficients <- jmvcore::OptionBool$new(
+                "show_coefficients",
+                show_coefficients,
+                default=TRUE)
+            private$..show_residuals <- jmvcore::OptionBool$new(
+                "show_residuals",
+                show_residuals,
+                default=FALSE)
+            private$..confidence_level <- jmvcore::OptionNumber$new(
+                "confidence_level",
+                confidence_level,
+                min=0.5,
+                max=0.99,
+                default=0.95)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..time_var)
+            self$.addOption(private$..event_var)
+            self$.addOption(private$..predictors)
+            self$.addOption(private$..model_engine)
+            self$.addOption(private$..parametric_dist)
+            self$.addOption(private$..prediction_type)
+            self$.addOption(private$..penalty)
+            self$.addOption(private$..mixture)
+            self$.addOption(private$..trees)
+            self$.addOption(private$..min_n)
+            self$.addOption(private$..split_data)
+            self$.addOption(private$..train_prop)
+            self$.addOption(private$..cross_validation)
+            self$.addOption(private$..cv_folds)
+            self$.addOption(private$..bootstrap_resamples)
+            self$.addOption(private$..show_predictions)
+            self$.addOption(private$..show_metrics)
+            self$.addOption(private$..show_coefficients)
+            self$.addOption(private$..show_residuals)
+            self$.addOption(private$..confidence_level)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        time_var = function() private$..time_var$value,
+        event_var = function() private$..event_var$value,
+        predictors = function() private$..predictors$value,
+        model_engine = function() private$..model_engine$value,
+        parametric_dist = function() private$..parametric_dist$value,
+        prediction_type = function() private$..prediction_type$value,
+        penalty = function() private$..penalty$value,
+        mixture = function() private$..mixture$value,
+        trees = function() private$..trees$value,
+        min_n = function() private$..min_n$value,
+        split_data = function() private$..split_data$value,
+        train_prop = function() private$..train_prop$value,
+        cross_validation = function() private$..cross_validation$value,
+        cv_folds = function() private$..cv_folds$value,
+        bootstrap_resamples = function() private$..bootstrap_resamples$value,
+        show_predictions = function() private$..show_predictions$value,
+        show_metrics = function() private$..show_metrics$value,
+        show_coefficients = function() private$..show_coefficients$value,
+        show_residuals = function() private$..show_residuals$value,
+        confidence_level = function() private$..confidence_level$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..time_var = NA,
+        ..event_var = NA,
+        ..predictors = NA,
+        ..model_engine = NA,
+        ..parametric_dist = NA,
+        ..prediction_type = NA,
+        ..penalty = NA,
+        ..mixture = NA,
+        ..trees = NA,
+        ..min_n = NA,
+        ..split_data = NA,
+        ..train_prop = NA,
+        ..cross_validation = NA,
+        ..cv_folds = NA,
+        ..bootstrap_resamples = NA,
+        ..show_predictions = NA,
+        ..show_metrics = NA,
+        ..show_coefficients = NA,
+        ..show_residuals = NA,
+        ..confidence_level = NA)
 )
 
 jparsnipsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jparsnipsurvivalResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        model_info = function() private$.items[["model_info"]],
+        coefficients = function() private$.items[["coefficients"]],
+        predictions = function() private$.items[["predictions"]],
+        performance_metrics = function() private$.items[["performance_metrics"]],
+        cross_validation_results = function() private$.items[["cross_validation_results"]],
+        variable_importance = function() private$.items[["variable_importance"]],
+        survival_curves = function() private$.items[["survival_curves"]],
+        residual_plots = function() private$.items[["residual_plots"]],
+        model_summary = function() private$.items[["model_summary"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="ClinicoPath Survival")
-            self$add(jmvcore::Preformatted$new(
+                title="Parsnip Survival Model Wrappers")
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="ClinicoPath Survival"))}))
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="model_info",
+                title="Model Information",
+                visible="(show_coefficients)",
+                columns=list(
+                    list(
+                        `name`="Attribute", 
+                        `title`="Attribute", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine",
+                    "parametric_dist")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="coefficients",
+                title="Model Coefficients",
+                visible="(show_coefficients)",
+                columns=list(
+                    list(
+                        `name`="Variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine",
+                    "parametric_dist",
+                    "penalty",
+                    "mixture")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="predictions",
+                title="Model Predictions",
+                visible="(show_predictions)",
+                columns=list(
+                    list(
+                        `name`="Info", 
+                        `title`="Information", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine",
+                    "prediction_type",
+                    "split_data")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="performance_metrics",
+                title="Performance Metrics",
+                visible="(show_metrics)",
+                columns=list(
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine",
+                    "split_data",
+                    "cross_validation")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cross_validation_results",
+                title="Cross Validation Results",
+                visible="(cross_validation && show_metrics)",
+                columns=list(
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine",
+                    "cv_folds")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variable_importance",
+                title="Variable Importance",
+                visible="(model_engine:random_forest && show_coefficients)",
+                columns=list(
+                    list(
+                        `name`="Variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="Importance", 
+                        `title`="Importance", 
+                        `type`="text")),
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "trees",
+                    "min_n")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survival_curves",
+                title="Survival Curves",
+                width=500,
+                height=400,
+                renderFun=".plot_survival_curves",
+                visible="(prediction_type:survival)",
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="residual_plots",
+                title="Residual Analysis",
+                width=500,
+                height=400,
+                renderFun=".plot_residuals",
+                visible="(show_residuals)",
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "predictors",
+                    "model_engine")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="model_summary",
+                title="Model Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation",
+                visible=TRUE))}))
 
 jparsnipsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jparsnipsurvivalBase",
@@ -91,44 +425,115 @@ jparsnipsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 weightsSupport = 'auto')
         }))
 
-#' ClinicoPath Survival
+#' Parsnip Survival Model Wrappers
 #'
+#' Unified interface to survival models using the parsnip package and 
+#' tidymodels framework.
+#' Supports multiple survival model engines with standardized syntax
+#' for model fitting, prediction, and evaluation.
 #' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param data Dataset for survival modeling
+#' @param time_var Survival time or time to event variable
+#' @param event_var Event indicator (0=censored, 1=event)
+#' @param predictors Variables to include in the survival model
+#' @param model_engine Survival model engine to use
+#' @param parametric_dist Distribution for parametric survival models
+#' @param prediction_type Type of prediction to generate
+#' @param penalty L1/L2 penalty parameter for regularized models
+#' @param mixture Elastic net mixing parameter (0=ridge, 1=lasso)
+#' @param trees Number of trees for random forest models
+#' @param min_n Minimum number of observations in terminal nodes
+#' @param split_data Split data into training and testing sets
+#' @param train_prop Proportion of data to use for training
+#' @param cross_validation Perform cross-validation for model assessment
+#' @param cv_folds Number of cross-validation folds
+#' @param bootstrap_resamples Number of bootstrap resamples for uncertainty
+#'   estimation
+#' @param show_predictions Display model predictions
+#' @param show_metrics Display model performance metrics
+#' @param show_coefficients Display model coefficients and statistics
+#' @param show_residuals Display residual plots and diagnostics
+#' @param confidence_level Confidence level for intervals
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$model_info} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$predictions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$performance_metrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cross_validation_results} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$variable_importance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survival_curves} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$residual_plots} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$model_info$asDF}
+#'
+#' \code{as.data.frame(results$model_info)}
 #'
 #' @export
 jparsnipsurvival <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    time_var,
+    event_var,
+    predictors,
+    model_engine = "cox_survival",
+    parametric_dist = "weibull",
+    prediction_type = "linear_pred",
+    penalty = 0.01,
+    mixture = 1,
+    trees = 500,
+    min_n = 10,
+    split_data = FALSE,
+    train_prop = 0.8,
+    cross_validation = FALSE,
+    cv_folds = 5,
+    bootstrap_resamples = 100,
+    show_predictions = TRUE,
+    show_metrics = TRUE,
+    show_coefficients = TRUE,
+    show_residuals = FALSE,
+    confidence_level = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jparsnipsurvival requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(time_var)) time_var <- jmvcore::resolveQuo(jmvcore::enquo(time_var))
+    if ( ! missing(event_var)) event_var <- jmvcore::resolveQuo(jmvcore::enquo(event_var))
+    if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(time_var), time_var, NULL),
+            `if`( ! missing(event_var), event_var, NULL),
+            `if`( ! missing(predictors), predictors, NULL))
 
 
     options <- jparsnipsurvivalOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        time_var = time_var,
+        event_var = event_var,
+        predictors = predictors,
+        model_engine = model_engine,
+        parametric_dist = parametric_dist,
+        prediction_type = prediction_type,
+        penalty = penalty,
+        mixture = mixture,
+        trees = trees,
+        min_n = min_n,
+        split_data = split_data,
+        train_prop = train_prop,
+        cross_validation = cross_validation,
+        cv_folds = cv_folds,
+        bootstrap_resamples = bootstrap_resamples,
+        show_predictions = show_predictions,
+        show_metrics = show_metrics,
+        show_coefficients = show_coefficients,
+        show_residuals = show_residuals,
+        confidence_level = confidence_level)
 
     analysis <- jparsnipsurvivalClass$new(
         options = options,

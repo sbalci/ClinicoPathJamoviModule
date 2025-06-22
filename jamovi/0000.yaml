@@ -1426,9 +1426,61 @@ analyses:
     menuTitle: Parsnip Survival Model Wrappers
     ribbon: analyses
     description: >
-      Unified interface to survival models using the parsnip package and tidymodels
-      framework. Supports multiple survival model engines with standardized
-      syntax for model fitting, prediction, and evaluation.
+      Unified interface to survival models using the parsnip package and
+      tidymodels framework.
+
+      Supports multiple survival model engines with standardized syntax
+
+      for model fitting, prediction, and evaluation.
+  - title: Forest Plot Visualization
+    name: jforestmodel
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Statistical Models
+    menuTitle: Forest Plot Visualization
+    ribbon: analyses
+    description: >
+      Create professional forest plots from regression models including linear,
+
+      logistic, and survival models. Visualize coefficients, confidence
+      intervals,
+
+      and effect sizes with customizable formatting and layout options.
+  - title: Predictive Power Score Analysis
+    name: jpps
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Correlation & Association
+    menuTitle: Predictive Power Score Analysis
+    ribbon: analyses
+    description: >
+      Predictive Power Score (PPS) analysis provides an asymmetric,
+      data-type-agnostic
+
+      score that can detect linear or non-linear relationships between
+      variables.
+
+      PPS ranges from 0 (no predictive power) to 1 (perfect predictive power).
+  - title: Forest Plot Visualization
+    name: jforester
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Statistical Models
+    menuTitle: Forest Plot Visualization
+    ribbon: analyses
+    description: >
+      Create publication-ready forest plots for meta-analyses, subgroup
+      analyses, 
+
+      and clinical trial results. Display point estimates with confidence
+      intervals
+
+      in a professional format suitable for academic publications.
+  - title: Summary Statistics with summarytools
+    name: jsummarytools
+    ns: ClinicoPath
+    menuGroup: ClinicoPathJamoviModule
+    menuTitle: Summary Statistics with summarytools
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

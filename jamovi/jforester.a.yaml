@@ -1,0 +1,278 @@
+---
+name: jforester
+title: Forest Plot Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Statistical Models
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Create publication-ready forest plots for meta-analyses, subgroup analyses, 
+        and clinical trial results. Display point estimates with confidence intervals
+        in a professional format suitable for academic publications.
+
+options:
+    - name: data
+      type: Data
+      description: Dataset for forest plot analysis
+
+    - name: study_labels
+      title: Study/Group Labels
+      type: Variable
+      description: Variable containing study or subgroup names
+
+    - name: estimates
+      title: Effect Estimates
+      type: Variable
+      description: Point estimates (odds ratios, risk ratios, mean differences, etc.)
+
+    - name: ci_lower
+      title: Lower Confidence Interval
+      type: Variable
+      description: Lower bounds of confidence intervals
+
+    - name: ci_upper
+      title: Upper Confidence Interval
+      type: Variable
+      description: Upper bounds of confidence intervals
+
+    - name: sample_sizes
+      title: Sample Sizes
+      type: Variable
+      description: Sample sizes for each study/group (optional)
+
+    - name: events
+      title: Events/Cases
+      type: Variable
+      description: Number of events or cases (optional)
+
+    - name: effect_type
+      title: Effect Measure Type
+      type: List
+      options:
+        - title: Odds Ratio
+          name: or
+        - title: Risk Ratio
+          name: rr
+        - title: Hazard Ratio
+          name: hr
+        - title: Mean Difference
+          name: md
+        - title: Standardized Mean Difference
+          name: smd
+        - title: Custom
+          name: custom
+      default: or
+      description: Type of effect measure being displayed
+
+    - name: confidence_level
+      title: Confidence Level
+      type: List
+      options:
+        - title: 95%
+          name: "95"
+        - title: 90%
+          name: "90"
+        - title: 99%
+          name: "99"
+      default: "95"
+      description: Confidence level for intervals
+
+    - name: reference_line
+      title: Reference Line Value
+      type: Number
+      default: 1
+      description: Position of vertical reference line
+
+    - name: log_scale
+      title: Use Logarithmic Scale
+      type: Bool
+      default: true
+      description: Display forest plot on logarithmic scale
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: ""
+      description: Custom title for forest plot
+
+    - name: x_axis_label
+      title: X-Axis Label
+      type: String
+      default: ""
+      description: Custom x-axis label
+
+    - name: show_summary
+      title: Show Summary Effect
+      type: Bool
+      default: false
+      description: Display overall summary effect at bottom
+
+    - name: summary_estimate
+      title: Summary Estimate
+      type: Number
+      default: 1
+      description: Overall summary effect estimate
+
+    - name: summary_ci_lower
+      title: Summary Lower CI
+      type: Number
+      default: 0.8
+      description: Lower bound of summary confidence interval
+
+    - name: summary_ci_upper
+      title: Summary Upper CI
+      type: Number
+      default: 1.2
+      description: Upper bound of summary confidence interval
+
+    - name: point_size_range
+      title: Point Size Range
+      type: List
+      options:
+        - title: Small (2-4)
+          name: small
+        - title: Medium (3-6)
+          name: medium
+        - title: Large (4-8)
+          name: large
+      default: medium
+      description: Range of point sizes based on sample size
+
+    - name: color_scheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default Blue
+          name: default
+        - title: Medical Red
+          name: medical
+        - title: Forest Green
+          name: forest
+        - title: Grayscale
+          name: grayscale
+        - title: Custom
+          name: custom
+      default: default
+      description: Color scheme for points and confidence intervals
+
+    - name: custom_point_color
+      title: Custom Point Color
+      type: String
+      default: "#2166AC"
+      description: Custom color for points (hex code)
+
+    - name: custom_ci_color
+      title: Custom CI Color
+      type: String
+      default: "#4D4D4D"
+      description: Custom color for confidence intervals (hex code)
+
+    - name: font_family
+      title: Font Family
+      type: List
+      options:
+        - title: Arial
+          name: Arial
+        - title: Times New Roman
+          name: Times
+        - title: Helvetica
+          name: Helvetica
+        - title: Calibri
+          name: Calibri
+      default: Arial
+      description: Font family for plot text
+
+    - name: plot_width
+      title: Plot Width (inches)
+      type: Number
+      min: 6
+      max: 16
+      default: 10
+      description: Width of exported plot
+
+    - name: plot_height
+      title: Plot Height (inches)
+      type: Number
+      min: 4
+      max: 20
+      default: 8
+      description: Height of exported plot
+
+    - name: dpi
+      title: Resolution (DPI)
+      type: Integer
+      min: 150
+      max: 1200
+      default: 600
+      description: Resolution for exported plot
+
+    - name: show_table
+      title: Show Data Table
+      type: Bool
+      default: true
+      description: Display accompanying data table
+
+    - name: table_position
+      title: Table Position
+      type: List
+      options:
+        - title: Left Side
+          name: left
+        - title: Right Side
+          name: right
+        - title: Below Plot
+          name: below
+      default: left
+      description: Position of data table relative to plot
+
+    - name: include_weights
+      title: Include Study Weights
+      type: Bool
+      default: false
+      description: Display study weights in table (requires sample sizes)
+
+    - name: show_heterogeneity
+      title: Show Heterogeneity Statistics
+      type: Bool
+      default: false
+      description: Display I² and Q-test statistics
+
+    - name: arrow_labels
+      title: Arrow Labels
+      type: Bool
+      default: false
+      description: Add directional arrows with labels
+
+    - name: left_arrow_label
+      title: Left Arrow Label
+      type: String
+      default: "Favors Control"
+      description: Label for left arrow
+
+    - name: right_arrow_label
+      title: Right Arrow Label
+      type: String
+      default: "Favors Treatment"
+      description: Label for right arrow
+
+    - name: stripe_rows
+      title: Stripe Rows
+      type: Bool
+      default: true
+      description: Add alternating row colors for readability
+
+    - name: export_format
+      title: Export Format
+      type: List
+      options:
+        - title: PNG
+          name: png
+        - title: PDF
+          name: pdf
+        - title: SVG
+          name: svg
+        - title: TIFF
+          name: tiff
+      default: png
+      description: Format for plot export

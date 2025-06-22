@@ -1,14 +1,125 @@
 ---
-name:  icccoeff
-title: ICC coefficients
-jrs:   '1.1'
+name: icccoeff
+title: Intraclass Correlation Coefficient
+jrs: '1.1'
 
 items:
-    - name:  text
-      title: ICC coefficients
-      type:  Preformatted
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: icc_results
+      title: ICC Results
+      type: Table
+      visible: true
+      columns:
+        - name: icc_type
+          title: ICC Type
+          type: text
+        - name: icc_value
+          title: ICC
+          type: number
+          format: zto,dp:4
+        - name: ci_lower
+          title: Lower CI
+          type: number
+          format: zto,dp:4
+        - name: ci_upper
+          title: Upper CI
+          type: number
+          format: zto,dp:4
+        - name: f_value
+          title: F
+          type: number
+          format: zto,dp:3
+        - name: df1
+          title: df1
+          type: integer
+        - name: df2
+          title: df2
+          type: integer
+        - name: p_value
+          title: p
+          type: number
+          format: zto,dp:4
+      clearWith:
+        - vars
+        - icc_type
+        - agreement_type
+        - confidence_level
+
+    - name: apa_format
+      title: APA Style Results
+      type: Html
+      visible: (show_apa_format)
+      clearWith:
+        - vars
+        - icc_type
+        - agreement_type
+        - confidence_level
+        - decimal_places
+
+    - name: descriptive_stats
+      title: Descriptive Statistics
+      type: Table
+      visible: (show_descriptive_stats)
+      columns:
+        - name: rater
+          title: Rater
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: mean
+          title: Mean
+          type: number
+          format: zto,dp:3
+        - name: sd
+          title: SD
+          type: number
+          format: zto,dp:3
+        - name: min
+          title: Min
+          type: number
+          format: zto,dp:3
+        - name: max
+          title: Max
+          type: number
+          format: zto,dp:3
+        - name: missing
+          title: Missing
+          type: integer
+      clearWith:
+        - vars
+        - missing_values
+
+    - name: reliability_assessment
+      title: Reliability Assessment
+      type: Table
+      visible: true
+      columns:
+        - name: criteria
+          title: Criteria
+          type: text
+        - name: threshold
+          title: Threshold
+          type: text
+        - name: assessment
+          title: Assessment
+          type: text
+      clearWith:
+        - vars
+        - icc_type
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: (show_interpretation)
 
 refs:
-    - ClinicoPathJamoviModule
+    - McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+    - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations - uses in assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+    - Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. Journal of Chiropractic Medicine, 15(2), 155-163.
 
 ...

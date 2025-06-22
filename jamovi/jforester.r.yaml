@@ -1,0 +1,92 @@
+---
+name: jforester
+title: Forest Plot Visualization
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: forest_plot
+      title: Forest Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_forest
+      visible: true
+      clearWith:
+        - study_labels
+        - estimates
+        - ci_lower
+        - ci_upper
+        - effect_type
+        - log_scale
+        - reference_line
+        - color_scheme
+        - custom_point_color
+        - custom_ci_color
+
+    - name: data_table
+      title: Study Data
+      type: Table
+      visible: (show_table)
+      columns:
+        - name: study
+          title: Study/Group
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto,dp:3
+        - name: ci_lower
+          title: Lower CI
+          type: number
+          format: zto,dp:3
+        - name: ci_upper
+          title: Upper CI
+          type: number
+          format: zto,dp:3
+        - name: sample_size
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: weight
+          title: Weight (%)
+          type: number
+          format: zto,dp:1
+      clearWith:
+        - study_labels
+        - estimates
+        - ci_lower
+        - ci_upper
+        - sample_sizes
+        - events
+
+    - name: summary_statistics
+      title: Summary Statistics
+      type: Table
+      visible: (show_summary || show_heterogeneity)
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: text
+      clearWith:
+        - estimates
+        - ci_lower
+        - ci_upper
+        - show_summary
+        - show_heterogeneity
+
+    - name: interpretation
+      title: Forest Plot Interpretation
+      type: Html
+      visible: true
+
+...
