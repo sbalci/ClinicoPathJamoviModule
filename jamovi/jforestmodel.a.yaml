@@ -1,0 +1,216 @@
+---
+name: jforestmodel
+title: Forest Plot Visualization
+menuGroup: JJStatsPlot
+menuSubgroup: Statistical Models
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Create professional forest plots from regression models including linear,
+        logistic, and survival models. Visualize coefficients, confidence intervals,
+        and effect sizes with customizable formatting and layout options.
+
+options:
+    - name: data
+      type: Data
+      description: Dataset containing variables for regression modeling
+
+    - name: dependent_var
+      title: Dependent Variable
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      description: Outcome variable for regression modeling
+
+    - name: predictor_vars
+      title: Predictor Variables
+      type: Variables
+      description: Independent variables to include in the model
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - title: Linear Regression (lm)
+          name: lm
+        - title: Logistic Regression (glm)
+          name: glm
+        - title: Cox Proportional Hazards (coxph)
+          name: coxph
+        - title: Custom Model Object
+          name: custom
+      default: lm
+      description: Type of regression model to fit
+
+    - name: time_var
+      title: Time Variable (for Cox model)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: Time-to-event variable for Cox regression
+
+    - name: event_var
+      title: Event Variable (for Cox model)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: Event indicator (0=censored, 1=event) for Cox regression
+
+    - name: family
+      title: GLM Family
+      type: List
+      options:
+        - title: Binomial (Logistic)
+          name: binomial
+        - title: Poisson
+          name: poisson
+        - title: Gaussian (Normal)
+          name: gaussian
+        - title: Gamma
+          name: gamma
+      default: binomial
+      description: Distribution family for GLM models
+
+    - name: exponentiate
+      title: Exponentiate Coefficients
+      type: Bool
+      default: false
+      description: Transform coefficients to odds ratios or hazard ratios
+
+    - name: show_p_values
+      title: Show P-values
+      type: Bool
+      default: true
+      description: Display p-values in the forest plot
+
+    - name: show_confidence_intervals
+      title: Show Confidence Intervals
+      type: Bool
+      default: true
+      description: Display confidence intervals as horizontal lines
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description: Confidence level for intervals
+
+    - name: factor_separate_line
+      title: Factor Variables on Separate Lines
+      type: Bool
+      default: true
+      description: Display each factor level on a separate line
+
+    - name: covariates
+      title: Specific Covariates to Display
+      type: Variables
+      description: Optional subset of variables to include in plot
+
+    - name: sort_variables
+      title: Sort Variables
+      type: List
+      options:
+        - title: No sorting (model order)
+          name: none
+        - title: By coefficient size
+          name: coefficient
+        - title: By p-value
+          name: pvalue
+        - title: Alphabetical
+          name: alphabetical
+      default: none
+      description: How to sort variables in the plot
+
+    - name: plot_title
+      title: Plot Title
+      type: String
+      default: "Forest Plot"
+      description: Custom title for the forest plot
+
+    - name: x_axis_label
+      title: X-axis Label
+      type: String
+      default: ""
+      description: Custom label for x-axis (auto-generated if empty)
+
+    - name: point_size
+      title: Point Size
+      type: Number
+      min: 0.5
+      max: 5
+      default: 2
+      description: Size of coefficient points
+
+    - name: line_size
+      title: Line Size
+      type: Number
+      min: 0.1
+      max: 2
+      default: 0.5
+      description: Thickness of confidence interval lines
+
+    - name: color_scheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Blue
+          name: blue
+        - title: Red
+          name: red
+        - title: Green
+          name: green
+        - title: Purple
+          name: purple
+        - title: Custom
+          name: custom
+      default: default
+      description: Color scheme for the plot
+
+    - name: custom_color
+      title: Custom Color
+      type: String
+      default: "#2E8B57"
+      description: Custom color (hex code) when using custom color scheme
+
+    - name: show_reference_line
+      title: Show Reference Line
+      type: Bool
+      default: true
+      description: Display vertical reference line at null effect
+
+    - name: reference_value
+      title: Reference Line Value
+      type: Number
+      default: 0
+      description: Value for reference line (0 for linear, 1 for exponentiated)
+
+    - name: panel_width_ratio
+      title: Panel Width Ratio
+      type: String
+      default: "1:1:1"
+      description: Ratio of panel widths (labels:plot:values)
+
+    - name: show_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description: Display model summary information
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description: Provide interpretation guidance

@@ -13,6 +13,13 @@ items:
       title: Model Information
       type: Table
       visible: (show_coefficients)
+      columns:
+        - name: Attribute
+          title: Attribute
+          type: text
+        - name: Value
+          title: Value
+          type: text
       clearWith:
         - time_var
         - event_var
@@ -24,6 +31,13 @@ items:
       title: Model Coefficients
       type: Table
       visible: (show_coefficients)
+      columns:
+        - name: Variable
+          title: Variable
+          type: text
+        - name: Value
+          title: Value
+          type: text
       clearWith:
         - time_var
         - event_var
@@ -37,6 +51,10 @@ items:
       title: Model Predictions
       type: Table
       visible: (show_predictions)
+      columns:
+        - name: Info
+          title: Information
+          type: text
       clearWith:
         - time_var
         - event_var
@@ -49,6 +67,13 @@ items:
       title: Performance Metrics
       type: Table
       visible: (show_metrics)
+      columns:
+        - name: Metric
+          title: Metric
+          type: text
+        - name: Value
+          title: Value
+          type: text
       clearWith:
         - time_var
         - event_var
@@ -61,6 +86,13 @@ items:
       title: Cross Validation Results
       type: Table
       visible: (cross_validation && show_metrics)
+      columns:
+        - name: Metric
+          title: Metric
+          type: text
+        - name: Value
+          title: Value
+          type: text
       clearWith:
         - time_var
         - event_var
@@ -72,6 +104,13 @@ items:
       title: Variable Importance
       type: Table
       visible: (model_engine:random_forest && show_coefficients)
+      columns:
+        - name: Variable
+          title: Variable
+          type: text
+        - name: Importance
+          title: Importance
+          type: text
       clearWith:
         - time_var
         - event_var

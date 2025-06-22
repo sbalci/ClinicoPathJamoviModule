@@ -1,4 +1,4 @@
-title: ICC coefficients
+title: Intraclass Correlation Coefficient
 name: icccoeff
 jus: '3.0'
 stage: 0
@@ -9,8 +9,53 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variables
+        label: Rater Variables
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: icc_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: agreement_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: confidence_level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: missing_values
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_apa_format
+      - type: CheckBox
+        name: show_interpretation
+      - type: CheckBox
+        name: show_confidence_intervals
+      - type: CheckBox
+        name: show_f_test
+      - type: CheckBox
+        name: show_descriptive_stats
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: decimal_places
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number

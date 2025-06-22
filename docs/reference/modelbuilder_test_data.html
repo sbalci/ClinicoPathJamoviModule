@@ -11,7 +11,7 @@ lab values, and an outcome variable."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.30</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,10 +31,8 @@ lab values, and an outcome variable."></head><body>
     <li><a class="dropdown-item" href="../articles/benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
     <li><a class="dropdown-item" href="../articles/categorical-plots.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/clinical-examples.html">Clinical Research Examples with jsurvival</a></li>
-    <li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/clinicoPathDescriptives-introduction.html">Getting Started with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/continuous-comparisons-vignette.html">Continuous Variable Comparisons</a></li>
-    <li><a class="dropdown-item" href="../articles/continuous-comparisons.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/correlations-scatterplots.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="../articles/crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/data-preparation.html">Data Preparation for Survival Analysis</a></li>
@@ -169,53 +167,15 @@ lab values, and an outcome variable.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">modelbuilder_test_data</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set ‘modelbuilder_test_data’ not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">modelbuilder_test_data</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	600 obs. of  16 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ patient_id          : chr  "PT0001" "PT0002" "PT0003" "PT0004" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ hospital            : chr  "University Medical Center" "General Hospital" "Community Hospital" "Community Hospital" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ age                 : num  81 58 69 73 70 64 83 64 85 64 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sex                 : chr  "Male" "Male" "Female" "Male" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ diabetes            : chr  "Yes" "No" "No" "Yes" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ hypertension        : chr  "No" "No" "No" "Yes" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ smoking             : chr  "Never" "Current" "Never" "Former" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ cholesterol         : num  167 194 185 186 129 205 243 250 283 219 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ bmi                 : num  20.2 28.2 21.3 25.1 21.8 34.3 29.6 28.1 30.6 32.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ systolic_bp         : num  132 121 134 131 130 170 107 148 132 130 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ family_history      : chr  "No" "Yes" "No" "Yes" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ troponin            : num  7.36 2.32 3.43 2.41 NA 3.66 3.12 2.68 2.5 3.39 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ creatinine          : num  1.19 1.19 1.09 1.29 1.15 0.93 1.32 0.9 1.07 0.96 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ cardiovascular_event: Factor w/ 2 levels "No","Yes": 1 2 1 2 NA 2 2 2 2 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ true_risk           : num  0.823 0.901 0.212 0.976 NA 0.875 0.764 0.792 0.987 0.811 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ risk_category       : Factor w/ 4 levels "Low","Moderate",..: 4 4 3 4 NA 4 4 4 4 4 ...</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'modelbuilder_test_data' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">modelbuilder_test_data</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   patient_id                  hospital age    sex diabetes hypertension smoking</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     PT0001 University Medical Center  81   Male      Yes           No   Never</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     PT0002          General Hospital  58   Male       No           No Current</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     PT0003        Community Hospital  69 Female       No           No   Never</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     PT0004        Community Hospital  73   Male      Yes          Yes  Former</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5     PT0005 University Medical Center  70 Female       No          Yes   Never</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6     PT0006        Community Hospital  64 Female       No          Yes  Former</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   cholesterol  bmi systolic_bp family_history troponin creatinine</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         167 20.2         132             No     7.36       1.19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         194 28.2         121            Yes     2.32       1.19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         185 21.3         134             No     3.43       1.09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4         186 25.1         131            Yes     2.41       1.29</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         129 21.8         130             No       NA       1.15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         205 34.3         170            Yes     3.66       0.93</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   cardiovascular_event true_risk risk_category</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   No     0.823     Very High</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                  Yes     0.901     Very High</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   No     0.212          High</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                  Yes     0.976     Very High</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                 &lt;NA&gt;        NA          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                  Yes     0.875     Very High</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'modelbuilder_test_data' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">modelbuilder_test_data</span><span class="op">$</span><span class="va">bmi</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   18.00   23.80   26.70   26.72   29.40   40.20 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'modelbuilder_test_data' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">modelbuilder_test_data</span><span class="op">$</span><span class="va">cardiovascular_event</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  No Yes </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 169 358 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'modelbuilder_test_data' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

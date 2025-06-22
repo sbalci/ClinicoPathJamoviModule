@@ -1,0 +1,258 @@
+---
+name: jsummarytools
+title: Summary Statistics with summarytools
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Comprehensive descriptive statistics using the summarytools package.
+        Provides professional data frame summaries, frequency tables, and
+        descriptive statistics with publication-ready output for clinical research.
+
+options:
+    - name: data
+      type: Data
+      description: Dataset for descriptive analysis
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - title: Data Frame Summary (dfSummary)
+          name: dfsummary
+        - title: Frequency Tables (freq)
+          name: freq
+        - title: Descriptive Statistics (descr)
+          name: descr
+        - title: Cross-tabulation (ctable)
+          name: ctable
+      default: dfsummary
+      description: Type of summarytools analysis to perform
+
+    - name: vars
+      title: Variables to Analyze
+      type: Variables
+      description: Variables for analysis (all variables if empty)
+
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      description: Optional grouping variable for stratified analysis
+
+    - name: weights_var
+      title: Weights Variable
+      type: Variable
+      description: Optional variable containing sample weights
+
+    - name: cross_var1
+      title: First Variable (for Cross-table)
+      type: Variable
+      description: First variable for cross-tabulation
+
+    - name: cross_var2
+      title: Second Variable (for Cross-table)
+      type: Variable
+      description: Second variable for cross-tabulation
+
+    - name: show_labels
+      title: Show Variable Labels
+      type: Bool
+      default: true
+      description: Display variable labels when available
+
+    - name: show_variable_numbers
+      title: Show Variable Numbers
+      type: Bool
+      default: false
+      description: Display variable numbers in output
+
+    - name: show_graphs
+      title: Show Distribution Graphs
+      type: Bool
+      default: true
+      description: Include histograms and bar charts in dfSummary
+
+    - name: show_valid_counts
+      title: Show Valid Counts
+      type: Bool
+      default: true
+      description: Display valid observation counts and proportions
+
+    - name: show_na_counts
+      title: Show Missing Data Info
+      type: Bool
+      default: true
+      description: Display missing data information
+
+    - name: round_digits
+      title: Decimal Places
+      type: Integer
+      min: 0
+      max: 6
+      default: 2
+      description: Number of decimal places for numeric output
+
+    - name: max_distinct_values
+      title: Max Distinct Values to Show
+      type: Integer
+      min: 5
+      max: 50
+      default: 10
+      description: Maximum number of distinct values to show for categorical variables
+
+    - name: include_cumulative
+      title: Include Cumulative Frequencies
+      type: Bool
+      default: false
+      description: Include cumulative frequencies in frequency tables
+
+    - name: report_missing
+      title: Report Missing Values
+      type: Bool
+      default: true
+      description: Include missing values in frequency tables
+
+    - name: transpose_output
+      title: Transpose Output
+      type: Bool
+      default: false
+      description: Transpose descriptive statistics table (variables as rows)
+
+    - name: stats_to_include
+      title: Statistics to Include
+      type: List
+      options:
+        - title: All Statistics
+          name: all
+        - title: Basic Statistics Only
+          name: basic
+        - title: Central Tendency Only
+          name: central
+        - title: Dispersion Only
+          name: dispersion
+        - title: Custom Selection
+          name: custom
+      default: all
+      description: Which descriptive statistics to include
+
+    - name: include_mean
+      title: Include Mean
+      type: Bool
+      default: true
+      description: Include mean in descriptive statistics
+
+    - name: include_median
+      title: Include Median
+      type: Bool
+      default: true
+      description: Include median in descriptive statistics
+
+    - name: include_mode
+      title: Include Mode
+      type: Bool
+      default: false
+      description: Include mode in descriptive statistics
+
+    - name: include_sd
+      title: Include Standard Deviation
+      type: Bool
+      default: true
+      description: Include standard deviation in descriptive statistics
+
+    - name: include_var
+      title: Include Variance
+      type: Bool
+      default: false
+      description: Include variance in descriptive statistics
+
+    - name: include_range
+      title: Include Range
+      type: Bool
+      default: true
+      description: Include min, max, and range in descriptive statistics
+
+    - name: include_quartiles
+      title: Include Quartiles
+      type: Bool
+      default: true
+      description: Include Q1, Q3, and IQR in descriptive statistics
+
+    - name: include_skewness
+      title: Include Skewness
+      type: Bool
+      default: false
+      description: Include skewness in descriptive statistics
+
+    - name: include_kurtosis
+      title: Include Kurtosis
+      type: Bool
+      default: false
+      description: Include kurtosis in descriptive statistics
+
+    - name: cross_proportions
+      title: Cross-table Proportions
+      type: List
+      options:
+        - title: No Proportions
+          name: none
+        - title: Row Proportions
+          name: row
+        - title: Column Proportions
+          name: col
+        - title: Total Proportions
+          name: total
+      default: none
+      description: Type of proportions to calculate in cross-tabulation
+
+    - name: output_style
+      title: Output Style
+      type: List
+      options:
+        - title: Grid (Default)
+          name: grid
+        - title: Simple
+          name: simple
+        - title: Bootstrap
+          name: bootstrap
+        - title: Minimal
+          name: minimal
+      default: grid
+      description: HTML output styling
+
+    - name: plain_ascii
+      title: Plain ASCII Output
+      type: Bool
+      default: false
+      description: Use plain ASCII instead of HTML formatting
+
+    - name: headings
+      title: Include Headings
+      type: Bool
+      default: true
+      description: Include section headings in output
+
+    - name: escape_pipe
+      title: Escape Pipe Characters
+      type: Bool
+      default: true
+      description: Escape pipe characters for markdown compatibility
+
+    - name: bootstrap_css
+      title: Bootstrap CSS
+      type: Bool
+      default: true
+      description: Include Bootstrap CSS styling in HTML output
+
+    - name: custom_css
+      title: Custom CSS
+      type: String
+      default: ""
+      description: Custom CSS styling for HTML output
+
+    - name: show_interpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: true
+      description: Display interpretation guidance for results

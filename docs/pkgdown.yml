@@ -10,10 +10,8 @@ articles:
   benford: benford.html
   categorical-plots: categorical-plots.html
   clinical-examples: clinical-examples.html
-  clinical-workflow: clinical-workflow.html
   clinicoPathDescriptives-introduction: clinicoPathDescriptives-introduction.html
   continuous-comparisons-vignette: continuous-comparisons-vignette.html
-  continuous-comparisons: continuous-comparisons.html
   correlations-scatterplots: correlations-scatterplots.html
   crosstable: crosstable.html
   data-preparation: data-preparation.html
@@ -64,7 +62,7 @@ articles:
   visualization-gallery: visualization-gallery.html
   visualization: visualization.html
   waterfall: waterfall.html
-last_built: 2025-06-22T09:21Z
+last_built: 2025-06-22T14:21Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

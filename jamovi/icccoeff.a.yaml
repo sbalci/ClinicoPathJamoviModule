@@ -1,31 +1,122 @@
 ---
-name:  icccoeff
-title: ICC coefficients
-menuGroup: meddecideD
-menuSubgroup: Drafts
-menuSubtitle: Agreement
-version: '0.0.3'
+name: icccoeff
+title: Intraclass Correlation Coefficient
+menuGroup: meddecide
+menuSubgroup: Agreement
+version: '1.0.0'
 jas: '1.2'
-
 description:
-    main: Function for Interclass Correlation Coefficient Calculation.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
-
+    main: |
+        Calculate Intraclass Correlation Coefficient (ICC) for inter-rater reliability 
+        and agreement studies. Provides multiple ICC types with confidence intervals 
+        and APA-style formatting for clinical research applications.
 
 options:
     - name: data
       type: Data
-      description:
-          R: >
-            The data as a data frame.
-
+      description: Dataset containing ratings from multiple raters
 
     - name: vars
-      title: Variables
+      title: Rater Variables
       type: Variables
+      description: Variables representing ratings from different raters (subjects as rows, raters as columns)
 
+    - name: icc_type
+      title: ICC Type
+      type: List
+      options:
+        - title: ICC(1,1) - One-way random, single measures
+          name: icc1_1
+        - title: ICC(2,1) - Two-way random, single measures  
+          name: icc2_1
+        - title: ICC(3,1) - Two-way mixed, single measures
+          name: icc3_1
+        - title: ICC(1,k) - One-way random, average measures
+          name: icc1_k
+        - title: ICC(2,k) - Two-way random, average measures
+          name: icc2_k
+        - title: ICC(3,k) - Two-way mixed, average measures
+          name: icc3_k
+      default: icc2_1
+      description: Type of ICC calculation based on study design
 
-...
+    - name: agreement_type
+      title: Agreement Type
+      type: List
+      options:
+        - title: Consistency (ICC(C))
+          name: consistency
+        - title: Absolute Agreement (ICC(A))
+          name: agreement
+      default: consistency
+      description: Whether to assess consistency or absolute agreement
+
+    - name: confidence_level
+      title: Confidence Level
+      type: List
+      options:
+        - title: 95%
+          name: "0.95"
+        - title: 90%
+          name: "0.90"
+        - title: 99%
+          name: "0.99"
+      default: "0.95"
+      description: Confidence level for ICC confidence intervals
+
+    - name: missing_values
+      title: Handle Missing Values
+      type: List
+      options:
+        - title: Complete cases only
+          name: complete
+        - title: Pairwise deletion
+          name: pairwise
+      default: complete
+      description: How to handle missing data
+
+    - name: show_apa_format
+      title: Show APA Format
+      type: Bool
+      default: true
+      description: Display results in APA style format
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description: Include interpretation guide for ICC values
+
+    - name: show_confidence_intervals
+      title: Show Confidence Intervals
+      type: Bool
+      default: true
+      description: Display confidence intervals for ICC estimates
+
+    - name: show_f_test
+      title: Show F-test
+      type: Bool
+      default: true
+      description: Include F-test for significance of ICC
+
+    - name: show_descriptive_stats
+      title: Show Descriptive Statistics
+      type: Bool
+      default: true
+      description: Display descriptive statistics for each rater
+
+    - name: decimal_places
+      title: Decimal Places
+      type: Integer
+      min: 2
+      max: 6
+      default: 3
+      description: Number of decimal places in output
+
+    - name: alpha_level
+      title: Alpha Level
+      type: Number
+      min: 0.001
+      max: 0.10
+      default: 0.05
+      description: Alpha level for statistical tests

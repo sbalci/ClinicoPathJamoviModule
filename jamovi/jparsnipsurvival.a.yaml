@@ -4,10 +4,11 @@ title: Parsnip Survival Model Wrappers
 menuGroup: ClinicoPath Survival
 version: '1.0.0'
 jas: '1.2'
-description: >
-    Unified interface to survival models using the parsnip package and tidymodels
-    framework. Supports multiple survival model engines with standardized syntax
-    for model fitting, prediction, and evaluation.
+description:
+    main: |
+        Unified interface to survival models using the parsnip package and tidymodels framework.
+        Supports multiple survival model engines with standardized syntax
+        for model fitting, prediction, and evaluation.
 
 options:
     - name: data

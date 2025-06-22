@@ -6,7 +6,18 @@ icccoeffOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            vars = NULL, ...) {
+            vars = NULL,
+            icc_type = "icc2_1",
+            agreement_type = "consistency",
+            confidence_level = "0.95",
+            missing_values = "complete",
+            show_apa_format = TRUE,
+            show_interpretation = TRUE,
+            show_confidence_intervals = TRUE,
+            show_f_test = TRUE,
+            show_descriptive_stats = TRUE,
+            decimal_places = 3,
+            alpha_level = 0.05, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,33 +28,265 @@ icccoeffOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars)
+            private$..icc_type <- jmvcore::OptionList$new(
+                "icc_type",
+                icc_type,
+                options=list(
+                    "icc1_1",
+                    "icc2_1",
+                    "icc3_1",
+                    "icc1_k",
+                    "icc2_k",
+                    "icc3_k"),
+                default="icc2_1")
+            private$..agreement_type <- jmvcore::OptionList$new(
+                "agreement_type",
+                agreement_type,
+                options=list(
+                    "consistency",
+                    "agreement"),
+                default="consistency")
+            private$..confidence_level <- jmvcore::OptionList$new(
+                "confidence_level",
+                confidence_level,
+                options=list(
+                    "0.95",
+                    "0.90",
+                    "0.99"),
+                default="0.95")
+            private$..missing_values <- jmvcore::OptionList$new(
+                "missing_values",
+                missing_values,
+                options=list(
+                    "complete",
+                    "pairwise"),
+                default="complete")
+            private$..show_apa_format <- jmvcore::OptionBool$new(
+                "show_apa_format",
+                show_apa_format,
+                default=TRUE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=TRUE)
+            private$..show_confidence_intervals <- jmvcore::OptionBool$new(
+                "show_confidence_intervals",
+                show_confidence_intervals,
+                default=TRUE)
+            private$..show_f_test <- jmvcore::OptionBool$new(
+                "show_f_test",
+                show_f_test,
+                default=TRUE)
+            private$..show_descriptive_stats <- jmvcore::OptionBool$new(
+                "show_descriptive_stats",
+                show_descriptive_stats,
+                default=TRUE)
+            private$..decimal_places <- jmvcore::OptionInteger$new(
+                "decimal_places",
+                decimal_places,
+                min=2,
+                max=6,
+                default=3)
+            private$..alpha_level <- jmvcore::OptionNumber$new(
+                "alpha_level",
+                alpha_level,
+                min=0.001,
+                max=0.1,
+                default=0.05)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..icc_type)
+            self$.addOption(private$..agreement_type)
+            self$.addOption(private$..confidence_level)
+            self$.addOption(private$..missing_values)
+            self$.addOption(private$..show_apa_format)
+            self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..show_confidence_intervals)
+            self$.addOption(private$..show_f_test)
+            self$.addOption(private$..show_descriptive_stats)
+            self$.addOption(private$..decimal_places)
+            self$.addOption(private$..alpha_level)
         }),
     active = list(
-        vars = function() private$..vars$value),
+        vars = function() private$..vars$value,
+        icc_type = function() private$..icc_type$value,
+        agreement_type = function() private$..agreement_type$value,
+        confidence_level = function() private$..confidence_level$value,
+        missing_values = function() private$..missing_values$value,
+        show_apa_format = function() private$..show_apa_format$value,
+        show_interpretation = function() private$..show_interpretation$value,
+        show_confidence_intervals = function() private$..show_confidence_intervals$value,
+        show_f_test = function() private$..show_f_test$value,
+        show_descriptive_stats = function() private$..show_descriptive_stats$value,
+        decimal_places = function() private$..decimal_places$value,
+        alpha_level = function() private$..alpha_level$value),
     private = list(
-        ..vars = NA)
+        ..vars = NA,
+        ..icc_type = NA,
+        ..agreement_type = NA,
+        ..confidence_level = NA,
+        ..missing_values = NA,
+        ..show_apa_format = NA,
+        ..show_interpretation = NA,
+        ..show_confidence_intervals = NA,
+        ..show_f_test = NA,
+        ..show_descriptive_stats = NA,
+        ..decimal_places = NA,
+        ..alpha_level = NA)
 )
 
 icccoeffResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "icccoeffResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        icc_results = function() private$.items[["icc_results"]],
+        apa_format = function() private$.items[["apa_format"]],
+        descriptive_stats = function() private$.items[["descriptive_stats"]],
+        reliability_assessment = function() private$.items[["reliability_assessment"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="ICC coefficients",
+                title="Intraclass Correlation Coefficient",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+                    "McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.",
+                    "Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations - uses in assessing rater reliability. Psychological Bulletin, 86(2), 420-428.",
+                    "Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. Journal of Chiropractic Medicine, 15(2), 155-163."))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="ICC coefficients"))}))
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="icc_results",
+                title="ICC Results",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="icc_type", 
+                        `title`="ICC Type", 
+                        `type`="text"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC", 
+                        `type`="number", 
+                        `format`="zto,dp:4"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto,dp:4"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto,dp:4"),
+                    list(
+                        `name`="f_value", 
+                        `title`="F", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="df1", 
+                        `title`="df1", 
+                        `type`="integer"),
+                    list(
+                        `name`="df2", 
+                        `title`="df2", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,dp:4")),
+                clearWith=list(
+                    "vars",
+                    "icc_type",
+                    "agreement_type",
+                    "confidence_level")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="apa_format",
+                title="APA Style Results",
+                visible="(show_apa_format)",
+                clearWith=list(
+                    "vars",
+                    "icc_type",
+                    "agreement_type",
+                    "confidence_level",
+                    "decimal_places")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="descriptive_stats",
+                title="Descriptive Statistics",
+                visible="(show_descriptive_stats)",
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="min", 
+                        `title`="Min", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="max", 
+                        `title`="Max", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "missing_values")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="reliability_assessment",
+                title="Reliability Assessment",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="criteria", 
+                        `title`="Criteria", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="text"),
+                    list(
+                        `name`="assessment", 
+                        `title`="Assessment", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "icc_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Interpretation Guide",
+                visible="(show_interpretation)"))}))
 
 icccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "icccoeffBase",
@@ -53,7 +296,7 @@ icccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "icccoeff",
-                version = c(0,0,3),
+                version = c(1,0,0),
                 options = options,
                 results = icccoeffResults$new(options=options),
                 data = data,
@@ -66,25 +309,60 @@ icccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' ICC coefficients
+#' Intraclass Correlation Coefficient
 #'
-#' Function for Interclass Correlation Coefficient Calculation.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
-#' @param data The data as a data frame.
-#' @param vars .
+#' Calculate Intraclass Correlation Coefficient (ICC) for inter-rater 
+#' reliability 
+#' and agreement studies. Provides multiple ICC types with confidence 
+#' intervals 
+#' and APA-style formatting for clinical research applications.
+#' 
+#' @param data Dataset containing ratings from multiple raters
+#' @param vars Variables representing ratings from different raters (subjects
+#'   as rows, raters as columns)
+#' @param icc_type Type of ICC calculation based on study design
+#' @param agreement_type Whether to assess consistency or absolute agreement
+#' @param confidence_level Confidence level for ICC confidence intervals
+#' @param missing_values How to handle missing data
+#' @param show_apa_format Display results in APA style format
+#' @param show_interpretation Include interpretation guide for ICC values
+#' @param show_confidence_intervals Display confidence intervals for ICC
+#'   estimates
+#' @param show_f_test Include F-test for significance of ICC
+#' @param show_descriptive_stats Display descriptive statistics for each rater
+#' @param decimal_places Number of decimal places in output
+#' @param alpha_level Alpha level for statistical tests
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$icc_results} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$apa_format} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$descriptive_stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$reliability_assessment} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$icc_results$asDF}
+#'
+#' \code{as.data.frame(results$icc_results)}
 #'
 #' @export
 icccoeff <- function(
     data,
-    vars) {
+    vars,
+    icc_type = "icc2_1",
+    agreement_type = "consistency",
+    confidence_level = "0.95",
+    missing_values = "complete",
+    show_apa_format = TRUE,
+    show_interpretation = TRUE,
+    show_confidence_intervals = TRUE,
+    show_f_test = TRUE,
+    show_descriptive_stats = TRUE,
+    decimal_places = 3,
+    alpha_level = 0.05) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("icccoeff requires jmvcore to be installed (restart may be required)")
@@ -97,7 +375,18 @@ icccoeff <- function(
 
 
     options <- icccoeffOptions$new(
-        vars = vars)
+        vars = vars,
+        icc_type = icc_type,
+        agreement_type = agreement_type,
+        confidence_level = confidence_level,
+        missing_values = missing_values,
+        show_apa_format = show_apa_format,
+        show_interpretation = show_interpretation,
+        show_confidence_intervals = show_confidence_intervals,
+        show_f_test = show_f_test,
+        show_descriptive_stats = show_descriptive_stats,
+        decimal_places = decimal_places,
+        alpha_level = alpha_level)
 
     analysis <- icccoeffClass$new(
         options = options,

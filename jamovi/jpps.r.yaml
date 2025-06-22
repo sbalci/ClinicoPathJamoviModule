@@ -1,0 +1,139 @@
+---
+name: jpps
+title: Predictive Power Score Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: pps_scores
+      title: PPS Scores
+      type: Table
+      visible: true
+      columns:
+        - name: predictor
+          title: Predictor
+          type: text
+        - name: target
+          title: Target
+          type: text
+        - name: pps_score
+          title: PPS Score
+          type: number
+          format: zto,dp:4
+        - name: baseline_score
+          title: Baseline Score
+          type: number
+          format: zto,dp:4
+        - name: model_score
+          title: Model Score
+          type: number
+          format: zto,dp:4
+        - name: cross_validation
+          title: CV Method
+          type: text
+      clearWith:
+        - analysis_type
+        - target_var
+        - predictor_var
+        - predictor_vars
+        - matrix_vars
+        - algorithm
+        - cv_folds
+
+    - name: correlation_comparison
+      title: PPS vs Correlation Comparison
+      type: Table
+      visible: (show_correlation_comparison)
+      columns:
+        - name: variable_pair
+          title: Variable Pair
+          type: text
+        - name: pps_score
+          title: PPS Score
+          type: number
+          format: zto,dp:4
+        - name: correlation
+          title: Correlation
+          type: number
+          format: zto,dp:4
+        - name: pps_advantage
+          title: PPS Advantage
+          type: number
+          format: zto,dp:4
+      clearWith:
+        - analysis_type
+        - target_var
+        - predictor_vars
+        - matrix_vars
+        - correlation_method
+
+    - name: pps_heatmap
+      title: PPS Heatmap
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_heatmap
+      visible: (show_heatmap && analysis_type:matrix)
+      clearWith:
+        - matrix_vars
+        - color_scheme
+        - custom_color_low
+        - custom_color_high
+        - show_values_on_plot
+        - plot_title
+
+    - name: pps_barplot
+      title: PPS Barplot
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_barplot
+      visible: (show_barplot && (analysis_type:predictors || analysis_type:single))
+      clearWith:
+        - target_var
+        - predictor_var
+        - predictor_vars
+        - color_scheme
+        - sort_results
+        - show_values_on_plot
+        - plot_title
+
+    - name: comparison_plot
+      title: PPS vs Correlation Plot
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_comparison
+      visible: (show_correlation_comparison && analysis_type:compare)
+      clearWith:
+        - matrix_vars
+        - correlation_method
+        - color_scheme
+
+    - name: summary_stats
+      title: Analysis Summary
+      type: Table
+      visible: (show_summary)
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: text
+      clearWith:
+        - analysis_type
+        - target_var
+        - predictor_vars
+        - matrix_vars
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: (show_interpretation)
+
+...

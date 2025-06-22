@@ -1,0 +1,108 @@
+---
+name: jforestmodel
+title: Forest Plot Visualization
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: model_summary
+      title: Model Summary
+      type: Table
+      visible: (show_summary)
+      columns:
+        - name: Attribute
+          title: Attribute
+          type: text
+        - name: Value
+          title: Value
+          type: text
+      clearWith:
+        - dependent_var
+        - predictor_vars
+        - model_type
+        - family
+
+    - name: coefficients_table
+      title: Model Coefficients
+      type: Table
+      visible: true
+      columns:
+        - name: Variable
+          title: Variable
+          type: text
+        - name: Coefficient
+          title: Coefficient
+          type: number
+        - name: SE
+          title: Std. Error
+          type: number
+        - name: CI_Lower
+          title: CI Lower
+          type: number
+        - name: CI_Upper
+          title: CI Upper
+          type: number
+        - name: P_Value
+          title: p-value
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - dependent_var
+        - predictor_vars
+        - model_type
+        - confidence_level
+        - exponentiate
+
+    - name: forest_plot
+      title: Forest Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_forest
+      visible: true
+      clearWith:
+        - dependent_var
+        - predictor_vars
+        - model_type
+        - exponentiate
+        - show_p_values
+        - show_confidence_intervals
+        - confidence_level
+        - factor_separate_line
+        - sort_variables
+        - point_size
+        - line_size
+        - color_scheme
+        - custom_color
+        - show_reference_line
+        - reference_value
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (model_type:lm || model_type:glm)
+      columns:
+        - name: Diagnostic
+          title: Diagnostic
+          type: text
+        - name: Value
+          title: Value
+          type: text
+        - name: Interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+        - dependent_var
+        - predictor_vars
+        - model_type
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...
