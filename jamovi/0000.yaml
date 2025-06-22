@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.30
+version: 0.0.3.31
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -1395,11 +1395,40 @@ analyses:
       hierarchical clustering, multiple color schemes, and flexible matrix data
       handling for clinical research.
     ribbon: analyses
-  - title: JJStatsPlot
-    name: jggridges
+  - title: Complex UpSet Plot Visualization
+    name: jcomplexupset
     ns: ClinicoPath
-    menuGroup: ClinicoPathJamoviModule
-    menuTitle: JJStatsPlot
+    menuGroup: JJStatsPlot
+    menuSubgroup: Set Visualization
+    menuTitle: Complex UpSet Plot Visualization
+    description: >
+      Creates advanced UpSet plots for visualizing complex set intersections.
+      Superior to Venn diagrams for analyzing relationships between multiple
+      sets, with support for intersection analysis and statistical annotations.
+    ribbon: analyses
+  - title: Statistical Data Extraction from ggstatsplot
+    name: jextractggstats
+    ns: ClinicoPath
+    menuGroup: JJStatsPlot
+    menuSubgroup: Data Extraction
+    menuTitle: Statistical Data Extraction from ggstatsplot
+    description: >
+      Extracts statistical details and dataframes from ggstatsplot analyses.
+      Provides structured access to statistical test results, effect sizes,
+      pairwise comparisons, and descriptive statistics for custom reporting and
+      further analysis workflows.
+    ribbon: analyses
+  - title: Parsnip Survival Model Wrappers
+    name: jparsnipsurvival
+    ns: ClinicoPath
+    menuGroup: ClinicoPath Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Parsnip Survival Model Wrappers
+    ribbon: analyses
+    description: >
+      Unified interface to survival models using the parsnip package and tidymodels
+      framework. Supports multiple survival model engines with standardized
+      syntax for model fitting, prediction, and evaluation.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

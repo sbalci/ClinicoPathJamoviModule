@@ -1,0 +1,29 @@
+---
+name: jextractggstats
+title: Statistical Data Extraction Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+      refs: []
+
+    - name: extracted_data
+      title: Extracted Statistical Data
+      type: Html
+      visible: true
+      refs: []
+
+    - name: statistical_summary
+      title: Statistical Summary
+      type: Html
+      visible: (detailed_results)
+      refs: []
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: (show_interpretation)
+      refs: []

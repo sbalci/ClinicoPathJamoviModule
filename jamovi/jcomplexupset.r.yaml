@@ -1,0 +1,31 @@
+---
+name: jcomplexupset
+title: Complex UpSet Plot Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+      refs: []
+
+    - name: plot
+      title: UpSet Plot
+      type: Image
+      width: 1000
+      height: 700
+      renderFun: .plot
+      requiresData: true
+
+    - name: statistics
+      title: Set Statistics
+      type: Html
+      visible: (show_statistics)
+      refs: []
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: (show_interpretation)
+      refs: []

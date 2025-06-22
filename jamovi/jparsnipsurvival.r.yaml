@@ -1,0 +1,118 @@
+---
+name: jparsnipsurvival
+title: Parsnip Survival Model Wrappers
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: model_info
+      title: Model Information
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+        - parametric_dist
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+        - parametric_dist
+        - penalty
+        - mixture
+
+    - name: predictions
+      title: Model Predictions
+      type: Table
+      visible: (show_predictions)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+        - prediction_type
+        - split_data
+
+    - name: performance_metrics
+      title: Performance Metrics
+      type: Table
+      visible: (show_metrics)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+        - split_data
+        - cross_validation
+
+    - name: cross_validation_results
+      title: Cross Validation Results
+      type: Table
+      visible: (cross_validation && show_metrics)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+        - cv_folds
+
+    - name: variable_importance
+      title: Variable Importance
+      type: Table
+      visible: (model_engine:random_forest && show_coefficients)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - trees
+        - min_n
+
+    - name: survival_curves
+      title: Survival Curves
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_survival_curves
+      visible: (prediction_type:survival)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+
+    - name: residual_plots
+      title: Residual Analysis
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_residuals
+      visible: (show_residuals)
+      clearWith:
+        - time_var
+        - event_var
+        - predictors
+        - model_engine
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: true
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+
+...

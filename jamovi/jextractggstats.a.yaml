@@ -1,0 +1,184 @@
+---
+name: jextractggstats
+title: Statistical Data Extraction from ggstatsplot
+menuGroup: JJStatsPlot
+menuSubgroup: Data Extraction
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description: R object to use
+    
+    - name: dep_var
+      title: Dependent Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: Dependent variable for analysis
+    
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: Grouping variable for comparisons
+    
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - name: between_stats
+          title: Between Groups Comparison
+        - name: within_stats
+          title: Within Groups Comparison
+        - name: correlation
+          title: Correlation Analysis
+        - name: histogram
+          title: Histogram Analysis
+        - name: scatterplot
+          title: Scatterplot Analysis
+        - name: bar_chart
+          title: Bar Chart Analysis
+      default: between_stats
+      description: Type of ggstatsplot analysis to perform
+    
+    - name: extract_components
+      title: Extract Components
+      type: List
+      options:
+        - name: all
+          title: All Components
+        - name: subtitle_data
+          title: Subtitle Data
+        - name: caption_data
+          title: Caption Data
+        - name: pairwise_data
+          title: Pairwise Comparisons
+        - name: descriptive_data
+          title: Descriptive Statistics
+      default: all
+      description: Which statistical components to extract
+    
+    - name: statistical_test
+      title: Statistical Test
+      type: List
+      options:
+        - name: parametric
+          title: Parametric
+        - name: nonparametric
+          title: Non-parametric
+        - name: robust
+          title: Robust
+        - name: bayes
+          title: Bayesian
+      default: parametric
+      description: Type of statistical test to use
+    
+    - name: effect_size_type
+      title: Effect Size Type
+      type: List
+      options:
+        - name: eta
+          title: Eta-squared
+        - name: omega
+          title: Omega-squared
+        - name: cohens_d
+          title: Cohen's d
+        - name: hedges_g
+          title: Hedges' g
+        - name: cramers_v
+          title: Cramer's V
+        - name: phi
+          title: Phi
+      default: eta
+      description: Type of effect size to calculate
+    
+    - name: pairwise_comparisons
+      title: Pairwise Comparisons
+      type: Bool
+      default: false
+      description: Perform pairwise comparisons for multiple groups
+    
+    - name: pairwise_correction
+      title: Pairwise Correction Method
+      type: List
+      options:
+        - name: holm
+          title: Holm
+        - name: bonferroni
+          title: Bonferroni
+        - name: fdr
+          title: FDR (BH)
+        - name: none
+          title: None
+      default: holm
+      description: Multiple comparison correction method
+    
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description: Confidence level for intervals
+    
+    - name: bf_prior
+      title: Bayes Factor Prior
+      type: Number
+      default: 0.707
+      min: 0.1
+      max: 2.0
+      description: Prior width for Bayesian analysis
+    
+    - name: centrality_plotting
+      title: Show Centrality
+      type: Bool
+      default: true
+      description: Display measures of central tendency
+    
+    - name: outlier_tagging
+      title: Tag Outliers
+      type: Bool
+      default: false
+      description: Identify and tag outliers
+    
+    - name: output_format
+      title: Output Format
+      type: List
+      options:
+        - name: table
+          title: HTML Table
+        - name: csv
+          title: CSV Export
+        - name: dataframe
+          title: R DataFrame
+        - name: json
+          title: JSON Export
+      default: table
+      description: Format for extracted data
+    
+    - name: include_plot_data
+      title: Include Plot Data
+      type: Bool
+      default: true
+      description: Include underlying plot data
+    
+    - name: include_model_data
+      title: Include Model Data
+      type: Bool
+      default: true
+      description: Include statistical model information
+    
+    - name: detailed_results
+      title: Detailed Results
+      type: Bool
+      default: true
+      description: Include detailed statistical output
+    
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+      description: Display result interpretation
