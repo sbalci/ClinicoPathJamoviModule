@@ -1,0 +1,27 @@
+---
+name: jvisr
+title: "Clinical Research Visualization with visR"
+jrs: '1.1'
+
+items:
+    - name: plot
+      title: "Clinical Visualization Plot"
+      type: Image
+      description: "Main clinical visualization plot using visR package"
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: summary
+      title: "Summary Statistics"
+      type: Html
+      description: "Summary statistics and data information"
+      visible: true
+
+    - name: interpretation
+      title: "Clinical Interpretation"
+      type: Html
+      description: "Clinical interpretation of the results"
+      visible: true
+
+...

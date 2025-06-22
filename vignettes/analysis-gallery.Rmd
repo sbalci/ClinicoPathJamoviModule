@@ -457,7 +457,7 @@ within_basic$plot
 
 ---
 
-## 9. Waffle Charts - `waffle()`
+## 9. Waffle Charts - `jwaffle()`
 
 ### Purpose
 Display proportional data using a grid of squares for intuitive visualization.
@@ -472,7 +472,7 @@ Display proportional data using a grid of squares for intuitive visualization.
 
 ```{r waffle-basic}
 # Waffle chart
-waffle_basic <- waffle(
+waffle_basic <- jwaffle(
   data = mtcars_clean,
   counts = "hp",
   groups = "cyl",

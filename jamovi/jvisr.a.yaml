@@ -1,0 +1,255 @@
+---
+name: jvisr
+title: "Clinical Research Visualization with visR"
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: "Fit-for-Purpose Clinical Visualizations"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Clinical and medical research focused visualizations using the visR package with sensible defaults based on graphical principles.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            library(visR)
+            # Kaplan-Meier estimation
+            survfit_object <- estimate_KM(data = data, strata = "treatment")
+            # Clinical visualization
+            visr(survfit_object)
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for clinical research visualization.
+
+    - name: analysis_type
+      title: "Analysis Type"
+      type: List
+      options:
+        - title: "Kaplan-Meier Survival"
+          name: kaplan_meier
+        - title: "Cumulative Incidence"
+          name: cuminc
+        - title: "Table One Summary"
+          name: tableone
+        - title: "Attrition Flowchart"
+          name: attrition
+        - title: "Risk Table"
+          name: risktable
+      default: kaplan_meier
+      description:
+        R: Type of clinical visualization to generate.
+        jamovi: Choose the type of clinical research visualization.
+
+    - name: time_var
+      title: "Time Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Time-to-event variable for survival analysis.
+        jamovi: Variable containing time to event or censoring.
+
+    - name: event_var
+      title: "Event Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+        R: Event indicator variable (1=event, 0=censored).
+        jamovi: Variable indicating whether event occurred.
+
+    - name: strata_var
+      title: "Stratification Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Variable for stratified analysis.
+        jamovi: Variable to stratify the analysis by (optional).
+
+    - name: cdisc_format
+      title: "Use CDISC Format"
+      type: Bool
+      default: false
+      description:
+        R: Whether to assume CDISC ADaM ADTTE data format.
+        jamovi: Enable if using CDISC standard variable names (AVAL, CNSR).
+
+    - name: aval_var
+      title: "AVAL Variable (CDISC)"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Analysis value for CDISC format (time variable).
+        jamovi: CDISC AVAL variable (analysis value for time-to-event).
+
+    - name: cnsr_var
+      title: "CNSR Variable (CDISC)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+        R: Censor variable for CDISC format (1=censored, 0=event).
+        jamovi: CDISC CNSR variable (censor indicator).
+
+    - name: fun_type
+      title: "Function Scale"
+      type: List
+      options:
+        - title: "Survival Probability"
+          name: "surv"
+        - title: "Event Probability"
+          name: "event"
+        - title: "Cumulative Hazard"
+          name: "cumhaz"
+        - title: "Log Cumulative Hazard"
+          name: "cloglog"
+        - title: "Survival Percentage"
+          name: "pct"
+        - title: "Log Survival"
+          name: "log"
+      default: "surv"
+      description:
+        R: Function scale for survival plots.
+        jamovi: Choose the scale for survival visualization.
+
+    - name: confidence_interval
+      title: "Show Confidence Intervals"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display confidence intervals.
+        jamovi: Add confidence intervals to survival curves.
+
+    - name: risk_table
+      title: "Show Risk Table"
+      type: Bool
+      default: true
+      description:
+        R: Whether to include risk table below plot.
+        jamovi: Add risk table showing numbers at risk over time.
+
+    - name: quantiles
+      title: "Show Quantiles"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display survival quantiles.
+        jamovi: Add median and quartile survival times to plot.
+
+    - name: p_value
+      title: "Show P-value"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display statistical p-value.
+        jamovi: Add p-value from log-rank test for group comparisons.
+
+    - name: legend_position
+      title: "Legend Position"
+      type: List
+      options:
+        - title: "Right"
+          name: "right"
+        - title: "Left"
+          name: "left"
+        - title: "Top"
+          name: "top"
+        - title: "Bottom"
+          name: "bottom"
+        - title: "None"
+          name: "none"
+      default: "right"
+      description:
+        R: Position of the legend in the plot.
+        jamovi: Choose where to place the legend.
+
+    - name: time_label
+      title: "Time Axis Label"
+      type: String
+      default: "Time"
+      description:
+        R: Label for the time axis.
+        jamovi: Enter custom label for time axis.
+
+    - name: time_units
+      title: "Time Units"
+      type: String
+      default: ""
+      description:
+        R: Units for time measurement.
+        jamovi: Specify time units (e.g., days, months, years).
+
+    - name: survival_label
+      title: "Survival Axis Label"
+      type: String
+      default: ""
+      description:
+        R: Label for the survival probability axis.
+        jamovi: Enter custom label for survival axis.
+
+    - name: title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Main title for the plot.
+        jamovi: Enter a title for your clinical visualization.
+
+    - name: theme_style
+      title: "Theme Style"
+      type: List
+      options:
+        - title: "visR Default"
+          name: "visr"
+        - title: "Classic"
+          name: "classic"
+        - title: "Minimal"
+          name: "minimal"
+        - title: "Clean"
+          name: "clean"
+      default: "visr"
+      description:
+        R: Visual theme for the plot.
+        jamovi: Choose the visual style theme.
+
+    - name: color_palette
+      title: "Color Palette"
+      type: List
+      options:
+        - title: "Default"
+          name: "default"
+        - title: "Set1"
+          name: "Set1"
+        - title: "Set2"
+          name: "Set2"
+        - title: "Dark2"
+          name: "Dark2"
+        - title: "Paired"
+          name: "Paired"
+      default: "default"
+      description:
+        R: Color palette for group stratification.
+        jamovi: Choose color scheme for different groups.
+
+    - name: show_summary
+      title: "Show Summary Table"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display summary statistics table.
+        jamovi: Include summary statistics in output.
+
+    - name: show_interpretation
+      title: "Show Clinical Interpretation"
+      type: Bool
+      default: true
+      description:
+        R: Whether to include clinical interpretation.
+        jamovi: Include clinical interpretation of results.

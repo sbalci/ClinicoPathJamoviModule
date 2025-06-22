@@ -1,0 +1,27 @@
+---
+name: jscattermore
+title: "High-Performance Scatter Plots"
+jrs: '1.1'
+
+items:
+    - name: plot
+      title: "High-Performance Scatter Plot"
+      type: Image
+      description: "Fast scatter plot using scattermore package"
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: summary
+      title: "Plot Summary & Statistics"
+      type: Html
+      description: "Summary statistics and performance information"
+      visible: true
+
+    - name: performance
+      title: "Performance Analysis"
+      type: Html
+      description: "Detailed performance metrics and comparisons"
+      visible: false
+
+...

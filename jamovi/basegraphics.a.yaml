@@ -1,0 +1,234 @@
+---
+name: basegraphics
+title: "Base Graphics Visualization"
+menuGroup: JJStatsPlot
+menuSubgroup: Base R Graphics
+menuSubtitle: "Fast & Customizable Base R Plots"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Base R graphics visualization module providing fast, blazing fast, and extremely customizable data visualization solutions using pure base R graphics.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            # Scatter plot
+            plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")
+            # Histogram
+            hist(data, main="Histogram", xlab="Values")
+            # Box plot
+            boxplot(data ~ group, main="Box Plot")
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for base graphics visualization.
+
+    - name: plot_type
+      title: "Plot Type"
+      type: List
+      options:
+        - title: "Scatter Plot"
+          name: scatter
+        - title: "Line Plot"
+          name: line
+        - title: "Histogram"
+          name: histogram
+        - title: "Box Plot"
+          name: boxplot
+        - title: "Bar Plot"
+          name: barplot
+        - title: "Density Plot"
+          name: density
+        - title: "Pairs Plot"
+          name: pairs
+        - title: "Matrix Plot"
+          name: matplot
+      default: scatter
+      description:
+        R: Type of base R plot to generate.
+        jamovi: Choose the type of base R graphics plot.
+
+    - name: x_var
+      title: "X Variable"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+        R: Variable for x-axis.
+        jamovi: Select variable for the x-axis.
+
+    - name: y_var
+      title: "Y Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Variable for y-axis (continuous plots).
+        jamovi: Select continuous variable for the y-axis.
+
+    - name: group_var
+      title: "Grouping Variable (Optional)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Optional grouping variable for stratified plots.
+        jamovi: Optional variable to group data by different colors/symbols.
+
+    - name: main_title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Main title for the plot.
+        jamovi: Enter a title for your plot.
+
+    - name: x_label
+      title: "X-axis Label"
+      type: String
+      default: ""
+      description:
+        R: Label for x-axis.
+        jamovi: Enter label for the x-axis.
+
+    - name: y_label
+      title: "Y-axis Label"
+      type: String
+      default: ""
+      description:
+        R: Label for y-axis.
+        jamovi: Enter label for the y-axis.
+
+    - name: point_type
+      title: "Point Type"
+      type: List
+      options:
+        - title: "Circle"
+          name: "1"
+        - title: "Triangle"
+          name: "2"
+        - title: "Plus"
+          name: "3"
+        - title: "Cross"
+          name: "4"
+        - title: "Diamond"
+          name: "5"
+        - title: "Square"
+          name: "15"
+        - title: "Filled Circle"
+          name: "16"
+        - title: "Filled Triangle"
+          name: "17"
+        - title: "Filled Square"
+          name: "18"
+        - title: "Filled Diamond"
+          name: "19"
+      default: "16"
+      description:
+        R: Point type for scatter plots (pch parameter).
+        jamovi: Choose point symbol type for scatter plots.
+
+    - name: point_size
+      title: "Point Size"
+      type: Number
+      min: 0.5
+      max: 3.0
+      default: 1.0
+      description:
+        R: Size of points in plots (cex parameter).
+        jamovi: Adjust size of points in the plot.
+
+    - name: color_scheme
+      title: "Color Scheme"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Rainbow"
+          name: rainbow
+        - title: "Heat Colors"
+          name: heat
+        - title: "Terrain Colors"
+          name: terrain
+        - title: "Topology Colors"
+          name: topo
+        - title: "CM Colors"
+          name: cm
+      default: default
+      description:
+        R: Color scheme for grouped plots.
+        jamovi: Choose color scheme for grouped data visualization.
+
+    - name: add_grid
+      title: "Add Grid Lines"
+      type: Bool
+      default: true
+      description:
+        R: Whether to add grid lines to the plot.
+        jamovi: Add grid lines to improve plot readability.
+
+    - name: add_legend
+      title: "Add Legend"
+      type: Bool
+      default: true
+      description:
+        R: Whether to add legend for grouped plots.
+        jamovi: Add legend when grouping variable is used.
+
+    - name: bins
+      title: "Number of Bins (Histogram)"
+      type: Number
+      min: 5
+      max: 50
+      default: 15
+      description:
+        R: Number of bins for histogram plots.
+        jamovi: Number of bins to use for histogram visualization.
+
+    - name: show_statistics
+      title: "Show Statistics"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display basic statistics on the plot.
+        jamovi: Display basic statistical information on the plot.
+
+    - name: custom_limits
+      title: "Use Custom Axis Limits"
+      type: Bool
+      default: false
+      description:
+        R: Whether to use custom axis limits.
+        jamovi: Enable custom axis limits for precise control.
+
+    - name: x_min
+      title: "X-axis Minimum"
+      type: Number
+      description:
+        R: Minimum value for x-axis (when custom limits enabled).
+        jamovi: Set minimum value for x-axis.
+
+    - name: x_max
+      title: "X-axis Maximum"
+      type: Number
+      description:
+        R: Maximum value for x-axis (when custom limits enabled).
+        jamovi: Set maximum value for x-axis.
+
+    - name: y_min
+      title: "Y-axis Minimum"
+      type: Number
+      description:
+        R: Minimum value for y-axis (when custom limits enabled).
+        jamovi: Set minimum value for y-axis.
+
+    - name: y_max
+      title: "Y-axis Maximum"
+      type: Number
+      description:
+        R: Maximum value for y-axis (when custom limits enabled).
+        jamovi: Set maximum value for y-axis.

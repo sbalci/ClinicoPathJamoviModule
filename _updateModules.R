@@ -9,8 +9,8 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.29"
-new_date <- "2024-06-21"
+new_version <- "0.0.3.30"
+new_date <- "2024-06-22"
 
 # Define WIP, check, extended status ----
 check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
@@ -37,11 +37,27 @@ ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathD
 
 
 if (WIP) {
+  # Create WIP directories if they do not exist
+  fs::dir_copy(path = jjstatsplot_dir,
+               new_path = file.path(paste0(jjstatsplot_dir, "-WIP")),
+               overwrite = TRUE)
+  fs::dir_copy(path = meddecide_dir,
+               new_path = file.path(paste0(meddecide_dir, "-WIP")),
+               overwrite = TRUE)
+  fs::dir_copy(path = jsurvival_dir,
+               new_path = file.path(paste0(jsurvival_dir, "-WIP")),
+               overwrite = TRUE)
+  fs::dir_copy(path = ClinicoPathDescriptives_dir,
+               new_path = file.path(paste0(ClinicoPathDescriptives_dir, "-WIP")),
+               overwrite = TRUE)
+
+  # Update the directories to WIP versions
   jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot-WIP"
   meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide-WIP"
   jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival-WIP"
   ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives-WIP"
-}
+
+  }
 
 
 # Function to update DESCRIPTION files with new version and date ----
@@ -98,8 +114,11 @@ commit_repo <- function(repo_dir, commit_message) {
   setwd(old_wd)
 }
 
+
+
 # Copy example files to each module directory ----
 
+if (!WIP) {
 ## jjstatsplot_example_files ----
 
 jjstatsplot_example_files <- c(
@@ -441,20 +460,14 @@ fs::file_copy(file.path(main_repo_dir, "vignettes", ClinicoPathDescriptives_vign
 
 
 
-## Function to replace ClinicoPath with given module name in R and Rmd files ----
-replace_clinicopath_with_module <- function(base_dir, module_name) {
-  if (!dir.exists(base_dir)) {
-    message("Directory does not exist: ", base_dir)
-    return()
-  }
-  # Get all R and Rmd files in the directory recursively
-  files <- list.files(path = base_dir, pattern = "\\.(R|Rmd|rmd)$", full.names = TRUE, recursive = TRUE)
-  # Perform replacements
-  xfun::gsub_files(files = files, pattern = "library\\(ClinicoPath\\)", replacement = paste0("library(", module_name, ")"))
-  xfun::gsub_files(files = files, pattern = "ClinicoPath::", replacement = paste0(module_name, "::"))
+
 }
 
-    # --- Module files ---
+
+
+
+
+#  Module files ----
 
     ## jjstatsplot module functions ----
     jjstatsplot_modules <- c(
@@ -617,7 +630,7 @@ replace_clinicopath_with_module <- function(base_dir, module_name) {
 
 
 
-  # --- Update DESCRIPTION files ---
+# Update DESCRIPTION files ----
   description_paths <- c(
     file.path(main_repo_dir, "DESCRIPTION"),             # Main repository
     file.path(jjstatsplot_dir, "DESCRIPTION"),            # jjstatsplot repository
@@ -630,7 +643,7 @@ replace_clinicopath_with_module <- function(base_dir, module_name) {
                            date = new_date)
 
 
-  # --- Update YAML files ---
+# Update YAML files ----
   yaml_0000_paths <- c(
     file.path(main_repo_dir, "jamovi", "0000.yaml"),
     file.path(jjstatsplot_dir, "jamovi", "0000.yaml"),
@@ -653,7 +666,7 @@ yaml_0000_paths <- yaml_0000_paths[file.exists(yaml_0000_paths)]
 yaml_a_paths <- yaml_a_paths[file.exists(yaml_a_paths)]
 
 
-  # Update YAML files with new version
+# Update YAML files with new version
 update_yaml_0000_files(paths = yaml_0000_paths,
                     version = new_version,
                     date = new_date)
@@ -661,7 +674,7 @@ update_yaml_0000_files(paths = yaml_0000_paths,
 update_yaml_a_files(paths = yaml_a_paths,
                     version = new_version)
 
-  # --- Copy module files ---
+# Copy module files ----
 
 
   # jjstatsplot_modules
@@ -727,20 +740,38 @@ update_yaml_a_files(paths = yaml_a_paths,
                     dest_dir = file.path(ClinicoPathDescriptives_dir, "jamovi"),
                     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"))
 
-  # --- Replace ClinicoPath references in module code ---
+
+
+
+## Function to replace ClinicoPath with given module name in R and Rmd files ----
+  replace_clinicopath_with_module <- function(base_dir, module_name) {
+    if (!dir.exists(base_dir)) {
+      message("Directory does not exist: ", base_dir)
+      return()
+    }
+    # Get all R and Rmd files in the directory recursively
+    files <- list.files(path = base_dir, pattern = "\\.(R|Rmd|rmd)$", full.names = TRUE, recursive = TRUE)
+    # Perform replacements
+    xfun::gsub_files(files = files, pattern = "library\\(ClinicoPath\\)", replacement = paste0("library(", module_name, ")"))
+    xfun::gsub_files(files = files, pattern = "ClinicoPath::", replacement = paste0(module_name, "::"))
+  }
+
+  if (!WIP) {
+  ## --- Replace ClinicoPath references in module code ----
   replace_clinicopath_with_module(jjstatsplot_dir, "jjstatsplot")
   replace_clinicopath_with_module(meddecide_dir, "meddecide")
   replace_clinicopath_with_module(jsurvival_dir, "jsurvival")
   replace_clinicopath_with_module(ClinicoPathDescriptives_dir, "ClinicoPathDescriptives")
+  }
 
-  # --- Prepare, document, and install modules ---
+  # --- Prepare, document, and install modules ----
   jmvtools::prepare(main_repo_dir)
   devtools::document(main_repo_dir)
   jmvtools::prepare(main_repo_dir)
   devtools::document(main_repo_dir)
   jmvtools::install(main_repo_dir)
 
-  # --- Commit changes in each repository ---
+  # --- Commit changes in each repository ----
   commit_message <- sprintf("WIP, update modules to version %s and date %s", new_version, new_date)
   commit_repo(main_repo_dir, commit_message)
   commit_repo(jjstatsplot_dir, commit_message)
@@ -750,6 +781,8 @@ update_yaml_a_files(paths = yaml_a_paths,
 
   message("Modules updated to version ", new_version, " and date ", new_date)
 # }
+
+
 
 
 # Run the update process ----

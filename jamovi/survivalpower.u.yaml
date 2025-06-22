@@ -1,0 +1,113 @@
+title: Survival Analysis Power & Sample Size
+name: survivalpower
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: calculation_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: hazard_control
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: hazard_treatment
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: hazard_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: study_duration
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: accrual_duration
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: dropout_rate
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: allocation_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: beta
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: power
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sided
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: entry_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: gamma
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: sample_size_input
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: events_input
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_summary
+      - type: CheckBox
+        name: show_formulas
+      - type: CheckBox
+        name: show_interpretation

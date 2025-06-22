@@ -1,4 +1,4 @@
-title: coxdiagnostics
+title: Cox Proportional Hazards Model Diagnostics
 name: coxdiagnostics
 jus: '3.0'
 stage: 0
@@ -9,26 +9,83 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Time Variable
         children:
           - type: VariablesListBox
-            name: dep
+            name: time
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable
+        label: Event Variable
         children:
           - type: VariablesListBox
-            name: group
+            name: event
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: alt
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: strata_var
+            maxItemCount: 1
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: varEq
+        name: show_martingale
+      - type: CheckBox
+        name: show_deviance
+      - type: CheckBox
+        name: show_score
+      - type: CheckBox
+        name: show_schoenfeld
+      - type: CheckBox
+        name: show_dfbeta
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ox_scale
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: add_smooth
+      - type: CheckBox
+        name: add_reference
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: point_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_ph_test
+      - type: CheckBox
+        name: show_model_summary
+      - type: CheckBox
+        name: show_interpretation
+      - type: CheckBox
+        name: exclude_missing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
