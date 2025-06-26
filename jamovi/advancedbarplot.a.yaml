@@ -1,0 +1,422 @@
+---
+name: advancedbarplot
+title: "Advanced Bar Charts - 5 Ways"
+menuGroup: JJStatsPlotD
+menuSubgroup: ClinicoPath Advanced Plots
+menuSubtitle: "Professional Bar Charts with Multiple Approaches"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced bar chart visualization module implementing 5 different approaches 
+        for creating professional bar charts. Choose from ggplot2 basics, polished 
+        presentations, statistical annotations, interactive plots, and publication-ready 
+        designs. Each approach optimized for different use cases in clinical research.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage - 5 different bar chart approaches:
+            # 1. Basic ggplot2 approach
+            # 2. Polished presentation style
+            # 3. Statistical annotation style
+            # 4. Interactive plotly style  
+            # 5. Publication-ready style
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for advanced bar chart visualization.
+
+    - name: x_var
+      title: "X Variable (Categories)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Categorical variable for x-axis categories.
+        jamovi: Select categorical variable for the x-axis.
+
+    - name: y_var
+      title: "Y Variable (Values)"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Numeric variable for bar heights.
+        jamovi: Select numeric variable for bar heights.
+
+    - name: fill_var
+      title: "Fill Variable (Optional)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Optional variable for bar fill colors (grouped/stacked bars).
+        jamovi: Optional variable to color bars by groups.
+
+    - name: facet_var
+      title: "Facet Variable (Optional)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Optional variable for creating multiple panels.
+        jamovi: Optional variable to create separate panels.
+
+    - name: chart_approach
+      title: "Bar Chart Approach"
+      type: List
+      options:
+        - title: "1. Basic ggplot2"
+          name: basic
+        - title: "2. Polished Presentation"
+          name: polished
+        - title: "3. Statistical Annotations"
+          name: statistical
+        - title: "4. Interactive Plotly"
+          name: interactive
+        - title: "5. Publication Ready"
+          name: publication
+        - title: "6. BBC News Style"
+          name: bbc_style
+        - title: "7. GraphPad Prism Style"
+          name: prism_style
+      default: polished
+      description:
+        R: Choose the bar chart approach and styling.
+        jamovi: Select one of 7 professional bar chart approaches including BBC News and GraphPad Prism styles.
+
+    - name: bar_position
+      title: "Bar Position"
+      type: List
+      options:
+        - title: "Grouped (Dodge)"
+          name: dodge
+        - title: "Stacked"
+          name: stack
+        - title: "Filled (100%)"
+          name: fill
+        - title: "Identity"
+          name: identity
+      default: dodge
+      description:
+        R: Position adjustment for grouped bars.
+        jamovi: How to position bars when using fill variable.
+
+    - name: stat_type
+      title: "Statistical Summary"
+      type: List
+      options:
+        - title: "Mean"
+          name: mean
+        - title: "Median"
+          name: median
+        - title: "Sum"
+          name: sum
+        - title: "Count"
+          name: count
+        - title: "Proportion"
+          name: prop
+      default: mean
+      description:
+        R: Type of statistical summary for y-axis values.
+        jamovi: Statistical function to apply to y-variable.
+
+    - name: error_bars
+      title: "Error Bars"
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Standard Error"
+          name: se
+        - title: "Standard Deviation"
+          name: sd
+        - title: "95% Confidence Interval"
+          name: ci95
+        - title: "Custom Interval"
+          name: custom
+      default: se
+      description:
+        R: Type of error bars to display.
+        jamovi: Add error bars to show data variability.
+
+    - name: color_palette
+      title: "Color Palette"
+      type: List
+      options:
+        - title: "Default ggplot2"
+          name: default
+        - title: "BBC Blue (#1380A1)"
+          name: bbc_blue
+        - title: "BBC Orange (#FAAB18)"
+          name: bbc_orange
+        - title: "BBC Multi-color"
+          name: bbc_multi
+        - title: "Viridis"
+          name: viridis
+        - title: "RColorBrewer Set1"
+          name: set1
+        - title: "RColorBrewer Dark2"
+          name: dark2
+        - title: "Clinical Research"
+          name: clinical
+        - title: "Nature Journal"
+          name: nature
+        - title: "Science Journal"
+          name: science
+        - title: "Colorblind Friendly"
+          name: colorblind
+        - title: "--- GraphPad Prism Palettes ---"
+          name: separator1
+        - title: "Prism Floral (12 colors)"
+          name: prism_floral
+        - title: "Prism Candy Bright (9 colors)"
+          name: prism_candy_bright
+        - title: "Prism Office (9 colors)"
+          name: prism_office
+        - title: "Prism Pastels (9 colors)"
+          name: prism_pastels
+        - title: "Prism Colorblind Safe (6 colors)"
+          name: prism_colorblind_safe
+        - title: "Prism Blueprint (9 colors)"
+          name: prism_blueprint
+        - title: "Prism Neon (9 colors)"
+          name: prism_neon
+        - title: "Prism Ocean (9 colors)"
+          name: prism_ocean
+        - title: "Prism Spring (9 colors)"
+          name: prism_spring
+        - title: "Prism Dark (10 colors)"
+          name: prism_dark
+        - title: "Prism Light (10 colors)"
+          name: prism_light
+      default: clinical
+      description:
+        R: Color palette for bar fills including GraphPad Prism palettes.
+        jamovi: Choose color scheme optimized for different purposes including Prism styling.
+
+    - name: show_values
+      title: "Show Data Values"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display values on top of bars.
+        jamovi: Show numeric values on top of each bar.
+
+    - name: value_format
+      title: "Value Format"
+      type: List
+      options:
+        - title: "Auto"
+          name: auto
+        - title: "Integer"
+          name: integer
+        - title: "1 Decimal"
+          name: decimal1
+        - title: "2 Decimals"
+          name: decimal2
+        - title: "Percentage"
+          name: percentage
+        - title: "Scientific"
+          name: scientific
+      default: auto
+      description:
+        R: Format for displayed values.
+        jamovi: How to format the numbers displayed on bars.
+
+    - name: add_statistics
+      title: "Add Statistical Tests"
+      type: Bool
+      default: false
+      description:
+        R: Whether to perform and display statistical tests.
+        jamovi: Add statistical comparisons between groups.
+
+    - name: stat_method
+      title: "Statistical Test"
+      type: List
+      options:
+        - title: "ANOVA"
+          name: anova
+        - title: "t-test"
+          name: ttest
+        - title: "Wilcoxon"
+          name: wilcox
+        - title: "Chi-square"
+          name: chisq
+        - title: "Kruskal-Wallis"
+          name: kruskal
+      default: anova
+      description:
+        R: Type of statistical test to perform.
+        jamovi: Statistical test for group comparisons.
+
+    - name: orientation
+      title: "Bar Orientation"
+      type: List
+      options:
+        - title: "Vertical"
+          name: vertical
+        - title: "Horizontal"
+          name: horizontal
+      default: vertical
+      description:
+        R: Orientation of the bars.
+        jamovi: Whether bars should be vertical or horizontal.
+
+    - name: plot_title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Main title for the plot.
+        jamovi: Enter a title for your bar chart.
+
+    - name: x_title
+      title: "X-axis Title"
+      type: String
+      default: ""
+      description:
+        R: Title for x-axis.
+        jamovi: Enter title for the x-axis.
+
+    - name: y_title
+      title: "Y-axis Title"
+      type: String
+      default: ""
+      description:
+        R: Title for y-axis.
+        jamovi: Enter title for the y-axis.
+
+    - name: legend_position
+      title: "Legend Position"
+      type: List
+      options:
+        - title: "Right"
+          name: right
+        - title: "Left"
+          name: left
+        - title: "Top"
+          name: top
+        - title: "Bottom"
+          name: bottom
+        - title: "None"
+          name: none
+      default: right
+      description:
+        R: Position of the legend.
+        jamovi: Where to place the legend.
+
+    - name: theme_style
+      title: "Theme Style"
+      type: List
+      options:
+        - title: "Clean & Modern"
+          name: clean
+        - title: "Classic"
+          name: classic
+        - title: "Minimal"
+          name: minimal
+        - title: "Publication"
+          name: publication
+        - title: "Presentation"
+          name: presentation
+        - title: "--- GraphPad Prism Themes ---"
+          name: separator2
+        - title: "Prism Default"
+          name: prism_default
+        - title: "Prism White"
+          name: prism_white
+        - title: "Prism Minimal"
+          name: prism_minimal
+        - title: "Prism Publication"
+          name: prism_publication
+      default: clean
+      description:
+        R: Overall theme style for the plot including GraphPad Prism themes.
+        jamovi: Choose the overall visual style including authentic Prism styling.
+
+    - name: bar_width
+      title: "Bar Width"
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.8
+      description:
+        R: Width of the bars (0.1 to 1.0).
+        jamovi: Adjust the width of bars.
+
+    - name: plot_width
+      title: "Plot Width"
+      type: Number
+      min: 4
+      max: 16
+      default: 10
+      description:
+        R: Width of the plot in inches.
+        jamovi: Set plot width for optimal display.
+
+    - name: plot_height
+      title: "Plot Height"
+      type: Number
+      min: 3
+      max: 12
+      default: 6
+      description:
+        R: Height of the plot in inches.
+        jamovi: Set plot height for optimal display.
+
+    - name: sort_bars
+      title: "Sort Bars"
+      type: List
+      options:
+        - title: "No Sorting"
+          name: none
+        - title: "Ascending"
+          name: asc
+        - title: "Descending"
+          name: desc
+        - title: "Alphabetical"
+          name: alpha
+      default: none
+      description:
+        R: How to sort the bars.
+        jamovi: Sort bars by value or alphabetically.
+
+    - name: add_trend_line
+      title: "Add Trend Line"
+      type: Bool
+      default: false
+      description:
+        R: Whether to add a trend line for numeric x-axis.
+        jamovi: Add trend line to show patterns.
+
+    - name: highlight_bars
+      title: "Highlight Specific Bars"
+      type: String
+      default: ""
+      description:
+        R: Comma-separated list of categories to highlight.
+        jamovi: Enter category names to highlight (comma-separated).
+
+    - name: transparency
+      title: "Bar Transparency"
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.9
+      description:
+        R: Transparency level for bars (alpha value).
+        jamovi: Adjust transparency of bars.
+
+    - name: export_options
+      title: "Export Ready"
+      type: Bool
+      default: true
+      description:
+        R: Whether to optimize plot for high-quality export.
+        jamovi: Optimize plot for publication/presentation export.

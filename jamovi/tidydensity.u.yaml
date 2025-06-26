@@ -183,3 +183,7 @@ children:
         name: show_parameter_info
       - type: CheckBox
         name: show_interpretation
+      - type: CheckBox
+        name: economist_theme
+      - type: CheckBox
+        name: economist_colors

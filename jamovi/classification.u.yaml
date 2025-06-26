@@ -155,6 +155,25 @@ children:
           - type: CheckBox
             name: predictedFreq
             enable: (classifier_singleDecisionTree)
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: classifier_knn
+        type: RadioButton
+        optionName: classifier
+        optionPart: knn
+      - name: classifier_naiveBayes
+        type: RadioButton
+        optionName: classifier
+        optionPart: naiveBayes
+      - name: classifier_logisticRegression
+        type: RadioButton
+        optionName: classifier
+        optionPart: logisticRegression
+      - name: classifier_svm
+        type: RadioButton
+        optionName: classifier
+        optionPart: svm
   - type: CollapseBox
     label: Random forest
     stretchFactor: 1
@@ -214,3 +233,31 @@ children:
             name: reportClinicalMetrics
           - type: CheckBox
             name: reportConfidenceIntervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: knnNeighbors
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: knnDistance
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: svmKernel
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: svmCost
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: svmGamma
+        format: number

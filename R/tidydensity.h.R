@@ -38,7 +38,9 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             show_statistics = TRUE,
             show_summary_table = TRUE,
             show_parameter_info = TRUE,
-            show_interpretation = TRUE, ...) {
+            show_interpretation = TRUE,
+            economist_theme = TRUE,
+            economist_colors = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -199,7 +201,8 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "density",
                     "quantile",
                     "probability",
-                    "qq"),
+                    "qq",
+                    "economist"),
                 default="density")
             private$..plot_enhancements <- jmvcore::OptionBool$new(
                 "plot_enhancements",
@@ -220,6 +223,14 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
+                default=TRUE)
+            private$..economist_theme <- jmvcore::OptionBool$new(
+                "economist_theme",
+                economist_theme,
+                default=TRUE)
+            private$..economist_colors <- jmvcore::OptionBool$new(
+                "economist_colors",
+                economist_colors,
                 default=TRUE)
 
             self$.addOption(private$..distribution_type)
@@ -255,6 +266,8 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..show_summary_table)
             self$.addOption(private$..show_parameter_info)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..economist_theme)
+            self$.addOption(private$..economist_colors)
         }),
     active = list(
         distribution_type = function() private$..distribution_type$value,
@@ -289,7 +302,9 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         show_statistics = function() private$..show_statistics$value,
         show_summary_table = function() private$..show_summary_table$value,
         show_parameter_info = function() private$..show_parameter_info$value,
-        show_interpretation = function() private$..show_interpretation$value),
+        show_interpretation = function() private$..show_interpretation$value,
+        economist_theme = function() private$..economist_theme$value,
+        economist_colors = function() private$..economist_colors$value),
     private = list(
         ..distribution_type = NA,
         ..n_observations = NA,
@@ -323,7 +338,9 @@ tidydensityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..show_statistics = NA,
         ..show_summary_table = NA,
         ..show_parameter_info = NA,
-        ..show_interpretation = NA)
+        ..show_interpretation = NA,
+        ..economist_theme = NA,
+        ..economist_colors = NA)
 )
 
 tidydensityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -551,6 +568,10 @@ tidydensityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   parameters and their effects.
 #' @param show_interpretation Display guidance on statistical distributions
 #'   and their applications in clinical research.
+#' @param economist_theme Apply The Economist's visual theme when using
+#'   Economist-style plots.
+#' @param economist_colors Apply The Economist's signature color scheme for
+#'   distribution elements.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -596,7 +617,9 @@ tidydensity <- function(
     show_statistics = TRUE,
     show_summary_table = TRUE,
     show_parameter_info = TRUE,
-    show_interpretation = TRUE) {
+    show_interpretation = TRUE,
+    economist_theme = TRUE,
+    economist_colors = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tidydensity requires jmvcore to be installed (restart may be required)")
@@ -639,7 +662,9 @@ tidydensity <- function(
         show_statistics = show_statistics,
         show_summary_table = show_summary_table,
         show_parameter_info = show_parameter_info,
-        show_interpretation = show_interpretation)
+        show_interpretation = show_interpretation,
+        economist_theme = economist_theme,
+        economist_colors = economist_colors)
 
     analysis <- tidydensityClass$new(
         options = options,

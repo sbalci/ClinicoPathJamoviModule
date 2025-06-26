@@ -1,0 +1,81 @@
+---
+name: coefplot
+title: Coefficient Plots
+jrs: '1.1'
+
+items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      clearWith:
+          - dep
+          - covs
+          - model_type
+
+    - name: coefficient_plot
+      title: Coefficient Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot
+      visible: (show_coefficient_plot)
+      clearWith:
+          - dep
+          - covs
+          - model_type
+          - time_var
+          - include_intercept
+          - coef_selection
+          - specific_coefs
+          - ci_level
+          - inner_ci_level
+          - sort_coefs
+          - decreasing_sort
+          - horizontal_plot
+          - point_size
+          - line_thickness
+          - standardize
+          - robust_se
+          - exp_transform
+          - compare_models
+          - model2_covs
+          - model3_covs
+          - model_names
+          - custom_title
+          - custom_x_label
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+      clearWith:
+          - dep
+          - covs
+          - model_type
+          - time_var
+          - standardize
+          - robust_se
+
+    - name: coefficient_table
+      title: Coefficient Table
+      type: Html
+      visible: (show_coefficient_table)
+      clearWith:
+          - dep
+          - covs
+          - model_type
+          - time_var
+          - include_intercept
+          - ci_level
+          - standardize
+          - robust_se
+          - exp_transform
+
+refs:
+    - coefplot
+    - jtools
+    - ggplot2
+    - ClinicoPathJamoviModule
+
+...

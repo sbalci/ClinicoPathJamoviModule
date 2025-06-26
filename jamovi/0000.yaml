@@ -39,6 +39,21 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
+  - title: Coefficient Plots
+    name: coefplot
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Coefficient Plots
+    menuSubtitle: Regression Coefficient Visualization
+    description: >-
+      Creates professional coefficient plots (forest plots) for regression
+      models. Visualizes coefficients and confidence intervals from linear,
+      logistic, and  Cox regression models. Supports multiple models comparison,
+      custom coefficient selection, standardized coefficients, and various
+      styling options. Essential  for presenting regression results in clinical
+      research and epidemiological studies.
+    ribbon: analyses
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
@@ -91,6 +106,34 @@ analyses:
 
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
+    ribbon: analyses
+  - title: Clinical Hemodynamic Monitoring
+    name: clinmon
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Clinical Hemodynamic Monitoring
+    menuSubtitle: Hemodynamic Indices from Continuous Monitoring
+    description: >-
+      Calculates hemodynamic indices from continuous clinical monitoring data.
+      Uses the clintools package to compute COest, CPPopt, CVRi, Dx, Mx, PI,
+      PRx, PWA, RI, and Sx from continuous recordings of arterial blood
+      pressure, intracranial pressure,  middle cerebral artery blood velocity,
+      and heart rate.
+    ribbon: analyses
+  - title: Advanced Statistical Tests
+    name: desctools
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Advanced Statistical Tests
+    menuSubtitle: Statistical Tests from DescTools Package
+    description: >-
+      Advanced statistical tests using functions from the DescTools package.
+      Includes effect size calculations (Cohen's D), goodness-of-fit tests 
+      (Hosmer-Lemeshow, Anderson-Darling), agreement tests (Barnard,
+      Breslow-Day), and trend tests (Cochran-Armitage). Essential for clinical
+      research, epidemiological studies, and advanced statistical analysis.
     ribbon: analyses
   - title: Automated Exploratory Data Analysis
     name: autoeda
@@ -193,6 +236,21 @@ analyses:
       This function generates a "Table One", a descriptive summary table
       frequently used in  clinicopathological research manuscripts. It supports
       multiple output styles for flexible formatting.
+    ribbon: analyses
+  - title: Enhanced Tables with gt
+    name: enhancedtables
+    ns: ClinicoPath
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Tables with gt
+    menuSubtitle: Professional Table Formatting
+    description: |
+      Creates professional, publication-ready tables using the gt package.
+      This module provides comprehensive table formatting with advanced styling,
+      grouping, summary statistics, and clinical research optimizations. 
+      Designed for high-quality table presentation in medical publications,
+      reports, and presentations. Features include conditional formatting,
+      custom themes, statistical summaries, and multi-level grouping.
     ribbon: analyses
   - title: Modern Table Formatting
     name: tinytable
@@ -586,13 +644,20 @@ analyses:
     menuTitle: Tables via gtsummary
     menuSubtitle: Comparisons
     ribbon: analyses
-  - title: ICC coefficients
+  - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecideD
-    menuSubgroup: Drafts
-    menuTitle: ICC coefficients
-    description: Function for Interclass Correlation Coefficient Calculation.
+    menuGroup: meddecide
+    menuSubgroup: Agreement
+    menuTitle: Intraclass Correlation Coefficient
+    description: >
+      Calculate Intraclass Correlation Coefficient (ICC) for inter-rater
+      reliability 
+
+      and agreement studies. Provides multiple ICC types with confidence
+      intervals 
+
+      and APA-style formatting for clinical research applications.
     menuSubtitle: Agreement
     ribbon: analyses
   - title: Graphs and Plots
@@ -1222,7 +1287,7 @@ analyses:
   - title: Advanced Decision Tree Analysis
     name: advancedtree
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Advanced Decision Tree Analysis
     menuSubtitle: Modern Tree Algorithms for Clinical Research
@@ -1244,7 +1309,7 @@ analyses:
   - title: Scientific Visualization with Grafify
     name: grafify
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: ClinicoPath Scientific Plots
     menuTitle: Scientific Visualization with Grafify
     menuSubtitle: Easy Graphs & Color-Blind Friendly Palettes
@@ -1266,7 +1331,7 @@ analyses:
   - title: Enhanced Cross Tables with danchaltiel/crosstable
     name: enhancedcrosstable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Enhanced Cross Tables with danchaltiel/crosstable
     menuSubgroup: ClinicoPath Comparisons
     menuSubtitle: Advanced Tidyselect & Automated Reporting
@@ -1276,7 +1341,7 @@ analyses:
   - title: Cox Proportional Hazards Model Diagnostics
     name: coxdiagnostics
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuTitle: Cox Proportional Hazards Model Diagnostics
     menuSubgroup: ClinicoPath Survival
     menuSubtitle: Model Validation & Residual Analysis
@@ -1286,7 +1351,7 @@ analyses:
   - title: Base Graphics Visualization
     name: basegraphics
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuTitle: Base Graphics Visualization
     menuSubgroup: Base R Graphics
     menuSubtitle: Fast & Customizable Base R Plots
@@ -1294,6 +1359,59 @@ analyses:
       Base R graphics visualization module providing fast, blazing fast, and
       extremely customizable data visualization solutions using pure base R
       graphics.
+  - title: Advanced Bar Charts - 5 Ways
+    name: advancedbarplot
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuTitle: Advanced Bar Charts - 5 Ways
+    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubtitle: Professional Bar Charts with Multiple Approaches
+    description: >
+      Advanced bar chart visualization module implementing 5 different
+      approaches 
+
+      for creating professional bar charts. Choose from ggplot2 basics,
+      polished 
+
+      presentations, statistical annotations, interactive plots, and
+      publication-ready 
+
+      designs. Each approach optimized for different use cases in clinical
+      research.
+    ribbon: analyses
+  - title: Economist-Style Distribution Plots
+    name: economistplots
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuTitle: Economist-Style Distribution Plots
+    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubtitle: Publication-Quality Distribution Visualization
+    description: >
+      Creates elegant Economist-style distribution plots using ggeconodist
+      package
+
+      for professional publication-quality visualizations. Provides diminutive 
+
+      distribution charts that effectively communicate statistical distribution 
+
+      characteristics with The Economist's distinctive visual style. Perfect
+      for 
+
+      comparing distributions across categories, showing price variations, or 
+
+      visualizing any statistical distribution data in clinical research.
+    ribbon: analyses
+  - title: BBC-Style Data Visualization
+    name: bbcplots
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuTitle: BBC-Style Data Visualization
+    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubtitle: Professional News Graphics with BBC Design
+    description: >-
+      Creates professional BBC News-style data visualizations using the bbplot
+      package design principles.
+    ribbon: analyses
   - title: Survival Analysis Power & Sample Size
     name: survivalpower
     ns: ClinicoPath
@@ -1479,8 +1597,16 @@ analyses:
   - title: Summary Statistics with summarytools
     name: jsummarytools
     ns: ClinicoPath
-    menuGroup: ClinicoPathJamoviModule
+    menuGroup: Exploration
     menuTitle: Summary Statistics with summarytools
+    menuSubgroup: ClinicoPath Descriptives
+    description: >
+      Comprehensive descriptive statistics using the summarytools package.
+
+      Provides professional data frame summaries, frequency tables, and
+
+      descriptive statistics with publication-ready output for clinical
+      research.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

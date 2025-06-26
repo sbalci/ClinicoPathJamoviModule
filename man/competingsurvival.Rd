@@ -39,8 +39,18 @@ competingsurvival(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$cuminc} \tab \tab \tab \tab \tab a table \cr
+\code{results$comprisksPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$survivalTable$asDF}
+
+\code{as.data.frame(results$survivalTable)}
 }
 \description{
 Overall, Cause Specific, and Competing Survival.

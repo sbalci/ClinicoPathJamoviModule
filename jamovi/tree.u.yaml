@@ -128,6 +128,90 @@ children:
             suffix: '% expected prevalence'
             enable: (prevalenceAdjustment)
   - type: CollapseBox
+    label: Model Validation (Issue
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Cross-Validation
+            children:
+              - type: CheckBox
+                name: crossValidation
+              - type: TextBox
+                name: cvFolds
+                format: number
+                suffix: folds
+                enable: (crossValidation)
+          - type: Label
+            label: Bootstrap Validation
+            children:
+              - type: CheckBox
+                name: bootstrapValidation
+              - type: TextBox
+                name: bootstrapSamples
+                format: number
+                suffix: samples
+                enable: (bootstrapValidation)
+          - type: Label
+            label: Model Comparison
+            children:
+              - type: CheckBox
+                name: compareModels
+              - type: ComboBox
+                name: modelComparisonMetric
+                enable: (compareModels)
+  - type: CollapseBox
+    label: Performance Thresholds (Issue
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: customThresholds
+          - type: TextBox
+            name: sensitivityThreshold
+            format: number
+            suffix: minimum sensitivity
+            enable: (customThresholds)
+          - type: TextBox
+            name: specificityThreshold
+            format: number
+            suffix: minimum specificity
+            enable: (customThresholds)
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Spatial Coordinates (X, Y)
+        children:
+          - type: VariablesListBox
+            name: spatialCoords
+            isTarget: true
+  - type: CollapseBox
+    label: Variable Importance (Issue
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: featureImportance
+          - type: ComboBox
+            name: variableImportanceMethod
+            enable: (featureImportance)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: useAutocart
+  - type: CollapseBox
     label: Visualization & Output
     collapsed: true
     stretchFactor: 1
@@ -136,12 +220,44 @@ children:
         margin: large
         children:
           - type: Label
-            label: Plots
+            label: Decision Tree Plots
             children:
               - type: CheckBox
                 name: showPlot
+              - type: ComboBox
+                name: treeVisualization
+                enable: (showPlot)
+              - type: CheckBox
+                name: showNodeStatistics
+                enable: (showPlot)
+          - type: Label
+            label: Performance Plots (Issue
+            children:
+              - type: CheckBox
+                name: showROCCurve
+              - type: CheckBox
+                name: showCalibrationPlot
+              - type: CheckBox
+                name: showClinicalUtility
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showPartitionPlot
           - type: Label
             label: Export Results
             children:
               - type: CheckBox
                 name: exportPredictions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: spatialAlpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: spatialBeta
+        format: number

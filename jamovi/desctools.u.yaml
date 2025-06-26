@@ -1,0 +1,142 @@
+title: Advanced Statistical Tests
+name: desctools
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: effect_size_analysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Continuous Variable
+        children:
+          - type: VariablesListBox
+            name: continuous_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: pooled_sd
+      - type: CheckBox
+        name: hedges_correction
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: effect_ci_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: goodness_of_fit
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Fitted Probabilities
+        children:
+          - type: VariablesListBox
+            name: fitted_probs
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Observed Outcomes
+        children:
+          - type: VariablesListBox
+            name: observed_outcomes
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: hl_groups
+        format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variable for Normality Testing
+        children:
+          - type: VariablesListBox
+            name: normality_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: categorical_tests
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: First Categorical Variable
+        children:
+          - type: VariablesListBox
+            name: cat_var1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Second Categorical Variable
+        children:
+          - type: VariablesListBox
+            name: cat_var2
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: stratum_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Ordered Exposure Variable
+        children:
+          - type: VariablesListBox
+            name: ordered_exposure
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Binary Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: binary_outcome
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multiple_testing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_effect_sizes
+      - type: CheckBox
+        name: show_goodness_tests
+      - type: CheckBox
+        name: show_categorical_tests
+      - type: CheckBox
+        name: show_interpretations

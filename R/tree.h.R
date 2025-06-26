@@ -19,6 +19,7 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             featureImportance = FALSE,
             showInterpretation = FALSE,
             showPlot = FALSE,
+            showPartitionPlot = FALSE,
             minCases = 10,
             maxDepth = 4,
             confidenceInterval = FALSE,
@@ -27,7 +28,26 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             clinicalContext = "diagnosis",
             costRatio = 1,
             prevalenceAdjustment = FALSE,
-            expectedPrevalence = 10, ...) {
+            expectedPrevalence = 10,
+            crossValidation = FALSE,
+            cvFolds = 5,
+            bootstrapValidation = FALSE,
+            bootstrapSamples = 1000,
+            showROCCurve = FALSE,
+            showCalibrationPlot = FALSE,
+            showClinicalUtility = FALSE,
+            variableImportanceMethod = "frequency",
+            customThresholds = FALSE,
+            sensitivityThreshold = 0.8,
+            specificityThreshold = 0.8,
+            treeVisualization = "standard",
+            showNodeStatistics = FALSE,
+            compareModels = FALSE,
+            spatialCoords = NULL,
+            useAutocart = FALSE,
+            spatialAlpha = 0.5,
+            spatialBeta = 0.5,
+            modelComparisonMetric = "bacc", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -102,6 +122,10 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showPlot",
                 showPlot,
                 default=FALSE)
+            private$..showPartitionPlot <- jmvcore::OptionBool$new(
+                "showPartitionPlot",
+                showPartitionPlot,
+                default=FALSE)
             private$..minCases <- jmvcore::OptionInteger$new(
                 "minCases",
                 minCases,
@@ -153,6 +177,111 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=10,
                 min=0.1,
                 max=50)
+            private$..crossValidation <- jmvcore::OptionBool$new(
+                "crossValidation",
+                crossValidation,
+                default=FALSE)
+            private$..cvFolds <- jmvcore::OptionInteger$new(
+                "cvFolds",
+                cvFolds,
+                default=5,
+                min=3,
+                max=10)
+            private$..bootstrapValidation <- jmvcore::OptionBool$new(
+                "bootstrapValidation",
+                bootstrapValidation,
+                default=FALSE)
+            private$..bootstrapSamples <- jmvcore::OptionInteger$new(
+                "bootstrapSamples",
+                bootstrapSamples,
+                default=1000,
+                min=100,
+                max=5000)
+            private$..showROCCurve <- jmvcore::OptionBool$new(
+                "showROCCurve",
+                showROCCurve,
+                default=FALSE)
+            private$..showCalibrationPlot <- jmvcore::OptionBool$new(
+                "showCalibrationPlot",
+                showCalibrationPlot,
+                default=FALSE)
+            private$..showClinicalUtility <- jmvcore::OptionBool$new(
+                "showClinicalUtility",
+                showClinicalUtility,
+                default=FALSE)
+            private$..variableImportanceMethod <- jmvcore::OptionList$new(
+                "variableImportanceMethod",
+                variableImportanceMethod,
+                options=list(
+                    "frequency",
+                    "permutation",
+                    "gini"),
+                default="frequency")
+            private$..customThresholds <- jmvcore::OptionBool$new(
+                "customThresholds",
+                customThresholds,
+                default=FALSE)
+            private$..sensitivityThreshold <- jmvcore::OptionNumber$new(
+                "sensitivityThreshold",
+                sensitivityThreshold,
+                default=0.8,
+                min=0.5,
+                max=1)
+            private$..specificityThreshold <- jmvcore::OptionNumber$new(
+                "specificityThreshold",
+                specificityThreshold,
+                default=0.8,
+                min=0.5,
+                max=1)
+            private$..treeVisualization <- jmvcore::OptionList$new(
+                "treeVisualization",
+                treeVisualization,
+                options=list(
+                    "standard",
+                    "detailed",
+                    "compact"),
+                default="standard")
+            private$..showNodeStatistics <- jmvcore::OptionBool$new(
+                "showNodeStatistics",
+                showNodeStatistics,
+                default=FALSE)
+            private$..compareModels <- jmvcore::OptionBool$new(
+                "compareModels",
+                compareModels,
+                default=FALSE)
+            private$..spatialCoords <- jmvcore::OptionVariables$new(
+                "spatialCoords",
+                spatialCoords,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..useAutocart <- jmvcore::OptionBool$new(
+                "useAutocart",
+                useAutocart,
+                default=FALSE)
+            private$..spatialAlpha <- jmvcore::OptionNumber$new(
+                "spatialAlpha",
+                spatialAlpha,
+                default=0.5,
+                min=0,
+                max=1)
+            private$..spatialBeta <- jmvcore::OptionNumber$new(
+                "spatialBeta",
+                spatialBeta,
+                default=0.5,
+                min=0,
+                max=1)
+            private$..modelComparisonMetric <- jmvcore::OptionList$new(
+                "modelComparisonMetric",
+                modelComparisonMetric,
+                options=list(
+                    "bacc",
+                    "auc",
+                    "sens",
+                    "spec",
+                    "f1"),
+                default="bacc")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
@@ -167,6 +296,7 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..featureImportance)
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..showPlot)
+            self$.addOption(private$..showPartitionPlot)
             self$.addOption(private$..minCases)
             self$.addOption(private$..maxDepth)
             self$.addOption(private$..confidenceInterval)
@@ -176,6 +306,25 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..costRatio)
             self$.addOption(private$..prevalenceAdjustment)
             self$.addOption(private$..expectedPrevalence)
+            self$.addOption(private$..crossValidation)
+            self$.addOption(private$..cvFolds)
+            self$.addOption(private$..bootstrapValidation)
+            self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..showROCCurve)
+            self$.addOption(private$..showCalibrationPlot)
+            self$.addOption(private$..showClinicalUtility)
+            self$.addOption(private$..variableImportanceMethod)
+            self$.addOption(private$..customThresholds)
+            self$.addOption(private$..sensitivityThreshold)
+            self$.addOption(private$..specificityThreshold)
+            self$.addOption(private$..treeVisualization)
+            self$.addOption(private$..showNodeStatistics)
+            self$.addOption(private$..compareModels)
+            self$.addOption(private$..spatialCoords)
+            self$.addOption(private$..useAutocart)
+            self$.addOption(private$..spatialAlpha)
+            self$.addOption(private$..spatialBeta)
+            self$.addOption(private$..modelComparisonMetric)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -191,6 +340,7 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         featureImportance = function() private$..featureImportance$value,
         showInterpretation = function() private$..showInterpretation$value,
         showPlot = function() private$..showPlot$value,
+        showPartitionPlot = function() private$..showPartitionPlot$value,
         minCases = function() private$..minCases$value,
         maxDepth = function() private$..maxDepth$value,
         confidenceInterval = function() private$..confidenceInterval$value,
@@ -199,7 +349,26 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         clinicalContext = function() private$..clinicalContext$value,
         costRatio = function() private$..costRatio$value,
         prevalenceAdjustment = function() private$..prevalenceAdjustment$value,
-        expectedPrevalence = function() private$..expectedPrevalence$value),
+        expectedPrevalence = function() private$..expectedPrevalence$value,
+        crossValidation = function() private$..crossValidation$value,
+        cvFolds = function() private$..cvFolds$value,
+        bootstrapValidation = function() private$..bootstrapValidation$value,
+        bootstrapSamples = function() private$..bootstrapSamples$value,
+        showROCCurve = function() private$..showROCCurve$value,
+        showCalibrationPlot = function() private$..showCalibrationPlot$value,
+        showClinicalUtility = function() private$..showClinicalUtility$value,
+        variableImportanceMethod = function() private$..variableImportanceMethod$value,
+        customThresholds = function() private$..customThresholds$value,
+        sensitivityThreshold = function() private$..sensitivityThreshold$value,
+        specificityThreshold = function() private$..specificityThreshold$value,
+        treeVisualization = function() private$..treeVisualization$value,
+        showNodeStatistics = function() private$..showNodeStatistics$value,
+        compareModels = function() private$..compareModels$value,
+        spatialCoords = function() private$..spatialCoords$value,
+        useAutocart = function() private$..useAutocart$value,
+        spatialAlpha = function() private$..spatialAlpha$value,
+        spatialBeta = function() private$..spatialBeta$value,
+        modelComparisonMetric = function() private$..modelComparisonMetric$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
@@ -214,6 +383,7 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..featureImportance = NA,
         ..showInterpretation = NA,
         ..showPlot = NA,
+        ..showPartitionPlot = NA,
         ..minCases = NA,
         ..maxDepth = NA,
         ..confidenceInterval = NA,
@@ -222,7 +392,26 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..clinicalContext = NA,
         ..costRatio = NA,
         ..prevalenceAdjustment = NA,
-        ..expectedPrevalence = NA)
+        ..expectedPrevalence = NA,
+        ..crossValidation = NA,
+        ..cvFolds = NA,
+        ..bootstrapValidation = NA,
+        ..bootstrapSamples = NA,
+        ..showROCCurve = NA,
+        ..showCalibrationPlot = NA,
+        ..showClinicalUtility = NA,
+        ..variableImportanceMethod = NA,
+        ..customThresholds = NA,
+        ..sensitivityThreshold = NA,
+        ..specificityThreshold = NA,
+        ..treeVisualization = NA,
+        ..showNodeStatistics = NA,
+        ..compareModels = NA,
+        ..spatialCoords = NA,
+        ..useAutocart = NA,
+        ..spatialAlpha = NA,
+        ..spatialBeta = NA,
+        ..modelComparisonMetric = NA)
 )
 
 treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -245,7 +434,16 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         riskStratification = function() private$.items[["riskStratification"]],
         confusionMatrix = function() private$.items[["confusionMatrix"]],
         adjustedMetrics = function() private$.items[["adjustedMetrics"]],
+        crossValidationResults = function() private$.items[["crossValidationResults"]],
+        bootstrapResults = function() private$.items[["bootstrapResults"]],
+        modelComparison = function() private$.items[["modelComparison"]],
+        spatialAnalysis = function() private$.items[["spatialAnalysis"]],
+        spatialInterpretation = function() private$.items[["spatialInterpretation"]],
         plot = function() private$.items[["plot"]],
+        partitionPlot = function() private$.items[["partitionPlot"]],
+        rocPlot = function() private$.items[["rocPlot"]],
+        calibrationPlot = function() private$.items[["calibrationPlot"]],
+        clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]],
         deploymentGuidelines = function() private$.items[["deploymentGuidelines"]],
         predictions = function() private$.items[["predictions"]],
         probabilities = function() private$.items[["probabilities"]]),
@@ -262,6 +460,8 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "caret",
                     "rpart",
                     "rpart.plot",
+                    "parttree",
+                    "autocart",
                     "ClinicoPathJamoviModule",
                     "whoisinthisstudy",
                     "recist",
@@ -523,6 +723,132 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Difference", 
                         `type`="number", 
                         `format`="dp:3"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="crossValidationResults",
+                title="Cross-Validation Performance",
+                visible="(crossValidation)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="fold", 
+                        `title`="CV Fold", 
+                        `type`="integer"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="dp:3"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bootstrapResults",
+                title="Bootstrap Validation Summary",
+                visible="(bootstrapValidation)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Performance Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="bias", 
+                        `title`="Bias", 
+                        `type`="number", 
+                        `format`="dp:3"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparison",
+                title="Model Performance Comparison",
+                visible="(compareModels)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model Type", 
+                        `type`="text"),
+                    list(
+                        `name`="primary_metric", 
+                        `title`="Primary Metric", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="spatial_metric", 
+                        `title`="Spatial Fit", 
+                        `type`="text"),
+                    list(
+                        `name`="best_model", 
+                        `title`="Best Model", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="spatialAnalysis",
+                title="Spatial Autocart Analysis",
+                visible="(useAutocart)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Spatial Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="spatialInterpretation",
+                title="Spatial Analysis Interpretation",
+                visible="(useAutocart)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -539,7 +865,72 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "train",
                     "trainLevel",
                     "minCases",
-                    "maxDepth")))
+                    "maxDepth",
+                    "treeVisualization",
+                    "showNodeStatistics")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="partitionPlot",
+                title="Decision Partition Visualization",
+                width=800,
+                height=600,
+                renderFun=".plotPartition",
+                visible="(showPartitionPlot)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="rocPlot",
+                title="ROC Curve Analysis",
+                width=600,
+                height=600,
+                renderFun=".plotROC",
+                visible="(showROCCurve)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="calibrationPlot",
+                title="Probability Calibration",
+                width=600,
+                height=600,
+                renderFun=".plotCalibration",
+                visible="(showCalibrationPlot)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "train",
+                    "trainLevel")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="clinicalUtilityPlot",
+                title="Clinical Utility Analysis",
+                width=600,
+                height=600,
+                renderFun=".plotClinicalUtility",
+                visible="(showClinicalUtility)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "costRatio")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="deploymentGuidelines",
@@ -635,6 +1026,9 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showInterpretation Provide clinical interpretation of results
 #'   including  diagnostic utility and clinical recommendations.
 #' @param showPlot Display visual representation of the decision tree.
+#' @param showPartitionPlot Display 2D decision boundary visualization using
+#'   parttree.  Requires exactly 2 continuous variables for optimal
+#'   visualization.
 #' @param minCases Minimum number of cases required in each terminal node
 #'   (higher values prevent overfitting).
 #' @param maxDepth Maximum depth of decision tree (deeper trees may overfit).
@@ -652,6 +1046,45 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   prevalence  in target population (different from study sample).
 #' @param expectedPrevalence Expected disease prevalence in target population
 #'   for  adjusted predictive value calculations.
+#' @param crossValidation Perform k-fold cross-validation for robust
+#'   performance estimation.
+#' @param cvFolds Number of folds for cross-validation (typically 5 or 10).
+#' @param bootstrapValidation Perform bootstrap validation for confidence
+#'   intervals on performance metrics.
+#' @param bootstrapSamples Number of bootstrap samples for confidence interval
+#'   calculation.
+#' @param showROCCurve Display ROC curve with AUC for model discrimination
+#'   assessment.
+#' @param showCalibrationPlot Display probability calibration plot to assess
+#'   prediction reliability.
+#' @param showClinicalUtility Display clinical utility curve for threshold
+#'   optimization.
+#' @param variableImportanceMethod Method for calculating variable importance
+#'   in decision trees.
+#' @param customThresholds Set custom thresholds for clinical performance
+#'   interpretation.
+#' @param sensitivityThreshold Minimum sensitivity threshold for clinical
+#'   acceptability.
+#' @param specificityThreshold Minimum specificity threshold for clinical
+#'   acceptability.
+#' @param treeVisualization Style of decision tree visualization display.
+#' @param showNodeStatistics Display detailed statistics at each decision tree
+#'   node.
+#' @param compareModels Compare FFTrees performance with logistic regression,
+#'   CART, and autocart (if spatial coordinates provided).
+#' @param spatialCoords X and Y coordinates for spatial analysis. Required for
+#'   autocart spatial regression trees. Typically longitude/latitude or tissue
+#'   microarray coordinates.
+#' @param useAutocart Enable spatial-aware regression trees using autocart
+#'   methodology. Requires spatial coordinates (X, Y variables).
+#' @param spatialAlpha Weight for spatial autocorrelation in autocart
+#'   splitting (0.0-1.0). Higher values emphasize spatial clustering in decision
+#'   tree splits.
+#' @param spatialBeta Weight for spatial compactness in autocart splitting
+#'   (0.0-1.0). Higher values favor spatially compact regions in tree
+#'   partitions.
+#' @param modelComparisonMetric Primary metric for comparing model
+#'   performance.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -670,7 +1103,16 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$partitionPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinicalUtilityPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$predictions} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$probabilities} \tab \tab \tab \tab \tab an output \cr
@@ -698,6 +1140,7 @@ tree <- function(
     featureImportance = FALSE,
     showInterpretation = FALSE,
     showPlot = FALSE,
+    showPartitionPlot = FALSE,
     minCases = 10,
     maxDepth = 4,
     confidenceInterval = FALSE,
@@ -706,7 +1149,26 @@ tree <- function(
     clinicalContext = "diagnosis",
     costRatio = 1,
     prevalenceAdjustment = FALSE,
-    expectedPrevalence = 10) {
+    expectedPrevalence = 10,
+    crossValidation = FALSE,
+    cvFolds = 5,
+    bootstrapValidation = FALSE,
+    bootstrapSamples = 1000,
+    showROCCurve = FALSE,
+    showCalibrationPlot = FALSE,
+    showClinicalUtility = FALSE,
+    variableImportanceMethod = "frequency",
+    customThresholds = FALSE,
+    sensitivityThreshold = 0.8,
+    specificityThreshold = 0.8,
+    treeVisualization = "standard",
+    showNodeStatistics = FALSE,
+    compareModels = FALSE,
+    spatialCoords,
+    useAutocart = FALSE,
+    spatialAlpha = 0.5,
+    spatialBeta = 0.5,
+    modelComparisonMetric = "bacc") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tree requires jmvcore to be installed (restart may be required)")
@@ -715,13 +1177,15 @@ tree <- function(
     if ( ! missing(facs)) facs <- jmvcore::resolveQuo(jmvcore::enquo(facs))
     if ( ! missing(target)) target <- jmvcore::resolveQuo(jmvcore::enquo(target))
     if ( ! missing(train)) train <- jmvcore::resolveQuo(jmvcore::enquo(train))
+    if ( ! missing(spatialCoords)) spatialCoords <- jmvcore::resolveQuo(jmvcore::enquo(spatialCoords))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(facs), facs, NULL),
             `if`( ! missing(target), target, NULL),
-            `if`( ! missing(train), train, NULL))
+            `if`( ! missing(train), train, NULL),
+            `if`( ! missing(spatialCoords), spatialCoords, NULL))
 
     for (v in facs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in target) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -741,6 +1205,7 @@ tree <- function(
         featureImportance = featureImportance,
         showInterpretation = showInterpretation,
         showPlot = showPlot,
+        showPartitionPlot = showPartitionPlot,
         minCases = minCases,
         maxDepth = maxDepth,
         confidenceInterval = confidenceInterval,
@@ -749,7 +1214,26 @@ tree <- function(
         clinicalContext = clinicalContext,
         costRatio = costRatio,
         prevalenceAdjustment = prevalenceAdjustment,
-        expectedPrevalence = expectedPrevalence)
+        expectedPrevalence = expectedPrevalence,
+        crossValidation = crossValidation,
+        cvFolds = cvFolds,
+        bootstrapValidation = bootstrapValidation,
+        bootstrapSamples = bootstrapSamples,
+        showROCCurve = showROCCurve,
+        showCalibrationPlot = showCalibrationPlot,
+        showClinicalUtility = showClinicalUtility,
+        variableImportanceMethod = variableImportanceMethod,
+        customThresholds = customThresholds,
+        sensitivityThreshold = sensitivityThreshold,
+        specificityThreshold = specificityThreshold,
+        treeVisualization = treeVisualization,
+        showNodeStatistics = showNodeStatistics,
+        compareModels = compareModels,
+        spatialCoords = spatialCoords,
+        useAutocart = useAutocart,
+        spatialAlpha = spatialAlpha,
+        spatialBeta = spatialBeta,
+        modelComparisonMetric = modelComparisonMetric)
 
     analysis <- treeClass$new(
         options = options,

@@ -25,7 +25,16 @@ ggprism(
   legend_position = "right",
   base_size = 12,
   show_summary = TRUE,
-  error_bars = "se"
+  error_bars = "se",
+  prism_guides = "standard",
+  annotation_ticks = FALSE,
+  preview_mode = FALSE,
+  prism_shape_palette = "default",
+  jitter_width = 0.2,
+  violin_width = 1,
+  publication_ready = FALSE,
+  export_dpi = 300,
+  custom_comparisons = ""
 )
 }
 \arguments{
@@ -45,7 +54,8 @@ layout.}
 
 \item{prism_theme}{GraphPad Prism theme variant to apply.}
 
-\item{prism_palette}{Prism-style color palette for different groups.}
+\item{prism_palette}{Prism-style color palette for different groups. Choose
+from 20+ authentic GraphPad Prism palettes.}
 
 \item{show_points}{If TRUE, overlays individual data points on the plot.}
 
@@ -76,15 +86,43 @@ annotations.}
 
 \item{error_bars}{Type of error bars to display (for applicable plot
 types).}
+
+\item{prism_guides}{Axis guide style following GraphPad Prism conventions.}
+
+\item{annotation_ticks}{Add tick marks as annotations in Prism style.}
+
+\item{preview_mode}{Enable palette preview mode to see all colors in the
+selected palette.}
+
+\item{prism_shape_palette}{Shape palette for point plots following Prism
+conventions.}
+
+\item{jitter_width}{Width of horizontal jittering for overlaid points.}
+
+\item{violin_width}{Scale factor for violin plot widths.}
+
+\item{publication_ready}{Optimize plot for publication with enhanced
+styling and formatting.}
+
+\item{export_dpi}{DPI for high-resolution export (publication standard:
+300).}
+
+\item{custom_comparisons}{Custom pairwise comparisons (e.g.,
+"Group1-Group2,Group1-Group3").}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$statistics} \tab \tab \tab \tab \tab a html \cr
-\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$main_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$palette_preview} \tab \tab \tab \tab \tab an image \cr
+\code{results$publication_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary_statistics} \tab \tab \tab \tab \tab a html \cr
+\code{results$statistical_tests} \tab \tab \tab \tab \tab a html \cr
+\code{results$prism_guide} \tab \tab \tab \tab \tab a html \cr
+\code{results$palette_information} \tab \tab \tab \tab \tab a html \cr
+\code{results$export_code} \tab \tab \tab \tab \tab a html \cr
+\code{results$accessibility_notes} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

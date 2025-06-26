@@ -2,26 +2,74 @@
 % Please edit documentation in R/icccoeff.h.R
 \name{icccoeff}
 \alias{icccoeff}
-\title{ICC coefficients}
+\title{Intraclass Correlation Coefficient}
 \usage{
-icccoeff(data, vars)
+icccoeff(
+  data,
+  vars,
+  icc_type = "icc2_1",
+  agreement_type = "consistency",
+  confidence_level = "0.95",
+  missing_values = "complete",
+  show_apa_format = TRUE,
+  show_interpretation = TRUE,
+  show_confidence_intervals = TRUE,
+  show_f_test = TRUE,
+  show_descriptive_stats = TRUE,
+  decimal_places = 3,
+  alpha_level = 0.05
+)
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{Dataset containing ratings from multiple raters}
 
-\item{vars}{.}
+\item{vars}{Variables representing ratings from different raters (subjects
+as rows, raters as columns)}
+
+\item{icc_type}{Type of ICC calculation based on study design}
+
+\item{agreement_type}{Whether to assess consistency or absolute agreement}
+
+\item{confidence_level}{Confidence level for ICC confidence intervals}
+
+\item{missing_values}{How to handle missing data}
+
+\item{show_apa_format}{Display results in APA style format}
+
+\item{show_interpretation}{Include interpretation guide for ICC values}
+
+\item{show_confidence_intervals}{Display confidence intervals for ICC
+estimates}
+
+\item{show_f_test}{Include F-test for significance of ICC}
+
+\item{show_descriptive_stats}{Display descriptive statistics for each rater}
+
+\item{decimal_places}{Number of decimal places in output}
+
+\item{alpha_level}{Alpha level for statistical tests}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$icc_results} \tab \tab \tab \tab \tab a table \cr
+\code{results$apa_format} \tab \tab \tab \tab \tab a html \cr
+\code{results$descriptive_stats} \tab \tab \tab \tab \tab a table \cr
+\code{results$reliability_assessment} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$icc_results$asDF}
+
+\code{as.data.frame(results$icc_results)}
 }
 \description{
-Function for Interclass Correlation Coefficient Calculation.
-}
-\examples{
-\donttest{
-# example will be added
-}
+Calculate Intraclass Correlation Coefficient (ICC) for inter-rater
+reliability
+and agreement studies. Provides multiple ICC types with confidence
+intervals
+and APA-style formatting for clinical research applications.
 }

@@ -31,6 +31,17 @@ items:
       - strata_var
       - confidence_level
 
+  - name: vif_results
+    title: "Multicollinearity Analysis (VIF)"
+    type: Html
+    visible: (time && event && covariates && show_vif)
+    clearWith:
+      - time
+      - event
+      - covariates
+      - strata_var
+      - vif_threshold
+
   - name: martingale_plot
     title: "Martingale Residuals"
     type: Image
@@ -131,4 +142,5 @@ items:
 refs:
   - survival
   - survminer
+  - car
 ...

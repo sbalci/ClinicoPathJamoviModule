@@ -47,8 +47,6 @@ children:
           - type: Output
             name: calculatedcutoff
             enable: (findcut)
-
-
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -121,7 +119,7 @@ children:
                     format: number
                     enable: (uselandmark)
       - type: Label
-        label: Calculated Time to Data 
+        label: Calculated Time to Data
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -130,6 +128,16 @@ children:
               - type: Output
                 name: calculatedtime
                 enable: (tint)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: calculatedmulticut
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: multiple_cutoffs
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -163,7 +171,7 @@ children:
             name: analysistype
             enable: (outcome && multievent)
       - type: Label
-        label: Calculated Outcome to Data 
+        label: Calculated Outcome to Data
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -172,9 +180,11 @@ children:
               - type: Output
                 name: outcomeredefined
                 enable: (outcome && multievent)
-
-
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: num_cutoffs
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -198,7 +208,6 @@ children:
               - type: CheckBox
                 name: ch
                 enable: (findcut)
-
       - type: Label
         label: Plot Arguments
         children:
@@ -233,10 +242,11 @@ children:
               - type: ComboBox
                 name: medianline
                 enable: (findcut)
-
-
-
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cutoff_method
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -249,8 +259,12 @@ children:
             enable: (findcut)
             format: string
             width: large
-
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_group_size
+        format: number
   - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true

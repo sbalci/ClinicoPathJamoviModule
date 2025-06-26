@@ -1,0 +1,65 @@
+---
+name: clinmon
+title: Clinical Hemodynamic Monitoring
+jrs: '1.1'
+
+items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      clearWith:
+          - time_var
+          - abp
+          - mcav
+          - icp
+          - cpp
+          - hr
+
+    - name: summary_stats
+      title: Summary Statistics
+      type: Html
+      visible: (show_summary)
+      clearWith:
+          - time_var
+          - abp
+          - mcav
+          - icp
+          - cpp
+          - hr
+          - freq
+          - blocksize
+          - epochsize
+          - output_level
+          - overlapping
+          - blockmin
+          - epochmin
+          - fast_processing
+          - show_summary
+
+    - name: detailed_results
+      title: Detailed Results
+      type: Html
+      visible: (show_detailed)
+      clearWith:
+          - time_var
+          - abp
+          - mcav
+          - icp
+          - cpp
+          - hr
+          - freq
+          - blocksize
+          - epochsize
+          - output_level
+          - overlapping
+          - blockmin
+          - epochmin
+          - fast_processing
+          - show_detailed
+
+refs:
+    - clintools
+    - ClinicoPathJamoviModule
+
+...

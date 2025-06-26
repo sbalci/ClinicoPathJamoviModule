@@ -67,15 +67,15 @@ items:
           title: Frequency
           type: integer
         - name: pct_valid
-          title: % Valid
+          title: '% Valid'
           type: number
           format: zto,dp:2
         - name: pct_total
-          title: % Total
+          title: '% Total'
           type: number
           format: zto,dp:2
         - name: pct_cum
-          title: % Cumulative
+          title: '% Cumulative'
           type: number
           format: zto,dp:2
       clearWith:

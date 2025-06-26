@@ -1,20 +1,46 @@
 #' @title GraphPad Prism Style Plots
-#' @return Publication-ready plots with Prism styling using ggprism package
-#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot geom_point geom_col geom_line
 #' @importFrom ggplot2 labs theme facet_wrap coord_flip position_dodge position_jitter
 #' @importFrom ggplot2 stat_summary geom_errorbar scale_x_discrete scale_y_continuous
-#' @importFrom ggprism theme_prism scale_color_prism scale_fill_prism add_pvalue
+#' @importFrom ggplot2 guides guide_legend ggsave element_text element_blank margin
 #' @importFrom dplyr group_by summarise mutate n
 #' @importFrom stats t.test wilcox.test aov kruskal.test shapiro.test
-#' @importFrom htmltools HTML
+#' @importFrom stringr str_to_title str_replace_all
+#' @export
 
 ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
     inherit = ggprismBase,
     private = list(
+        
+        # Internal data storage
+        .analysis_data = NULL,
+        
+        .init = function() {
+            # Dynamic plot sizing based on plot type and options
+            plot_width <- 800
+            plot_height <- 600
+            
+            # Adjust for publication mode
+            if (self$options$publication_ready) {
+                plot_width <- 1200
+                plot_height <- 900
+                self$results$publication_plot$setVisible(TRUE)
+            } else {
+                self$results$publication_plot$setVisible(FALSE)
+            }
+            
+            # Set main plot size
+            self$results$main_plot$setSize(plot_width, plot_height)
+            
+            # Control palette preview visibility
+            if (self$options$preview_mode) {
+                self$results$palette_preview$setVisible(TRUE)
+            } else {
+                self$results$palette_preview$setVisible(FALSE)
+            }
+        },
 
         .run = function() {
 
@@ -54,10 +80,10 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 </p>
                 </div>"
                 
-                self$results$todo$setContent(intro_msg)
+                self$results$instructions$setContent(intro_msg)
                 return()
             } else {
-                self$results$todo$setContent("")
+                self$results$instructions$setContent("")
             }
 
             # Validate dataset
@@ -73,7 +99,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 <p>The ggprism package is required for GraphPad Prism style plots.</p>
                 <p>Please install it using: <code>install.packages('ggprism')</code></p>
                 </div>"
-                self$results$interpretation$setContent(error_msg)
+                self$results$prism_guide$setContent(error_msg)
                 return()
             }
 
@@ -120,25 +146,51 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             # Generate summary statistics if requested
             if (self$options$show_summary) {
                 summary_html <- private$.generate_summary_statistics(analysis_data, x_var, y_var, group_var)
-                self$results$summary$setContent(summary_html)
+                self$results$summary_statistics$setContent(summary_html)
             }
             
             # Generate statistical tests if requested
             if (self$options$show_statistics) {
                 stats_html <- private$.generate_statistical_tests(analysis_data, x_var, y_var, group_var)
-                self$results$statistics$setContent(stats_html)
+                self$results$statistical_tests$setContent(stats_html)
             }
             
-            # Generate interpretation guide
-            interpretation_html <- private$.generate_interpretation_guide(analysis_data, x_var, y_var, group_var)
-            self$results$interpretation$setContent(interpretation_html)
+            # Generate Prism style guide
+            guide_html <- private$.generate_prism_guide(analysis_data, x_var, y_var, group_var)
+            self$results$prism_guide$setContent(guide_html)
+            
+            # Generate palette information
+            palette_html <- private$.generate_palette_information()
+            self$results$palette_information$setContent(palette_html)
+            
+            # Generate export code if publication mode
+            if (self$options$publication_ready) {
+                code_html <- private$.generate_export_code()
+                self$results$export_code$setContent(code_html)
+            }
+            
+            # Generate accessibility notes
+            accessibility_html <- private$.generate_accessibility_notes()
+            self$results$accessibility_notes$setContent(accessibility_html)
 
             # Store data for plotting
             private$.analysis_data <- analysis_data
 
         },
 
-        .plot = function(image, ggtheme, theme, ...) {
+        .plot_main = function(image, ggtheme, theme, ...) {
+            return(private$.create_main_plot(image, ggtheme, theme, ...))
+        },
+        
+        .plot_palette_preview = function(image, ggtheme, theme, ...) {
+            return(private$.create_palette_preview(image, ggtheme, theme, ...))
+        },
+        
+        .plot_publication = function(image, ggtheme, theme, ...) {
+            return(private$.create_publication_plot(image, ggtheme, theme, ...))
+        },
+        
+        .create_main_plot = function(image, ggtheme, theme, ...) {
             
             # Check if analysis was performed
             if (is.null(private$.analysis_data)) {
@@ -228,11 +280,23 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             # Apply Prism theme
             p <- p + private$.get_prism_theme()
             
-            # Apply Prism color palette
+            # Apply comprehensive Prism styling
+            palette_name <- self$options$prism_palette
+            
+            # Apply color and fill scales
             if (!is.null(group_mapping)) {
-                palette_name <- self$options$prism_palette
-                p <- p + ggprism::scale_fill_prism(palette = palette_name)
-                p <- p + ggprism::scale_color_prism(palette = palette_name)
+                color_scales <- private$.get_prism_color_scales(palette_name)
+                p <- p + color_scales[[1]] + color_scales[[2]]
+            }
+            
+            # Apply Prism guides if advanced options enabled
+            if (self$options$prism_guides != "standard") {
+                p <- p + private$.get_prism_guides()
+            }
+            
+            # Apply shape palette if relevant for scatter plots
+            if (plot_type == "scatter" && !is.null(group_mapping)) {
+                p <- p + private$.get_prism_shape_scale()
             }
             
             # Add faceting if specified
@@ -267,20 +331,79 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             theme_name <- self$options$prism_theme
             base_size <- self$options$base_size
             
-            base_theme <- switch(theme_name,
-                "default" = ggprism::theme_prism(base_size = base_size),
-                "white" = ggprism::theme_prism(base_size = base_size, axis_text_angle = 0),
-                "minimal" = ggprism::theme_prism(base_size = base_size) + 
-                    ggplot2::theme(panel.grid.major = ggplot2::element_blank()),
-                "publication" = ggprism::theme_prism(base_size = base_size) +
+            # Create base Prism theme with error handling
+            if (requireNamespace("ggprism", quietly = TRUE)) {
+                base_theme <- switch(theme_name,
+                    "default" = ggprism::theme_prism(base_size = base_size),
+                    "white" = ggprism::theme_prism(base_size = base_size, axis_text_angle = 0),
+                    "minimal" = ggprism::theme_prism(base_size = base_size) + 
+                        ggplot2::theme(panel.grid.major = ggplot2::element_blank()),
+                    "publication" = ggprism::theme_prism(base_size = base_size) +
+                        ggplot2::theme(
+                            plot.title = ggplot2::element_text(size = base_size + 2, face = "bold", hjust = 0.5),
+                            axis.title = ggplot2::element_text(size = base_size + 1, face = "bold"),
+                            legend.background = ggplot2::element_rect(fill = "white", colour = "black"),
+                            panel.border = ggplot2::element_rect(colour = "black", fill = NA)
+                        ),
+                    ggprism::theme_prism(base_size = base_size)  # fallback
+                )
+            } else {
+                # Fallback theme if ggprism not available
+                base_theme <- ggplot2::theme_minimal(base_size = base_size) +
                     ggplot2::theme(
-                        plot.title = ggplot2::element_text(size = base_size + 2, face = "bold", hjust = 0.5),
-                        axis.title = ggplot2::element_text(size = base_size + 1, face = "bold")
-                    ),
-                ggprism::theme_prism(base_size = base_size)  # fallback
-            )
+                        panel.border = ggplot2::element_rect(colour = "black", fill = NA),
+                        axis.line = ggplot2::element_line(colour = "black")
+                    )
+            }
             
             return(base_theme)
+        },
+        
+        .get_prism_color_scales = function(palette_name) {
+            if (!requireNamespace("ggprism", quietly = TRUE)) {
+                # Fallback to viridis if ggprism not available
+                return(list(
+                    ggplot2::scale_fill_viridis_d(),
+                    ggplot2::scale_color_viridis_d()
+                ))
+            }
+            
+            # Apply ggprism color scales
+            list(
+                ggprism::scale_fill_prism(palette = palette_name),
+                ggprism::scale_color_prism(palette = palette_name)
+            )
+        },
+        
+        .get_prism_guides = function() {
+            guide_type <- self$options$prism_guides
+            
+            if (!requireNamespace("ggprism", quietly = TRUE)) {
+                return(ggplot2::guides())
+            }
+            
+            switch(guide_type,
+                "minor" = ggprism::guide_prism_minor(),
+                "offset" = ggprism::guide_prism_offset(),
+                "offset_minor" = ggprism::guide_prism_offset_minor(),
+                "bracket" = ggprism::guide_prism_bracket(),
+                ggplot2::guides()  # standard fallback
+            )
+        },
+        
+        .get_prism_shape_scale = function() {
+            shape_palette <- self$options$prism_shape_palette
+            
+            if (!requireNamespace("ggprism", quietly = TRUE)) {
+                return(ggplot2::scale_shape_discrete())
+            }
+            
+            switch(shape_palette,
+                "prism" = ggprism::scale_shape_prism(),
+                "filled" = ggprism::scale_shape_prism(palette = "filled"),
+                "open" = ggprism::scale_shape_prism(palette = "open"),
+                ggplot2::scale_shape_discrete()  # default fallback
+            )
         },
 
         .get_error_function = function() {
@@ -543,19 +666,97 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             }
         },
 
-        .generate_interpretation_guide = function(data, x_var, y_var, group_var) {
-            # Generate interpretation guide
+        .create_palette_preview = function(image, ggtheme, theme, ...) {
+            if (!self$options$preview_mode) {
+                return()
+            }
+            
+            palette_name <- self$options$prism_palette
+            
+            # Create color preview plot
+            if (requireNamespace("ggprism", quietly = TRUE)) {
+                # Get palette colors
+                palette_colors <- try({
+                    ggprism::prism_colour_pal(palette = palette_name)(10)
+                }, silent = TRUE)
+                
+                if (inherits(palette_colors, "try-error")) {
+                    palette_colors <- viridis::viridis(10)
+                }
+            } else {
+                palette_colors <- viridis::viridis(10)
+            }
+            
+            # Create data frame for color swatches
+            color_data <- data.frame(
+                x = rep(1:5, 2),
+                y = rep(c(1, 2), each = 5),
+                color = palette_colors[1:10],
+                label = paste("Color", 1:10)
+            )
+            
+            # Create palette preview plot
+            p <- ggplot2::ggplot(color_data, ggplot2::aes(x = x, y = y, fill = color)) +
+                ggplot2::geom_tile(color = "white", size = 2) +
+                ggplot2::scale_fill_identity() +
+                ggplot2::geom_text(ggplot2::aes(label = label), color = "white", fontface = "bold") +
+                ggplot2::labs(title = paste("Color Palette Preview:", stringr::str_to_title(palette_name))) +
+                ggplot2::theme_void() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 16, face = "bold")
+                )
+            
+            print(p)
+            TRUE
+        },
+        
+        .create_publication_plot = function(image, ggtheme, theme, ...) {
+            if (!self$options$publication_ready) {
+                return()
+            }
+            
+            # Create enhanced publication version
+            p <- private$.create_main_plot(image, ggtheme, theme, ...)
+            
+            # Add publication enhancements
+            if (!is.null(p)) {
+                # Enhanced titles and labels
+                p <- p + ggplot2::theme(
+                    plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0.5),
+                    plot.subtitle = ggplot2::element_text(size = 14, hjust = 0.5),
+                    axis.title = ggplot2::element_text(size = 14, face = "bold"),
+                    axis.text = ggplot2::element_text(size = 12),
+                    legend.title = ggplot2::element_text(size = 12, face = "bold"),
+                    legend.text = ggplot2::element_text(size = 11),
+                    panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 1)
+                )
+                
+                # Add publication subtitle if not already present
+                if (self$options$plot_title == "GraphPad Prism Style Plot") {
+                    p <- p + ggplot2::labs(
+                        title = "Publication-Ready Scientific Visualization",
+                        subtitle = "Generated with GraphPad Prism Styling"
+                    )
+                }
+                
+                print(p)
+            }
+            TRUE
+        },
+        
+        .generate_prism_guide = function(data, x_var, y_var, group_var) {
+            # Generate comprehensive Prism style guide
             
             n_total <- nrow(data)
             plot_type <- self$options$plot_type
             prism_theme <- self$options$prism_theme
             prism_palette <- self$options$prism_palette
             
-            interpretation_html <- paste0(
+            guide_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>🎨 GraphPad Prism Style Plot Guide</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'>🎨 GraphPad Prism Style Guide</h3>",
                 
-                "<h4 style='color: #2e7d32;'>Plot Configuration:</h4>",
+                "<h4 style='color: #2e7d32;'>Current Configuration:</h4>",
                 "<ul>",
                 "<li><strong>Plot Type:</strong> ", stringr::str_to_title(plot_type), " plot with Prism styling</li>",
                 "<li><strong>Theme:</strong> ", stringr::str_to_title(prism_theme), " Prism theme</li>",
@@ -569,7 +770,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 "<ul>",
                 "<li><strong>Authentic Styling:</strong> Professional GraphPad Prism look and feel</li>",
                 "<li><strong>Publication Ready:</strong> Journal-quality formatting and typography</li>",
-                "<li><strong>Color Schemes:</strong> Carefully designed palettes for scientific visualization</li>",
+                "<li><strong>20+ Color Palettes:</strong> Carefully designed scientific color schemes</li>",
+                "<li><strong>Advanced Guides:</strong> Minor ticks, offset axes, and bracket annotations</li>",
                 "<li><strong>Statistical Integration:</strong> Seamless p-value annotations and error bars</li>",
                 "</ul>",
                 
@@ -581,25 +783,129 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 "<li><strong>Data Communication:</strong> Effective statistical storytelling with visual appeal</li>",
                 "</ul>",
                 
-                "<h4 style='color: #2e7d32;'>Plot Type Specific Information:</h4>",
-                switch(plot_type,
-                    "violin" = "<p><strong>Violin Plots:</strong> Show full distribution shape with density curves, ideal for revealing multimodality and distribution characteristics.</p>",
-                    "boxplot" = "<p><strong>Box Plots:</strong> Display quartiles, median, and outliers with classic Prism formatting for clear statistical summaries.</p>",
-                    "scatter" = "<p><strong>Scatter Plots:</strong> Reveal relationships between continuous variables with professional Prism styling.</p>",
-                    "column" = "<p><strong>Column Plots:</strong> Present mean values with error bars using authentic Prism column chart aesthetics.</p>",
-                    "line" = "<p><strong>Line Plots:</strong> Track changes over time or ordered categories with Prism line styling.</p>"
-                ),
-                
                 "<p style='font-size: 12px; color: #2e7d32; margin-top: 15px;'>",
                 "<em>🎨 Experience the professional quality of GraphPad Prism styling within R's powerful analysis environment</em>",
                 "</p></div>"
             )
             
-            return(interpretation_html)
+            return(guide_html)
+        },
+        
+        .generate_palette_information = function() {
+            palette_name <- self$options$prism_palette
+            
+            # Define palette descriptions
+            palette_info <- list(
+                "floral" = "12 nature-inspired colors perfect for biological data",
+                "candy_bright" = "9 vibrant, high-contrast colors for clear group distinction",
+                "office" = "9 professional colors suitable for corporate presentations",
+                "pastels" = "9 soft, muted colors ideal for subtle group differences",
+                "colorblind_safe" = "6 carefully selected colors accessible to colorblind viewers",
+                "blueprint" = "9 blue-toned colors for technical and engineering themes",
+                "neon" = "9 bright, attention-grabbing colors for impactful presentations",
+                "flames" = "9 warm colors ranging from red to orange for heat-themed data",
+                "ocean" = "9 blue-green colors perfect for environmental and marine data",
+                "spring" = "9 fresh, light colors ideal for positive data trends",
+                "starry" = "5 deep, cosmic colors for astronomical or night-themed data",
+                "the_blues" = "9 monochromatic blue shades for professional presentations",
+                "viridis" = "6 perceptually uniform colors following viridis principles",
+                "pearl" = "6 elegant, lustrous colors for sophisticated visualizations",
+                "quiet" = "9 understated colors for subtle, professional presentations",
+                "stained_glass" = "9 rich, jewel-toned colors inspired by stained glass art",
+                "warm_pastels" = "9 gentle, warm-toned colors for approachable visualizations",
+                "prism_dark" = "10 deep, rich colors for high-contrast presentations",
+                "prism_light" = "10 bright, airy colors for clean, modern aesthetics",
+                "evergreen" = "9 nature-inspired greens for environmental data",
+                "sunny_garden" = "9 cheerful, garden-inspired colors for positive data"
+            )
+            
+            current_info <- palette_info[[palette_name]] %||% "Professional color palette for scientific visualization"
+            
+            info_html <- paste0(
+                "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
+                "<h3 style='color: #ef6c00; margin-top: 0;'>🎨 Color Palette Information</h3>",
+                "<h4 style='color: #ef6c00;'>Current Palette: ", stringr::str_to_title(palette_name), "</h4>",
+                "<p><strong>Description:</strong> ", current_info, "</p>",
+                "<h4 style='color: #ef6c00;'>Usage Tips:</h4>",
+                "<ul>",
+                "<li><strong>Preview Mode:</strong> Enable palette preview to see all colors</li>",
+                "<li><strong>Accessibility:</strong> Consider colorblind_safe palette for inclusive design</li>",
+                "<li><strong>Publication:</strong> Professional palettes work best for journals</li>",
+                "<li><strong>Presentation:</strong> High-contrast palettes improve visibility</li>",
+                "</ul>",
+                "</div>"
+            )
+            
+            return(info_html)
+        },
+        
+        .generate_export_code = function() {
+            if (!self$options$publication_ready) {
+                return("")
+            }
+            
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+            group_var <- self$options$group_var
+            plot_type <- self$options$plot_type
+            palette_name <- self$options$prism_palette
+            theme_name <- self$options$prism_theme
+            
+            code_html <- paste0(
+                "<div style='background-color: #f5f5f5; padding: 20px; border-radius: 8px;'>",
+                "<h3 style='color: #424242; margin-top: 0;'>💻 Reproducible R Code</h3>",
+                "<p>Use this code to recreate your plot in R:</p>",
+                "<pre style='background-color: #263238; color: #eeffff; padding: 15px; border-radius: 5px; overflow-x: auto;'>",
+                "<code>",
+                "# Load required packages\n",
+                "library(ggplot2)\n",
+                "library(ggprism)\n\n",
+                "# Create the plot\n",
+                "ggplot(data, aes(x = ", x_var, ", y = ", y_var,
+                if (!is.null(group_var) && group_var != "") paste0(", fill = ", group_var, ", color = ", group_var) else "",
+                ")) +\n",
+                "  geom_", plot_type, "() +\n",
+                "  theme_prism(base_size = ", self$options$base_size, ") +\n",
+                "  scale_fill_prism(palette = '", palette_name, "') +\n",
+                "  scale_color_prism(palette = '", palette_name, "') +\n",
+                "  labs(title = '", self$options$plot_title, "')\n",
+                "</code></pre>",
+                "<p style='font-size: 12px; color: #666;'>",
+                "<em>💡 Copy this code to reproduce your exact visualization in any R environment</em>",
+                "</p></div>"
+            )
+            
+            return(code_html)
+        },
+        
+        .generate_accessibility_notes = function() {
+            accessibility_html <- paste0(
+                "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px;'>",
+                "<h3 style='color: #0277bd; margin-top: 0;'>♿ Accessibility & Best Practices</h3>",
+                "<h4 style='color: #0277bd;'>Color Accessibility:</h4>",
+                "<ul>",
+                "<li><strong>Colorblind Safe:</strong> Use the 'colorblind_safe' palette for inclusive design</li>",
+                "<li><strong>High Contrast:</strong> Ensure sufficient contrast between colors and backgrounds</li>",
+                "<li><strong>Alternative Encodings:</strong> Combine color with shapes or patterns when possible</li>",
+                "</ul>",
+                "<h4 style='color: #0277bd;'>Publication Standards:</h4>",
+                "<ul>",
+                "<li><strong>DPI:</strong> Use 300 DPI minimum for print publications</li>",
+                "<li><strong>Font Size:</strong> Ensure text remains readable when scaled</li>",
+                "<li><strong>Consistency:</strong> Maintain consistent styling across all figures</li>",
+                "</ul>",
+                "<h4 style='color: #0277bd;'>Statistical Clarity:</h4>",
+                "<ul>",
+                "<li><strong>Error Bars:</strong> Always include appropriate error representations</li>",
+                "<li><strong>Sample Sizes:</strong> Report sample sizes clearly</li>",
+                "<li><strong>Statistical Tests:</strong> Use appropriate tests for your data type</li>",
+                "</ul>",
+                "</div>"
+            )
+            
+            return(accessibility_html)
         }
 
     )
 )
 
-# Store analysis data for plotting
-.analysis_data <- NULL

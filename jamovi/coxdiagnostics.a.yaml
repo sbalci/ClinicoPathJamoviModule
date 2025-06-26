@@ -1,7 +1,7 @@
 ---
 name: coxdiagnostics
 title: "Cox Proportional Hazards Model Diagnostics"
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: "Model Validation & Residual Analysis"
 version: '0.0.3'
@@ -174,6 +174,24 @@ options:
     description:
       R: Whether to display Cox regression model summary.
       jamovi: Display summary statistics for the fitted Cox model.
+
+  - name: show_vif
+    title: "Show VIF Analysis"
+    type: Bool
+    default: true
+    description:
+      R: Whether to calculate and display Variance Inflation Factor (VIF) for multicollinearity assessment.
+      jamovi: Display VIF statistics to detect multicollinearity among covariates.
+
+  - name: vif_threshold
+    title: "VIF Warning Threshold"
+    type: Number
+    min: 2.0
+    max: 10.0
+    default: 5.0
+    description:
+      R: VIF threshold for multicollinearity warning.
+      jamovi: VIF values above this threshold suggest potential multicollinearity issues.
 
   - name: show_interpretation
     title: "Show Diagnostic Interpretation"

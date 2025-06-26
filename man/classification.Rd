@@ -25,6 +25,11 @@ classification(
   maxDepthRandFor = 30,
   sampleFraction = 1,
   splitRule,
+  knnNeighbors = 5,
+  knnDistance = "euclidean",
+  svmKernel = "radial",
+  svmCost = 1,
+  svmGamma = 1,
   plotDecisionTree = FALSE,
   predictedFreq = FALSE,
   printRandForest = FALSE,
@@ -77,6 +82,17 @@ classification(
 \item{sampleFraction}{.}
 
 \item{splitRule}{.}
+
+\item{knnNeighbors}{Number of nearest neighbors for KNN classification.}
+
+\item{knnDistance}{.}
+
+\item{svmKernel}{.}
+
+\item{svmCost}{Regularization parameter for SVM.}
+
+\item{svmGamma}{Kernel coefficient for SVM (used in RBF, polynomial,
+sigmoid kernels).}
 
 \item{plotDecisionTree}{.}
 

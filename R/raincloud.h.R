@@ -139,7 +139,15 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "set2",
                     "dark2",
                     "clinical",
-                    "pastel"),
+                    "pastel",
+                    "separator_prism",
+                    "prism_floral",
+                    "prism_candy_bright",
+                    "prism_office",
+                    "prism_pastels",
+                    "prism_colorblind_safe",
+                    "prism_ocean",
+                    "prism_spring"),
                 default="clinical")
             private$..plot_theme <- jmvcore::OptionList$new(
                 "plot_theme",
@@ -149,7 +157,11 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "minimal",
                     "classic",
                     "publication",
-                    "tidyquant"),
+                    "tidyquant",
+                    "separator_theme",
+                    "prism_default",
+                    "prism_white",
+                    "prism_publication"),
                 default="clinical")
             private$..plot_title <- jmvcore::OptionString$new(
                 "plot_title",
@@ -401,7 +413,8 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alpha_dots Transparency level for data point dots.
 #' @param orientation Orientation of the plot. Horizontal creates the classic
 #'   "raincloud" appearance.
-#' @param color_palette Color palette for different groups.
+#' @param color_palette Color palette for different groups including GraphPad
+#'   Prism palettes.
 #' @param plot_theme Overall visual theme for the plot.
 #' @param plot_title Custom title for the raincloud plot.
 #' @param x_label Custom label for X-axis. If empty, uses variable name.

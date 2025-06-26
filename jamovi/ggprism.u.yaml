@@ -122,3 +122,49 @@ children:
     children:
       - type: ComboBox
         name: error_bars
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: prism_guides
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: annotation_ticks
+      - type: CheckBox
+        name: preview_mode
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: prism_shape_palette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: jitter_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: violin_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: publication_ready
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: export_dpi
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: custom_comparisons
+        format: string

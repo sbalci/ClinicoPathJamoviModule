@@ -906,7 +906,7 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  jmvtools::install()
+  # jmvtools::install()
   if (check) {
     devtools::check()
   }
@@ -919,7 +919,7 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  jmvtools::install()
+  # jmvtools::install()
   if (check) {
     devtools::check()
   }
@@ -932,7 +932,7 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  jmvtools::install()
+  # jmvtools::install()
   if (check) {
     devtools::check()
   }
@@ -945,7 +945,7 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  jmvtools::install()
+  # jmvtools::install()
   if (check) {
     devtools::check()
   }

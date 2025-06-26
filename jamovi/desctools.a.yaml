@@ -1,0 +1,233 @@
+---
+name: desctools
+title: Advanced Statistical Tests
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: 'Statistical Tests from DescTools Package'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >-
+        Advanced statistical tests using functions from the DescTools package.
+        Includes effect size calculations (Cohen's D), goodness-of-fit tests 
+        (Hosmer-Lemeshow, Anderson-Darling), agreement tests (Barnard, Breslow-Day),
+        and trend tests (Cochran-Armitage). Essential for clinical research,
+        epidemiological studies, and advanced statistical analysis.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for statistical analysis.
+
+    # Effect Size Calculations ----
+    
+    - name: effect_size_analysis
+      title: 'Effect Size Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Calculate effect sizes including Cohen's D for comparing group means.
+        Essential for determining practical significance in clinical studies.
+
+    - name: group_var
+      title: 'Grouping Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description: >-
+        Categorical variable defining groups for effect size comparison.
+        Should have exactly 2 levels for Cohen's D calculation.
+
+    - name: continuous_var
+      title: 'Continuous Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Continuous variable for effect size calculation (outcome measure).
+
+    - name: pooled_sd
+      title: 'Use Pooled Standard Deviation'
+      type: Bool
+      default: true
+      description: >-
+        Use pooled standard deviation for Cohen's D calculation.
+        Recommended when group variances are similar.
+
+    - name: hedges_correction
+      title: 'Apply Hedges Correction'
+      type: Bool
+      default: false
+      description: >-
+        Apply Hedges correction for small sample bias in effect size calculation.
+
+    - name: effect_ci_level
+      title: 'Effect Size Confidence Level'
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description: >-
+        Confidence level for effect size confidence intervals.
+
+    # Goodness of Fit Tests ----
+
+    - name: goodness_of_fit
+      title: 'Goodness of Fit Tests'
+      type: Bool
+      default: false
+      description: >-
+        Perform goodness of fit tests including Hosmer-Lemeshow test for
+        logistic regression models and normality tests.
+
+    - name: fitted_probs
+      title: 'Fitted Probabilities'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Fitted probabilities from a logistic regression model for
+        Hosmer-Lemeshow goodness of fit test.
+
+    - name: observed_outcomes
+      title: 'Observed Outcomes'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+      description: >-
+        Observed binary outcomes (0/1) for Hosmer-Lemeshow test.
+
+    - name: hl_groups
+      title: 'Number of Groups (Hosmer-Lemeshow)'
+      type: Integer
+      min: 5
+      max: 20
+      default: 10
+      description: >-
+        Number of groups for Hosmer-Lemeshow test. Usually 10 groups
+        provide good balance between power and stability.
+
+    - name: normality_var
+      title: 'Variable for Normality Testing'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Continuous variable for normality testing using Anderson-Darling
+        and other goodness of fit tests.
+
+    # Categorical Data Tests ----
+
+    - name: categorical_tests
+      title: 'Advanced Categorical Tests'
+      type: Bool
+      default: false
+      description: >-
+        Perform advanced tests for categorical data including Barnard's test,
+        Breslow-Day test, and Cochran-Armitage trend test.
+
+    - name: cat_var1
+      title: 'First Categorical Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description: >-
+        First categorical variable for contingency table analysis.
+
+    - name: cat_var2
+      title: 'Second Categorical Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description: >-
+        Second categorical variable for contingency table analysis.
+
+    - name: stratum_var
+      title: 'Stratification Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description: >-
+        Stratification variable for Breslow-Day test of homogeneity
+        of odds ratios across strata.
+
+    - name: ordered_exposure
+      title: 'Ordered Exposure Variable'
+      type: Variable
+      suggested: [ ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      description: >-
+        Ordered exposure variable for Cochran-Armitage trend test.
+        Should represent ordered dose or exposure levels.
+
+    - name: binary_outcome
+      title: 'Binary Outcome Variable'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description: >-
+        Binary outcome variable for Cochran-Armitage trend test.
+
+    # Multiple Testing Correction ----
+
+    - name: multiple_testing
+      title: 'Multiple Testing Correction'
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Benjamini-Hochberg (FDR)
+          name: BH
+        - title: Benjamini-Yekutieli
+          name: BY
+      default: none
+      description: >-
+        Method for correcting p-values when multiple tests are performed.
+        FDR (Benjamini-Hochberg) is recommended for most clinical studies.
+
+    # Output Options ----
+
+    - name: show_effect_sizes
+      title: 'Show Effect Size Results'
+      type: Bool
+      default: true
+      description: >-
+        Display effect size calculations including Cohen's D with
+        confidence intervals and interpretation.
+
+    - name: show_goodness_tests
+      title: 'Show Goodness of Fit Results'
+      type: Bool
+      default: true
+      description: >-
+        Display goodness of fit test results including Hosmer-Lemeshow
+        and normality tests.
+
+    - name: show_categorical_tests
+      title: 'Show Categorical Test Results'
+      type: Bool
+      default: true
+      description: >-
+        Display results of advanced categorical data tests.
+
+    - name: show_interpretations
+      title: 'Show Clinical Interpretations'
+      type: Bool
+      default: true
+      description: >-
+        Provide clinical interpretations and guidelines for statistical
+        results to aid in medical decision making.
+
+...

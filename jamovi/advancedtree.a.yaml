@@ -1,7 +1,7 @@
 ---
 name: advancedtree
 title: Advanced Decision Tree Analysis
-menuGroup: meddecide
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Modern Tree Algorithms for Clinical Research
 version: '0.0.3'

@@ -256,9 +256,40 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     base_colors <- RColorBrewer::brewer.pal(8, palette_r_name)
                     return(grDevices::colorRampPalette(base_colors)(n_colors))
                 }
+            # GraphPad Prism color palettes
+            } else if (palette_name %in% c("prism_floral", "prism_candy_bright", "prism_office", 
+                                          "prism_pastels", "prism_colorblind_safe", "prism_ocean", "prism_spring")) {
+                return(private$.get_prism_palette_colors(palette_name, n_colors))
             } else {
                 # Default ggplot2 colors
                 return(scales::hue_pal()(n_colors))
+            }
+        },
+        
+        .get_prism_palette_colors = function(palette_name, n_colors) {
+            # Convert internal palette names to ggprism names
+            prism_name <- switch(palette_name,
+                "prism_floral" = "floral",
+                "prism_candy_bright" = "candy_bright",
+                "prism_office" = "office",
+                "prism_pastels" = "pastels",
+                "prism_colorblind_safe" = "colorblind_safe",
+                "prism_ocean" = "ocean",
+                "prism_spring" = "spring",
+                "floral"  # fallback
+            )
+            
+            if (requireNamespace("ggprism", quietly = TRUE)) {
+                # Get colors from ggprism package
+                tryCatch({
+                    ggprism::prism_colour_pal(palette = prism_name)(n_colors)
+                }, error = function(e) {
+                    # Fallback to viridis if ggprism palette fails
+                    viridis::viridis(n_colors, discrete = TRUE)
+                })
+            } else {
+                # Fallback to viridis if ggprism not available
+                viridis::viridis(n_colors, discrete = TRUE)
             }
         },
 
@@ -291,10 +322,44 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         panel.grid.minor = ggplot2::element_blank(),
                         plot.title = ggplot2::element_text(size = 14, face = "bold")
                     ),
+                # GraphPad Prism themes
+                "prism_default" = private$.get_prism_theme("default"),
+                "prism_white" = private$.get_prism_theme("white"),
+                "prism_publication" = private$.get_prism_theme("publication"),
                 ggplot2::theme_minimal()  # fallback
             )
             
             return(base_theme)
+        },
+        
+        .get_prism_theme = function(theme_type) {
+            base_size <- 12
+            
+            if (requireNamespace("ggprism", quietly = TRUE)) {
+                # Use authentic ggprism themes
+                switch(theme_type,
+                    "default" = ggprism::theme_prism(base_size = base_size),
+                    "white" = ggprism::theme_prism(base_size = base_size, axis_text_angle = 0),
+                    "publication" = ggprism::theme_prism(base_size = base_size) +
+                        ggplot2::theme(
+                            plot.title = ggplot2::element_text(size = base_size + 2, face = "bold", hjust = 0.5),
+                            axis.title = ggplot2::element_text(size = base_size + 1, face = "bold"),
+                            legend.background = ggplot2::element_rect(fill = "white", colour = "black"),
+                            panel.border = ggplot2::element_rect(colour = "black", fill = NA)
+                        ),
+                    ggprism::theme_prism(base_size = base_size)  # fallback
+                )
+            } else {
+                # Fallback themes that approximate Prism styling
+                ggplot2::theme_minimal(base_size = base_size) +
+                    ggplot2::theme(
+                        panel.border = ggplot2::element_rect(colour = "black", fill = NA),
+                        axis.line = ggplot2::element_line(colour = "black"),
+                        panel.grid.major = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        plot.title = ggplot2::element_text(size = base_size + 2, face = "bold", hjust = 0.5)
+                    )
+            }
         },
 
         .generate_statistics = function(data, dep_var, group_var) {

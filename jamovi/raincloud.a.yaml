@@ -203,10 +203,26 @@ options:
           name: clinical
         - title: "Pastel"
           name: pastel
+        - title: "--- GraphPad Prism Palettes ---"
+          name: separator_prism
+        - title: "Prism Floral"
+          name: prism_floral
+        - title: "Prism Candy Bright"
+          name: prism_candy_bright
+        - title: "Prism Office"
+          name: prism_office
+        - title: "Prism Pastels"
+          name: prism_pastels
+        - title: "Prism Colorblind Safe"
+          name: prism_colorblind_safe
+        - title: "Prism Ocean"
+          name: prism_ocean
+        - title: "Prism Spring"
+          name: prism_spring
       default: clinical
       description:
         R: >
-          Color palette for different groups.
+          Color palette for different groups including GraphPad Prism palettes.
 
     - name: plot_theme
       title: Plot Theme
@@ -222,6 +238,14 @@ options:
           name: publication
         - title: "TidyQuant"
           name: tidyquant
+        - title: "--- GraphPad Prism Themes ---"
+          name: separator_theme
+        - title: "Prism Default"
+          name: prism_default
+        - title: "Prism White"
+          name: prism_white
+        - title: "Prism Publication"
+          name: prism_publication
       default: clinical
       description:
         R: >

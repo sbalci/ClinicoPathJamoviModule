@@ -539,6 +539,227 @@ items:
           - tint
           - multievent
 
+    - name: multipleCutTable
+      title: 'Multiple Cut-off Points'
+      type: Table
+      rows: 0
+      columns:
+        - name: cutpoint_number
+          title: 'Cut-off #'
+          type: integer
+        - name: cutpoint_value
+          title: 'Cut-off Value'
+          type: number
+        - name: group_created
+          title: 'Groups Created'
+          type: text
+        - name: logrank_statistic
+          title: 'Log-rank χ²'
+          type: number
+        - name: p_value
+          title: 'P-value'
+          type: number
+          format: zto,pvalue
+      visible: (multiple_cutoffs)
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: multipleMedianTable
+      title: '`Median Survival by Multiple Cut-offs: ${contexpl}`'
+      type: Table
+      rows: 0
+      columns:
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+        - name: n_patients
+          title: "N"
+          type: integer
+        - name: events
+          title: "Events"
+          type: integer
+        - name: median_survival
+          title: "Median Survival"
+          type: number
+        - name: median_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+        - name: median_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+      visible: (multiple_cutoffs)
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: multipleSurvTable
+      title: '`Survival Estimates by Multiple Cut-offs: ${contexpl}`'
+      type: Table
+      rows: 0
+      columns:
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+        - name: time_point
+          title: "Time"
+          type: integer
+        - name: n_risk
+          title: "N at Risk"
+          type: integer
+        - name: survival_prob
+          title: "Survival"
+          type: number
+          format: pc
+        - name: surv_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: pc
+        - name: surv_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: pc
+      visible: (multiple_cutoffs)
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: plotMultipleCutoffs
+      title: '`Multiple Cut-offs Visualization - ${contexpl}`'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotMultipleCutoffs
+      visible: (multiple_cutoffs)
+      requiresData: true
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: plotMultipleSurvival
+      title: '`Survival Plot with Multiple Cut-offs - ${contexpl}`'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotMultipleSurvival
+      visible: (multiple_cutoffs && sc)
+      requiresData: true
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: calculatedmulticut
+      title: Add Multiple Cut-off Groups to Data
+      type: Output
+      varTitle: '`Multiple Cut-off Risk Groups - from ${ contexpl }`'
+      varDescription: Multiple Cut-off Risk Groups from given Cut-offs in Continuous Survival Function
+      clearWith:
+          - multiple_cutoffs
+          - num_cutoffs
+          - cutoff_method
+          - min_group_size
+          - contexpl
+          - outcome
+          - analysistype
+          - multievent
+          - findcut
+          - sc
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
 
 
 

@@ -1,0 +1,346 @@
+---
+name: economistplots
+title: "Economist-Style Distribution Plots"
+menuGroup: JJStatsPlotD
+menuSubgroup: ClinicoPath Advanced Plots
+menuSubtitle: "Publication-Quality Distribution Visualization"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Creates elegant Economist-style distribution plots using ggeconodist package
+        for professional publication-quality visualizations. Provides diminutive 
+        distribution charts that effectively communicate statistical distribution 
+        characteristics with The Economist's distinctive visual style. Perfect for 
+        comparing distributions across categories, showing price variations, or 
+        visualizing any statistical distribution data in clinical research.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            # 1. Select continuous variable for distribution analysis
+            # 2. Choose grouping variable for comparison
+            # 3. Customize Economist-style visual elements
+            # 4. Add statistical annotations and interpretations
+            library(ggeconodist)
+            ggplot(data, aes(x = group, y = value)) +
+              geom_econodist() +
+              theme_econodist()
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for Economist-style distribution visualization.
+
+    - name: y_var
+      title: "Distribution Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Continuous variable whose distribution will be visualized.
+        jamovi: Select the continuous variable to analyze the distribution of.
+
+    - name: x_var
+      title: "Grouping Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Categorical variable for grouping distributions.
+        jamovi: Select categorical variable to group distributions by.
+
+    - name: facet_var
+      title: "Faceting Variable (Optional)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Optional variable for creating multiple panels.
+        jamovi: Optional variable to create separate panels for each level.
+
+    - name: color_var
+      title: "Color Variable (Optional)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Optional variable for coloring distribution elements.
+        jamovi: Optional variable to color distributions by different groups.
+
+    - name: plot_orientation
+      title: "Plot Orientation"
+      type: List
+      options:
+        - title: "Vertical"
+          name: vertical
+        - title: "Horizontal"
+          name: horizontal
+      default: vertical
+      description:
+        R: Orientation of the distribution plots.
+        jamovi: Choose vertical or horizontal orientation for the plots.
+
+    - name: economist_theme
+      title: "Use Economist Theme"
+      type: Bool
+      default: true
+      description:
+        R: Whether to apply the full Economist visual theme.
+        jamovi: Apply The Economist's signature visual styling.
+
+    - name: show_legend
+      title: "Show Economist Legend"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display the Economist-style legend.
+        jamovi: Display legend explaining the distribution visualization.
+
+    - name: percentile_colors
+      title: "Custom Percentile Colors"
+      type: Bool
+      default: false
+      description:
+        R: Whether to use custom colors for different percentiles.
+        jamovi: Enable custom coloring for different distribution percentiles.
+
+    - name: tenth_color
+      title: "10th Percentile Color"
+      type: String
+      default: "#c7254e"
+      description:
+        R: Color for the 10th percentile in the distribution.
+        jamovi: Color for highlighting the 10th percentile.
+
+    - name: ninetieth_color
+      title: "90th Percentile Color"
+      type: String
+      default: "#18bc9c"
+      description:
+        R: Color for the 90th percentile in the distribution.
+        jamovi: Color for highlighting the 90th percentile.
+
+    - name: median_color
+      title: "Median Color"
+      type: String
+      default: "#2c3e50"
+      description:
+        R: Color for the median line in the distribution.
+        jamovi: Color for highlighting the median value.
+
+    - name: distribution_fill
+      title: "Distribution Fill Color"
+      type: String
+      default: "#95a5a6"
+      description:
+        R: Fill color for the main distribution area.
+        jamovi: Color for filling the distribution area.
+
+    - name: alpha_level
+      title: "Transparency Level"
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.7
+      description:
+        R: Transparency level for distribution elements.
+        jamovi: Adjust transparency of distribution visualization.
+
+    - name: bandwidth_adjust
+      title: "Bandwidth Adjustment"
+      type: Number
+      min: 0.1
+      max: 3.0
+      default: 1.0
+      description:
+        R: Adjustment factor for distribution bandwidth smoothing.
+        jamovi: Fine-tune the smoothness of distribution curves.
+
+    - name: show_points
+      title: "Show Individual Points"
+      type: Bool
+      default: false
+      description:
+        R: Whether to overlay individual data points.
+        jamovi: Display individual data points on the distribution.
+
+    - name: point_jitter
+      title: "Point Jitter Width"
+      type: Number
+      min: 0.0
+      max: 0.5
+      default: 0.1
+      description:
+        R: Amount of horizontal jittering for overlaid points.
+        jamovi: Adjust horizontal spread of individual points.
+
+    - name: add_statistics
+      title: "Add Statistical Annotations"
+      type: Bool
+      default: true
+      description:
+        R: Whether to include statistical summaries and tests.
+        jamovi: Include statistical information and tests in the visualization.
+
+    - name: stat_method
+      title: "Statistical Test"
+      type: List
+      options:
+        - title: "ANOVA"
+          name: anova
+        - title: "Kruskal-Wallis"
+          name: kruskal
+        - title: "t-test"
+          name: ttest
+        - title: "Wilcoxon"
+          name: wilcox
+      default: anova
+      description:
+        R: Statistical test to perform for group comparisons.
+        jamovi: Choose statistical test for comparing distributions.
+
+    - name: effect_size
+      title: "Include Effect Size"
+      type: Bool
+      default: true
+      description:
+        R: Whether to calculate and display effect sizes.
+        jamovi: Calculate and display effect size measures.
+
+    - name: plot_title
+      title: "Plot Title"
+      type: String
+      default: ""
+      description:
+        R: Custom title for the plot.
+        jamovi: Enter a custom title for your distribution plot.
+
+    - name: x_title
+      title: "X-axis Title"
+      type: String
+      default: ""
+      description:
+        R: Custom label for x-axis.
+        jamovi: Enter a custom label for the x-axis.
+
+    - name: y_title
+      title: "Y-axis Title"
+      type: String
+      default: ""
+      description:
+        R: Custom label for y-axis.
+        jamovi: Enter a custom label for the y-axis.
+
+    - name: caption_text
+      title: "Caption Text"
+      type: String
+      default: ""
+      description:
+        R: Custom caption text for the plot.
+        jamovi: Enter caption text (data source, notes, etc.).
+
+    - name: plot_width
+      title: "Plot Width"
+      type: Number
+      min: 4
+      max: 16
+      default: 10
+      description:
+        R: Width of the plot in inches.
+        jamovi: Set plot width for optimal display.
+
+    - name: plot_height
+      title: "Plot Height"
+      type: Number
+      min: 3
+      max: 12
+      default: 6
+      description:
+        R: Height of the plot in inches.
+        jamovi: Set plot height for optimal display.
+
+    - name: left_align_title
+      title: "Left-Align Plot Elements"
+      type: Bool
+      default: true
+      description:
+        R: Whether to left-align title and caption elements.
+        jamovi: Apply left-alignment typical of Economist style.
+
+    - name: custom_breaks
+      title: "Custom Y-axis Breaks"
+      type: String
+      default: ""
+      description:
+        R: Comma-separated values for custom y-axis breaks.
+        jamovi: Enter custom y-axis break points (comma-separated).
+
+    - name: show_quartiles
+      title: "Highlight Quartiles"
+      type: Bool
+      default: true
+      description:
+        R: Whether to highlight quartile boundaries.
+        jamovi: Highlight 25th, 50th, and 75th percentiles.
+
+    - name: distribution_style
+      title: "Distribution Style"
+      type: List
+      options:
+        - title: "Classic Economist"
+          name: classic
+        - title: "Minimal"
+          name: minimal
+        - title: "Enhanced"
+          name: enhanced
+        - title: "Publication"
+          name: publication
+      default: classic
+      description:
+        R: Overall visual style for the distribution plots.
+        jamovi: Choose the visual style approach.
+
+    - name: comparison_annotations
+      title: "Add Comparison Annotations"
+      type: Bool
+      default: false
+      description:
+        R: Whether to add pairwise comparison annotations.
+        jamovi: Add statistical comparison annotations between groups.
+
+    - name: outlier_treatment
+      title: "Outlier Treatment"
+      type: List
+      options:
+        - title: "Show All"
+          name: all
+        - title: "Hide Extreme"
+          name: hide_extreme
+        - title: "Mark Outliers"
+          name: mark
+        - title: "Transform"
+          name: transform
+      default: all
+      description:
+        R: How to handle outliers in the visualization.
+        jamovi: Choose how to treat outliers in the distribution.
+
+    - name: summary_statistics
+      title: "Show Summary Statistics"
+      type: Bool
+      default: true
+      description:
+        R: Whether to display comprehensive summary statistics.
+        jamovi: Display detailed statistics for each distribution.
+
+    - name: export_economist_code
+      title: "Export R Code"
+      type: Bool
+      default: true
+      description:
+        R: Whether to generate reproducible R code using ggeconodist.
+        jamovi: Generate R code example for reproducing the visualization.

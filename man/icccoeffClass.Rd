@@ -2,14 +2,11 @@
 % Please edit documentation in R/icccoeff.b.R
 \name{icccoeffClass}
 \alias{icccoeffClass}
-\title{Interclass Correlation Coefficient
-Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}}
+\title{Intraclass Correlation Coefficient}
 \description{
-Interclass Correlation Coefficient
-Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
+Intraclass Correlation Coefficient
 
-Interclass Correlation Coefficient
-Also see \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
+Intraclass Correlation Coefficient
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::icccoeffBase} -> \code{icccoeffClass}

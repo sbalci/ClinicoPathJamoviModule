@@ -273,6 +273,58 @@ options:
         Enable this option to automatically find the optimal cut-off point for the continuous explanatory variable using the maximally
         selected rank statistic. This option is only available if you enable the "Survival Plot" option. The optimal cut-off point
         will be displayed on the survival plot as a vertical dashed line.
+
+    - name: multiple_cutoffs
+      title: Find Multiple Cut-offs
+      type: Bool
+      default: false
+      description: >-
+        Enable this option to find multiple optimal cut-off points for the continuous explanatory variable. This extends
+        the single cutoff analysis to identify 2-4 optimal cut-off points that maximize survival group separation.
+        Creates stratified groups for enhanced survival analysis.
+
+    - name: num_cutoffs
+      title: Number of Cut-offs
+      type: List
+      options:
+        - title: "2 Cut-offs (3 Groups)"
+          name: two
+        - title: "3 Cut-offs (4 Groups)"
+          name: three
+        - title: "4 Cut-offs (5 Groups)"
+          name: four
+      default: two
+      description: >-
+        Select the number of cut-off points to identify. This will create multiple risk groups
+        for stratified survival analysis (e.g., 2 cut-offs create Low, Medium, High risk groups).
+
+    - name: cutoff_method
+      title: Multiple Cut-off Method
+      type: List
+      options:
+        - title: "Quantile-Based"
+          name: quantile
+        - title: "Recursive Optimal"
+          name: recursive
+        - title: "Tree-Based Partitioning"
+          name: tree
+        - title: "Minimum P-value"
+          name: minpval
+      default: quantile
+      description: >-
+        Method for finding multiple cut-offs. Quantile-based uses tertiles/quartiles,
+        Recursive finds sequential optimal points, Tree-based uses survival trees,
+        Minimum P-value finds points that minimize log-rank p-values.
+
+    - name: min_group_size
+      title: Minimum Group Size (%)
+      type: Number
+      min: 5
+      max: 30
+      default: 10
+      description: >-
+        Minimum percentage of patients required in each group created by cut-offs.
+        Prevents creating groups with insufficient sample sizes for reliable analysis.
         
     - name: calculatedcutoff
       title: Add Calculated Cut-off Group to Data
@@ -281,6 +333,14 @@ options:
         If you enable this option, the calculated cut-off group will be added to your data as a new variable. This variable will have
         two levels: "Below Cut-off" and "Above Cut-off" based on the optimal cut-off point found using the maximally selected rank
         statistic. This option is only available if you enable the "Find Cut-off for Continious Explanatory Variable" option.
+
+    - name: calculatedmulticut
+      title: Add Multiple Cut-off Groups to Data
+      type: Output
+      description: >-
+        If you enable this option, the multiple cut-off groups will be added to your data as a new variable.
+        This creates stratified risk groups (Low, Medium, High, etc.) based on the multiple optimal cut-off points.
+        Only available when "Find Multiple Cut-offs" option is enabled.
 
 
     - name: multievent
