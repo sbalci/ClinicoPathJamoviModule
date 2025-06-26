@@ -1,6 +1,14 @@
 ---
 title: "ROC Curve Analysis"
-output: rmarkdown::html_vignette
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
 vignette: >
   %\VignetteIndexEntry{ROC Curve Analysis}
   %\VignetteEngine{knitr::rmarkdown}

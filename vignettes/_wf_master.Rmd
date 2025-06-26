@@ -69,5 +69,5 @@ output: html_document
 
 <!-- ``` -->
 
-<!-- `r paste(knitr::knit(text = out), collapse = '\n')` -->
+<!-- Workflow master file - code generation would go here -->
 

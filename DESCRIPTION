@@ -170,7 +170,9 @@ Imports:
     clintools,
     coefplot,
     ggeconodist,
-    jtools
+    jtools,
+    DescTools,
+    plotly
 VignetteBuilder: 
     knitr, 
     tiff, 
