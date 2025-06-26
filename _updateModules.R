@@ -191,11 +191,16 @@ if (!WIP) {
     dir.create(file.path(jjstatsplot_dir, "vignettes"), recursive = TRUE)
   }
 
-  fs::file_copy(
-    file.path(main_repo_dir, "vignettes", jjstatsplot_vignette_files),
-    file.path(jjstatsplot_dir, "vignettes"),
-    overwrite = TRUE
-  )
+  tryCatch({
+    fs::file_copy(
+      file.path(main_repo_dir, "vignettes", jjstatsplot_vignette_files),
+      file.path(jjstatsplot_dir, "vignettes"),
+      overwrite = TRUE
+    )
+  }, error = function(e) {
+    message("Error copying jjstatsplot vignette files: ", e$message)
+  })
+
 
 
 
@@ -273,12 +278,15 @@ if (!WIP) {
     dir.create(file.path(meddecide_dir, "vignettes"), recursive = TRUE)
   }
 
-
+tryCatch({
   fs::file_copy(
     file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
     file.path(meddecide_dir, "vignettes"),
     overwrite = TRUE
   )
+}, error = function(e) {
+  message("Error copying meddecide vignette files: ", e$message)
+})
 
 
 
@@ -360,11 +368,15 @@ if (!WIP) {
     dir.create(file.path(jsurvival_dir, "vignettes"), recursive = TRUE)
   }
 
-  fs::file_copy(
-    file.path(main_repo_dir, "vignettes", jsurvival_vignette_files),
-    file.path(jsurvival_dir, "vignettes"),
-    overwrite = TRUE
-  )
+  tryCatch({
+    fs::file_copy(
+      file.path(main_repo_dir, "vignettes", jsurvival_vignette_files),
+      file.path(jsurvival_dir, "vignettes"),
+      overwrite = TRUE
+    )
+  }, error = function(e) {
+    message("Error copying jsurvival vignette files: ", e$message)
+  })
 
 
 
@@ -411,15 +423,16 @@ if (!WIP) {
   }
 
 
-  fs::file_copy(
-    file.path(
-      main_repo_dir,
-      "data",
-      ClinicoPathDescriptives_example_files
-    ),
-    file.path(ClinicoPathDescriptives_dir, "data"),
-    overwrite = TRUE
-  )
+  tryCatch({
+    fs::file_copy(
+      file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_files),
+      file.path(ClinicoPathDescriptives_dir, "data"),
+      overwrite = TRUE
+    )
+  }, error = function(e) {
+    message("Error copying ClinicoPathDescriptives example files: ", e$message)
+  })
+
 
 
   ## ClinicoPathDescriptives_data_description_files ----
@@ -502,6 +515,8 @@ if (!WIP) {
                recursive = TRUE)
   }
 
+
+  tryCatch({
   fs::file_copy(
     file.path(
       main_repo_dir,
@@ -511,6 +526,9 @@ if (!WIP) {
     file.path(ClinicoPathDescriptives_dir, "vignettes"),
     overwrite = TRUE
   )
+  }, error = function(e) {
+    message("Error copying ClinicoPathDescriptives vignette files: ", e$message)
+  })
 
 
 

@@ -341,7 +341,6 @@
 #' 
 #' # Quality factor impact assessment
 #' boxplot(EQA_Score ~ Specimen_Adequacy, data = biomarker_validation)
-#' @export
 "biomarker_validation"
 
 #' Precision Oncology Dataset
@@ -381,7 +380,6 @@
 #' 
 #' # Targeted therapy selection workflow
 #' subset(precision_oncology, HER2_FISH_Status == "Amplified")
-#' @export
 "precision_oncology"
 
 #' Digital Pathology Validation Dataset

@@ -1,6 +1,14 @@
 ---
 title: "Diagnostic Test Evaluation"
-output: rmarkdown::html_vignette
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
 vignette: >
   %\VignetteIndexEntry{Diagnostic Test Evaluation}
   %\VignetteEngine{knitr::rmarkdown}
