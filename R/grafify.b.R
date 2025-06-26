@@ -1,10 +1,8 @@
 #' @title Scientific Visualization with Grafify
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom grafify plot_scatterbar
 #' @importFrom grafify plot_scatterbox
 #' @importFrom grafify plot_scatterviolin
-#' @importFrom grafify plot_dotbar
 #' @importFrom grafify plot_dotbox
 #' @importFrom grafify plot_dotviolin
 #' @importFrom grafify plot_befafter_box

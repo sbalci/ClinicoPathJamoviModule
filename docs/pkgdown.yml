@@ -4,41 +4,45 @@ pkgdown_sha: ~
 articles:
   advanced-topics: advanced-topics.html
   agepyramid: agepyramid.html
-  agreement-analysis: agreement-analysis.html
   alluvial: alluvial.html
   analysis-gallery: analysis-gallery.html
   benford: benford.html
   categorical-plots: categorical-plots.html
   clinical-examples: clinical-examples.html
-  clinicoPathDescriptives-introduction: clinicoPathDescriptives-introduction.html
+  clinical-workflow: clinical-workflow.html
+  ClinicoPathDescriptives-agreement-analysis: ClinicoPathDescriptives-agreement-analysis.html
+  ClinicoPathDescriptives-digital-pathology-validation: ClinicoPathDescriptives-digital-pathology-validation.html
+  ClinicoPathDescriptives-modern-molecular-pathology-workflow: ClinicoPathDescriptives-modern-molecular-pathology-workflow.html
   continuous-comparisons-vignette: continuous-comparisons-vignette.html
+  continuous-comparisons: continuous-comparisons.html
   correlations-scatterplots: correlations-scatterplots.html
   crosstable: crosstable.html
   data-preparation: data-preparation.html
-  data-preperation: data-preperation.html
   data-quality-exploration: data-quality-exploration.html
   data-summary: data-summary.html
-  decision-tree-examples: decision-tree-examples.html
-  decision-tree-vs-markov-analysis: decision-tree-vs-markov-analysis.html
   decisionpanel_advanced: decisionpanel_advanced.html
   decisionpanel_clinical: decisionpanel_clinical.html
   decisionpanel_optimisation: decisionpanel_optimisation.html
-  decisiontree-analysis-vignette: decisiontree-analysis-vignette.html
   diagnostic_style_clustering: diagnostic_style_clustering.html
   diagnostic_style_quick_guide: diagnostic_style_quick_guide.html
   diagnostic-tests: diagnostic-tests.html
-  examples: examples.html
   getting-started: getting-started.html
   ihcstats_comprehensive_guide: ihcstats_comprehensive_guide.html
   jamovi-user-guide: jamovi-user-guide.html
   jamovi-workflow-examples: jamovi-workflow-examples.html
   jamovi-workflow: jamovi-workflow.html
   jjstatsplot-introduction: jjstatsplot-introduction.html
+  jsurvival-introduction: jsurvival-introduction.html
   jsurvival: jsurvival.html
+  meddecide-decision-tree-examples: meddecide-decision-tree-examples.html
+  meddecide-decision-tree-vs-markov-analysis: meddecide-decision-tree-vs-markov-analysis.html
+  meddecide-decisiontree-analysis-vignette: meddecide-decisiontree-analysis-vignette.html
+  meddecide-introduction: meddecide-introduction.html
+  meddecide-precision-oncology-biomarkers: meddecide-precision-oncology-biomarkers.html
+  meddecide-roc-analysis: meddecide-roc-analysis.html
   meddecide-vignettes: meddecide-vignettes.html
   medical_decision_tree_guide: medical_decision_tree_guide.html
   module_development_jamovi: module_development_jamovi.html
-  motivation: motivation.html
   nogoldstandard: nogoldstandard.html
   pathology_jamovi: pathology_jamovi.html
   person-time-analysis: person-time-analysis.html
@@ -46,7 +50,6 @@ articles:
   quick-reference: quick-reference.html
   r-programming-guide: r-programming-guide.html
   reportcat: reportcat.html
-  roc-analysis: roc-analysis.html
   stage-migration-analysis: stage-migration-analysis.html
   summarydata: summarydata.html
   swimmerplot: swimmerplot.html
@@ -62,7 +65,7 @@ articles:
   visualization-gallery: visualization-gallery.html
   visualization: visualization.html
   waterfall: waterfall.html
-last_built: 2025-06-22T14:21Z
+last_built: 2025-06-26T15:21Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

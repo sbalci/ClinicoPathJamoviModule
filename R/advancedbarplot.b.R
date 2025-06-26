@@ -21,7 +21,7 @@
 #' @importFrom dplyr group_by summarise mutate arrange
 #' @importFrom plotly ggplotly plot_ly
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom viridis scale_fill_viridis_d
+#' @importFrom viridis viridis
 #' @importFrom scales percent comma
 #' @importFrom stats aov t.test wilcox.test chisq.test kruskal.test
 #' @importFrom stringr str_to_title

@@ -9,13 +9,13 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.31"
-new_date <- "2024-06-22"
+new_version <- "0.0.3.32"
+new_date <- "2024-06-26"
 
 # Define WIP, check, extended status ----
-check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
-extended <- FALSE # Set to TRUE if you want to document and install submodules
-webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
+check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
+extended <- TRUE # Set to TRUE if you want to document and install submodules
+webpage <- TRUE # Set to TRUE if you want to build the pkgdown website for the modules
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
 
 # Load required packages ----
@@ -259,9 +259,7 @@ if (!WIP) {
 
   meddecide_vignette_files <- c(
     "nogoldstandard.Rmd",
-    "agreement-analysis.Rmd",
     "diagnostic-tests.Rmd",
-    "roc-analysis.Rmd",
     "decisionpanel_advanced.Rmd",
     "decisionpanel_optimisation.Rmd",
     "decisionpanel_clinical.Rmd",
@@ -493,7 +491,6 @@ if (!WIP) {
 
 
   ClinicoPathDescriptives_vignette_files <- c(
-    "clinicoPathDescriptives-introduction.Rmd",
     "data-summary.Rmd",
     "visualization.Rmd"
   )
