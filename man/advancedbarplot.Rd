@@ -55,7 +55,8 @@ bars).}
 
 \item{error_bars}{Type of error bars to display.}
 
-\item{color_palette}{Color palette for bar fills.}
+\item{color_palette}{Color palette for bar fills including GraphPad Prism
+palettes.}
 
 \item{show_values}{Whether to display values on top of bars.}
 
@@ -75,7 +76,8 @@ bars).}
 
 \item{legend_position}{Position of the legend.}
 
-\item{theme_style}{Overall theme style for the plot.}
+\item{theme_style}{Overall theme style for the plot including GraphPad
+Prism themes.}
 
 \item{bar_width}{Width of the bars (0.1 to 1.0).}
 

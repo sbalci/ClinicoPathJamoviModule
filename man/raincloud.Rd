@@ -72,7 +72,8 @@ outliers.}
 \item{orientation}{Orientation of the plot. Horizontal creates the classic
 "raincloud" appearance.}
 
-\item{color_palette}{Color palette for different groups.}
+\item{color_palette}{Color palette for different groups including GraphPad
+Prism palettes.}
 
 \item{plot_theme}{Overall visual theme for the plot.}
 

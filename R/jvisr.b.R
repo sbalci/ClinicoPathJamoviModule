@@ -4,9 +4,9 @@
 # Clinical Research Visualization with visR
 # Following jamovi naming convention with j-prefix to avoid namespace conflicts
 
-visrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "visrClass",
-    inherit = visrBase,
+jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "jvisrClass",
+    inherit = jvisrBase,
     private = list(
         .init = function() {
             # Initialize with appropriate plot dimensions

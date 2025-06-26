@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.31
-Date: 2024-06-22
+Version: 0.0.3.32
+Date: 2024-06-26
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -166,7 +166,11 @@ Imports:
     dials,
     psych,
     cmprsk,
-    car
+    car,
+    clintools,
+    coefplot,
+    ggeconodist,
+    jtools
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -175,6 +179,7 @@ Remotes:
     nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
     gastonstat/arcdiagram,
     hrbrmstr/streamgraph,
+    hrbrmstr/ggeconodist,
     jbengler/tidyplots,
     hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
