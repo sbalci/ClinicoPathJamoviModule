@@ -71,6 +71,14 @@ options:
           title: Single decision tree
         - name: randomForest
           title: Random forest
+        - name: knn
+          title: K-Nearest Neighbors
+        - name: naiveBayes
+          title: Naive Bayes
+        - name: logisticRegression
+          title: Logistic Regression
+        - name: svm
+          title: Support Vector Machine
 
     - name: minSplit
       title: Min. split
@@ -137,6 +145,61 @@ options:
           title: Extra trees
         - name: hellinger
           title: Hellinger
+
+    # KNN Parameters
+    - name: knnNeighbors
+      title: Number of Neighbors (k)
+      type: Number
+      default: 5
+      min: 1
+      max: 100
+      description: >
+        Number of nearest neighbors for KNN classification.
+
+    - name: knnDistance
+      title: Distance Metric
+      type: List
+      options:
+        - name: euclidean
+          title: Euclidean
+        - name: manhattan
+          title: Manhattan
+        - name: minkowski
+          title: Minkowski
+      default: euclidean
+
+    # SVM Parameters
+    - name: svmKernel
+      title: SVM Kernel
+      type: List
+      options:
+        - name: linear
+          title: Linear
+        - name: polynomial
+          title: Polynomial
+        - name: radial
+          title: Radial (RBF)
+        - name: sigmoid
+          title: Sigmoid
+      default: radial
+
+    - name: svmCost
+      title: SVM Cost Parameter
+      type: Number
+      default: 1.0
+      min: 0.01
+      max: 100
+      description: >
+        Regularization parameter for SVM.
+
+    - name: svmGamma
+      title: SVM Gamma Parameter
+      type: Number
+      default: 1.0
+      min: 0.001
+      max: 10
+      description: >
+        Kernel coefficient for SVM (used in RBF, polynomial, sigmoid kernels).
 
     - name: plotDecisionTree
       title: Plot decision tree

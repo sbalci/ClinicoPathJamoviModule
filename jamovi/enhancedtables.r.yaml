@@ -1,0 +1,63 @@
+---
+name: enhancedtables
+title: Enhanced Tables Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: enhanced_table
+      title: Enhanced Table
+      type: Html
+      visible: (vars)
+      clearWith:
+        - vars
+        - group_var
+        - strata_var
+        - table_type
+        - stats_continuous
+        - stats_categorical
+        - table_theme
+
+    - name: summary_stats
+      title: Summary Statistics
+      type: Html
+      visible: (vars && table_type:summary)
+      clearWith:
+        - vars
+        - group_var
+        - stats_continuous
+        - stats_categorical
+
+    - name: group_comparison
+      title: Group Comparison Results
+      type: Html
+      visible: (vars && group_var && include_pvalues)
+      clearWith:
+        - vars
+        - group_var
+        - include_pvalues
+        - test_type
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_interpretation && vars)
+      clearWith:
+        - vars
+        - group_var
+        - table_type
+
+    - name: export_table
+      title: Export Ready Table
+      type: Html
+      visible: (vars && export_format)
+      clearWith:
+        - vars
+        - export_format
+        - table_theme
+
+...

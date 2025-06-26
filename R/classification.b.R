@@ -1,10 +1,14 @@
 # @import mlr3
 # @import mlr3measures
 # @import mlr3learners
+# @import mlr3extralearners
 # @import mlr3viz
 # @importFrom caret sensitivity specificity posPredValue negPredValue
 # @importFrom pROC roc auc ci.auc
 # @importFrom boot boot boot.ci
+# @importFrom kknn kknn
+# @importFrom naivebayes naive_bayes
+# @importFrom e1071 svm
 
 # Enhanced for clinical applications - based on https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
@@ -202,31 +206,76 @@ private = list(
     },
 
     .initLearner = function() {
-        classifier <- ifelse(self$options$classifier == 'singleDecisionTree', 'classif.rpart', 'classif.ranger')
+        classifier_type <- switch(self$options$classifier,
+            'singleDecisionTree' = 'classif.rpart',
+            'randomForest' = 'classif.ranger',
+            'knn' = 'classif.kknn',
+            'naiveBayes' = 'classif.naive_bayes',
+            'logisticRegression' = 'classif.log_reg',
+            'svm' = 'classif.svm',
+            'classif.rpart'  # default
+        )
 
+        # Initialize options based on classifier type
+        options <- list()
+        
         if(self$options$classifier == 'singleDecisionTree'){
-            classifierType <- 'classif.rpart'
             options <- list(
-                   minsplit = self$options$minSplit,
-                   maxcompete = self$options$maxCompete,
-                   maxsurrogate = self$options$maxSurrogate,
-                   maxdepth = self$options$maxDepth,
-                   cp = self$options$complecity
+                minsplit = self$options$minSplit,
+                maxcompete = self$options$maxCompete,
+                maxsurrogate = self$options$maxSurrogate,
+                maxdepth = self$options$maxDepth,
+                cp = self$options$complecity
             )
-        } else {
-            classifierType <- 'classif.ranger'
+        } else if(self$options$classifier == 'randomForest') {
             options <- list(
-                        num.trees = self$options$noOfTrees,
-                        splitrule = self$options$splitRule,
-                        sample.fraction = self$options$sampleFraction,
-                        min.node.size = self$options$maxDepth
+                num.trees = self$options$noOfTrees,
+                splitrule = self$options$splitRule,
+                sample.fraction = self$options$sampleFraction,
+                min.node.size = self$options$maxDepth
             )
+        } else if(self$options$classifier == 'knn') {
+            options <- list(
+                k = self$options$knnNeighbors,
+                distance = 2  # Euclidean distance
+            )
+            if(self$options$knnDistance == 'manhattan') {
+                options$distance <- 1
+            } else if(self$options$knnDistance == 'minkowski') {
+                options$distance <- 3
+                options$p <- 3
+            }
+        } else if(self$options$classifier == 'naiveBayes') {
+            # Naive Bayes typically doesn't need many hyperparameters
+            options <- list()
+        } else if(self$options$classifier == 'logisticRegression') {
+            # Logistic regression parameters
+            options <- list()
+        } else if(self$options$classifier == 'svm') {
+            options <- list(
+                kernel = self$options$svmKernel,
+                cost = self$options$svmCost
+            )
+            if(self$options$svmKernel %in% c('radial', 'polynomial', 'sigmoid')) {
+                options$gamma <- self$options$svmGamma
+            }
         }
 
-        learner <- lrn(classifierType, predict_type = 'prob')
-        learner$param_set$values <- options
-
-        return (learner)
+        # Check if the learner is available, fallback to decision tree if not
+        tryCatch({
+            learner <- lrn(classifier_type, predict_type = 'prob')
+            learner$param_set$values <- options
+            return(learner)
+        }, error = function(e) {
+            warning(paste("Learner", classifier_type, "not available, using decision tree. Error:", e$message))
+            learner <- lrn('classif.rpart', predict_type = 'prob')
+            learner$param_set$values <- list(
+                minsplit = self$options$minSplit,
+                maxdepth = self$options$maxDepth,
+                cp = self$options$complecity
+            )
+            return(learner)
+        })
     },
 
     .printModelParameters = function(parameters) {

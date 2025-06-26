@@ -1,7 +1,7 @@
 ---
 name: enhancedcrosstable
 title: "Enhanced Cross Tables with danchaltiel/crosstable"
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Comparisons
 menuSubtitle: "Advanced Tidyselect & Automated Reporting"
 version: '0.0.3'

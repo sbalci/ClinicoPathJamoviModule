@@ -1,0 +1,535 @@
+---
+title: "meddecide: Introduction to Medical Decision Analysis"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{meddecide: Introduction to Medical Decision Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+The meddecide module provides comprehensive tools for medical decision analysis, enabling healthcare professionals to make evidence-based clinical decisions through systematic evaluation of diagnostic tests, treatment options, and health economic outcomes. This module combines traditional decision tree analysis with advanced Markov modeling for complex medical scenarios.
+
+**Learning Objectives:**
+
+- Understand the fundamentals of medical decision analysis
+- Learn diagnostic test evaluation and ROC analysis
+- Master decision tree construction and interpretation
+- Apply Markov modeling for chronic disease scenarios
+- Conduct cost-effectiveness analysis for healthcare interventions
+- Implement precision medicine decision frameworks
+
+## Module Overview
+
+meddecide encompasses four main areas of medical decision analysis:
+
+### 1. **Diagnostic Test Evaluation**
+- **ROC Analysis**: Receiver operating characteristic curves and AUC calculation
+- **Diagnostic Accuracy**: Sensitivity, specificity, predictive values
+- **Test Performance**: Likelihood ratios and clinical utility measures
+- **Biomarker Validation**: Companion diagnostic development
+
+### 2. **Decision Tree Analysis**
+- **Simple Decision Trees**: Binary choice scenarios with immediate outcomes
+- **Complex Decision Trees**: Multi-branch decisions with sequential outcomes
+- **Cost-Effectiveness Trees**: Economic evaluation integrated with clinical outcomes
+- **Sensitivity Analysis**: Parameter uncertainty assessment
+
+### 3. **Markov Modeling**
+- **State Transition Models**: Chronic disease progression modeling
+- **Markov Chains**: Time-dependent health state transitions
+- **Cohort Simulation**: Population-level outcome prediction
+- **Economic Evaluation**: Long-term cost-effectiveness analysis
+
+### 4. **Precision Medicine Decisions**
+- **Biomarker-Guided Therapy**: Treatment selection algorithms
+- **Companion Diagnostics**: Test-treatment combinations
+- **Pharmacoeconomics**: Personalized medicine cost-effectiveness
+- **Real-World Evidence**: Population-based decision modeling
+
+```{r load-packages}
+library(ClinicoPath)
+library(dplyr)
+library(pROC)
+```
+
+# Getting Started
+
+## Installation and Setup
+
+meddecide is part of the comprehensive ClinicoPath suite and provides specialized tools for medical decision analysis.
+
+### In jamovi:
+1. Install the ClinicoPath module from the jamovi library
+2. Navigate to **meddecide** in the analysis menu
+3. Choose from: Agreement, Decision, ROC, or Power Analysis
+
+### In R:
+```{r installation, eval=FALSE}
+# Install from GitHub
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+devtools::install_github("sbalci/meddecide")
+
+# Load the package
+library(ClinicoPath)
+```
+
+## Sample Datasets
+
+meddecide includes comprehensive datasets for decision analysis training:
+
+```{r sample-data}
+# Load decision analysis datasets
+data(basic_decision_data)
+data(markov_decision_data) 
+data(precision_oncology_data)
+
+# Decision tree data overview
+cat("Basic decision data dimensions:", nrow(basic_decision_data), "×", ncol(basic_decision_data), "\n")
+cat("Key variables:", paste(names(basic_decision_data)[1:8], collapse = ", "), "...\n")
+
+# Markov model data overview
+cat("Markov decision data dimensions:", nrow(markov_decision_data), "×", ncol(markov_decision_data), "\n")
+cat("Key variables:", paste(names(markov_decision_data)[1:8], collapse = ", "), "...\n")
+
+# Precision oncology data overview
+cat("Precision oncology data dimensions:", nrow(precision_oncology_data), "×", ncol(precision_oncology_data), "\n")
+molecular_vars <- names(precision_oncology_data)[grepl("Mutation|Status|TPS", names(precision_oncology_data))]
+cat("Biomarker variables:", paste(molecular_vars[1:5], collapse = ", "), "...\n")
+```
+
+# Core Analysis Workflows
+
+## 1. ROC Analysis and Diagnostic Test Evaluation
+
+Foundation for biomarker validation and diagnostic test assessment.
+
+```{r roc-analysis}
+# ROC Analysis Example
+# In jamovi: meddecide > ROC > ROC Analysis
+
+# Using precision oncology data for biomarker evaluation
+data(precision_oncology_data)
+
+# Create binary outcome for treatment response
+response_binary <- as.numeric(precision_oncology_data$Treatment_Response %in% 
+                             c("Complete_Response", "Partial_Response"))
+
+cat("ROC Analysis Example - PD-L1 TPS for Treatment Response\n")
+cat("=====================================================\n\n")
+
+# Basic ROC statistics
+if(requireNamespace("pROC", quietly = TRUE)) {
+  library(pROC)
+  
+  # ROC analysis for PD-L1 TPS
+  roc_pdl1 <- roc(response_binary, precision_oncology_data$PD_L1_TPS, quiet = TRUE)
+  
+  cat("PD-L1 TPS ROC Results:\n")
+  cat("AUC:", round(auc(roc_pdl1), 3), "\n")
+  cat("95% CI:", paste(round(ci.auc(roc_pdl1), 3), collapse = " - "), "\n")
+  
+  # Optimal cutpoint
+  optimal_cutpoint <- coords(roc_pdl1, "best", ret = "threshold")
+  cat("Optimal cutpoint:", round(optimal_cutpoint, 1), "%\n")
+  
+  # Clinical cutpoints evaluation
+  cutpoints <- c(1, 10, 20, 50)
+  cat("\nPerformance at Clinical Cutpoints:\n")
+  
+  for(cutpoint in cutpoints) {
+    sens <- coords(roc_pdl1, cutpoint, ret = "sensitivity")
+    spec <- coords(roc_pdl1, cutpoint, ret = "specificity")
+    cat(paste0("PD-L1 ≥", cutpoint, "%: Sensitivity = ", round(sens, 3), 
+              ", Specificity = ", round(spec, 3), "\n"))
+  }
+}
+
+# Diagnostic test characteristics
+n_positive <- sum(precision_oncology_data$PD_L1_TPS >= 50)
+n_total <- nrow(precision_oncology_data)
+prevalence <- round(n_positive / n_total * 100, 1)
+
+cat("\nDiagnostic Test Characteristics:\n")
+cat("PD-L1 ≥50% prevalence:", prevalence, "%\n")
+cat("Sample size:", n_total, "patients\n")
+```
+
+## 2. Simple Decision Tree Analysis
+
+Evaluate treatment alternatives with immediate outcomes.
+
+```{r decision-tree}
+# Decision Tree Analysis Example
+# In jamovi: meddecide > Decision > Decision Tree Graph
+
+# Using basic decision data
+data(basic_decision_data)
+
+cat("Decision Tree Analysis Example - Surgery vs Medical Treatment\n")
+cat("===========================================================\n\n")
+
+# Decision analysis summary
+decision_summary <- basic_decision_data %>%
+  group_by(treatment) %>%
+  summarise(
+    n = n(),
+    mean_prob_success = round(mean(prob_success_surgery + prob_success_medical)/2, 3),
+    mean_cost = round(mean(cost_surgery + cost_medical)/2, 0),
+    mean_utility_success = round(mean(utility_success), 3),
+    clinical_response_rate = round(mean(clinical_outcome == "Complete_Response") * 100, 1),
+    .groups = 'drop'
+  )
+
+cat("Decision Alternatives:\n")
+print(decision_summary)
+
+# Expected value calculation example
+surgery_cases <- basic_decision_data[basic_decision_data$treatment == "Surgery", ]
+medical_cases <- basic_decision_data[basic_decision_data$treatment == "Medical Treatment", ]
+
+if(nrow(surgery_cases) > 0 && nrow(medical_cases) > 0) {
+  # Surgery expected values
+  surgery_ev_cost <- mean(surgery_cases$cost_surgery * surgery_cases$prob_success_surgery + 
+                         surgery_cases$cost_complications * surgery_cases$prob_complications)
+  
+  surgery_ev_utility <- mean(surgery_cases$utility_success * surgery_cases$prob_success_surgery + 
+                            surgery_cases$utility_failure * (1 - surgery_cases$prob_success_surgery))
+  
+  # Medical treatment expected values  
+  medical_ev_cost <- mean(medical_cases$cost_medical * medical_cases$prob_success_medical)
+  
+  medical_ev_utility <- mean(medical_cases$utility_success * medical_cases$prob_success_medical + 
+                            medical_cases$utility_failure * (1 - medical_cases$prob_success_medical))
+  
+  cat("\nExpected Value Analysis:\n")
+  cat("Surgery - Expected Cost: $", round(surgery_ev_cost, 0), 
+      ", Expected Utility: ", round(surgery_ev_utility, 3), "\n")
+  cat("Medical - Expected Cost: $", round(medical_ev_cost, 0), 
+      ", Expected Utility: ", round(medical_ev_utility, 3), "\n")
+  
+  # Cost-effectiveness ratio
+  if(medical_ev_utility != surgery_ev_utility) {
+    icer <- (surgery_ev_cost - medical_ev_cost) / (surgery_ev_utility - medical_ev_utility)
+    cat("Incremental Cost-Effectiveness Ratio: $", round(abs(icer), 0), " per utility unit\n")
+  }
+}
+```
+
+## 3. Markov Model Analysis
+
+Long-term disease progression modeling for chronic conditions.
+
+```{r markov-analysis}
+# Markov Model Analysis Example
+# In jamovi: meddecide > Decision > Decision Tree Graph (Markov Model Tree)
+
+# Using markov decision data
+data(markov_decision_data)
+
+cat("Markov Model Analysis Example - Chronic Disease Management\n")
+cat("=========================================================\n\n")
+
+# Treatment strategy comparison
+strategy_summary <- markov_decision_data %>%
+  group_by(treatment_strategy) %>%
+  summarise(
+    n_states = n(),
+    mean_healthy_to_sick = round(mean(prob_healthy_to_sick), 4),
+    mean_sick_to_recovered = round(mean(prob_sick_to_recovered), 4),
+    annual_cost_healthy = round(mean(cost_healthy_state), 0),
+    annual_cost_sick = round(mean(cost_sick_state), 0),
+    annual_utility_healthy = round(mean(utility_healthy), 3),
+    annual_utility_sick = round(mean(utility_sick), 3),
+    .groups = 'drop'
+  )
+
+cat("Treatment Strategy Comparison:\n")
+print(strategy_summary)
+
+# Transition probability validation
+cat("\nTransition Probability Validation:\n")
+sample_state <- markov_decision_data[1, ]
+prob_sum <- sample_state$prob_healthy_to_sick + (1 - sample_state$prob_healthy_to_sick)
+cat("Probability sum check (should = 1.0):", prob_sum, "\n")
+
+# Long-term outcome simulation (simplified)
+time_horizon <- 10  # years
+initial_cohort <- 1000
+
+cat("\nSimulated 10-Year Outcomes (per 1000 patients):\n")
+for(strategy in unique(markov_decision_data$treatment_strategy)) {
+  strategy_data <- markov_decision_data[markov_decision_data$treatment_strategy == strategy, ][1, ]
+  
+  # Simplified simulation
+  annual_transition_rate <- strategy_data$prob_healthy_to_sick
+  annual_recovery_rate <- strategy_data$prob_sick_to_recovered
+  
+  # Estimate patients progressing over time horizon
+  patients_progressing <- round(initial_cohort * annual_transition_rate * time_horizon)
+  
+  # Estimate total costs
+  total_cost <- strategy_data$cost_healthy_state * time_horizon + 
+                patients_progressing * strategy_data$cost_sick_state
+  
+  cat(paste0(strategy, ": ", patients_progressing, " progressions, $", 
+            round(total_cost, 0), " total cost\n"))
+}
+```
+
+## 4. Precision Medicine Decision Analysis
+
+Biomarker-guided treatment selection with cost-effectiveness evaluation.
+
+```{r precision-medicine}
+# Precision Medicine Decision Analysis
+# Combining diagnostic testing with treatment selection
+
+data(precision_oncology_data)
+
+cat("Precision Medicine Decision Analysis\n")
+cat("===================================\n\n")
+
+# Biomarker testing strategy evaluation
+biomarker_strategy <- precision_oncology_data %>%
+  mutate(
+    # Define testing strategy
+    test_egfr = TRUE,  # Universal EGFR testing
+    test_pdl1 = TRUE,  # Universal PD-L1 testing
+    
+    # Treatment assignment based on biomarkers
+    recommended_treatment = case_when(
+      EGFR_Mutation == "Positive" ~ "EGFR_TKI",
+      PD_L1_TPS >= 50 ~ "Anti_PD1_Mono",
+      PD_L1_TPS >= 1 ~ "Combo_Immuno",
+      TRUE ~ "Chemotherapy"
+    ),
+    
+    # Estimate treatment costs
+    treatment_cost = case_when(
+      recommended_treatment == "EGFR_TKI" ~ 120000,
+      recommended_treatment == "Anti_PD1_Mono" ~ 150000,
+      recommended_treatment == "Combo_Immuno" ~ 200000,
+      TRUE ~ 80000
+    ),
+    
+    # Testing costs
+    testing_cost = 3000,  # Comprehensive biomarker panel
+    
+    # Total cost
+    total_cost = treatment_cost + testing_cost
+  )
+
+# Strategy outcomes
+strategy_outcomes <- biomarker_strategy %>%
+  group_by(recommended_treatment) %>%
+  summarise(
+    n_patients = n(),
+    percentage = round(n() / nrow(biomarker_strategy) * 100, 1),
+    response_rate = round(mean(Treatment_Response %in% c("Complete_Response", "Partial_Response")) * 100, 1),
+    median_pfs = median(PFS_Months),
+    mean_cost = round(mean(total_cost), 0),
+    .groups = 'drop'
+  )
+
+cat("Biomarker-Guided Treatment Strategy Outcomes:\n")
+print(strategy_outcomes)
+
+# Cost-effectiveness summary
+total_responses <- sum(biomarker_strategy$Treatment_Response %in% c("Complete_Response", "Partial_Response"))
+total_cost <- sum(biomarker_strategy$total_cost)
+cost_per_response <- round(total_cost / total_responses, 0)
+
+cat("\nOverall Strategy Performance:\n")
+cat("Total patients:", nrow(biomarker_strategy), "\n")
+cat("Total responses:", total_responses, "\n")
+cat("Response rate:", round(total_responses / nrow(biomarker_strategy) * 100, 1), "%\n")
+cat("Cost per response: $", cost_per_response, "\n")
+
+# Compare with standard care (no biomarker testing)
+standard_care_response_rate <- 25  # Assumed standard chemotherapy response rate
+standard_care_cost <- 80000  # Standard chemotherapy cost
+cost_per_response_standard <- round(standard_care_cost / (standard_care_response_rate/100), 0)
+
+cat("\nComparison with Standard Care:\n")
+cat("Standard care cost per response: $", cost_per_response_standard, "\n")
+cat("Biomarker strategy cost per response: $", cost_per_response, "\n")
+
+if(cost_per_response < cost_per_response_standard) {
+  cat("Biomarker strategy is more cost-effective\n")
+} else {
+  cat("Standard care is more cost-effective\n")
+}
+```
+
+# Advanced Applications
+
+## Agreement Analysis
+
+Evaluate diagnostic test reliability and inter-observer agreement.
+
+```{r agreement-intro}
+cat("Agreement Analysis Applications\n")
+cat("==============================\n\n")
+
+# Load biomarker validation data for agreement analysis
+data(biomarker_validation_study)
+
+# Multi-platform agreement
+platform_agreement <- biomarker_validation_study %>%
+  summarise(
+    n_cases = n(),
+    correlation = round(cor(Platform_A_PD_L1, Platform_B_PD_L1), 3),
+    mean_difference = round(mean(Platform_B_PD_L1 - Platform_A_PD_L1), 2),
+    agreement_within_10pct = round(mean(abs(Platform_B_PD_L1 - Platform_A_PD_L1) <= 10) * 100, 1),
+    overall_agreement = round(mean(Platform_Agreement) * 100, 1)
+  )
+
+cat("Multi-Platform Biomarker Agreement:\n")
+cat("Cases analyzed:", platform_agreement$n_cases, "\n")
+cat("Correlation:", platform_agreement$correlation, "\n")
+cat("Mean difference:", platform_agreement$mean_difference, "%\n")
+cat("Agreement within ±10%:", platform_agreement$agreement_within_10pct, "%\n")
+cat("Overall agreement:", platform_agreement$overall_agreement, "%\n")
+
+# Clinical significance
+if(platform_agreement$correlation >= 0.90 && platform_agreement$overall_agreement >= 85) {
+  cat("Conclusion: Platforms show excellent agreement for clinical use\n")
+} else {
+  cat("Conclusion: Platform harmonization may be needed\n")
+}
+```
+
+## Power Analysis
+
+Sample size and statistical power calculations for diagnostic studies.
+
+```{r power-intro}
+cat("\nPower Analysis for Diagnostic Studies\n")
+cat("====================================\n\n")
+
+# Sample size calculation for ROC analysis
+# Based on AUC difference detection
+
+auc_null <- 0.5      # Null hypothesis (no discrimination)
+auc_alternative <- 0.75  # Alternative hypothesis (good discrimination)
+alpha <- 0.05        # Type I error rate
+power <- 0.80        # Desired power
+
+# Simplified sample size estimation
+# Using normal approximation for AUC
+z_alpha <- qnorm(1 - alpha/2)  # 1.96 for 95% confidence
+z_beta <- qnorm(power)         # 0.84 for 80% power
+
+# Approximate sample size (simplified formula)
+estimated_n <- ((z_alpha + z_beta)^2 * 2) / ((auc_alternative - auc_null)^2 * 4)
+
+cat("Sample Size Estimation for ROC Study:\n")
+cat("Null AUC:", auc_null, "\n")
+cat("Alternative AUC:", auc_alternative, "\n") 
+cat("Alpha:", alpha, "\n")
+cat("Power:", power, "\n")
+cat("Estimated sample size:", round(estimated_n), "per group\n")
+cat("Total sample size:", round(estimated_n * 2), "\n")
+
+# Recommendations
+if(estimated_n < 50) {
+  cat("Recommendation: Small study feasible\n")
+} else if(estimated_n < 200) {
+  cat("Recommendation: Moderate-sized study required\n")
+} else {
+  cat("Recommendation: Large study required, consider multi-center collaboration\n")
+}
+```
+
+# Integration with Other Modules
+
+meddecide works seamlessly with other ClinicoPath modules:
+
+## Connection to ClinicoPathDescriptives
+- Descriptive statistics inform decision model parameters
+- Quality metrics validate input data reliability
+- Baseline characteristics define patient populations
+
+## Connection to jsurvival
+- Survival analysis provides time-to-event data for Markov models
+- Hazard ratios inform transition probabilities
+- Survival curves validate decision model outcomes
+
+## Connection to jjstatsplot
+- Statistical plots support decision analysis communication
+- ROC curves and forest plots enhance interpretation
+- Sensitivity analysis visualization
+
+# Best Practices
+
+## Decision Model Development
+
+1. **Problem Definition**: Clearly define the decision context and alternatives
+2. **Model Structure**: Choose appropriate model type (tree vs. Markov)
+3. **Parameter Estimation**: Use high-quality data sources
+4. **Validation**: Test model predictions against real-world outcomes
+5. **Sensitivity Analysis**: Assess parameter uncertainty impact
+
+## ROC Analysis Guidelines
+
+1. **Study Design**: Prospective cohort with appropriate controls
+2. **Sample Size**: Adequate power for clinically meaningful differences
+3. **Cutpoint Selection**: Balance sensitivity and specificity based on clinical needs
+4. **Validation**: Independent validation cohort required
+5. **Clinical Utility**: Demonstrate impact on patient outcomes
+
+## Economic Evaluation
+
+1. **Perspective**: Clearly state economic perspective (payer, societal)
+2. **Time Horizon**: Appropriate to capture all relevant costs and benefits
+3. **Discounting**: Apply standard discount rates for future costs/benefits
+4. **Uncertainty**: Comprehensive sensitivity and scenario analysis
+5. **Transparency**: Report all assumptions and data sources
+
+# Conclusion
+
+The meddecide module provides comprehensive tools for evidence-based medical decision making, from simple diagnostic test evaluation to complex health economic modeling. The integration of traditional decision analysis with modern precision medicine applications makes it an essential tool for contemporary healthcare research and practice.
+
+## Next Steps
+
+To explore specific applications in detail:
+
+- **Precision Oncology**: See `meddecide-precision-oncology-biomarkers.Rmd`
+- **ROC Analysis**: See `meddecide-roc-analysis.Rmd`
+- **Decision Trees**: See `meddecide-decision-tree-examples.Rmd`
+- **Markov Modeling**: See `meddecide-decision-tree-vs-markov-analysis.Rmd`
+
+## Support and Resources
+
+- **Comprehensive Documentation**: Detailed function references
+- **Real-World Examples**: Clinical case studies and applications
+- **Best Practice Guidelines**: Evidence-based recommendations
+- **Community Support**: Active user forums and expert guidance
+
+---
+
+*This introduction provides the foundation for using meddecide in medical decision analysis. Explore the detailed vignettes for specific techniques and advanced applications.*

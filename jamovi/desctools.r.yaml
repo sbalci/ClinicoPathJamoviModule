@@ -1,0 +1,55 @@
+---
+name: desctools
+title: Advanced Statistical Tests
+jrs: '1.1'
+
+items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      clearWith:
+          - effect_size_analysis
+          - goodness_of_fit
+          - categorical_tests
+
+    - name: effect_size_results
+      title: Effect Size Analysis
+      type: Html
+      visible: (effect_size_analysis && show_effect_sizes)
+      clearWith:
+          - group_var
+          - continuous_var
+          - pooled_sd
+          - hedges_correction
+          - effect_ci_level
+          - multiple_testing
+
+    - name: goodness_fit_results
+      title: Goodness of Fit Tests
+      type: Html
+      visible: (goodness_of_fit && show_goodness_tests)
+      clearWith:
+          - fitted_probs
+          - observed_outcomes
+          - hl_groups
+          - normality_var
+          - multiple_testing
+
+    - name: categorical_results
+      title: Categorical Data Tests
+      type: Html
+      visible: (categorical_tests && show_categorical_tests)
+      clearWith:
+          - cat_var1
+          - cat_var2
+          - stratum_var
+          - ordered_exposure
+          - binary_outcome
+          - multiple_testing
+
+refs:
+    - DescTools
+    - ClinicoPathJamoviModule
+
+...

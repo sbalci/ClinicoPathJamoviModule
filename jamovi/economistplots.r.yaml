@@ -1,0 +1,98 @@
+---
+name: economistplots
+title: "Economist-Style Distribution Plots"
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: "Instructions"
+      type: Html
+      visible: true
+
+    - name: main_plot
+      title: "Economist Distribution Plot"
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_main
+      visible: true
+      clearWith:
+        - y_var
+        - x_var
+        - facet_var
+        - plot_orientation
+        - economist_theme
+        - distribution_style
+
+    - name: statistical_results
+      title: "Statistical Analysis Results"
+      type: Html
+      visible: (add_statistics && y_var && x_var)
+      clearWith:
+        - y_var
+        - x_var
+        - stat_method
+        - add_statistics
+        - effect_size
+
+    - name: summary_statistics
+      title: "Distribution Summary Statistics"
+      type: Html
+      visible: (summary_statistics && y_var && x_var)
+      clearWith:
+        - y_var
+        - x_var
+        - facet_var
+
+    - name: economist_legend_info
+      title: "Economist Legend Explanation"
+      type: Html
+      visible: (show_legend)
+      clearWith:
+        - show_legend
+        - distribution_style
+
+    - name: comparison_results
+      title: "Pairwise Comparisons"
+      type: Html
+      visible: (comparison_annotations && add_statistics && y_var && x_var)
+      clearWith:
+        - y_var
+        - x_var
+        - comparison_annotations
+        - stat_method
+
+    - name: distribution_diagnostics
+      title: "Distribution Diagnostics"
+      type: Image
+      width: 800
+      height: 400
+      renderFun: .plot_diagnostics
+      visible: (add_statistics && y_var && x_var)
+      clearWith:
+        - y_var
+        - x_var
+        - outlier_treatment
+
+    - name: r_code_output
+      title: "Reproducible R Code"
+      type: Html
+      visible: (export_economist_code)
+      clearWith:
+        - y_var
+        - x_var
+        - economist_theme
+        - distribution_style
+
+    - name: interpretation_guide
+      title: "Plot Interpretation Guide"
+      type: Html
+      visible: true
+      clearWith:
+        - distribution_style
+        - economist_theme
+
+refs:
+  - ggeconodist
+  - ggplot2
+  - dplyr

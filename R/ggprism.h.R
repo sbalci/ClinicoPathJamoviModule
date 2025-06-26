@@ -25,7 +25,16 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             legend_position = "right",
             base_size = 12,
             show_summary = TRUE,
-            error_bars = "se", ...) {
+            error_bars = "se",
+            prism_guides = "standard",
+            annotation_ticks = FALSE,
+            preview_mode = FALSE,
+            prism_shape_palette = "default",
+            jitter_width = 0.2,
+            violin_width = 1,
+            publication_ready = FALSE,
+            export_dpi = 300,
+            custom_comparisons = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -93,12 +102,25 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "floral",
                     "candy_bright",
-                    "neon",
-                    "starry",
-                    "flames",
+                    "office",
                     "pastels",
+                    "colorblind_safe",
+                    "blueprint",
+                    "neon",
+                    "flames",
+                    "ocean",
+                    "spring",
+                    "starry",
+                    "the_blues",
+                    "viridis",
                     "pearl",
-                    "viridis"),
+                    "quiet",
+                    "stained_glass",
+                    "warm_pastels",
+                    "prism_dark",
+                    "prism_light",
+                    "evergreen",
+                    "sunny_garden"),
                 default="floral")
             private$..show_points <- jmvcore::OptionBool$new(
                 "show_points",
@@ -180,6 +202,59 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sd",
                     "ci"),
                 default="se")
+            private$..prism_guides <- jmvcore::OptionList$new(
+                "prism_guides",
+                prism_guides,
+                options=list(
+                    "standard",
+                    "minor",
+                    "offset",
+                    "offset_minor",
+                    "bracket"),
+                default="standard")
+            private$..annotation_ticks <- jmvcore::OptionBool$new(
+                "annotation_ticks",
+                annotation_ticks,
+                default=FALSE)
+            private$..preview_mode <- jmvcore::OptionBool$new(
+                "preview_mode",
+                preview_mode,
+                default=FALSE)
+            private$..prism_shape_palette <- jmvcore::OptionList$new(
+                "prism_shape_palette",
+                prism_shape_palette,
+                options=list(
+                    "default",
+                    "prism",
+                    "filled",
+                    "open"),
+                default="default")
+            private$..jitter_width <- jmvcore::OptionNumber$new(
+                "jitter_width",
+                jitter_width,
+                min=0,
+                max=1,
+                default=0.2)
+            private$..violin_width <- jmvcore::OptionNumber$new(
+                "violin_width",
+                violin_width,
+                min=0.1,
+                max=2,
+                default=1)
+            private$..publication_ready <- jmvcore::OptionBool$new(
+                "publication_ready",
+                publication_ready,
+                default=FALSE)
+            private$..export_dpi <- jmvcore::OptionNumber$new(
+                "export_dpi",
+                export_dpi,
+                min=150,
+                max=600,
+                default=300)
+            private$..custom_comparisons <- jmvcore::OptionString$new(
+                "custom_comparisons",
+                custom_comparisons,
+                default="")
 
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
@@ -201,6 +276,15 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..base_size)
             self$.addOption(private$..show_summary)
             self$.addOption(private$..error_bars)
+            self$.addOption(private$..prism_guides)
+            self$.addOption(private$..annotation_ticks)
+            self$.addOption(private$..preview_mode)
+            self$.addOption(private$..prism_shape_palette)
+            self$.addOption(private$..jitter_width)
+            self$.addOption(private$..violin_width)
+            self$.addOption(private$..publication_ready)
+            self$.addOption(private$..export_dpi)
+            self$.addOption(private$..custom_comparisons)
         }),
     active = list(
         x_var = function() private$..x_var$value,
@@ -222,7 +306,16 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         legend_position = function() private$..legend_position$value,
         base_size = function() private$..base_size$value,
         show_summary = function() private$..show_summary$value,
-        error_bars = function() private$..error_bars$value),
+        error_bars = function() private$..error_bars$value,
+        prism_guides = function() private$..prism_guides$value,
+        annotation_ticks = function() private$..annotation_ticks$value,
+        preview_mode = function() private$..preview_mode$value,
+        prism_shape_palette = function() private$..prism_shape_palette$value,
+        jitter_width = function() private$..jitter_width$value,
+        violin_width = function() private$..violin_width$value,
+        publication_ready = function() private$..publication_ready$value,
+        export_dpi = function() private$..export_dpi$value,
+        custom_comparisons = function() private$..custom_comparisons$value),
     private = list(
         ..x_var = NA,
         ..y_var = NA,
@@ -243,51 +336,134 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..legend_position = NA,
         ..base_size = NA,
         ..show_summary = NA,
-        ..error_bars = NA)
+        ..error_bars = NA,
+        ..prism_guides = NA,
+        ..annotation_ticks = NA,
+        ..preview_mode = NA,
+        ..prism_shape_palette = NA,
+        ..jitter_width = NA,
+        ..violin_width = NA,
+        ..publication_ready = NA,
+        ..export_dpi = NA,
+        ..custom_comparisons = NA)
 )
 
 ggprismResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ggprismResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]],
-        summary = function() private$.items[["summary"]],
-        statistics = function() private$.items[["statistics"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        instructions = function() private$.items[["instructions"]],
+        main_plot = function() private$.items[["main_plot"]],
+        palette_preview = function() private$.items[["palette_preview"]],
+        publication_plot = function() private$.items[["publication_plot"]],
+        summary_statistics = function() private$.items[["summary_statistics"]],
+        statistical_tests = function() private$.items[["statistical_tests"]],
+        prism_guide = function() private$.items[["prism_guide"]],
+        palette_information = function() private$.items[["palette_information"]],
+        export_code = function() private$.items[["export_code"]],
+        accessibility_notes = function() private$.items[["accessibility_notes"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="GraphPad Prism Style Plots")
+                title="GraphPad Prism Style Plots",
+                refs=list(
+                    "ggprism",
+                    "ggplot2",
+                    "dplyr"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
+                name="instructions",
                 title="Instructions",
-                visible=FALSE))
+                visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
+                name="main_plot",
                 title="Prism Style Plot",
                 width=800,
                 height=600,
-                renderFun=".plot"))
+                renderFun=".plot_main",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "plot_type",
+                    "prism_theme",
+                    "prism_palette",
+                    "prism_guides")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="palette_preview",
+                title="Color Palette Preview",
+                width=600,
+                height=400,
+                renderFun=".plot_palette_preview",
+                visible="(preview_mode)",
+                clearWith=list(
+                    "prism_palette")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="publication_plot",
+                title="Publication Ready Plot",
+                width=1200,
+                height=900,
+                renderFun=".plot_publication",
+                visible="(publication_ready)",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "plot_type",
+                    "prism_theme",
+                    "prism_palette",
+                    "export_dpi")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="summary",
+                name="summary_statistics",
                 title="Summary Statistics",
-                visible="(show_summary)"))
+                visible="(show_summary)",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="statistics",
-                title="Statistical Tests",
-                visible="(show_statistics)"))
+                name="statistical_tests",
+                title="Statistical Test Results",
+                visible="(show_statistics)",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "stats_method")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="interpretation",
-                title="Interpretation Guide"))}))
+                name="prism_guide",
+                title="GraphPad Prism Style Guide",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="palette_information",
+                title="Color Palette Information",
+                visible=TRUE,
+                clearWith=list(
+                    "prism_palette")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="export_code",
+                title="Reproducible R Code",
+                visible="(publication_ready)",
+                clearWith=list(
+                    "plot_type",
+                    "prism_theme",
+                    "prism_palette")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="accessibility_notes",
+                title="Accessibility & Best Practices",
+                visible=TRUE))}))
 
 ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ggprismBase",
@@ -343,7 +519,8 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   layout.
 #' @param plot_type Type of plot to create with Prism styling.
 #' @param prism_theme GraphPad Prism theme variant to apply.
-#' @param prism_palette Prism-style color palette for different groups.
+#' @param prism_palette Prism-style color palette for different groups. Choose
+#'   from 20+ authentic GraphPad Prism palettes.
 #' @param show_points If TRUE, overlays individual data points on the plot.
 #' @param point_size Size of individual data points.
 #' @param point_alpha Transparency level for data points (0 = transparent, 1 =
@@ -361,13 +538,32 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_summary If TRUE, displays summary statistics table.
 #' @param error_bars Type of error bars to display (for applicable plot
 #'   types).
+#' @param prism_guides Axis guide style following GraphPad Prism conventions.
+#' @param annotation_ticks Add tick marks as annotations in Prism style.
+#' @param preview_mode Enable palette preview mode to see all colors in the
+#'   selected palette.
+#' @param prism_shape_palette Shape palette for point plots following Prism
+#'   conventions.
+#' @param jitter_width Width of horizontal jittering for overlaid points.
+#' @param violin_width Scale factor for violin plot widths.
+#' @param publication_ready Optimize plot for publication with enhanced
+#'   styling and formatting.
+#' @param export_dpi DPI for high-resolution export (publication standard:
+#'   300).
+#' @param custom_comparisons Custom pairwise comparisons (e.g.,
+#'   "Group1-Group2,Group1-Group3").
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$main_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$palette_preview} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$publication_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary_statistics} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$prism_guide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$palette_information} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$export_code} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$accessibility_notes} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -392,7 +588,16 @@ ggprism <- function(
     legend_position = "right",
     base_size = 12,
     show_summary = TRUE,
-    error_bars = "se") {
+    error_bars = "se",
+    prism_guides = "standard",
+    annotation_ticks = FALSE,
+    preview_mode = FALSE,
+    prism_shape_palette = "default",
+    jitter_width = 0.2,
+    violin_width = 1,
+    publication_ready = FALSE,
+    export_dpi = 300,
+    custom_comparisons = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ggprism requires jmvcore to be installed (restart may be required)")
@@ -430,7 +635,16 @@ ggprism <- function(
         legend_position = legend_position,
         base_size = base_size,
         show_summary = show_summary,
-        error_bars = error_bars)
+        error_bars = error_bars,
+        prism_guides = prism_guides,
+        annotation_ticks = annotation_ticks,
+        preview_mode = preview_mode,
+        prism_shape_palette = prism_shape_palette,
+        jitter_width = jitter_width,
+        violin_width = violin_width,
+        publication_ready = publication_ready,
+        export_dpi = export_dpi,
+        custom_comparisons = custom_comparisons)
 
     analysis <- ggprismClass$new(
         options = options,

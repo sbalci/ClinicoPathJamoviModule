@@ -22,6 +22,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             alpha_level = 0.6,
             show_ph_test = TRUE,
             show_model_summary = TRUE,
+            show_vif = TRUE,
+            vif_threshold = 5,
             show_interpretation = TRUE,
             exclude_missing = TRUE,
             confidence_level = 0.95, ...) {
@@ -122,6 +124,16 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "show_model_summary",
                 show_model_summary,
                 default=TRUE)
+            private$..show_vif <- jmvcore::OptionBool$new(
+                "show_vif",
+                show_vif,
+                default=TRUE)
+            private$..vif_threshold <- jmvcore::OptionNumber$new(
+                "vif_threshold",
+                vif_threshold,
+                min=2,
+                max=10,
+                default=5)
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
@@ -153,6 +165,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..alpha_level)
             self$.addOption(private$..show_ph_test)
             self$.addOption(private$..show_model_summary)
+            self$.addOption(private$..show_vif)
+            self$.addOption(private$..vif_threshold)
             self$.addOption(private$..show_interpretation)
             self$.addOption(private$..exclude_missing)
             self$.addOption(private$..confidence_level)
@@ -174,6 +188,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         alpha_level = function() private$..alpha_level$value,
         show_ph_test = function() private$..show_ph_test$value,
         show_model_summary = function() private$..show_model_summary$value,
+        show_vif = function() private$..show_vif$value,
+        vif_threshold = function() private$..vif_threshold$value,
         show_interpretation = function() private$..show_interpretation$value,
         exclude_missing = function() private$..exclude_missing$value,
         confidence_level = function() private$..confidence_level$value),
@@ -194,6 +210,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..alpha_level = NA,
         ..show_ph_test = NA,
         ..show_model_summary = NA,
+        ..show_vif = NA,
+        ..vif_threshold = NA,
         ..show_interpretation = NA,
         ..exclude_missing = NA,
         ..confidence_level = NA)
@@ -206,6 +224,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         instructions = function() private$.items[["instructions"]],
         model_summary = function() private$.items[["model_summary"]],
         ph_test_results = function() private$.items[["ph_test_results"]],
+        vif_results = function() private$.items[["vif_results"]],
         martingale_plot = function() private$.items[["martingale_plot"]],
         deviance_plot = function() private$.items[["deviance_plot"]],
         score_plot = function() private$.items[["score_plot"]],
@@ -221,7 +240,8 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Cox Proportional Hazards Model Diagnostics",
                 refs=list(
                     "survival",
-                    "survminer"))
+                    "survminer",
+                    "car"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -249,6 +269,17 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "covariates",
                     "strata_var",
                     "confidence_level")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="vif_results",
+                title="Multicollinearity Analysis (VIF)",
+                visible="(time && event && covariates && show_vif)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "strata_var",
+                    "vif_threshold")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="martingale_plot",
@@ -402,6 +433,9 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param show_ph_test Whether to display results of proportional hazards
 #'   test.
 #' @param show_model_summary Whether to display Cox regression model summary.
+#' @param show_vif Whether to calculate and display Variance Inflation Factor
+#'   (VIF) for multicollinearity assessment.
+#' @param vif_threshold VIF threshold for multicollinearity warning.
 #' @param show_interpretation Whether to include interpretation of diagnostic
 #'   results.
 #' @param exclude_missing Whether to exclude observations with missing values.
@@ -412,6 +446,7 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ph_test_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$vif_results} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$martingale_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$deviance_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$score_plot} \tab \tab \tab \tab \tab an image \cr
@@ -439,6 +474,8 @@ coxdiagnostics <- function(
     alpha_level = 0.6,
     show_ph_test = TRUE,
     show_model_summary = TRUE,
+    show_vif = TRUE,
+    vif_threshold = 5,
     show_interpretation = TRUE,
     exclude_missing = TRUE,
     confidence_level = 0.95) {
@@ -477,6 +514,8 @@ coxdiagnostics <- function(
         alpha_level = alpha_level,
         show_ph_test = show_ph_test,
         show_model_summary = show_model_summary,
+        show_vif = show_vif,
+        vif_threshold = vif_threshold,
         show_interpretation = show_interpretation,
         exclude_missing = exclude_missing,
         confidence_level = confidence_level)

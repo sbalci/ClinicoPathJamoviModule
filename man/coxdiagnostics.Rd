@@ -22,6 +22,8 @@ coxdiagnostics(
   alpha_level = 0.6,
   show_ph_test = TRUE,
   show_model_summary = TRUE,
+  show_vif = TRUE,
+  vif_threshold = 5,
   show_interpretation = TRUE,
   exclude_missing = TRUE,
   confidence_level = 0.95
@@ -63,6 +65,11 @@ test.}
 
 \item{show_model_summary}{Whether to display Cox regression model summary.}
 
+\item{show_vif}{Whether to calculate and display Variance Inflation Factor
+(VIF) for multicollinearity assessment.}
+
+\item{vif_threshold}{VIF threshold for multicollinearity warning.}
+
 \item{show_interpretation}{Whether to include interpretation of diagnostic
 results.}
 
@@ -77,6 +84,7 @@ A results object containing:
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$ph_test_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$vif_results} \tab \tab \tab \tab \tab a html \cr
 \code{results$martingale_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$deviance_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$score_plot} \tab \tab \tab \tab \tab an image \cr

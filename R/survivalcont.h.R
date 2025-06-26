@@ -32,6 +32,10 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             yend_plot = 1,
             byplot = 12,
             findcut = FALSE,
+            multiple_cutoffs = FALSE,
+            num_cutoffs = "two",
+            cutoff_method = "quantile",
+            min_group_size = 10,
             multievent = FALSE,
             ci95 = FALSE,
             risktable = FALSE,
@@ -186,8 +190,37 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "findcut",
                 findcut,
                 default=FALSE)
+            private$..multiple_cutoffs <- jmvcore::OptionBool$new(
+                "multiple_cutoffs",
+                multiple_cutoffs,
+                default=FALSE)
+            private$..num_cutoffs <- jmvcore::OptionList$new(
+                "num_cutoffs",
+                num_cutoffs,
+                options=list(
+                    "two",
+                    "three",
+                    "four"),
+                default="two")
+            private$..cutoff_method <- jmvcore::OptionList$new(
+                "cutoff_method",
+                cutoff_method,
+                options=list(
+                    "quantile",
+                    "recursive",
+                    "tree",
+                    "minpval"),
+                default="quantile")
+            private$..min_group_size <- jmvcore::OptionNumber$new(
+                "min_group_size",
+                min_group_size,
+                min=5,
+                max=30,
+                default=10)
             private$..calculatedcutoff <- jmvcore::OptionOutput$new(
                 "calculatedcutoff")
+            private$..calculatedmulticut <- jmvcore::OptionOutput$new(
+                "calculatedmulticut")
             private$..multievent <- jmvcore::OptionBool$new(
                 "multievent",
                 multievent,
@@ -254,7 +287,12 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..yend_plot)
             self$.addOption(private$..byplot)
             self$.addOption(private$..findcut)
+            self$.addOption(private$..multiple_cutoffs)
+            self$.addOption(private$..num_cutoffs)
+            self$.addOption(private$..cutoff_method)
+            self$.addOption(private$..min_group_size)
             self$.addOption(private$..calculatedcutoff)
+            self$.addOption(private$..calculatedmulticut)
             self$.addOption(private$..multievent)
             self$.addOption(private$..ci95)
             self$.addOption(private$..risktable)
@@ -293,7 +331,12 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         yend_plot = function() private$..yend_plot$value,
         byplot = function() private$..byplot$value,
         findcut = function() private$..findcut$value,
+        multiple_cutoffs = function() private$..multiple_cutoffs$value,
+        num_cutoffs = function() private$..num_cutoffs$value,
+        cutoff_method = function() private$..cutoff_method$value,
+        min_group_size = function() private$..min_group_size$value,
         calculatedcutoff = function() private$..calculatedcutoff$value,
+        calculatedmulticut = function() private$..calculatedmulticut$value,
         multievent = function() private$..multievent$value,
         ci95 = function() private$..ci95$value,
         risktable = function() private$..risktable$value,
@@ -331,7 +374,12 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..yend_plot = NA,
         ..byplot = NA,
         ..findcut = NA,
+        ..multiple_cutoffs = NA,
+        ..num_cutoffs = NA,
+        ..cutoff_method = NA,
+        ..min_group_size = NA,
         ..calculatedcutoff = NA,
+        ..calculatedmulticut = NA,
         ..multievent = NA,
         ..ci95 = NA,
         ..risktable = NA,
@@ -364,7 +412,13 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         plot6 = function() private$.items[["plot6"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]],
-        calculatedcutoff = function() private$.items[["calculatedcutoff"]]),
+        calculatedcutoff = function() private$.items[["calculatedcutoff"]],
+        multipleCutTable = function() private$.items[["multipleCutTable"]],
+        multipleMedianTable = function() private$.items[["multipleMedianTable"]],
+        multipleSurvTable = function() private$.items[["multipleSurvTable"]],
+        plotMultipleCutoffs = function() private$.items[["plotMultipleCutoffs"]],
+        plotMultipleSurvival = function() private$.items[["plotMultipleSurvival"]],
+        calculatedmulticut = function() private$.items[["calculatedmulticut"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -911,6 +965,244 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multipleCutTable",
+                title="Multiple Cut-off Points",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="cutpoint_number", 
+                        `title`="Cut-off #", 
+                        `type`="integer"),
+                    list(
+                        `name`="cutpoint_value", 
+                        `title`="Cut-off Value", 
+                        `type`="number"),
+                    list(
+                        `name`="group_created", 
+                        `title`="Groups Created", 
+                        `type`="text"),
+                    list(
+                        `name`="logrank_statistic", 
+                        `title`="Log-rank \u03C7\u00B2", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                visible="(multiple_cutoffs)",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multipleMedianTable",
+                title="`Median Survival by Multiple Cut-offs: ${contexpl}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="risk_group", 
+                        `title`="Risk Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_patients", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="median_survival", 
+                        `title`="Median Survival", 
+                        `type`="number"),
+                    list(
+                        `name`="median_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="median_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number")),
+                visible="(multiple_cutoffs)",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multipleSurvTable",
+                title="`Survival Estimates by Multiple Cut-offs: ${contexpl}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="risk_group", 
+                        `title`="Risk Group", 
+                        `type`="text"),
+                    list(
+                        `name`="time_point", 
+                        `title`="Time", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="N at Risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="survival_prob", 
+                        `title`="Survival", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="surv_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="surv_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="pc")),
+                visible="(multiple_cutoffs)",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotMultipleCutoffs",
+                title="`Multiple Cut-offs Visualization - ${contexpl}`",
+                width=800,
+                height=600,
+                renderFun=".plotMultipleCutoffs",
+                visible="(multiple_cutoffs)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotMultipleSurvival",
+                title="`Survival Plot with Multiple Cut-offs - ${contexpl}`",
+                width=800,
+                height=600,
+                renderFun=".plotMultipleSurvival",
+                visible="(multiple_cutoffs && sc)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="calculatedmulticut",
+                title="Add Multiple Cut-off Groups to Data",
+                varTitle="`Multiple Cut-off Risk Groups - from ${ contexpl }`",
+                varDescription="Multiple Cut-off Risk Groups from given Cut-offs in Continuous Survival Function",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "num_cutoffs",
+                    "cutoff_method",
+                    "min_group_size",
+                    "contexpl",
+                    "outcome",
+                    "analysistype",
+                    "multievent",
+                    "findcut",
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ci95",
+                    "risktable",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "multievent")))}))
 
 survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -999,6 +1291,21 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rank statistic. This option is only available if you enable the "Survival
 #'   Plot" option. The optimal cut-off point will be displayed on the survival
 #'   plot as a vertical dashed line.
+#' @param multiple_cutoffs Enable this option to find multiple optimal cut-off
+#'   points for the continuous explanatory variable. This extends the single
+#'   cutoff analysis to identify 2-4 optimal cut-off points that maximize
+#'   survival group separation. Creates stratified groups for enhanced survival
+#'   analysis.
+#' @param num_cutoffs Select the number of cut-off points to identify. This
+#'   will create multiple risk groups for stratified survival analysis (e.g., 2
+#'   cut-offs create Low, Medium, High risk groups).
+#' @param cutoff_method Method for finding multiple cut-offs. Quantile-based
+#'   uses tertiles/quartiles, Recursive finds sequential optimal points,
+#'   Tree-based uses survival trees, Minimum P-value finds points that minimize
+#'   log-rank p-values.
+#' @param min_group_size Minimum percentage of patients required in each group
+#'   created by cut-offs. Prevents creating groups with insufficient sample
+#'   sizes for reliable analysis.
 #' @param multievent Enable this option if your data includes multiple event
 #'   levels (e.g., different types of events or outcomes). This option is
 #'   required for cause-specific and competing risk survival analyses.
@@ -1040,6 +1347,12 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$multipleCutTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multipleMedianTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multipleSurvTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plotMultipleCutoffs} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotMultipleSurvival} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calculatedmulticut} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1077,6 +1390,10 @@ survivalcont <- function(
     yend_plot = 1,
     byplot = 12,
     findcut = FALSE,
+    multiple_cutoffs = FALSE,
+    num_cutoffs = "two",
+    cutoff_method = "quantile",
+    min_group_size = 10,
     multievent = FALSE,
     ci95 = FALSE,
     risktable = FALSE,
@@ -1131,6 +1448,10 @@ survivalcont <- function(
         yend_plot = yend_plot,
         byplot = byplot,
         findcut = findcut,
+        multiple_cutoffs = multiple_cutoffs,
+        num_cutoffs = num_cutoffs,
+        cutoff_method = cutoff_method,
+        min_group_size = min_group_size,
         multievent = multievent,
         ci95 = ci95,
         risktable = risktable,

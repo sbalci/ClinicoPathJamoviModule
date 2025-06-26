@@ -163,7 +163,10 @@ Imports:
     officer,
     gsDesign,
     censored,
-    dials    
+    dials,
+    psych,
+    cmprsk,
+    car
 VignetteBuilder: 
     knitr, 
     tiff, 

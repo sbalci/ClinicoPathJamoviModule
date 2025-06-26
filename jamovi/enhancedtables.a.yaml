@@ -1,0 +1,333 @@
+---
+name: enhancedtables
+title: Enhanced Tables with gt
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates professional, publication-ready tables using the gt package.
+    This module provides comprehensive table formatting with advanced styling,
+    grouping, summary statistics, and clinical research optimizations. 
+    Designed for high-quality table presentation in medical publications,
+    reports, and presentations. Features include conditional formatting,
+    custom themes, statistical summaries, and multi-level grouping.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select variables for analysis
+      # 2. Choose grouping and summary options
+      # 3. Apply clinical formatting themes
+      # 4. Generate publication-ready tables
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables to Display
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+        R: >
+          Variables to include in the enhanced table display.
+
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+        R: >
+          Variable for grouping rows and creating summary comparisons.
+
+    - name: strata_var
+      title: Stratification Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+        R: >
+          Additional variable for creating stratified analysis tables.
+
+    - name: table_type
+      title: Table Type
+      type: List
+      options:
+        - title: "Summary Statistics"
+          name: summary
+        - title: "Grouped Comparison"
+          name: grouped
+        - title: "Descriptive Overview"
+          name: descriptive
+        - title: "Clinical Characteristics"
+          name: clinical
+        - title: "Research Table One"
+          name: tableone
+        - title: "Custom Format"
+          name: custom
+      default: summary
+      description:
+        R: >
+          Type of enhanced table to generate with appropriate clinical formatting.
+
+    - name: stats_continuous
+      title: Statistics for Continuous Variables
+      type: List
+      options:
+        - title: "Mean ± SD"
+          name: mean_sd
+        - title: "Median [IQR]"
+          name: median_iqr
+        - title: "Mean ± SD, Median [IQR]"
+          name: both
+        - title: "Mean ± SD, Min-Max"
+          name: mean_sd_range
+        - title: "All Statistics"
+          name: all
+      default: mean_sd
+      description:
+        R: >
+          Statistical summaries to display for continuous variables.
+
+    - name: stats_categorical
+      title: Statistics for Categorical Variables
+      type: List
+      options:
+        - title: "N (%)"
+          name: n_percent
+        - title: "N only"
+          name: n_only
+        - title: "% only"
+          name: percent_only
+        - title: "N (%), Missing N"
+          name: n_percent_missing
+      default: n_percent
+      description:
+        R: >
+          Statistical summaries to display for categorical variables.
+
+    - name: include_total
+      title: Include Total Column
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, includes a total column with overall statistics.
+
+    - name: include_pvalues
+      title: Include P-values
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, includes statistical tests and p-values for group comparisons.
+
+    - name: test_type
+      title: Statistical Test Type
+      type: List
+      options:
+        - title: "Automatic Selection"
+          name: auto
+        - title: "Parametric Tests"
+          name: parametric
+        - title: "Non-parametric Tests"
+          name: nonparametric
+        - title: "Chi-square/Fisher"
+          name: categorical
+      default: auto
+      description:
+        R: >
+          Type of statistical tests to use for group comparisons.
+
+    - name: missing_handling
+      title: Missing Value Handling
+      type: List
+      options:
+        - title: "Show Missing"
+          name: show
+        - title: "Hide Missing"
+          name: hide
+        - title: "Exclude Missing"
+          name: exclude
+        - title: "Missing as Category"
+          name: category
+      default: show
+      description:
+        R: >
+          How to handle missing values in the analysis.
+
+    - name: table_theme
+      title: Table Theme
+      type: List
+      options:
+        - title: "Clinical Research"
+          name: clinical
+        - title: "Publication Ready"
+          name: publication
+        - title: "Modern Clean"
+          name: modern
+        - title: "Traditional"
+          name: traditional
+        - title: "Minimal"
+          name: minimal
+        - title: "Journal Style"
+          name: journal
+      default: clinical
+      description:
+        R: >
+          Visual theme for professional table appearance.
+
+    - name: table_title
+      title: Table Title
+      type: String
+      default: "Enhanced Data Summary"
+      description:
+        R: >
+          Title for the enhanced table.
+
+    - name: table_subtitle
+      title: Table Subtitle
+      type: String
+      default: ""
+      description:
+        R: >
+          Optional subtitle for additional context.
+
+    - name: source_note
+      title: Source Note
+      type: String
+      default: ""
+      description:
+        R: >
+          Optional source note to display below the table.
+
+    - name: show_footnotes
+      title: Show Statistical Footnotes
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, includes footnotes explaining statistical methods and symbols.
+
+    - name: decimal_places
+      title: Decimal Places
+      type: Number
+      min: 0
+      max: 4
+      default: 2
+      description:
+        R: >
+          Number of decimal places for numeric displays.
+
+    - name: font_size
+      title: Font Size
+      type: List
+      options:
+        - title: "Small (10pt)"
+          name: small
+        - title: "Normal (12pt)"
+          name: normal
+        - title: "Large (14pt)"
+          name: large
+      default: normal
+      description:
+        R: >
+          Font size for table text.
+
+    - name: table_width
+      title: Table Width
+      type: List
+      options:
+        - title: "Auto"
+          name: auto
+        - title: "Full Width"
+          name: full
+        - title: "Compact"
+          name: compact
+        - title: "Wide"
+          name: wide
+      default: auto
+      description:
+        R: >
+          Width setting for the table layout.
+
+    - name: stripe_rows
+      title: Striped Rows
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, applies alternating row background colors for readability.
+
+    - name: group_colors
+      title: Group Header Colors
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, applies color coding to group headers.
+
+    - name: highlight_significant
+      title: Highlight Significant Results
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, highlights statistically significant p-values.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+        R: >
+          Confidence level for statistical tests and intervals.
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays clinical interpretation and usage guidelines.
+
+    - name: export_format
+      title: Additional Export Format
+      type: List
+      options:
+        - title: "HTML Only"
+          name: html
+        - title: "Word Compatible"
+          name: word
+        - title: "LaTeX"
+          name: latex
+        - title: "RTF"
+          name: rtf
+      default: html
+      description:
+        R: >
+          Additional export format for the enhanced table.
+
+...

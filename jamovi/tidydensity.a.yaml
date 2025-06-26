@@ -327,6 +327,8 @@ options:
           name: probability
         - title: "Q-Q Plot"
           name: qq
+        - title: "Economist Style"
+          name: economist
       default: density
       description:
           R: >
@@ -372,3 +374,19 @@ options:
           R: >
             Display guidance on statistical distributions and their applications
             in clinical research.
+
+    - name: economist_theme
+      title: Use Economist Theme (for Economist plots)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply The Economist's visual theme when using Economist-style plots.
+
+    - name: economist_colors
+      title: Use Economist Colors (for Economist plots)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply The Economist's signature color scheme for distribution elements.

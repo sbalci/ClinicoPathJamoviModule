@@ -10,13 +10,12 @@ items:
       type:  Html
 
     - name:  text1
-      title: 'Correlation 1'
+      title: 'Correlation Results'
       type:  Preformatted
 
-
-    # - name:  text2
-    #   title: 'Correlation 2'
-    #   type:  Preformatted
+    - name:  text2
+      title: 'Natural Language Report'
+      type:  Html
 
     # - name:  text3
     #   title: 'Correlation 3'
@@ -38,6 +37,7 @@ items:
 
 refs:
     - correlation
+    - report
     - ClinicoPathJamoviModule
     
 ...

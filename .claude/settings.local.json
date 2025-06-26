@@ -16,7 +16,8 @@
       "Bash(mv:*)",
       "Bash(rg:*)",
       "WebFetch(domain:rdrr.io)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

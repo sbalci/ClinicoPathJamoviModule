@@ -548,6 +548,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 private$.lifetablecutoff(cutoffdata)
 
+                ## Run Multiple Cut-offs Analysis ----
+                if (self$options$multiple_cutoffs) {
+                    multicut_results <- private$.multipleCutoffs(results)
+                    private$.multipleCutoffTables(multicut_results)
+                    
+                    # Add multiple cutoff groups to data
+                    if (self$options$calculatedmulticut &&
+                        self$results$calculatedmulticut$isNotFilled()) {
+                        self$results$calculatedmulticut$setValues(multicut_results$risk_groups)
+                    }
+                }
+
 
 
 
@@ -1539,6 +1551,321 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 print(plot6)
+                TRUE
+            }
+
+            # Multiple Cut-offs Analysis ----
+            ,
+            .multipleCutoffs = function(results) {
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mycontexpl <- results$name3contexpl
+                mydata <- results$cleanData
+                
+                # Convert to numeric
+                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+                
+                # Extract continuous variable values
+                cont_var <- mydata[[mycontexpl]]
+                cont_var <- cont_var[!is.na(cont_var)]
+                
+                # Determine number of cutoffs
+                num_cuts <- switch(self$options$num_cutoffs,
+                                   "two" = 2,
+                                   "three" = 3,
+                                   "four" = 4)
+                
+                # Calculate cutoffs based on method
+                cutoff_values <- switch(self$options$cutoff_method,
+                    "quantile" = private$.quantileCutoffs(cont_var, num_cuts),
+                    "recursive" = private$.recursiveCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
+                    "tree" = private$.treeCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
+                    "minpval" = private$.minPvalueCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts)
+                )
+                
+                # Create risk groups
+                risk_groups <- private$.createRiskGroups(mydata[[mycontexpl]], cutoff_values)
+                
+                # Calculate survival statistics for each group
+                group_stats <- private$.calculateGroupStats(mydata, mytime, myoutcome, risk_groups)
+                
+                return(list(
+                    cutoff_values = cutoff_values,
+                    risk_groups = risk_groups,
+                    group_stats = group_stats,
+                    method = self$options$cutoff_method,
+                    num_cuts = num_cuts
+                ))
+            }
+
+            # Quantile-based cutoffs ----
+            ,
+            .quantileCutoffs = function(cont_var, num_cuts) {
+                if (num_cuts == 2) {
+                    quantiles <- c(1/3, 2/3)
+                } else if (num_cuts == 3) {
+                    quantiles <- c(0.25, 0.5, 0.75)
+                } else if (num_cuts == 4) {
+                    quantiles <- c(0.2, 0.4, 0.6, 0.8)
+                }
+                
+                cutoffs <- quantile(cont_var, probs = quantiles, na.rm = TRUE)
+                return(as.numeric(cutoffs))
+            }
+
+            # Recursive optimal cutoffs ----
+            ,
+            .recursiveCutoffs = function(mydata, mytime, myoutcome, mycontexpl, num_cuts) {
+                if (!requireNamespace("survminer", quietly = TRUE)) {
+                    return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                }
+                
+                cutoffs <- numeric(num_cuts)
+                current_data <- mydata
+                
+                for (i in 1:num_cuts) {
+                    tryCatch({
+                        res.cut <- survminer::surv_cutpoint(
+                            current_data,
+                            time = mytime,
+                            event = myoutcome,
+                            variables = mycontexpl,
+                            minprop = self$options$min_group_size / 100
+                        )
+                        
+                        cutoffs[i] <- summary(res.cut)$cutpoint
+                        
+                        # Remove data around cutpoint for next iteration
+                        if (i < num_cuts) {
+                            cutoff_val <- cutoffs[i]
+                            margin <- 0.1 * sd(current_data[[mycontexpl]], na.rm = TRUE)
+                            current_data <- current_data[
+                                abs(current_data[[mycontexpl]] - cutoff_val) > margin, 
+                            ]
+                        }
+                    }, error = function(e) {
+                        # Fallback to quantile method
+                        remaining_cuts <- num_cuts - i + 1
+                        fallback_cuts <- private$.quantileCutoffs(current_data[[mycontexpl]], remaining_cuts)
+                        cutoffs[i:num_cuts] <<- fallback_cuts
+                    })
+                }
+                
+                return(sort(cutoffs))
+            }
+
+            # Tree-based partitioning ----
+            ,
+            .treeCutoffs = function(mydata, mytime, myoutcome, mycontexpl, num_cuts) {
+                if (!requireNamespace("rpart", quietly = TRUE)) {
+                    return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                }
+                
+                tryCatch({
+                    # Prepare survival formula
+                    formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", mycontexpl)
+                    formula <- as.formula(formula_str)
+                    
+                    # Fit survival tree with specified depth
+                    tree_fit <- rpart::rpart(
+                        formula, 
+                        data = mydata,
+                        method = "exp",
+                        control = rpart::rpart.control(
+                            maxdepth = num_cuts + 1,
+                            minsplit = max(10, nrow(mydata) * self$options$min_group_size / 100),
+                            cp = 0.01
+                        )
+                    )
+                    
+                    # Extract split points
+                    splits <- tree_fit$splits
+                    if (is.null(splits) || nrow(splits) == 0) {
+                        return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                    }
+                    
+                    cutoffs <- unique(splits[splits[,1] == mycontexpl, "index"])
+                    cutoffs <- sort(cutoffs)
+                    
+                    if (length(cutoffs) > num_cuts) {
+                        cutoffs <- cutoffs[1:num_cuts]
+                    } else if (length(cutoffs) < num_cuts) {
+                        # Supplement with quantile cutoffs
+                        additional_cuts <- private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts - length(cutoffs))
+                        cutoffs <- sort(c(cutoffs, additional_cuts))
+                        cutoffs <- unique(cutoffs)[1:num_cuts]
+                    }
+                    
+                    return(cutoffs)
+                }, error = function(e) {
+                    return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                })
+            }
+
+            # Minimum p-value cutoffs ----
+            ,
+            .minPvalueCutoffs = function(mydata, mytime, myoutcome, mycontexpl, num_cuts) {
+                cont_var <- mydata[[mycontexpl]]
+                sorted_vals <- sort(unique(cont_var))
+                
+                # Ensure minimum group size
+                min_n <- ceiling(nrow(mydata) * self$options$min_group_size / 100)
+                valid_cuts <- sorted_vals[(min_n + 1):(length(sorted_vals) - min_n)]
+                
+                if (length(valid_cuts) < num_cuts) {
+                    return(private$.quantileCutoffs(cont_var, num_cuts))
+                }
+                
+                # Test multiple combinations of cutoffs
+                best_pval <- 1
+                best_cuts <- numeric(num_cuts)
+                
+                # Sample cutoff combinations to avoid computational explosion
+                n_samples <- min(1000, choose(length(valid_cuts), num_cuts))
+                
+                tryCatch({
+                    for (i in 1:n_samples) {
+                        test_cuts <- sort(sample(valid_cuts, num_cuts))
+                        test_groups <- private$.createRiskGroups(cont_var, test_cuts)
+                        
+                        # Calculate log-rank test p-value
+                        formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ test_groups")
+                        formula <- as.formula(formula_str)
+                        
+                        test_data <- mydata
+                        test_data$test_groups <- test_groups
+                        
+                        logrank_test <- survival::survdiff(formula, data = test_data)
+                        pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+                        
+                        if (pval < best_pval) {
+                            best_pval <- pval
+                            best_cuts <- test_cuts
+                        }
+                    }
+                    
+                    return(best_cuts)
+                }, error = function(e) {
+                    return(private$.quantileCutoffs(cont_var, num_cuts))
+                })
+            }
+
+            # Create risk groups from cutoffs ----
+            ,
+            .createRiskGroups = function(cont_var, cutoffs) {
+                if (length(cutoffs) == 2) {
+                    groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
+                                   ifelse(cont_var <= cutoffs[2], "Medium Risk", "High Risk"))
+                } else if (length(cutoffs) == 3) {
+                    groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
+                                   ifelse(cont_var <= cutoffs[2], "Medium-Low Risk",
+                                         ifelse(cont_var <= cutoffs[3], "Medium-High Risk", "High Risk")))
+                } else if (length(cutoffs) == 4) {
+                    groups <- ifelse(cont_var <= cutoffs[1], "Very Low Risk",
+                                   ifelse(cont_var <= cutoffs[2], "Low Risk",
+                                         ifelse(cont_var <= cutoffs[3], "Medium Risk",
+                                               ifelse(cont_var <= cutoffs[4], "High Risk", "Very High Risk"))))
+                }
+                
+                return(factor(groups, levels = unique(groups[order(cont_var)])))
+            }
+
+            # Calculate survival statistics by group ----
+            ,
+            .calculateGroupStats = function(mydata, mytime, myoutcome, risk_groups) {
+                stats_list <- list()
+                
+                for (group in levels(risk_groups)) {
+                    group_data <- mydata[risk_groups == group, ]
+                    
+                    if (nrow(group_data) > 0) {
+                        # Calculate median survival
+                        formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ 1")
+                        formula <- as.formula(formula_str)
+                        
+                        km_fit <- survival::survfit(formula, data = group_data)
+                        
+                        stats_list[[group]] <- list(
+                            group = group,
+                            n = nrow(group_data),
+                            events = sum(group_data[[myoutcome]], na.rm = TRUE),
+                            median_surv = summary(km_fit)$table["median"],
+                            median_lower = summary(km_fit)$table["0.95LCL"],
+                            median_upper = summary(km_fit)$table["0.95UCL"]
+                        )
+                    }
+                }
+                
+                return(stats_list)
+            }
+
+            # Populate multiple cutoffs tables ----
+            ,
+            .multipleCutoffTables = function(multicut_results) {
+                # Populate cut-off points table
+                cutoff_table <- self$results$multipleCutTable
+                for (i in seq_along(multicut_results$cutoff_values)) {
+                    cutoff_table$addRow(rowKey = i, values = list(
+                        cutpoint_number = i,
+                        cutpoint_value = multicut_results$cutoff_values[i],
+                        group_created = paste("Cut", i),
+                        logrank_statistic = NA,  # Will be calculated separately
+                        p_value = NA
+                    ))
+                }
+                
+                # Populate median survival table
+                median_table <- self$results$multipleMedianTable
+                for (group_name in names(multicut_results$group_stats)) {
+                    stats <- multicut_results$group_stats[[group_name]]
+                    median_table$addRow(rowKey = group_name, values = list(
+                        risk_group = stats$group,
+                        n_patients = stats$n,
+                        events = stats$events,
+                        median_survival = stats$median_surv,
+                        median_lower = stats$median_lower,
+                        median_upper = stats$median_upper
+                    ))
+                }
+                
+                # TODO: Add survival estimates table population
+                # This would require calculating survival at specific time points
+            }
+
+            # Multiple cutoffs visualization ----
+            ,
+            .plotMultipleCutoffs = function(image, ggtheme, theme, ...) {
+                if (!self$options$multiple_cutoffs) {
+                    return()
+                }
+                
+                # Placeholder for multiple cutoffs visualization
+                # This would show the cutoff points on the continuous variable distribution
+                plot <- ggplot2::ggplot() + 
+                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, label = "Multiple Cutoffs Visualization\n(Implementation in progress)"),
+                                      size = 6) +
+                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                    ggplot2::theme_void()
+                
+                print(plot)
+                TRUE
+            }
+
+            # Multiple cutoffs survival plot ----
+            ,
+            .plotMultipleSurvival = function(image, ggtheme, theme, ...) {
+                if (!self$options$multiple_cutoffs || !self$options$sc) {
+                    return()
+                }
+                
+                # Placeholder for multiple cutoffs survival plot
+                plot <- ggplot2::ggplot() + 
+                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, label = "Multiple Cutoffs Survival Plot\n(Implementation in progress)"),
+                                      size = 6) +
+                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                    ggplot2::theme_void()
+                
+                print(plot)
                 TRUE
             }
         )

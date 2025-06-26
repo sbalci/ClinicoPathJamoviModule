@@ -3,9 +3,6 @@
 \name{ggprismClass}
 \alias{ggprismClass}
 \title{GraphPad Prism Style Plots}
-\value{
-Publication-ready plots with Prism styling using ggprism package
-}
 \description{
 GraphPad Prism Style Plots
 

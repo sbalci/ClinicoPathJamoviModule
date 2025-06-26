@@ -38,7 +38,9 @@ tidydensity(
   show_statistics = TRUE,
   show_summary_table = TRUE,
   show_parameter_info = TRUE,
-  show_interpretation = TRUE
+  show_interpretation = TRUE,
+  economist_theme = TRUE,
+  economist_colors = TRUE
 )
 }
 \arguments{
@@ -119,6 +121,12 @@ parameters and their effects.}
 
 \item{show_interpretation}{Display guidance on statistical distributions
 and their applications in clinical research.}
+
+\item{economist_theme}{Apply The Economist's visual theme when using
+Economist-style plots.}
+
+\item{economist_colors}{Apply The Economist's signature color scheme for
+distribution elements.}
 }
 \value{
 A results object containing:

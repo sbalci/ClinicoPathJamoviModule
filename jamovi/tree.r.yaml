@@ -245,6 +245,116 @@ items:
           type: number
           format: dp:3
 
+    # Cross-validation results (Issue #12 enhancement)
+    - name: crossValidationResults
+      title: Cross-Validation Performance
+      type: Table
+      visible: (crossValidation)
+      rows: 0
+      columns:
+        - name: fold
+          title: "CV Fold"
+          type: integer
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: dp:3
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: dp:3
+        - name: accuracy
+          title: "Accuracy"
+          type: number
+          format: dp:3
+        - name: auc
+          title: "AUC"
+          type: number
+          format: dp:3
+
+    # Bootstrap validation results (Issue #12 enhancement)
+    - name: bootstrapResults
+      title: Bootstrap Validation Summary
+      type: Table
+      visible: (bootstrapValidation)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Performance Metric"
+          type: text
+        - name: mean
+          title: "Mean"
+          type: number
+          format: dp:3
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: dp:3
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: dp:3
+        - name: bias
+          title: "Bias"
+          type: number
+          format: dp:3
+
+    # Model comparison results (Issue #12 enhancement)
+    - name: modelComparison
+      title: Model Performance Comparison
+      type: Table
+      visible: (compareModels)
+      rows: 0
+      columns:
+        - name: model
+          title: "Model Type"
+          type: text
+        - name: primary_metric
+          title: "Primary Metric"
+          type: number
+          format: dp:3
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: dp:3
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: dp:3
+        - name: auc
+          title: "AUC"
+          type: number
+          format: dp:3
+        - name: spatial_metric
+          title: "Spatial Fit"
+          type: text
+        - name: best_model
+          title: "Best Model"
+          type: text
+
+    # Spatial autocart analysis results
+    - name: spatialAnalysis
+      title: Spatial Autocart Analysis
+      type: Table
+      visible: (useAutocart)
+      rows: 0
+      columns:
+        - name: parameter
+          title: "Spatial Parameter"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+          format: dp:3
+        - name: interpretation
+          title: "Clinical Interpretation"
+          type: text
+
+    - name: spatialInterpretation
+      title: Spatial Analysis Interpretation
+      type: Html
+      visible: (useAutocart)
+
     # Clinical decision tree visualization
     - name: plot
       title: Clinical Decision Tree
@@ -262,6 +372,75 @@ items:
           - trainLevel
           - minCases
           - maxDepth
+          - treeVisualization
+          - showNodeStatistics
+
+    # Partition Plot (parttree visualization)
+    - name: partitionPlot
+      title: Decision Partition Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotPartition
+      visible: (showPartitionPlot)
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
+    # ROC Curve (Issue #12 enhancement)
+    - name: rocPlot
+      title: ROC Curve Analysis
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotROC
+      visible: (showROCCurve)
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
+    # Calibration Plot (Issue #12 enhancement)
+    - name: calibrationPlot
+      title: Probability Calibration
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotCalibration
+      visible: (showCalibrationPlot)
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - train
+          - trainLevel
+
+    # Clinical Utility Curve (Issue #12 enhancement)
+    - name: clinicalUtilityPlot
+      title: Clinical Utility Analysis
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotClinicalUtility
+      visible: (showClinicalUtility)
+      requiresData: true
+      clearWith:
+          - vars
+          - facs
+          - target
+          - targetLevel
+          - costRatio
 
     # Model deployment guidelines
     - name: deploymentGuidelines
@@ -297,6 +476,8 @@ refs:
     - caret
     - rpart
     - rpart.plot
+    - parttree
+    - autocart
     - ClinicoPathJamoviModule
     - whoisinthisstudy
     - recist

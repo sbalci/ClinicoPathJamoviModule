@@ -123,26 +123,52 @@ options:
       title: Color Palette
       type: List
       options:
-        - title: "Floral"
+        - title: "Floral (12 colors)"
           name: floral
-        - title: "Candy Bright"
+        - title: "Candy Bright (9 colors)"
           name: candy_bright
-        - title: "Neon"
-          name: neon
-        - title: "Starry"
-          name: starry
-        - title: "Flames"
-          name: flames
-        - title: "Pastels"
+        - title: "Office (9 colors)"
+          name: office
+        - title: "Pastels (9 colors)"
           name: pastels
-        - title: "Pearl"
-          name: pearl
-        - title: "Viridis"
+        - title: "Colorblind Safe (6 colors)"
+          name: colorblind_safe
+        - title: "Blueprint (9 colors)"
+          name: blueprint
+        - title: "Neon (9 colors)"
+          name: neon
+        - title: "Flames (9 colors)"
+          name: flames
+        - title: "Ocean (9 colors)"
+          name: ocean
+        - title: "Spring (9 colors)"
+          name: spring
+        - title: "Starry (5 colors)"
+          name: starry
+        - title: "The Blues (9 colors)"
+          name: the_blues
+        - title: "Viridis (6 colors)"
           name: viridis
+        - title: "Pearl (6 colors)"
+          name: pearl
+        - title: "Quiet (9 colors)"
+          name: quiet
+        - title: "Stained Glass (9 colors)"
+          name: stained_glass
+        - title: "Warm Pastels (9 colors)"
+          name: warm_pastels
+        - title: "Prism Dark (10 colors)"
+          name: prism_dark
+        - title: "Prism Light (10 colors)"
+          name: prism_light
+        - title: "Evergreen (9 colors)"
+          name: evergreen
+        - title: "Sunny Garden (9 colors)"
+          name: sunny_garden
       default: floral
       description:
         R: >
-          Prism-style color palette for different groups.
+          Prism-style color palette for different groups. Choose from 20+ authentic GraphPad Prism palettes.
 
     - name: show_points
       title: Show Data Points
@@ -293,5 +319,103 @@ options:
       description:
         R: >
           Type of error bars to display (for applicable plot types).
+
+    - name: prism_guides
+      title: Prism Axis Guides
+      type: List
+      options:
+        - title: "Standard"
+          name: standard
+        - title: "Minor Ticks"
+          name: minor
+        - title: "Offset Axis"
+          name: offset
+        - title: "Offset with Minor Ticks"
+          name: offset_minor
+        - title: "Bracket Guides"
+          name: bracket
+      default: standard
+      description:
+        R: >
+          Axis guide style following GraphPad Prism conventions.
+
+    - name: annotation_ticks
+      title: Add Annotation Ticks
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add tick marks as annotations in Prism style.
+
+    - name: preview_mode
+      title: Preview Palette Mode
+      type: Bool
+      default: false
+      description:
+        R: >
+          Enable palette preview mode to see all colors in the selected palette.
+
+    - name: prism_shape_palette
+      title: Shape Palette
+      type: List
+      options:
+        - title: "Default Shapes"
+          name: default
+        - title: "Prism Shapes"
+          name: prism
+        - title: "Filled Shapes"
+          name: filled
+        - title: "Open Shapes"
+          name: open
+      default: default
+      description:
+        R: >
+          Shape palette for point plots following Prism conventions.
+
+    - name: jitter_width
+      title: "Jitter Width"
+      type: Number
+      min: 0
+      max: 1
+      default: 0.2
+      description:
+        R: >
+          Width of horizontal jittering for overlaid points.
+
+    - name: violin_width
+      title: Violin Width Scale
+      type: Number
+      min: 0.1
+      max: 2
+      default: 1
+      description:
+        R: >
+          Scale factor for violin plot widths.
+
+    - name: publication_ready
+      title: Publication Ready Export
+      type: Bool
+      default: false
+      description:
+        R: >
+          Optimize plot for publication with enhanced styling and formatting.
+
+    - name: export_dpi
+      title: Export DPI
+      type: Number
+      min: 150
+      max: 600
+      default: 300
+      description:
+        R: >
+          DPI for high-resolution export (publication standard: 300).
+
+    - name: custom_comparisons
+      title: Custom Statistical Comparisons
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom pairwise comparisons (e.g., "Group1-Group2,Group1-Group3").
 
 ...

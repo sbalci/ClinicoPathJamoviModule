@@ -3,370 +3,406 @@
 #' @import jmvcore
 #'
 
-
 competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "competingsurvivalClass",
     inherit = competingsurvivalBase,
     private = list(
+        
+        .getData = function() {
+            # Clean and label data following survival module pattern
+            mydata <- self$data
+            mydata$row_names <- rownames(mydata)
+            original_names <- names(mydata)
+            labels <- setNames(original_names, original_names)
+            
+            mydata <- mydata %>% janitor::clean_names()
+            corrected_labels <- setNames(original_names, names(mydata))
+            mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
+            all_labels <- labelled::var_label(mydata)
+            
+            # Get variable names from labels
+            mytime <- names(all_labels)[all_labels == self$options$overalltime]
+            myoutcome <- names(all_labels)[all_labels == self$options$outcome]
+            myexplanatory <- names(all_labels)[all_labels == self$options$explanatory]
+            
+            return(list(
+                "mydata_labelled" = mydata,
+                "mytime_labelled" = mytime,
+                "myoutcome_labelled" = myoutcome, 
+                "myexplanatory_labelled" = myexplanatory
+            ))
+        },
+        
         .run = function() {
-
-            # https://finalfit.org/articles/survival.html#death-status
-
-
+            # Check required packages
+            if (!requireNamespace('finalfit', quietly = TRUE)) {
+                stop('The finalfit package is required but not installed')
+            }
+            if (!requireNamespace('cmprsk', quietly = TRUE)) {
+                stop('The cmprsk package is required but not installed')
+            }
+            
             # If no variable selected Initial Message ----
-
-            if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime) ) {
-
+            if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime)) {
                 todo <- glue::glue("
-<br>This Module is still under development<br><hr><br>
+<br>Welcome to Competing Survival Analysis<br><hr><br>
 <br>
 The explanation below is adopted from <a href = 'https://finalfit.org/articles/survival.html#death-status'>finalfit website documentation</a>.
 <br><br>
-<b>Outcome</b> is the the status at the time of study:<br>
-Dead of Disease   : Patients had died from disease.<br>
-Dead of Other     : Patients had died from other causes.<br>
-Alive w Disease   : Patients are alive and still have disease (at the last known time).<br>
-Alive w/o Disease : PAtients are alive and free of disease (at the last known time).<br>
+<b>Outcome</b> is the status at the time of study:<br>
+• <b>Dead of Disease</b>: Patients had died from disease<br>
+• <b>Dead of Other</b>: Patients had died from other causes<br>
+• <b>Alive w Disease</b>: Patients are alive and still have disease<br>
+• <b>Alive w/o Disease</b>: Patients are alive and free of disease<br>
 <br>
-<b>Select Analysis Type</b>
+<b>Analysis Types:</b><br>
+• <b>Overall survival</b>: All-cause mortality (Alive vs All Deaths)<br>
+• <b>Cause-specific survival</b>: Disease-specific mortality only<br>
+• <b>Competing risks</b>: Disease death accounting for other deaths<br>
 <br>
-<b>Overall survival:</b><br>
-Considering all-cause mortality.<br>
-Does not care whether patient is died of disease or a traffic accident.<br>
-(Alive) <=> (Dead of Disease & Dead of Other Causes)<br>
+<b>Required Variables:</b><br>
+• Explanatory Variable: Treatment group or other factor<br>
+• Overall Time: Follow-up time in months<br>
+• Outcome: Multi-level factor with death/alive status<br>
 <br>
-<b>Cause-specific (Disease-specific) survival:</b><br>
-Considering disease-specific mortality.<br>
-(Alive & Dead of Other Causes) <=> (Dead of Disease)<br>
-<br>
-<b>Competing risks:</b><br>
-Alive <=> Dead of Disease accounting for Dead of Other Causes.<br>
-<br>
-<hr>
-<br>
-This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-<br>
-<br>
-<hr>
-<br>
-                                   "
-                )
-
+This function uses survival, survminer, finalfit, and cmprsk packages.
+<br><hr>
+                ")
+                
                 html <- self$results$todo
                 html$setContent(todo)
                 return()
-
-            } else {
-
-
-
-                dod <- self$options$dod
-
-                dooc <- self$options$dooc
-
-                awd <- self$options$awd
-
-                awod <- self$options$awod
-
-
-
-                # interim results ----
-
-
-                results <- list("Dead of disease" = dod,
-                                "Dead of other causes" = dooc,
-                                "Alive with Disease" = awd,
-                                "Alive wo Disease" = awod)
-
-
-                self$results$text1$setContent(results)
-
-
-
-                # select analysis type ----
-
-                analysistype <- self$options$analysistype
-
-
-                # Overall survival ----
-
-
-                if ( analysistype == "overall" ) {
-
-
-                todo <- glue::glue("
-                <br>
-                <b>Overall Survival</b> <br>
-                This tool will help you calculate median survivals and 1,3,5-yr survivals for a given fisk factor.<br>
-                <br>
-                Explanatory variable should be categorical (ordinal or nominal).<br>
-                Outcome variable should be coded binary (0 or 1).<br>
-                If patient is dead or event (recurrence) occured it is 1.<br>
-                If censored (patient is alive or free of disease) at the last visit it is 0.<br>
-                Survival should be numeric, continuous, and in months.<br>
-                ")
-                html <- self$results$todo
-                html$setContent(todo)
-
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-
-                # dod + dooc vs awd + awod ----
-
-
-                # status is the the patients status at the end of the study.
-                # 1 indicates that they had died from melanoma;
-                # 2 indicates that they were still alive and;
-                # 3 indicates that they had died from causes unrelated to their melanoma.
-
-
-                # status_os = ifelse(status == 2, 0, # "still alive"
-                #                    1), # "died of melanoma" or "died of other causes"
-
-
-
-
-
-                # library(survival)
-                #
-                # survival_object = melanoma %$%
-                #     Surv(time, status_os)
-                #
-                # # Explore:
-                # head(survival_object) # + marks censoring, in this case "Alive"
-                # #> [1]  10   30   35+  99  185  204
-                #
-                # # Expressing time in years
-                # survival_object = melanoma %$%
-                #     Surv(time/365, status_os)
-
-
-
-
-                # # Overall survival in whole cohort
-                # my_survfit = survfit(survival_object ~ 1, data = melanoma)
-                # my_survfit # 205 patients, 71 events
-                # #> Call: survfit(formula = survival_object ~ 1, data = melanoma)
-                # #>
-                # #>       n  events  median 0.95LCL 0.95UCL
-                # #>  205.00   71.00      NA    9.15      NA
-
-
-
-                # summary(my_survfit, times = c(0, 1, 2, 3, 4, 5))
-                # #> Call: survfit(formula = survival_object ~ 1, data = melanoma)
-                # #>
-                # #>  time n.risk n.event survival std.err lower 95% CI upper 95% CI
-                # #>     0    205       0    1.000  0.0000        1.000        1.000
-                # #>     1    193      11    0.946  0.0158        0.916        0.978
-                # #>     2    183      10    0.897  0.0213        0.856        0.940
-                # #>     3    167      16    0.819  0.0270        0.767        0.873
-                # #>     4    160       7    0.784  0.0288        0.730        0.843
-                # #>     5    122      10    0.732  0.0313        0.673        0.796
-                # # 5 year overall survival is 73%
-
-
-                # dependent_os = "Surv(time/365, status_os)"
-                # explanatory = c("ulcer")
-                #
-                # melanoma %>%
-                #     surv_plot(dependent_os, explanatory, pval = TRUE)
-                # #> Warning: Vectorized input to `element_text()` is not officially supported.
-                # #> Results may be unexpected or may change in future versions of ggplot2.
-
-
-                # dependent_os = "Surv(time, status_os)"
-                # explanatory = c("age", "sex", "thickness", "ulcer")
-
-                # melanoma %>%
-                #     finalfit(dependent_os, explanatory)
-
-
-
-
+            }
+            
+            # Validate data
+            if (nrow(self$data) == 0) {
+                stop('Data contains no (complete) rows')
+            }
+            
+            # Get processed data
+            labelled_data <- private$.getData()
+            mydata <- labelled_data$mydata_labelled
+            mytime <- labelled_data$mytime_labelled
+            myoutcome <- labelled_data$myoutcome_labelled
+            myexplanatory <- labelled_data$myexplanatory_labelled
+            
+            # Get analysis options
+            dod <- self$options$dod
+            dooc <- self$options$dooc
+            awd <- self$options$awd
+            awod <- self$options$awod
+            analysistype <- self$options$analysistype
+            
+            # Clean data and handle missing values
+            mydata <- mydata %>%
+                dplyr::filter(!is.na(.data[[mytime]]), !is.na(.data[[myoutcome]]), !is.na(.data[[myexplanatory]]))
+            
+            if (nrow(mydata) == 0) {
+                stop('No complete cases available for analysis')
+            }
+            
+            # Perform analysis based on type
+            private$.performAnalysis(mydata, mytime, myoutcome, myexplanatory, analysistype, dod, dooc, awd, awod)
+        },
+        
+        .performAnalysis = function(mydata, mytime, myoutcome, myexplanatory, analysistype, dod, dooc, awd, awod) {
+            
+            # Overall survival analysis
+            if (analysistype == "overall") {
+                private$.overallSurvival(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod)
+            } else if (analysistype == "cause") {
+                private$.causeSpecificSurvival(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod)
+            } else if (analysistype == "compete") {
+                private$.competingRisksSurvival(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod)
+            }
+        },
+        
+        .overallSurvival = function(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod) {
+            # Create overall survival outcome: all deaths = 1, alive = 0
+            mydata$status_os <- ifelse(
+                mydata[[myoutcome]] %in% c(dod, dooc), 1, 0
+            )
+            
+            # Create survival object
+            dependent_os <- paste0("Surv(", mytime, ", status_os)")
+            
+            # Perform survival analysis
+            tryCatch({
+                result <- mydata %>%
+                    finalfit::finalfit(dependent_os, myexplanatory, add_dependent_label = FALSE)
+                
+                # Extract and format results
+                private$.formatSurvivalResults(result, "Overall Survival")
+                
+            }, error = function(e) {
+                stop(paste("Overall survival analysis failed:", e$message))
+            })
+        },
+        
+        .causeSpecificSurvival = function(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod) {
+            # Create cause-specific survival outcome: disease death = 1, others = 0
+            mydata$status_dss <- ifelse(
+                mydata[[myoutcome]] == dod, 1, 0
+            )
+            
+            # Create survival object
+            dependent_dss <- paste0("Surv(", mytime, ", status_dss)")
+            
+            # Perform survival analysis
+            tryCatch({
+                result <- mydata %>%
+                    finalfit::finalfit(dependent_dss, myexplanatory, add_dependent_label = FALSE)
+                
+                # Extract and format results
+                private$.formatSurvivalResults(result, "Cause-Specific Survival")
+                
+            }, error = function(e) {
+                stop(paste("Cause-specific survival analysis failed:", e$message))
+            })
+        },
+ 
+        .competingRisksSurvival = function(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod) {
+            # Create competing risks outcome: alive=0, disease death=1, other death=2
+            mydata$status_crr <- dplyr::case_when(
+                mydata[[myoutcome]] %in% c(awd, awod) ~ 0,  # alive/censored
+                mydata[[myoutcome]] == dod ~ 1,            # disease death
+                mydata[[myoutcome]] == dooc ~ 2,           # other death
+                TRUE ~ 0
+            )
+            
+            # Create survival object for competing risks
+            dependent_crr <- paste0("Surv(", mytime, ", status_crr)")
+            
+            tryCatch({
+                # Competing risks regression using finalfit
+                result_crr <- mydata %>%
+                    finalfit::crrmulti(dependent_crr, myexplanatory) %>%
+                    finalfit::fit2df(estimate_suffix = " (Competing Risks)")
+                
+                # Cumulative incidence analysis
+                time_var <- mydata[[mytime]]
+                status_var <- mydata$status_crr
+                group_var <- mydata[[myexplanatory]]
+                
+                # Calculate cumulative incidence function
+                cuminc_result <- cmprsk::cuminc(
+                    ftime = time_var,
+                    fstatus = status_var,
+                    group = group_var
+                )
+                
+                # Format results
+                private$.formatCompetingRisksResults(result_crr, cuminc_result)
+                
+                # Store data for plotting
+                self$results$comprisksPlot$setState(list(
+                    "data" = mydata,
+                    "time_var" = mytime,
+                    "status_var" = "status_crr",
+                    "group_var" = myexplanatory,
+                    "cuminc" = cuminc_result
+                ))
+                
+            }, error = function(e) {
+                stop(paste("Competing risks analysis failed:", e$message))
+            })
+        },
+ 
+        .formatSurvivalResults = function(result, analysis_type) {
+            # Extract coefficients from finalfit result
+            if (is.data.frame(result) && nrow(result) > 0) {
+                # Parse HR and CI from finalfit output
+                hr_col <- grep("HR", names(result), value = TRUE)[1]
+                if (!is.null(hr_col) && !is.na(hr_col)) {
+                    hr_text <- result[[hr_col]][1]
+                    
+                    # Extract values from "HR (CI, p)" format
+                    if (!is.na(hr_text) && grepl("\\(", hr_text)) {
+                        parsed <- private$.parseHRText(hr_text)
+                        
+                        table <- self$results$survivalTable
+                        table$addRow(rowKey = 1, values = list(
+                            term = result[[1]][1],
+                            hr = parsed$hr,
+                            ci_lower = parsed$ci_lower,
+                            ci_upper = parsed$ci_upper,
+                            p_value = parsed$p_value
+                        ))
+                    }
                 }
-
-
-
-                # Diease-specific survival ----
-
-
-
-                if ( analysistype == "cause" ) {
-
-
-                todo <- glue::glue("
-                                   <br>
-                                   <b>Cause-specific (Diease-specific) survival</b>
-                                   <br>
-                                   <hr>
-                                   <br>
-                                   ")
-                html <- self$results$todo
-                html$setContent(todo)
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-
-                # dod vs awd + awod + dooc  ----
-
-
-
-
-
-                # status is the the patients status at the end of the study.
-                # 1 indicates that they had died from melanoma;
-                # 2 indicates that they were still alive and;
-                # 3 indicates that they had died from causes unrelated to their melanoma.
-
-
-
-                # status_dss = case_when(
-                #     status == 2 ~ 0, # "still alive"
-                #     status == 1 ~ 1, # "died of melanoma"
-                #     TRUE ~  0),     # "died of other causes is censored"
-
-
-                # dependent_dss = "Surv(time, status_dss)"
-                # explanatory = c("age", "sex", "thickness", "ulcer")
-
-
-                # melanoma %>%
-                #     finalfit(dependent_dss, explanatory)
-
+            }
+            
+            # Generate summary
+            summary_text <- glue::glue(
+                "<h3>{analysis_type} Analysis Results</h3>
+                <p>Analysis completed using finalfit package with Cox proportional hazards regression.</p>
+                <p>Results show hazard ratios (HR) with 95% confidence intervals and p-values.</p>"
+            )
+            
+            self$results$summary$setContent(summary_text)
+            
+            # Generate interpretation
+            private$.generateInterpretation(analysis_type)
+        },
+        
+        .formatCompetingRisksResults = function(result_crr, cuminc_result) {
+            # Format competing risks regression results
+            if (is.data.frame(result_crr) && nrow(result_crr) > 0) {
+                hr_col <- grep("HR", names(result_crr), value = TRUE)[1]
+                if (!is.null(hr_col) && !is.na(hr_col)) {
+                    hr_text <- result_crr[[hr_col]][1]
+                    parsed <- private$.parseHRText(hr_text)
+                    
+                    table <- self$results$survivalTable
+                    table$addRow(rowKey = 1, values = list(
+                        term = result_crr[[1]][1],
+                        hr = parsed$hr,
+                        ci_lower = parsed$ci_lower,
+                        ci_upper = parsed$ci_upper,
+                        p_value = parsed$p_value
+                    ))
                 }
-
-
-
-                # Competing risks ----
-
-                if ( analysistype == "compete" ) {
-
-
-
-
-                todo <- glue::glue("
-                                       <br>
-                                       <b>Competing risks</b>
-                                       <br>
-                                       <hr>
-                                       <br>
-                                       ")
-                html <- self$results$todo
-                html$setContent(todo)
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-
-                # status is the the patients status at the end of the study.
-                # 1 indicates that they had died from melanoma;
-                # 2 indicates that they were still alive and;
-                # 3 indicates that they had died from causes unrelated to their melanoma.
-
-
-
-                # status_crr = case_when(
-                #     status == 2 ~ 0, # "still alive"
-                #     status == 1 ~ 1, # "died of melanoma"
-                #     TRUE ~ 2),       # "died of other causes"
-
-
-
-                # dependent_crr = "Surv(time, status_crr)"
-                # explanatory = c("age", "sex", "thickness", "ulcer")
-
-
-                # melanoma %>%
-                #     finalfit(dependent_crr, explanatory)
-
-
-
-
-
-                # Competing risks regression ----
-
-                # Competing-risks regression is an alternative to CPH regression. It can be useful if the outcome of interest may not be able to occur simply because something else (like death) has happened first. For instance, in our example it is obviously not possible for a patient to die from melanoma if they have died from another disease first. By simply looking at cause-specific mortality (deaths from melanoma) and considering other deaths as censored, bias may result in estimates of the influence of predictors.
-
-                # The approach by Fine and Gray is one option for dealing with this. It is implemented in the package cmprsk. The crr() syntax differs from survival::coxph() but finalfit brings these together.
-
-                # It uses the finalfit::ff_merge() function, which can join any number of models together.
-
-
-                # explanatory = c("age", "sex", "thickness", "ulcer")
-                # dependent_dss = "Surv(time, status_dss)"
-                # dependent_crr = "Surv(time, status_crr)"
-
-                # melanoma %>%
-                #
-                #     # Summary table
-                #     summary_factorlist(dependent_dss, explanatory, column = TRUE, fit_id = TRUE) %>%
-                #
-                #     # CPH univariable
-                #     ff_merge(
-                #         melanoma %>%
-                #             coxphmulti(dependent_dss, explanatory) %>%
-                #             fit2df(estimate_suffix = " (DSS CPH univariable)")
-                #     ) %>%
-                #
-                #     # CPH multivariable
-                #     ff_merge(
-                #         melanoma %>%
-                #             coxphmulti(dependent_dss, explanatory) %>%
-                #             fit2df(estimate_suffix = " (DSS CPH multivariable)")
-                #     ) %>%
-                #
-                #     # Fine and Gray competing risks regression
-                #     ff_merge(
-                #         melanoma %>%
-                #             crrmulti(dependent_crr, explanatory) %>%
-                #             fit2df(estimate_suffix = " (competing risks multivariable)")
-                #     ) %>%
-                #
-                #
-                #     select(-fit_id, -index) %>%
-                #     dependent_label(melanoma, "Survival") %>%
-                #     mykable()
-                # #> Dependent variable is a survival object
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            }
+            
+            # Format cumulative incidence results
+            if (!is.null(cuminc_result)) {
+                private$.formatCumulativeIncidence(cuminc_result)
+            }
+            
+            # Generate summary for competing risks
+            summary_text <- glue::glue(
+                "<h3>Competing Risks Analysis Results</h3>
+                <p>Analysis using Fine-Gray subdistribution hazard model (cmprsk package).</p>
+                <p>Cumulative incidence functions calculated for disease-specific and competing events.</p>
+                <p>Results account for the competing nature of different death causes.</p>"
+            )
+            
+            self$results$summary$setContent(summary_text)
+            private$.generateInterpretation("Competing Risks")
+        },
+        
+        .formatCumulativeIncidence = function(cuminc_result) {
+            # Extract cumulative incidence estimates at key timepoints
+            if (!is.null(cuminc_result) && length(cuminc_result) > 0) {
+                table <- self$results$cuminc
+                
+                # Get time points and estimates for first group
+                first_group <- names(cuminc_result)[1]
+                times <- cuminc_result[[first_group]]$time
+                est1 <- cuminc_result[[first_group]]$est
+                var1 <- cuminc_result[[first_group]]$var
+                
+                # Find estimates for competing risk if available
+                competing_group <- names(cuminc_result)[length(cuminc_result)]
+                est2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$est else rep(NA, length(times))
+                var2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$var else rep(NA, length(times))
+                
+                # Add key time points (1, 2, 3, 5 years)
+                key_times <- c(12, 24, 36, 60)  # months
+                for (i in seq_along(key_times)) {
+                    target_time <- key_times[i]
+                    closest_idx <- which.min(abs(times - target_time))
+                    
+                    if (length(closest_idx) > 0) {
+                        table$addRow(rowKey = i, values = list(
+                            time = target_time,
+                            est_1 = round(est1[closest_idx], 3),
+                            est_2 = round(est2[closest_idx], 3),
+                            var_1 = round(var1[closest_idx], 6),
+                            var_2 = round(var2[closest_idx], 6)
+                        ))
+                    }
                 }
-
-
-
-
-
-
-
-
-
-
-}
-
-        })
+            }
+        },
+        
+        .parseHRText = function(hr_text) {
+            # Parse "1.23 (0.89-1.67, p=0.045)" format
+            hr <- as.numeric(gsub("\\s*\\(.*", "", hr_text))
+            ci_match <- regmatches(hr_text, regexpr("\\(.*?\\)", hr_text))
+            
+            if (length(ci_match) > 0) {
+                ci_content <- gsub("[\\(\\)]", "", ci_match)
+                parts <- strsplit(ci_content, ",")[[1]]
+                
+                if (length(parts) >= 2) {
+                    ci_range <- strsplit(trimws(parts[1]), "-")[[1]]
+                    ci_lower <- as.numeric(ci_range[1])
+                    ci_upper <- as.numeric(ci_range[2])
+                    
+                    p_text <- trimws(parts[2])
+                    p_value <- as.numeric(gsub("p=", "", p_text))
+                    
+                    return(list(hr = hr, ci_lower = ci_lower, ci_upper = ci_upper, p_value = p_value))
+                }
+            }
+            
+            return(list(hr = hr, ci_lower = NA, ci_upper = NA, p_value = NA))
+        },
+        
+        .generateInterpretation = function(analysis_type) {
+            interpretation <- switch(analysis_type,
+                "Overall Survival" = "<p><b>Clinical Interpretation:</b><br>Overall survival considers all deaths as events, regardless of cause. This provides the most comprehensive view of mortality but may not distinguish disease-specific effects.</p>",
+                "Cause-Specific Survival" = "<p><b>Clinical Interpretation:</b><br>Cause-specific survival focuses only on disease-related deaths. Other deaths are treated as censored observations. This approach may overestimate survival if competing risks are substantial.</p>",
+                "Competing Risks" = "<p><b>Clinical Interpretation:</b><br>Competing risks analysis accounts for the fact that patients can die from multiple causes. The cumulative incidence function shows the probability of each event type over time, accounting for competition between causes.</p>",
+                "<p>Analysis completed successfully.</p>"
+            )
+            
+            self$results$interpretation$setContent(interpretation)
+        },
+        
+        .plotCompetingRisks = function(image, ggtheme, theme, ...) {
+            if (!self$options$analysistype == "compete") return()
+            
+            plotData <- image$state
+            if (is.null(plotData)) return()
+            
+            # Create competing risks plot using ggplot2
+            tryCatch({
+                cuminc_data <- plotData$cuminc
+                if (!is.null(cuminc_data)) {
+                    # Convert cuminc result to plottable format
+                    plot_df <- data.frame()
+                    
+                    for (i in seq_along(cuminc_data)) {
+                        group_name <- names(cuminc_data)[i]
+                        times <- cuminc_data[[i]]$time
+                        est <- cuminc_data[[i]]$est
+                        
+                        temp_df <- data.frame(
+                            time = times,
+                            estimate = est,
+                            group = group_name,
+                            stringsAsFactors = FALSE
+                        )
+                        plot_df <- rbind(plot_df, temp_df)
+                    }
+                    
+                    # Create the plot
+                    plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = estimate, color = group)) +
+                        ggplot2::geom_step(size = 1) +
+                        ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                        ggplot2::labs(
+                            title = "Cumulative Incidence Function",
+                            x = "Time (months)",
+                            y = "Cumulative Incidence",
+                            color = "Event Type"
+                        ) +
+                        ggtheme
+                    
+                    print(plot)
+                }
+            }, error = function(e) {
+                # If plotting fails, create a simple message
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                                    label = "Competing risks plot\navailable after analysis", 
+                                    size = 6) +
+                    ggplot2::theme_void()
+                print(plot)
+            })
+            
+            TRUE
+        }
+    )
 )

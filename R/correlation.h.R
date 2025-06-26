@@ -36,6 +36,7 @@ correlationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
+        text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]]),
     private = list(),
@@ -47,6 +48,7 @@ correlationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Correlation",
                 refs=list(
                     "correlation",
+                    "report",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -55,7 +57,11 @@ correlationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Correlation 1"))
+                title="Correlation Results"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text2",
+                title="Natural Language Report"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -104,6 +110,7 @@ correlationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }

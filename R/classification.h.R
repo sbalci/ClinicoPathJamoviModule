@@ -26,6 +26,11 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             maxDepthRandFor = 30,
             sampleFraction = 1,
             splitRule = NULL,
+            knnNeighbors = 5,
+            knnDistance = "euclidean",
+            svmKernel = "radial",
+            svmCost = 1,
+            svmGamma = 1,
             plotDecisionTree = FALSE,
             predictedFreq = FALSE,
             printRandForest = FALSE,
@@ -88,7 +93,11 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 classifier,
                 options=list(
                     "singleDecisionTree",
-                    "randomForest"))
+                    "randomForest",
+                    "knn",
+                    "naiveBayes",
+                    "logisticRegression",
+                    "svm"))
             private$..minSplit <- jmvcore::OptionNumber$new(
                 "minSplit",
                 minSplit,
@@ -140,6 +149,41 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "gini",
                     "extratrees",
                     "hellinger"))
+            private$..knnNeighbors <- jmvcore::OptionNumber$new(
+                "knnNeighbors",
+                knnNeighbors,
+                default=5,
+                min=1,
+                max=100)
+            private$..knnDistance <- jmvcore::OptionList$new(
+                "knnDistance",
+                knnDistance,
+                options=list(
+                    "euclidean",
+                    "manhattan",
+                    "minkowski"),
+                default="euclidean")
+            private$..svmKernel <- jmvcore::OptionList$new(
+                "svmKernel",
+                svmKernel,
+                options=list(
+                    "linear",
+                    "polynomial",
+                    "radial",
+                    "sigmoid"),
+                default="radial")
+            private$..svmCost <- jmvcore::OptionNumber$new(
+                "svmCost",
+                svmCost,
+                default=1,
+                min=0.01,
+                max=100)
+            private$..svmGamma <- jmvcore::OptionNumber$new(
+                "svmGamma",
+                svmGamma,
+                default=1,
+                min=0.001,
+                max=10)
             private$..plotDecisionTree <- jmvcore::OptionBool$new(
                 "plotDecisionTree",
                 plotDecisionTree,
@@ -213,6 +257,11 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..maxDepthRandFor)
             self$.addOption(private$..sampleFraction)
             self$.addOption(private$..splitRule)
+            self$.addOption(private$..knnNeighbors)
+            self$.addOption(private$..knnDistance)
+            self$.addOption(private$..svmKernel)
+            self$.addOption(private$..svmCost)
+            self$.addOption(private$..svmGamma)
             self$.addOption(private$..plotDecisionTree)
             self$.addOption(private$..predictedFreq)
             self$.addOption(private$..printRandForest)
@@ -244,6 +293,11 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         maxDepthRandFor = function() private$..maxDepthRandFor$value,
         sampleFraction = function() private$..sampleFraction$value,
         splitRule = function() private$..splitRule$value,
+        knnNeighbors = function() private$..knnNeighbors$value,
+        knnDistance = function() private$..knnDistance$value,
+        svmKernel = function() private$..svmKernel$value,
+        svmCost = function() private$..svmCost$value,
+        svmGamma = function() private$..svmGamma$value,
         plotDecisionTree = function() private$..plotDecisionTree$value,
         predictedFreq = function() private$..predictedFreq$value,
         printRandForest = function() private$..printRandForest$value,
@@ -274,6 +328,11 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..maxDepthRandFor = NA,
         ..sampleFraction = NA,
         ..splitRule = NA,
+        ..knnNeighbors = NA,
+        ..knnDistance = NA,
+        ..svmKernel = NA,
+        ..svmCost = NA,
+        ..svmGamma = NA,
         ..plotDecisionTree = NA,
         ..predictedFreq = NA,
         ..printRandForest = NA,
@@ -517,6 +576,12 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param maxDepthRandFor .
 #' @param sampleFraction .
 #' @param splitRule .
+#' @param knnNeighbors Number of nearest neighbors for KNN classification.
+#' @param knnDistance .
+#' @param svmKernel .
+#' @param svmCost Regularization parameter for SVM.
+#' @param svmGamma Kernel coefficient for SVM (used in RBF, polynomial,
+#'   sigmoid kernels).
 #' @param plotDecisionTree .
 #' @param predictedFreq .
 #' @param printRandForest .
@@ -568,6 +633,11 @@ classification <- function(
     maxDepthRandFor = 30,
     sampleFraction = 1,
     splitRule,
+    knnNeighbors = 5,
+    knnDistance = "euclidean",
+    svmKernel = "radial",
+    svmCost = 1,
+    svmGamma = 1,
     plotDecisionTree = FALSE,
     predictedFreq = FALSE,
     printRandForest = FALSE,
@@ -612,6 +682,11 @@ classification <- function(
         maxDepthRandFor = maxDepthRandFor,
         sampleFraction = sampleFraction,
         splitRule = splitRule,
+        knnNeighbors = knnNeighbors,
+        knnDistance = knnDistance,
+        svmKernel = svmKernel,
+        svmCost = svmCost,
+        svmGamma = svmGamma,
         plotDecisionTree = plotDecisionTree,
         predictedFreq = predictedFreq,
         printRandForest = printRandForest,

@@ -13,8 +13,72 @@ items:
           - outcome
           - overalltime
 
-    - name:  text1
-      title: Competing Survival
-      type:  Preformatted
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: (explanatory && outcome && overalltime)
+
+    - name:  survivalTable
+      title: Survival Analysis Results
+      type:  Table
+      visible: (explanatory && outcome && overalltime)
+      rows: 1
+      columns:
+          - name: term
+            title: 'Variable'
+            type: text
+          - name: hr
+            title: 'HR'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name:  cuminc
+      title: Cumulative Incidence Function
+      type:  Table
+      visible: (explanatory && outcome && overalltime && analysistype:compete)
+      rows: 1
+      columns:
+          - name: time
+            title: 'Time'
+            type: number
+          - name: est_1
+            title: 'CIF Disease Death'
+            type: number
+          - name: est_2
+            title: 'CIF Other Death'
+            type: number
+          - name: var_1
+            title: 'Variance 1'
+            type: number
+          - name: var_2
+            title: 'Variance 2'
+            type: number
+
+    - name:  comprisksPlot
+      title: Competing Risks Plot
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .plotCompetingRisks
+      visible: (explanatory && outcome && overalltime && analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: (explanatory && outcome && overalltime)
 
 ...

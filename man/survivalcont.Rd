@@ -32,6 +32,10 @@ survivalcont(
   yend_plot = 1,
   byplot = 12,
   findcut = FALSE,
+  multiple_cutoffs = FALSE,
+  num_cutoffs = "two",
+  cutoff_method = "quantile",
+  min_group_size = 10,
   multievent = FALSE,
   ci95 = FALSE,
   risktable = FALSE,
@@ -132,6 +136,25 @@ rank statistic. This option is only available if you enable the "Survival
 Plot" option. The optimal cut-off point will be displayed on the survival
 plot as a vertical dashed line.}
 
+\item{multiple_cutoffs}{Enable this option to find multiple optimal cut-off
+points for the continuous explanatory variable. This extends the single
+cutoff analysis to identify 2-4 optimal cut-off points that maximize
+survival group separation. Creates stratified groups for enhanced survival
+analysis.}
+
+\item{num_cutoffs}{Select the number of cut-off points to identify. This
+will create multiple risk groups for stratified survival analysis (e.g., 2
+cut-offs create Low, Medium, High risk groups).}
+
+\item{cutoff_method}{Method for finding multiple cut-offs. Quantile-based
+uses tertiles/quartiles, Recursive finds sequential optimal points,
+Tree-based uses survival trees, Minimum P-value finds points that minimize
+log-rank p-values.}
+
+\item{min_group_size}{Minimum percentage of patients required in each group
+created by cut-offs. Prevents creating groups with insufficient sample
+sizes for reliable analysis.}
+
 \item{multievent}{Enable this option if your data includes multiple event
 levels (e.g., different types of events or outcomes). This option is
 required for cause-specific and competing risk survival analyses.}
@@ -182,6 +205,12 @@ A results object containing:
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
+\code{results$multipleCutTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$multipleMedianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$multipleSurvTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$plotMultipleCutoffs} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotMultipleSurvival} \tab \tab \tab \tab \tab an image \cr
+\code{results$calculatedmulticut} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

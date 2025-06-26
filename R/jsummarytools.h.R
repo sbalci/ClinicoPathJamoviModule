@@ -6,10 +6,40 @@ jsummarytoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            analysis_type = "dfsummary",
+            vars = NULL,
+            group_var = NULL,
+            weights_var = NULL,
+            cross_var1 = NULL,
+            cross_var2 = NULL,
+            show_labels = TRUE,
+            show_variable_numbers = FALSE,
+            show_graphs = TRUE,
+            show_valid_counts = TRUE,
+            show_na_counts = TRUE,
+            round_digits = 2,
+            max_distinct_values = 10,
+            include_cumulative = FALSE,
+            report_missing = TRUE,
+            transpose_output = FALSE,
+            stats_to_include = "all",
+            include_mean = TRUE,
+            include_median = TRUE,
+            include_mode = FALSE,
+            include_sd = TRUE,
+            include_var = FALSE,
+            include_range = TRUE,
+            include_quartiles = TRUE,
+            include_skewness = FALSE,
+            include_kurtosis = FALSE,
+            cross_proportions = "none",
+            output_style = "grid",
+            plain_ascii = FALSE,
+            headings = TRUE,
+            escape_pipe = TRUE,
+            bootstrap_css = TRUE,
+            custom_css = "",
+            show_interpretation = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,47 +47,281 @@ jsummarytoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+            private$..analysis_type <- jmvcore::OptionList$new(
+                "analysis_type",
+                analysis_type,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+                    "dfsummary",
+                    "freq",
+                    "descr",
+                    "ctable"),
+                default="dfsummary")
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars)
+            private$..group_var <- jmvcore::OptionVariable$new(
+                "group_var",
+                group_var)
+            private$..weights_var <- jmvcore::OptionVariable$new(
+                "weights_var",
+                weights_var)
+            private$..cross_var1 <- jmvcore::OptionVariable$new(
+                "cross_var1",
+                cross_var1)
+            private$..cross_var2 <- jmvcore::OptionVariable$new(
+                "cross_var2",
+                cross_var2)
+            private$..show_labels <- jmvcore::OptionBool$new(
+                "show_labels",
+                show_labels,
+                default=TRUE)
+            private$..show_variable_numbers <- jmvcore::OptionBool$new(
+                "show_variable_numbers",
+                show_variable_numbers,
+                default=FALSE)
+            private$..show_graphs <- jmvcore::OptionBool$new(
+                "show_graphs",
+                show_graphs,
+                default=TRUE)
+            private$..show_valid_counts <- jmvcore::OptionBool$new(
+                "show_valid_counts",
+                show_valid_counts,
+                default=TRUE)
+            private$..show_na_counts <- jmvcore::OptionBool$new(
+                "show_na_counts",
+                show_na_counts,
+                default=TRUE)
+            private$..round_digits <- jmvcore::OptionInteger$new(
+                "round_digits",
+                round_digits,
+                min=0,
+                max=6,
+                default=2)
+            private$..max_distinct_values <- jmvcore::OptionInteger$new(
+                "max_distinct_values",
+                max_distinct_values,
+                min=5,
+                max=50,
+                default=10)
+            private$..include_cumulative <- jmvcore::OptionBool$new(
+                "include_cumulative",
+                include_cumulative,
+                default=FALSE)
+            private$..report_missing <- jmvcore::OptionBool$new(
+                "report_missing",
+                report_missing,
+                default=TRUE)
+            private$..transpose_output <- jmvcore::OptionBool$new(
+                "transpose_output",
+                transpose_output,
+                default=FALSE)
+            private$..stats_to_include <- jmvcore::OptionList$new(
+                "stats_to_include",
+                stats_to_include,
+                options=list(
+                    "all",
+                    "basic",
+                    "central",
+                    "dispersion",
+                    "custom"),
+                default="all")
+            private$..include_mean <- jmvcore::OptionBool$new(
+                "include_mean",
+                include_mean,
+                default=TRUE)
+            private$..include_median <- jmvcore::OptionBool$new(
+                "include_median",
+                include_median,
+                default=TRUE)
+            private$..include_mode <- jmvcore::OptionBool$new(
+                "include_mode",
+                include_mode,
+                default=FALSE)
+            private$..include_sd <- jmvcore::OptionBool$new(
+                "include_sd",
+                include_sd,
+                default=TRUE)
+            private$..include_var <- jmvcore::OptionBool$new(
+                "include_var",
+                include_var,
+                default=FALSE)
+            private$..include_range <- jmvcore::OptionBool$new(
+                "include_range",
+                include_range,
+                default=TRUE)
+            private$..include_quartiles <- jmvcore::OptionBool$new(
+                "include_quartiles",
+                include_quartiles,
+                default=TRUE)
+            private$..include_skewness <- jmvcore::OptionBool$new(
+                "include_skewness",
+                include_skewness,
+                default=FALSE)
+            private$..include_kurtosis <- jmvcore::OptionBool$new(
+                "include_kurtosis",
+                include_kurtosis,
+                default=FALSE)
+            private$..cross_proportions <- jmvcore::OptionList$new(
+                "cross_proportions",
+                cross_proportions,
+                options=list(
+                    "none",
+                    "row",
+                    "col",
+                    "total"),
+                default="none")
+            private$..output_style <- jmvcore::OptionList$new(
+                "output_style",
+                output_style,
+                options=list(
+                    "grid",
+                    "simple",
+                    "bootstrap",
+                    "minimal"),
+                default="grid")
+            private$..plain_ascii <- jmvcore::OptionBool$new(
+                "plain_ascii",
+                plain_ascii,
+                default=FALSE)
+            private$..headings <- jmvcore::OptionBool$new(
+                "headings",
+                headings,
+                default=TRUE)
+            private$..escape_pipe <- jmvcore::OptionBool$new(
+                "escape_pipe",
+                escape_pipe,
+                default=TRUE)
+            private$..bootstrap_css <- jmvcore::OptionBool$new(
+                "bootstrap_css",
+                bootstrap_css,
+                default=TRUE)
+            private$..custom_css <- jmvcore::OptionString$new(
+                "custom_css",
+                custom_css,
+                default="")
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
                 default=TRUE)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..analysis_type)
+            self$.addOption(private$..vars)
+            self$.addOption(private$..group_var)
+            self$.addOption(private$..weights_var)
+            self$.addOption(private$..cross_var1)
+            self$.addOption(private$..cross_var2)
+            self$.addOption(private$..show_labels)
+            self$.addOption(private$..show_variable_numbers)
+            self$.addOption(private$..show_graphs)
+            self$.addOption(private$..show_valid_counts)
+            self$.addOption(private$..show_na_counts)
+            self$.addOption(private$..round_digits)
+            self$.addOption(private$..max_distinct_values)
+            self$.addOption(private$..include_cumulative)
+            self$.addOption(private$..report_missing)
+            self$.addOption(private$..transpose_output)
+            self$.addOption(private$..stats_to_include)
+            self$.addOption(private$..include_mean)
+            self$.addOption(private$..include_median)
+            self$.addOption(private$..include_mode)
+            self$.addOption(private$..include_sd)
+            self$.addOption(private$..include_var)
+            self$.addOption(private$..include_range)
+            self$.addOption(private$..include_quartiles)
+            self$.addOption(private$..include_skewness)
+            self$.addOption(private$..include_kurtosis)
+            self$.addOption(private$..cross_proportions)
+            self$.addOption(private$..output_style)
+            self$.addOption(private$..plain_ascii)
+            self$.addOption(private$..headings)
+            self$.addOption(private$..escape_pipe)
+            self$.addOption(private$..bootstrap_css)
+            self$.addOption(private$..custom_css)
+            self$.addOption(private$..show_interpretation)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        analysis_type = function() private$..analysis_type$value,
+        vars = function() private$..vars$value,
+        group_var = function() private$..group_var$value,
+        weights_var = function() private$..weights_var$value,
+        cross_var1 = function() private$..cross_var1$value,
+        cross_var2 = function() private$..cross_var2$value,
+        show_labels = function() private$..show_labels$value,
+        show_variable_numbers = function() private$..show_variable_numbers$value,
+        show_graphs = function() private$..show_graphs$value,
+        show_valid_counts = function() private$..show_valid_counts$value,
+        show_na_counts = function() private$..show_na_counts$value,
+        round_digits = function() private$..round_digits$value,
+        max_distinct_values = function() private$..max_distinct_values$value,
+        include_cumulative = function() private$..include_cumulative$value,
+        report_missing = function() private$..report_missing$value,
+        transpose_output = function() private$..transpose_output$value,
+        stats_to_include = function() private$..stats_to_include$value,
+        include_mean = function() private$..include_mean$value,
+        include_median = function() private$..include_median$value,
+        include_mode = function() private$..include_mode$value,
+        include_sd = function() private$..include_sd$value,
+        include_var = function() private$..include_var$value,
+        include_range = function() private$..include_range$value,
+        include_quartiles = function() private$..include_quartiles$value,
+        include_skewness = function() private$..include_skewness$value,
+        include_kurtosis = function() private$..include_kurtosis$value,
+        cross_proportions = function() private$..cross_proportions$value,
+        output_style = function() private$..output_style$value,
+        plain_ascii = function() private$..plain_ascii$value,
+        headings = function() private$..headings$value,
+        escape_pipe = function() private$..escape_pipe$value,
+        bootstrap_css = function() private$..bootstrap_css$value,
+        custom_css = function() private$..custom_css$value,
+        show_interpretation = function() private$..show_interpretation$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..analysis_type = NA,
+        ..vars = NA,
+        ..group_var = NA,
+        ..weights_var = NA,
+        ..cross_var1 = NA,
+        ..cross_var2 = NA,
+        ..show_labels = NA,
+        ..show_variable_numbers = NA,
+        ..show_graphs = NA,
+        ..show_valid_counts = NA,
+        ..show_na_counts = NA,
+        ..round_digits = NA,
+        ..max_distinct_values = NA,
+        ..include_cumulative = NA,
+        ..report_missing = NA,
+        ..transpose_output = NA,
+        ..stats_to_include = NA,
+        ..include_mean = NA,
+        ..include_median = NA,
+        ..include_mode = NA,
+        ..include_sd = NA,
+        ..include_var = NA,
+        ..include_range = NA,
+        ..include_quartiles = NA,
+        ..include_skewness = NA,
+        ..include_kurtosis = NA,
+        ..cross_proportions = NA,
+        ..output_style = NA,
+        ..plain_ascii = NA,
+        ..headings = NA,
+        ..escape_pipe = NA,
+        ..bootstrap_css = NA,
+        ..custom_css = NA,
+        ..show_interpretation = NA)
 )
 
 jsummarytoolsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jsummarytoolsResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        summary_output = function() private$.items[["summary_output"]],
+        data_summary_table = function() private$.items[["data_summary_table"]],
+        frequency_table = function() private$.items[["frequency_table"]],
+        descriptive_stats = function() private$.items[["descriptive_stats"]],
+        crosstab_output = function() private$.items[["crosstab_output"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -65,10 +329,200 @@ jsummarytoolsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="",
                 title="Summary Statistics with summarytools")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Summary Statistics with summarytools"))}))
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary_output",
+                title="Summary Statistics Output",
+                visible=TRUE,
+                clearWith=list(
+                    "analysis_type",
+                    "vars",
+                    "group_var",
+                    "weights_var",
+                    "cross_var1",
+                    "cross_var2",
+                    "show_labels",
+                    "show_graphs",
+                    "round_digits")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="data_summary_table",
+                title="Data Summary",
+                visible="(analysis_type:dfsummary)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="type", 
+                        `title`="Type", 
+                        `type`="text"),
+                    list(
+                        `name`="label", 
+                        `title`="Label", 
+                        `type`="text"),
+                    list(
+                        `name`="stats", 
+                        `title`="Statistics/Values", 
+                        `type`="text"),
+                    list(
+                        `name`="freqs", 
+                        `title`="Frequencies", 
+                        `type`="text"),
+                    list(
+                        `name`="valid", 
+                        `title`="Valid", 
+                        `type`="text"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "show_labels",
+                    "round_digits")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="frequency_table",
+                title="Frequency Table",
+                visible="(analysis_type:freq)",
+                columns=list(
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="freq", 
+                        `title`="Frequency", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct_valid", 
+                        `title`="% Valid", 
+                        `type`="number", 
+                        `format`="zto,dp:2"),
+                    list(
+                        `name`="pct_total", 
+                        `title`="% Total", 
+                        `type`="number", 
+                        `format`="zto,dp:2"),
+                    list(
+                        `name`="pct_cum", 
+                        `title`="% Cumulative", 
+                        `type`="number", 
+                        `format`="zto,dp:2")),
+                clearWith=list(
+                    "vars",
+                    "include_cumulative",
+                    "report_missing")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="descriptive_stats",
+                title="Descriptive Statistics",
+                visible="(analysis_type:descr)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="std_dev", 
+                        `title`="Std.Dev", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="min", 
+                        `title`="Min", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="q1", 
+                        `title`="Q1", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="q3", 
+                        `title`="Q3", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="max", 
+                        `title`="Max", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="mad", 
+                        `title`="MAD", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="iqr", 
+                        `title`="IQR", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="cv", 
+                        `title`="CV", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="skewness", 
+                        `title`="Skewness", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="se_skewness", 
+                        `title`="SE.Skewness", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="kurtosis", 
+                        `title`="Kurtosis", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="n_valid", 
+                        `title`="N.Valid", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct_valid", 
+                        `title`="Pct.Valid", 
+                        `type`="number", 
+                        `format`="zto,dp:1")),
+                clearWith=list(
+                    "vars",
+                    "stats_to_include",
+                    "round_digits")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="crosstab_output",
+                title="Cross-tabulation",
+                visible="(analysis_type:ctable)",
+                clearWith=list(
+                    "cross_var1",
+                    "cross_var2",
+                    "cross_proportions",
+                    "weights_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Output Interpretation",
+                visible="(show_interpretation)"))}))
 
 jsummarytoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jsummarytoolsBase",
@@ -93,42 +547,157 @@ jsummarytoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Summary Statistics with summarytools
 #'
+#' Comprehensive descriptive statistics using the summarytools package.
+#' Provides professional data frame summaries, frequency tables, and
+#' descriptive statistics with publication-ready output for clinical research.
 #' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param data Dataset for descriptive analysis
+#' @param analysis_type Type of summarytools analysis to perform
+#' @param vars Variables for analysis (all variables if empty)
+#' @param group_var Optional grouping variable for stratified analysis
+#' @param weights_var Optional variable containing sample weights
+#' @param cross_var1 First variable for cross-tabulation
+#' @param cross_var2 Second variable for cross-tabulation
+#' @param show_labels Display variable labels when available
+#' @param show_variable_numbers Display variable numbers in output
+#' @param show_graphs Include histograms and bar charts in dfSummary
+#' @param show_valid_counts Display valid observation counts and proportions
+#' @param show_na_counts Display missing data information
+#' @param round_digits Number of decimal places for numeric output
+#' @param max_distinct_values Maximum number of distinct values to show for
+#'   categorical variables
+#' @param include_cumulative Include cumulative frequencies in frequency
+#'   tables
+#' @param report_missing Include missing values in frequency tables
+#' @param transpose_output Transpose descriptive statistics table (variables
+#'   as rows)
+#' @param stats_to_include Which descriptive statistics to include
+#' @param include_mean Include mean in descriptive statistics
+#' @param include_median Include median in descriptive statistics
+#' @param include_mode Include mode in descriptive statistics
+#' @param include_sd Include standard deviation in descriptive statistics
+#' @param include_var Include variance in descriptive statistics
+#' @param include_range Include min, max, and range in descriptive statistics
+#' @param include_quartiles Include Q1, Q3, and IQR in descriptive statistics
+#' @param include_skewness Include skewness in descriptive statistics
+#' @param include_kurtosis Include kurtosis in descriptive statistics
+#' @param cross_proportions Type of proportions to calculate in
+#'   cross-tabulation
+#' @param output_style HTML output styling
+#' @param plain_ascii Use plain ASCII instead of HTML formatting
+#' @param headings Include section headings in output
+#' @param escape_pipe Escape pipe characters for markdown compatibility
+#' @param bootstrap_css Include Bootstrap CSS styling in HTML output
+#' @param custom_css Custom CSS styling for HTML output
+#' @param show_interpretation Display interpretation guidance for results
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary_output} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$data_summary_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frequency_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$descriptive_stats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crosstab_output} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$data_summary_table$asDF}
+#'
+#' \code{as.data.frame(results$data_summary_table)}
 #'
 #' @export
 jsummarytools <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    analysis_type = "dfsummary",
+    vars,
+    group_var,
+    weights_var,
+    cross_var1,
+    cross_var2,
+    show_labels = TRUE,
+    show_variable_numbers = FALSE,
+    show_graphs = TRUE,
+    show_valid_counts = TRUE,
+    show_na_counts = TRUE,
+    round_digits = 2,
+    max_distinct_values = 10,
+    include_cumulative = FALSE,
+    report_missing = TRUE,
+    transpose_output = FALSE,
+    stats_to_include = "all",
+    include_mean = TRUE,
+    include_median = TRUE,
+    include_mode = FALSE,
+    include_sd = TRUE,
+    include_var = FALSE,
+    include_range = TRUE,
+    include_quartiles = TRUE,
+    include_skewness = FALSE,
+    include_kurtosis = FALSE,
+    cross_proportions = "none",
+    output_style = "grid",
+    plain_ascii = FALSE,
+    headings = TRUE,
+    escape_pipe = TRUE,
+    bootstrap_css = TRUE,
+    custom_css = "",
+    show_interpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jsummarytools requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(group_var)) group_var <- jmvcore::resolveQuo(jmvcore::enquo(group_var))
+    if ( ! missing(weights_var)) weights_var <- jmvcore::resolveQuo(jmvcore::enquo(weights_var))
+    if ( ! missing(cross_var1)) cross_var1 <- jmvcore::resolveQuo(jmvcore::enquo(cross_var1))
+    if ( ! missing(cross_var2)) cross_var2 <- jmvcore::resolveQuo(jmvcore::enquo(cross_var2))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(group_var), group_var, NULL),
+            `if`( ! missing(weights_var), weights_var, NULL),
+            `if`( ! missing(cross_var1), cross_var1, NULL),
+            `if`( ! missing(cross_var2), cross_var2, NULL))
 
 
     options <- jsummarytoolsOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        analysis_type = analysis_type,
+        vars = vars,
+        group_var = group_var,
+        weights_var = weights_var,
+        cross_var1 = cross_var1,
+        cross_var2 = cross_var2,
+        show_labels = show_labels,
+        show_variable_numbers = show_variable_numbers,
+        show_graphs = show_graphs,
+        show_valid_counts = show_valid_counts,
+        show_na_counts = show_na_counts,
+        round_digits = round_digits,
+        max_distinct_values = max_distinct_values,
+        include_cumulative = include_cumulative,
+        report_missing = report_missing,
+        transpose_output = transpose_output,
+        stats_to_include = stats_to_include,
+        include_mean = include_mean,
+        include_median = include_median,
+        include_mode = include_mode,
+        include_sd = include_sd,
+        include_var = include_var,
+        include_range = include_range,
+        include_quartiles = include_quartiles,
+        include_skewness = include_skewness,
+        include_kurtosis = include_kurtosis,
+        cross_proportions = cross_proportions,
+        output_style = output_style,
+        plain_ascii = plain_ascii,
+        headings = headings,
+        escape_pipe = escape_pipe,
+        bootstrap_css = bootstrap_css,
+        custom_css = custom_css,
+        show_interpretation = show_interpretation)
 
     analysis <- jsummarytoolsClass$new(
         options = options,

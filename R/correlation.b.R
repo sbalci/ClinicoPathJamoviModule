@@ -76,18 +76,33 @@ correlationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$text1$setContent(cor1)
 
-
-
-            # corx <- mydata %>%
-            #     dplyr::select(myvars) %$%
-            #     stats::cor.test(method = "spearman", exact = FALSE) %>%
-            #     report::report()
-
-            # cor2 <- cor1 %>%
-            #     report::report(.)
-
-
-            # self$results$text2$setContent(cor2)
+            # Generate natural language report
+            if (requireNamespace("report", quietly = TRUE)) {
+                cor_report <- cor1 %>%
+                    report::report(.) %>%
+                    as.character()
+                
+                # Format as HTML with proper styling
+                report_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<h4 style='color: #495057; margin-top: 0;'>Correlation Analysis Summary</h4>",
+                    "<p style='margin-bottom: 0; line-height: 1.6; color: #212529;'>",
+                    gsub("\n", "<br>", cor_report),
+                    "</p>",
+                    "</div>"
+                )
+                
+                self$results$text2$setContent(report_html)
+            } else {
+                # Fallback if report package not available
+                fallback_html <- paste0(
+                    "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<p><strong>Note:</strong> Natural language reporting requires the 'report' package. ",
+                    "Please install it for enhanced correlation interpretation.</p>",
+                    "</div>"
+                )
+                self$results$text2$setContent(fallback_html)
+            }
 
 
 

@@ -107,7 +107,11 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text1 = function() private$.items[["text1"]]),
+        summary = function() private$.items[["summary"]],
+        survivalTable = function() private$.items[["survivalTable"]],
+        cuminc = function() private$.items[["cuminc"]],
+        comprisksPlot = function() private$.items[["comprisksPlot"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -123,10 +127,84 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "explanatory",
                     "outcome",
                     "overalltime")))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text1",
-                title="Competing Survival"))}))
+                name="summary",
+                title="Analysis Summary",
+                visible="(explanatory && outcome && overalltime)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="survivalTable",
+                title="Survival Analysis Results",
+                visible="(explanatory && outcome && overalltime)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cuminc",
+                title="Cumulative Incidence Function",
+                visible="(explanatory && outcome && overalltime && analysistype:compete)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="time", 
+                        `title`="Time", 
+                        `type`="number"),
+                    list(
+                        `name`="est_1", 
+                        `title`="CIF Disease Death", 
+                        `type`="number"),
+                    list(
+                        `name`="est_2", 
+                        `title`="CIF Other Death", 
+                        `type`="number"),
+                    list(
+                        `name`="var_1", 
+                        `title`="Variance 1", 
+                        `type`="number"),
+                    list(
+                        `name`="var_2", 
+                        `title`="Variance 2", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="comprisksPlot",
+                title="Competing Risks Plot",
+                width=700,
+                height=400,
+                renderFun=".plotCompetingRisks",
+                visible="(explanatory && outcome && overalltime && analysistype:compete)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime",
+                    "analysistype")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation",
+                visible="(explanatory && outcome && overalltime)"))}))
 
 competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "competingsurvivalBase",
@@ -169,8 +247,18 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cuminc} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comprisksPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$survivalTable$asDF}
+#'
+#' \code{as.data.frame(results$survivalTable)}
 #'
 #' @export
 competingsurvival <- function(

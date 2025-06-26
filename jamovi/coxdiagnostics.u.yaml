@@ -80,6 +80,17 @@ children:
       - type: CheckBox
         name: show_model_summary
       - type: CheckBox
+        name: show_vif
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: vif_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
         name: show_interpretation
       - type: CheckBox
         name: exclude_missing

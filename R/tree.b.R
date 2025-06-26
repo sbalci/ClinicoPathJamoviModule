@@ -42,7 +42,7 @@ treeClass <- if (requireNamespace('jmvcore'))
                         }
 
                         # Check for unrealistic biomarker values
-                        varsName <- self$options$vars
+                        varsName <- if(!is.null(self$options$vars)) trimws(self$options$vars) else NULL
                         for (var in varsName) {
                             values <- jmvcore::toNumeric(self$data[[var]])
 
@@ -69,10 +69,11 @@ treeClass <- if (requireNamespace('jmvcore'))
                             return(NULL)
                         }
 
-                        varsName <- self$options$vars
-                        facsName <- self$options$facs
-                        targetName <- self$options$target
-                        trainName <- self$options$train
+                        # Trim variable names to handle spaces in variable names (Issue #12)
+                        varsName <- if(!is.null(self$options$vars)) trimws(self$options$vars) else NULL
+                        facsName <- if(!is.null(self$options$facs)) trimws(self$options$facs) else NULL
+                        targetName <- if(!is.null(self$options$target)) trimws(self$options$target) else NULL
+                        trainName <- if(!is.null(self$options$train)) trimws(self$options$train) else NULL
 
                         # Select variables
                         allVars <- c(varsName, facsName, targetName)
@@ -188,9 +189,10 @@ treeClass <- if (requireNamespace('jmvcore'))
 
                     # Medical-appropriate missing data imputation ----
                     .imputeMedicalData = function(data) {
-                        varsName <- self$options$vars
-                        facsName <- self$options$facs
-                        targetName <- self$options$target
+                        # Trim variable names to handle spaces (Issue #12 fix)
+                        varsName <- if(!is.null(self$options$vars)) trimws(self$options$vars) else NULL
+                        facsName <- if(!is.null(self$options$facs)) trimws(self$options$facs) else NULL
+                        targetName <- if(!is.null(self$options$target)) trimws(self$options$target) else NULL
 
                         # For continuous biomarkers: median imputation within disease groups
                         for (var in varsName) {
@@ -450,10 +452,12 @@ treeClass <- if (requireNamespace('jmvcore'))
                         prevalence <- results$prevalence
 
                         # Build medical decision tree
-                        targetName <- self$options$target
+                        targetName <- if(!is.null(self$options$target)) trimws(self$options$target) else NULL
 
-                        # Prepare formula
-                        varsFormula <- paste(c(self$options$vars, self$options$facs), collapse = " + ")
+                        # Prepare formula with trimmed variable names (Issue #12 fix)
+                        trimmed_vars <- if(!is.null(self$options$vars)) trimws(self$options$vars) else NULL
+                        trimmed_facs <- if(!is.null(self$options$facs)) trimws(self$options$facs) else NULL
+                        varsFormula <- paste(c(trimmed_vars, trimmed_facs), collapse = " + ")
                         myformula <- as.formula(paste("outcome ~", varsFormula))
 
                         # Progress indicator
@@ -547,6 +551,19 @@ treeClass <- if (requireNamespace('jmvcore'))
                         self$results$text1$setContent("Analysis completed successfully!")
                         self$results$text3$setContent("Model ready for clinical evaluation")
 
+                        # Perform additional validations if requested (Issue #12 enhancements)
+                        if (self$options$crossValidation) {
+                            private$.performCrossValidation(results$mydata, myformula)
+                        }
+                        
+                        if (self$options$bootstrapValidation) {
+                            private$.performBootstrapValidation(trainData, testData, myformula)
+                        }
+                        
+                        if (self$options$compareModels) {
+                            private$.compareModels(trainData, testData, myformula)
+                        }
+
                         # Store plot data
                         plotData <- list(
                             model = mytree.fft,
@@ -554,8 +571,12 @@ treeClass <- if (requireNamespace('jmvcore'))
                             trainData = trainData
                         )
 
-                        image <- self$results$plot
-                        image$setState(plotData)
+                        # Store plot data for all plot types
+                        self$results$plot$setState(plotData)
+                        self$results$partitionPlot$setState(plotData)
+                        self$results$rocPlot$setState(plotData)
+                        self$results$calibrationPlot$setState(plotData)
+                        self$results$clinicalUtilityPlot$setState(plotData)
                     },
 
                     # Assess clinical relevance of features ----
@@ -852,5 +873,451 @@ treeClass <- if (requireNamespace('jmvcore'))
                         abline(h = 0, lty = 2, col = "gray")
 
                         TRUE
+                    },
+
+                    # Partition plot function using parttree ----
+                    .plotPartition = function(image, ggtheme, theme, ...) {
+                        
+                        plotData <- image$state
+                        
+                        if (is.null(plotData$model)) {
+                            return()
+                        }
+                        
+                        # Check if parttree package is available
+                        if (!requireNamespace("parttree", quietly = TRUE)) {
+                            plot.new()
+                            text(0.5, 0.5, "parttree package required for partition plots\nInstall with: install.packages('parttree')", 
+                                 cex = 1.2, col = "red", adj = 0.5)
+                            return(TRUE)
+                        }
+                        
+                        # Check if we have exactly 2 continuous variables for optimal visualization
+                        continuous_vars <- self$options$vars
+                        
+                        if (length(continuous_vars) < 2) {
+                            plot.new()
+                            text(0.5, 0.5, "Partition plot requires at least 2 continuous variables\nPlease select additional variables", 
+                                 cex = 1.2, col = "orange", adj = 0.5)
+                            return(TRUE)
+                        }
+                        
+                        if (length(continuous_vars) > 2) {
+                            # Use first 2 variables and warn user
+                            continuous_vars <- continuous_vars[1:2]
+                            message("Using first 2 continuous variables for partition plot: ", 
+                                   paste(continuous_vars, collapse = ", "))
+                        }
+                        
+                        # Get the appropriate dataset
+                        plot_data <- if(nrow(plotData$testData) > 0) plotData$testData else plotData$trainData
+                        
+                        # Create formula for rpart (parttree requires rpart model)
+                        formula_vars <- paste(continuous_vars, collapse = " + ")
+                        partition_formula <- as.formula(paste("outcome ~", formula_vars))
+                        
+                        # Fit rpart model for partition visualization
+                        rpart_model <- rpart::rpart(partition_formula, data = plot_data,
+                                                   method = "class",
+                                                   control = rpart::rpart.control(
+                                                       minsplit = max(10, self$options$minCases),
+                                                       maxdepth = self$options$maxDepth
+                                                   ))
+                        
+                        # Create parttree plot
+                        tryCatch({
+                            library(ggplot2)
+                            
+                            # Create the base ggplot
+                            p <- ggplot(plot_data, aes(x = .data[[continuous_vars[1]]], 
+                                                      y = .data[[continuous_vars[2]]], 
+                                                      color = outcome)) +
+                                geom_point(alpha = 0.7, size = 2) +
+                                parttree::geom_parttree(data = rpart_model, alpha = 0.3) +
+                                labs(
+                                    title = "Decision Tree Partition Plot",
+                                    subtitle = paste("Variables:", paste(continuous_vars, collapse = " vs ")),
+                                    x = continuous_vars[1],
+                                    y = continuous_vars[2],
+                                    color = "Outcome"
+                                ) +
+                                scale_color_manual(values = c("Control" = "#2E86AB", "Disease" = "#A23B72")) +
+                                theme_minimal() +
+                                theme(
+                                    plot.title = element_text(size = 14, face = "bold"),
+                                    plot.subtitle = element_text(size = 12),
+                                    legend.position = "bottom"
+                                )
+                            
+                            # Apply user theme if provided
+                            if (!missing(ggtheme)) {
+                                p <- p + ggtheme
+                            }
+                            
+                            print(p)
+                            
+                        }, error = function(e) {
+                            plot.new()
+                            text(0.5, 0.5, paste("Error creating partition plot:", e$message), 
+                                 cex = 1, col = "red", adj = 0.5)
+                        })
+                        
+                        TRUE
+                    },
+
+                    # Cross-validation implementation (Issue #12 enhancement) ----
+                    .performCrossValidation = function(data, formula) {
+                        tryCatch({
+                            folds <- self$options$cvFolds
+                            set.seed(123)  # For reproducibility
+                            
+                            # Create folds
+                            fold_indices <- caret::createFolds(data$outcome, k = folds, list = TRUE)
+                            
+                            cv_results <- data.frame()
+                            
+                            for (i in 1:folds) {
+                                # Split data
+                                test_idx <- fold_indices[[i]]
+                                cv_train <- data[-test_idx, ]
+                                cv_test <- data[test_idx, ]
+                                
+                                # Build model
+                                cv_model <- FFTrees::FFTrees(
+                                    formula = formula,
+                                    data = cv_train,
+                                    data.test = cv_test,
+                                    goal = "bacc",
+                                    do.comp = FALSE,
+                                    do.cart = FALSE,
+                                    do.lr = FALSE,
+                                    do.rf = FALSE,
+                                    do.svm = FALSE
+                                )
+                                
+                                # Get predictions and calculate metrics
+                                predictions <- predict(cv_model, cv_test)
+                                probabilities <- predict(cv_model, cv_test, type = "prob")
+                                
+                                metrics <- private$.calculateClinicalMetrics(
+                                    predictions, cv_test$outcome, probabilities[, "Disease"]
+                                )
+                                
+                                # Add to results
+                                cv_results <- rbind(cv_results, data.frame(
+                                    fold = i,
+                                    sensitivity = metrics$Sensitivity,
+                                    specificity = metrics$Specificity,
+                                    accuracy = metrics$Accuracy,
+                                    auc = metrics$AUC
+                                ))
+                            }
+                            
+                            # Populate CV results table
+                            for (i in 1:nrow(cv_results)) {
+                                self$results$crossValidationResults$addRow(rowKey = i, values = list(
+                                    fold = cv_results$fold[i],
+                                    sensitivity = cv_results$sensitivity[i],
+                                    specificity = cv_results$specificity[i],
+                                    accuracy = cv_results$accuracy[i],
+                                    auc = cv_results$auc[i]
+                                ))
+                            }
+                            
+                        }, error = function(e) {
+                            warning(paste("Cross-validation failed:", e$message))
+                        })
+                    },
+
+                    # Bootstrap validation implementation (Issue #12 enhancement) ----
+                    .performBootstrapValidation = function(trainData, testData, formula) {
+                        tryCatch({
+                            n_boot <- self$options$bootstrapSamples
+                            set.seed(123)
+                            
+                            boot_results <- list()
+                            
+                            for (i in 1:n_boot) {
+                                # Bootstrap sample
+                                boot_idx <- sample(nrow(trainData), replace = TRUE)
+                                boot_train <- trainData[boot_idx, ]
+                                
+                                # Build model
+                                boot_model <- FFTrees::FFTrees(
+                                    formula = formula,
+                                    data = boot_train,
+                                    data.test = testData,
+                                    goal = "bacc",
+                                    do.comp = FALSE,
+                                    do.cart = FALSE,
+                                    do.lr = FALSE,
+                                    do.rf = FALSE,
+                                    do.svm = FALSE
+                                )
+                                
+                                # Get predictions and calculate metrics
+                                if (nrow(testData) > 0) {
+                                    predictions <- predict(boot_model, testData)
+                                    probabilities <- predict(boot_model, testData, type = "prob")
+                                    
+                                    metrics <- private$.calculateClinicalMetrics(
+                                        predictions, testData$outcome, probabilities[, "Disease"]
+                                    )
+                                    
+                                    boot_results[[i]] <- metrics
+                                }
+                            }
+                            
+                            # Calculate summary statistics
+                            if (length(boot_results) > 0) {
+                                metric_names <- names(boot_results[[1]])
+                                summary_stats <- list()
+                                
+                                for (metric in metric_names) {
+                                    values <- sapply(boot_results, function(x) x[[metric]])
+                                    values <- values[is.finite(values)]
+                                    
+                                    if (length(values) > 0) {
+                                        summary_stats[[metric]] <- list(
+                                            mean = mean(values),
+                                            ci_lower = quantile(values, 0.025),
+                                            ci_upper = quantile(values, 0.975),
+                                            bias = mean(values) - boot_results[[1]][[metric]]
+                                        )
+                                    }
+                                }
+                                
+                                # Populate bootstrap results table
+                                i <- 1
+                                for (metric in names(summary_stats)) {
+                                    stats <- summary_stats[[metric]]
+                                    self$results$bootstrapResults$addRow(rowKey = i, values = list(
+                                        metric = metric,
+                                        mean = stats$mean,
+                                        ci_lower = stats$ci_lower,
+                                        ci_upper = stats$ci_upper,
+                                        bias = stats$bias
+                                    ))
+                                    i <- i + 1
+                                }
+                            }
+                            
+                        }, error = function(e) {
+                            warning(paste("Bootstrap validation failed:", e$message))
+                        })
+                    },
+
+                    # Model comparison implementation (Issue #12 enhancement) ----
+                    .compareModels = function(trainData, testData, formula) {
+                        tryCatch({
+                            if (nrow(testData) == 0) return()
+                            
+                            models <- list()
+                            results <- data.frame()
+                            
+                            # FFTrees model (already built, simplified version for comparison)
+                            fft_model <- FFTrees::FFTrees(
+                                formula = formula,
+                                data = trainData,
+                                data.test = testData,
+                                goal = self$options$modelComparisonMetric,
+                                do.comp = FALSE,
+                                do.cart = TRUE,
+                                do.lr = TRUE,
+                                do.rf = FALSE,
+                                do.svm = FALSE
+                            )
+                            
+                            # Get FFTrees predictions
+                            fft_pred <- predict(fft_model, testData)
+                            fft_prob <- predict(fft_model, testData, type = "prob")
+                            fft_metrics <- private$.calculateClinicalMetrics(
+                                fft_pred, testData$outcome, fft_prob[, "Disease"]
+                            )
+                            
+                            # Logistic regression
+                            lr_model <- glm(formula, data = trainData, family = binomial)
+                            lr_prob <- predict(lr_model, testData, type = "response")
+                            lr_pred <- factor(ifelse(lr_prob > 0.5, "Disease", "Control"), levels = c("Control", "Disease"))
+                            lr_metrics <- private$.calculateClinicalMetrics(
+                                lr_pred, testData$outcome, lr_prob
+                            )
+                            
+                            # CART model
+                            cart_model <- rpart::rpart(formula, data = trainData, method = "class")
+                            cart_pred <- predict(cart_model, testData, type = "class")
+                            cart_prob <- predict(cart_model, testData, type = "prob")[, "Disease"]
+                            cart_metrics <- private$.calculateClinicalMetrics(
+                                cart_pred, testData$outcome, cart_prob
+                            )
+                            
+                            # Initialize model lists
+                            model_metrics <- list(fft_metrics, lr_metrics, cart_metrics)
+                            model_names <- c("FFTrees", "Logistic Regression", "CART")
+                            primary_values <- c(
+                                fft_metrics[[switch(comparison_metric, 
+                                                   "bacc" = "Accuracy", "auc" = "AUC", "sens" = "Sensitivity", 
+                                                   "spec" = "Specificity", "f1" = "F1_Score")]],
+                                lr_metrics[[switch(comparison_metric, 
+                                                  "bacc" = "Accuracy", "auc" = "AUC", "sens" = "Sensitivity", 
+                                                  "spec" = "Specificity", "f1" = "F1_Score")]],
+                                cart_metrics[[switch(comparison_metric, 
+                                                    "bacc" = "Accuracy", "auc" = "AUC", "sens" = "Sensitivity", 
+                                                    "spec" = "Specificity", "f1" = "F1_Score")]]
+                            )
+                            spatial_fits <- c("N/A", "N/A", "N/A")
+                            
+                            # Add autocart if spatial coordinates and option enabled
+                            if (self$options$useAutocart && length(self$options$spatialCoords) >= 2) {
+                                autocart_result <- private$.performAutocartAnalysis(trainData, testData, formula)
+                                if (!is.null(autocart_result)) {
+                                    model_names <- c(model_names, "Autocart (Spatial)")
+                                    model_metrics <- c(model_metrics, list(autocart_result$metrics))
+                                    primary_values <- c(primary_values, autocart_result$metrics[[switch(comparison_metric, 
+                                                       "bacc" = "Accuracy", "auc" = "AUC", "sens" = "Sensitivity", 
+                                                       "spec" = "Specificity", "f1" = "F1_Score")]])
+                                    spatial_fits <- c(spatial_fits, autocart_result$spatial_fit)
+                                }
+                            }
+                            
+                            best_idx <- which.max(primary_values)
+                            
+                            # Populate comparison table
+                            for (i in seq_along(model_names)) {
+                                metrics <- model_metrics[[i]]
+                                self$results$modelComparison$addRow(rowKey = i, values = list(
+                                    model = model_names[i],
+                                    primary_metric = primary_values[i],
+                                    sensitivity = metrics$Sensitivity,
+                                    specificity = metrics$Specificity,
+                                    auc = metrics$AUC,
+                                    spatial_metric = spatial_fits[i],
+                                    best_model = if(i == best_idx) "★ Best" else ""
+                                ))
+                            }
+                            
+                        }, error = function(e) {
+                            warning(paste("Model comparison failed:", e$message))
+                        })
+                    },
+
+                    # Autocart spatial analysis implementation ----
+                    .performAutocartAnalysis = function(trainData, testData, formula) {
+                        tryCatch({
+                            # Check if autocart package is available
+                            if (!requireNamespace("autocart", quietly = TRUE)) {
+                                warning("autocart package not available. Install with: devtools::install_github('ethanancell/autocart')")
+                                return(NULL)
+                            }
+                            
+                            # Get spatial coordinates
+                            coord_vars <- self$options$spatialCoords[1:2]
+                            x_var <- coord_vars[1]
+                            y_var <- coord_vars[2]
+                            
+                            # Prepare spatial data for autocart
+                            spatial_train <- trainData
+                            spatial_test <- testData
+                            
+                            # Check if coordinates exist
+                            if (!all(c(x_var, y_var) %in% names(spatial_train))) {
+                                warning("Spatial coordinates not found in data")
+                                return(NULL)
+                            }
+                            
+                            # Build autocart model
+                            autocart_model <- autocart::autocart(
+                                formula = formula,
+                                data = spatial_train,
+                                xcoord = x_var,
+                                ycoord = y_var,
+                                alpha = self$options$spatialAlpha,
+                                beta = self$options$spatialBeta
+                            )
+                            
+                            # Get predictions
+                            autocart_pred <- predict(autocart_model, spatial_test)
+                            
+                            # Calculate metrics
+                            # Note: autocart may return different prediction format, handle accordingly
+                            if (is.factor(autocart_pred)) {
+                                pred_class <- autocart_pred
+                                pred_prob <- as.numeric(autocart_pred == "Disease")
+                            } else {
+                                pred_prob <- autocart_pred
+                                pred_class <- factor(ifelse(pred_prob > 0.5, "Disease", "Control"), 
+                                                   levels = c("Control", "Disease"))
+                            }
+                            
+                            metrics <- private$.calculateClinicalMetrics(
+                                pred_class, spatial_test$outcome, pred_prob
+                            )
+                            
+                            # Calculate spatial fit measure (simplified)
+                            spatial_fit <- paste0("α=", self$options$spatialAlpha, ", β=", self$options$spatialBeta)
+                            
+                            # Update spatial analysis table
+                            private$.updateSpatialAnalysis(autocart_model, spatial_fit)
+                            
+                            return(list(
+                                model = autocart_model,
+                                metrics = metrics,
+                                spatial_fit = spatial_fit
+                            ))
+                            
+                        }, error = function(e) {
+                            warning(paste("Autocart analysis failed:", e$message))
+                            return(NULL)
+                        })
+                    },
+
+                    # Update spatial analysis results ----
+                    .updateSpatialAnalysis = function(autocart_model, spatial_fit) {
+                        tryCatch({
+                            # Clear existing rows
+                            self$results$spatialAnalysis$setNote("", "note")
+                            
+                            # Add spatial parameter rows
+                            self$results$spatialAnalysis$addRow(rowKey = 1, values = list(
+                                parameter = "Spatial Autocorrelation Weight (α)",
+                                value = self$options$spatialAlpha,
+                                interpretation = if(self$options$spatialAlpha > 0.7) "High spatial clustering emphasis" 
+                                               else if(self$options$spatialAlpha > 0.3) "Moderate spatial clustering"
+                                               else "Low spatial clustering emphasis"
+                            ))
+                            
+                            self$results$spatialAnalysis$addRow(rowKey = 2, values = list(
+                                parameter = "Spatial Compactness Weight (β)",
+                                value = self$options$spatialBeta,
+                                interpretation = if(self$options$spatialBeta > 0.7) "High compactness preference"
+                                               else if(self$options$spatialBeta > 0.3) "Moderate compactness preference"
+                                               else "Low compactness preference"
+                            ))
+                            
+                            # Add spatial interpretation
+                            spatial_interpretation <- paste0(
+                                "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                                "<h4 style='color: #1565C0; margin-top: 0;'>Spatial Autocart Analysis</h4>",
+                                "<p><strong>Spatial Parameters:</strong> α=", self$options$spatialAlpha, 
+                                ", β=", self$options$spatialBeta, "</p>",
+                                "<p><strong>Clinical Relevance:</strong> Autocart considers spatial relationships ",
+                                "between samples, which is valuable for:</p>",
+                                "<ul>",
+                                "<li>Tissue microarray analysis with coordinate information</li>",
+                                "<li>Multi-center studies with geographic clustering</li>",
+                                "<li>Spatial pathology where location matters for diagnosis</li>",
+                                "<li>Epidemiological studies with spatial disease patterns</li>",
+                                "</ul>",
+                                "<p><strong>Interpretation:</strong> Higher α values emphasize spatial autocorrelation ",
+                                "(similar outcomes in nearby locations), while higher β values favor spatially ",
+                                "compact decision regions.</p>",
+                                "</div>"
+                            )
+                            
+                            self$results$spatialInterpretation$setContent(spatial_interpretation)
+                            
+                        }, error = function(e) {
+                            warning(paste("Spatial analysis update failed:", e$message))
+                        })
                     }
                 ))

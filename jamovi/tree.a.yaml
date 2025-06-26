@@ -145,6 +145,14 @@ options:
       description: >
                   Display visual representation of the decision tree.
 
+    - name: showPartitionPlot
+      title: Show Partition Plot (2D Variables Only)
+      type: Bool
+      default: false
+      description: >
+                  Display 2D decision boundary visualization using parttree. 
+                  Requires exactly 2 continuous variables for optimal visualization.
+
     # Advanced options
     - name: minCases
       title: Minimum Cases per Node
@@ -237,5 +245,187 @@ options:
       description: >
                   Expected disease prevalence in target population for 
                   adjusted predictive value calculations.
+
+    # Cross-validation and validation options (Issue #12 enhancements)
+    - name: crossValidation
+      title: Perform Cross-Validation
+      type: Bool
+      default: false
+      description: >
+                  Perform k-fold cross-validation for robust performance estimation.
+
+    - name: cvFolds
+      title: Number of CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description: >
+                  Number of folds for cross-validation (typically 5 or 10).
+
+    - name: bootstrapValidation
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+      description: >
+                  Perform bootstrap validation for confidence intervals on performance metrics.
+
+    - name: bootstrapSamples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+      description: >
+                  Number of bootstrap samples for confidence interval calculation.
+
+    # Advanced plotting options (Issue #12 enhancements)
+    - name: showROCCurve
+      title: Show ROC Curve
+      type: Bool
+      default: false
+      description: >
+                  Display ROC curve with AUC for model discrimination assessment.
+
+    - name: showCalibrationPlot
+      title: Show Calibration Plot
+      type: Bool
+      default: false
+      description: >
+                  Display probability calibration plot to assess prediction reliability.
+
+    - name: showClinicalUtility
+      title: Show Clinical Utility Curve
+      type: Bool
+      default: false
+      description: >
+                  Display clinical utility curve for threshold optimization.
+
+    # Variable importance options (Issue #12 enhancements)
+    - name: variableImportanceMethod
+      title: Variable Importance Method
+      type: List
+      options:
+        - title: Frequency in Trees
+          name: frequency
+        - title: Permutation Importance
+          name: permutation
+        - title: Gini Importance
+          name: gini
+      default: frequency
+      description: >
+                  Method for calculating variable importance in decision trees.
+
+    # Performance threshold options (Issue #12 enhancements)
+    - name: customThresholds
+      title: Use Custom Performance Thresholds
+      type: Bool
+      default: false
+      description: >
+                  Set custom thresholds for clinical performance interpretation.
+
+    - name: sensitivityThreshold
+      title: Minimum Acceptable Sensitivity
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 1.0
+      description: >
+                  Minimum sensitivity threshold for clinical acceptability.
+
+    - name: specificityThreshold
+      title: Minimum Acceptable Specificity
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 1.0
+      description: >
+                  Minimum specificity threshold for clinical acceptability.
+
+    # Tree visualization options (Issue #12 enhancements)
+    - name: treeVisualization
+      title: Tree Visualization Style
+      type: List
+      options:
+        - title: Standard FFTrees Plot
+          name: standard
+        - title: Detailed Node Information
+          name: detailed
+        - title: Compact Summary
+          name: compact
+      default: standard
+      description: >
+                  Style of decision tree visualization display.
+
+    - name: showNodeStatistics
+      title: Show Node Statistics
+      type: Bool
+      default: false
+      description: >
+                  Display detailed statistics at each decision tree node.
+
+    # Model comparison options (Issue #12 enhancements)
+    - name: compareModels
+      title: Compare with Alternative Models
+      type: Bool
+      default: false
+      description: >
+                  Compare FFTrees performance with logistic regression, CART, and autocart (if spatial coordinates provided).
+
+    # Spatial analysis options for autocart
+    - name: spatialCoords
+      title: Spatial Coordinates (X, Y)
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+                  X and Y coordinates for spatial analysis. Required for autocart spatial regression trees.
+                  Typically longitude/latitude or tissue microarray coordinates.
+
+    - name: useAutocart
+      title: Enable Spatial Autocart Analysis
+      type: Bool
+      default: false
+      description: >
+                  Enable spatial-aware regression trees using autocart methodology.
+                  Requires spatial coordinates (X, Y variables).
+
+    - name: spatialAlpha
+      title: Spatial Autocorrelation Weight (α)
+      type: Number
+      default: 0.5
+      min: 0.0
+      max: 1.0
+      description: >
+                  Weight for spatial autocorrelation in autocart splitting (0.0-1.0).
+                  Higher values emphasize spatial clustering in decision tree splits.
+
+    - name: spatialBeta
+      title: Spatial Compactness Weight (β)
+      type: Number
+      default: 0.5
+      min: 0.0
+      max: 1.0
+      description: >
+                  Weight for spatial compactness in autocart splitting (0.0-1.0).
+                  Higher values favor spatially compact regions in tree partitions.
+
+    - name: modelComparisonMetric
+      title: Primary Comparison Metric
+      type: List
+      options:
+        - title: Balanced Accuracy
+          name: bacc
+        - title: AUC (Area Under Curve)
+          name: auc
+        - title: Sensitivity
+          name: sens
+        - title: Specificity
+          name: spec
+        - title: F1 Score
+          name: f1
+      default: bacc
+      description: >
+                  Primary metric for comparing model performance.
 
 ...

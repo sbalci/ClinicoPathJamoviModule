@@ -1,0 +1,99 @@
+---
+name: bbcplots
+title: "BBC-Style Data Visualization Results"
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: "Instructions"
+    type: Html
+    visible: true
+
+  - name: main_plot
+    title: "BBC-Style Visualization"
+    type: Image
+    width: 640
+    height: 450
+    renderFun: .plot_main
+    clearWith:
+      - y_var
+      - x_var
+      - group_var
+      - chart_type
+      - bbc_colors
+      - custom_colors
+      - title_text
+      - subtitle_text
+      - horizontal_gridlines
+      - vertical_gridlines
+      - legend_position
+      - font_family
+
+  - name: finalized_plot
+    title: "Publication-Ready Chart"
+    type: Image
+    width: 640
+    height: 500
+    renderFun: .plot_finalized
+    visible: (export_finalized)
+    clearWith:
+      - y_var
+      - x_var
+      - group_var
+      - chart_type
+      - bbc_colors
+      - source_text
+      - add_branding
+      - chart_width
+      - chart_height
+
+  - name: statistical_results
+    title: "Statistical Analysis"
+    type: Html
+    visible: (statistical_annotations)
+    clearWith:
+      - y_var
+      - x_var
+      - group_var
+      - stat_method
+      - confidence_level
+
+  - name: chart_summary
+    title: "Chart Summary Statistics"
+    type: Html
+    visible: (show_sample_sizes)
+    clearWith:
+      - y_var
+      - x_var
+      - group_var
+
+  - name: color_guide
+    title: "BBC Color Guidelines"
+    type: Html
+    visible: true
+
+  - name: design_notes
+    title: "BBC Design Principles"
+    type: Html
+    visible: true
+
+  - name: export_code
+    title: "Reproducible R Code"
+    type: Html
+    visible: (export_finalized)
+    clearWith:
+      - chart_type
+      - bbc_colors
+      - title_text
+      - subtitle_text
+      - source_text
+
+  - name: accessibility_info
+    title: "Accessibility & Standards"
+    type: Html
+    visible: true
+
+refs:
+  - bbplot
+  - ggplot2
+  - ggpubr

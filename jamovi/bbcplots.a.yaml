@@ -1,0 +1,448 @@
+---
+name: bbcplots
+title: "BBC-Style Data Visualization"
+menuGroup: JJStatsPlotD
+menuSubgroup: ClinicoPath Advanced Plots
+menuTitle: "BBC-Style Data Visualization"
+menuSubtitle: "Professional News Graphics with BBC Design"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    Creates professional BBC News-style data visualizations using the bbplot package design principles.
+    
+    This module implements the BBC Visual and Data Journalism team's design standards for creating
+    publication-ready graphics with clean typography, consistent color schemes, and professional
+    branding elements. Perfect for creating news-quality visualizations for reports, presentations,
+    and publications.
+    
+    Features BBC's signature minimalist aesthetic with Helvetica typography, strategic use of
+    gridlines, and standardized chart dimensions optimized for digital publication.
+  R:
+    dontrun: false
+    usage: |
+      # Basic BBC-style visualization
+      library(bbplot)
+      library(ggplot2)
+      
+      # Create plot with BBC styling
+      plot <- ggplot(data, aes(x = category, y = value)) +
+        geom_col(fill = "#1380A1") +
+        bbc_style()
+      
+      # Finalize with BBC branding
+      finalise_plot(plot, "Source: Data source", "output.png")
+
+options:
+  - name: data
+    type: Data
+    description:
+      R: >
+        The data as a data frame.
+      jamovi: >
+        The dataset for analysis and visualization.
+
+  - name: y_var
+    title: "Y-axis Variable"
+    type: Variable
+    suggested: [continuous, nominal, ordinal]
+    permitted: [numeric, factor]
+    description:
+      R: >
+        The dependent variable for the main axis.
+      ui: >
+        Select the primary variable to visualize (values, measurements, counts).
+      jamovi: >
+        The main variable to be plotted on the Y-axis.
+
+  - name: x_var
+    title: "X-axis Variable"
+    type: Variable
+    suggested: [nominal, ordinal, continuous]
+    permitted: [factor, numeric]
+    description:
+      R: >
+        The independent variable for categories or groups.
+      ui: >
+        Select the categorical or grouping variable for the X-axis.
+      jamovi: >
+        The variable that defines categories or groups for comparison.
+
+  - name: group_var
+    title: "Grouping Variable (Optional)"
+    type: Variable
+    suggested: [nominal, ordinal]
+    permitted: [factor]
+    description:
+      R: >
+        Optional variable for creating grouped or series comparisons.
+      ui: >
+        Select a variable to create multiple series or grouped comparisons.
+      jamovi: >
+        Optional variable for creating grouped visualizations.
+
+  - name: facet_var
+    title: "Faceting Variable (Optional)"
+    type: Variable
+    suggested: [nominal, ordinal]
+    permitted: [factor]
+    description:
+      R: >
+        Optional variable for creating faceted subplots.
+      ui: >
+        Select a variable to create separate subplots for each category.
+      jamovi: >
+        Optional variable for creating multiple panel displays.
+
+  - name: chart_type
+    title: "Chart Type"
+    type: List
+    options:
+      - title: "Column Chart"
+        name: column
+      - title: "Bar Chart"
+        name: bar
+      - title: "Line Chart"
+        name: line
+      - title: "Point Plot"
+        name: point
+      - title: "Area Chart"
+        name: area
+      - title: "Stacked Column"
+        name: stacked_column
+      - title: "Grouped Column"
+        name: grouped_column
+      - title: "Horizontal Bar"
+        name: horizontal_bar
+    default: column
+    description:
+      R: >
+        The type of chart to create using BBC styling.
+      ui: >
+        Choose the chart type that best represents your data.
+      jamovi: >
+        Select the visualization type for your data.
+
+  - name: bbc_colors
+    title: "BBC Color Scheme"
+    type: List
+    options:
+      - title: "BBC Blue (#1380A1)"
+        name: bbc_blue
+      - title: "BBC Orange (#FAAB18)"
+        name: bbc_orange
+      - title: "BBC Teal (#007f7f)"
+        name: bbc_teal
+      - title: "BBC Dark Gray (#333333)"
+        name: bbc_gray
+      - title: "Custom Color Set"
+        name: custom
+      - title: "Multi-color Palette"
+        name: multi_color
+    default: bbc_blue
+    description:
+      R: >
+        BBC-approved color scheme for data visualization.
+      ui: >
+        Select BBC standard colors or create custom color schemes.
+      jamovi: >
+        Choose colors that follow BBC design guidelines.
+
+  - name: custom_colors
+    title: "Custom Colors (comma-separated)"
+    type: String
+    default: "#1380A1, #FAAB18, #007f7f, #333333"
+    description:
+      R: >
+        Custom color palette as comma-separated hex codes.
+      ui: >
+        Enter custom colors as hex codes separated by commas.
+      jamovi: >
+        Specify custom colors for your visualization.
+
+  - name: title_text
+    title: "Chart Title"
+    type: String
+    default: ""
+    description:
+      R: >
+        Main title for the chart in BBC style (28pt Helvetica bold).
+      ui: >
+        Enter the main title for your chart.
+      jamovi: >
+        The primary title displayed at the top of the chart.
+
+  - name: subtitle_text
+    title: "Chart Subtitle"
+    type: String
+    default: ""
+    description:
+      R: >
+        Subtitle for additional context (22pt Helvetica).
+      ui: >
+        Enter a subtitle to provide additional context.
+      jamovi: >
+        Secondary title providing additional information.
+
+  - name: source_text
+    title: "Data Source"
+    type: String
+    default: "Source: Data analysis"
+    description:
+      R: >
+        Data source attribution for the chart footer.
+      ui: >
+        Enter the data source for proper attribution.
+      jamovi: >
+        Source information displayed in the chart footer.
+
+  - name: x_axis_title
+    title: "X-axis Title"
+    type: String
+    default: ""
+    description:
+      R: >
+        Custom title for the X-axis (leave blank for variable name).
+      ui: >
+        Override the default X-axis label.
+      jamovi: >
+        Custom label for the horizontal axis.
+
+  - name: y_axis_title
+    title: "Y-axis Title"
+    type: String
+    default: ""
+    description:
+      R: >
+        Custom title for the Y-axis (leave blank for variable name).
+      ui: >
+        Override the default Y-axis label.
+      jamovi: >
+        Custom label for the vertical axis.
+
+  - name: show_values
+    title: "Show Data Values"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to display data values on the chart.
+      ui: >
+        Display actual data values on chart elements.
+      jamovi: >
+        Show numerical values on bars, points, or other chart elements.
+
+  - name: value_position
+    title: "Value Position"
+    type: List
+    options:
+      - title: "Above/End"
+        name: above
+      - title: "Center/Middle"
+        name: center
+      - title: "Below/Start"
+        name: below
+    default: above
+    description:
+      R: >
+        Position of data value labels on chart elements.
+      ui: >
+        Choose where to position the data value labels.
+      jamovi: >
+        Specify the placement of value labels.
+
+  - name: horizontal_gridlines
+    title: "Show Horizontal Gridlines"
+    type: Bool
+    default: true
+    description:
+      R: >
+        Whether to show horizontal gridlines (BBC standard).
+      ui: >
+        Display horizontal gridlines following BBC design principles.
+      jamovi: >
+        Show horizontal gridlines for easier value reading.
+
+  - name: vertical_gridlines
+    title: "Show Vertical Gridlines"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to show vertical gridlines (not BBC standard).
+      ui: >
+        Display vertical gridlines (not recommended for BBC style).
+      jamovi: >
+        Show vertical gridlines (deviates from BBC standards).
+
+  - name: legend_position
+    title: "Legend Position"
+    type: List
+    options:
+      - title: "Top (BBC Standard)"
+        name: top
+      - title: "Bottom"
+        name: bottom
+      - title: "Right"
+        name: right
+      - title: "Left"
+        name: left
+      - title: "None"
+        name: none
+    default: top
+    description:
+      R: >
+        Position of the chart legend following BBC guidelines.
+      ui: >
+        Choose legend placement (top is BBC standard).
+      jamovi: >
+        Specify where to place the chart legend.
+
+  - name: chart_width
+    title: "Chart Width (pixels)"
+    type: Number
+    min: 400
+    max: 1200
+    default: 640
+    description:
+      R: >
+        Width of the exported chart in pixels (BBC standard: 640).
+      ui: >
+        Set the chart width for export (640px is BBC standard).
+      jamovi: >
+        Chart width in pixels for consistent export sizing.
+
+  - name: chart_height
+    title: "Chart Height (pixels)"
+    type: Number
+    min: 300
+    max: 800
+    default: 450
+    description:
+      R: >
+        Height of the exported chart in pixels (BBC standard: 450).
+      ui: >
+        Set the chart height for export (450px is BBC standard).
+      jamovi: >
+        Chart height in pixels for consistent export sizing.
+
+  - name: left_align_title
+    title: "Left-align Title"
+    type: Bool
+    default: true
+    description:
+      R: >
+        Whether to left-align the title (BBC standard).
+      ui: >
+        Left-align title and subtitle following BBC style.
+      jamovi: >
+        Apply left alignment to titles (BBC standard practice).
+
+  - name: font_family
+    title: "Font Family"
+    type: List
+    options:
+      - title: "Helvetica (BBC Standard)"
+        name: Helvetica
+      - title: "Arial"
+        name: Arial
+      - title: "Calibri"
+        name: Calibri
+      - title: "System Default"
+        name: sans
+    default: Helvetica
+    description:
+      R: >
+        Font family for text elements (Helvetica is BBC standard).
+      ui: >
+        Choose font family (Helvetica recommended for BBC style).
+      jamovi: >
+        Select the typeface for chart text elements.
+
+  - name: add_branding
+    title: "Add BBC-style Branding"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to add BBC-style branding elements to the chart.
+      ui: >
+        Include branding elements in BBC style format.
+      jamovi: >
+        Add professional branding following BBC design principles.
+
+  - name: export_finalized
+    title: "Export Finalized Chart"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to export a finalized version with BBC formatting.
+      ui: >
+        Create a publication-ready export with BBC formatting.
+      jamovi: >
+        Generate a finalized chart suitable for publication.
+
+  - name: statistical_annotations
+    title: "Add Statistical Annotations"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to include statistical test results on the chart.
+      ui: >
+        Add statistical significance indicators and test results.
+      jamovi: >
+        Include statistical analysis annotations on the visualization.
+
+  - name: stat_method
+    title: "Statistical Test"
+    type: List
+    options:
+      - title: "Automatic Selection"
+        name: auto
+      - title: "ANOVA"
+        name: anova
+      - title: "t-test"
+        name: ttest
+      - title: "Chi-square"
+        name: chisq
+      - title: "Kruskal-Wallis"
+        name: kruskal
+      - title: "None"
+        name: none
+    default: auto
+    description:
+      R: >
+        Statistical test to perform and display on the chart.
+      ui: >
+        Choose statistical test for group comparisons.
+      jamovi: >
+        Select the appropriate statistical test for your data.
+
+  - name: confidence_level
+    title: "Confidence Level"
+    type: Number
+    min: 0.8
+    max: 0.99
+    default: 0.95
+    description:
+      R: >
+        Confidence level for statistical intervals and tests.
+      ui: >
+        Set confidence level for statistical calculations.
+      jamovi: >
+        Confidence level for statistical analysis (typically 0.95).
+
+  - name: show_sample_sizes
+    title: "Show Sample Sizes"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Whether to display sample sizes for each group.
+      ui: >
+        Display the number of observations in each category.
+      jamovi: >
+        Show sample size information for transparency.

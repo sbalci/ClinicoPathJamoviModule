@@ -1,0 +1,185 @@
+---
+name: clinmon
+title: Clinical Hemodynamic Monitoring
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: 'Hemodynamic Indices from Continuous Monitoring'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >-
+        Calculates hemodynamic indices from continuous clinical monitoring data.
+        Uses the clintools package to compute COest, CPPopt, CVRi, Dx, Mx, PI, PRx, PWA, RI, and Sx
+        from continuous recordings of arterial blood pressure, intracranial pressure, 
+        middle cerebral artery blood velocity, and heart rate.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame with continuous monitoring data. 
+            First column must be time in seconds, followed by physiological variables.
+
+    - name: time_var
+      title: 'Time Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Time variable in seconds. This should be the first column and contain 
+        continuous time measurements from the monitoring system.
+
+    - name: abp
+      title: 'Arterial Blood Pressure (ABP)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Arterial blood pressure measurements in mmHg. Used for calculating 
+        multiple hemodynamic indices including PRx, Mx, Sx, Dx, CVRi, and COest.
+
+    - name: mcav
+      title: 'Middle Cerebral Artery Velocity (MCAv)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Middle cerebral artery blood velocity measurements. Used for calculating
+        Mx, Sx, Dx, CVRi, PI, and RI indices.
+
+    - name: icp
+      title: 'Intracranial Pressure (ICP)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Intracranial pressure measurements in mmHg. Used for calculating
+        PRx and CPPopt indices when combined with arterial blood pressure.
+
+    - name: cpp
+      title: 'Cerebral Perfusion Pressure (CPP)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Cerebral perfusion pressure measurements in mmHg. Alternative to ICP
+        for calculating Mx, Sx, and Dx indices.
+
+    - name: hr
+      title: 'Heart Rate (HR)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Heart rate measurements in beats per minute. Used for calculating
+        estimated cardiac output (COest).
+
+    - name: freq
+      title: 'Sampling Frequency (Hz)'
+      type: Integer
+      min: 1
+      max: 10000
+      default: 1000
+      description: >-
+        Frequency of recorded data in Hz. Default is 1000 Hz for high-resolution
+        monitoring systems. Adjust based on your data collection frequency.
+
+    - name: blocksize
+      title: 'Block Size (seconds)'
+      type: Integer
+      min: 1
+      max: 60
+      default: 3
+      description: >-
+        Length of a block in seconds. Blocks are the fundamental units for
+        calculating indices. Default is 3 seconds.
+
+    - name: epochsize
+      title: 'Epoch Size (blocks)'
+      type: Integer
+      min: 1
+      max: 100
+      default: 20
+      description: >-
+        Size of epochs in number of blocks. Epochs aggregate multiple blocks
+        for correlation-based indices. Default is 20 blocks.
+
+    - name: output_level
+      title: 'Output Level'
+      type: List
+      options:
+        - title: Period
+          name: period
+        - title: Epoch
+          name: epoch
+        - title: Block
+          name: block
+        - title: CPPopt
+          name: cppopt
+      default: period
+      description: >-
+        Select what each output row should represent:
+        - Period: Analysis periods (requires trigger data)
+        - Epoch: Epoch-level results (correlation indices available)
+        - Block: Block-level results (no correlation indices)
+        - CPPopt: Optimal cerebral perfusion pressure analysis
+
+    - name: overlapping
+      title: 'Overlapping Blocks'
+      type: Bool
+      default: false
+      description: >-
+        Enable overlapping calculations for correlation-based indices.
+        This can improve temporal resolution but increases computation time.
+
+    - name: blockmin
+      title: 'Minimum Block Data (%)'
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+      description: >-
+        Minimum measurements required to create a block as a percentage.
+        Blocks with less data will be omitted. Default is 50%.
+
+    - name: epochmin
+      title: 'Minimum Epoch Data (%)'
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+      description: >-
+        Minimum blocks required to create an epoch as a percentage.
+        Epochs with fewer blocks will be omitted. Default is 50%.
+
+    - name: fast_processing
+      title: 'Fast Processing'
+      type: Bool
+      default: false
+      description: >-
+        Enable fast processing by aggregating data before analysis.
+        This speeds up computation but may reduce precision.
+
+    - name: show_summary
+      title: 'Show Summary Statistics'
+      type: Bool
+      default: true
+      description: >-
+        Display summary statistics for calculated hemodynamic indices.
+
+    - name: show_detailed
+      title: 'Show Detailed Results'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed results table with all calculated indices
+        for each time period/epoch/block.
+
+...

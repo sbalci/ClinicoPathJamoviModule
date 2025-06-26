@@ -19,6 +19,7 @@ tree(
   featureImportance = FALSE,
   showInterpretation = FALSE,
   showPlot = FALSE,
+  showPartitionPlot = FALSE,
   minCases = 10,
   maxDepth = 4,
   confidenceInterval = FALSE,
@@ -27,7 +28,26 @@ tree(
   clinicalContext = "diagnosis",
   costRatio = 1,
   prevalenceAdjustment = FALSE,
-  expectedPrevalence = 10
+  expectedPrevalence = 10,
+  crossValidation = FALSE,
+  cvFolds = 5,
+  bootstrapValidation = FALSE,
+  bootstrapSamples = 1000,
+  showROCCurve = FALSE,
+  showCalibrationPlot = FALSE,
+  showClinicalUtility = FALSE,
+  variableImportanceMethod = "frequency",
+  customThresholds = FALSE,
+  sensitivityThreshold = 0.8,
+  specificityThreshold = 0.8,
+  treeVisualization = "standard",
+  showNodeStatistics = FALSE,
+  compareModels = FALSE,
+  spatialCoords,
+  useAutocart = FALSE,
+  spatialAlpha = 0.5,
+  spatialBeta = 0.5,
+  modelComparisonMetric = "bacc"
 )
 }
 \arguments{
@@ -72,6 +92,10 @@ including  diagnostic utility and clinical recommendations.}
 
 \item{showPlot}{Display visual representation of the decision tree.}
 
+\item{showPartitionPlot}{Display 2D decision boundary visualization using
+parttree.  Requires exactly 2 continuous variables for optimal
+visualization.}
+
 \item{minCases}{Minimum number of cases required in each terminal node
 (higher values prevent overfitting).}
 
@@ -97,6 +121,64 @@ prevalence  in target population (different from study sample).}
 
 \item{expectedPrevalence}{Expected disease prevalence in target population
 for  adjusted predictive value calculations.}
+
+\item{crossValidation}{Perform k-fold cross-validation for robust
+performance estimation.}
+
+\item{cvFolds}{Number of folds for cross-validation (typically 5 or 10).}
+
+\item{bootstrapValidation}{Perform bootstrap validation for confidence
+intervals on performance metrics.}
+
+\item{bootstrapSamples}{Number of bootstrap samples for confidence interval
+calculation.}
+
+\item{showROCCurve}{Display ROC curve with AUC for model discrimination
+assessment.}
+
+\item{showCalibrationPlot}{Display probability calibration plot to assess
+prediction reliability.}
+
+\item{showClinicalUtility}{Display clinical utility curve for threshold
+optimization.}
+
+\item{variableImportanceMethod}{Method for calculating variable importance
+in decision trees.}
+
+\item{customThresholds}{Set custom thresholds for clinical performance
+interpretation.}
+
+\item{sensitivityThreshold}{Minimum sensitivity threshold for clinical
+acceptability.}
+
+\item{specificityThreshold}{Minimum specificity threshold for clinical
+acceptability.}
+
+\item{treeVisualization}{Style of decision tree visualization display.}
+
+\item{showNodeStatistics}{Display detailed statistics at each decision tree
+node.}
+
+\item{compareModels}{Compare FFTrees performance with logistic regression,
+CART, and autocart (if spatial coordinates provided).}
+
+\item{spatialCoords}{X and Y coordinates for spatial analysis. Required for
+autocart spatial regression trees. Typically longitude/latitude or tissue
+microarray coordinates.}
+
+\item{useAutocart}{Enable spatial-aware regression trees using autocart
+methodology. Requires spatial coordinates (X, Y variables).}
+
+\item{spatialAlpha}{Weight for spatial autocorrelation in autocart
+splitting (0.0-1.0). Higher values emphasize spatial clustering in decision
+tree splits.}
+
+\item{spatialBeta}{Weight for spatial compactness in autocart splitting
+(0.0-1.0). Higher values favor spatially compact regions in tree
+partitions.}
+
+\item{modelComparisonMetric}{Primary metric for comparing model
+performance.}
 }
 \value{
 A results object containing:
@@ -117,7 +199,16 @@ A results object containing:
 \code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
 \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$partitionPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalUtilityPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
 \code{results$predictions} \tab \tab \tab \tab \tab an output \cr
 \code{results$probabilities} \tab \tab \tab \tab \tab an output \cr

@@ -38,6 +38,7 @@
 #' @importFrom dplyr select all_of
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
+#' @importFrom car vif
 #' @import magrittr
 #'
 
@@ -64,6 +65,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "<li><strong>Score Residuals:</strong> Assess influential observations</li>",
                 "<li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption</li>",
                 "<li><strong>DFBeta Plots:</strong> Evaluate influence of individual observations</li>",
+                "<li><strong>VIF Analysis:</strong> Detect multicollinearity among covariates</li>",
                 "</ul>",
                 "</div>",
                 "<div style='margin: 10px 0;'>",
@@ -137,6 +139,11 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Generate proportional hazards test
             if (self$options$show_ph_test) {
                 private$.generate_ph_test()
+            }
+            
+            # Generate VIF analysis
+            if (self$options$show_vif) {
+                private$.generate_vif_analysis()
             }
             
             # Set plot states for rendering
@@ -350,6 +357,121 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             })
         },
         
+        .generate_vif_analysis = function() {
+            if (is.null(private$.cox_model)) return()
+            
+            tryCatch({
+                # Check if car package is available
+                if (!requireNamespace("car", quietly = TRUE)) {
+                    error_msg <- "Package 'car' is required for VIF analysis."
+                    self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    return()
+                }
+                
+                # Check minimum number of covariates for VIF
+                if (length(self$options$covariates) < 2) {
+                    info_msg <- "VIF analysis requires at least 2 covariates. Current model has only 1 covariate."
+                    self$results$vif_results$setContent(paste("<p style='color: orange;'>", info_msg, "</p>"))
+                    return()
+                }
+                
+                # Calculate VIF
+                vif_values <- car::vif(private$.cox_model)
+                
+                # Handle different VIF output formats
+                if (is.matrix(vif_values)) {
+                    # For models with factors, VIF returns a matrix
+                    vif_df <- data.frame(
+                        Variable = rownames(vif_values),
+                        VIF = vif_values[, "GVIF"],
+                        stringsAsFactors = FALSE
+                    )
+                } else {
+                    # For simple numeric variables, VIF returns a named vector
+                    vif_df <- data.frame(
+                        Variable = names(vif_values),
+                        VIF = as.numeric(vif_values),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                
+                # Create HTML for VIF results
+                vif_html <- "<h4>Variance Inflation Factor (VIF) Analysis</h4>"
+                vif_html <- paste0(vif_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                
+                vif_html <- paste0(vif_html, "<p><strong>Multicollinearity Assessment:</strong></p>")
+                vif_html <- paste0(vif_html, "<p>VIF measures how much the variance of coefficient estimates increases due to collinearity.</p>")
+                
+                # VIF results table
+                vif_html <- paste0(vif_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 500px;'>")
+                vif_html <- paste0(vif_html, "<thead><tr><th>Variable</th><th>VIF</th><th>Status</th></tr></thead><tbody>")
+                
+                max_vif <- max(vif_df$VIF, na.rm = TRUE)
+                threshold <- self$options$vif_threshold
+                
+                for (i in 1:nrow(vif_df)) {
+                    var_name <- vif_df$Variable[i]
+                    vif_val <- round(vif_df$VIF[i], 3)
+                    
+                    # Determine status and color
+                    if (vif_val >= threshold) {
+                        status <- "⚠️ High"
+                        color <- "color: red; font-weight: bold;"
+                    } else if (vif_val >= 2.5) {
+                        status <- "⚠️ Moderate"
+                        color <- "color: orange; font-weight: bold;"
+                    } else {
+                        status <- "✅ Low"
+                        color <- "color: green;"
+                    }
+                    
+                    vif_html <- paste0(vif_html, "<tr>")
+                    vif_html <- paste0(vif_html, "<td><strong>", var_name, "</strong></td>")
+                    vif_html <- paste0(vif_html, "<td>", vif_val, "</td>")
+                    vif_html <- paste0(vif_html, "<td style='", color, "'>", status, "</td>")
+                    vif_html <- paste0(vif_html, "</tr>")
+                }
+                
+                vif_html <- paste0(vif_html, "</tbody></table>")
+                
+                # Overall interpretation
+                vif_html <- paste0(vif_html, "<h5>Interpretation Guidelines:</h5>")
+                vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                vif_html <- paste0(vif_html, "<li><strong>VIF < 2.5:</strong> Low multicollinearity (acceptable)</li>")
+                vif_html <- paste0(vif_html, "<li><strong>VIF 2.5-", threshold, ":</strong> Moderate multicollinearity (monitor)</li>")
+                vif_html <- paste0(vif_html, "<li><strong>VIF ≥ ", threshold, ":</strong> High multicollinearity (problematic)</li>")
+                vif_html <- paste0(vif_html, "</ul>")
+                
+                # Clinical recommendations
+                if (max_vif >= threshold) {
+                    vif_html <- paste0(vif_html, "<p style='color: red; font-weight: bold;'>⚠️ Warning: High multicollinearity detected!</p>")
+                    vif_html <- paste0(vif_html, "<p><strong>Recommendations:</strong></p>")
+                    vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                    vif_html <- paste0(vif_html, "<li>Consider removing highly correlated variables</li>")
+                    vif_html <- paste0(vif_html, "<li>Use principal component analysis (PCA)</li>")
+                    vif_html <- paste0(vif_html, "<li>Apply regularization techniques (ridge/lasso)</li>")
+                    vif_html <- paste0(vif_html, "<li>Combine correlated variables into composite scores</li>")
+                    vif_html <- paste0(vif_html, "</ul>")
+                } else if (max_vif >= 2.5) {
+                    vif_html <- paste0(vif_html, "<p style='color: orange; font-weight: bold;'>⚠️ Moderate multicollinearity detected. Monitor carefully.</p>")
+                } else {
+                    vif_html <- paste0(vif_html, "<p style='color: green; font-weight: bold;'>✅ No significant multicollinearity detected.</p>")
+                }
+                
+                vif_html <- paste0(vif_html, "</div>")
+                
+                self$results$vif_results$setContent(vif_html)
+                
+            }, error = function(e) {
+                error_msg <- paste("Error calculating VIF:", e$message)
+                # Provide specific guidance for common VIF errors
+                if (grepl("aliased coefficients", e$message)) {
+                    error_msg <- paste(error_msg, "This may indicate perfect multicollinearity or linear dependencies between variables.")
+                }
+                self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+            })
+        },
+        
         .generate_interpretation = function() {
             interp_html <- "<h4>Cox Model Diagnostic Interpretation Guide</h4>"
             interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
@@ -392,11 +514,22 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             interp_html <- paste0(interp_html, "</ul>")
             interp_html <- paste0(interp_html, "</div>")
             
+            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>VIF (Variance Inflation Factor):</h6>")
+            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+            interp_html <- paste0(interp_html, "<li>VIF < 2.5: No multicollinearity concern</li>")
+            interp_html <- paste0(interp_html, "<li>VIF 2.5-5: Moderate multicollinearity (monitor)</li>")
+            interp_html <- paste0(interp_html, "<li>VIF ≥ 5: High multicollinearity (problematic)</li>")
+            interp_html <- paste0(interp_html, "<li>Consider variable removal or regularization for high VIF</li>")
+            interp_html <- paste0(interp_html, "</ul>")
+            interp_html <- paste0(interp_html, "</div>")
+            
             interp_html <- paste0(interp_html, "<h5 style='color: #4a148c;'>Clinical Recommendations:</h5>")
             interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
             interp_html <- paste0(interp_html, "<li><strong>Model violations:</strong> Consider stratification or time-dependent covariates</li>")
             interp_html <- paste0(interp_html, "<li><strong>Outliers:</strong> Investigate extreme residuals for data quality</li>")
             interp_html <- paste0(interp_html, "<li><strong>Non-linearity:</strong> Consider splines or transformations</li>")
+            interp_html <- paste0(interp_html, "<li><strong>Multicollinearity:</strong> Remove correlated variables or use regularization</li>")
             interp_html <- paste0(interp_html, "<li><strong>Documentation:</strong> Report diagnostic results in publications</li>")
             interp_html <- paste0(interp_html, "</ul>")
             

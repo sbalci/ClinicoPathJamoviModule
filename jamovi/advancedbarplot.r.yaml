@@ -1,0 +1,100 @@
+---
+name: advancedbarplot
+title: "Advanced Bar Charts - 5 Ways"
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: "Instructions"
+      type: Html
+      visible: true
+
+    - name: approach_description
+      title: "Current Approach Description"
+      type: Html
+      visible: true
+      clearWith:
+        - chart_approach
+
+    - name: main_plot
+      title: "Advanced Bar Chart"
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_main
+      visible: true
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - chart_approach
+        - bar_position
+        - stat_type
+        - color_palette
+        - orientation
+
+    - name: statistical_results
+      title: "Statistical Test Results"
+      type: Html
+      visible: (add_statistics && x_var && y_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - stat_method
+        - add_statistics
+
+    - name: summary_stats
+      title: "Summary Statistics"
+      type: Html
+      visible: (x_var && y_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - stat_type
+
+    - name: interactive_plot
+      title: "Interactive Version"
+      type: Html
+      visible: (chart_approach:interactive && x_var && y_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - chart_approach
+
+    - name: comparison_grid
+      title: "5 Approaches Comparison"
+      type: Image
+      width: 1200
+      height: 900
+      renderFun: .plot_comparison
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+
+    - name: code_example
+      title: "R Code Example"
+      type: Html
+      visible: true
+      clearWith:
+        - chart_approach
+        - x_var
+        - y_var
+
+    - name: interpretation_guide
+      title: "Interpretation Guide"
+      type: Html
+      visible: true
+      clearWith:
+        - chart_approach
+        - stat_type
+
+refs:
+  - ggplot2
+  - plotly
+  - RColorBrewer
+  - viridis

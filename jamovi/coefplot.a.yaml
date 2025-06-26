@@ -1,0 +1,278 @@
+---
+name: coefplot
+title: Coefficient Plots
+menuGroup: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+menuSubtitle: 'Regression Coefficient Visualization'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >-
+        Creates professional coefficient plots (forest plots) for regression models.
+        Visualizes coefficients and confidence intervals from linear, logistic, and 
+        Cox regression models. Supports multiple models comparison, custom coefficient
+        selection, standardized coefficients, and various styling options. Essential 
+        for presenting regression results in clinical research and epidemiological studies.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for regression analysis.
+
+    # Model Specification ----
+    
+    - name: dep
+      title: 'Dependent Variable'
+      type: Variable
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description: >-
+        The outcome variable for regression analysis. Can be continuous 
+        (linear regression), binary (logistic regression), or time-to-event.
+
+    - name: covs
+      title: 'Covariates'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description: >-
+        Independent variables (predictors) to include in the regression model.
+        These will be displayed as coefficients in the plot.
+
+    - name: model_type
+      title: 'Model Type'
+      type: List
+      options:
+        - title: Linear Regression
+          name: linear
+        - title: Logistic Regression
+          name: logistic
+        - title: Cox Regression
+          name: cox
+        - title: Poisson Regression
+          name: poisson
+      default: linear
+      description: >-
+        Type of regression model to fit:
+        - Linear: For continuous outcomes
+        - Logistic: For binary outcomes (odds ratios)
+        - Cox: For survival analysis (hazard ratios)
+        - Poisson: For count outcomes (rate ratios)
+
+    - name: time_var
+      title: 'Time Variable (Cox only)'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >-
+        Time-to-event variable for Cox regression. Only required when 
+        model type is set to Cox regression.
+
+    # Coefficient Selection ----
+
+    - name: include_intercept
+      title: 'Include Intercept'
+      type: Bool
+      default: false
+      description: >-
+        Include the intercept term in the coefficient plot. Usually 
+        excluded as it's often not of primary interest.
+
+    - name: coef_selection
+      title: 'Coefficient Selection'
+      type: List
+      options:
+        - title: All Coefficients
+          name: all
+        - title: Specific Coefficients
+          name: specific
+        - title: Exclude Specific
+          name: exclude
+      default: all
+      description: >-
+        How to select which coefficients to display in the plot.
+
+    - name: specific_coefs
+      title: 'Specific Coefficients'
+      type: String
+      default: ''
+      description: >-
+        Comma-separated list of coefficient names to include or exclude 
+        (depending on selection method). Leave blank to use all coefficients.
+
+    # Plot Customization ----
+
+    - name: ci_level
+      title: 'Confidence Level'
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description: >-
+        Confidence level for coefficient confidence intervals (e.g., 0.95 for 95% CI).
+
+    - name: inner_ci_level
+      title: 'Inner Confidence Level'
+      type: Number
+      min: 0.5
+      max: 0.95
+      default: 0.8
+      description: >-
+        Optional inner confidence interval for enhanced visualization.
+        Set to 0 to disable inner CI. Common values are 0.8 or 0.9.
+
+    - name: sort_coefs
+      title: 'Sort Coefficients'
+      type: List
+      options:
+        - title: Natural Order
+          name: natural
+        - title: By Magnitude
+          name: magnitude
+        - title: Alphabetical
+          name: alphabetical
+      default: natural
+      description: >-
+        How to order coefficients in the plot. Magnitude sorting can help
+        identify the most important predictors.
+
+    - name: decreasing_sort
+      title: 'Decreasing Sort Order'
+      type: Bool
+      default: true
+      description: >-
+        When sorting by magnitude or alphabetically, use decreasing order.
+
+    - name: horizontal_plot
+      title: 'Horizontal Layout'
+      type: Bool
+      default: true
+      description: >-
+        Display coefficients horizontally (default) or vertically.
+        Horizontal layout is typically preferred for readability.
+
+    - name: point_size
+      title: 'Point Size'
+      type: Number
+      min: 1
+      max: 10
+      default: 3
+      description: >-
+        Size of the coefficient points in the plot.
+
+    - name: line_thickness
+      title: 'Line Thickness'
+      type: Number
+      min: 0.5
+      max: 3
+      default: 1
+      description: >-
+        Thickness of the confidence interval lines.
+
+    # Statistical Options ----
+
+    - name: standardize
+      title: 'Standardize Coefficients'
+      type: Bool
+      default: false
+      description: >-
+        Standardize coefficients by scaling predictors to have mean 0 and SD 1.
+        Useful for comparing effect sizes across variables with different scales.
+
+    - name: robust_se
+      title: 'Robust Standard Errors'
+      type: Bool
+      default: false
+      description: >-
+        Use robust (sandwich) standard errors for confidence intervals.
+        Recommended when there are concerns about heteroscedasticity.
+
+    - name: exp_transform
+      title: 'Exponentiate Coefficients'
+      type: Bool
+      default: false
+      description: >-
+        Exponentiate coefficients to show odds ratios (logistic), hazard ratios (Cox),
+        or rate ratios (Poisson). Automatically enabled for logistic and Cox models.
+
+    # Model Comparison ----
+
+    - name: compare_models
+      title: 'Compare Multiple Models'
+      type: Bool
+      default: false
+      description: >-
+        Create comparison plots for multiple model specifications.
+        Useful for sensitivity analysis or model selection.
+
+    - name: model2_covs
+      title: 'Model 2 Covariates'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description: >-
+        Covariates for second model comparison. Only used when comparing models.
+
+    - name: model3_covs
+      title: 'Model 3 Covariates'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description: >-
+        Covariates for third model comparison. Only used when comparing models.
+
+    - name: model_names
+      title: 'Model Names'
+      type: String
+      default: 'Model 1, Model 2, Model 3'
+      description: >-
+        Comma-separated names for models when comparing multiple models.
+        Will be used in the legend.
+
+    # Output Options ----
+
+    - name: show_coefficient_plot
+      title: 'Show Coefficient Plot'
+      type: Bool
+      default: true
+      description: >-
+        Display the main coefficient plot with confidence intervals.
+
+    - name: show_model_summary
+      title: 'Show Model Summary'
+      type: Bool
+      default: true
+      description: >-
+        Display statistical summary of the fitted model(s) including
+        R-squared, AIC, and other fit statistics.
+
+    - name: show_coefficient_table
+      title: 'Show Coefficient Table'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed table of coefficients, standard errors, and p-values.
+
+    - name: custom_title
+      title: 'Custom Plot Title'
+      type: String
+      default: ''
+      description: >-
+        Custom title for the coefficient plot. Leave blank for automatic title.
+
+    - name: custom_x_label
+      title: 'Custom X-axis Label'
+      type: String
+      default: ''
+      description: >-
+        Custom label for x-axis. Leave blank for automatic label based on model type.
+
+...
