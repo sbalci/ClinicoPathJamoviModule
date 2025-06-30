@@ -131,4 +131,4 @@ datageneration
 ^vignettes/*_files$
 .venv
 
-*.sh
+\.sh$
