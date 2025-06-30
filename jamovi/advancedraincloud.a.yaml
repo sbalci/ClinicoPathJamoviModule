@@ -6,22 +6,22 @@ menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.3'
 jas: '1.2'
 
-# description:
-  # main: |
-  #   Creates advanced raincloud plots with longitudinal connections using ggrain package.
-  #   This module complements the existing Raincloud Plot module by providing advanced 
-  #   features including longitudinal data connections, Likert scale support, and flexible
-  #   raincloud positioning. Perfect for repeated measures data, survey analysis, and 
-  #   complex distribution visualization in clinical research. Uses the ggrain package
-  #   for enhanced customization and connectivity features.
-  # R:
-  #   dontrun: true
-  #   usage: |
-  #     # Example:
-  #     # 1. Select continuous variable for distribution analysis.
-  #     # 2. Choose grouping variable for comparisons.
-  #     # 3. Optionally add longitudinal ID variable for connections.
-  #     # 4. Configure advanced raincloud features and positioning.
+description:
+  main: |
+    Creates advanced raincloud plots with longitudinal connections using ggrain package.
+    This module complements the existing Raincloud Plot module by providing advanced 
+    features including longitudinal data connections, Likert scale support, and flexible
+    raincloud positioning. Perfect for repeated measures data, survey analysis, and 
+    complex distribution visualization in clinical research. Uses the ggrain package
+    for enhanced customization and connectivity features.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Select continuous variable for distribution analysis.
+      # 2. Choose grouping variable for comparisons.
+      # 3. Optionally add longitudinal ID variable for connections.
+      # 4. Configure advanced raincloud features and positioning.
 
 options:
 
@@ -64,6 +64,7 @@ options:
       permitted:
         - factor
         - numeric
+      default: NULL
       description:
         R: >
           Optional variable for color filling different groups.
@@ -78,6 +79,7 @@ options:
         - factor
         - numeric
         - id
+      default: NULL
       description:
         R: >
           Optional ID variable for connecting longitudinal observations across groups.
@@ -92,6 +94,7 @@ options:
       permitted:
         - numeric
         - factor
+      default: NULL
       description:
         R: >
           Optional variable for remapping point colors based on covariate values.

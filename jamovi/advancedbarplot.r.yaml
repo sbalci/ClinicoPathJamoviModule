@@ -36,7 +36,7 @@ items:
     - name: statistical_results
       title: "Statistical Test Results"
       type: Html
-      visible: (add_statistics && x_var && y_var)
+      visible: add_statistics
       clearWith:
         - x_var
         - y_var
@@ -47,7 +47,7 @@ items:
     - name: summary_stats
       title: "Summary Statistics"
       type: Html
-      visible: (x_var && y_var)
+      visible: (x_var)
       clearWith:
         - x_var
         - y_var
@@ -57,7 +57,7 @@ items:
     - name: interactive_plot
       title: "Interactive Version"
       type: Html
-      visible: (chart_approach:interactive && x_var && y_var)
+      visible: (chart_approach:interactive)
       clearWith:
         - x_var
         - y_var

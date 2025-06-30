@@ -1,0 +1,642 @@
+---
+title: "Advanced Raincloud Plots - Enhanced Distribution Visualization"
+description: "Comprehensive guide to advanced raincloud plots with longitudinal connections, Likert scale support, and flexible positioning using ggrain"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{Advanced Raincloud Plots - Enhanced Distribution Visualization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "vignettes/",
+  fig.width = 10,
+  fig.height = 6,
+  out.width = "100%",
+  dpi = 300
+)
+
+library(ClinicoPath)
+library(ggplot2)
+library(dplyr)
+```
+
+## Overview
+
+The `advancedraincloud` module provides **enhanced raincloud visualization** using the modern `ggrain` package, offering advanced features beyond standard raincloud plots. This module is specifically designed for complex research scenarios requiring longitudinal connections, Likert scale support, and flexible positioning.
+
+### Key Advantages Over Standard Raincloud
+
+| Feature | Standard Raincloud (ggdist) | Advanced Raincloud (ggrain) |
+|---------|---------------------------|----------------------------|
+| **Package** | ggdist | ggrain |
+| **Longitudinal Connections** | ❌ | ✅ Connect repeated measures |
+| **Likert Scale Support** | ❌ | ✅ Y-axis jittering for ordinal data |
+| **Positioning Options** | Fixed | ✅ Left/Right/Flanking |
+| **Covariate Mapping** | ❌ | ✅ Point color remapping |
+| **Clinical Applications** | Basic distribution | ✅ Complex research designs |
+
+### When to Use Advanced Raincloud
+
+- **Longitudinal Studies**: Before/after or repeated measures data
+- **Survey Analysis**: Likert scales and ordinal responses  
+- **Clinical Trials**: Treatment response with individual tracking
+- **Complex Comparisons**: Multi-group analysis with covariates
+
+## Dataset Overview
+
+We'll demonstrate using the comprehensive `histopathology` dataset:
+
+```{r data-overview}
+# Load the histopathology dataset
+data("histopathology")
+
+# Dataset structure for raincloud plots
+str(histopathology[c("Group", "Age", "OverallTime", "Sex", "Grade_Level", "ID")])
+
+# Key variables for advanced raincloud plots
+cat("Variables suitable for advanced raincloud visualization:\n")
+cat("Y-axis (continuous):", paste(c("Age", "OverallTime", "MeasurementA", "MeasurementB"), collapse = ", "), "\n")
+cat("X-axis (grouping):", paste(c("Group", "Sex", "Grade_Level"), collapse = ", "), "\n")
+cat("Fill variable:", paste(c("Sex", "Grade_Level"), collapse = ", "), "\n")
+cat("ID variable:", "ID (for longitudinal connections)\n")
+
+# Check for repeated measures (simulated)
+set.seed(123)
+histopathology$ID <- rep(1:125, 2)  # Simulate paired data
+histopathology$Time <- rep(c("Baseline", "Follow-up"), each = 125)
+cat("Simulated longitudinal data: 125 patients with baseline and follow-up measurements\n")
+```
+
+## Basic Advanced Raincloud Plot
+
+Let's start with a basic advanced raincloud plot:
+
+```{r basic-example, eval=FALSE}
+# Basic advanced raincloud plot
+advancedraincloud(
+  data = histopathology,
+  y_var = "Age",
+  x_var = "Group",
+  plot_title = "Age Distribution by Treatment Group",
+  show_statistics = TRUE,
+  show_interpretation = TRUE
+)
+```
+
+### R Code Example for Basic Plot
+
+```{r basic-code, eval=TRUE}
+# Reproducible R code using ggrain
+library(ggrain)
+library(ggplot2)
+
+# Basic advanced raincloud with ggrain
+basic_plot <- ggplot(histopathology, aes(x = Group, y = Age, fill = Group)) +
+  geom_rain(rain.side = "l") +
+  scale_fill_manual(values = c("#2E86AB", "#A23B72")) +
+  theme_minimal() +
+  labs(
+    title = "Advanced Raincloud Plot - Basic Example",
+    x = "Treatment Group",
+    y = "Age (years)"
+  ) +
+  theme(legend.position = "none")
+
+print(basic_plot)
+```
+
+## Longitudinal Connections
+
+The most powerful feature of advanced raincloud plots is connecting repeated observations:
+
+```{r longitudinal-example, eval=FALSE}
+# Advanced raincloud with longitudinal connections
+advancedraincloud(
+  data = histopathology,
+  y_var = "OverallTime", 
+  x_var = "Time",
+  id_var = "ID",
+  show_longitudinal = TRUE,
+  plot_title = "Overall Survival Time: Baseline vs Follow-up",
+  x_label = "Time Point",
+  y_label = "Overall Time (months)"
+)
+```
+
+### R Code Example for Longitudinal Connections
+
+```{r longitudinal-code, eval=TRUE}
+# Create simulated longitudinal data
+longitudinal_data <- histopathology %>%
+  filter(!is.na(OverallTime)) %>%
+  slice_head(n = 50) %>%  # Smaller sample for clearer visualization
+  mutate(
+    Baseline = OverallTime,
+    Follow_up = OverallTime + rnorm(n(), 2, 1),  # Simulated follow-up
+    ID = row_number()
+  ) %>%
+  tidyr::pivot_longer(
+    cols = c(Baseline, Follow_up),
+    names_to = "Time",
+    values_to = "Measurement"
+  )
+
+# Advanced raincloud with longitudinal connections
+longitudinal_plot <- ggplot(longitudinal_data, aes(x = Time, y = Measurement, fill = Time)) +
+  geom_rain(
+    id.long.var = "ID",  # Connect observations by ID
+    rain.side = "f"      # Flanking rainclouds
+  ) +
+  scale_fill_manual(values = c("#1f77b4", "#ff7f0e")) +
+  theme_minimal() +
+  labs(
+    title = "Advanced Raincloud with Longitudinal Connections",
+    x = "Time Point",
+    y = "Measurement Value",
+    caption = "Lines connect repeated observations from the same subjects"
+  )
+
+print(longitudinal_plot)
+```
+
+## Raincloud Positioning Options
+
+Advanced raincloud plots offer flexible positioning:
+
+```{r positioning-examples, eval=FALSE}
+# Left-side raincloud (default)
+advancedraincloud(
+  data = histopathology,
+  y_var = "Age",
+  x_var = "Sex", 
+  rain_side = "l",
+  plot_title = "Left-side Raincloud"
+)
+
+# Right-side raincloud
+advancedraincloud(
+  data = histopathology,
+  y_var = "Age",
+  x_var = "Sex",
+  rain_side = "r", 
+  plot_title = "Right-side Raincloud"
+)
+
+# Flanking rainclouds (both sides)
+advancedraincloud(
+  data = histopathology,
+  y_var = "Age",
+  x_var = "Sex",
+  rain_side = "f",
+  plot_title = "Flanking Rainclouds"
+)
+```
+
+### R Code Examples for Different Positions
+
+```{r positioning-code, eval=TRUE}
+# Create comparison plots
+library(gridExtra)
+
+# Left-side raincloud
+left_plot <- ggplot(histopathology, aes(x = Sex, y = Age, fill = Sex)) +
+  geom_rain(rain.side = "l") +
+  scale_fill_manual(values = c("#e74c3c", "#3498db")) +
+  theme_minimal() +
+  labs(title = "Left-side Raincloud", x = "Sex", y = "Age") +
+  theme(legend.position = "none")
+
+# Right-side raincloud  
+right_plot <- ggplot(histopathology, aes(x = Sex, y = Age, fill = Sex)) +
+  geom_rain(rain.side = "r") +
+  scale_fill_manual(values = c("#e74c3c", "#3498db")) +
+  theme_minimal() +
+  labs(title = "Right-side Raincloud", x = "Sex", y = "Age") +
+  theme(legend.position = "none")
+
+# Flanking rainclouds
+flanking_plot <- ggplot(histopathology, aes(x = Sex, y = Age, fill = Sex)) +
+  geom_rain(rain.side = "f") +
+  scale_fill_manual(values = c("#e74c3c", "#3498db")) +
+  theme_minimal() +
+  labs(title = "Flanking Rainclouds", x = "Sex", y = "Age") +
+  theme(legend.position = "none")
+
+# Display plots
+grid.arrange(left_plot, right_plot, flanking_plot, ncol = 3)
+```
+
+## Likert Scale Support
+
+For ordinal survey data, advanced raincloud plots offer specialized support:
+
+```{r likert-example, eval=FALSE}
+# Simulate Likert scale data
+histopathology$Satisfaction <- sample(1:5, nrow(histopathology), replace = TRUE,
+                                     prob = c(0.1, 0.2, 0.4, 0.2, 0.1))
+
+# Advanced raincloud for Likert data
+advancedraincloud(
+  data = histopathology,
+  y_var = "Satisfaction",
+  x_var = "Group",
+  likert_mode = TRUE,  # Enable Likert mode
+  plot_title = "Patient Satisfaction by Treatment Group",
+  y_label = "Satisfaction Score (1-5)"
+)
+```
+
+### R Code Example for Likert Data
+
+```{r likert-code, eval=TRUE}
+# Create Likert scale data
+likert_data <- histopathology %>%
+  mutate(
+    Satisfaction = sample(1:5, n(), replace = TRUE, prob = c(0.1, 0.2, 0.4, 0.2, 0.1)),
+    Satisfaction_Factor = factor(Satisfaction, levels = 1:5, 
+                                labels = c("Very Poor", "Poor", "Average", "Good", "Excellent"))
+  )
+
+# Advanced raincloud for Likert data with jittering
+likert_plot <- ggplot(likert_data, aes(x = Group, y = Satisfaction, fill = Group)) +
+  geom_rain(
+    likert = TRUE,  # Enable Likert mode for Y-axis jittering
+    rain.side = "l"
+  ) +
+  scale_fill_manual(values = c("#2E86AB", "#A23B72")) +
+  scale_y_continuous(breaks = 1:5, labels = c("Very Poor", "Poor", "Average", "Good", "Excellent")) +
+  theme_minimal() +
+  labs(
+    title = "Patient Satisfaction by Treatment Group - Likert Scale",
+    x = "Treatment Group",
+    y = "Satisfaction Score",
+    caption = "Y-axis jittering applied for discrete ordinal responses"
+  ) +
+  theme(legend.position = "none")
+
+print(likert_plot)
+```
+
+## Covariate Mapping
+
+Advanced raincloud plots support point color remapping based on additional variables:
+
+```{r covariate-example, eval=FALSE}
+# Advanced raincloud with covariate mapping
+advancedraincloud(
+  data = histopathology,
+  y_var = "OverallTime",
+  x_var = "Group",
+  cov_var = "Age",  # Map point colors to age
+  plot_title = "Overall Time by Group with Age Mapping",
+  show_statistics = TRUE
+)
+```
+
+### R Code Example for Covariate Mapping
+
+```{r covariate-code, eval=TRUE}
+# Advanced raincloud with covariate mapping
+covariate_plot <- ggplot(histopathology, aes(x = Group, y = OverallTime, fill = Group)) +
+  geom_rain(
+    rain.side = "l",
+    cov = "Age"  # Map point colors to age covariate
+  ) +
+  scale_fill_manual(values = c("#2E86AB", "#A23B72")) +
+  scale_color_viridis_c(name = "Age") +  # Continuous color scale for age
+  theme_minimal() +
+  labs(
+    title = "Overall Time by Group with Age Covariate Mapping",
+    x = "Treatment Group", 
+    y = "Overall Time (months)",
+    caption = "Point colors represent patient age"
+  )
+
+print(covariate_plot)
+```
+
+## Color Palettes
+
+The module includes 6 professional color palettes:
+
+```{r color-palettes, eval=FALSE}
+# Clinical palette (default)
+advancedraincloud(data = histopathology, y_var = "Age", x_var = "Grade_Level", 
+                 color_palette = "clinical")
+
+# Viridis palette
+advancedraincloud(data = histopathology, y_var = "Age", x_var = "Grade_Level",
+                 color_palette = "viridis")
+
+# Pastel palette
+advancedraincloud(data = histopathology, y_var = "Age", x_var = "Grade_Level",
+                 color_palette = "pastel")
+```
+
+### R Code Examples for Color Palettes
+
+```{r palette-code, eval=TRUE}
+# Create palette comparison
+grade_data <- histopathology %>% filter(!is.na(Grade_Level))
+
+# Clinical palette
+clinical_colors <- c("#2E86AB", "#A23B72", "#F18F01")
+clinical_plot <- ggplot(grade_data, aes(x = Grade_Level, y = Age, fill = Grade_Level)) +
+  geom_rain() +
+  scale_fill_manual(values = clinical_colors) +
+  theme_minimal() +
+  labs(title = "Clinical Palette") +
+  theme(legend.position = "none")
+
+# Viridis palette
+viridis_plot <- ggplot(grade_data, aes(x = Grade_Level, y = Age, fill = Grade_Level)) +
+  geom_rain() +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  labs(title = "Viridis Palette") +
+  theme(legend.position = "none")
+
+# Pastel palette  
+pastel_colors <- c("#FFB3BA", "#BAFFC9", "#BAE1FF")
+pastel_plot <- ggplot(grade_data, aes(x = Grade_Level, y = Age, fill = Grade_Level)) +
+  geom_rain() +
+  scale_fill_manual(values = pastel_colors) +
+  theme_minimal() +
+  labs(title = "Pastel Palette") +
+  theme(legend.position = "none")
+
+# Display palette comparison
+grid.arrange(clinical_plot, viridis_plot, pastel_plot, ncol = 3)
+```
+
+## Statistical Integration
+
+Advanced raincloud plots include comprehensive statistical analysis:
+
+```{r statistics-example, eval=FALSE}
+# With summary statistics and group comparisons
+advancedraincloud(
+  data = histopathology,
+  y_var = "Age", 
+  x_var = "Group",
+  show_statistics = TRUE,      # Summary statistics table
+  show_comparisons = TRUE,     # Statistical tests
+  show_interpretation = TRUE   # Feature guide
+)
+```
+
+### Statistical Test Details
+
+The module automatically selects appropriate tests:
+
+- **2 Groups**: Wilcoxon rank-sum test (robust, non-parametric)
+- **>2 Groups**: Kruskal-Wallis test (robust, non-parametric)
+
+```{r statistics-demo, eval=TRUE}
+# Demonstrate statistical testing
+group_data <- histopathology %>% filter(Group %in% c("Control", "Treatment"))
+
+# Wilcoxon test for two groups
+wilcox_result <- wilcox.test(Age ~ Group, data = group_data)
+
+cat("Statistical Test Results:\n")
+cat("Wilcoxon rank-sum test\n")
+cat("W =", wilcox_result$statistic, "\n")
+cat("p-value =", format.pval(wilcox_result$p.value, digits = 3), "\n")
+
+# Summary statistics by group
+summary_stats <- group_data %>%
+  group_by(Group) %>%
+  summarise(
+    n = n(),
+    mean = round(mean(Age, na.rm = TRUE), 1),
+    median = round(median(Age, na.rm = TRUE), 1),
+    sd = round(sd(Age, na.rm = TRUE), 1),
+    .groups = 'drop'
+  )
+
+print(summary_stats)
+```
+
+## Customization Options
+
+Advanced raincloud plots offer extensive customization:
+
+```{r customization-example, eval=FALSE}
+# Highly customized advanced raincloud
+advancedraincloud(
+  data = histopathology,
+  y_var = "OverallTime",
+  x_var = "Group", 
+  fill_var = "Sex",
+  point_size = 2.0,          # Larger points
+  point_alpha = 0.8,         # Point transparency
+  violin_alpha = 0.6,        # Violin transparency
+  boxplot_width = 0.15,      # Boxplot width
+  plot_title = "Customized Advanced Raincloud Plot",
+  x_label = "Treatment Group",
+  y_label = "Overall Survival Time (months)"
+)
+```
+
+### R Code Example for Customization
+
+```{r customization-code, eval=TRUE}
+# Highly customized plot
+custom_plot <- ggplot(histopathology, aes(x = Group, y = OverallTime, fill = Sex)) +
+  geom_rain(
+    rain.side = "l",
+    point.args = list(size = 2.0, alpha = 0.8),      # Custom points
+    violin.args = list(alpha = 0.6),                  # Custom violin
+    boxplot.args = list(width = 0.15)                 # Custom boxplot
+  ) +
+  scale_fill_manual(values = c("#e74c3c", "#3498db")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 12),
+    legend.position = "bottom"
+  ) +
+  labs(
+    title = "Customized Advanced Raincloud Plot",
+    x = "Treatment Group",
+    y = "Overall Survival Time (months)",
+    fill = "Sex"
+  )
+
+print(custom_plot)
+```
+
+## Clinical Research Applications
+
+### 1. Before/After Treatment Analysis
+
+```{r clinical-before-after, eval=TRUE}
+# Simulate before/after treatment data
+treatment_data <- data.frame(
+  Patient_ID = rep(1:30, 2),
+  Time = rep(c("Before", "After"), each = 30),
+  Biomarker = c(
+    rnorm(30, 100, 15),                    # Before treatment
+    rnorm(30, 85, 12)                      # After treatment (improvement)
+  ),
+  Treatment = rep(c("Drug A", "Drug B"), each = 15, times = 2)
+)
+
+# Advanced raincloud with connections
+before_after_plot <- ggplot(treatment_data, aes(x = Time, y = Biomarker, fill = Treatment)) +
+  geom_rain(
+    id.long.var = "Patient_ID",  # Connect before/after for same patients
+    rain.side = "f"              # Flanking for comparison
+  ) +
+  scale_fill_manual(values = c("#2E86AB", "#A23B72")) +
+  theme_minimal() +
+  labs(
+    title = "Before/After Treatment Analysis with Patient Connections",
+    x = "Time Point",
+    y = "Biomarker Level",
+    fill = "Treatment",
+    caption = "Lines connect measurements from the same patients"
+  )
+
+print(before_after_plot)
+```
+
+### 2. Multi-Group Clinical Trial
+
+```{r clinical-trial, eval=TRUE}
+# Simulate clinical trial data
+trial_data <- histopathology %>%
+  mutate(
+    Treatment_Arm = case_when(
+      Group == "Control" ~ "Placebo",
+      Group == "Treatment" ~ sample(c("Low Dose", "High Dose"), n(), replace = TRUE)
+    ),
+    Response_Score = case_when(
+      Treatment_Arm == "Placebo" ~ rnorm(n(), 3, 1),
+      Treatment_Arm == "Low Dose" ~ rnorm(n(), 5, 1.2),
+      Treatment_Arm == "High Dose" ~ rnorm(n(), 7, 1.5)
+    )
+  ) %>%
+  filter(!is.na(Treatment_Arm))
+
+# Multi-group comparison
+trial_plot <- ggplot(trial_data, aes(x = Treatment_Arm, y = Response_Score, fill = Treatment_Arm)) +
+  geom_rain(rain.side = "l") +
+  scale_fill_manual(values = c("#95a5a6", "#3498db", "#e74c3c")) +
+  theme_minimal() +
+  labs(
+    title = "Clinical Trial: Treatment Response by Dose",
+    x = "Treatment Arm",
+    y = "Response Score",
+    caption = "Advanced raincloud plot showing distribution differences"
+  ) +
+  theme(legend.position = "none")
+
+print(trial_plot)
+```
+
+## Best Practices
+
+### 1. Choosing the Right Approach
+
+- **Standard Raincloud**: Simple group comparisons, basic distribution analysis
+- **Advanced Raincloud**: Repeated measures, longitudinal data, complex designs
+
+### 2. Data Preparation
+
+```{r data-preparation}
+# Always check your data structure
+cat("Data preparation checklist:\n")
+cat("✓ Y-variable: continuous/numeric\n")
+cat("✓ X-variable: categorical/factor\n")
+cat("✓ ID variable: unique identifier for each subject\n")
+cat("✓ No excessive missing values\n")
+
+# Example data check
+data_check <- histopathology %>%
+  summarise(
+    n_total = n(),
+    n_complete = sum(complete.cases(Group, Age)),
+    missing_pct = round((n_total - n_complete) / n_total * 100, 1)
+  )
+
+cat("\nData completeness:", data_check$n_complete, "of", data_check$n_total, 
+    "cases (", data_check$missing_pct, "% missing)\n")
+```
+
+### 3. Interpretation Guidelines
+
+```{r interpretation-guidelines}
+cat("Advanced Raincloud Plot Interpretation:\n")
+cat("📊 Violin: Shows probability density distribution\n")
+cat("📦 Box: Median, quartiles, and outliers\n") 
+cat("🔵 Points: Individual observations\n")
+cat("📈 Connections: Longitudinal relationships (when enabled)\n")
+cat("🎨 Colors: Group or covariate distinctions\n")
+```
+
+## Package Dependencies
+
+The advanced raincloud module requires:
+
+```{r dependencies, eval=FALSE}
+# Core dependencies
+library(ggrain)      # Enhanced raincloud plots
+library(ggplot2)     # Graphics
+library(dplyr)       # Data manipulation
+library(jmvcore)     # jamovi framework
+
+# Optional enhancements
+library(viridis)     # Color palettes
+library(RColorBrewer) # Additional palettes
+```
+
+## Conclusion
+
+Advanced raincloud plots represent a significant enhancement over standard raincloud visualization, providing:
+
+### Key Benefits
+
+1. **Longitudinal Connections**: Track individual subjects across time/conditions
+2. **Likert Scale Support**: Specialized handling for ordinal survey data
+3. **Flexible Positioning**: Optimal layout for different research designs
+4. **Covariate Integration**: Multi-dimensional data visualization
+5. **Statistical Integration**: Robust non-parametric testing
+6. **Clinical Focus**: Designed for medical and clinical research
+
+### When to Use
+
+- **Repeated Measures Studies**: Before/after, pre/post designs
+- **Survey Research**: Likert scales, ordinal responses
+- **Clinical Trials**: Treatment comparisons with individual tracking
+- **Longitudinal Analysis**: Multi-timepoint studies
+- **Complex Visualizations**: Multi-group, multi-variable analyses
+
+### Next Steps
+
+- Explore the interactive features in jamovi
+- Experiment with different positioning options
+- Try longitudinal connections with your repeated measures data
+- Use covariate mapping for multi-dimensional analysis
+
+For additional statistical plotting modules in ClinicoPath:
+- `raincloud` for standard raincloud plots
+- `jjscatterstats` for correlation visualization
+- `jjbarstats` for categorical data analysis
+- `jjhistostats` for distribution analysis

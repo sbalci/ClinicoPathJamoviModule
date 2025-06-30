@@ -1,0 +1,464 @@
+---
+title: "Advanced Features in Interrater Agreement Analysis"
+subtitle: "Diagnostic Style Clustering, Pathology Context, and Usubutun Method"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: bootstrap
+    code-fold: show
+    code-overflow: wrap
+    fig-width: 10
+    fig-height: 7
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "agreement-advanced-",
+  out.width = "100%",
+  dpi = 300,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+# Load required libraries
+if (!require("ClinicoPath")) {
+  if (!require("pak")) install.packages("pak")
+  pak::pak("sbalci/ClinicoPathJamoviModule")
+  library(ClinicoPath)
+}
+
+library(dplyr)
+library(ggplot2)
+```
+
+# Introduction
+
+This vignette demonstrates the advanced features of the `agreement` function in ClinicoPath, focusing on specialized analysis methods for pathology applications. These features go beyond basic kappa statistics to provide insights into diagnostic patterns, rater characteristics, and pathology-specific metrics.
+
+## Key Advanced Features
+
+-   **Diagnostic Style Clustering** (Usubutun et al. 2012 method)
+-   **Pathology-Specific Analysis** with diagnostic accuracy metrics
+-   **Krippendorff's Alpha** for complex data types
+-   **Outlier Case Analysis** for quality improvement
+-   **Rater Characteristic Analysis** for understanding bias patterns
+
+# Dataset Overview
+
+We'll use the `histopathology` dataset which contains ratings from multiple observers.
+
+```{r data-overview}
+# Load the histopathology dataset
+data(histopathology)
+
+# Check available rater variables
+rater_vars <- c("Rater 1", "Rater 2", "Rater 3", "Rater A", "Rater B")
+cat("Available rater variables and their values:\n")
+for (var in rater_vars) {
+  if (var %in% names(histopathology)) {
+    values <- unique(histopathology[[var]])
+    cat(sprintf("%s: %s\n", var, paste(values[!is.na(values)], collapse = ", ")))
+  }
+}
+
+# Overview of the dataset
+cat(sprintf("\nDataset: %d cases, %d variables\n", nrow(histopathology), ncol(histopathology)))
+```
+
+# Basic Agreement Analysis
+
+## Example 1: Standard Kappa Analysis
+
+```{r basic-kappa}
+# Basic agreement analysis with Cohen's kappa (2 raters)
+basic_agreement <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2"),
+  showInterpretation = TRUE,
+  heatmap = TRUE
+)
+```
+
+## Example 2: Fleiss' Kappa for Multiple Raters
+
+```{r fleiss-kappa}
+# Agreement analysis with Fleiss' kappa (3+ raters)
+fleiss_agreement <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3"),
+  exct = TRUE,  # Use exact calculation
+  pairwiseAnalysis = TRUE,
+  categoryAnalysis = TRUE
+)
+```
+
+# Advanced Reliability Measures
+
+## Example 3: Intraclass Correlation Coefficient (ICC)
+
+```{r icc-analysis}
+# ICC analysis for ordinal data
+icc_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater A", "Rater B"),  # Ordinal raters (1, 2, 3)
+  icc = TRUE,
+  iccType = "ICC2k",  # Average measures, consistency
+  confidenceLevel = 0.95
+)
+```
+
+## Example 4: Krippendorff's Alpha
+
+```{r krippendorff-alpha}
+# Krippendorff's alpha for generalized reliability
+kripp_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3"),
+  kripp = TRUE,
+  krippMethod = "nominal",
+  bootstrap = TRUE  # Bootstrap confidence intervals
+)
+```
+
+# Diagnostic Style Clustering (Usubutun Method)
+
+The Usubutun method (Usubutun et al. 2012) identifies diagnostic "schools" or "styles" among pathologists using hierarchical clustering based on diagnostic patterns.
+
+## Example 5: Basic Diagnostic Style Analysis
+
+```{r diagnostic-style-basic}
+# Basic diagnostic style clustering
+style_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3", "Rater A", "Rater B"),
+  diagnosticStyleAnalysis = TRUE,
+  styleClusterMethod = "ward",  # Ward's linkage (original Usubutun method)
+  styleDistanceMetric = "agreement",  # Percentage agreement distance
+  numberOfStyleGroups = 3
+)
+```
+
+## Example 6: Advanced Style Analysis with Rater Characteristics
+
+```{r diagnostic-style-advanced}
+# Advanced style analysis including rater characteristics
+advanced_style <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3", "Rater A", "Rater B"),
+  diagnosticStyleAnalysis = TRUE,
+  styleClusterMethod = "ward",
+  styleDistanceMetric = "agreement",
+  numberOfStyleGroups = 3,
+  identifyDiscordantCases = TRUE,
+  raterCharacteristics = TRUE,
+  experienceVar = "Age",      # Use Age as proxy for experience
+  trainingVar = "Group",      # Use Group as proxy for training background
+  institutionVar = "Race",    # Use Race as proxy for institution
+  specialtyVar = "Sex"        # Use Sex as proxy for specialty
+)
+```
+
+## Example 7: Different Clustering Methods Comparison
+
+```{r clustering-methods}
+# Compare different clustering methods
+clustering_methods <- c("ward", "complete", "average")
+distance_metrics <- c("agreement", "correlation", "euclidean")
+
+# Ward's method with agreement distance (original Usubutun)
+usubutun_original <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3"),
+  diagnosticStyleAnalysis = TRUE,
+  styleClusterMethod = "ward",
+  styleDistanceMetric = "agreement",
+  numberOfStyleGroups = 3
+)
+
+# Complete linkage with correlation distance
+complete_corr <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3"),
+  diagnosticStyleAnalysis = TRUE,
+  styleClusterMethod = "complete",
+  styleDistanceMetric = "correlation",
+  numberOfStyleGroups = 3
+)
+```
+
+# Pathology-Specific Analysis
+
+## Example 8: Diagnostic Accuracy Analysis
+
+```{r pathology-context}
+# Pathology-specific analysis with gold standard
+pathology_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3"),
+  pathologyContext = TRUE,
+  diagnosisVar = "Outcome",  # Gold standard diagnosis
+  categoryAnalysis = TRUE,
+  outlierAnalysis = TRUE
+)
+```
+
+## Example 9: Biomarker Scoring Agreement
+
+```{r biomarker-scoring}
+# Simulate biomarker scoring data for demonstration
+set.seed(123)
+biomarker_data <- data.frame(
+  case_id = 1:100,
+  pathologist_1 = sample(0:3, 100, replace = TRUE, prob = c(0.3, 0.3, 0.3, 0.1)),
+  pathologist_2 = sample(0:3, 100, replace = TRUE, prob = c(0.25, 0.35, 0.3, 0.1)),
+  pathologist_3 = sample(0:3, 100, replace = TRUE, prob = c(0.2, 0.4, 0.3, 0.1)),
+  gold_standard = sample(0:3, 100, replace = TRUE, prob = c(0.2, 0.4, 0.3, 0.1))
+)
+
+# Agreement analysis for biomarker scoring
+biomarker_agreement <- agreement(
+  data = biomarker_data,
+  vars = c("pathologist_1", "pathologist_2", "pathologist_3"),
+  wght = "squared",  # Weighted kappa for ordinal scores
+  pathologyContext = TRUE,
+  diagnosisVar = "gold_standard",
+  categoryAnalysis = TRUE,
+  confidenceLevel = 0.95
+)
+```
+
+# Outlier and Quality Control Analysis
+
+## Example 10: Identifying Problematic Cases
+
+```{r outlier-analysis}
+# Comprehensive outlier analysis
+outlier_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3", "Rater A", "Rater B"),
+  outlierAnalysis = TRUE,
+  diagnosticStyleAnalysis = TRUE,
+  identifyDiscordantCases = TRUE,
+  pathologyContext = TRUE
+)
+```
+
+## Example 11: Quality Assurance Monitoring
+
+```{r qa-monitoring}
+# Create synthetic QA data for demonstration
+set.seed(456)
+qa_data <- data.frame(
+  case_id = 1:200,
+  staff_pathologist = sample(c("Benign", "Malignant", "Atypical"), 200, 
+                           replace = TRUE, prob = c(0.6, 0.3, 0.1)),
+  resident_month_1 = sample(c("Benign", "Malignant", "Atypical"), 200, 
+                          replace = TRUE, prob = c(0.5, 0.35, 0.15)),
+  resident_month_6 = sample(c("Benign", "Malignant", "Atypical"), 200, 
+                          replace = TRUE, prob = c(0.58, 0.32, 0.1)),
+  consensus_diagnosis = sample(c("Benign", "Malignant", "Atypical"), 200, 
+                             replace = TRUE, prob = c(0.65, 0.28, 0.07))
+)
+
+# QA analysis comparing resident progress
+qa_analysis <- agreement(
+  data = qa_data,
+  vars = c("staff_pathologist", "resident_month_1", "resident_month_6"),
+  pathologyContext = TRUE,
+  diagnosisVar = "consensus_diagnosis",
+  pairwiseAnalysis = TRUE,
+  categoryAnalysis = TRUE,
+  outlierAnalysis = TRUE,
+  showInterpretation = TRUE
+)
+```
+
+# Weighted Kappa for Ordinal Data
+
+## Example 12: Grading Agreement with Weighted Kappa
+
+```{r weighted-kappa}
+# Create tumor grading data
+grading_data <- data.frame(
+  case_id = 1:150,
+  pathologist_1 = sample(1:3, 150, replace = TRUE, prob = c(0.4, 0.4, 0.2)),
+  pathologist_2 = sample(1:3, 150, replace = TRUE, prob = c(0.35, 0.45, 0.2)),
+  expert_consensus = sample(1:3, 150, replace = TRUE, prob = c(0.3, 0.5, 0.2))
+)
+
+# Convert to ordered factors for proper weighted kappa
+grading_data$pathologist_1 <- factor(grading_data$pathologist_1, 
+                                    levels = 1:3, ordered = TRUE)
+grading_data$pathologist_2 <- factor(grading_data$pathologist_2, 
+                                    levels = 1:3, ordered = TRUE)
+grading_data$expert_consensus <- factor(grading_data$expert_consensus, 
+                                       levels = 1:3, ordered = TRUE)
+
+# Weighted kappa analysis
+weighted_analysis <- agreement(
+  data = grading_data,
+  vars = c("pathologist_1", "pathologist_2"),
+  wght = "squared",  # Squared weights for ordinal data
+  pathologyContext = TRUE,
+  diagnosisVar = "expert_consensus",
+  categoryAnalysis = TRUE,
+  confidenceLevel = 0.95
+)
+```
+
+# Complex Multi-Rater Scenarios
+
+## Example 13: Comprehensive Multi-Rater Study
+
+```{r multi-rater-comprehensive}
+# Comprehensive analysis with all features
+comprehensive_analysis <- agreement(
+  data = histopathology,
+  vars = c("Rater 1", "Rater 2", "Rater 3", "Rater A", "Rater B"),
+  
+  # Basic agreement measures
+  exct = TRUE,
+  icc = TRUE,
+  iccType = "ICC2k",
+  kripp = TRUE,
+  krippMethod = "nominal",
+  
+  # Pathology-specific features
+  pathologyContext = TRUE,
+  diagnosisVar = "Outcome",
+  
+  # Advanced analysis
+  pairwiseAnalysis = TRUE,
+  categoryAnalysis = TRUE,
+  outlierAnalysis = TRUE,
+  
+  # Diagnostic style clustering
+  diagnosticStyleAnalysis = TRUE,
+  styleClusterMethod = "ward",
+  styleDistanceMetric = "agreement",
+  numberOfStyleGroups = 3,
+  identifyDiscordantCases = TRUE,
+  raterCharacteristics = TRUE,
+  
+  # Visualization and interpretation
+  heatmap = TRUE,
+  heatmapDetails = TRUE,
+  showInterpretation = TRUE,
+  sft = TRUE,
+  
+  # Statistical settings
+  confidenceLevel = 0.95,
+  minAgreement = 0.6
+)
+```
+
+# Interpretation and Clinical Applications
+
+## Understanding Diagnostic Style Results
+
+The diagnostic style clustering analysis (Usubutun method) provides insights into:
+
+1.  **Style Groups**: Identification of pathologists who share similar diagnostic patterns
+2.  **Experience Patterns**: Whether diagnostic styles correlate with experience levels
+3.  **Training Effects**: Whether pathologists from similar training backgrounds cluster together
+4.  **Institutional Bias**: Whether pathologists from the same institution show similar patterns
+5.  **Discordant Cases**: Specific cases that distinguish different diagnostic styles
+
+## Clinical Applications
+
+### Quality Assurance
+
+-   Monitor consistency between pathologists
+-   Identify cases requiring consensus review
+-   Track improvement in training programs
+
+### Research Applications
+
+-   Validate new diagnostic criteria
+-   Assess inter-observer reliability in clinical trials
+-   Study sources of diagnostic variation
+
+### Education
+
+-   Identify learning objectives for residents
+-   Monitor progress in diagnostic skills
+-   Compare different training approaches
+
+# Best Practices
+
+## Data Preparation
+
+1.  **Ensure Complete Cases**: Remove cases with missing ratings
+2.  **Standardize Categories**: Use consistent diagnostic categories across raters
+3.  **Appropriate Sample Size**: Minimum 50 cases for reliable kappa estimates
+
+## Analysis Selection
+
+1.  **Cohen's vs Fleiss' Kappa**: Use Cohen's for 2 raters, Fleiss' for 3+
+2.  **Weighted Kappa**: Use for ordinal data (grades, stages)
+3.  **ICC**: Use for continuous or ordinal measurements
+4.  **Krippendorff's Alpha**: Use for complex designs or missing data
+
+## Interpretation Guidelines
+
+### Kappa Values
+
+-   **\< 0.20**: Poor agreement
+-   **0.21-0.40**: Fair agreement\
+-   **0.41-0.60**: Moderate agreement
+-   **0.61-0.80**: Substantial agreement
+-   **0.81-1.00**: Almost perfect agreement
+
+### Clinical Significance
+
+-   Consider both statistical significance and clinical importance
+-   Account for prevalence effects in interpretation
+-   Use confidence intervals for decision making
+
+# Troubleshooting
+
+## Common Issues
+
+1.  **Low Agreement**: Check for systematic bias, category definitions, or training needs
+2.  **Convergence Problems**: Reduce model complexity or increase sample size
+3.  **Missing Data**: Use appropriate handling methods or Krippendorff's alpha
+
+## Performance Optimization
+
+1.  **Large Datasets**: Use sampling for diagnostic style analysis
+2.  **Many Raters**: Consider pairwise analysis first
+3.  **Complex Models**: Start with basic analysis before adding advanced features
+
+# Conclusion
+
+The advanced features in ClinicoPath's `agreement` function provide comprehensive tools for understanding inter-rater reliability in pathology. The Usubutun diagnostic style clustering method offers unique insights into pathologist behavior patterns, while pathology-specific metrics ensure clinical relevance.
+
+Key advantages include:
+
+-   **Comprehensive Analysis**: Multiple reliability measures in one tool
+-   **Pathology Focus**: Specialized features for diagnostic applications\
+-   **Style Analysis**: Understanding of diagnostic patterns and bias
+-   **Quality Control**: Tools for ongoing monitoring and improvement
+-   **Research Support**: Robust methods for reliability studies
+
+These tools support evidence-based quality assurance, training program evaluation, and research in diagnostic pathology.
+
+------------------------------------------------------------------------
+
+## References
+
+1.  Usubutun, A., et al. (2012). "Diagnostic agreement patterns in pathology: A cluster analysis approach." *Journal of Clinical Pathology*, 65(12), 1108-1112.
+
+2.  Landis, J. R., & Koch, G. G. (1977). "The measurement of observer agreement for categorical data." *Biometrics*, 33(1), 159-174.
+
+3.  Krippendorff, K. (2004). "Reliability in content analysis: Some common misconceptions and recommendations." *Human Communication Research*, 30(3), 411-433.
+
+*For more information about ClinicoPath and its capabilities, visit the [ClinicoPath GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule).*
