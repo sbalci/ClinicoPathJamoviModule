@@ -42,7 +42,7 @@ analyses:
   - title: Coefficient Plots
     name: coefplot
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Coefficient Plots
     menuSubtitle: Regression Coefficient Visualization
@@ -110,7 +110,7 @@ analyses:
   - title: Clinical Hemodynamic Monitoring
     name: clinmon
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Clinical Hemodynamic Monitoring
     menuSubtitle: Hemodynamic Indices from Continuous Monitoring
@@ -124,7 +124,7 @@ analyses:
   - title: Advanced Statistical Tests
     name: desctools
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Advanced Statistical Tests
     menuSubtitle: Statistical Tests from DescTools Package
@@ -170,7 +170,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -208,7 +208,7 @@ analyses:
   - title: Statistical Distribution Generator
     name: tidydensity
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Statistical Distribution Generator
     menuSubtitle: TidyDensity - Distribution Analysis & Simulation
@@ -240,7 +240,7 @@ analyses:
   - title: Enhanced Tables with gt
     name: enhancedtables
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Enhanced Tables with gt
     menuSubtitle: Professional Table Formatting
@@ -647,7 +647,7 @@ analyses:
   - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideD
     menuSubgroup: Agreement
     menuTitle: Intraclass Correlation Coefficient
     description: >
@@ -972,7 +972,7 @@ analyses:
   - title: Ridge Plot Visualization
     name: jggridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Distribution
     menuTitle: Ridge Plot Visualization
     description: >
@@ -1040,7 +1040,7 @@ analyses:
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuTitle: River Plots
     menuSubgroup: Categorical Over Time
     menuSubtitle: Flow and Transition Visualization
@@ -1263,7 +1263,7 @@ analyses:
   - title: Missing Data Analysis and Imputation
     name: missingdata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Missing Data Analysis and Imputation
     menuSubtitle: mice & ggmice - Multiple Imputation
@@ -1415,7 +1415,7 @@ analyses:
   - title: Survival Analysis Power & Sample Size
     name: survivalpower
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuTitle: Survival Analysis Power & Sample Size
     menuSubgroup: Design and Analysis
     menuSubtitle: Power Analysis for Survival Studies
@@ -1425,7 +1425,7 @@ analyses:
   - title: Clinical Research Visualization with visR
     name: jvisr
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Clinical Research Visualization with visR
     menuSubtitle: Fit-for-Purpose Clinical Visualizations
@@ -1436,7 +1436,7 @@ analyses:
   - title: High-Performance Scatter Plots
     name: jscattermore
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Continuous vs Continuous
     menuTitle: High-Performance Scatter Plots
     menuSubtitle: Fast Scatter Plots for Large Datasets
@@ -1447,7 +1447,7 @@ analyses:
   - title: Social Science Statistical Visualization
     name: jsjplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Statistical Models
     menuTitle: Social Science Statistical Visualization
     menuSubtitle: sjPlot Integration for Social Science Research
@@ -1458,7 +1458,7 @@ analyses:
   - title: Intuitive Survival Analysis
     name: jiwillsurvive
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuTitle: Intuitive Survival Analysis
     menuSubgroup: ClinicoPath Survival
     menuSubtitle: User-Friendly Survival Analysis with iwillsurvive
@@ -1469,7 +1469,7 @@ analyses:
   - title: Statistical Data Extraction from ggstatsplot
     name: jextractstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Data Extraction
     menuTitle: Statistical Data Extraction from ggstatsplot
     menuSubtitle: Extract Statistical Details from ggstatsplot Analyses
@@ -1480,7 +1480,7 @@ analyses:
   - title: Sankey & Alluvial Diagrams
     name: jggsankeyfier
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Categorical Over Time
     menuTitle: Sankey & Alluvial Diagrams
     menuSubtitle: Flow Visualization with ggsankeyfier
@@ -1492,7 +1492,7 @@ analyses:
   - title: Enhanced Statistical Visualization
     name: jggstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Advanced Statistical Plots
     menuTitle: Enhanced Statistical Visualization
     menuSubtitle: ggstats Integration for Advanced Statistical Graphics
@@ -1504,7 +1504,7 @@ analyses:
   - title: Advanced Heatmap Visualization
     name: jggheatmap
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Matrix Visualization
     menuTitle: Advanced Heatmap Visualization
     menuSubtitle: ggheatmap Integration for Matrix Data
@@ -1516,7 +1516,7 @@ analyses:
   - title: Complex UpSet Plot Visualization
     name: jcomplexupset
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Set Visualization
     menuTitle: Complex UpSet Plot Visualization
     description: >
@@ -1527,7 +1527,7 @@ analyses:
   - title: Statistical Data Extraction from ggstatsplot
     name: jextractggstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Data Extraction
     menuTitle: Statistical Data Extraction from ggstatsplot
     description: >
@@ -1539,7 +1539,7 @@ analyses:
   - title: Parsnip Survival Model Wrappers
     name: jparsnipsurvival
     ns: ClinicoPath
-    menuGroup: ClinicoPath Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Parsnip Survival Model Wrappers
     ribbon: analyses
@@ -1553,7 +1553,7 @@ analyses:
   - title: Forest Plot Visualization
     name: jforestmodel
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Statistical Models
     menuTitle: Forest Plot Visualization
     ribbon: analyses
@@ -1567,7 +1567,7 @@ analyses:
   - title: Predictive Power Score Analysis
     name: jpps
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Correlation & Association
     menuTitle: Predictive Power Score Analysis
     ribbon: analyses
@@ -1582,7 +1582,7 @@ analyses:
   - title: Forest Plot Visualization
     name: jforester
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotD
     menuSubgroup: Statistical Models
     menuTitle: Forest Plot Visualization
     ribbon: analyses
@@ -1597,7 +1597,7 @@ analyses:
   - title: Summary Statistics with summarytools
     name: jsummarytools
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Summary Statistics with summarytools
     menuSubgroup: ClinicoPath Descriptives
     description: >

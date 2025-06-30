@@ -20,7 +20,6 @@ options:
           R: >
             The data as a data frame.
 
-
     - name: vars
       title: Variables
       type: Variables
@@ -32,23 +31,27 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
 
     - name: percvarLevel
       title: Level
       type: Level
       variable: (percvar)
+      allowNone: true
 
     - name: summaryvar
       title: Continuous Variable for Summaries
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
 
     - name: prunebelow
       title: Prune Below
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
 
     - name: pruneLevel1
       title: 'Level 1'
@@ -67,6 +70,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
 
     - name: followLevel1
       title: 'Level 1'
@@ -124,7 +128,6 @@ options:
       title: Legends
       type: Bool
       default: false
-
 
     - name: pattern
       title: Pattern Tree

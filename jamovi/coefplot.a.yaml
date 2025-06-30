@@ -1,7 +1,7 @@
 ---
 name: coefplot
 title: Coefficient Plots
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: 'Regression Coefficient Visualization'
 version: '0.0.3'

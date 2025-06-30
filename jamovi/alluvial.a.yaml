@@ -28,6 +28,7 @@ options:
     - name: condensationvar
       title: Condensation Variable
       type: Variable
+      default: NULL
       description:
           R: >
             The primary variable to be used for condensation.

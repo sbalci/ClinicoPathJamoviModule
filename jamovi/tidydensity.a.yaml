@@ -1,7 +1,7 @@
 ---
 name: tidydensity
 title: Statistical Distribution Generator
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: TidyDensity - Distribution Analysis & Simulation
 version: '0.0.3'
