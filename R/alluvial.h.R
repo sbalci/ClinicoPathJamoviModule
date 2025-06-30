@@ -27,7 +27,8 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 vars)
             private$..condensationvar <- jmvcore::OptionVariable$new(
                 "condensationvar",
-                condensationvar)
+                condensationvar,
+                default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -204,7 +205,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 alluvial <- function(
     data,
     vars,
-    condensationvar,
+    condensationvar = NULL,
     excl = FALSE,
     marg = FALSE,
     fill = "first_variable",

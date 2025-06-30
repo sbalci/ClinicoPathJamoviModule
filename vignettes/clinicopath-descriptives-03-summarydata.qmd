@@ -1,0 +1,56 @@
+---
+title: "Vignette: Descriptive Analysis of Continuous Variables in Clinical Data"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Summarizing Continuous Variables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r}
+# Create a sample data frame for a clinical cohort
+set.seed(123)
+n_patients <- 100
+brca_data <- data.frame(
+  AgeAtDiagnosis = as.integer(rnorm(n_patients, mean = 62, sd = 12)),
+  TumorSize_mm = rlnorm(n_patients, meanlog = 3, sdlog = 0.5), # Log-normal (skewed)
+  Ki67_Index = runif(n_patients, min = 5, max = 80)
+)
+
+head(brca_data)
+```
+
+
+```{r}
+# This code simulates how the jamovi module would be called in an R environment.
+# You would need the ClinicoPathDescriptives package installed.
+
+# Load the library
+library(ClinicoPath)
+
+# Run the summarydata analysis with distribution diagnostics enabled
+results <- summarydata(
+    data = brca_data,
+    vars = c("AgeAtDiagnosis", "TumorSize_mm", "Ki67_Index"),
+    date_vars = character(0),
+    grvar = NULL,
+    distr = TRUE
+)
+
+# The results are HTML outputs that render directly in jamovi.
+# In R, you would access them like this:
+results$text  # (for the text summary)
+results$text1 # (for the visual summary table)
+```
+
+

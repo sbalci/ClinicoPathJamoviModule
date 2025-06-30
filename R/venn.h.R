@@ -52,7 +52,8 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..var3true <- jmvcore::OptionLevel$new(
                 "var3true",
                 var3true,
@@ -64,7 +65,8 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..var4true <- jmvcore::OptionLevel$new(
                 "var4true",
                 var4true,
@@ -205,9 +207,9 @@ venn <- function(
     var1true,
     var2,
     var2true,
-    var3,
+    var3 = NULL,
     var3true,
-    var4,
+    var4 = NULL,
     var4true) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

@@ -1,0 +1,260 @@
+---
+title: "Use jsurvival in R"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{Use jsurvival in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+```{r data histopathology}
+data("histopathology")
+```
+
+```{r}
+#| glimpse histopathology
+
+dplyr::glimpse(histopathology)
+```
+
+
+```{r}
+ClinicoPath::survival(
+    data = histopathology,
+    elapsedtime = "OverallTime",
+    tint = TRUE,
+    dxdate = SurgeryDate,
+    fudate = LastFollowUpDate,
+    explanatory = LVI,
+    outcome = Outcome,
+    outcomeLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL,
+    timetypedata = "ymdhms",
+    sc = TRUE,
+    ce = TRUE,
+    ch = TRUE
+    )
+```
+
+
+
+
+```{r}
+overall_survival <-
+ClinicoPath::survival(
+    data = histopathology,
+    elapsedtime = "OverallTime",
+    tint = TRUE,
+    dxdate = SurgeryDate,
+    fudate = LastFollowUpDate,
+    explanatory = LVI,
+    outcome = Outcome,
+    outcomeLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL,
+    timetypedata = "ymdhms",
+    sc = TRUE,
+    ce = TRUE,
+    ch = TRUE
+    )
+```
+
+
+```{r}
+ls(overall_survival)
+```
+
+
+
+```{r}
+overall_survival$tCoxtext2
+```
+
+
+```{r}
+overall_survival$survTableSummary
+```
+
+
+```{r}
+overall_survival$survTable
+```
+
+
+
+```{r}
+overall_survival$subtitle
+```
+
+
+
+```{r}
+overall_survival$plot3
+```
+
+
+
+```{r}
+overall_survival$plot2
+```
+
+
+
+```{r}
+overall_survival$plot
+```
+
+
+
+```{r}
+overall_survival$medianTable
+```
+
+
+```{r}
+overall_survival$medianSummary
+```
+
+
+
+```{r}
+overall_survival$coxTable
+```
+
+
+
+```{r}
+overall_survival$coxTable$asDF
+```
+
+
+
+
+```{r}
+overall_survival$coxSummary
+```
+
+
+
+
+```{r}
+overall_survival$plot
+
+```
+
+
+```{r}
+# overall_survival$plot$saveAs("overall_survival.png")
+# 
+# overall_survival <- png::readPNG("overall_survival.png")
+# 
+# tiff::writeTIFF(what = overall_survival, where = "overall_survival.tiff", compression = "none")
+```
+ 
+ 
+
+
+
+```{r}
+# htmlTable::htmlTable(
+#   kableExtra::kable(
+#     overall_survival$coxTable$asDF
+#     ))
+
+
+```
+
+
+
+
+All functions
+
+histopathology
+	
+
+histopathology
+
+jsurvival-package _PACKAGE jsurvival
+	
+
+jsurvival: Analysis for jsurvivalological Research
+
+multisurvival()
+	
+
+Multivariable Survival Analysis
+
+multisurvivalClass
+	
+
+Multivariable Survival Analysis
+
+oddsratio()
+	
+
+Odds Ratio Table and Plot
+
+oddsratioClass
+	
+
+Odds Ratio Table and Plot
+
+singlearm()
+	
+
+Single Arm Survival
+
+singlearmClass
+	
+
+Single Arm Survival
+
+survival()
+	
+
+Survival Analysis
+
+survivalClass
+	
+
+Survival Analysis
+
+survivalcont()
+	
+
+Survival Analysis for Continuous Variable
+
+survivalcontClass
+	
+
+Survival Analysis for Continuous Explanatory Variable
+Contents
+
+    Reference
+
+

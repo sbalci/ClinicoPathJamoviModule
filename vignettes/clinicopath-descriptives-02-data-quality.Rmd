@@ -1,0 +1,194 @@
+---
+title: "Data Quality Assessment and Exploration"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data Quality Assessment and Exploration}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+Data quality assessment is fundamental to reliable clinical research. This vignette demonstrates essential data exploration and quality assessment techniques using ClinicoPathDescriptives.
+
+## Basic Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+
+# Load the dataset
+data(histopathology)
+
+# Initial data overview
+cat("Dataset Dimensions:", dim(histopathology), "\n")
+cat("Variables:", ncol(histopathology), "\n")
+cat("Observations:", nrow(histopathology), "\n\n")
+```
+
+## Phase 1: Completeness Assessment
+
+### Missing Data Analysis
+
+```{r}
+# Calculate missing data percentages
+missing_summary <- histopathology %>%
+  summarise_all(~sum(is.na(.))) %>%
+  pivot_longer(everything(), names_to = "Variable", values_to = "Missing_Count") %>%
+  mutate(
+    Missing_Percentage = round(Missing_Count / nrow(histopathology) * 100, 1),
+    Data_Quality = case_when(
+      Missing_Percentage == 0 ~ "Complete",
+      Missing_Percentage <= 5 ~ "Excellent", 
+      Missing_Percentage <= 10 ~ "Good",
+      Missing_Percentage <= 20 ~ "Acceptable",
+      TRUE ~ "Poor"
+    )
+  ) %>%
+  arrange(desc(Missing_Percentage))
+
+# Display missing data summary
+kable(missing_summary %>% filter(Missing_Count > 0),
+      caption = "Missing Data Summary",
+      col.names = c("Variable", "Missing Count", "Missing %", "Quality Rating"))
+```
+
+## Phase 2: Distribution Assessment
+
+### Continuous Variables Analysis
+
+```{r}
+# Analyze distributions of continuous variables
+continuous_vars <- c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+
+# Basic summary statistics
+summary(histopathology[continuous_vars])
+
+# Check for normality and distribution patterns
+cat("\nDistribution Assessment:\n")
+for(var in continuous_vars) {
+  if(var %in% names(histopathology)) {
+    cat(paste(var, "- Mean:", round(mean(histopathology[[var]], na.rm = TRUE), 2), 
+              "SD:", round(sd(histopathology[[var]], na.rm = TRUE), 2), "\n"))
+  }
+}
+```
+
+### Categorical Variables Analysis
+
+```{r}
+# Analyze categorical variable distributions
+categorical_vars <- c("Sex", "Grade", "TStage", "Group", "LVI", "PNI")
+
+# Basic frequency tables for categorical variables
+cat("Categorical Variables Distribution:\n\n")
+for(var in categorical_vars) {
+  if(var %in% names(histopathology)) {
+    cat(paste("==", var, "==\n"))
+    print(table(histopathology[[var]], useNA = "ifany"))
+    cat("\n")
+  }
+}
+```
+
+## Phase 3: Quality Assessment with ClinicoPath Functions
+
+### Cross-tabulation Analysis
+
+```{r}
+# Example of proper crosstable usage
+crosstable(
+  data = histopathology,
+  vars = c("Grade", "TStage"),
+  group = "Group"
+)
+```
+
+### Data Summary
+
+```{r}
+# Example of proper summarydata usage
+summarydata(
+  data = histopathology,
+  vars = c("Age", "OverallTime"),
+  date_vars = character(0),
+  grvar = "Group"
+)
+```
+
+### Categorical Reporting
+
+```{r}
+# Example of proper reportcat usage
+reportcat(
+  data = histopathology,
+  vars = c("Sex", "Grade", "LVI", "PNI")
+)
+```
+
+## Phase 4: Advanced Quality Assessment
+
+### Benford's Law Analysis
+
+```{r}
+# Fraud detection using Benford's law
+benford(
+  data = histopathology,
+  var = "MeasurementA"
+)
+```
+
+### Agreement Analysis
+
+```{r}
+# Example agreement analysis (if rater variables exist)
+# Note: This requires specific rater variables in the dataset
+# agreement(
+#   data = histopathology,
+#   vars = c("Rater1", "Rater2")
+# )
+
+cat("Agreement analysis available - see agreement vignette for detailed examples")
+```
+
+## Best Practices Summary
+
+### Data Quality Checklist
+
+1. **Completeness**: Check for missing data patterns
+2. **Consistency**: Verify logical relationships between variables
+3. **Accuracy**: Assess distribution normality and outliers
+4. **Validity**: Confirm data formats and ranges
+5. **Reliability**: Test inter-rater agreement when applicable
+
+### Quality Thresholds
+
+- **Missing Data**: < 5% excellent, 5-10% good, 10-20% acceptable
+- **Agreement**: κ > 0.8 excellent, 0.6-0.8 good, 0.4-0.6 moderate
+- **Benford Compliance**: Chi-square p > 0.05 suggests natural data
+
+## Conclusion
+
+Regular data quality assessment using these techniques ensures reliable and trustworthy clinical research results. For detailed function usage and advanced examples, consult the individual function vignettes.
+
+## Best Practices
+
+- Perform quality assessment before any statistical analysis
+- Document and investigate any quality issues found
+- Establish quality thresholds appropriate for your research context
+- Implement ongoing quality monitoring throughout data collection
+- Use multiple quality assessment methods for comprehensive evaluation

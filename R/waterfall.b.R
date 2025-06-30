@@ -900,23 +900,46 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         # Add confidence bands around median line
-        if (plotData$options$showCI) {
+        if (plotData$options$showCI && nrow(df) >= 10) {
+          ci <- t.test(df$response)$conf.int
+          med <- median(df$response, na.rm = TRUE)
           p <- p +
             ggplot2::geom_ribbon(
-              data = median_response,
-              aes(ymin = ci_lower, ymax = ci_upper),
-              alpha = 0.2
+              ggplot2::aes(
+                x = c(1, nrow(df)),
+                ymin = ci[1],
+                ymax = ci[2]
+              ),
+              alpha = 0.2,
+              fill = "gray",
+              inherit.aes = FALSE
             )
         }
 
-        # Add optional patient annotations
-        if (plotData$options$showPatientLabels) {
-          p <- p +
-            ggplot2::geom_text(
-              aes(label = ifelse(abs(response) > labelThreshold,
-                                 as.character(patientID), "")),
-              vjust = -0.5
-            )
+        # Add optional patient annotations (controlled by labelOutliers option)
+        if (plotData$options$labelOutliers) {
+          threshold <- plotData$options$minResponseForLabel
+          # Add patient ID labels for responses exceeding threshold
+          df$patient_label <- ifelse(
+            !is.na(df$response) & abs(df$response) > threshold,
+            as.character(df[[plotData$options$patientID]]),
+            ""
+          )
+          
+          if (any(df$patient_label != "")) {
+            p <- p +
+              ggplot2::geom_text(
+                data = df[df$patient_label != "",],
+                ggplot2::aes(
+                  x = factor(which(df$patient_label != "")),
+                  y = response,
+                  label = patient_label
+                ),
+                vjust = ifelse(df$response[df$patient_label != ""] >= 0, -0.5, 1.5),
+                size = 2.5,
+                angle = 45
+              )
+          }
         }
 
         # Finalize plot aesthetics
