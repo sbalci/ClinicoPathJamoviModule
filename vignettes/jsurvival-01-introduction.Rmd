@@ -1,0 +1,511 @@
+---
+title: "jSurvival 01: Introduction to Survival Analysis for Pathologists"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{jSurvival 01: Introduction to Survival Analysis for Pathologists}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+jsurvival provides comprehensive survival analysis tools specifically designed for clinical research and oncology studies. This module offers user-friendly interfaces for time-to-event analysis, from basic Kaplan-Meier curves to advanced competing risks and multivariate Cox regression models.
+
+**Learning Objectives:**
+
+- Master fundamental survival analysis concepts and methods
+- Learn Kaplan-Meier survival curve construction and interpretation
+- Apply Cox proportional hazards regression for multivariable analysis
+- Understand competing risks analysis for complex clinical scenarios
+- Implement molecular biomarker survival analysis workflows
+- Create publication-ready survival plots and tables
+
+## Module Overview
+
+jsurvival encompasses four main areas of survival analysis:
+
+### 1. **Basic Survival Analysis**
+- **Kaplan-Meier Curves**: Non-parametric survival estimation
+- **Log-rank Tests**: Compare survival between groups
+- **Median Survival**: Time-to-event summary statistics
+- **Confidence Intervals**: Uncertainty quantification for survival estimates
+
+### 2. **Regression Models**
+- **Cox Proportional Hazards**: Multivariable time-to-event modeling
+- **Stratified Cox Models**: Account for non-proportional hazards
+- **Time-dependent Covariates**: Dynamic risk factor modeling
+- **Model Diagnostics**: Assumption testing and validation
+
+### 3. **Advanced Methods**
+- **Competing Risks**: Multiple event types analysis
+- **Multistate Models**: Disease progression modeling
+- **Parametric Survival**: Weibull, exponential, and other distributions
+- **Frailty Models**: Unobserved heterogeneity modeling
+
+### 4. **Clinical Applications**
+- **Biomarker Analysis**: Molecular predictor evaluation
+- **Treatment Comparisons**: Therapeutic intervention assessment
+- **Prognostic Models**: Risk stratification tools
+- **Real-World Evidence**: Population-based survival studies
+
+```{r load-packages}
+library(ClinicoPath)
+library(survival)
+library(dplyr)
+```
+
+# Getting Started
+
+## Sample Data Overview
+
+```{r sample-data}
+# Load molecular pathology survival data
+data(ihc_molecular_comprehensive)
+
+# Survival data structure
+cat("Survival dataset dimensions:", nrow(ihc_molecular_comprehensive), "×", ncol(ihc_molecular_comprehensive), "\n")
+
+# Key survival variables
+survival_vars <- c("Overall_Survival_Months", "Death_Event", "PFS_Months", "Progression_Event")
+cat("Survival variables:", paste(survival_vars, collapse = ", "), "\n")
+
+# Molecular biomarkers for stratification
+biomarker_vars <- c("EGFR_Mutation", "MSI_Status", "HER2_IHC", "PD_L1_TPS")
+cat("Biomarker variables:", paste(biomarker_vars, collapse = ", "), "\n")
+
+# Basic survival summary
+survival_summary <- ihc_molecular_comprehensive %>%
+  summarise(
+    n = n(),
+    median_os = median(Overall_Survival_Months),
+    death_rate = round(mean(Death_Event) * 100, 1),
+    median_pfs = median(PFS_Months),
+    progression_rate = round(mean(Progression_Event) * 100, 1)
+  )
+
+cat("\nSurvival Summary:\n")
+cat("Patients:", survival_summary$n, "\n")
+cat("Median OS:", survival_summary$median_os, "months\n")
+cat("Death rate:", survival_summary$death_rate, "%\n")
+cat("Median PFS:", survival_summary$median_pfs, "months\n")
+cat("Progression rate:", survival_summary$progression_rate, "%\n")
+```
+
+# Core Survival Analysis
+
+## 1. Kaplan-Meier Survival Analysis
+
+Foundation of survival analysis for time-to-event data.
+
+```{r kaplan-meier}
+# Kaplan-Meier Analysis Example
+# In jamovi: jsurvival > Survival Analysis
+
+cat("Kaplan-Meier Survival Analysis\n")
+cat("==============================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  library(survival)
+  
+  # Create survival object
+  surv_obj <- Surv(ihc_molecular_comprehensive$Overall_Survival_Months,
+                   ihc_molecular_comprehensive$Death_Event)
+  
+  # Overall survival curve
+  km_overall <- survfit(surv_obj ~ 1, data = ihc_molecular_comprehensive)
+  
+  cat("Overall Survival Analysis:\n")
+  print(summary(km_overall, times = c(12, 24, 36, 60))$table)
+  
+  # Survival by EGFR mutation status
+  km_egfr <- survfit(surv_obj ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  
+  cat("\nSurvival by EGFR Status:\n")
+  egfr_summary <- summary(km_egfr)$table
+  print(egfr_summary)
+  
+  # Log-rank test
+  logrank_egfr <- survdiff(surv_obj ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  p_value <- 1 - pchisq(logrank_egfr$chisq, 1)
+  
+  cat("\nLog-rank test p-value:", round(p_value, 4), "\n")
+  
+  if(p_value < 0.05) {
+    cat("Conclusion: Significant difference in survival by EGFR status\n")
+  } else {
+    cat("Conclusion: No significant difference in survival by EGFR status\n")
+  }
+}
+```
+
+## 2. Cox Proportional Hazards Regression
+
+Multivariable analysis accounting for multiple prognostic factors.
+
+```{r cox-regression}
+# Cox Regression Analysis Example
+# In jamovi: jsurvival > Cox Diagnostics
+
+cat("\nCox Proportional Hazards Regression\n")
+cat("===================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  # Multivariable Cox model
+  cox_model <- coxph(Surv(Overall_Survival_Months, Death_Event) ~ 
+                     EGFR_Mutation + MSI_Status + Age + Grade + Tumor_Mutational_Burden,
+                     data = ihc_molecular_comprehensive)
+  
+  cat("Cox Regression Results:\n")
+  cox_summary <- summary(cox_model)
+  print(cox_summary$coefficients[, c("coef", "exp(coef)", "Pr(>|z|)")])
+  
+  # Model performance
+  cat("\nModel Performance:\n")
+  cat("Concordance:", round(cox_summary$concordance[1], 3), "\n")
+  cat("R-squared:", round(cox_summary$rsq[1], 3), "\n")
+  cat("Likelihood ratio test p-value:", round(cox_summary$logtest[3], 4), "\n")
+  
+  # Hazard ratios with confidence intervals
+  cat("\nHazard Ratios (95% CI):\n")
+  hr_ci <- exp(confint(cox_model))
+  hr_estimates <- exp(cox_model$coefficients)
+  
+  for(i in 1:length(hr_estimates)) {
+    var_name <- names(hr_estimates)[i]
+    hr <- round(hr_estimates[i], 2)
+    ci_lower <- round(hr_ci[i, 1], 2)
+    ci_upper <- round(hr_ci[i, 2], 2)
+    p_val <- round(cox_summary$coefficients[i, "Pr(>|z|)"], 3)
+    
+    cat(paste0(var_name, ": HR = ", hr, " (", ci_lower, "-", ci_upper, "), p = ", p_val, "\n"))
+  }
+}
+```
+
+## 3. Competing Risks Analysis
+
+Handle situations where multiple types of events can occur.
+
+```{r competing-risks}
+# Competing Risks Analysis Example
+# In jamovi: jsurvival > Competing Survival
+
+cat("\nCompeting Risks Analysis\n")
+cat("=======================\n\n")
+
+# Create competing events data
+# Death from disease vs death from other causes
+competing_data <- ihc_molecular_comprehensive %>%
+  mutate(
+    # Simulate competing events
+    death_cause = case_when(
+      Death_Event == 0 ~ "Alive",
+      Death_Event == 1 & Grade == 3 ~ "Disease",
+      Death_Event == 1 & Age > 75 ~ "Other",
+      Death_Event == 1 ~ sample(c("Disease", "Other"), 1, prob = c(0.7, 0.3)),
+      TRUE ~ "Alive"
+    ),
+    
+    # Competing event indicator
+    event_type = case_when(
+      death_cause == "Disease" ~ 1,
+      death_cause == "Other" ~ 2,
+      TRUE ~ 0
+    )
+  )
+
+# Competing risks summary
+competing_summary <- competing_data %>%
+  group_by(death_cause) %>%
+  summarise(
+    n = n(),
+    percentage = round(n() / nrow(competing_data) * 100, 1),
+    median_time = median(Overall_Survival_Months),
+    .groups = 'drop'
+  )
+
+cat("Competing Events Summary:\n")
+print(competing_summary)
+
+# Event rates by biomarker status
+biomarker_events <- competing_data %>%
+  group_by(EGFR_Mutation, death_cause) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  group_by(EGFR_Mutation) %>%
+  mutate(percentage = round(n / sum(n) * 100, 1))
+
+cat("\nEvent Rates by EGFR Status:\n")
+print(biomarker_events)
+
+# Clinical interpretation
+disease_death_rate <- mean(competing_data$death_cause == "Disease") * 100
+cat("\nClinical Interpretation:\n")
+cat("Disease-specific death rate:", round(disease_death_rate, 1), "%\n")
+
+if(disease_death_rate > 50) {
+  cat("Conclusion: Disease is the predominant cause of death\n")
+} else {
+  cat("Conclusion: Competing causes of death are significant\n")
+}
+```
+
+# Biomarker Survival Analysis
+
+## Molecular Stratification
+
+Evaluate prognostic impact of molecular biomarkers.
+
+```{r molecular-stratification}
+cat("Molecular Biomarker Survival Analysis\n")
+cat("====================================\n\n")
+
+# Multiple biomarker analysis
+biomarkers <- c("EGFR_Mutation", "MSI_Status", "HER2_IHC")
+
+for(biomarker in biomarkers) {
+  cat(paste0("Survival Analysis for ", biomarker, ":\n"))
+  cat(paste0(rep("-", nchar(biomarker) + 25), collapse = ""), "\n")
+  
+  # Create survival object
+  surv_obj <- Surv(ihc_molecular_comprehensive$Overall_Survival_Months,
+                   ihc_molecular_comprehensive$Death_Event)
+  
+  # Survival by biomarker
+  formula_str <- paste("surv_obj ~", biomarker)
+  km_biomarker <- survfit(as.formula(formula_str), data = ihc_molecular_comprehensive)
+  
+  # Summary statistics
+  biomarker_summary <- summary(km_biomarker)$table
+  print(biomarker_summary)
+  
+  # Log-rank test
+  logrank_test <- survdiff(as.formula(formula_str), data = ihc_molecular_comprehensive)
+  p_value <- 1 - pchisq(logrank_test$chisq, length(unique(ihc_molecular_comprehensive[[biomarker]])) - 1)
+  
+  cat("Log-rank test p-value:", round(p_value, 4), "\n")
+  
+  if(p_value < 0.05) {
+    cat("Result: Significant prognostic biomarker\n")
+  } else {
+    cat("Result: Not a significant prognostic biomarker\n")
+  }
+  cat("\n")
+}
+```
+
+## Continuous Biomarker Analysis
+
+Evaluate continuous biomarkers like PD-L1 expression or tumor mutational burden.
+
+```{r continuous-biomarkers}
+cat("Continuous Biomarker Analysis\n")
+cat("=============================\n\n")
+
+# PD-L1 TPS analysis
+pdl1_quartiles <- quantile(ihc_molecular_comprehensive$PD_L1_TPS, 
+                          probs = c(0, 0.25, 0.5, 0.75, 1.0))
+
+ihc_with_quartiles <- ihc_molecular_comprehensive %>%
+  mutate(
+    PD_L1_Quartile = cut(PD_L1_TPS, 
+                        breaks = pdl1_quartiles,
+                        labels = c("Q1 (Low)", "Q2", "Q3", "Q4 (High)"),
+                        include.lowest = TRUE),
+    
+    PD_L1_Clinical = case_when(
+      PD_L1_TPS < 1 ~ "Negative (<1%)",
+      PD_L1_TPS < 50 ~ "Low Positive (1-49%)",
+      TRUE ~ "High Positive (≥50%)"
+    )
+  )
+
+cat("PD-L1 TPS Distribution:\n")
+pdl1_dist <- table(ihc_with_quartiles$PD_L1_Clinical)
+print(pdl1_dist)
+
+# Survival by PD-L1 clinical categories
+if(requireNamespace("survival", quietly = TRUE)) {
+  surv_obj <- Surv(ihc_with_quartiles$Overall_Survival_Months,
+                   ihc_with_quartiles$Death_Event)
+  
+  km_pdl1 <- survfit(surv_obj ~ PD_L1_Clinical, data = ihc_with_quartiles)
+  
+  cat("\nSurvival by PD-L1 Expression Level:\n")
+  pdl1_summary <- summary(km_pdl1)$table
+  print(pdl1_summary)
+  
+  # Test for trend
+  logrank_pdl1 <- survdiff(surv_obj ~ PD_L1_Clinical, data = ihc_with_quartiles)
+  p_value_pdl1 <- 1 - pchisq(logrank_pdl1$chisq, 2)
+  
+  cat("Log-rank test p-value:", round(p_value_pdl1, 4), "\n")
+  
+  # Tumor mutational burden analysis
+  tmb_median <- median(ihc_molecular_comprehensive$Tumor_Mutational_Burden)
+  tmb_high <- ihc_molecular_comprehensive$Tumor_Mutational_Burden >= tmb_median
+  
+  cat("\nTumor Mutational Burden Analysis:\n")
+  cat("Median TMB:", tmb_median, "mutations/Mb\n")
+  cat("TMB-High cases:", sum(tmb_high), "(", round(mean(tmb_high) * 100, 1), "%)\n")
+  
+  # TMB survival analysis
+  km_tmb <- survfit(surv_obj ~ tmb_high, data = ihc_molecular_comprehensive)
+  tmb_summary <- summary(km_tmb)$table
+  
+  cat("Survival by TMB Status:\n")
+  print(tmb_summary)
+}
+```
+
+# Advanced Applications
+
+## Multivariable Prognostic Models
+
+Develop comprehensive prognostic models incorporating multiple biomarkers.
+
+```{r prognostic-models}
+cat("Multivariable Prognostic Model Development\n")
+cat("=========================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  # Comprehensive prognostic model
+  prog_model <- coxph(Surv(Overall_Survival_Months, Death_Event) ~ 
+                      Age + Grade + 
+                      EGFR_Mutation + MSI_Status + 
+                      PD_L1_TPS + Tumor_Mutational_Burden,
+                      data = ihc_molecular_comprehensive)
+  
+  # Model summary
+  prog_summary <- summary(prog_model)
+  
+  cat("Comprehensive Prognostic Model:\n")
+  print(prog_summary$coefficients[, c("coef", "exp(coef)", "Pr(>|z|)")])
+  
+  # Model performance metrics
+  cat("\nModel Performance:\n")
+  cat("Concordance index:", round(prog_summary$concordance[1], 3), "\n")
+  cat("Standard error:", round(prog_summary$concordance[2], 3), "\n")
+  
+  # Risk score calculation
+  risk_scores <- predict(prog_model, type = "risk")
+  risk_tertiles <- cut(risk_scores, 
+                      breaks = quantile(risk_scores, probs = c(0, 1/3, 2/3, 1)),
+                      labels = c("Low Risk", "Intermediate Risk", "High Risk"),
+                      include.lowest = TRUE)
+  
+  # Risk group validation
+  risk_validation <- ihc_molecular_comprehensive %>%
+    mutate(Risk_Group = risk_tertiles) %>%
+    group_by(Risk_Group) %>%
+    summarise(
+      n = n(),
+      events = sum(Death_Event),
+      event_rate = round(mean(Death_Event) * 100, 1),
+      median_survival = median(Overall_Survival_Months),
+      .groups = 'drop'
+    )
+  
+  cat("\nRisk Group Validation:\n")
+  print(risk_validation)
+  
+  # Test risk stratification
+  surv_risk <- Surv(ihc_molecular_comprehensive$Overall_Survival_Months,
+                    ihc_molecular_comprehensive$Death_Event)
+  
+  km_risk <- survfit(surv_risk ~ risk_tertiles)
+  logrank_risk <- survdiff(surv_risk ~ risk_tertiles)
+  p_value_risk <- 1 - pchisq(logrank_risk$chisq, 2)
+  
+  cat("Risk stratification p-value:", round(p_value_risk, 4), "\n")
+  
+  if(p_value_risk < 0.001) {
+    cat("Conclusion: Excellent risk stratification achieved\n")
+  } else if(p_value_risk < 0.05) {
+    cat("Conclusion: Significant risk stratification achieved\n")
+  } else {
+    cat("Conclusion: Risk stratification needs improvement\n")
+  }
+}
+```
+
+# Integration with Other Modules
+
+jsurvival works seamlessly with other ClinicoPath modules:
+
+## Connection to ClinicoPathDescriptives
+- Baseline characteristics inform survival model covariates
+- Quality metrics validate survival endpoint reliability
+- Descriptive statistics support survival study design
+
+## Connection to meddecide
+- Survival analysis provides time-to-event data for decision trees
+- Hazard ratios inform Markov model transition probabilities
+- Prognostic models support treatment decision algorithms
+
+## Connection to jjstatsplot
+- Survival curves and forest plots enhance presentation
+- Statistical visualization supports survival analysis interpretation
+- Publication-ready graphics for survival studies
+
+# Best Practices
+
+## Study Design Considerations
+
+1. **Follow-up Time**: Adequate duration to observe events of interest
+2. **Censoring**: Understand and appropriately handle censored observations
+3. **Sample Size**: Power calculations for survival studies
+4. **Endpoint Definition**: Clear, objective, and clinically meaningful endpoints
+5. **Covariate Collection**: Comprehensive baseline and time-dependent variables
+
+## Statistical Analysis Guidelines
+
+1. **Proportional Hazards**: Test and address violations when necessary
+2. **Model Building**: Use principled variable selection approaches
+3. **Validation**: Internal and external validation of prognostic models
+4. **Missing Data**: Appropriate handling of incomplete observations
+5. **Multiple Testing**: Adjust for multiple comparisons when appropriate
+
+## Reporting Standards
+
+1. **STROBE Guidelines**: Follow reporting guidelines for observational studies
+2. **Complete Reporting**: Include all relevant model diagnostics
+3. **Clinical Interpretation**: Translate statistical findings to clinical relevance
+4. **Limitations**: Discuss study limitations and potential biases
+5. **Reproducibility**: Provide sufficient detail for study replication
+
+# Conclusion
+
+jsurvival provides comprehensive tools for modern survival analysis in clinical research, from basic Kaplan-Meier curves to sophisticated prognostic modeling. The integration with molecular biomarker data and other ClinicoPath modules makes it essential for contemporary oncology research and precision medicine applications.
+
+## Next Steps
+
+To explore specific survival analysis techniques:
+
+- **Advanced Methods**: See detailed survival analysis vignettes
+- **Biomarker Analysis**: Explore molecular prognostic factor evaluation
+- **Model Development**: Learn comprehensive prognostic model building
+- **Clinical Applications**: Study real-world survival analysis examples
+
+---
+
+*This introduction provides the foundation for using jsurvival in clinical research. Explore the detailed vignettes for specific techniques and advanced applications.*

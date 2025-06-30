@@ -1,0 +1,244 @@
+---
+title: "Comprehensive IHC Analysis Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comprehensive IHC Analysis Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+The `ihcstats` function in ClinicoPath provides comprehensive immunohistochemical (IHC) expression analysis implementing methodologies from landmark research papers:
+
+1. **Matsuoka et al. (2011)** - Ward's hierarchical clustering for colorectal cancer prognosis
+2. **Carvalho et al. (2011)** - Iterative marker selection for renal oncocytoma diagnosis  
+3. **Olsen et al. (2006)** - Differential diagnosis clustering for sarcomas
+4. **Sterlacci et al. (2019)** - TIL signature analysis for NSCLC
+
+## Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+# Load available dataset
+data("ihc_test_data")
+
+# Check available variables
+cat("Available variables in ihc_test_data:\n")
+print(names(ihc_test_data))
+```
+
+## Core Functionality Overview
+
+### Clustering Methods Available
+
+```{r clustering_overview}
+cat("IHC Clustering Methods:\n")
+cat("1. Hierarchical clustering with multiple distance metrics\n")
+cat("2. PAM (Partitioning Around Medoids) clustering\n")
+cat("3. K-means clustering\n")
+cat("4. Fuzzy clustering\n\n")
+
+cat("Distance Metrics:\n")
+cat("- Gower: Mixed data types (categorical + continuous)\n")
+cat("- Jaccard: Binary/categorical data\n")
+cat("- Euclidean: Continuous data\n")
+cat("- Manhattan: Robust to outliers\n\n")
+```
+
+## Methodology Implementation
+
+### Matsuoka 2011 Methodology
+
+```{r matsuoka_methodology}
+cat("Matsuoka 2011 Features:\n")
+cat("- Ward's hierarchical clustering (ward.D2)\n")
+cat("- 3-tier scoring system (0, 1, 2)\n")
+cat("- Prognostic clustering with survival analysis\n")
+cat("- Multi-region tumor analysis (central vs invasive)\n")
+cat("- Cox regression for prognostic groups\n\n")
+
+cat("Target: Colorectal cancer prognosis\n")
+cat("Key markers: p53, Ki67, VEGF, COX2\n")
+```
+
+### Carvalho 2011 Methodology
+
+```{r carvalho_methodology}
+cat("Carvalho 2011 Features:\n")
+cat("- Iterative marker selection algorithm\n")
+cat("- Binary scoring system for specific markers\n")
+cat("- Renal tumor differential diagnosis\n")
+cat("- Automatic marker importance ranking\n")
+cat("- Diagnostic accuracy optimization\n\n")
+
+cat("Target: Renal oncocytoma vs chromophobe RCC\n")
+cat("Key markers: CK7, CD117, E-cadherin, Claudin-7\n")
+```
+
+### Olsen 2006 Methodology
+
+```{r olsen_methodology}
+cat("Olsen 2006 Features:\n")
+cat("- Hierarchical clustering for sarcoma classification\n")
+cat("- Standard IHC scoring scale integration\n")
+cat("- Differential diagnosis clustering\n")
+cat("- Subtype-specific marker panels\n")
+cat("- Morphology correlation analysis\n\n")
+
+cat("Target: Sarcoma differential diagnosis\n")
+cat("Key markers: Vimentin, SMA, Desmin, S100, CD34\n")
+```
+
+### Sterlacci 2019 Methodology
+
+```{r sterlacci_methodology}
+cat("Sterlacci 2019 Features:\n")
+cat("- TIL (Tumor-Infiltrating Lymphocytes) signature analysis\n")
+cat("- CD3, CD8, CD20, PD-L1 integration\n")
+cat("- Immune microenvironment clustering\n")
+cat("- NSCLC histotype correlation\n")
+cat("- Prognostic immune signatures\n\n")
+
+cat("Target: NSCLC immune microenvironment\n")
+cat("Key markers: CD3, CD8, CD20, PD-L1, FOXP3\n")
+```
+
+## Advanced Features
+
+### H-Score Calculation
+
+```{r hscore_features}
+cat("H-Score Calculation:\n")
+cat("- Automated H-Score computation from IHC data\n")
+cat("- Integration with clustering results\n")
+cat("- Intensity and percentage scoring\n")
+cat("- Quality control and validation metrics\n\n")
+```
+
+### Prognostic Analysis
+
+```{r prognostic_features}
+cat("Prognostic Analysis Features:\n")
+cat("- Survival time and event integration\n")
+cat("- Cox proportional hazards modeling\n")
+cat("- Kaplan-Meier survival curves\n")
+cat("- Log-rank test for cluster comparison\n")
+cat("- Hazard ratio calculation with confidence intervals\n\n")
+```
+
+### Visualization Options
+
+```{r visualization_features}
+cat("Visualization Components:\n")
+cat("- Hierarchical clustering dendrograms\n")
+cat("- IHC expression heatmaps\n")
+cat("- Cluster assignment plots\n")
+cat("- Survival curves by cluster\n")
+cat("- Marker importance rankings\n")
+cat("- Correlation matrices\n\n")
+```
+
+## Clinical Applications
+
+### Diagnostic Workflows
+
+```{r diagnostic_workflows}
+cat("Diagnostic Applications:\n")
+cat("1. Sarcoma subtype classification\n")
+cat("2. Renal tumor differential diagnosis\n")
+cat("3. Colorectal cancer prognostic grouping\n")
+cat("4. NSCLC immune profiling\n")
+cat("5. Custom marker panel optimization\n\n")
+```
+
+### Research Applications
+
+```{r research_applications}
+cat("Research Applications:\n")
+cat("1. Biomarker discovery and validation\n")
+cat("2. Tumor heterogeneity analysis\n")
+cat("3. Immune microenvironment characterization\n")
+cat("4. Multi-region tumor analysis\n")
+cat("5. Prognostic signature development\n\n")
+```
+
+## Data Requirements
+
+### Input Data Format
+
+```{r data_requirements}
+cat("Required Data Structure:\n")
+cat("- Patient/case identifier column\n")
+cat("- IHC marker expression variables\n")
+cat("- Optional: Survival time and event variables\n")
+cat("- Optional: Clinical and pathological variables\n")
+cat("- Optional: Multi-region scoring variables\n\n")
+
+cat("Scoring Systems Supported:\n")
+cat("- Binary (0/1, negative/positive)\n")
+cat("- 3-tier (0/1/2, negative/weak/strong)\n")
+cat("- 4-tier (0/1/2/3)\n")
+cat("- H-Score (0-300)\n")
+cat("- Percentage (0-100)\n")
+```
+
+## Implementation in jamovi
+
+All IHC analysis functions are available in jamovi:
+
+1. **IHC Stats**: `Exploration > Specialized Analyses > IHC Statistical Analysis`
+2. **Data Input**: Direct import of IHC scoring spreadsheets
+3. **Interactive Parameters**: Point-and-click parameter selection
+4. **Visual Output**: Integrated plots and tables in jamovi results
+
+## Best Practices
+
+### Data Preparation
+
+1. **Standardize Scoring**: Use consistent scoring systems across observers
+2. **Quality Control**: Implement inter-observer agreement assessment
+3. **Missing Data**: Handle missing scores appropriately
+4. **Validation**: Cross-validate results with independent datasets
+
+### Analysis Strategy
+
+1. **Method Selection**: Choose methodology based on clinical question
+2. **Parameter Optimization**: Test different clustering parameters
+3. **Validation**: Validate clusters with clinical outcomes
+4. **Interpretation**: Consider biological plausibility of results
+
+### Reporting Guidelines
+
+1. **Methodology**: Report complete analysis methodology
+2. **Parameters**: Document all analysis parameters used
+3. **Validation**: Include validation metrics and statistics
+4. **Clinical Relevance**: Discuss clinical implications of findings
+
+## Further Resources
+
+- **Individual Function Vignettes**: For detailed parameter usage
+- **Clinical Workflow Guide**: For integrated analysis pipelines
+- **Getting Started Guide**: For basic ClinicoPath functionality
+- **Visualization Gallery**: For advanced plot customization
+
+## Conclusion
+
+The `ihcstats` function provides a comprehensive platform for IHC analysis implementing proven methodologies from the literature. The integration with jamovi makes these advanced techniques accessible to clinical researchers and pathologists without programming experience.
+
+For specific use cases and detailed examples, consult the individual function vignettes and clinical workflow guides.

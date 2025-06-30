@@ -1,0 +1,57 @@
+---
+title: "Vignette: Visualizing Data Flows with Alluvial Diagrams"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Creating Alluvial Diagrams}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r}
+# Create a sample data frame
+set.seed(42) # for reproducibility
+patient_flow <- data.frame(
+  Stage = sample(c("Stage I", "Stage II", "Stage III"), 100, replace = TRUE),
+  Treatment = sample(c("Chemo", "Radiation", "Combined"), 100, replace = TRUE),
+  Response = sample(c("Complete", "Partial", "None"), 100, replace = TRUE, 
+                    prob = c(0.4, 0.4, 0.2))
+)
+
+# View the first few rows
+head(patient_flow)
+```
+
+
+
+```{r}
+# This code simulates how the jamovi module would be called in an R environment.
+# You would need the ClinicoPathDescriptives package installed.
+
+# Load the library
+library(ClinicoPath)
+
+# Run the alluvial analysis
+results <- alluvial(
+    data = patient_flow,
+    vars = c("Stage", "Treatment", "Response"),
+    condensationvar = NULL, # No condensation variable
+    fill = "first_variable", # Color the flows based on initial cancer stage
+    marg = TRUE # Include marginal histograms
+)
+
+# To view the plot:
+print(results$plot)
+```
+
+
+

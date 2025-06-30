@@ -1,0 +1,71 @@
+---
+title: "Vignette: Creating Waterfall Plots to Show Patient Response to Therapy"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Creating Waterfall Plots to Show Patient Response to Therapy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r}
+# For vignette demonstration, ensure 'treatmentResponse' is available.
+# This data is part of the ClinicoPathDescriptives package.
+data(treatmentResponse, package = "ClinicoPathDescriptives")
+if (!exists("treatmentResponse")) {
+  set.seed(123)
+  
+  # Step 1: Create the data frame with the first two columns.
+  treatmentResponse <- data.frame(
+    patientID = 1:50,
+    change = round(c(rnorm(25, -40, 20), rnorm(25, 20, 25)))
+  )
+  
+  # Step 2: Now that 'treatmentResponse$change' exists, create the responseCategory column.
+  treatmentResponse$responseCategory <- factor(
+    ifelse(treatmentResponse$change <= -30, "Partial Response",
+      ifelse(treatmentResponse$change >= 20, "Progressive Disease", "Stable Disease")
+    )
+  )
+}
+head(treatmentResponse)
+```
+
+
+```{r}
+library(ClinicoPath)
+# data(treatmentResponse, package = "ClinicoPathDescriptives") # if needed
+
+results_waterfall <- ClinicoPath::waterfall(
+  data = treatmentResponse,
+  patientID = "patientID",
+  responseVar = "change",
+  timeVar = NULL, # Not needed for percentage data
+  showThresholds = TRUE, # Show +20% and -30% RECIST thresholds
+  showWaterfallPlot = TRUE
+)
+
+# The waterfall function returns a jamovi results object
+# The plot is rendered automatically when showWaterfallPlot = TRUE
+```
+
+
+```{r}
+# Display the results structure
+if (!is.null(results_waterfall)) {
+  print(results_waterfall)
+} else {
+  cat("Results object is NULL - check function execution above\n")
+}
+```
+
+

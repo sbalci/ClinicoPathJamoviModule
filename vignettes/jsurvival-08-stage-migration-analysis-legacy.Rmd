@@ -1,0 +1,431 @@
+---
+title: "Stage Migration Analysis: Understanding the Will Rogers Phenomenon"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Stage Migration Analysis: Understanding the Will Rogers Phenomenon}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The Will Rogers phenomenon is a statistical paradox that occurs in medicine when patients are reclassified between disease stages due to improvements in diagnostic technology or changes in staging criteria. This phenomenon gets its name from a humorous quote attributed to American humorist Will Rogers: "When the Okies left Oklahoma and moved to California, they raised the average intelligence level in both states."
+
+In pathology and oncology, this phenomenon is particularly relevant when analyzing the impact of staging system revisions (such as TNM edition updates) on survival outcomes and treatment effectiveness.
+
+## What is the Will Rogers Phenomenon?
+
+The Will Rogers phenomenon describes a situation where:
+
+1. **Stage Migration Occurs**: Patients are reclassified into different disease stages due to improved diagnostic methods or revised staging criteria.
+
+2. **Apparent Improvement**: This reclassification leads to apparent improvements in stage-specific outcomes without any actual improvement in individual patient outcomes.
+
+3. **Statistical Paradox**: Both stages appear to have improved survival rates, but overall survival remains unchanged.
+
+### Clinical Example
+
+Consider lung cancer staging between TNM 7th and 8th editions:
+
+- **Original System (7th Edition)**: A patient with a 3.5cm tumor and 2 positive lymph nodes is classified as Stage II
+- **New System (8th Edition)**: The same patient is now classified as Stage IIB due to refined criteria
+
+If this patient has better survival than the average Stage II patient but worse survival than the average Stage IIB patient:
+
+- Stage II survival improves (worst patients removed)
+- Stage IIB survival improves (relatively good patients added)
+- The patient's actual prognosis hasn't changed
+
+## The Stage Migration Analysis Module
+
+The Stage Migration Analysis module in ClinicoPath helps you:
+
+1. **Quantify stage migration** between different staging systems
+2. **Compare prognostic performance** of old vs. new staging systems
+3. **Visualize migration patterns** using flow diagrams
+4. **Detect the Will Rogers phenomenon** through statistical analysis
+5. **Evaluate staging system improvements** objectively
+
+# Getting Started
+
+## Required Data
+
+To perform stage migration analysis, you need:
+
+1. **Patient identifiers** 
+2. **Original staging variable** (e.g., TNM 7th edition stages)
+3. **New staging variable** (e.g., TNM 8th edition stages)
+4. **Survival time** (in consistent units: months, years)
+5. **Event indicator** (death, progression, etc.)
+
+## Data Format
+
+Your data should look like this:
+
+| patient_id | old_stage | new_stage | survival_months | event | vital_status |
+|------------|-----------|-----------|-----------------|-------|--------------|
+| PT0001     | Stage_I   | Stage_IA  | 48.2           | 0     | Alive        |
+| PT0002     | Stage_II  | Stage_IIB | 23.7           | 1     | Deceased     |
+| PT0003     | Stage_III | Stage_IIIA| 15.3           | 1     | Deceased     |
+
+## Loading Your Data
+
+1. **Import your dataset** into jamovi (CSV, Excel, SPSS, etc.)
+2. **Ensure staging variables are factors** with appropriate level ordering
+3. **Check survival time is numeric** and in consistent units
+4. **Verify event variable** is either 0/1 (numeric) or Alive/Dead (factor)
+
+# Using the Stage Migration Analysis Module
+
+## Step 1: Access the Module
+
+1. Navigate to **Analyses** → **SurvivalD** → **ClinicoPath Survival**
+2. Select **Stage Migration Analysis**
+
+## Step 2: Variable Selection
+
+### Required Variables
+
+1. **Original Stage**: Select the variable representing the original staging system
+   - Must be a factor variable
+   - Example: `tnm_7th_edition`, `old_stage`
+
+2. **New Stage**: Select the variable representing the new staging system
+   - Must be a factor variable  
+   - Example: `tnm_8th_edition`, `new_stage`
+
+3. **Survival Time**: Select the time-to-event variable
+   - Must be numeric
+   - Should be in consistent units (months, years)
+   - Example: `survival_months`, `follow_up_time`
+
+4. **Event**: Select the event indicator variable
+   - Can be numeric (0/1) or factor (Alive/Dead)
+   - Example: `event`, `vital_status`
+
+5. **Event Level**: If using a factor event variable, specify which level indicates the event
+   - Example: "Deceased", "Dead", "Event"
+
+## Step 3: Configure Analysis Options
+
+### Plot Options
+
+1. **Show Migration Plot**: Enables alluvial/Sankey diagram showing patient flow between stages
+   - Recommended: **Enabled** for visual understanding
+
+2. **Survival Plot Type**: Controls how survival curves are displayed
+   - **Separate plots**: Shows full Kaplan-Meier plots for each staging system
+   - **Side by side**: Focuses on direct stage comparisons
+
+3. **Show Confidence Intervals**: Adds 95% confidence intervals to survival curves
+   - Recommended for formal presentations
+
+### Analysis Options
+
+1. **Analyze Will Rogers Phenomenon**: Performs detailed analysis of the phenomenon
+   - Recommended: **Enabled** for comprehensive analysis
+   - Compares survival within stages between migrated vs. non-migrated patients
+
+## Step 4: Interpret Results
+
+The analysis produces several key outputs:
+
+### Migration Summary Table
+
+**Key Metrics:**
+- **Total patients**: Overall sample size
+- **Unchanged stage**: Number of patients remaining in the same stage
+- **Stage migration (%)**: Percentage of patients who changed stages
+- **Upstaging (%)**: Percentage moved to higher stages
+- **Downstaging (%)**: Percentage moved to lower stages
+- **Chi-square**: Statistical test for association between staging systems
+
+**Interpretation:**
+- Migration rates >20% indicate substantial staging changes
+- Significant chi-square suggests non-random migration patterns
+- Balance of upstaging vs. downstaging reveals revision direction
+
+### Stage Distribution Comparison
+
+Shows how patient distribution changes between staging systems:
+
+**Columns:**
+- **Stage**: Individual stage categories
+- **Original Count/%)**: Distribution in original system
+- **New Count/(%)**: Distribution in new system  
+- **Change**: Percentage point change
+
+**Interpretation:**
+- Large changes indicate major revision impact
+- Shifts toward early/late stages reveal staging drift
+- Balanced changes suggest refinement rather than systematic bias
+
+### Stage Migration Matrix
+
+Cross-tabulation showing exact patient flow between stages:
+
+**Features:**
+- Rows: Original staging system
+- Columns: New staging system
+- Values: Patient counts and percentages
+
+**Interpretation:**
+- Diagonal elements: Patients remaining in equivalent stages
+- Off-diagonal elements: Migration patterns
+- High off-diagonal values indicate significant reclassification
+
+### Prognostic Performance Comparison
+
+Compares discriminative ability between staging systems:
+
+**Metrics:**
+- **C-index (Harrell's)**: Measures discriminative ability (0.5 = random, 1.0 = perfect)
+- **Log-rank test**: Tests for survival differences within each system
+- **AIC**: Model quality measure (lower is better)
+
+**Interpretation:**
+- C-index improvement >0.02 is clinically meaningful
+- Lower AIC in new system suggests better model fit
+- Stronger log-rank statistics indicate better stage separation
+
+### Will Rogers Phenomenon Analysis
+
+Identifies evidence of the phenomenon by comparing survival within stages:
+
+**Columns:**
+- **Stage**: Original stage being analyzed
+- **Unchanged N**: Patients remaining in same stage
+- **Unchanged Median**: Median survival for unchanged patients
+- **Migrated N**: Patients moving to different stages
+- **Migrated Median**: Median survival for migrated patients
+- **p-value**: Test comparing unchanged vs. migrated survival
+
+**Interpretation:**
+- Significant p-values indicate Will Rogers phenomenon
+- Different median survivals between groups confirm the effect
+- Multiple significant stages suggest systematic migration bias
+
+## Step 5: Visual Interpretation
+
+### Migration Flow Plot
+
+The alluvial/Sankey diagram visualizes patient flow:
+
+**Elements:**
+- **Left axis**: Original staging system
+- **Right axis**: New staging system
+- **Flow bands**: Patient migration pathways
+- **Band thickness**: Proportional to patient numbers
+
+**Interpretation:**
+- Thick diagonal flows indicate stage stability
+- Curved flows show migration patterns
+- Complex flow patterns suggest major revision impact
+
+### Survival Comparison Plots
+
+Kaplan-Meier curves for each staging system:
+
+**Features:**
+- **Separate plots**: Full survival curves for each system
+- **Side-by-side**: Direct comparison of equivalent stages
+- **Confidence intervals**: Statistical uncertainty bounds
+
+**Interpretation:**
+- Better curve separation indicates improved discrimination
+- Crossing curves suggest staging inconsistencies
+- Similar overall survival confirms unchanged patient outcomes
+
+### Concordance Index Plot
+
+Bar chart comparing discriminative performance:
+
+**Elements:**
+- **Original System**: C-index for original staging
+- **New System**: C-index for new staging  
+- **Improvement**: Absolute and percentage change
+
+**Interpretation:**
+- Higher bars indicate better discrimination
+- Positive improvement suggests staging enhancement
+- Magnitude reflects clinical significance
+
+# Clinical Applications
+
+## Use Case 1: TNM Staging Revision Impact
+
+**Scenario**: Evaluate impact of TNM 8th edition on lung cancer staging
+
+**Analysis Steps:**
+1. Load dataset with both TNM 7th and 8th edition stages
+2. Set "tnm_7th" as original stage, "tnm_8th" as new stage
+3. Use overall survival as endpoint
+4. Enable Will Rogers analysis
+
+**Expected Findings:**
+- Migration rate 25-40% for lung cancer
+- Improved C-index for 8th edition (typically +0.02 to +0.05)
+- Evidence of Will Rogers phenomenon in Stage II/III patients
+- Better survival separation in new system
+
+## Use Case 2: Institutional Staging Consistency
+
+**Scenario**: Compare staging between different time periods
+
+**Analysis Steps:**
+1. Create "era" variable (e.g., 2010-2015 vs. 2016-2020)
+2. Compare staging distributions across eras
+3. Assess for staging drift or improvement
+
+**Expected Findings:**
+- Temporal changes in stage distribution
+- Improved prognostic performance over time
+- Evidence of stage migration due to better imaging
+
+## Use Case 3: Pathology Subspecialty Analysis
+
+**Scenario**: Evaluate impact of subspecialist review on staging
+
+**Analysis Steps:**
+1. Compare initial staging vs. subspecialist review
+2. Focus on difficult cases or borderline stages
+3. Assess survival impact of reclassification
+
+**Expected Findings:**
+- Systematic upstaging or downstaging patterns
+- Improved prognostic accuracy
+- Clinical impact of subspecialist expertise
+
+# Advanced Analysis Tips
+
+## Sample Size Considerations
+
+- **Minimum**: 100 patients with adequate follow-up
+- **Recommended**: 200+ patients for robust Will Rogers analysis
+- **Power**: Consider event rate and median follow-up time
+
+## Statistical Considerations
+
+1. **Censoring**: Ensure adequate follow-up in both staging systems
+2. **Competing Risks**: Consider disease-specific vs. overall survival
+3. **Time Bias**: Account for temporal changes in treatment
+4. **Institution Bias**: Consider multi-institutional validation
+
+## Interpretation Guidelines
+
+### Evidence of Will Rogers Phenomenon
+
+**Strong Evidence:**
+- Migration rate >30%
+- Multiple stages with significant Will Rogers tests
+- Improved stage-specific survival without overall improvement
+- C-index improvement primarily from redistribution
+
+**Weak Evidence:**
+- Migration rate <15%
+- Few significant Will Rogers tests
+- Genuine improvement in C-index
+- Overall survival improvement
+
+### Clinical Significance
+
+**Clinically Meaningful Changes:**
+- C-index improvement >0.02
+- Stage migration affecting >20% of patients
+- Survival differences >6 months between systems
+- Impact on treatment decision thresholds
+
+## Quality Assurance
+
+### Data Validation
+
+1. **Staging Accuracy**: Verify both staging systems use same criteria
+2. **Missing Data**: Assess pattern and impact of missing stages
+3. **Follow-up Adequacy**: Ensure sufficient events and follow-up
+4. **Covariate Balance**: Check for confounding variables
+
+### Results Validation
+
+1. **External Validation**: Test findings in independent cohort
+2. **Sensitivity Analysis**: Test robustness to assumptions
+3. **Clinical Review**: Confirm findings make clinical sense
+4. **Literature Comparison**: Compare to published staging studies
+
+# Reporting Results
+
+## Key Elements to Include
+
+### Methods Section
+
+```
+Stage migration analysis was performed using the ClinicoPath module in jamovi. 
+Patients were classified according to both [original system] and [new system] 
+staging criteria. Migration patterns were quantified using cross-tabulation 
+and chi-square tests. Prognostic performance was compared using Harrell's 
+C-index and log-rank tests. The Will Rogers phenomenon was assessed by 
+comparing survival between patients who remained in the same stage versus 
+those who migrated to different stages.
+```
+
+### Results Section
+
+```
+Of [N] patients analyzed, [X]% experienced stage migration between the 
+[original] and [new] staging systems (p<0.001). The C-index improved from 
+[old C-index] to [new C-index] (improvement: +[change], [%] increase). 
+Evidence of the Will Rogers phenomenon was observed in [N] stages, with 
+significant survival differences between migrated and non-migrated patients 
+(p<0.05). Migration predominantly involved [describe pattern].
+```
+
+### Visual Presentation
+
+1. **Migration flow diagram** showing patient pathways
+2. **Side-by-side survival curves** for key stages
+3. **C-index comparison** bar chart
+4. **Will Rogers analysis table** for significant stages
+
+## Common Pitfalls
+
+### Analytical Pitfalls
+
+1. **Insufficient Follow-up**: Premature analysis with inadequate follow-up
+2. **Selection Bias**: Non-representative patient population
+3. **Temporal Confounding**: Changes in treatment concurrent with staging
+4. **Multiple Testing**: Not adjusting for multiple comparisons
+
+### Interpretation Pitfalls
+
+1. **Causation vs. Association**: Assuming staging changes cause outcome improvements
+2. **Clinical vs. Statistical**: Overinterpreting small but significant changes
+3. **Generalizability**: Extrapolating single-institution findings
+4. **Complexity**: Over-interpreting complex migration patterns
+
+# Conclusion
+
+The Stage Migration Analysis module provides comprehensive tools for understanding the impact of staging system changes on clinical outcomes. By systematically analyzing migration patterns, prognostic performance, and the Will Rogers phenomenon, researchers and clinicians can:
+
+1. **Objectively evaluate** staging system revisions
+2. **Detect statistical artifacts** that may mislead clinical interpretation
+3. **Quantify improvements** in prognostic discrimination
+4. **Guide clinical practice** based on evidence-based staging analysis
+
+Understanding stage migration is crucial for proper interpretation of cancer outcomes research and for making informed decisions about staging system adoption in clinical practice.
+
+## Further Resources
+
+- **ClinicoPath Documentation**: Comprehensive module reference
+- **TNM Classification Guidelines**: Official staging criteria
+- **Survival Analysis Methods**: Statistical background and methods
+- **Will Rogers Literature**: Published examples and methodological papers
+
+For questions or support, please refer to the ClinicoPath documentation or contact the development team.

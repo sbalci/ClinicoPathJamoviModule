@@ -1,0 +1,91 @@
+---
+title: "Use meddecide in R"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{Use meddecide in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+agreement()
+	
+
+Interrater Reliability
+
+agreementClass
+	
+
+Interrater Reliability Analysis
+
+decision()
+	
+
+Medical Decision
+
+decisionClass
+	
+
+Medical Decision Making
+
+decisioncalculator()
+	
+
+Medical Decision Calculator
+
+decisioncalculatorClass
+	
+
+Decision Calculator
+
+histopathology
+	
+
+histopathology
+
+kappaSizeCI()
+	
+
+Confidence Interval Approach for the Number of Subjects Required
+
+kappaSizeCIClass
+	
+
+Confidence Interval Approach for the Number of Subjects Required
+
+kappaSizeFixedN()
+	
+
+Lowest Expected Value for a fixed sample size
+
+kappaSizeFixedNClass
+	
+
+Lowest Expected Value for a fixed sample size
+
+kappaSizePower()
+	
+
+Power Approach for the Number of Subjects Required
+
+kappaSizePowerClass 
+

@@ -45,7 +45,8 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -216,7 +217,7 @@ jjbarstats <- function(
     data,
     dep,
     group,
-    grvar,
+    grvar = NULL,
     excl = TRUE,
     typestatistics = "parametric",
     pairwisecomparisons = TRUE,

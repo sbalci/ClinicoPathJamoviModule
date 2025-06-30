@@ -50,7 +50,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..inputType <- jmvcore::OptionList$new(
                 "inputType",
                 inputType,
@@ -419,7 +420,7 @@ waterfall <- function(
     data,
     patientID,
     responseVar,
-    timeVar,
+    timeVar = NULL,
     inputType = "percentage",
     sortBy = "response",
     showThresholds = FALSE,

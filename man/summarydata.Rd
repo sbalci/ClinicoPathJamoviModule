@@ -7,10 +7,10 @@
 summarydata(
   data,
   vars,
-  date_vars,
+  date_vars = NULL,
   distr = FALSE,
   summary_format = "standard",
-  grvar,
+  grvar = NULL,
   pivot_layout = "clinical",
   include_confidence = TRUE,
   advanced_metrics = FALSE,

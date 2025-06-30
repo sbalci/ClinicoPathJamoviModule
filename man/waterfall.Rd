@@ -8,7 +8,7 @@ waterfall(
   data,
   patientID,
   responseVar,
-  timeVar,
+  timeVar = NULL,
   inputType = "percentage",
   sortBy = "response",
   showThresholds = FALSE,

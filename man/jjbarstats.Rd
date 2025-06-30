@@ -8,7 +8,7 @@ jjbarstats(
   data,
   dep,
   group,
-  grvar,
+  grvar = NULL,
   excl = TRUE,
   typestatistics = "parametric",
   pairwisecomparisons = TRUE,

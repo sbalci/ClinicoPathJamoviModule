@@ -1,0 +1,563 @@
+---
+title: "Complete Analysis Gallery - All jjstatsplot Functions"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{Complete Analysis Gallery - All jjstatsplot Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = TRUE, 
+                      fig.width = 8, fig.height = 6, warning = FALSE, message = FALSE)
+```
+
+# Complete jjstatsplot Analysis Gallery
+
+This comprehensive guide demonstrates every analysis type available in jjstatsplot with practical examples, use cases, and statistical interpretations.
+
+```{r libraries}
+library(ClinicoPath)
+library(dplyr)
+
+# Load datasets
+data(mtcars)
+data(iris)
+
+# Prepare example datasets
+mtcars_clean <- mtcars %>%
+  mutate(
+    cyl = factor(cyl, labels = c("4-cyl", "6-cyl", "8-cyl")),
+    am = factor(am, labels = c("Automatic", "Manual")),
+    vs = factor(vs, labels = c("V-shaped", "Straight"))
+  )
+
+iris_clean <- iris %>%
+  mutate(Species = factor(Species))
+```
+
+## 1. Histogram Analysis - `jjhistostats()`
+
+### Purpose
+Explore the distribution of continuous variables with automatic normality testing and descriptive statistics.
+
+### When to Use
+- Examine variable distributions before analysis
+- Check normality assumptions
+- Identify outliers and skewness
+- Compare distributions across groups
+
+### Basic Usage
+
+```{r histogram-basic}
+# Single variable distribution
+hist_basic <- jjhistostats(
+  data = mtcars_clean,
+  dep = "mpg",
+  grvar = NULL  # No grouping variable
+)
+
+hist_basic$plot
+```
+
+### Advanced: Multiple Variables
+
+```{r histogram-multiple}
+# Multiple variables
+hist_multi <- jjhistostats(
+  data = iris,
+  dep = c("Sepal.Length", "Sepal.Width", "Petal.Length"),
+  grvar = NULL  # No grouping variable
+)
+
+hist_multi$plot
+```
+
+### Grouped Analysis
+
+```{r histogram-grouped}
+# Separate histograms by group
+hist_grouped <- jjhistostats(
+  data = mtcars_clean,
+  dep = "mpg",
+  grvar = "cyl"
+)
+
+hist_grouped$plot2
+```
+
+### Statistical Output
+- Shapiro-Wilk normality test
+- Descriptive statistics (mean, median, SD)
+- Sample size information
+
+### Interpretation Tips
+- **Normal distribution**: p > 0.05 in normality test
+- **Skewness**: Asymmetric distribution patterns
+- **Outliers**: Points far from main distribution
+
+---
+
+## 2. Scatter Plots - `jjscatterstats()`
+
+### Purpose
+Examine relationships between two continuous variables with correlation analysis and regression fitting.
+
+### When to Use
+- Explore bivariate relationships
+- Test correlation hypotheses
+- Visualize regression relationships
+- Identify influential points
+
+### Basic Usage
+
+```{r scatter-basic}
+# Basic scatter plot with correlation
+scatter_basic <- jjscatterstats(
+  data = mtcars_clean,
+  dep = "mpg",
+  group = "hp",
+  grvar = NULL  # No grouping variable
+)
+
+scatter_basic$plot
+```
+
+### Grouped Analysis
+
+```{r scatter-grouped}
+# Separate scatter plots by group
+scatter_grouped <- jjscatterstats(
+  data = mtcars_clean,
+  dep = "mpg",
+  group = "hp", 
+  grvar = "cyl"
+)
+
+scatter_grouped$plot2
+```
+
+### Statistical Output
+- Pearson/Spearman correlation coefficient
+- Confidence intervals
+- Regression equation
+- R-squared value
+
+### Interpretation Tips
+- **Strong correlation**: |r| > 0.7
+- **Moderate correlation**: 0.3 < |r| < 0.7
+- **Weak correlation**: |r| < 0.3
+- **Linear relationship**: Points follow straight line pattern
+
+---
+
+## 3. Box-Violin Plots (Between Groups) - `jjbetweenstats()`
+
+### Purpose
+Compare continuous variables across independent groups with appropriate statistical tests.
+
+### When to Use
+- Compare means/medians between groups
+- Test group differences
+- Visualize data distribution by group
+- Assess homogeneity of variance
+
+### Basic Usage
+
+```{r between-basic}
+# Compare groups
+between_basic <- jjbetweenstats(
+  data = iris_clean,
+  dep = "Sepal.Length",
+  group = "Species"
+)
+
+between_basic$plot
+```
+
+### Multiple Dependent Variables
+
+```{r between-multiple}
+# Multiple variables comparison
+between_multi <- jjbetweenstats(
+  data = iris_clean,
+  dep = c("Sepal.Length", "Petal.Length"),
+  group = "Species"
+)
+
+between_multi$plot
+```
+
+### Statistical Output
+- ANOVA or Kruskal-Wallis test
+- Post-hoc pairwise comparisons
+- Effect size measures (eta-squared, Cohen's d)
+- Homogeneity of variance tests
+
+### Interpretation Tips
+- **Significant difference**: p < 0.05
+- **Large effect**: η² > 0.14 or d > 0.8
+- **Medium effect**: η² > 0.06 or d > 0.5
+- **Small effect**: η² > 0.01 or d > 0.2
+
+---
+
+## 4. Correlation Matrix - `jjcorrmat()`
+
+### Purpose
+Visualize correlations among multiple continuous variables simultaneously.
+
+### When to Use
+- Explore multivariate relationships
+- Identify redundant variables
+- Screen variables for analysis
+- Data reduction decisions
+
+### Basic Usage
+
+```{r corrmat-basic}
+# Correlation matrix
+corrmat_basic <- jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec", "disp"),
+  grvar = NULL  # No grouping variable
+)
+
+corrmat_basic$plot
+```
+
+### Grouped Analysis
+
+```{r corrmat-grouped}
+# Separate correlation matrices by group
+corrmat_grouped <- jjcorrmat(
+  data = iris,
+  dep = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+  grvar = "Species"
+)
+
+corrmat_grouped$plot2
+```
+
+### Statistical Output
+- Correlation coefficients matrix
+- Significance testing for each correlation
+- Confidence intervals
+
+### Interpretation Tips
+- **High correlation**: |r| > 0.8 (consider multicollinearity)
+- **Pattern recognition**: Look for clusters of correlated variables
+- **Significance**: Starred values indicate p < 0.05
+
+---
+
+## 5. Dot Charts - `jjdotplotstats()`
+
+### Purpose
+Display group means with confidence intervals and statistical comparisons.
+
+### When to Use
+- Present group means clearly
+- Show uncertainty (confidence intervals)
+- Compare multiple groups
+- Publication-ready group comparisons
+
+### Basic Usage
+
+```{r dot-basic}
+# Dot chart with group means
+dot_basic <- jjdotplotstats(
+  data = mtcars_clean,
+  dep = "mpg",
+  group = "cyl",
+  grvar = NULL  # No grouping variable
+)
+
+dot_basic$plot
+```
+
+### Multiple Variables
+
+```{r dot-multiple}
+# Multiple dependent variables
+dot_multi <- jjdotplotstats(
+  data = iris_clean,
+  dep = c("Sepal.Length"),
+  group = "Species",
+  grvar = NULL  # No grouping variable
+)
+
+dot_multi$plot
+```
+
+### Statistical Output
+- Group means and standard errors
+- Confidence intervals
+- Statistical test results
+- Effect sizes
+
+### Interpretation Tips
+- **Non-overlapping CIs**: Likely significant difference
+- **Large separation**: Meaningful group differences
+- **Consistent patterns**: Across multiple variables
+
+---
+
+## 6. Bar Charts - `jjbarstats()`
+
+### Purpose
+Analyze categorical variables and their associations with frequency tests.
+
+### When to Use
+- Display frequency distributions
+- Test independence between categorical variables
+- Visualize contingency tables
+- Report categorical data summaries
+
+### Basic Usage
+
+```{r bar-basic}
+# Frequency bar chart
+bar_basic <- jjbarstats(
+  data = mtcars_clean,
+  dep = "cyl",
+  group = NULL,  # No grouping variable
+  grvar = NULL  # No grouping variable
+)
+
+bar_basic$plot
+```
+
+### Two-Way Analysis
+
+```{r bar-twoway}
+# Two categorical variables
+bar_twoway <- jjbarstats(
+  data = mtcars_clean,
+  dep = "cyl",
+  group = "am",
+  grvar = NULL  # No additional grouping variable
+)
+
+bar_twoway$plot
+```
+
+### Statistical Output
+- Chi-square test of independence
+- Cramér's V (effect size)
+- Expected vs observed frequencies
+- Standardized residuals
+
+### Interpretation Tips
+- **Significant association**: p < 0.05 in chi-square test
+- **Strong association**: Cramér's V > 0.5
+- **Moderate association**: Cramér's V > 0.3
+- **Weak association**: Cramér's V > 0.1
+
+---
+
+## 7. Pie Charts - `jjpiestats()`
+
+### Purpose
+Display proportional data with statistical testing for categorical variables.
+
+### When to Use
+- Show proportions of categories
+- Test goodness-of-fit
+- Display survey results
+- Present percentage distributions
+
+### Basic Usage
+
+```{r pie-basic}
+# Basic pie chart
+pie_basic <- jjpiestats(
+  data = mtcars_clean,
+  dep = "cyl",
+  group = NULL,  # No grouping variable
+  grvar = NULL  # No grouping variable
+)
+
+pie_basic$plot1
+```
+
+### Grouped Analysis
+
+```{r pie-grouped}
+# Separate pie charts by group
+pie_grouped <- jjpiestats(
+  data = mtcars_clean,
+  dep = "cyl",
+  group = NULL,  # No grouping variable
+  grvar = "am"
+)
+
+pie_grouped$plot2
+```
+
+### Statistical Output
+- Goodness-of-fit tests
+- Frequency and percentage tables
+- Chi-square statistics
+
+### Interpretation Tips
+- **Equal proportions**: Uniform distribution
+- **Dominant category**: One slice much larger
+- **Balanced distribution**: Similar slice sizes
+
+---
+
+## 8. Within-Subjects Analysis - `jjwithinstats()`
+
+### Purpose
+Compare repeated measures or matched observations with appropriate paired tests.
+
+### When to Use
+- Pre-post comparisons
+- Repeated measures designs
+- Matched pairs analysis
+- Longitudinal data
+
+### Example with Paired Data
+
+```{r within-example}
+# Create example paired data
+paired_data <- data.frame(
+  Subject = rep(1:20, 2),
+  Time = rep(c("Pre", "Post"), each = 20),
+  Score = c(rnorm(20, 50, 10), rnorm(20, 55, 10)),
+  Group = rep(c("Treatment", "Control"), 20)
+)
+
+# Reshape for within-subjects analysis
+paired_wide <- paired_data %>%
+  tidyr::pivot_wider(names_from = Time, values_from = Score)
+
+within_basic <- jjwithinstats(
+  data = paired_wide,
+  dep1 = "Pre",
+  dep2 = "Post",
+  dep3 = NULL,  # No third dependent variable
+  dep4 = NULL,  # No fourth dependent variable
+  )
+
+within_basic$plot
+```
+
+
+### Statistical Output
+- Paired t-test or Wilcoxon signed-rank test
+- Effect size (Cohen's d for paired data)
+- Confidence intervals for differences
+
+### Interpretation Tips
+- **Significant change**: p < 0.05
+- **Practical significance**: Consider effect size magnitude
+- **Direction of change**: Positive vs negative differences
+
+---
+
+## 9. Waffle Charts - `jwaffle()`
+
+### Purpose
+Display proportional data using a grid of squares for intuitive visualization.
+
+### When to Use
+- Show parts of a whole
+- Display survey results
+- Present demographic breakdowns
+- Alternative to pie charts
+
+### Basic Usage
+
+```{r waffle-basic}
+# Waffle chart
+waffle_basic <- jwaffle(
+  data = mtcars_clean,
+  counts = "hp",
+  groups = "cyl",
+  facet = "am"
+)
+
+waffle_basic$plot
+```
+
+### Interpretation Tips
+- **Visual proportion**: Each square represents equal units
+- **Easy comparison**: Squares easier to compare than pie slices
+- **Pattern recognition**: Spatial arrangement shows patterns
+
+---
+
+## Choosing the Right Analysis
+
+### Decision Tree
+
+```{r decision-tree, eval=FALSE}
+# Pseudocode decision tree
+if (data_type == "one_continuous") {
+  use_jjhistostats()
+} else if (data_type == "two_continuous") {
+  use_jjscatterstats() # or jjcorrmat() for multiple variables
+} else if (data_type == "continuous_by_groups") {
+  if (groups_independent) {
+    use_jjbetweenstats()
+  } else {
+    use_jjwithinstats()
+  }
+} else if (data_type == "categorical") {
+  if (display_preference == "bars") {
+    use_jjbarstats()
+  } else if (display_preference == "pie") {
+    use_jjpiestats()
+  } else if (display_preference == "waffle") {
+    use_waffle()
+  }
+} else if (data_type == "group_means") {
+  use_jjdotplotstats()
+}
+```
+
+### Data Type Requirements
+
+| Analysis | Dependent Variable | Grouping Variable | Sample Size |
+|----------|-------------------|-------------------|-------------|
+| Histogram | Continuous | Optional categorical | n ≥ 10 |
+| Scatter | 2 × Continuous | Optional categorical | n ≥ 10 |
+| Box-Violin | Continuous | Categorical (2+ levels) | n ≥ 5 per group |
+| Correlation Matrix | 2+ × Continuous | Optional categorical | n ≥ 10 |
+| Dot Chart | Continuous | Categorical (2+ levels) | n ≥ 3 per group |
+| Bar Chart | Categorical | Optional categorical | n ≥ 5 |
+| Pie Chart | Categorical | Optional categorical | n ≥ 5 |
+| Within-Subjects | 2+ × Continuous | Optional categorical | n ≥ 5 pairs |
+| Waffle Chart | Categorical | Optional categorical | n ≥ 10 |
+
+## Best Practices Summary
+
+### Statistical Considerations
+1. **Check assumptions** before interpreting results
+2. **Report effect sizes** alongside p-values
+3. **Consider multiple comparisons** when doing many tests
+4. **Validate findings** with appropriate diagnostics
+
+### Visualization Guidelines
+1. **Choose appropriate plot** for your data type
+2. **Use consistent color schemes** across related plots
+3. **Include informative titles** and labels
+4. **Consider your audience** when selecting plot complexity
+
+### Workflow Recommendations
+1. **Start with exploratory** plots (histograms, scatter plots)
+2. **Progress to confirmatory** analyses (between-groups, correlations)
+3. **Use grouped analyses** to explore interactions
+4. **Combine multiple approaches** for comprehensive understanding
+
+This gallery provides a complete reference for all jjstatsplot analyses. Each function offers extensive customization options - explore the jamovi interface or function documentation for additional parameters and settings.

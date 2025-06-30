@@ -1,0 +1,593 @@
+---
+title: "ClinicoPath Descriptives 04: Data Quality Assessment for Clinical Research"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ClinicoPath Descriptives 04: Data Quality Assessment for Clinical Research}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+Data quality assessment is fundamental to reliable clinical research. This vignette demonstrates comprehensive data exploration and quality assessment techniques using ClinicoPathDescriptives, including missing data analysis, distribution assessment, outlier detection, and fraud detection using Benford's law.
+
+## Data Quality Framework
+
+### Quality Dimensions
+
+1. **Completeness**: Presence of missing data
+2. **Consistency**: Logical relationships between variables
+3. **Accuracy**: Conformance to expected patterns
+4. **Validity**: Adherence to defined formats and ranges
+5. **Integrity**: Referential and business rule compliance
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+
+# Load the dataset
+data(histopathology)
+
+# Initial data overview
+cat("Dataset Dimensions:", dim(histopathology), "\n")
+cat("Variables:", ncol(histopathology), "\n")
+cat("Observations:", nrow(histopathology), "\n\n")
+
+# Variable types overview
+str(histopathology, give.attr = FALSE)
+```
+
+## Phase 1: Completeness Assessment
+
+### Missing Data Analysis
+
+```{r}
+# Calculate missing data percentages
+missing_summary <- histopathology %>%
+  summarise_all(~sum(is.na(.))) %>%
+  pivot_longer(everything(), names_to = "Variable", values_to = "Missing_Count") %>%
+  mutate(
+    Missing_Percentage = round(Missing_Count / nrow(histopathology) * 100, 1),
+    Data_Quality = case_when(
+      Missing_Percentage == 0 ~ "Complete",
+      Missing_Percentage <= 5 ~ "Excellent", 
+      Missing_Percentage <= 10 ~ "Good",
+      Missing_Percentage <= 20 ~ "Acceptable",
+      TRUE ~ "Poor"
+    )
+  ) %>%
+  arrange(desc(Missing_Percentage))
+
+# Display missing data summary
+kable(missing_summary %>% filter(Missing_Count > 0),
+      caption = "Missing Data Summary",
+      col.names = c("Variable", "Missing Count", "Missing %", "Quality Rating"))
+```
+
+### Completeness by Variable Type
+
+```{r}
+# Analyze completeness by variable groups
+demographic_vars <- c("Age", "Sex", "Race")
+pathology_vars <- c("Grade", "TStage", "LVI", "PNI", "LymphNodeMetastasis")
+biomarker_vars <- c("MeasurementA", "MeasurementB", "Anti-X-intensity", "Anti-Y-intensity")
+outcome_vars <- c("Outcome", "Death", "OverallTime", "Mortality5yr")
+
+# Function to calculate completeness for variable groups
+assess_completeness <- function(data, vars, group_name) {
+  if(all(vars %in% names(data))) {
+    completeness <- data %>%
+      select(all_of(vars)) %>%
+      summarise_all(~sum(!is.na(.))) %>%
+      pivot_longer(everything(), names_to = "Variable", values_to = "Complete_Count") %>%
+      mutate(
+        Group = group_name,
+        Completeness_Rate = round(Complete_Count / nrow(data) * 100, 1)
+      )
+    return(completeness)
+  }
+  return(NULL)
+}
+
+# Assess each variable group
+completeness_by_group <- bind_rows(
+  assess_completeness(histopathology, demographic_vars, "Demographics"),
+  assess_completeness(histopathology, pathology_vars, "Pathology"),
+  assess_completeness(histopathology, biomarker_vars, "Biomarkers"),
+  assess_completeness(histopathology, outcome_vars, "Outcomes")
+) %>%
+  filter(!is.null(.))
+
+# Summary by group
+group_summary <- completeness_by_group %>%
+  group_by(Group) %>%
+  summarise(
+    Variables = n(),
+    Mean_Completeness = round(mean(Completeness_Rate), 1),
+    Min_Completeness = round(min(Completeness_Rate), 1),
+    .groups = 'drop'
+  )
+
+kable(group_summary,
+      caption = "Data Completeness by Variable Group",
+      col.names = c("Variable Group", "Variables", "Mean Completeness (%)", "Min Completeness (%)"))
+```
+
+## Phase 2: Distribution Assessment
+
+### Continuous Variables Analysis
+
+```{r}
+# Analyze distributions of continuous variables
+continuous_vars <- c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+
+# Check which variables exist in the dataset
+available_vars <- continuous_vars[continuous_vars %in% names(histopathology)]
+if(length(available_vars) > 0) {
+  tryCatch({
+    summarydata(
+      data = histopathology,
+      vars = available_vars,
+      date_vars = NULL,
+      grvar = NULL
+    )
+  }, error = function(e) {
+    cat("Error with summarydata:", conditionMessage(e), "\n")
+    cat("Available continuous variables:", paste(available_vars, collapse = ", "), "\n")
+    cat("Variable types:\n")
+    print(sapply(histopathology[available_vars], class))
+  })
+} else {
+  cat("No continuous variables found in dataset\n")
+}
+```
+
+### Categorical Variables Analysis
+
+```{r}
+# Analyze categorical variable distributions
+categorical_vars <- c("Sex", "Grade", "TStage", "Group", "LVI", "PNI")
+
+# Check which categorical variables exist in the dataset
+available_cat_vars <- categorical_vars[categorical_vars %in% names(histopathology)]
+if(length(available_cat_vars) > 0) {
+  tryCatch({
+    reportcat(
+      data = histopathology,
+      vars = available_cat_vars
+    )
+  }, error = function(e) {
+    cat("Error with reportcat:", conditionMessage(e), "\n")
+    cat("Available categorical variables:", paste(available_cat_vars, collapse = ", "), "\n")
+  })
+} else {
+  cat("No categorical variables found in dataset\n")
+}
+```
+
+### Variable Relationship Overview
+
+```{r}
+# Hierarchical overview of key variables
+vartree_vars <- c("Group", "Grade", "TStage", "LVI", "PNI", "LymphNodeMetastasis", "Outcome")
+available_vartree_vars <- vartree_vars[vartree_vars %in% names(histopathology)]
+
+if(length(available_vartree_vars) > 0) {
+  tryCatch({
+    vartree(
+      data = histopathology,
+      vars = available_vartree_vars,
+      percvar = NULL,
+      percvarLevel = NULL,
+      summaryvar = NULL,
+      prunebelow = NULL,
+      pruneLevel1 = NULL,
+      pruneLevel2 = NULL,
+      follow = NULL,
+      followLevel1 = NULL,
+      followLevel2 = NULL,
+      excl = FALSE,
+      vp = TRUE,
+      horizontal = FALSE,
+      sline = TRUE,
+      varnames = FALSE,
+      nodelabel = TRUE,
+      pct = FALSE
+    )
+  }, error = function(e) {
+    cat("Error with vartree:", conditionMessage(e), "\n")
+    cat("Available variables for tree:", paste(available_vartree_vars, collapse = ", "), "\n")
+  })
+} else {
+  cat("No variables found for variable tree\n")
+}
+```
+
+## Phase 3: Consistency and Logic Checks
+
+### Temporal Consistency
+
+```{r}
+# Check date consistency (if dates are properly formatted)
+date_vars <- histopathology %>%
+  select(contains("Date")) %>%
+  names()
+
+if(length(date_vars) > 0) {
+  cat("Date variables found:", paste(date_vars, collapse = ", "), "\n")
+  
+  # Basic date analysis
+  tryCatch({
+    reportcat(
+      data = histopathology,
+      vars = date_vars[1:min(2, length(date_vars))]
+    )
+  }, error = function(e) {
+    cat("Error with date variables reportcat:", conditionMessage(e), "\n")
+    cat("Date variables:", paste(date_vars, collapse = ", "), "\n")
+  })
+}
+```
+
+### Logical Relationship Checks
+
+```{r}
+# Cross-tabulation to check logical relationships
+crosstable(
+  data = histopathology,
+  vars = "Death",
+  group = "Mortality5yr"
+)
+```
+
+```{r}
+# Outcome consistency check
+crosstable(
+  data = histopathology,
+  vars = "Outcome",
+  group = "Death"
+)
+```
+
+### Grade-Stage Relationship Assessment
+
+```{r}
+# Check pathological grade vs stage relationships
+crosstable(
+  data = histopathology,
+  vars = "Grade",
+  group = "TStage"
+)
+```
+
+## Phase 4: Benford's Law Analysis
+
+Benford's law states that in naturally occurring datasets, the leading digit 1 appears about 30.1% of the time, digit 2 about 17.6%, and so on. Deviation from this pattern may indicate data fabrication.
+
+### Measurement A Analysis
+
+```{r}
+# Benford's law analysis for Measurement A
+benford(
+  data = histopathology,
+  var = "MeasurementA"
+)
+```
+
+### Measurement B Analysis
+
+```{r}
+# Benford's law analysis for Measurement B
+benford(
+  data = histopathology, 
+  var = "MeasurementB"
+)
+```
+
+### Overall Time Analysis
+
+```{r}
+# Benford's law analysis for follow-up time
+benford(
+  data = histopathology,
+  var = "OverallTime"
+)
+```
+
+## Phase 5: Inter-rater Reliability Assessment
+
+### Rater Agreement Analysis
+
+```{r}
+# Analyze inter-rater reliability data
+rater_vars <- histopathology %>%
+  select(starts_with("Rater")) %>%
+  names()
+
+if(length(rater_vars) > 0) {
+  # Binary rater variables
+  binary_raters <- rater_vars[grepl("[0-9]$", rater_vars)]
+  if(length(binary_raters) > 0) {
+    tryCatch({
+      reportcat(
+        data = histopathology,
+        vars = binary_raters[1:min(3, length(binary_raters))]
+      )
+    }, error = function(e) {
+      cat("Error with binary raters reportcat:", conditionMessage(e), "\n")
+      cat("Binary rater variables:", paste(binary_raters, collapse = ", "), "\n")
+    })
+  } else {
+    cat("No binary rater variables found (ending with digits)\n")
+  }
+  
+  # Categorical rater variables  
+  categorical_raters <- rater_vars[grepl("[A-Z]$", rater_vars)]
+  if(length(categorical_raters) > 0) {
+    tryCatch({
+      reportcat(
+        data = histopathology,
+        vars = categorical_raters
+      )
+    }, error = function(e) {
+      cat("Error with categorical raters reportcat:", conditionMessage(e), "\n")
+      cat("Categorical rater variables:", paste(categorical_raters, collapse = ", "), "\n")
+    })
+  } else {
+    cat("No categorical rater variables found (ending with letters)\n")
+  }
+} else {
+  cat("No rater variables found in dataset\n")
+}
+```
+
+### Agreement Cross-tabulation
+
+```{r}
+# Cross-tabulate raters for agreement assessment
+if(length(rater_vars) >= 2) {
+  crosstable(
+    data = histopathology,
+    vars = rater_vars[1],
+    group = rater_vars[2]
+  )
+}
+```
+
+## Phase 6: Outlier Detection
+
+### Statistical Outlier Analysis
+
+```{r}
+# Identify potential outliers in continuous variables
+outlier_analysis <- histopathology %>%
+  select(Age, OverallTime, MeasurementA, MeasurementB) %>%
+  summarise_all(
+    list(
+      Mean = ~round(mean(., na.rm = TRUE), 2),
+      SD = ~round(sd(., na.rm = TRUE), 2),
+      Q1 = ~round(quantile(., 0.25, na.rm = TRUE), 2),
+      Q3 = ~round(quantile(., 0.75, na.rm = TRUE), 2),
+      IQR = ~round(IQR(., na.rm = TRUE), 2),
+      Lower_Fence = ~round(quantile(., 0.25, na.rm = TRUE) - 1.5 * IQR(., na.rm = TRUE), 2),
+      Upper_Fence = ~round(quantile(., 0.75, na.rm = TRUE) + 1.5 * IQR(., na.rm = TRUE), 2)
+    )
+  ) %>%
+  pivot_longer(everything(), names_to = "Stat", values_to = "Value") %>%
+  separate(Stat, into = c("Variable", "Statistic"), sep = "_", extra = "merge") %>%
+  pivot_wider(names_from = Statistic, values_from = Value)
+
+kable(outlier_analysis,
+      caption = "Outlier Detection Statistics",
+      digits = 2)
+```
+
+### Extreme Value Assessment
+
+```{r}
+# Count extreme values beyond fences
+extreme_values <- histopathology %>%
+  summarise(
+    Age_Low_Outliers = sum(Age < (quantile(Age, 0.25, na.rm = TRUE) - 1.5 * IQR(Age, na.rm = TRUE)), na.rm = TRUE),
+    Age_High_Outliers = sum(Age > (quantile(Age, 0.75, na.rm = TRUE) + 1.5 * IQR(Age, na.rm = TRUE)), na.rm = TRUE),
+    Time_Low_Outliers = sum(OverallTime < (quantile(OverallTime, 0.25, na.rm = TRUE) - 1.5 * IQR(OverallTime, na.rm = TRUE)), na.rm = TRUE),
+    Time_High_Outliers = sum(OverallTime > (quantile(OverallTime, 0.75, na.rm = TRUE) + 1.5 * IQR(OverallTime, na.rm = TRUE)), na.rm = TRUE),
+    MeasA_Low_Outliers = sum(MeasurementA < (quantile(MeasurementA, 0.25, na.rm = TRUE) - 1.5 * IQR(MeasurementA, na.rm = TRUE)), na.rm = TRUE),
+    MeasA_High_Outliers = sum(MeasurementA > (quantile(MeasurementA, 0.75, na.rm = TRUE) + 1.5 * IQR(MeasurementA, na.rm = TRUE)), na.rm = TRUE)
+  ) %>%
+  pivot_longer(everything(), names_to = "Variable_Type", values_to = "Outlier_Count") %>%
+  separate(Variable_Type, into = c("Variable", "Outlier_Type"), sep = "_", extra = "merge")
+
+kable(extreme_values,
+      caption = "Extreme Value Counts by Variable")
+```
+
+## Phase 7: Diagnostic Test Validation
+
+### Test Performance Analysis
+
+```{r}
+# Analyze diagnostic test performance if available
+test_vars <- histopathology %>%
+  select(contains("Test"), contains("Standard")) %>%
+  names()
+
+if(length(test_vars) >= 2) {
+  # Cross-tabulate new test vs gold standard
+  crosstable(
+    data = histopathology,
+    vars = test_vars[1],
+    group = test_vars[2]
+  )
+}
+```
+
+### Validity Assessment
+
+```{r}
+# Analyze data validity flags
+validity_vars <- histopathology %>%
+  select(contains("Valid")) %>%
+  names()
+
+if(length(validity_vars) > 0) {
+  tryCatch({
+    reportcat(
+      data = histopathology,
+      vars = validity_vars[1]
+    )
+  }, error = function(e) {
+    cat("Error with validity variables reportcat:", conditionMessage(e), "\n")
+    cat("Validity variables:", paste(validity_vars, collapse = ", "), "\n")
+  })
+} else {
+  cat("No validity variables found in dataset\n")
+}
+```
+
+## Phase 8: Data Quality Dashboard
+
+### Overall Quality Metrics
+
+```{r}
+# Create comprehensive quality summary
+quality_metrics <- data.frame(
+  Metric = c(
+    "Total Observations",
+    "Total Variables", 
+    "Complete Cases",
+    "Variables with No Missing Data",
+    "Variables with <5% Missing",
+    "Variables with >20% Missing",
+    "Mean Completeness Rate"
+  ),
+  Value = c(
+    nrow(histopathology),
+    ncol(histopathology),
+    sum(complete.cases(histopathology)),
+    sum(missing_summary$Missing_Count == 0),
+    sum(missing_summary$Missing_Percentage <= 5),
+    sum(missing_summary$Missing_Percentage > 20),
+    paste0(round(mean(100 - missing_summary$Missing_Percentage), 1), "%")
+  )
+)
+
+kable(quality_metrics,
+      caption = "Data Quality Dashboard")
+```
+
+### Quality Recommendations
+
+```{r}
+# Generate quality recommendations
+high_missing <- missing_summary %>%
+  filter(Missing_Percentage > 20) %>%
+  pull(Variable)
+
+moderate_missing <- missing_summary %>%
+  filter(Missing_Percentage > 5 & Missing_Percentage <= 20) %>%
+  pull(Variable)
+
+recommendations <- data.frame(
+  Priority = c("High", "Medium", "Low"),
+  Action = c(
+    ifelse(length(high_missing) > 0, 
+           paste("Investigate high missing data in:", paste(high_missing, collapse = ", ")),
+           "No high-priority missing data issues"),
+    ifelse(length(moderate_missing) > 0,
+           paste("Consider imputation for:", paste(moderate_missing, collapse = ", ")),
+           "No moderate missing data issues"), 
+    "Continue routine quality monitoring"
+  )
+)
+
+kable(recommendations,
+      caption = "Data Quality Recommendations")
+```
+
+## Phase 9: Reporting Quality Issues
+
+### Missing Data Patterns
+
+```{r}
+# Analyze missing data patterns
+if(any(missing_summary$Missing_Count > 0)) {
+  # Create missing data profile
+  missing_profile <- histopathology %>%
+    summarise_all(~ifelse(is.na(.), "Missing", "Present")) %>%
+    pivot_longer(everything(), names_to = "Variable", values_to = "Status") %>%
+    count(Variable, Status) %>%
+    pivot_wider(names_from = Status, values_from = n, values_fill = 0) %>%
+    mutate(
+      Total = Missing + Present,
+      Missing_Rate = round(Missing / Total * 100, 1)
+    ) %>%
+    filter(Missing > 0) %>%
+    arrange(desc(Missing_Rate))
+  
+  kable(missing_profile,
+        caption = "Missing Data Profile")
+}
+```
+
+### Benford's Law Compliance Summary
+
+```{r}
+# Summary of Benford's law results
+benford_summary <- data.frame(
+  Variable = c("MeasurementA", "MeasurementB", "OverallTime"),
+  Expected_Pattern = "Natural logarithmic distribution",
+  Assessment = c(
+    "Evaluate first digit distribution",
+    "Evaluate first digit distribution", 
+    "Evaluate first digit distribution"
+  ),
+  Recommendation = "Review any significant deviations from expected pattern"
+)
+
+kable(benford_summary,
+      caption = "Benford's Law Assessment Summary")
+```
+
+## Implementation in jamovi
+
+Data quality assessment functions are available in jamovi:
+
+1. **Benford's Law**: `Exploration > ClinicoPath Descriptives > Benford Analysis`
+2. **Variable Summary**: `Exploration > ClinicoPath Descriptives > Summary of Continuous/Categorical Variables`
+3. **Cross-tabulations**: `Exploration > ClinicoPath Comparisons > Cross Tables`
+4. **Variable Tree**: `Exploration > ClinicoPath Descriptive Plots > Variable Tree`
+
+## Conclusions
+
+This comprehensive data quality assessment provides:
+
+1. **Completeness Evaluation**: Systematic missing data analysis
+2. **Consistency Checks**: Logical relationship validation
+3. **Accuracy Assessment**: Statistical distribution analysis and outlier detection
+4. **Fraud Detection**: Benford's law analysis for data integrity
+5. **Reliability Testing**: Inter-rater agreement evaluation
+
+Regular data quality assessment using these techniques ensures reliable and trustworthy clinical research results.
+
+## Best Practices
+
+- Perform quality assessment before any statistical analysis
+- Document and investigate any quality issues found
+- Establish quality thresholds appropriate for your research context
+- Implement ongoing quality monitoring throughout data collection
+- Use multiple quality assessment methods for comprehensive evaluation

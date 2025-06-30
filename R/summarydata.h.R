@@ -37,7 +37,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..distr <- jmvcore::OptionBool$new(
                 "distr",
                 distr,
@@ -60,7 +61,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..pivot_layout <- jmvcore::OptionList$new(
                 "pivot_layout",
                 pivot_layout,
@@ -251,10 +253,10 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 summarydata <- function(
     data,
     vars,
-    date_vars,
+    date_vars = NULL,
     distr = FALSE,
     summary_format = "standard",
-    grvar,
+    grvar = NULL,
     pivot_layout = "clinical",
     include_confidence = TRUE,
     advanced_metrics = FALSE,

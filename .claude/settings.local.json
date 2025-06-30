@@ -17,7 +17,8 @@
       "Bash(rg:*)",
       "WebFetch(domain:rdrr.io)",
       "Bash(gh repo view:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(export PATH=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64:$PATH\")"
     ],
     "deny": []
   }
