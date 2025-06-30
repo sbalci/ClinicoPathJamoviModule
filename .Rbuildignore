@@ -130,3 +130,5 @@ datageneration
 ^vignettes/\.quarto$
 ^vignettes/*_files$
 .venv
+
+*.sh
