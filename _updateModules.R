@@ -9,8 +9,8 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.32"
-new_date <- "2024-06-26"
+new_version <- "0.0.3.33"
+new_date <- "2024-06-30"
 
 # Define WIP, check, extended status ----
 check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules

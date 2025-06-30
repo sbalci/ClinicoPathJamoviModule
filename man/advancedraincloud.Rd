@@ -8,9 +8,9 @@ advancedraincloud(
   data,
   y_var,
   x_var,
-  fill_var,
-  id_var,
-  cov_var,
+  fill_var = NULL,
+  id_var = NULL,
+  cov_var = NULL,
   rain_side = "l",
   likert_mode = FALSE,
   show_longitudinal = FALSE,
@@ -84,5 +84,24 @@ A results object containing:
 }
 }
 \description{
-Advanced Raincloud Plot
+Creates advanced raincloud plots with longitudinal connections using ggrain
+package.
+This module complements the existing Raincloud Plot module by providing
+advanced
+features including longitudinal data connections, Likert scale support, and
+flexible
+raincloud positioning. Perfect for repeated measures data, survey analysis,
+and
+complex distribution visualization in clinical research. Uses the ggrain
+package
+for enhanced customization and connectivity features.
+}
+\examples{
+\donttest{
+# Example:
+# 1. Select continuous variable for distribution analysis.
+# 2. Choose grouping variable for comparisons.
+# 3. Optionally add longitudinal ID variable for connections.
+# 4. Configure advanced raincloud features and positioning.
+}
 }
