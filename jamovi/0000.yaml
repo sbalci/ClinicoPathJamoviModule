@@ -368,12 +368,21 @@ analyses:
     menuSubtitle: Longitudinal & Likert Support with ggrain
     description: >
       Creates advanced raincloud plots with longitudinal connections using
-      ggrain package. This module complements the existing Raincloud Plot module
-      by providing advanced  features including longitudinal data connections,
-      Likert scale support, and flexible raincloud positioning. Perfect for
-      repeated measures data, survey analysis, and  complex distribution
-      visualization in clinical research. Uses the ggrain package for enhanced
-      customization and connectivity features.
+      ggrain package.
+
+      This module complements the existing Raincloud Plot module by providing
+      advanced 
+
+      features including longitudinal data connections, Likert scale support,
+      and flexible
+
+      raincloud positioning. Perfect for repeated measures data, survey
+      analysis, and 
+
+      complex distribution visualization in clinical research. Uses the ggrain
+      package
+
+      for enhanced customization and connectivity features.
     ribbon: analyses
   - title: GraphPad Prism Style Plots
     name: ggprism

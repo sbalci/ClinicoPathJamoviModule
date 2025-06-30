@@ -387,3 +387,7 @@ Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:"
     - if not, update the vignettes and documentation accordingly
     - check if the function is tested in the tests folder
     - if not, write tests for the function
+
+### YAML Development Memories
+- Add default: NULL to optional variables
+- Required variables should not be with default: NULL

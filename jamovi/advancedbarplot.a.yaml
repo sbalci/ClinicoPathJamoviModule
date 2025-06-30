@@ -53,6 +53,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
+      default: NULL
       description:
         R: Optional variable for bar fill colors (grouped/stacked bars).
         jamovi: Optional variable to color bars by groups.
@@ -62,6 +63,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
+      default: NULL
       description:
         R: Optional variable for creating multiple panels.
         jamovi: Optional variable to create separate panels.

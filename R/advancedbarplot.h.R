@@ -62,7 +62,8 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
                 facet_var,
@@ -70,7 +71,8 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..chart_approach <- jmvcore::OptionList$new(
                 "chart_approach",
                 chart_approach,
@@ -403,7 +405,7 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="statistical_results",
                 title="Statistical Test Results",
-                visible="(add_statistics && x_var && y_var)",
+                visible="add_statistics",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -414,7 +416,7 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="summary_stats",
                 title="Summary Statistics",
-                visible="(x_var && y_var)",
+                visible="(x_var)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -424,7 +426,7 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="interactive_plot",
                 title="Interactive Version",
-                visible="(chart_approach:interactive && x_var && y_var)",
+                visible="(chart_approach:interactive)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -549,8 +551,8 @@ advancedbarplot <- function(
     data,
     x_var,
     y_var,
-    fill_var,
-    facet_var,
+    fill_var = NULL,
+    facet_var = NULL,
     chart_approach = "polished",
     bar_position = "dodge",
     stat_type = "mean",
