@@ -1,7 +1,7 @@
 ---
 name: jggsankeyfier
 title: Sankey & Alluvial Diagrams
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Categorical Over Time
 version: '1.0.0'
 jas: '1.2'

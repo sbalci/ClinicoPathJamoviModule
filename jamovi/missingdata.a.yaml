@@ -1,7 +1,7 @@
 ---
 name: missingdata
 title: Missing Data Analysis and Imputation
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: mice & ggmice - Multiple Imputation
 version: '0.0.3'

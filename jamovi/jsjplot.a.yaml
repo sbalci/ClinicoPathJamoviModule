@@ -1,7 +1,7 @@
 ---
 name: jsjplot
 title: "Social Science Statistical Visualization"
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Statistical Models
 menuSubtitle: "sjPlot Integration for Social Science Research"
 version: '0.0.3'

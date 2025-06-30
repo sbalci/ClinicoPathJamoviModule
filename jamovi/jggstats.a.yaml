@@ -1,7 +1,7 @@
 ---
 name: jggstats
 title: Enhanced Statistical Visualization
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Advanced Statistical Plots
 version: '1.0.0'
 jas: '1.2'

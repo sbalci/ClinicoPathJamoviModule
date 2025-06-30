@@ -1,7 +1,7 @@
 ---
 name: jparsnipsurvival
 title: Parsnip Survival Model Wrappers
-menuGroup: ClinicoPath Survival
+menuGroup: SurvivalD
 version: '1.0.0'
 jas: '1.2'
 description:

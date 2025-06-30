@@ -1,7 +1,7 @@
 ---
 name: jggridges
 title: Ridge Plot Visualization
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Distribution
 version: '1.0.0'
 jas: '1.2'

@@ -1,7 +1,7 @@
 ---
 name: jforester
 title: Forest Plot Visualization
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Statistical Models
 version: '1.0.0'
 jas: '1.2'

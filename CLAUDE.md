@@ -46,13 +46,11 @@ crosstableClass <- R6::R6Class(
 The `decisiongraph` module supports both traditional decision trees and advanced Markov chain models:
 
 **Decision Trees**: One-time decisions with immediate outcomes
-
 - Acute medical conditions (surgery vs. conservative treatment)
 - Emergency decisions with clear cost/utility trade-offs
 - Point-in-time cost-effectiveness analysis
 
 **Markov Chain Models**: Long-term disease progression modeling
-
 - Chronic disease management with multiple health states
 - Transition probability matrices for state changes over time
 - Cohort trace analysis with discounted cost-effectiveness calculations
@@ -83,13 +81,15 @@ Rscript -e "devtools::build()"
 
 # Install development version
 Rscript -e "devtools::install()"
+
+# Test vignette rendering
+Rscript -e "pkgdown::build_articles()"
 ```
 
 ### Jamovi Module Development
 
 ```bash
-# Build jamovi module (.jmo file)
-# This requires jamovi development tools
+# Build jamovi module (.jmo file) - CRITICAL WORKFLOW
 Rscript -e "jmvtools::prepare()"
 Rscript -e "devtools::document()"
 Rscript -e "jmvtools::install()"
@@ -98,11 +98,272 @@ Rscript -e "jmvtools::install()"
 # Copy .jmo file to jamovi modules directory
 ```
 
-**IMPORTANT**:
-
-- Prepare a dataset and vignette for each function.
-  - Make sure the data is comprehensive enough to test all arguments.
-  - Vignette should be explanatory for the clinicians.
+**CRITICAL**:
 - After adding a new function, always ensure `jmvtools::prepare()` and `devtools::document()` run without errors to verify module compilation success
-- Before closing any GitHub issue, always ensure `jmvtools::prepare()` and `devtools::document()` run without errors to verify module compilation success.
-- When the implementation is finished successfully close the issue and move to the next one
+- Before closing any GitHub issue, always ensure `jmvtools::prepare()` and `devtools::document()` run without errors to verify module compilation success
+
+## Function Parameter Architecture
+
+### Common Parameter Patterns
+
+Functions must include ALL required parameters, even if set to NULL:
+
+```r
+# vartree function requires complete parameter list
+vartree(
+  data = data,
+  vars = variables,
+  percvar = NULL,
+  percvarLevel = NULL,
+  summaryvar = NULL,
+  prunebelow = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  follow = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL,
+  excl = FALSE,
+  vp = TRUE,
+  horizontal = FALSE,
+  sline = TRUE,
+  varnames = FALSE,
+  nodelabel = TRUE,
+  pct = FALSE
+)
+```
+
+### Function-Specific Parameter Requirements
+
+- **agepyramid**: Use `gender = "Sex", female = "Female"` (not `sex = "Sex"`)
+- **crosstable**: Use `vars` and `group` parameters (not `rows/cols`)
+- **jjstatsplot functions**: Always include `grvar` parameter (can be NULL)
+- **summarydata**: Requires `date_vars` and `grvar` parameters
+- **alluvial**: Must include `condensationvar` parameter
+- **venn**: Use `var1`, `var2`, `var3`, `var4` with corresponding `var1true`, `var2true`, etc.
+- **vartree**: Must include ALL level parameters (`followLevel1`, `followLevel2`, etc.)
+
+### Deprecated Parameters
+
+Never use these parameters (removed from functions):
+- `title`, `subtitle`, `mytitle` - Not supported in most functions
+- `total`, `percentages` - Removed from crosstable
+- `group_comparisons` - Use other tableone parameters instead
+
+## Data Architecture
+
+### Included Datasets
+
+- **histopathology**: Main example dataset (250 patients, 38 variables)
+- **BreastCancer**: Wisconsin dataset for classification
+- **colon**: Colon cancer survival data
+- **melanoma**: Melanoma survival data
+- **treatmentResponse**: Oncology treatment response data
+- **rocdata**: ROC analysis examples
+
+### Dataset Pattern
+
+All datasets include comprehensive variables for testing function parameters:
+- Demographics (Age, Sex, Race)
+- Pathological features (Grade, TStage, LVI, PNI)
+- Outcomes (Death, Outcome, OverallTime)
+- Biomarkers (MeasurementA, MeasurementB)
+
+## Vignette Organization
+
+### Vignette Structure (100+ vignettes)
+
+1. **01-XX**: Getting started and user guides
+2. **02-XX**: ClinicoPath Descriptives modules
+3. **03-XX**: meddecide (medical decision analysis)
+4. **04-XX**: jsurvival (survival analysis)
+5. **05-XX**: jjstatsplot (statistical visualization)
+6. **06-XX**: Clinical workflows and examples
+7. **07-XX**: Diagnostic and specialized analysis
+8. **08-XX**: Individual function documentation
+9. **09-XX**: Advanced topics and galleries
+10. **10-XX**: Programming guides and references
+
+### Vignette Requirements
+
+- Each function must have a comprehensive dataset for testing all arguments
+- Vignettes should be explanatory for clinicians
+- Use `pkgdown::build_articles()` to test rendering
+- All function calls must use correct, complete parameter lists
+- **When rendering vignette files if outputs or artefacts are generated like figures, they should be under vignettes folder**
+
+### Vignette Naming Convention
+
+- Vignette names follow a structured format: `{domain}-{number}-{EXPLANATORY_HEADING}`
+- Domains include: `general`, `clinicopath-descriptives`, `jsurvival`, `meddecide`, `jjstatsplot`
+- Examples:
+  - `general-03-BBC_STYLE_IMPLEMENTATION.md`
+  - `general-04-ECONOMIST_FONTS_INSTALLATION.md`
+  - `general-05-QUICK_FONT_SETUP.md`
+  - `meddecide-06-DECISION_TREE_MODULE_SUMMARY.md`
+  - `clinicopath-descriptives-01-tableone.qmd`
+  - `clinicopath-descriptives-02-summarydata.qmd`
+  - `clinicopath-descriptives-03-reportcat.qmd`
+  - `clinicopath-descriptives-04-benford.qmd`
+  - `clinicopath-descriptives-05-alluvial.qmd`
+
+## Key Dependencies
+
+### Core Dependencies
+- **jmvcore**: jamovi core framework
+- **R6**: Object-oriented programming
+- **magrittr**: Pipe operators
+
+### Analysis Packages
+- **survival, survminer**: Survival analysis
+- **ggstatsplot**: Statistical plotting
+- **tableone, gtsummary**: Table generation
+- **pROC, cutpointr**: ROC analysis
+- **arsenal, janitor**: Data manipulation
+
+### Visualization Packages
+- **ggplot2**: Core plotting
+- **alluvial, ggalluvial**: Alluvial diagrams
+- **ggvenn**: Venn diagrams
+- **vtree**: Variable trees
+
+## Module Menu Organization
+
+### jamovi Menu Structure
+- **Exploration**: Descriptive analysis, cross-tables, visualizations
+- **Survival**: Survival analysis, Cox regression, person-time analysis
+- **meddecide**: Medical decision analysis, ROC curves, diagnostic tests
+- **JJStatsPlot**: Statistical plots and visualizations
+
+### Analysis Distribution
+- **170+ analysis functions** across 5 main functional areas
+- Each analysis has 4-file jamovi structure (.a.yaml, .b.R, .u.yaml, .r.yaml)
+- Auto-generated .h.R header files from yaml definitions
+
+## Environment Configuration
+
+- **Pandoc**: Version 3.4 available via RStudio at `/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64`
+- **R Version**: Requires R >= 4.1.0
+- **jamovi**: Module version 0.0.3.32, requires jamovi >= 1.8.0
+
+## Development Reminders
+
+### Repository Management
+- Do not rename pkgnet-report users-of-clinicopath module-development-jamovi vignettes
+
+## Code Analysis Tools
+
+### Using Gemini CLI for Large Codebase Analysis
+
+When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive
+context window. Use `gemini -p` to leverage Google Gemini's large context capacity.
+
+### File and Directory Inclusion Syntax
+
+Use the `@` syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the
+  gemini command:
+
+#### Examples:
+
+**Single file analysis:**
+gemini -p "@src/main.py Explain this file's purpose and structure"
+
+Multiple files:
+gemini -p "@package.json @src/index.js Analyze the dependencies used in the code"
+
+Entire directory:
+gemini -p "@src/ Summarize the architecture of this codebase"
+
+Multiple directories:
+gemini -p "@src/ @tests/ Analyze test coverage for the source code"
+
+Current directory and subdirectories:
+gemini -p "@./ Give me an overview of this entire project"
+
+# Or use --all_files flag:
+gemini --all_files -p "Analyze the project structure and dependencies"
+
+### Implementation Verification Examples
+
+Check if a feature is implemented:
+gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions"
+
+Verify authentication implementation:
+gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware"
+
+Check for specific patterns:
+gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths"
+
+Verify error handling:
+gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks"
+
+Check for rate limiting:
+gemini -p "@backend/ @middleware/ Is rate limiting implemented for the API? Show the implementation details"
+
+Verify caching strategy:
+gemini -p "@src/ @lib/ @services/ Is Redis caching implemented? List all cache-related functions and their usage"
+
+Check for specific security measures:
+gemini -p "@src/ @api/ Are SQL injection protections implemented? Show how user inputs are sanitized"
+
+Verify test coverage for features:
+gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases"
+
+### When to Use Gemini CLI
+
+Use gemini -p when:
+- Analyzing entire codebases or large directories
+- Comparing multiple large files
+- Need to understand project-wide patterns or architecture
+- Current context window is insufficient for the task
+- Working with files totaling more than 100KB
+- Verifying if specific features, patterns, or security measures are implemented
+- Checking for the presence of certain coding patterns across the entire codebase
+
+### Important Notes
+
+- Paths in @ syntax are relative to your current working directory when invoking gemini
+- The CLI will include file contents directly in the context
+- No need for --yolo flag for read-only analysis
+- Gemini's context window can handle entire codebases that would overflow Claude's context
+- When checking implementations, be specific about what you're looking for to get accurate results
+
+## YAML File Development Patterns
+
+### Argument Configuration Guidelines
+
+- **Default NULL Pattern**: For optional arguments in `.a.yaml` files, explicitly set `default: NULL`
+- **Example Configuration**:
+    - Add `default: NULL` for optional variables 
+    - Specify `allowNone: true` for level-based parameters
+    - Use `suggested` and `permitted` to control variable type selection
+
+### Specific YAML Configuration Examples
+
+- **Percentage Variable**:
+    ```yaml
+    - name: percvar
+      title: Variable for Percentage
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+
+    - name: percvarLevel
+      title: Level
+      type: Level
+      variable: (percvar)
+      allowNone: true
+
+    - name: summaryvar
+      title: Continuous Variable for Summaries
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+    ```
+
+### Key Recommendations
+- Always provide clear, descriptive `title` for each parameter
+- Use `suggested` and `permitted` to guide appropriate variable selection
+- Set `default: NULL` for optional parameters
+- Use `allowNone: true` for optional level-based parameters

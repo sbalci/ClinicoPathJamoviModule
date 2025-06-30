@@ -1,7 +1,7 @@
 ---
 name: jiwillsurvive
 title: "Intuitive Survival Analysis"
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: "User-Friendly Survival Analysis with iwillsurvive"
 version: '0.0.3'

@@ -1,7 +1,7 @@
 ---
 name: jsummarytools
 title: Summary Statistics with summarytools
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 version: '1.0.0'
 jas: '1.2'

@@ -1,7 +1,7 @@
 ---
 name: desctools
 title: Advanced Statistical Tests
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 'Statistical Tests from DescTools Package'
 version: '0.0.3'

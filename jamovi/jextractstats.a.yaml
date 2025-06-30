@@ -1,7 +1,7 @@
 ---
 name: jextractstats
 title: "Statistical Data Extraction from ggstatsplot"
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Data Extraction
 menuSubtitle: "Extract Statistical Details from ggstatsplot Analyses"
 version: '0.0.3'

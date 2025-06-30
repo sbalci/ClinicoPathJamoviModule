@@ -1,7 +1,7 @@
 ---
 name: jvisr
 title: "Clinical Research Visualization with visR"
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: "Fit-for-Purpose Clinical Visualizations"
 version: '0.0.3'

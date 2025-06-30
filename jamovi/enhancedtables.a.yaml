@@ -1,7 +1,7 @@
 ---
 name: enhancedtables
 title: Enhanced Tables with gt
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
 version: '0.0.3'
 jas: '1.2'
