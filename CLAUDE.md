@@ -367,3 +367,23 @@ Use gemini -p when:
 - Use `suggested` and `permitted` to guide appropriate variable selection
 - Set `default: NULL` for optional parameters
 - Use `allowNone: true` for optional level-based parameters
+
+## Development Workflow Memories
+
+### Testing Errors and Piping to Claude
+- Use bash command to test errors and pipe them to claude:
+```bash
+RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64" \
+Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude
+```
+
+### Function Development Workflow
+- Checking function step by step:
+    - read .b.R file and associated yaml files for each function
+    - find relevant vignettes and documentation for this function
+    - check if the function has appropriate data to test it
+    - if not, create a test dataset
+    - check if the vignettes and documentation reflect all the features of the function
+    - if not, update the vignettes and documentation accordingly
+    - check if the function is tested in the tests folder
+    - if not, write tests for the function
