@@ -13,10 +13,13 @@ new_version <- "0.0.3.34"
 new_date <- "2024-07-01"
 
 # Define WIP, check, extended status ----
-check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
-extended <- TRUE # Set to TRUE if you want to document and install submodules
-webpage <- TRUE # Set to TRUE if you want to build the pkgdown website for the modules
+check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
+extended <- FALSE # Set to TRUE if you want to document and install submodules
+webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
+commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
+
+
 
 # Load required packages ----
 library(xfun)
@@ -891,7 +894,7 @@ commit_message <- sprintf("WIP, update modules to version %s and date %s",
                           new_date)
 commit_repo(main_repo_dir, commit_message)
 
-if (WIP) {
+if (commit_modules) {
   commit_repo(jjstatsplot_dir, commit_message)
   commit_repo(meddecide_dir, commit_message)
   commit_repo(jsurvival_dir, commit_message)
