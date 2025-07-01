@@ -78,6 +78,9 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             # Initialize accessibility information
             private$.init_accessibility_info()
+            
+            # Initialize template system
+            private$.init_template_system()
         },
 
         .run = function() {
@@ -959,6 +962,104 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             }
             return("")
         },
+        
+        .perform_kruskal_analysis = function(data, y_var, x_var) {
+            if (!is.numeric(data[[y_var]])) {
+                return("<p style='color: orange;'>Kruskal-Wallis test requires numeric dependent variable</p>")
+            }
+            
+            formula_str <- paste(y_var, "~", x_var)
+            kruskal_result <- kruskal.test(as.formula(formula_str), data = data)
+            
+            # Calculate effect size (eta-squared equivalent for Kruskal-Wallis)
+            # Using the formula: eta² = (H - k + 1) / (n - k)
+            n <- nrow(data)
+            k <- length(unique(data[[x_var]]))
+            eta_squared_h <- (kruskal_result$statistic - k + 1) / (n - k)
+            eta_squared_h <- max(0, eta_squared_h)  # Ensure non-negative
+            
+            result_html <- paste0(
+                "<div style='border-left: 4px solid #007A54; padding-left: 15px; margin: 10px 0;'>",
+                "<p><strong>Kruskal-Wallis Test (Non-parametric ANOVA):</strong></p>",
+                "<p>H = ", round(kruskal_result$statistic, 3), 
+                ", df = ", kruskal_result$parameter, 
+                ", p = ", format.pval(kruskal_result$p.value, digits = 3), "</p>",
+                "<p><strong>Effect Size (η²H):</strong> ", round(eta_squared_h, 3), 
+                " (", private$.interpret_effect_size(eta_squared_h, "eta"), ")</p>",
+                "<p style='color: #666; font-style: italic;'>",
+                "Note: Kruskal-Wallis is used when ANOVA assumptions are violated (non-normal distributions)</p>",
+                if (kruskal_result$p.value < 0.05) "<p style='color: #007A54; font-style: italic;'>📌 Significant result detected. Consider Dunn's test for pairwise comparisons.</p>" else "",
+                "</div>"
+            )
+            
+            return(result_html)
+        },
+        
+        .perform_regression_analysis = function(data, y_var, x_var) {
+            if (!is.numeric(data[[y_var]])) {
+                return("<p style='color: orange;'>Regression analysis requires numeric dependent variable</p>")
+            }
+            
+            # Determine regression type based on x_var
+            if (is.numeric(data[[x_var]])) {
+                # Simple linear regression
+                formula_str <- paste(y_var, "~", x_var)
+                lm_result <- lm(as.formula(formula_str), data = data)
+                lm_summary <- summary(lm_result)
+                
+                # Extract key statistics
+                r_squared <- lm_summary$r.squared
+                adj_r_squared <- lm_summary$adj.r.squared
+                f_stat <- lm_summary$fstatistic[1]
+                f_p_value <- pf(f_stat, lm_summary$fstatistic[2], lm_summary$fstatistic[3], lower.tail = FALSE)
+                
+                # Coefficients
+                intercept <- lm_summary$coefficients[1, 1]
+                slope <- lm_summary$coefficients[2, 1]
+                slope_se <- lm_summary$coefficients[2, 2]
+                slope_t <- lm_summary$coefficients[2, 3]
+                slope_p <- lm_summary$coefficients[2, 4]
+                
+                # Confidence intervals for slope
+                conf_int <- confint(lm_result)[2, ]
+                
+                result_html <- paste0(
+                    "<div style='border-left: 4px solid #333333; padding-left: 15px; margin: 10px 0;'>",
+                    "<p><strong>Simple Linear Regression:</strong></p>",
+                    "<p><strong>Model:</strong> ", y_var, " = ", round(intercept, 3), " + ", round(slope, 3), " × ", x_var, "</p>",
+                    "<p><strong>Slope:</strong> β = ", round(slope, 3), 
+                    " (SE = ", round(slope_se, 3), ", t = ", round(slope_t, 3), 
+                    ", p = ", format.pval(slope_p, digits = 3), ")</p>",
+                    "<p><strong>95% CI for slope:</strong> [", round(conf_int[1], 3), ", ", round(conf_int[2], 3), "]</p>",
+                    "<p><strong>Model Fit:</strong></p>",
+                    "<ul>",
+                    "<li>R² = ", round(r_squared, 3), " (", round(r_squared * 100, 1), "% variance explained)</li>",
+                    "<li>Adjusted R² = ", round(adj_r_squared, 3), "</li>",
+                    "<li>F(1, ", lm_summary$fstatistic[3], ") = ", round(f_stat, 3), 
+                    ", p = ", format.pval(f_p_value, digits = 3), "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+                
+            } else {
+                # Categorical predictor - treat as ANOVA with regression output
+                formula_str <- paste(y_var, "~", x_var)
+                lm_result <- lm(as.formula(formula_str), data = data)
+                lm_summary <- summary(lm_result)
+                
+                result_html <- paste0(
+                    "<div style='border-left: 4px solid #333333; padding-left: 15px; margin: 10px 0;'>",
+                    "<p><strong>Regression with Categorical Predictor:</strong></p>",
+                    "<p><strong>R² = </strong>", round(lm_summary$r.squared, 3), 
+                    " (", round(lm_summary$r.squared * 100, 1), "% variance explained)</p>",
+                    "<p style='color: #666; font-style: italic;'>",
+                    "Note: This is equivalent to ANOVA. Use ANOVA for better interpretation of categorical predictors.</p>",
+                    "</div>"
+                )
+            }
+            
+            return(result_html)
+        },
 
         .generate_chart_summary = function() {
             data <- private$.processed_data
@@ -1069,8 +1170,9 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 sep = "\n"
             )
             
-            # Replace placeholders
+            # Replace placeholders - Enhanced with Phase 3 chart types
             geom_mapping <- list(
+                # Core BBC chart types
                 column = "col",
                 bar = "col",
                 line = "line",
@@ -1078,7 +1180,17 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 area = "area",
                 stacked_column = "col",
                 grouped_column = "col",
-                horizontal_bar = "col"
+                horizontal_bar = "col",
+                
+                # Phase 3: Advanced BBC chart types
+                scatter = "point",
+                bubble = "point",
+                boxplot = "boxplot",
+                violin = "violin",
+                density = "density",
+                heatmap = "tile",
+                slope = "line",
+                lollipop = "point"
             )
             
             actual_code <- gsub("\\{x_var\\}", x_var, code_template)
@@ -1184,6 +1296,435 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             self$results$accessibility_info$setContent(access_html)
         },
+        
+        # Phase 3: Advanced BBC Chart Type Implementations
+        .create_scatter_plot = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style scatter plot with optional regression line
+            if (is.null(group_var)) {
+                plot <- plot + ggplot2::geom_point(color = colors[1], size = 3, alpha = 0.7)
+            } else {
+                plot <- plot + ggplot2::geom_point(size = 3, alpha = 0.7)
+            }
+            
+            # Add regression line if both variables are numeric
+            if (is.numeric(data[[x_var]]) && is.numeric(data[[y_var]])) {
+                if (self$options$add_trend_line) {
+                    plot <- plot + ggplot2::geom_smooth(
+                        method = "lm", 
+                        se = self$options$show_confidence_band,
+                        color = colors[1], 
+                        fill = colors[1],
+                        alpha = 0.3,
+                        size = 1.5
+                    )
+                }
+            }
+            
+            return(plot)
+        },
+        
+        .create_bubble_plot = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style bubble chart with size aesthetic
+            size_var <- self$options$size_var
+            
+            if (is.null(size_var) || !size_var %in% names(data)) {
+                # Default bubble size
+                if (is.null(group_var)) {
+                    plot <- plot + ggplot2::geom_point(color = colors[1], size = 6, alpha = 0.7)
+                } else {
+                    plot <- plot + ggplot2::geom_point(size = 6, alpha = 0.7)
+                }
+            } else {
+                # Size mapped to variable
+                plot <- plot + ggplot2::geom_point(
+                    ggplot2::aes(size = .data[[size_var]]),
+                    alpha = 0.7
+                ) + ggplot2::scale_size_continuous(
+                    range = c(3, 15),
+                    guide = ggplot2::guide_legend(title = size_var)
+                )
+            }
+            
+            return(plot)
+        },
+        
+        .create_boxplot = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style box plot
+            if (is.null(group_var)) {
+                plot <- plot + ggplot2::geom_boxplot(
+                    fill = colors[1], 
+                    color = "#222222",
+                    alpha = 0.7,
+                    outlier.color = colors[1],
+                    outlier.size = 2
+                )
+            } else {
+                plot <- plot + ggplot2::geom_boxplot(
+                    color = "#222222",
+                    alpha = 0.7,
+                    outlier.size = 2
+                )
+            }
+            
+            # Add individual points if requested
+            if (self$options$show_points) {
+                plot <- plot + ggplot2::geom_jitter(
+                    width = 0.2, 
+                    alpha = 0.5, 
+                    size = 1.5,
+                    color = "#333333"
+                )
+            }
+            
+            return(plot)
+        },
+        
+        .create_violin_plot = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style violin plot
+            if (is.null(group_var)) {
+                plot <- plot + ggplot2::geom_violin(
+                    fill = colors[1],
+                    color = "#222222", 
+                    alpha = 0.7,
+                    trim = FALSE
+                )
+            } else {
+                plot <- plot + ggplot2::geom_violin(
+                    color = "#222222",
+                    alpha = 0.7,
+                    trim = FALSE
+                )
+            }
+            
+            # Add median line
+            plot <- plot + ggplot2::stat_summary(
+                fun = "median",
+                geom = "crossbar",
+                width = 0.3,
+                color = "#222222",
+                size = 0.5
+            )
+            
+            return(plot)
+        },
+        
+        .create_density_plot = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style density plot (using x_var for density, y_var ignored)
+            if (is.null(group_var)) {
+                plot <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]])) +
+                    ggplot2::geom_density(
+                        fill = colors[1],
+                        color = colors[1],
+                        alpha = 0.7,
+                        size = 1.5
+                    )
+            } else {
+                plot <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]], fill = .data[[group_var]])) +
+                    ggplot2::geom_density(alpha = 0.7, size = 1)
+            }
+            
+            return(plot)
+        },
+        
+        .create_heatmap = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style heatmap (requires aggregated data)
+            if (!is.null(group_var)) {
+                # Use group_var as the value for heatmap
+                plot <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]], fill = .data[[group_var]])) +
+                    ggplot2::geom_tile(color = "white", size = 0.5) +
+                    ggplot2::scale_fill_gradient(
+                        low = "#ffffff", 
+                        high = colors[1],
+                        name = group_var
+                    )
+            } else {
+                # Simple count-based heatmap
+                plot <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])) +
+                    ggplot2::geom_bin2d(bins = 20) +
+                    ggplot2::scale_fill_gradient(
+                        low = "#ffffff",
+                        high = colors[1],
+                        name = "Count"
+                    )
+            }
+            
+            return(plot)
+        },
+        
+        .create_slope_chart = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style slope chart for showing change over time
+            if (is.null(group_var)) {
+                plot <- plot + 
+                    ggplot2::geom_line(color = colors[1], size = 2, alpha = 0.8) +
+                    ggplot2::geom_point(color = colors[1], size = 4)
+            } else {
+                plot <- plot + 
+                    ggplot2::geom_line(ggplot2::aes(group = .data[[group_var]], color = .data[[group_var]]), size = 2, alpha = 0.8) +
+                    ggplot2::geom_point(ggplot2::aes(color = .data[[group_var]]), size = 4)
+            }
+            
+            # Add value labels at endpoints
+            if (self$options$show_values) {
+                plot <- plot + ggplot2::geom_text(
+                    ggplot2::aes(label = round(.data[[y_var]], 1)),
+                    size = 4,
+                    vjust = -0.5,
+                    color = "#222222"
+                )
+            }
+            
+            return(plot)
+        },
+        
+        .create_lollipop_chart = function(plot, data, x_var, y_var, group_var, colors) {
+            # BBC-style lollipop chart
+            if (is.null(group_var)) {
+                plot <- plot + 
+                    ggplot2::geom_segment(
+                        ggplot2::aes(xend = .data[[x_var]], yend = 0),
+                        color = colors[1],
+                        size = 1.5
+                    ) +
+                    ggplot2::geom_point(
+                        color = colors[1],
+                        size = 4
+                    )
+            } else {
+                plot <- plot + 
+                    ggplot2::geom_segment(
+                        ggplot2::aes(xend = .data[[x_var]], yend = 0, color = .data[[group_var]]),
+                        size = 1.5
+                    ) +
+                    ggplot2::geom_point(
+                        ggplot2::aes(color = .data[[group_var]]),
+                        size = 4
+                    )
+            }
+            
+            # Flip coordinates for horizontal lollipops
+            if (self$options$horizontal_lollipop) {
+                plot <- plot + ggplot2::coord_flip()
+            }
+            
+            return(plot)
+        },
+        
+        # Phase 3: BBC Template System
+        .init_template_system = function() {
+            template_html <- paste(
+                "<h4 style='color: #1380A1;'>📋 BBC News Templates</h4>",
+                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<p><strong>Pre-configured layouts for different BBC coverage areas:</strong></p>",
+                "<div style='display: grid; gap: 10px; margin: 15px 0;'>",
+                private$.get_template_cards(),
+                "</div>",
+                "<p style='color: #666; font-size: 0.9em; margin-top: 15px;'>",
+                "Templates apply appropriate colors, chart types, and styling based on BBC editorial guidelines for each coverage area.",
+                "</p>",
+                "</div>"
+            )
+            
+            self$results$template_guide$setContent(template_html)
+        },
+        
+        .get_template_cards = function() {
+            templates <- private$.get_bbc_templates()
+            cards <- ""
+            
+            for (template_name in names(templates)) {
+                template <- templates[[template_name]]
+                cards <- paste0(cards,
+                    "<div style='border: 1px solid #ddd; border-radius: 5px; padding: 10px; background: white;'>",
+                    "<div style='display: flex; align-items: center; margin-bottom: 8px;'>",
+                    "<span style='font-size: 20px; margin-right: 8px;'>", template$icon, "</span>",
+                    "<strong style='color: ", template$primary_color, ";'>", template$display_name, "</strong>",
+                    "</div>",
+                    "<p style='margin: 5px 0; font-size: 0.9em; color: #666;'>", template$description, "</p>",
+                    "<p style='margin: 5px 0; font-size: 0.8em;'>",
+                    "<strong>Best for:</strong> ", paste(template$chart_types, collapse = ", "), "</p>",
+                    "</div>"
+                )
+            }
+            
+            return(cards)
+        },
+        
+        .get_bbc_templates = function() {
+            return(list(
+                "economic" = list(
+                    display_name = "Economic Coverage",
+                    icon = "📊",
+                    description = "GDP, inflation, unemployment, and financial indicators",
+                    primary_color = "#1380A1",
+                    chart_types = c("column", "line", "area"),
+                    default_chart = "column",
+                    color_scheme = "bbc_blue",
+                    title_style = "Economic data with clear comparisons",
+                    subtitle_guidance = "Include time period and data source context"
+                ),
+                
+                "political" = list(
+                    display_name = "Political Coverage", 
+                    icon = "🗳️",
+                    description = "Elections, polling, approval ratings, and political analysis",
+                    primary_color = "#FAAB18",
+                    chart_types = c("grouped_column", "stacked_column", "line"),
+                    default_chart = "grouped_column",
+                    color_scheme = "multi_color",
+                    title_style = "Neutral reporting of political metrics",
+                    subtitle_guidance = "Specify polling dates and sample sizes"
+                ),
+                
+                "health" = list(
+                    display_name = "Health Coverage",
+                    icon = "🏥", 
+                    description = "NHS statistics, vaccination rates, waiting times, health outcomes",
+                    primary_color = "#007f7f",
+                    chart_types = c("line", "area", "column"),
+                    default_chart = "line",
+                    color_scheme = "bbc_teal",
+                    title_style = "Clear health trend communication",
+                    subtitle_guidance = "Include health system and time context"
+                ),
+                
+                "sports" = list(
+                    display_name = "Sports Coverage",
+                    icon = "⚽",
+                    description = "League tables, performance statistics, sports analysis",
+                    primary_color = "#FAAB18",
+                    chart_types = c("point", "lollipop", "horizontal_bar"),
+                    default_chart = "point", 
+                    color_scheme = "bbc_orange",
+                    title_style = "Performance rankings and comparisons",
+                    subtitle_guidance = "Specify season and competition details"
+                ),
+                
+                "climate" = list(
+                    display_name = "Climate & Environment",
+                    icon = "🌍",
+                    description = "Temperature trends, emissions, environmental data",
+                    primary_color = "#007A54",
+                    chart_types = c("area", "line", "heatmap"),
+                    default_chart = "area",
+                    color_scheme = "multi_color",
+                    title_style = "Long-term environmental trends",
+                    subtitle_guidance = "Include scientific context and time scales"
+                ),
+                
+                "education" = list(
+                    display_name = "Education Coverage",
+                    icon = "🎓",
+                    description = "Achievement gaps, university admissions, skills analysis",
+                    primary_color = "#1380A1",
+                    chart_types = c("stacked_column", "grouped_column", "boxplot"),
+                    default_chart = "grouped_column",
+                    color_scheme = "bbc_blue",
+                    title_style = "Educational equity and outcomes",
+                    subtitle_guidance = "Specify academic year and geographic scope"
+                ),
+                
+                "technology" = list(
+                    display_name = "Technology Coverage",
+                    icon = "💻",
+                    description = "Digital divide, device ownership, internet usage trends",
+                    primary_color = "#333333",
+                    chart_types = c("column", "scatter", "bubble"),
+                    default_chart = "column",
+                    color_scheme = "bbc_gray",
+                    title_style = "Technology adoption and digital trends",
+                    subtitle_guidance = "Include demographic breakdowns and survey details"
+                ),
+                
+                "general" = list(
+                    display_name = "General News",
+                    icon = "📰",
+                    description = "Flexible template for various news stories and analysis",
+                    primary_color = "#1380A1",
+                    chart_types = c("column", "line", "point", "bar"),
+                    default_chart = "column",
+                    color_scheme = "bbc_blue",
+                    title_style = "Clear, descriptive headlines",
+                    subtitle_guidance = "Provide context and key takeaways"
+                )
+            ))
+        },
+        
+        .apply_bbc_template = function(template_name) {
+            templates <- private$.get_bbc_templates()
+            
+            if (!template_name %in% names(templates)) {
+                warning(paste("Template", template_name, "not found. Using general template."))
+                template_name <- "general"
+            }
+            
+            template <- templates[[template_name]]
+            
+            # Apply template settings to options
+            tryCatch({
+                # Set color scheme
+                if (!is.null(template$color_scheme)) {
+                    self$options$bbc_colors <- template$color_scheme
+                }
+                
+                # Set default chart type
+                if (!is.null(template$default_chart)) {
+                    if (is.null(self$options$chart_type) || self$options$chart_type == "") {
+                        self$options$chart_type <- template$default_chart
+                    }
+                }
+                
+                # Update template guide with applied template
+                applied_html <- paste0(
+                    "<div style='background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<h5 style='color: #2e7d32; margin: 0 0 10px 0;'>", template$icon, " Applied: ", template$display_name, "</h5>",
+                    "<p style='margin: 0 0 10px 0; color: #2e7d32;'>", template$description, "</p>",
+                    "<p style='margin: 0; font-size: 0.9em; color: #2e7d32;'>",
+                    "<strong>Style Guide:</strong> ", template$title_style, "<br/>",
+                    "<strong>Subtitle Tips:</strong> ", template$subtitle_guidance,
+                    "</p>",
+                    "</div>"
+                )
+                
+                # Update the template guide display
+                current_content <- self$results$template_guide$content
+                enhanced_content <- paste0(applied_html, current_content)
+                self$results$template_guide$setContent(enhanced_content)
+                
+                return(TRUE)
+                
+            }, error = function(e) {
+                warning(paste("Error applying template:", e$message))
+                return(FALSE)
+            })
+        },
+        
+        .get_template_example_data = function(template_name) {
+            # Return appropriate example dataset for template
+            templates <- private$.get_bbc_templates()
+            
+            if (template_name %in% names(templates)) {
+                template <- templates[[template_name]]
+                
+                # Map templates to example datasets
+                dataset_map <- list(
+                    "economic" = "economic_indicators_data",
+                    "political" = "election_survey_data", 
+                    "health" = "health_statistics_data",
+                    "sports" = "sports_performance_data",
+                    "climate" = "climate_environment_data",
+                    "education" = "education_attainment_data",
+                    "technology" = "digital_technology_data",
+                    "general" = "histopathology"
+                )
+                
+                dataset_name <- dataset_map[[template_name]]
+                if (!is.null(dataset_name)) {
+                    return(dataset_name)
+                }
+            }
+            
+            return("histopathology")  # Default fallback
+        },
 
         .plot_main = function(image, ggtheme, theme, ...) {
             data <- image$state
@@ -1224,6 +1765,24 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     plot <- plot + ggplot2::geom_col(position = "stack")
                 } else if (chart_type == "grouped_column") {
                     plot <- plot + ggplot2::geom_col(position = "dodge")
+                
+                # Phase 3: Enhanced BBC Chart Types
+                } else if (chart_type == "scatter") {
+                    plot <- private$.create_scatter_plot(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "bubble") {
+                    plot <- private$.create_bubble_plot(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "boxplot") {
+                    plot <- private$.create_boxplot(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "violin") {
+                    plot <- private$.create_violin_plot(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "density") {
+                    plot <- private$.create_density_plot(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "heatmap") {
+                    plot <- private$.create_heatmap(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "slope") {
+                    plot <- private$.create_slope_chart(plot, data, x_var, y_var, group_var, colors)
+                } else if (chart_type == "lollipop") {
+                    plot <- private$.create_lollipop_chart(plot, data, x_var, y_var, group_var, colors)
                 }
                 
                 # Apply colors for grouped data
