@@ -1,0 +1,452 @@
+---
+title: "Treatment Pathway Visualization with alluvialSurvival"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+format: html
+vignette: >
+  %\VignetteIndexEntry{Treatment Pathway Visualization with alluvialSurvival}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+The `alluvialSurvival()` function in ClinicoPath provides specialized visualization for patient treatment pathways over time, combining alluvial diagrams with survival analysis. This tool is particularly valuable for understanding how patients move through different disease stages and treatments, with the ability to incorporate survival outcomes.
+
+Unlike static cross-sectional analyses, alluvial survival plots reveal the dynamic nature of patient care, showing:
+- Disease progression and stage migrations
+- Treatment sequence patterns
+- Patient flow through different therapeutic interventions
+- Survival outcomes associated with different pathways
+
+This vignette demonstrates all features of the alluvialSurvival function using real clinical datasets.
+
+## Loading Required Libraries and Data
+
+```{r setup}
+library(ClinicoPath)
+
+# Load the treatment pathways dataset
+data("treatment_pathways")
+
+# Preview the data structure
+str(treatment_pathways)
+head(treatment_pathways)
+```
+
+## Data Requirements
+
+The alluvialSurvival function requires longitudinal data with specific structure:
+
+### Required Variables:
+- **Time Variable**: Numeric time points (e.g., months, visits)
+- **Stage Variable**: Disease stage at each time point (factor)
+- **Treatment Variable**: Treatment received at each time point (factor)
+- **Patient ID**: Unique identifier for tracking individual patients (factor)
+
+### Optional Variables:
+- **Survival Variable**: Binary outcome variable (0 = alive, 1 = dead)
+
+### Data Structure:
+- **Longitudinal format**: One row per patient per time point
+- **Minimum requirements**: ≥5 patients, ≥2 time points
+- **No missing values** in time or patient ID variables
+
+## Basic Treatment Pathway Visualization
+
+### Simple Pathway Analysis
+
+```{r basic-pathway}
+# Basic treatment pathway visualization
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage", 
+    treatmentVar = "Treatment",
+    patientId = "ID"
+)
+```
+
+### Understanding the Visualization
+
+The alluvial plot shows:
+- **Vertical strata**: Categories at each time point
+- **Flows**: Patient transitions between categories
+- **Width**: Proportional to number of patients
+- **Colors**: Clinical color scheme by default
+
+## Parameter Customization
+
+### Color Schemes
+
+The function provides two carefully designed color palettes:
+
+```{r color-schemes}
+# Clinical color scheme (default)
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment", 
+    patientId = "ID",
+    colorScheme = "clinical"
+)
+
+# Colorblind-safe palette
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID", 
+    colorScheme = "colorblind"
+)
+```
+
+### Percentage Axis
+
+Add a secondary axis showing percentages:
+
+```{r percentage-axis}
+# Show percentage of patients on right axis
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    showRightAxis = TRUE
+)
+```
+
+## Survival Analysis Integration
+
+### Basic Survival Statistics
+
+When survival data is available, the function provides survival statistics:
+
+```{r survival-stats}
+# Add survival variable for statistics
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time", 
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    survivalVar = "Survival_Status"
+)
+```
+
+### Survival Curves
+
+Enable survival curve visualization:
+
+```{r survival-curves}
+# Complete analysis with survival curves
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage", 
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    survivalVar = "Survival_Status",
+    showSurvival = TRUE
+)
+```
+
+The survival plots show:
+- **Kaplan-Meier curves** by initial disease stage
+- **Risk tables** showing patients at risk
+- **P-values** for comparing survival curves
+- **Confidence intervals** for survival estimates
+
+## Comprehensive Analysis
+
+### All Features Combined
+
+```{r comprehensive-analysis}
+# Complete treatment pathway analysis
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment", 
+    patientId = "ID",
+    survivalVar = "Survival_Status",
+    showRightAxis = TRUE,
+    colorScheme = "colorblind",
+    showSurvival = TRUE
+)
+```
+
+## Advanced Examples
+
+### Cancer Treatment Progression
+
+```{r cancer-progression}
+# Focus on cancer stage progression
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    survivalVar = "Survival_Status",
+    colorScheme = "clinical"
+)
+```
+
+### Treatment Sequence Analysis
+
+```{r treatment-sequences}
+# Analyze treatment sequences with outcomes
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time", 
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    survivalVar = "Survival_Status",
+    showRightAxis = TRUE,
+    showSurvival = TRUE
+)
+```
+
+## Clinical Interpretation
+
+### Reading the Pathway Plot
+
+1. **Flow Thickness**: Indicates number of patients following that pathway
+2. **Stage Strata**: Show disease stage distribution at each time point
+3. **Treatment Strata**: Show treatment distribution at each time point
+4. **Transitions**: Reveal progression patterns and treatment responses
+
+### Reading the Survival Curves
+
+1. **Initial Stage Analysis**: Shows survival by disease stage at diagnosis
+2. **Treatment Effect**: Reveals survival differences by final treatment
+3. **Risk Tables**: Provide numbers at risk for each group over time
+4. **P-values**: Test statistical significance of survival differences
+
+## Output Components
+
+The function generates multiple outputs:
+
+### 1. Main Pathway Plot
+- Alluvial visualization of patient flows
+- Enhanced with clinical color schemes
+- Optional percentage axis
+
+### 2. Summary Statistics Table
+- Patient counts by time point
+- Stage and treatment distributions
+- Transition summaries
+
+### 3. Survival Statistics Table (when survival data provided)
+- Survival rates by stage-treatment combinations
+- Event counts and patient numbers
+- Statistical summaries
+
+### 4. Survival Curves (when showSurvival = TRUE)
+- Kaplan-Meier curves by initial stage
+- Risk tables with numbers at risk
+- Log-rank test p-values
+
+## Parameter Reference
+
+Complete parameter documentation:
+
+| Parameter | Type | Options | Default | Description |
+|-----------|------|---------|---------|-------------|
+| `timeVar` | Variable | - | Required | Time points for measurements |
+| `stageVar` | Variable | - | Required | Disease stage at each time point |
+| `treatmentVar` | Variable | - | Required | Treatment received at each time point |
+| `patientId` | Variable | - | Required | Unique patient identifier |
+| `survivalVar` | Variable | - | `NULL` | Binary survival status (0/1) |
+| `showRightAxis` | Boolean | `TRUE`/`FALSE` | `FALSE` | Show percentage axis |
+| `colorScheme` | List | `clinical`, `colorblind` | `clinical` | Color palette selection |
+| `showSurvival` | Boolean | `TRUE`/`FALSE` | `FALSE` | Generate survival curves |
+
+## Data Validation
+
+The function includes comprehensive data validation:
+
+### Required Checks:
+- All required variables present in dataset
+- Minimum 5 patients for meaningful analysis
+- Minimum 2 time points for pathway analysis
+- No missing values in time or patient ID variables
+
+### Survival Variable Validation:
+- Must be binary (0/1) or missing
+- 0 = alive/censored, 1 = dead/event
+
+### Error Messages:
+- Clear, specific error messages for validation failures
+- Guidance for data preparation requirements
+
+## Best Practices
+
+### Data Preparation
+1. **Longitudinal Structure**: Ensure one row per patient per time point
+2. **Consistent Coding**: Use consistent factor levels across time points
+3. **Missing Data**: Handle missing values appropriately before analysis
+4. **Time Points**: Use meaningful time intervals (e.g., months, quarters)
+
+### Visualization Guidelines
+1. **Color Scheme**: Choose based on audience (clinical vs. colorblind-safe)
+2. **Sample Size**: Function works best with 20-500 patients
+3. **Time Points**: Optimal with 3-6 time points
+4. **Categories**: Limit to 3-6 categories per variable for clarity
+
+### Clinical Applications
+1. **Treatment Protocols**: Evaluate standard vs. experimental pathways
+2. **Disease Progression**: Track stage migration patterns
+3. **Outcome Analysis**: Combine pathways with survival outcomes
+4. **Quality Improvement**: Identify optimal treatment sequences
+
+## Troubleshooting
+
+### Common Issues and Solutions:
+
+#### "Data must contain at least 2 time points"
+- Ensure longitudinal data structure
+- Check time variable has multiple unique values
+
+#### "Data must contain at least 5 patients"  
+- Increase sample size for meaningful analysis
+- Consider aggregating similar groups
+
+#### "Survival variable must be binary (0/1)"
+- Recode survival variable to 0 (alive) and 1 (dead)
+- Handle missing values appropriately
+
+#### "Time variable cannot contain missing values"
+- Remove or impute missing time values
+- Ensure complete follow-up data
+
+## Advanced Use Cases
+
+### Multi-Center Studies
+
+```{r multi-center}
+# Analyze pathways across different centers
+# (assuming center variable exists)
+if ("Center" %in% names(treatment_pathways)) {
+    # Subset by center for comparison
+    center_data <- treatment_pathways[treatment_pathways$Center == "A", ]
+    
+    alluvialSurvival(
+        data = center_data,
+        timeVar = "Time",
+        stageVar = "Disease_Stage",
+        treatmentVar = "Treatment",
+        patientId = "ID",
+        survivalVar = "Survival_Status",
+        showSurvival = TRUE
+    )
+}
+```
+
+### Subgroup Analysis
+
+```{r subgroup-analysis}
+# Analyze by age groups or other demographics
+if ("Age" %in% names(treatment_pathways)) {
+    # Create age groups
+    treatment_pathways$AgeGroup <- cut(
+        treatment_pathways$Age, 
+        breaks = c(0, 65, Inf), 
+        labels = c("≤65", ">65")
+    )
+    
+    # Analyze younger patients
+    young_patients <- treatment_pathways[treatment_pathways$AgeGroup == "≤65", ]
+    
+    alluvialSurvival(
+        data = young_patients,
+        timeVar = "Time",
+        stageVar = "Disease_Stage", 
+        treatmentVar = "Treatment",
+        patientId = "ID",
+        survivalVar = "Survival_Status",
+        colorScheme = "colorblind"
+    )
+}
+```
+
+## Integration with Other ClinicoPath Functions
+
+### Workflow Integration
+
+```{r workflow-integration}
+# 1. Start with descriptive analysis
+# (Use other ClinicoPath descriptive functions)
+
+# 2. Perform pathway visualization
+alluvialSurvival(
+    data = treatment_pathways,
+    timeVar = "Time",
+    stageVar = "Disease_Stage",
+    treatmentVar = "Treatment",
+    patientId = "ID",
+    survivalVar = "Survival_Status"
+)
+
+# 3. Follow with detailed survival analysis
+# (Use other ClinicoPath survival functions)
+```
+
+## Export and Reporting
+
+### Publication-Ready Outputs
+
+The alluvialSurvival function generates publication-ready visualizations:
+- High-resolution plots suitable for manuscripts
+- Professional clinical color schemes
+- Clear labeling and legends
+- Statistical annotations
+
+### Reproducible Analysis
+
+```{r reproducible}
+# Set seed for reproducible examples
+set.seed(123)
+
+# Document session info for reproducibility
+sessionInfo()
+```
+
+## Conclusion
+
+The `alluvialSurvival()` function provides a powerful tool for visualizing patient treatment pathways with survival outcomes. Key advantages include:
+
+1. **Comprehensive Visualization**: Combines pathway analysis with survival statistics
+2. **Clinical Focus**: Designed specifically for medical research applications
+3. **Robust Validation**: Extensive data validation and error handling
+4. **Publication Ready**: Professional visualization suitable for manuscripts
+5. **Flexible Analysis**: Supports various clinical research scenarios
+
+The function bridges the gap between descriptive pathway analysis and survival statistics, providing insights into both patient flow patterns and clinical outcomes.
+
+## References
+
+- Alluvial Diagrams in Medical Research
+- Survival Analysis Methods in Clinical Studies  
+- Treatment Pathway Visualization Best Practices
+- ClinicoPath Package Documentation
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

@@ -224,6 +224,62 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$plot_description$setContent(desc_html)
         },
         
+        .add_statistics_to_plot = function(data, options) {
+            # Add statistical information overlay to plots
+            
+            if (options$plot_type %in% c("scatter", "line") && !is.null(data$y)) {
+                # For bivariate plots, add correlation
+                cor_value <- cor(data$x, data$y, use = "complete.obs")
+                stats_text <- paste0("r = ", round(cor_value, 3))
+                
+                # Add regression line for scatter plots
+                if (options$plot_type == "scatter") {
+                    abline(lm(data$y ~ data$x), col = "red", lty = 2)
+                    lm_fit <- lm(data$y ~ data$x)
+                    r_squared <- round(summary(lm_fit)$r.squared, 3)
+                    stats_text <- paste0(stats_text, "\nR² = ", r_squared)
+                }
+                
+                # Position text in upper-left corner
+                mtext(stats_text, side = 3, line = -2, adj = 0.05, cex = 0.8, col = "blue")
+                
+            } else if (options$plot_type == "histogram") {
+                # For histograms, add summary statistics
+                mean_val <- round(mean(data$x, na.rm = TRUE), 2)
+                median_val <- round(median(data$x, na.rm = TRUE), 2)
+                sd_val <- round(sd(data$x, na.rm = TRUE), 2)
+                
+                stats_text <- paste0("Mean: ", mean_val, "\nMedian: ", median_val, "\nSD: ", sd_val)
+                mtext(stats_text, side = 3, line = -4, adj = 0.95, cex = 0.8, col = "blue")
+                
+                # Add vertical lines for mean and median
+                abline(v = mean_val, col = "red", lty = 2, lwd = 2)
+                abline(v = median_val, col = "blue", lty = 3, lwd = 2)
+                
+            } else if (options$plot_type == "boxplot") {
+                # For boxplots, add sample sizes
+                if (!is.null(data$group)) {
+                    group_counts <- table(data$group)
+                    stats_text <- paste0("n = ", paste(group_counts, collapse = ", "))
+                } else {
+                    stats_text <- paste0("n = ", length(data$x))
+                }
+                mtext(stats_text, side = 3, line = -2, adj = 0.05, cex = 0.8, col = "blue")
+                
+            } else if (options$plot_type == "density") {
+                # For density plots, add summary statistics
+                mean_val <- round(mean(data$x, na.rm = TRUE), 2)
+                median_val <- round(median(data$x, na.rm = TRUE), 2)
+                
+                stats_text <- paste0("Mean: ", mean_val, "\nMedian: ", median_val)
+                mtext(stats_text, side = 3, line = -3, adj = 0.95, cex = 0.8, col = "blue")
+                
+                # Add vertical lines for mean and median
+                abline(v = mean_val, col = "red", lty = 2)
+                abline(v = median_val, col = "blue", lty = 3)
+            }
+        },
+        
         # Plot rendering function
         .plot_base = function(image, ggtheme, theme, ...) {
             plot_state <- image$state
@@ -258,6 +314,14 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             tryCatch({
+                # Prepare custom axis limits
+                xlim <- if (options$custom_limits && !is.null(options$x_min) && !is.null(options$x_max)) {
+                    c(options$x_min, options$x_max)
+                } else NULL
+                ylim <- if (options$custom_limits && !is.null(options$y_min) && !is.null(options$y_max)) {
+                    c(options$y_min, options$y_max)
+                } else NULL
+                
                 # Generate plot based on type
                 if (options$plot_type == "scatter") {
                     if (!is.null(data$y)) {
@@ -268,7 +332,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 cex = options$point_size,
                                 main = main_title, 
                                 xlab = x_label, 
-                                ylab = y_label)
+                                ylab = y_label,
+                                xlim = xlim, ylim = ylim)
                             if (options$add_legend) {
                                 legend("topright", legend = levels(data$group), col = colors, pch = as.numeric(options$point_type))
                             }
@@ -279,7 +344,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 cex = options$point_size,
                                 main = main_title, 
                                 xlab = x_label, 
-                                ylab = y_label)
+                                ylab = y_label,
+                                xlim = xlim, ylim = ylim)
                         }
                     } else {
                         plot(data$x, 
@@ -288,7 +354,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             cex = options$point_size,
                             main = main_title, 
                             xlab = x_label, 
-                            ylab = "Index")
+                            ylab = "Index",
+                            xlim = xlim, ylim = ylim)
                     }
                 } else if (options$plot_type == "histogram") {
                     hist(data$x, 
@@ -296,19 +363,22 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         main = main_title, 
                         xlab = x_label, 
                         ylab = "Frequency",
-                        col = if (length(colors) == 1) colors else colors[1])
+                        col = if (length(colors) == 1) colors else colors[1],
+                        xlim = xlim, ylim = ylim)
                 } else if (options$plot_type == "boxplot") {
                     if (!is.null(data$group)) {
                         boxplot(data$x ~ data$group, 
                                main = main_title, 
                                xlab = data$group_name, 
                                ylab = x_label,
-                               col = colors)
+                               col = colors,
+                               ylim = ylim)  # xlim not applicable to boxplot with groups
                     } else {
                         boxplot(data$x, 
                                main = main_title, 
                                ylab = x_label,
-                               col = if (length(colors) == 1) colors else colors[1])
+                               col = if (length(colors) == 1) colors else colors[1],
+                               ylim = ylim)
                     }
                 } else if (options$plot_type == "barplot") {
                     if (is.factor(data$x) || is.character(data$x)) {
@@ -317,13 +387,15 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                main = main_title, 
                                xlab = x_label, 
                                ylab = "Frequency",
-                               col = colors)
+                               col = colors,
+                               ylim = ylim)  # xlim not meaningful for barplot
                     } else {
                         barplot(data$x, 
                                main = main_title, 
                                xlab = "Index", 
                                ylab = x_label,
-                               col = colors)
+                               col = colors,
+                               ylim = ylim)
                     }
                 } else if (options$plot_type == "density") {
                     if (!is.null(data$group)) {
@@ -334,7 +406,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             if (length(group_data) > 1) {
                                 d <- density(group_data, na.rm = TRUE)
                                 if (first_group) {
-                                    plot(d, main = main_title, xlab = x_label, ylab = "Density", col = colors[i])
+                                    plot(d, main = main_title, xlab = x_label, ylab = "Density", 
+                                         col = colors[i], xlim = xlim, ylim = ylim)
                                     first_group <- FALSE
                                 } else {
                                     lines(d, col = colors[i])
@@ -346,7 +419,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         }
                     } else {
                         d <- density(data$x, na.rm = TRUE)
-                        plot(d, main = main_title, xlab = x_label, ylab = "Density", col = colors)
+                        plot(d, main = main_title, xlab = x_label, ylab = "Density", 
+                             col = colors, xlim = xlim, ylim = ylim)
                     }
                 } else if (options$plot_type == "line") {
                     if (!is.null(data$y)) {
@@ -354,13 +428,89 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             main = main_title, 
                             xlab = x_label, 
                             ylab = y_label,
-                            col = colors)
+                            col = colors, xlim = xlim, ylim = ylim)
                     } else {
                         plot(data$x, type = "l", 
                             main = main_title, 
                             xlab = "Index", 
                             ylab = x_label,
-                            col = colors)
+                            col = colors, xlim = xlim, ylim = ylim)
+                    }
+                } else if (options$plot_type == "pairs") {
+                    # Pairs plot for multiple variable relationships
+                    mydata <- private$.processed_data
+                    
+                    # Select numeric variables for pairs plot
+                    numeric_vars <- sapply(mydata, is.numeric)
+                    if (sum(numeric_vars) < 2) {
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, "Pairs plot requires at least 2 numeric variables\nPlease add more numeric variables to your dataset", 
+                             cex = 1.2, col = "red")
+                    } else {
+                        numeric_data <- mydata[, numeric_vars, drop = FALSE]
+                        
+                        # Create pairs plot with customization
+                        if (!is.null(data$group)) {
+                            # Color by group
+                            pairs(numeric_data, 
+                                 main = main_title,
+                                 col = colors[data$group],
+                                 pch = as.numeric(options$point_type),
+                                 cex = options$point_size)
+                            
+                            # Add legend in corner
+                            if (options$add_legend) {
+                                # Get plot coordinates for legend placement
+                                par(xpd = TRUE)
+                                legend(0.85, 0.95, legend = levels(data$group), 
+                                      col = colors, pch = as.numeric(options$point_type),
+                                      bty = "n", cex = 0.8)
+                                par(xpd = FALSE)
+                            }
+                        } else {
+                            pairs(numeric_data, 
+                                 main = main_title,
+                                 col = colors,
+                                 pch = as.numeric(options$point_type),
+                                 cex = options$point_size)
+                        }
+                    }
+                } else if (options$plot_type == "matplot") {
+                    # Matrix plot for multiple data series
+                    mydata <- private$.processed_data
+                    
+                    # Select numeric variables for matrix plot
+                    numeric_vars <- sapply(mydata, is.numeric)
+                    if (sum(numeric_vars) < 2) {
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, "Matrix plot requires at least 2 numeric variables\nPlease add more numeric variables to your dataset", 
+                             cex = 1.2, col = "red")
+                    } else {
+                        numeric_data <- as.matrix(mydata[, numeric_vars, drop = FALSE])
+                        
+                        # Apply custom limits if specified
+                        xlim <- if (options$custom_limits && !is.null(options$x_min) && !is.null(options$x_max)) {
+                            c(options$x_min, options$x_max)
+                        } else NULL
+                        ylim <- if (options$custom_limits && !is.null(options$y_min) && !is.null(options$y_max)) {
+                            c(options$y_min, options$y_max)
+                        } else NULL
+                        
+                        # Create matrix plot
+                        matplot(numeric_data, 
+                               type = "l",
+                               main = main_title,
+                               xlab = x_label,
+                               ylab = y_label,
+                               col = colors,
+                               lty = 1:ncol(numeric_data),
+                               xlim = xlim, ylim = ylim)
+                        
+                        # Add legend
+                        if (options$add_legend) {
+                            legend("topright", legend = colnames(numeric_data), 
+                                  col = colors, lty = 1:ncol(numeric_data), bty = "n")
+                        }
                     }
                 }
                 
@@ -369,14 +519,9 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     grid()
                 }
                 
-                # Add custom axis limits if specified
-                if (options$custom_limits) {
-                    if (!is.null(options$x_min) && !is.null(options$x_max)) {
-                        par(usr = c(options$x_min, options$x_max, par("usr")[3:4]))
-                    }
-                    if (!is.null(options$y_min) && !is.null(options$y_max) && !is.null(data$y)) {
-                        par(usr = c(par("usr")[1:2], options$y_min, options$y_max))
-                    }
+                # Add statistics if requested
+                if (options$show_statistics) {
+                    private$.add_statistics_to_plot(data, options)
                 }
                 
                 TRUE

@@ -1,10 +1,10 @@
 ---
-title: "Vignette: Visualizing Data Flows with Alluvial Diagrams"
-author: "Analysis by Gemini"
+title: "Comprehensive Guide to Alluvial Diagrams in ClinicoPath"
+author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+format: html
 vignette: >
-  %\VignetteIndexEntry{Vignette: Creating Alluvial Diagrams}
+  %\VignetteIndexEntry{Comprehensive Guide to Alluvial Diagrams}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,46 +12,395 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
+## Introduction
 
-```{r}
-# Create a sample data frame
-set.seed(42) # for reproducibility
-patient_flow <- data.frame(
-  Stage = sample(c("Stage I", "Stage II", "Stage III"), 100, replace = TRUE),
-  Treatment = sample(c("Chemo", "Radiation", "Combined"), 100, replace = TRUE),
-  Response = sample(c("Complete", "Partial", "None"), 100, replace = TRUE, 
-                    prob = c(0.4, 0.4, 0.2))
-)
+Alluvial diagrams are powerful visualization tools for displaying categorical data flows and relationships between multiple categorical variables. The ClinicoPath package provides comprehensive alluvial diagram functionality through the `alluvial()` function, which offers extensive customization options for clinical and pathological research.
 
-# View the first few rows
-head(patient_flow)
-```
+This vignette demonstrates all available features and parameters of the alluvial function using real clinical datasets.
 
+## Loading Required Libraries and Data
 
-
-```{r}
-# This code simulates how the jamovi module would be called in an R environment.
-# You would need the ClinicoPathDescriptives package installed.
-
-# Load the library
+```{r setup}
 library(ClinicoPath)
 
-# Run the alluvial analysis
-results <- alluvial(
-    data = patient_flow,
-    vars = c("Stage", "Treatment", "Response"),
-    condensationvar = NULL, # No condensation variable
-    fill = "first_variable", # Color the flows based on initial cancer stage
-    marg = TRUE # Include marginal histograms
-)
+# Load the histopathology dataset
+data("histopathology")
 
-# To view the plot:
-print(results$plot)
+# Preview the data structure
+str(histopathology[, c("Sex", "Race", "Group", "Grade_Level", "LVI", "PNI", "PreinvasiveComponent")])
 ```
 
+## Basic Alluvial Diagrams
 
+### Simple Three-Variable Flow
 
+The most basic alluvial diagram shows the flow between three categorical variables:
+
+```{r basic-alluvial}
+# Basic alluvial diagram
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "LVI")
+)
+```
+
+### Four-Variable Analysis
+
+Extend the analysis to show more complex relationships:
+
+```{r four-variable}
+# Four-variable alluvial diagram
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group", "Grade_Level")
+)
+```
+
+## Fill Color Options
+
+The `fill` parameter controls how flows are colored in the diagram:
+
+### Fill by First Variable (Default)
+
+```{r fill-first}
+# Color flows based on the first variable
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "LVI", "PNI"),
+    fill = "first_variable"
+)
+```
+
+### Fill by Last Variable
+
+```{r fill-last}
+# Color flows based on the last variable
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "LVI", "PNI"),
+    fill = "last_variable"
+)
+```
+
+### Fill by All Flows
+
+```{r fill-all}
+# Color each unique flow path differently
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group"),
+    fill = "all_flows"
+)
+```
+
+### Fill by Values
+
+```{r fill-values}
+# Color by variable values
+alluvial(
+    data = histopathology,
+    vars = c("Grade_Level", "LVI", "PNI"),
+    fill = "values"
+)
+```
+
+## Bin Labeling Options
+
+For continuous variables that are automatically binned, you can control the bin labels:
+
+### Default Binning
+
+```{r bin-default}
+# Default bin labels: LL, ML, M, MH, HH
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "Group"),
+    bin = "default"
+)
+```
+
+### Mean-Based Binning
+
+```{r bin-mean}
+# Bin labels based on mean values
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Grade_Level"),
+    bin = "mean"
+)
+```
+
+### Median-Based Binning
+
+```{r bin-median}
+# Bin labels based on median values
+alluvial(
+    data = histopathology,
+    vars = c("Group", "Grade_Level", "LVI"),
+    bin = "median"
+)
+```
+
+### Min-Max Binning
+
+```{r bin-minmax}
+# Bin labels showing min-max ranges
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Group", "Grade_Level"),
+    bin = "min_max"
+)
+```
+
+### Cut-Based Binning
+
+```{r bin-cuts}
+# Bin labels based on cut points
+alluvial(
+    data = histopathology,
+    vars = c("Race", "Grade_Level", "LVI"),
+    bin = "cuts"
+)
+```
+
+## Plot Orientation
+
+Control whether the diagram flows vertically or horizontally:
+
+### Vertical Orientation (Default)
+
+```{r orient-vertical}
+# Vertical flow (default)
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group"),
+    orient = "vert"
+)
+```
+
+### Horizontal Orientation
+
+```{r orient-horizontal}
+# Horizontal flow
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group"),
+    orient = "horr"
+)
+```
+
+## Marginal Plots
+
+Add marginal histograms to show the distribution of each variable (only available with vertical orientation):
+
+```{r marginal-plots}
+# Alluvial diagram with marginal histograms
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "LVI"),
+    marg = TRUE,
+    orient = "vert"  # Required for marginal plots
+)
+```
+
+## Custom Titles
+
+Add custom titles to your diagrams (cannot be used with marginal plots):
+
+```{r custom-title}
+# Alluvial diagram with custom title
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group", "Grade_Level"),
+    usetitle = TRUE,
+    mytitle = "Patient Demographics and Clinical Characteristics Flow",
+    marg = FALSE  # Custom titles cannot be used with marginal plots
+)
+```
+
+## Missing Value Handling
+
+Control how missing values are handled in the analysis:
+
+### Include Missing Values (Default)
+
+```{r include-missing}
+# Include missing values in the analysis
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "PreinvasiveComponent", "LVI"),
+    excl = FALSE
+)
+```
+
+### Exclude Missing Values
+
+```{r exclude-missing}
+# Exclude missing values from the analysis
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "PreinvasiveComponent", "LVI"),
+    excl = TRUE
+)
+```
+
+## Condensation Plots
+
+Create condensation plots to show how a specific variable relates to the overall flow:
+
+```{r condensation-plot}
+# Main alluvial diagram with condensation analysis
+alluvial(
+    data = histopathology,
+    vars = c("Grade_Level", "LVI", "PNI"),
+    condensationvar = "Sex",  # This will generate a second plot
+    fill = "first_variable"
+)
+```
+
+The condensation plot shows how the selected variable (`Sex` in this example) relates to the patterns in the main alluvial diagram.
+
+## Advanced Examples
+
+### Comprehensive Clinical Analysis
+
+```{r comprehensive-example}
+# Comprehensive analysis with multiple parameters
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group", "Grade_Level", "LVI"),
+    condensationvar = "PNI",
+    excl = TRUE,
+    fill = "all_flows",
+    bin = "median",
+    orient = "vert",
+    usetitle = TRUE,
+    mytitle = "Comprehensive Histopathological Characteristics Analysis"
+)
+```
+
+### Treatment Response Analysis
+
+```{r treatment-response}
+# Load treatment response data
+data("treatmentResponse")
+
+# Analyze treatment pathways
+alluvial(
+    data = treatmentResponse,
+    vars = c("PreTreatment", "Treatment", "Response"),
+    fill = "first_variable",
+    usetitle = TRUE,
+    mytitle = "Treatment Response Pathways"
+)
+```
+
+### Survival Analysis Flow
+
+```{r survival-flow}
+# Using colon cancer dataset
+data("colon")
+
+# Analyze factors leading to outcomes
+alluvial(
+    data = colon,
+    vars = c("sex", "differ", "extent", "node4"),
+    fill = "last_variable",
+    excl = TRUE,
+    usetitle = TRUE,
+    mytitle = "Colon Cancer Prognostic Factors Flow"
+)
+```
+
+## Parameter Combinations and Constraints
+
+### Important Constraints
+
+1. **Marginal plots** (`marg = TRUE`) can only be used with:
+   - Vertical orientation (`orient = "vert"`)
+   - No custom titles (`usetitle = FALSE`)
+
+2. **Custom titles** (`usetitle = TRUE`) cannot be used with:
+   - Marginal plots (`marg = FALSE`)
+
+3. **Condensation variables** generate a second plot automatically
+
+### Valid Parameter Combinations
+
+```{r valid-combinations}
+# Valid: Marginal plots with vertical orientation
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Grade_Level", "LVI"),
+    marg = TRUE,
+    orient = "vert",
+    usetitle = FALSE
+)
+
+# Valid: Custom title with horizontal orientation
+alluvial(
+    data = histopathology,
+    vars = c("Sex", "Race", "Group"),
+    marg = FALSE,
+    orient = "horr",
+    usetitle = TRUE,
+    mytitle = "Horizontal Flow Diagram"
+)
+
+# Valid: All flow coloring with median binning
+alluvial(
+    data = histopathology,
+    vars = c("Grade_Level", "LVI", "PNI", "PreinvasiveComponent"),
+    fill = "all_flows",
+    bin = "median",
+    excl = TRUE
+)
+```
+
+## Complete Parameter Reference
+
+The `alluvial()` function supports the following parameters:
+
+| Parameter | Type | Options | Default | Description |
+|-----------|------|---------|---------|-------------|
+| `vars` | Variables | - | Required | Variables for the alluvial diagram |
+| `condensationvar` | Variable | - | `NULL` | Variable for condensation plot |
+| `excl` | Boolean | `TRUE`/`FALSE` | `FALSE` | Exclude missing values |
+| `marg` | Boolean | `TRUE`/`FALSE` | `FALSE` | Include marginal histograms |
+| `fill` | List | `first_variable`, `last_variable`, `all_flows`, `values` | `first_variable` | Color fill strategy |
+| `bin` | List | `default`, `mean`, `median`, `min_max`, `cuts` | `default` | Bin labeling method |
+| `orient` | List | `vert`, `horr` | `vert` | Plot orientation |
+| `usetitle` | Boolean | `TRUE`/`FALSE` | `FALSE` | Use custom title |
+| `mytitle` | String | - | `"Alluvial Plot"` | Custom title text |
+
+## Best Practices
+
+1. **Variable Selection**: Choose 3-6 categorical variables that have logical relationships
+2. **Data Preparation**: Ensure categorical variables are properly formatted
+3. **Missing Values**: Decide whether to include or exclude missing values based on your analysis goals
+4. **Color Strategy**: Choose fill options that highlight the most important relationships
+5. **Orientation**: Use vertical for detailed analysis, horizontal for presentation
+6. **Sample Size**: Alluvial diagrams work best with moderate sample sizes (50-500 cases)
+
+## Interpretation Guidelines
+
+- **Flow Width**: Represents the number of cases following that path
+- **Color Consistency**: Same colors represent the same categories across variables
+- **Branching Patterns**: Show how categories split or merge between variables
+- **Condensation Plots**: Reveal how a specific variable influences overall patterns
+
+## Conclusion
+
+The ClinicoPath alluvial function provides comprehensive functionality for visualizing categorical data flows in clinical research. With 9 customizable parameters and dual plot capabilities, it supports both exploratory analysis and publication-ready visualizations for understanding complex relationships in clinical and pathological data.
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

@@ -7,7 +7,7 @@
 Alluvial Survival Plot
 }
 \description{
-Generates an alluvial plot to visualize patient treatment pathways over time.
+Generates an alluvial plot to visualize patient treatment pathways over time with optional survival analysis.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::alluvialSurvivalBase} -> \code{alluvialSurvivalClass}
