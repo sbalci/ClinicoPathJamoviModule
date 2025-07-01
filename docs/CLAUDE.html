@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.32</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.33</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,8 +86,11 @@
     <li><a class="dropdown-item" href="articles/jjstatsplot-04-continuous-comparisons-alt.html">Continuous Variable Comparisons</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-05-correlations-scatterplots.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-06-use-in-r.html">Use jjstatsplot in R</a></li>
+    <li><a class="dropdown-item" href="articles/jjstatsplot-07-advancedbarplot.html">Advanced Bar Charts - 7 Professional Approaches</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-07-continuous-comparisons-legacy.html">Continuous Variable Comparisons</a></li>
+    <li><a class="dropdown-item" href="articles/jjstatsplot-08-advancedraincloud.html">Advanced Raincloud Plots - Enhanced Distribution Visualization</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-08-categorical-plots-legacy.html">Categorical Plot Functions</a></li>
+    <li><a class="dropdown-item" href="articles/jjstatsplot-09-advancedtree.html">Advanced Decision Tree Analysis in ClinicoPath</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-09-continuous-comparisons-legacy.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-10-correlations-scatterplots-legacy.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="articles/jjstatsplot-11-introduction-legacy.html">jjstatsplot: Statistical Visualization for Clinical Research</a></li>
@@ -106,6 +109,7 @@
     <li><a class="dropdown-item" href="articles/jsurvival-13-use-in-r-legacy.html">Use jsurvival in R</a></li>
     <li><a class="dropdown-item" href="articles/meddecide-01-introduction.html">MedDecide 01: Introduction to Medical Decision Analysis for Pathologists</a></li>
     <li><a class="dropdown-item" href="articles/meddecide-02-comprehensive-guide.html">meddecide: Medical Decision Making in R</a></li>
+    <li><a class="dropdown-item" href="articles/meddecide-03-agreement-advanced-features.html">Advanced Features in Interrater Agreement Analysis</a></li>
     <li><a class="dropdown-item" href="articles/meddecide-03-agreement-analysis.html">Inter-Rater Agreement and Reliability Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="articles/meddecide-03-roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="articles/meddecide-04-decision-tree-guide.html">Medical Decision Tree - Clinical Implementation Guide</a></li>
@@ -525,6 +529,33 @@
 <li>Use <code>suggested</code> and <code>permitted</code> to guide appropriate variable selection</li>
 <li>Set <code>default: NULL</code> for optional parameters</li>
 <li>Use <code>allowNone: true</code> for optional level-based parameters</li>
+</ul></div>
+</div>
+<div class="section level2">
+<h2 id="development-workflow-memories">Development Workflow Memories<a class="anchor" aria-label="anchor" href="#development-workflow-memories"></a></h2>
+<div class="section level3">
+<h3 id="testing-errors-and-piping-to-claude">Testing Errors and Piping to Claude<a class="anchor" aria-label="anchor" href="#testing-errors-and-piping-to-claude"></a></h3>
+<ul><li>Use bash command to test errors and pipe them to claude:</li>
+</ul><div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">RSTUDIO_PANDOC</span><span class="op">=</span><span class="st">"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64"</span> <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))'</span> <span class="kw">|</span> <span class="ex">claude</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="function-development-workflow">Function Development Workflow<a class="anchor" aria-label="anchor" href="#function-development-workflow"></a></h3>
+<ul><li>Checking function step by step:
+<ul><li>read .b.R file and associated yaml files for each function</li>
+<li>find relevant vignettes and documentation for this function</li>
+<li>check if the function has appropriate data to test it</li>
+<li>if not, create a test dataset</li>
+<li>check if the vignettes and documentation reflect all the features of the function</li>
+<li>if not, update the vignettes and documentation accordingly</li>
+<li>check if the function is tested in the tests folder</li>
+<li>if not, write tests for the function</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="yaml-development-memories">YAML Development Memories<a class="anchor" aria-label="anchor" href="#yaml-development-memories"></a></h3>
+<ul><li>Add default: NULL to optional variables</li>
+<li>Required variables should not be with default: NULL</li>
 </ul></div>
 </div>
 </div>
