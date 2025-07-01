@@ -69,8 +69,11 @@ articles:
   jjstatsplot-04-continuous-comparisons-alt: jjstatsplot-04-continuous-comparisons-alt.html
   jjstatsplot-05-correlations-scatterplots: jjstatsplot-05-correlations-scatterplots.html
   jjstatsplot-06-use-in-r: jjstatsplot-06-use-in-r.html
+  jjstatsplot-07-advancedbarplot: jjstatsplot-07-advancedbarplot.html
   jjstatsplot-07-continuous-comparisons-legacy: jjstatsplot-07-continuous-comparisons-legacy.html
+  jjstatsplot-08-advancedraincloud: jjstatsplot-08-advancedraincloud.html
   jjstatsplot-08-categorical-plots-legacy: jjstatsplot-08-categorical-plots-legacy.html
+  jjstatsplot-09-advancedtree: jjstatsplot-09-advancedtree.html
   jjstatsplot-09-continuous-comparisons-legacy: jjstatsplot-09-continuous-comparisons-legacy.html
   jjstatsplot-10-correlations-scatterplots-legacy: jjstatsplot-10-correlations-scatterplots-legacy.html
   jjstatsplot-11-introduction-legacy: jjstatsplot-11-introduction-legacy.html
@@ -89,6 +92,7 @@ articles:
   jsurvival-13-use-in-r-legacy: jsurvival-13-use-in-r-legacy.html
   meddecide-01-introduction: meddecide-01-introduction.html
   meddecide-02-comprehensive-guide: meddecide-02-comprehensive-guide.html
+  meddecide-03-agreement-advanced-features: meddecide-03-agreement-advanced-features.html
   meddecide-03-agreement-analysis: meddecide-03-agreement-analysis.html
   meddecide-03-roc-analysis: meddecide-03-roc-analysis.html
   meddecide-04-decision-tree-guide: meddecide-04-decision-tree-guide.html
@@ -125,7 +129,7 @@ articles:
   pkgnet-report: pkgnet-report.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   users-of-clinicopath: users-of-clinicopath.html
-last_built: 2025-06-30T12:59Z
+last_built: 2025-06-30T19:43Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

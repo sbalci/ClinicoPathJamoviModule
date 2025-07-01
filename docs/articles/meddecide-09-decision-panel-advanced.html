@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.32</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.33</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,8 +101,11 @@
     <li><a class="dropdown-item" href="../articles/jjstatsplot-04-continuous-comparisons-alt.html">Continuous Variable Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-05-correlations-scatterplots.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-06-use-in-r.html">Use jjstatsplot in R</a></li>
+    <li><a class="dropdown-item" href="../articles/jjstatsplot-07-advancedbarplot.html">Advanced Bar Charts - 7 Professional Approaches</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-07-continuous-comparisons-legacy.html">Continuous Variable Comparisons</a></li>
+    <li><a class="dropdown-item" href="../articles/jjstatsplot-08-advancedraincloud.html">Advanced Raincloud Plots - Enhanced Distribution Visualization</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-08-categorical-plots-legacy.html">Categorical Plot Functions</a></li>
+    <li><a class="dropdown-item" href="../articles/jjstatsplot-09-advancedtree.html">Advanced Decision Tree Analysis in ClinicoPath</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-09-continuous-comparisons-legacy.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-10-correlations-scatterplots-legacy.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-11-introduction-legacy.html">jjstatsplot: Statistical Visualization for Clinical Research</a></li>
@@ -121,6 +124,7 @@
     <li><a class="dropdown-item" href="../articles/jsurvival-13-use-in-r-legacy.html">Use jsurvival in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-01-introduction.html">MedDecide 01: Introduction to Medical Decision Analysis for Pathologists</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-02-comprehensive-guide.html">meddecide: Medical Decision Making in R</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-03-agreement-advanced-features.html">Advanced Features in Interrater Agreement Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-03-agreement-analysis.html">Inter-Rater Agreement and Reliability Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-03-roc-analysis.html">ROC Curve Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-04-decision-tree-guide.html">Medical Decision Tree - Clinical Implementation Guide</a></li>
@@ -1189,7 +1193,7 @@ Trees</caption>
 <span>  <span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu">calculate_test_performance_memo</span><span class="op">(</span><span class="va">test_vector</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, <span class="va">gold_vector</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.008   0.001   0.009</span></span>
+<span><span class="co">#&gt;   0.007   0.000   0.008</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Results match:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">result1</span>, <span class="va">result2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Results match: TRUE</span></span></code></pre></div>
@@ -1663,7 +1667,7 @@ Trees</caption>
 <span><span class="co">#&gt; API Response:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://jeroen.r-universe.dev/jsonlite/reference/fromJSON.html" class="external-link">toJSON</a></span><span class="op">(</span><span class="va">api_response</span>, pretty <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; {</span></span>
-<span><span class="co">#&gt;   "timestamp": ["2025-06-30 16:12:36"],</span></span>
+<span><span class="co">#&gt;   "timestamp": ["2025-06-30 22:56:52"],</span></span>
 <span><span class="co">#&gt;   "patient_id": [1],</span></span>
 <span><span class="co">#&gt;   "recommendations": {</span></span>
 <span><span class="co">#&gt;     "primary": {</span></span>
@@ -1820,7 +1824,7 @@ efficiency and clinical relevance.</p>
 <span><span class="co">#&gt; other attached packages:</span></span>
 <span><span class="co">#&gt; [1] memoise_2.0.1        forcats_1.0.0        knitr_1.50          </span></span>
 <span><span class="co">#&gt; [4] rpart.plot_3.1.2     rpart_4.1.24         ggplot2_3.5.2       </span></span>
-<span><span class="co">#&gt; [7] dplyr_1.1.4          ClinicoPath_0.0.3.32</span></span>
+<span><span class="co">#&gt; [7] dplyr_1.1.4          ClinicoPath_0.0.3.33</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] igraph_2.1.4            plotly_4.11.0           Formula_1.2-5          </span></span>
