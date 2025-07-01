@@ -21,8 +21,14 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bbc_gray = "#333333",
             multi_color = c("#1380A1", "#FAAB18", "#007f7f", "#333333", "#990000", "#007A54")
         ),
+        
+        .bbplot_available = FALSE,
+        .bbplot_version = NULL,
 
         .init = function() {
+            # Check bbplot package availability
+            private$.check_bbplot_availability()
+            
             # Comprehensive welcome instructions
             instructions_html <- paste(
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;'>",
@@ -80,24 +86,43 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 self$results$instructions$setContent("")
             }
             
-            # Early validation
-            if (is.null(self$options$y_var)) {
+            # Comprehensive validation
+            validation_result <- private$.validate_inputs()
+            if (!validation_result$valid) {
+                private$.show_error_message(validation_result$message)
                 return()
             }
             
-            if (is.null(self$options$x_var)) {
-                return()
-            }
-            
-            # Process the data
-            private$.processed_data <- private$.process_data()
-            
-            if (nrow(private$.processed_data) == 0) {
-                self$results$main_plot$setContent(
-                    "<div style='color: red; padding: 20px; text-align: center;'>No data available after processing. Please check your variable selections.</div>"
+            # Process the data with error handling
+            tryCatch({
+                private$.processed_data <- private$.process_data()
+                
+                if (nrow(private$.processed_data) == 0) {
+                    private$.show_error_message(
+                        "No data available after processing",
+                        "This usually occurs when:<br/>
+                        • All observations have missing values in selected variables<br/>
+                        • Data filtering removed all observations<br/>
+                        • Variables contain only invalid values<br/><br/>
+                        <strong>Solutions:</strong><br/>
+                        • Check for missing values in your data<br/>
+                        • Ensure variables contain appropriate data types<br/>
+                        • Try different variable combinations"
+                    )
+                    return()
+                }
+                
+                # Additional data quality checks
+                private$.check_data_quality()
+                
+            }, error = function(e) {
+                private$.show_error_message(
+                    "Data processing error",
+                    paste("Error details:", e$message, "<br/><br/>",
+                          "Please check your data format and variable selections.")
                 )
                 return()
-            }
+            })
             
             # Generate statistical analysis if requested
             if (self$options$statistical_annotations) {
@@ -122,6 +147,193 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             }
         },
 
+        .validate_inputs = function() {
+            # Comprehensive input validation
+            mydata <- self$data
+            
+            # Check if data exists
+            if (is.null(mydata) || nrow(mydata) == 0) {
+                return(list(valid = FALSE, message = list(
+                    title = "No data available",
+                    details = "Please load a dataset before creating BBC-style visualizations."
+                )))
+            }
+            
+            # Check required variables
+            if (is.null(self$options$y_var)) {
+                return(list(valid = FALSE, message = list(
+                    title = "Y-axis variable required",
+                    details = "Please select a variable for the Y-axis (values to display)."
+                )))
+            }
+            
+            if (is.null(self$options$x_var)) {
+                return(list(valid = FALSE, message = list(
+                    title = "X-axis variable required", 
+                    details = "Please select a variable for the X-axis (categories or groups)."
+                )))
+            }
+            
+            # Validate variable existence
+            all_vars <- names(mydata)
+            if (!self$options$y_var %in% all_vars) {
+                return(list(valid = FALSE, message = list(
+                    title = "Y-variable not found",
+                    details = paste("Variable '", self$options$y_var, "' not found in dataset.", 
+                                   "Available variables:", paste(all_vars, collapse = ", "))
+                )))
+            }
+            
+            if (!self$options$x_var %in% all_vars) {
+                return(list(valid = FALSE, message = list(
+                    title = "X-variable not found", 
+                    details = paste("Variable '", self$options$x_var, "' not found in dataset.",
+                                   "Available variables:", paste(all_vars, collapse = ", "))
+                )))
+            }
+            
+            # Validate optional variables
+            if (!is.null(self$options$group_var) && !self$options$group_var %in% all_vars) {
+                return(list(valid = FALSE, message = list(
+                    title = "Grouping variable not found",
+                    details = paste("Variable '", self$options$group_var, "' not found in dataset.")
+                )))
+            }
+            
+            if (!is.null(self$options$facet_var) && !self$options$facet_var %in% all_vars) {
+                return(list(valid = FALSE, message = list(
+                    title = "Faceting variable not found",
+                    details = paste("Variable '", self$options$facet_var, "' not found in dataset.")
+                )))
+            }
+            
+            # Check data type compatibility
+            y_data <- mydata[[self$options$y_var]]
+            x_data <- mydata[[self$options$x_var]]
+            
+            # Y-variable should be numeric for most chart types
+            if (!is.numeric(y_data) && self$options$chart_type %in% c("column", "bar", "line", "point", "area", "horizontal_bar")) {
+                return(list(valid = FALSE, message = list(
+                    title = "Y-variable must be numeric",
+                    details = paste("Selected chart type '", self$options$chart_type, "' requires a numeric Y-variable.",
+                                   "Current variable type:", class(y_data)[1])
+                )))
+            }
+            
+            # Check for sufficient data
+            valid_y <- sum(!is.na(y_data))
+            valid_x <- sum(!is.na(x_data))
+            
+            if (valid_y < 3 || valid_x < 3) {
+                return(list(valid = FALSE, message = list(
+                    title = "Insufficient data",
+                    details = paste("Need at least 3 valid observations for visualization.",
+                                   "Y-variable has", valid_y, "valid values,",
+                                   "X-variable has", valid_x, "valid values.")
+                )))
+            }
+            
+            # Validate threshold settings
+            if (self$options$thresholdMin >= self$options$thresholdMax) {
+                return(list(valid = FALSE, message = list(
+                    title = "Invalid threshold settings",
+                    details = "Minimum threshold must be less than maximum threshold."
+                )))
+            }
+            
+            # Validate chart dimensions
+            if (self$options$chart_width < 400 || self$options$chart_width > 1200) {
+                return(list(valid = FALSE, message = list(
+                    title = "Invalid chart width",
+                    details = "Chart width must be between 400 and 1200 pixels."
+                )))
+            }
+            
+            if (self$options$chart_height < 300 || self$options$chart_height > 800) {
+                return(list(valid = FALSE, message = list(
+                    title = "Invalid chart height", 
+                    details = "Chart height must be between 300 and 800 pixels."
+                )))
+            }
+            
+            return(list(valid = TRUE, message = NULL))
+        },
+        
+        .show_error_message = function(title, details = NULL) {
+            error_html <- paste0(
+                "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
+                "<div style='display: flex; align-items: center; margin-bottom: 10px;'>",
+                "<span style='font-size: 24px; margin-right: 10px;'>⚠️</span>",
+                "<h4 style='color: #856404; margin: 0;'>", title, "</h4>",
+                "</div>"
+            )
+            
+            if (!is.null(details)) {
+                error_html <- paste0(error_html,
+                    "<div style='color: #856404; line-height: 1.5;'>", details, "</div>"
+                )
+            }
+            
+            error_html <- paste0(error_html, "</div>")
+            
+            self$results$main_plot$setContent(error_html)
+        },
+        
+        .check_data_quality = function() {
+            data <- private$.processed_data
+            y_var <- self$options$y_var
+            x_var <- self$options$x_var
+            
+            # Check for extreme values
+            if (is.numeric(data[[y_var]])) {
+                y_values <- data[[y_var]]
+                q1 <- quantile(y_values, 0.25, na.rm = TRUE)
+                q3 <- quantile(y_values, 0.75, na.rm = TRUE)
+                iqr <- q3 - q1
+                
+                outliers <- sum(y_values < (q1 - 1.5 * iqr) | y_values > (q3 + 1.5 * iqr), na.rm = TRUE)
+                
+                if (outliers > 0) {
+                    warning_html <- paste0(
+                        "<div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 5px 0;'>",
+                        "<p style='margin: 0; color: #0066cc;'><strong>📊 Data Quality Note:</strong> ",
+                        "Found ", outliers, " potential outliers in Y-variable. ",
+                        "Consider reviewing extreme values for data accuracy.</p>",
+                        "</div>"
+                    )
+                    
+                    # Add to chart summary if enabled
+                    if (self$options$show_sample_sizes) {
+                        current_summary <- self$results$chart_summary$content
+                        enhanced_summary <- paste0(current_summary, warning_html)
+                        self$results$chart_summary$setContent(enhanced_summary)
+                    }
+                }
+            }
+            
+            # Check category distribution for grouped charts
+            if (is.factor(data[[x_var]])) {
+                category_counts <- table(data[[x_var]])
+                min_count <- min(category_counts)
+                
+                if (min_count < 3) {
+                    warning_html <- paste0(
+                        "<div style='background-color: #fff3e0; border: 1px solid #ffcc80; border-radius: 5px; padding: 10px; margin: 5px 0;'>",
+                        "<p style='margin: 0; color: #f57c00;'><strong>⚠️ Small Sample Warning:</strong> ",
+                        "Some categories have fewer than 3 observations. ",
+                        "Results may be unstable for categories with very small samples.</p>",
+                        "</div>"
+                    )
+                    
+                    if (self$options$show_sample_sizes) {
+                        current_summary <- self$results$chart_summary$content
+                        enhanced_summary <- paste0(current_summary, warning_html)
+                        self$results$chart_summary$setContent(enhanced_summary)
+                    }
+                }
+            }
+        },
+
         .process_data = function() {
             mydata <- self$data
             
@@ -138,72 +350,288 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             mydata <- mydata[vars_to_select]
             
-            # Remove missing values
-            mydata <- mydata[complete.cases(mydata), ]
+            # Track missing data before removal
+            original_n <- nrow(mydata)
+            complete_cases <- complete.cases(mydata)
+            missing_n <- sum(!complete_cases)
             
-            # Ensure proper data types
+            # Remove missing values
+            mydata <- mydata[complete_cases, ]
+            
+            # Inform about missing data if substantial
+            if (missing_n > 0 && missing_n / original_n > 0.1) {
+                missing_percent <- round(missing_n / original_n * 100, 1)
+                warning(paste("Removed", missing_n, "observations (", missing_percent, "%) with missing values"))
+            }
+            
+            # Enhanced data type handling
             if (!is.null(group_var)) {
                 mydata[[group_var]] <- as.factor(mydata[[group_var]])
+                
+                # Check for too many groups
+                n_groups <- length(levels(mydata[[group_var]]))
+                if (n_groups > 12) {
+                    warning(paste("Grouping variable has", n_groups, "levels. Consider grouping or filtering for clearer visualization."))
+                }
             }
             
             if (!is.null(facet_var)) {
                 mydata[[facet_var]] <- as.factor(mydata[[facet_var]])
+                
+                # Check for too many facets
+                n_facets <- length(levels(mydata[[facet_var]]))
+                if (n_facets > 8) {
+                    warning(paste("Faceting variable has", n_facets, "levels. Consider reducing for better readability."))
+                }
             }
             
-            # Convert x_var to factor if it's character or has few unique values
-            if (is.character(mydata[[x_var]]) || length(unique(mydata[[x_var]])) <= 10) {
+            # Enhanced x_var handling
+            if (is.character(mydata[[x_var]])) {
                 mydata[[x_var]] <- as.factor(mydata[[x_var]])
+            } else if (is.numeric(mydata[[x_var]])) {
+                unique_vals <- length(unique(mydata[[x_var]]))
+                if (unique_vals <= 15) {
+                    mydata[[x_var]] <- as.factor(mydata[[x_var]])
+                }
+            }
+            
+            # Ensure appropriate ordering for factors
+            if (is.factor(mydata[[x_var]])) {
+                # For BBC style, often natural ordering is preferred
+                if (all(grepl("^[0-9]+$", levels(mydata[[x_var]])))) {
+                    # Numeric levels - sort numerically
+                    mydata[[x_var]] <- factor(mydata[[x_var]], 
+                                             levels = sort(as.numeric(levels(mydata[[x_var]]))))
+                }
             }
             
             return(mydata)
         },
-
-        .create_bbc_style = function() {
-            # Recreate the BBC style theme
+        
+        .check_bbplot_availability = function() {
+            # Check if bbplot package is available
+            tryCatch({
+                if (requireNamespace("bbplot", quietly = TRUE)) {
+                    private$.bbplot_available <- TRUE
+                    # Get version if available
+                    private$.bbplot_version <- tryCatch({
+                        as.character(packageVersion("bbplot"))
+                    }, error = function(e) "unknown")
+                    
+                    message("✅ bbplot package detected - enhanced BBC functionality available")
+                } else {
+                    private$.bbplot_available <- FALSE
+                    private$.bbplot_version <- NULL
+                }
+            }, error = function(e) {
+                private$.bbplot_available <- FALSE
+                private$.bbplot_version <- NULL
+            })
+            
+            # Update accessibility info with bbplot status
+            private$.update_bbplot_status_info()
+        },
+        
+        .update_bbplot_status_info = function() {
+            bbplot_status_html <- if (private$.bbplot_available) {
+                paste0(
+                    "<div style='background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<h5 style='color: #2e7d32; margin: 0 0 10px 0;'>📦 Enhanced BBC Functionality Available</h5>",
+                    "<p style='margin: 0; color: #2e7d32;'>",
+                    "The official BBC bbplot package (v", private$.bbplot_version, ") is installed, providing:",
+                    "</p>",
+                    "<ul style='margin: 5px 0 0 20px; color: #2e7d32;'>",
+                    "<li>Official BBC finalise_plot() function for publication</li>",
+                    "<li>Authentic BBC logo and branding elements</li>",
+                    "<li>Advanced BBC typography and spacing</li>",
+                    "<li>Professional export capabilities</li>",
+                    "</ul>",
+                    "</div>"
+                )
+            } else {
+                paste0(
+                    "<div style='background-color: #fff3e0; border: 1px solid #ff9800; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<h5 style='color: #f57c00; margin: 0 0 10px 0;'>📦 Optional Enhancement Available</h5>",
+                    "<p style='margin: 0 0 10px 0; color: #f57c00;'>",
+                    "Install the official BBC bbplot package for enhanced functionality:",
+                    "</p>",
+                    "<pre style='background-color: #2d3748; color: #e2e8f0; padding: 10px; border-radius: 4px; font-size: 12px; margin: 10px 0;'>",
+                    "# Install bbplot from GitHub\n",
+                    "devtools::install_github('bbc/bbplot')\n",
+                    "library(bbplot)",
+                    "</pre>",
+                    "<p style='margin: 0; color: #f57c00; font-size: 0.9em;'>",
+                    "Current functionality provides authentic BBC styling without additional dependencies.",
+                    "</p>",
+                    "</div>"
+                )
+            }
+            
+            # Add to accessibility info
+            current_access_info <- private$.init_accessibility_info_content()
+            enhanced_access_info <- paste0(current_access_info, bbplot_status_html)
+            self$results$accessibility_info$setContent(enhanced_access_info)
+        },
+        
+        .get_enhanced_bbc_style = function() {
+            # Use bbplot package styling if available, otherwise fallback
+            if (private$.bbplot_available) {
+                tryCatch({
+                    # Try to use bbplot's bbc_style function
+                    return(bbplot::bbc_style())
+                }, error = function(e) {
+                    # Fallback to our implementation if bbplot fails
+                    return(private$.create_bbc_style_fallback())
+                })
+            } else {
+                return(private$.create_bbc_style_fallback())
+            }
+        },
+        
+        .create_bbc_style_fallback = function() {
+            # Our enhanced implementation of BBC style
             bbc_theme <- ggplot2::theme(
-                # Text elements
+                # Text elements with enhanced hierarchy
                 text = ggplot2::element_text(family = self$options$font_family, size = 18, color = "#222222"),
-                plot.title = ggplot2::element_text(family = self$options$font_family, size = 28, face = "bold", color = "#222222"),
-                plot.subtitle = ggplot2::element_text(family = self$options$font_family, size = 22, margin = ggplot2::margin(9, 0, 9, 0)),
-                plot.caption = ggplot2::element_text(family = self$options$font_family, size = 14, color = "#666666"),
+                plot.title = ggplot2::element_text(
+                    family = self$options$font_family, 
+                    size = 28, 
+                    face = "bold", 
+                    color = "#222222",
+                    hjust = if (self$options$left_align_title) 0 else 0.5,
+                    margin = ggplot2::margin(0, 0, 15, 0)
+                ),
+                plot.subtitle = ggplot2::element_text(
+                    family = self$options$font_family, 
+                    size = 22, 
+                    color = "#222222",
+                    hjust = if (self$options$left_align_title) 0 else 0.5,
+                    margin = ggplot2::margin(0, 0, 20, 0)
+                ),
+                plot.caption = ggplot2::element_text(
+                    family = self$options$font_family, 
+                    size = 14, 
+                    color = "#666666",
+                    hjust = 0,
+                    margin = ggplot2::margin(15, 0, 0, 0)
+                ),
                 
-                # Legend
+                # Enhanced legend styling
                 legend.position = self$options$legend_position,
                 legend.text = ggplot2::element_text(family = self$options$font_family, size = 18, color = "#222222"),
                 legend.title = ggplot2::element_blank(),
                 legend.key = ggplot2::element_blank(),
                 legend.background = ggplot2::element_blank(),
+                legend.margin = ggplot2::margin(0, 0, 15, 0),
+                legend.spacing.x = ggplot2::unit(8, "pt"),
                 
-                # Axis
+                # Enhanced axis styling
                 axis.title = ggplot2::element_blank(),
                 axis.text = ggplot2::element_text(family = self$options$font_family, size = 18, color = "#222222"),
-                axis.text.x = ggplot2::element_text(margin = ggplot2::margin(5, b = 10)),
+                axis.text.x = ggplot2::element_text(margin = ggplot2::margin(8, 0, 0, 0)),
+                axis.text.y = ggplot2::element_text(margin = ggplot2::margin(0, 8, 0, 0)),
                 axis.ticks = ggplot2::element_blank(),
                 axis.line = ggplot2::element_blank(),
                 
-                # Grid lines
+                # Enhanced grid styling
                 panel.grid.minor = ggplot2::element_blank(),
                 panel.grid.major.y = if (self$options$horizontal_gridlines) {
-                    ggplot2::element_line(color = "#cbcbcb")
+                    ggplot2::element_line(color = "#cbcbcb", size = 0.25)
                 } else {
                     ggplot2::element_blank()
                 },
                 panel.grid.major.x = if (self$options$vertical_gridlines) {
-                    ggplot2::element_line(color = "#cbcbcb")
+                    ggplot2::element_line(color = "#cbcbcb", size = 0.25)
                 } else {
                     ggplot2::element_blank()
                 },
                 
-                # Background
+                # Enhanced background and spacing
                 panel.background = ggplot2::element_blank(),
                 plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                plot.margin = ggplot2::margin(20, 20, 20, 20),
                 
-                # Facets
-                strip.background = ggplot2::element_rect(fill = "white"),
-                strip.text = ggplot2::element_text(family = self$options$font_family, size = 22, color = "#222222")
+                # Enhanced facet styling
+                strip.background = ggplot2::element_rect(fill = "white", color = NA),
+                strip.text = ggplot2::element_text(
+                    family = self$options$font_family, 
+                    size = 20, 
+                    color = "#222222",
+                    face = "bold",
+                    margin = ggplot2::margin(0, 0, 10, 0)
+                )
             )
             
             return(bbc_theme)
+        },
+        
+        .apply_bbplot_finalization = function(plot) {
+            # Apply bbplot finalisation if available
+            if (private$.bbplot_available && self$options$export_finalized) {
+                tryCatch({
+                    # Use bbplot's finalise_plot function
+                    if (exists("finalise_plot", envir = asNamespace("bbplot"))) {
+                        source_text <- if (self$options$source_text != "") {
+                            self$options$source_text
+                        } else {
+                            "Source: Data analysis"
+                        }
+                        
+                        # Apply bbplot finalisation
+                        finalised_plot <- bbplot::finalise_plot(
+                            plot_name = plot,
+                            source = source_text,
+                            save_filepath = NULL,  # Don't auto-save
+                            width_pixels = self$options$chart_width,
+                            height_pixels = self$options$chart_height,
+                            logo_image_path = NULL  # Use default BBC branding
+                        )
+                        
+                        return(finalised_plot)
+                    }
+                }, error = function(e) {
+                    warning("bbplot finalisation failed, using fallback method")
+                })
+            }
+            
+            # Fallback: add source annotation manually
+            if (self$options$source_text != "") {
+                plot <- plot + ggplot2::labs(caption = self$options$source_text)
+            }
+            
+            return(plot)
+        },
+        
+        .init_accessibility_info_content = function() {
+            # Base accessibility information
+            return(paste(
+                "<h4 style='color: #1380A1;'>♿ Accessibility & Standards</h4>",
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<h5>BBC Accessibility Standards:</h5>",
+                "<ul>",
+                "<li><strong>Color Contrast:</strong> All text meets WCAG AA standards (4.5:1 ratio minimum)</li>",
+                "<li><strong>Alternative Text:</strong> Charts should include descriptive alt text for screen readers</li>",
+                "<li><strong>Color Independence:</strong> Information not conveyed by color alone</li>",
+                "<li><strong>Font Size:</strong> Minimum 18pt text for readability</li>",
+                "<li><strong>Clear Hierarchy:</strong> Logical reading order and structure</li>",
+                "</ul>",
+                "<h5>Export Recommendations:</h5>",
+                "<ul>",
+                "<li>Export at 640×450px for web, 1280×900px for print</li>",
+                "<li>Include data tables as alternative formats</li>",
+                "<li>Provide chart descriptions in accompanying text</li>",
+                "<li>Test with screen readers and accessibility tools</li>",
+                "</ul>",
+                "<p style='margin: 10px 0 0 0; padding: 10px; background-color: #e8f5e8; border-radius: 4px;'>",
+                "<strong>💡 Tip:</strong> BBC charts prioritize clarity and accessibility over visual complexity. This ensures your message reaches the widest possible audience effectively.",
+                "</p>",
+                "</div>"
+            ))
+        },
+
+        .create_bbc_style = function() {
+            # Use enhanced version with bbplot integration
+            return(private$.get_enhanced_bbc_style())
         },
 
         .get_bbc_colors = function() {
@@ -226,71 +654,41 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             data <- private$.processed_data
             y_var <- self$options$y_var
             x_var <- self$options$x_var
+            group_var <- self$options$group_var
             stat_method <- self$options$stat_method
             
             tryCatch({
-                stat_html <- "<h4 style='color: #1380A1;'>📊 Statistical Analysis Results</h4>"
+                stat_html <- "<h4 style='color: #1380A1;'>📊 Enhanced Statistical Analysis Results</h4>"
                 stat_html <- paste0(stat_html, "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
                 
-                # Auto-select statistical test if needed
+                # Enhanced auto-selection with more sophisticated logic
                 if (stat_method == "auto") {
-                    if (is.factor(data[[x_var]]) && is.numeric(data[[y_var]])) {
-                        n_groups <- length(unique(data[[x_var]]))
-                        if (n_groups == 2) {
-                            stat_method <- "ttest"
-                        } else if (n_groups > 2) {
-                            stat_method <- "anova"
-                        }
-                    }
+                    stat_method <- private$.auto_select_statistical_test(data, y_var, x_var, group_var)
+                    stat_html <- paste0(stat_html, "<p style='color: #666; font-style: italic;'>Auto-selected test: <strong>", stat_method, "</strong></p>")
                 }
                 
-                # Perform statistical tests
+                # Perform comprehensive statistical analysis
                 if (stat_method == "anova" && is.factor(data[[x_var]])) {
-                    formula_str <- paste(y_var, "~", x_var)
-                    aov_result <- aov(as.formula(formula_str), data = data)
-                    aov_summary <- summary(aov_result)
-                    
-                    f_stat <- round(aov_summary[[1]]$`F value`[1], 3)
-                    p_value <- aov_summary[[1]]$`Pr(>F)`[1]
-                    df1 <- aov_summary[[1]]$Df[1]
-                    df2 <- aov_summary[[1]]$Df[2]
-                    
-                    stat_html <- paste0(stat_html, "<p><strong>One-way ANOVA:</strong></p>")
-                    stat_html <- paste0(stat_html, "<p>F(", df1, ", ", df2, ") = ", f_stat, ", p = ", format.pval(p_value, digits = 3), "</p>")
-                    
-                    # Effect size (eta-squared)
-                    ss_total <- sum(aov_summary[[1]]$`Sum Sq`)
-                    ss_between <- aov_summary[[1]]$`Sum Sq`[1]
-                    eta_squared <- ss_between / ss_total
-                    stat_html <- paste0(stat_html, "<p><strong>Effect Size (η²):</strong> ", round(eta_squared, 3), "</p>")
+                    stat_html <- paste0(stat_html, private$.perform_anova_analysis(data, y_var, x_var))
                     
                 } else if (stat_method == "ttest") {
-                    groups <- unique(data[[x_var]])
-                    if (length(groups) == 2) {
-                        group1_data <- data[data[[x_var]] == groups[1], y_var]
-                        group2_data <- data[data[[x_var]] == groups[2], y_var]
-                        
-                        t_result <- t.test(group1_data, group2_data)
-                        
-                        stat_html <- paste0(stat_html, "<p><strong>Independent t-test:</strong></p>")
-                        stat_html <- paste0(stat_html, "<p>t(", round(t_result$parameter, 1), ") = ", round(t_result$statistic, 3), ", p = ", format.pval(t_result$p.value, digits = 3), "</p>")
-                        stat_html <- paste0(stat_html, "<p>Mean difference: ", round(diff(t_result$estimate), 3), "</p>")
-                        
-                        # Cohen's d effect size
-                        pooled_sd <- sqrt(((length(group1_data) - 1) * var(group1_data) + 
-                                         (length(group2_data) - 1) * var(group2_data)) / 
-                                        (length(group1_data) + length(group2_data) - 2))
-                        cohens_d <- abs(diff(c(mean(group1_data), mean(group2_data)))) / pooled_sd
-                        stat_html <- paste0(stat_html, "<p><strong>Effect Size (Cohen's d):</strong> ", round(cohens_d, 3), "</p>")
-                    }
+                    stat_html <- paste0(stat_html, private$.perform_ttest_analysis(data, y_var, x_var))
                     
                 } else if (stat_method == "kruskal") {
-                    formula_str <- paste(y_var, "~", x_var)
-                    k_result <- kruskal.test(as.formula(formula_str), data = data)
+                    stat_html <- paste0(stat_html, private$.perform_kruskal_analysis(data, y_var, x_var))
                     
-                    stat_html <- paste0(stat_html, "<p><strong>Kruskal-Wallis Test:</strong></p>")
-                    stat_html <- paste0(stat_html, "<p>χ² = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
+                } else if (stat_method == "chisquare") {
+                    stat_html <- paste0(stat_html, private$.perform_chisquare_analysis(data, y_var, x_var))
+                    
+                } else if (stat_method == "correlation") {
+                    stat_html <- paste0(stat_html, private$.perform_correlation_analysis(data, y_var, x_var))
+                    
+                } else if (stat_method == "regression") {
+                    stat_html <- paste0(stat_html, private$.perform_regression_analysis(data, y_var, x_var))
                 }
+                
+                # Add interpretation guide for BBC journalism standards
+                stat_html <- paste0(stat_html, private$.add_interpretation_guide(stat_method))
                 
                 stat_html <- paste0(stat_html, "</div>")
                 self$results$statistical_results$setContent(stat_html)
@@ -299,10 +697,267 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 error_html <- paste0(
                     "<div style='color: orange; padding: 10px;'>",
                     "Statistical analysis could not be completed: ", e$message,
+                    "<br/><strong>Technical details:</strong> ", class(e)[1],
                     "</div>"
                 )
                 self$results$statistical_results$setContent(error_html)
             })
+        },
+        
+        .auto_select_statistical_test = function(data, y_var, x_var, group_var) {
+            # Enhanced automatic test selection logic
+            x_is_factor <- is.factor(data[[x_var]]) || is.character(data[[x_var]])
+            y_is_numeric <- is.numeric(data[[y_var]])
+            
+            # Check for binary outcomes
+            if (y_is_numeric) {
+                unique_y <- unique(data[[y_var]])
+                is_binary <- length(unique_y) == 2 && all(unique_y %in% c(0, 1))
+            } else {
+                is_binary <- FALSE
+            }
+            
+            if (x_is_factor && y_is_numeric && !is_binary) {
+                n_groups <- length(unique(data[[x_var]]))
+                
+                # Check normality assumptions (simplified)
+                if (n_groups >= 2) {
+                    # Test for normality using Shapiro-Wilk (for small samples)
+                    normal_test_passed <- TRUE
+                    if (nrow(data) <= 50) {
+                        tryCatch({
+                            shapiro_result <- shapiro.test(data[[y_var]])
+                            normal_test_passed <- shapiro_result$p.value > 0.05
+                        }, error = function(e) normal_test_passed <<- TRUE)
+                    }
+                    
+                    if (normal_test_passed) {
+                        return(if (n_groups == 2) "ttest" else "anova")
+                    } else {
+                        return(if (n_groups == 2) "wilcox" else "kruskal")
+                    }
+                }
+            } else if (x_is_factor && (is.factor(data[[y_var]]) || is_binary)) {
+                return("chisquare")
+            } else if (is.numeric(data[[x_var]]) && y_is_numeric) {
+                return("correlation")
+            }
+            
+            return("anova")  # Default fallback
+        },
+        
+        .perform_anova_analysis = function(data, y_var, x_var) {
+            formula_str <- paste(y_var, "~", x_var)
+            aov_result <- aov(as.formula(formula_str), data = data)
+            aov_summary <- summary(aov_result)
+            
+            f_stat <- round(aov_summary[[1]]$`F value`[1], 3)
+            p_value <- aov_summary[[1]]$`Pr(>F)`[1]
+            df1 <- aov_summary[[1]]$Df[1]
+            df2 <- aov_summary[[1]]$Df[2]
+            
+            # Effect size calculations
+            ss_total <- sum(aov_summary[[1]]$`Sum Sq`)
+            ss_between <- aov_summary[[1]]$`Sum Sq`[1]
+            eta_squared <- ss_between / ss_total
+            omega_squared <- (ss_between - df1 * aov_summary[[1]]$`Mean Sq`[2]) / 
+                           (ss_total + aov_summary[[1]]$`Mean Sq`[2])
+            
+            result_html <- paste0(
+                "<div style='border-left: 4px solid #1380A1; padding-left: 15px; margin: 10px 0;'>",
+                "<p><strong>One-way ANOVA Results:</strong></p>",
+                "<p>F(", df1, ", ", df2, ") = ", f_stat, ", p = ", format.pval(p_value, digits = 3), "</p>",
+                "<p><strong>Effect Sizes:</strong></p>",
+                "<ul>",
+                "<li>η² (eta-squared): ", round(eta_squared, 3), " (", private$.interpret_effect_size(eta_squared, "eta"), ")</li>",
+                "<li>ω² (omega-squared): ", round(max(0, omega_squared), 3), " (more conservative estimate)</li>",
+                "</ul>",
+                private$.add_post_hoc_note(p_value, length(unique(data[[x_var]]))),
+                "</div>"
+            )
+            
+            return(result_html)
+        },
+        
+        .perform_ttest_analysis = function(data, y_var, x_var) {
+            groups <- unique(data[[x_var]])
+            if (length(groups) != 2) {
+                return("<p style='color: orange;'>t-test requires exactly 2 groups</p>")
+            }
+            
+            group1_data <- data[data[[x_var]] == groups[1], y_var]
+            group2_data <- data[data[[x_var]] == groups[2], y_var]
+            
+            # Perform both independent and Welch's t-test
+            t_result <- t.test(group1_data, group2_data, var.equal = TRUE)
+            welch_result <- t.test(group1_data, group2_data, var.equal = FALSE)
+            
+            # Levene's test for equal variances
+            var_test <- var.test(group1_data, group2_data)
+            equal_vars <- var_test$p.value > 0.05
+            
+            # Choose appropriate test result
+            final_result <- if (equal_vars) t_result else welch_result
+            test_name <- if (equal_vars) "Independent samples t-test" else "Welch's t-test (unequal variances)"
+            
+            # Cohen's d effect size
+            pooled_sd <- sqrt(((length(group1_data) - 1) * var(group1_data) + 
+                             (length(group2_data) - 1) * var(group2_data)) / 
+                            (length(group1_data) + length(group2_data) - 2))
+            cohens_d <- abs(diff(c(mean(group1_data), mean(group2_data)))) / pooled_sd
+            
+            result_html <- paste0(
+                "<div style='border-left: 4px solid #FAAB18; padding-left: 15px; margin: 10px 0;'>",
+                "<p><strong>", test_name, ":</strong></p>",
+                "<p>t(", round(final_result$parameter, 1), ") = ", round(final_result$statistic, 3), 
+                ", p = ", format.pval(final_result$p.value, digits = 3), "</p>",
+                "<p><strong>Group Means:</strong> ", groups[1], " = ", round(mean(group1_data), 3), 
+                ", ", groups[2], " = ", round(mean(group2_data), 3), "</p>",
+                "<p><strong>Mean Difference:</strong> ", round(diff(final_result$estimate), 3), 
+                " (95% CI: [", round(final_result$conf.int[1], 3), ", ", round(final_result$conf.int[2], 3), "])</p>",
+                "<p><strong>Effect Size (Cohen's d):</strong> ", round(cohens_d, 3), 
+                " (", private$.interpret_effect_size(cohens_d, "cohens_d"), ")</p>",
+                if (!equal_vars) "<p style='color: #f57c00;'><em>Note: Unequal variances detected, Welch's correction applied</em></p>" else "",
+                "</div>"
+            )
+            
+            return(result_html)
+        },
+        
+        .perform_correlation_analysis = function(data, y_var, x_var) {
+            if (!is.numeric(data[[x_var]]) || !is.numeric(data[[y_var]])) {
+                return("<p style='color: orange;'>Correlation analysis requires both variables to be numeric</p>")
+            }
+            
+            # Pearson correlation
+            pearson_result <- cor.test(data[[x_var]], data[[y_var]], method = "pearson")
+            
+            # Spearman correlation (non-parametric)
+            spearman_result <- cor.test(data[[x_var]], data[[y_var]], method = "spearman")
+            
+            # Determine which to report based on normality
+            shapiro_x <- if (nrow(data) <= 50) shapiro.test(data[[x_var]])$p.value > 0.05 else TRUE
+            shapiro_y <- if (nrow(data) <= 50) shapiro.test(data[[y_var]])$p.value > 0.05 else TRUE
+            use_pearson <- shapiro_x && shapiro_y
+            
+            primary_result <- if (use_pearson) pearson_result else spearman_result
+            method_name <- if (use_pearson) "Pearson" else "Spearman"
+            
+            result_html <- paste0(
+                "<div style='border-left: 4px solid #007f7f; padding-left: 15px; margin: 10px 0;'>",
+                "<p><strong>", method_name, " Correlation Analysis:</strong></p>",
+                "<p>r = ", round(primary_result$estimate, 3), 
+                ", t(", primary_result$parameter, ") = ", round(primary_result$statistic, 3),
+                ", p = ", format.pval(primary_result$p.value, digits = 3), "</p>",
+                "<p><strong>95% Confidence Interval:</strong> [", round(primary_result$conf.int[1], 3), 
+                ", ", round(primary_result$conf.int[2], 3), "]</p>",
+                "<p><strong>Effect Size:</strong> ", private$.interpret_correlation_strength(abs(primary_result$estimate)), "</p>",
+                "<p><strong>Coefficient of Determination (r²):</strong> ", round(primary_result$estimate^2, 3), 
+                " (", round(primary_result$estimate^2 * 100, 1), "% shared variance)</p>",
+                if (!use_pearson) "<p style='color: #f57c00;'><em>Note: Non-normal distribution detected, Spearman correlation reported</em></p>" else "",
+                "</div>"
+            )
+            
+            return(result_html)
+        },
+        
+        .perform_chisquare_analysis = function(data, y_var, x_var) {
+            # Create contingency table
+            contingency_table <- table(data[[x_var]], data[[y_var]])
+            
+            # Perform chi-square test
+            chi_result <- chisq.test(contingency_table)
+            
+            # Calculate effect sizes
+            n <- sum(contingency_table)
+            cramers_v <- sqrt(chi_result$statistic / (n * (min(dim(contingency_table)) - 1)))
+            phi <- sqrt(chi_result$statistic / n)
+            
+            result_html <- paste0(
+                "<div style='border-left: 4px solid #990000; padding-left: 15px; margin: 10px 0;'>",
+                "<p><strong>Chi-square Test of Independence:</strong></p>",
+                "<p>χ²(", chi_result$parameter, ") = ", round(chi_result$statistic, 3), 
+                ", p = ", format.pval(chi_result$p.value, digits = 3), "</p>",
+                "<p><strong>Effect Sizes:</strong></p>",
+                "<ul>",
+                "<li>Cramér's V: ", round(cramers_v, 3), " (", private$.interpret_effect_size(cramers_v, "cramers_v"), ")</li>",
+                if (all(dim(contingency_table) == 2)) paste0("<li>Phi coefficient: ", round(phi, 3), "</li>") else "",
+                "</ul>",
+                private$.add_chi_square_assumptions_note(contingency_table),
+                "</div>"
+            )
+            
+            return(result_html)
+        },
+        
+        .interpret_effect_size = function(value, type) {
+            if (type == "eta" || type == "cohens_d") {
+                thresholds <- if (type == "eta") c(0.01, 0.06, 0.14) else c(0.2, 0.5, 0.8)
+                labels <- c("small", "medium", "large")
+            } else if (type == "cramers_v") {
+                thresholds <- c(0.1, 0.3, 0.5)
+                labels <- c("small", "medium", "large")
+            } else {
+                return("effect size")
+            }
+            
+            if (value < thresholds[1]) return("negligible")
+            if (value < thresholds[2]) return(labels[1])
+            if (value < thresholds[3]) return(labels[2])
+            return(labels[3])
+        },
+        
+        .interpret_correlation_strength = function(r) {
+            if (r < 0.1) return("negligible")
+            if (r < 0.3) return("small")
+            if (r < 0.5) return("medium")
+            if (r < 0.7) return("large")
+            return("very large")
+        },
+        
+        .add_interpretation_guide = function(stat_method) {
+            guide_html <- paste0(
+                "<div style='background-color: #e8f4fd; border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 15px 0;'>",
+                "<h6 style='color: #1380A1; margin: 0 0 8px 0;'>📋 BBC Editorial Guidelines for Statistical Reporting:</h6>"
+            )
+            
+            if (stat_method %in% c("anova", "ttest")) {
+                guide_html <- paste0(guide_html,
+                    "<p style='margin: 0; font-size: 0.9em;'>",
+                    "• Report p-values with appropriate precision (avoid 'p < 0.05')<br/>",
+                    "• Always include effect sizes for practical significance<br/>",
+                    "• Consider confidence intervals for key comparisons<br/>",
+                    "• Mention sample sizes for transparency</p>"
+                )
+            } else if (stat_method == "correlation") {
+                guide_html <- paste0(guide_html,
+                    "<p style='margin: 0; font-size: 0.9em;'>",
+                    "• Remember: correlation does not imply causation<br/>",
+                    "• Report both correlation coefficient and confidence interval<br/>",
+                    "• Consider potential confounding variables<br/>",
+                    "• Use appropriate correlation method for your data type</p>"
+                )
+            }
+            
+            guide_html <- paste0(guide_html, "</div>")
+            return(guide_html)
+        },
+        
+        .add_post_hoc_note = function(p_value, n_groups) {
+            if (p_value < 0.05 && n_groups > 2) {
+                return("<p style='color: #007A54; font-style: italic;'>📌 Significant result detected. Consider post-hoc tests for pairwise comparisons.</p>")
+            }
+            return("")
+        },
+        
+        .add_chi_square_assumptions_note = function(contingency_table) {
+            expected_counts <- chisq.test(contingency_table)$expected
+            min_expected <- min(expected_counts)
+            
+            if (min_expected < 5) {
+                return("<p style='color: #f57c00; font-style: italic;'>⚠️ Warning: Some expected cell counts < 5. Consider Fisher's exact test for small samples.</p>")
+            }
+            return("")
         },
 
         .generate_chart_summary = function() {

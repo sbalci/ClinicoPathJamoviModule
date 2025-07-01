@@ -112,7 +112,8 @@ alluvialSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         mydataview = function() private$.items[["mydataview"]],
         plot = function() private$.items[["plot"]],
         summaryTable = function() private$.items[["summaryTable"]],
-        survivalStats = function() private$.items[["survivalStats"]]),
+        survivalStats = function() private$.items[["survivalStats"]],
+        survivalPlot = function() private$.items[["survivalPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -190,7 +191,20 @@ alluvialSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `name`="survivalRate", 
                         `title`="Survival Rate", 
                         `type`="number", 
-                        `format`="pc"))))}))
+                        `format`="pc"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survivalPlot",
+                title="Survival Curves",
+                width=800,
+                height=600,
+                renderFun=".plotSurvival",
+                visible="(survivalVar && showSurvival)",
+                clearWith=list(
+                    "survivalVar",
+                    "showSurvival",
+                    "stageVar",
+                    "treatmentVar")))}))
 
 alluvialSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "alluvialSurvivalBase",
@@ -232,6 +246,7 @@ alluvialSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survivalStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

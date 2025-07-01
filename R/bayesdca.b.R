@@ -66,6 +66,14 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 thresholdMax <- self$options$thresholdMax
                 thresholdPoints <- self$options$thresholdPoints
 
+                # Validate threshold settings
+                if (thresholdMin >= thresholdMax) {
+                    jmvcore::reject("Minimum threshold must be less than maximum threshold")
+                }
+                if (thresholdMin < 0.001 || thresholdMax > 0.99) {
+                    jmvcore::reject("Thresholds must be between 0.001 and 0.99")
+                }
+                
                 # Generate threshold sequence
                 thresholds <- seq(thresholdMin, thresholdMax, length.out = thresholdPoints)
                 private$.thresholds <- thresholds
@@ -81,8 +89,16 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     }
                 }
 
-                # Remove NA values
+                # Validate and handle missing values
+                if (sum(is.na(outcomes)) > 0) {
+                    warning(paste("Removing", sum(is.na(outcomes)), "cases with missing outcome values"))
+                }
+                
                 complete_cases <- complete.cases(outcomes)
+                if (sum(complete_cases) < 10) {
+                    jmvcore::reject("Insufficient data: Need at least 10 complete cases for analysis")
+                }
+                
                 outcomes <- outcomes[complete_cases]
                 data <- data[complete_cases, , drop = FALSE]
 
@@ -100,6 +116,30 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 }
 
                 prevalence <- cases / total
+                
+                # Validate prevalence
+                if (prevalence < 0.01 || prevalence > 0.99) {
+                    warning("Extreme prevalence detected. Results may be unstable.")
+                }
+                
+                # Validate predictor variables
+                for (pred in predictorVars) {
+                    if (!pred %in% names(data)) {
+                        jmvcore::reject(paste("Predictor variable", pred, "not found in data"))
+                    }
+                    
+                    pred_values <- data[[pred]]
+                    if (all(is.na(pred_values))) {
+                        jmvcore::reject(paste("Predictor variable", pred, "contains only missing values"))
+                    }
+                    
+                    # Check if continuous predictor is in valid probability range
+                    if (!all(pred_values %in% c(0, 1, NA), na.rm = TRUE)) {
+                        if (any(pred_values < 0 | pred_values > 1, na.rm = TRUE)) {
+                            warning(paste("Predictor", pred, "contains values outside [0,1] range. Consider probability calibration."))
+                        }
+                    }
+                }
 
                 # Create summary
                 summary_html <- paste0(
@@ -231,10 +271,21 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         tn <- sum(outcomes == 0 & test_results == 0, na.rm = TRUE)
                         fn <- sum(outcomes == 1 & test_results == 0, na.rm = TRUE)
 
-                        # Point estimates
+                        # Point estimates with better error handling
                         sens <- if ((tp + fn) > 0) tp / (tp + fn) else 0
                         spec <- if ((tn + fp) > 0) tn / (tn + fp) else 0
-                        nb <- sens * prevalence - (1 - spec) * (1 - prevalence) * thresh / (1 - thresh)
+                        
+                        # Calculate net benefit with safeguards
+                        if (thresh >= 1.0) {
+                            nb <- 0  # At threshold = 1, no intervention is worthwhile
+                        } else {
+                            nb <- sens * prevalence - (1 - spec) * (1 - prevalence) * thresh / (1 - thresh)
+                        }
+                        
+                        # Ensure net benefit is finite
+                        if (!is.finite(nb)) {
+                            nb <- 0
+                        }
 
                         sensitivity[i] <- sens
                         specificity[i] <- spec
@@ -353,10 +404,21 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         tn <- sum(outcomes == 0 & test_results == 0, na.rm = TRUE)
                         fn <- sum(outcomes == 1 & test_results == 0, na.rm = TRUE)
 
-                        # Calculate metrics
+                        # Calculate metrics with better error handling
                         sens <- if ((tp + fn) > 0) tp / (tp + fn) else 0
                         spec <- if ((tn + fp) > 0) tn / (tn + fp) else 0
-                        nb <- sens * prevalence - (1 - spec) * (1 - prevalence) * thresh / (1 - thresh)
+                        
+                        # Calculate net benefit with safeguards
+                        if (thresh >= 1.0) {
+                            nb <- 0  # At threshold = 1, no intervention is worthwhile
+                        } else {
+                            nb <- sens * prevalence - (1 - spec) * (1 - prevalence) * thresh / (1 - thresh)
+                        }
+                        
+                        # Ensure net benefit is finite
+                        if (!is.finite(nb)) {
+                            nb <- 0
+                        }
 
                         sensitivity[i] <- sens
                         specificity[i] <- spec
@@ -391,11 +453,22 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                                 boot_tn <- sum(boot_outcomes == 0 & boot_test == 0, na.rm = TRUE)
                                 boot_fn <- sum(boot_outcomes == 1 & boot_test == 0, na.rm = TRUE)
 
-                                # Calculate bootstrap metrics
+                                # Calculate bootstrap metrics with safeguards
                                 boot_sens <- if ((boot_tp + boot_fn) > 0) boot_tp / (boot_tp + boot_fn) else 0
                                 boot_spec <- if ((boot_tn + boot_fp) > 0) boot_tn / (boot_tn + boot_fp) else 0
-                                boot_nb[b] <- boot_sens * prevalence -
-                                    (1 - boot_spec) * (1 - prevalence) * thresh / (1 - thresh)
+                                
+                                # Calculate bootstrap net benefit with safeguards
+                                if (thresh >= 1.0) {
+                                    boot_nb[b] <- 0
+                                } else {
+                                    boot_nb[b] <- boot_sens * prevalence -
+                                        (1 - boot_spec) * (1 - prevalence) * thresh / (1 - thresh)
+                                }
+                                
+                                # Ensure bootstrap net benefit is finite
+                                if (!is.finite(boot_nb[b])) {
+                                    boot_nb[b] <- 0
+                                }
                             }
 
                             # Get CI

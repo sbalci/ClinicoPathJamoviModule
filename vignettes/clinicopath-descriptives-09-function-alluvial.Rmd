@@ -1,10 +1,10 @@
 ---
-title: "Vignette: Visualizing Data Flows with Alluvial Diagrams"
-author: "Analysis by Gemini"
+title: "Function Reference: alluvial() - Complete Parameter Guide"
+author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette: Creating Alluvial Diagrams}
+  %\VignetteIndexEntry{Function Reference: alluvial() - Complete Parameter Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,46 +12,271 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
+## Overview
 
-```{r}
-# Create a sample data frame
-set.seed(42) # for reproducibility
-patient_flow <- data.frame(
-  Stage = sample(c("Stage I", "Stage II", "Stage III"), 100, replace = TRUE),
-  Treatment = sample(c("Chemo", "Radiation", "Combined"), 100, replace = TRUE),
-  Response = sample(c("Complete", "Partial", "None"), 100, replace = TRUE, 
-                    prob = c(0.4, 0.4, 0.2))
+The `alluvial()` function in ClinicoPath creates comprehensive alluvial diagrams for visualizing categorical data flows. This reference document provides complete parameter documentation and usage examples.
+
+## Function Signature
+
+```r
+alluvial(
+  data,
+  vars,
+  condensationvar = NULL,
+  excl = FALSE,
+  marg = FALSE,
+  fill = "first_variable",
+  bin = "default",
+  orient = "vert",
+  usetitle = FALSE,
+  mytitle = "Alluvial Plot"
 )
-
-# View the first few rows
-head(patient_flow)
 ```
 
+## Parameters
 
+### Required Parameters
 
-```{r}
-# This code simulates how the jamovi module would be called in an R environment.
-# You would need the ClinicoPathDescriptives package installed.
+#### `data`
+- **Type**: Data frame
+- **Description**: The dataset containing the variables for analysis
+- **Example**: `data = histopathology`
 
-# Load the library
+#### `vars`
+- **Type**: Vector of variable names
+- **Description**: 2-8 categorical variables for the alluvial diagram
+- **Example**: `vars = c("Sex", "Grade_Level", "LVI", "PNI")`
+
+### Optional Parameters
+
+#### `condensationvar`
+- **Type**: Variable name (string)
+- **Default**: `NULL`
+- **Description**: Variable used to create a condensation plot showing how this variable relates to the main flow patterns
+- **Example**: `condensationvar = "Sex"`
+- **Note**: When specified, generates a second plot alongside the main alluvial diagram
+
+#### `excl`
+- **Type**: Boolean
+- **Default**: `FALSE`
+- **Description**: Whether to exclude missing values from the analysis
+- **Options**:
+  - `FALSE`: Include missing values (default)
+  - `TRUE`: Exclude missing values
+- **Example**: `excl = TRUE`
+
+#### `marg`
+- **Type**: Boolean
+- **Default**: `FALSE`
+- **Description**: Whether to add marginal histograms showing variable distributions
+- **Options**:
+  - `FALSE`: No marginal plots (default)
+  - `TRUE`: Add marginal histograms
+- **Constraints**: 
+  - Only available with vertical orientation (`orient = "vert"`)
+  - Cannot be used with custom titles (`usetitle = FALSE`)
+- **Example**: `marg = TRUE`
+
+#### `fill`
+- **Type**: String
+- **Default**: `"first_variable"`
+- **Description**: Strategy for coloring the flows in the diagram
+- **Options**:
+  - `"first_variable"`: Color by the first variable in vars (default)
+  - `"last_variable"`: Color by the last variable in vars
+  - `"all_flows"`: Each unique flow path gets a different color
+  - `"values"`: Color by variable values
+- **Example**: `fill = "all_flows"`
+
+#### `bin`
+- **Type**: String
+- **Default**: `"default"`
+- **Description**: Method for labeling bins when continuous variables are automatically binned
+- **Options**:
+  - `"default"`: Uses labels c("LL", "ML", "M", "MH", "HH")
+  - `"mean"`: Bin labels based on mean values
+  - `"median"`: Bin labels based on median values
+  - `"min_max"`: Bin labels showing min-max ranges
+  - `"cuts"`: Bin labels based on cut points
+- **Example**: `bin = "median"`
+
+#### `orient`
+- **Type**: String
+- **Default**: `"vert"`
+- **Description**: Orientation of the alluvial diagram
+- **Options**:
+  - `"vert"`: Vertical flow (default)
+  - `"horr"`: Horizontal flow
+- **Constraints**: Marginal plots only work with vertical orientation
+- **Example**: `orient = "horr"`
+
+#### `usetitle`
+- **Type**: Boolean
+- **Default**: `FALSE`
+- **Description**: Whether to use a custom title for the plot
+- **Options**:
+  - `FALSE`: Use default title (default)
+  - `TRUE`: Use custom title specified in `mytitle`
+- **Constraints**: Cannot be used with marginal plots (`marg = FALSE`)
+- **Example**: `usetitle = TRUE`
+
+#### `mytitle`
+- **Type**: String
+- **Default**: `"Alluvial Plot"`
+- **Description**: Custom title text for the plot
+- **Note**: Only used when `usetitle = TRUE`
+- **Example**: `mytitle = "Patient Flow Analysis"`
+
+## Parameter Constraints and Interactions
+
+### Mutual Exclusions
+1. **Marginal plots + Custom titles**: Cannot use both simultaneously
+   - If `marg = TRUE`, then `usetitle` must be `FALSE`
+   - If `usetitle = TRUE`, then `marg` must be `FALSE`
+
+2. **Marginal plots + Horizontal orientation**: Cannot use both simultaneously
+   - If `marg = TRUE`, then `orient` must be `"vert"`
+   - If `orient = "horr"`, then `marg` must be `FALSE`
+
+### Valid Combinations
+```r
+# Valid: Marginal plots with vertical orientation
+alluvial(data = histopathology, vars = c("Sex", "LVI"), marg = TRUE, orient = "vert")
+
+# Valid: Custom title with horizontal orientation  
+alluvial(data = histopathology, vars = c("Sex", "LVI"), usetitle = TRUE, orient = "horr")
+
+# Invalid: This combination will cause issues
+# alluvial(data = histopathology, vars = c("Sex", "LVI"), marg = TRUE, usetitle = TRUE)
+```
+
+## Return Value
+
+The function returns an `alluvialClass` object that inherits from `alluvialBase`. This object contains:
+- Plot rendering methods (`.plot` and `.plot2`)
+- Parameter settings
+- Data processing methods
+- jamovi-compatible analysis structure
+
+## Examples
+
+### Basic Usage
+
+```{r basic-examples}
 library(ClinicoPath)
+data("histopathology")
 
-# Run the alluvial analysis
-results <- alluvial(
-    data = patient_flow,
-    vars = c("Stage", "Treatment", "Response"),
-    condensationvar = NULL, # No condensation variable
-    fill = "first_variable", # Color the flows based on initial cancer stage
-    marg = TRUE # Include marginal histograms
+# Minimal example
+alluvial(
+  data = histopathology,
+  vars = c("Sex", "Grade_Level", "LVI")
 )
 
-# To view the plot:
-print(results$plot)
+# With parameter customization
+alluvial(
+  data = histopathology,
+  vars = c("Sex", "Race", "Group", "Grade_Level"),
+  fill = "last_variable",
+  excl = TRUE,
+  orient = "horr"
+)
 ```
 
+### Advanced Usage
 
+```{r advanced-examples}
+# Comprehensive parameter usage
+alluvial(
+  data = histopathology,
+  vars = c("Sex", "Race", "Group", "Grade_Level", "LVI"),
+  condensationvar = "PNI",
+  excl = TRUE,
+  marg = FALSE,
+  fill = "all_flows",
+  bin = "median",
+  orient = "vert",
+  usetitle = TRUE,
+  mytitle = "Comprehensive Clinical Characteristics Flow"
+)
 
+# Marginal plots example
+alluvial(
+  data = histopathology,
+  vars = c("Sex", "Grade_Level", "LVI"),
+  marg = TRUE,
+  orient = "vert",
+  fill = "first_variable"
+)
+
+# Condensation analysis
+alluvial(
+  data = histopathology,
+  vars = c("Grade_Level", "LVI", "PNI"),
+  condensationvar = "Sex",
+  fill = "values"
+)
+```
+
+### Different Datasets
+
+```{r dataset-examples}
+# Colon cancer analysis
+data("colon")
+alluvial(
+  data = colon,
+  vars = c("sex", "differ", "extent"),
+  fill = "first_variable",
+  usetitle = TRUE,
+  mytitle = "Colon Cancer Characteristics"
+)
+
+# Treatment response analysis
+data("treatmentResponse") 
+alluvial(
+  data = treatmentResponse,
+  vars = c("PreTreatment", "Treatment", "Response"),
+  fill = "last_variable"
+)
+```
+
+## Technical Details
+
+### Underlying Implementation
+- Uses the `easyalluvial` R package for core functionality
+- Supports up to 8 variables (`max_variables = 8` in easyalluvial)
+- Integrates with jamovi's R6 class system
+- Provides dual plot functionality (main + condensation)
+
+### Data Requirements
+- Variables should be categorical (factors or character vectors)
+- Continuous variables are automatically binned using the specified `bin` method
+- Missing values are handled according to the `excl` parameter
+- Minimum 2 variables, maximum 8 variables recommended
+
+### Performance Considerations
+- Works best with moderate sample sizes (50-500 cases)
+- Large datasets may produce cluttered visualizations
+- Complex flows with many categories may be difficult to interpret
+
+## Error Handling
+
+The function includes comprehensive error handling:
+- Empty datasets trigger appropriate error messages
+- Invalid parameter combinations are prevented through UI constraints
+- Missing required parameters show helpful todo messages
+
+## See Also
+
+- [Comprehensive Alluvial Guide](clinicopath-descriptives-05-alluvial.html) - Complete usage examples
+- `easyalluvial` package documentation
+- Related ClinicoPath visualization functions: `jjalluvial()`, `riverplot()`
+
+## Version Information
+
+This documentation is current as of ClinicoPath version 0.0.3.32.

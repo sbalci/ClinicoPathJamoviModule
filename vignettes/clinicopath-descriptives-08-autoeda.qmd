@@ -1,0 +1,526 @@
+---
+title: "Automated Exploratory Data Analysis with AutoEDA"
+subtitle: "Comprehensive automated EDA using DataExplorer integration"
+date: "`r Sys.Date()`"
+author: "ClinicoPath"
+format:
+  html:
+    code-fold: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+editor: visual
+---
+
+# Introduction to AutoEDA
+
+The AutoEDA module provides comprehensive automated exploratory data analysis capabilities specifically designed for clinical and pathological research. Built on the DataExplorer package framework, it offers intelligent automation while maintaining clinical relevance and interpretation.
+
+## Key Features
+
+- **7 Analysis Types**: From basic overview to comprehensive reporting
+- **Clinical Intelligence**: Specialized pattern detection for medical data
+- **Reference Range Validation**: Automatic detection of physiologically implausible values
+- **Quality Assessment**: Clinical data quality scoring system
+- **Target Variable Analysis**: Supervised EDA for outcome prediction
+- **Missing Data Strategy**: Clinical-aware missing value analysis
+
+## Research Foundation
+
+Based on research from *R Journal 2019: The Landscape of R Packages for Automated Exploratory Data Analysis* (Staniak & Biecek), implementing best practices for automated statistical exploration.
+
+# Getting Started
+
+## Load Required Libraries
+
+```{r setup, message=FALSE, warning=FALSE}
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+
+# Use the histopathology dataset for comprehensive examples
+data("histopathology")
+mydata <- histopathology
+
+# Display basic dataset information
+cat("Dataset dimensions:", nrow(mydata), "rows ×", ncol(mydata), "columns\n")
+cat("Sample variables:", paste(head(names(mydata), 8), collapse = ", "), "...\n")
+```
+
+## Basic AutoEDA Workflow
+
+The AutoEDA analysis follows a systematic approach:
+
+1. **Variable Selection**: Choose variables for analysis
+2. **Analysis Type**: Select from 7 analysis types
+3. **Configuration**: Set parameters (target variable, correlation method, etc.)
+4. **Execution**: Run automated analysis
+5. **Interpretation**: Review insights and recommendations
+
+# Analysis Types Overview
+
+## 1. Dataset Overview Analysis
+
+Comprehensive introduction to your dataset using DataExplorer's `introduce()` function:
+
+```{r overview-example, eval=FALSE}
+# Dataset Overview Analysis
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI", 
+           "Death", "Recurrence", "OverallTime"),
+  analysis_type = "overview",
+  include_plots = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+**What you get:**
+- Dataset dimensions and completeness
+- Variable type breakdown (continuous vs discrete)
+- Data quality assessment with scoring
+- Memory usage analysis
+- Recommendations for next steps
+
+## 2. Missing Value Analysis
+
+Comprehensive missing data pattern analysis:
+
+```{r missing-example, eval=FALSE}
+# Missing Value Analysis with Clinical Insights
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI", 
+           "MarginDistance", "MeasurementA", "MeasurementB"),
+  analysis_type = "missing",
+  missing_threshold = 10,  # Flag variables with >10% missing
+  plot_theme = "clinical"
+)
+```
+
+**Features:**
+- Variable-by-variable missing value summary
+- Percentage missing with threshold flagging
+- Clinical recommendations for handling missing data
+- MCAR/MAR/MNAR considerations for clinical data
+
+## 3. Variable Distribution Analysis
+
+Automated univariate analysis for both numeric and categorical variables:
+
+```{r distribution-example, eval=FALSE}
+# Distribution Analysis
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "OverallTime", 
+           "MeasurementA", "MeasurementB"),
+  analysis_type = "distributions",
+  include_plots = TRUE,
+  categorical_limit = 15,
+  plot_theme = "clinical"
+)
+```
+
+**Analyzes:**
+- Continuous variables: histograms, summary statistics, normality
+- Categorical variables: frequency distributions, level analysis
+- Distribution characteristics and outlier detection
+- Recommendations for statistical test selection
+
+## 4. Correlation Analysis
+
+Relationship analysis between numeric variables:
+
+```{r correlation-example, eval=FALSE}
+# Correlation Analysis with Multiple Methods
+autoeda(
+  data = mydata,
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", 
+           "MarginDistance"),
+  analysis_type = "correlation",
+  correlation_method = "pearson",  # or "spearman", "kendall"
+  include_plots = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+**Provides:**
+- Correlation matrix calculation
+- Strong correlation detection (|r| > 0.7)
+- Multicollinearity warnings
+- Interpretation guidelines for correlation strength
+
+## 5. Principal Component Analysis (PCA)
+
+Dimensionality reduction and feature importance:
+
+```{r pca-example, eval=FALSE}
+# PCA Analysis
+autoeda(
+  data = mydata,
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", 
+           "MarginDistance"),
+  analysis_type = "pca",
+  pca_components = 5,
+  include_plots = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+**Results:**
+- Principal component variance explained
+- Cumulative variance analysis
+- Dimensionality reduction assessment
+- Recommendations for component retention
+
+## 6. Target Variable Analysis
+
+Supervised EDA with outcome variable relationships:
+
+```{r target-example, eval=FALSE}
+# Target Variable Analysis for Survival Outcome
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI", 
+           "MeasurementA", "MeasurementB"),
+  target_var = "Death",  # Outcome variable
+  analysis_type = "target",
+  include_plots = TRUE,
+  plot_theme = "clinical"
+)
+
+# Target Analysis for Continuous Outcome
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI"),
+  target_var = "OverallTime",  # Time to event
+  analysis_type = "target",
+  include_plots = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+**Features:**
+- Target variable characterization (continuous vs categorical)
+- Relationship analysis with predictors
+- Statistical approach recommendations
+- Feature importance insights
+
+## 7. Comprehensive Report
+
+Complete automated EDA report combining all analyses:
+
+```{r comprehensive-example, eval=FALSE}
+# Comprehensive AutoEDA Report
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI", 
+           "Death", "Recurrence", "OverallTime", "MeasurementA", "MeasurementB"),
+  analysis_type = "comprehensive",
+  target_var = "Death",
+  correlation_method = "spearman",
+  missing_threshold = 5,
+  pca_components = 5,
+  include_plots = TRUE,
+  advanced_options = TRUE,
+  plot_theme = "clinical",
+  output_format = "combined"
+)
+```
+
+**Comprehensive Output:**
+- All analysis types in one report
+- Executive summary with key findings
+- Data quality assessment
+- Clinical insights and patterns
+- Next steps recommendations
+
+# Advanced Clinical Features
+
+## Clinical Pattern Detection
+
+The AutoEDA module includes specialized detection for clinical variable patterns:
+
+```{r clinical-patterns, eval=FALSE}
+# Advanced Clinical Analysis
+autoeda(
+  data = mydata,
+  vars = names(mydata),  # Analyze all variables
+  analysis_type = "comprehensive",
+  advanced_options = TRUE,  # Enable clinical insights
+  plot_theme = "clinical"
+)
+```
+
+**Detects:**
+- **Age Variables**: Age-related patterns and distributions
+- **Vital Signs**: Blood pressure, temperature, heart rate patterns
+- **Laboratory Values**: Glucose, cholesterol, HbA1c ranges
+- **Anthropometric**: Weight, height, BMI analysis
+- **Diagnostic Variables**: Stage, grade, diagnosis hierarchies
+- **Treatment Variables**: Therapy, medication, surgery patterns
+- **Outcome Variables**: Survival, recurrence, progression analysis
+
+## Reference Range Validation
+
+Automatic detection of physiologically implausible values:
+
+```{r reference-ranges, eval=FALSE}
+# Create sample clinical data with potential outliers
+clinical_data <- data.frame(
+  patient_id = 1:100,
+  age = c(rnorm(95, 65, 15), 150, 200, -5, 250, 300),  # Some impossible ages
+  weight = c(rnorm(95, 70, 15), 600, 700, -10, 0.1, 800),  # Impossible weights
+  systolic_bp = c(rnorm(95, 120, 20), 300, 400, 20, 500, 10),  # Impossible BP
+  temperature = c(rnorm(95, 36.5, 0.5), 50, 60, 10, 70, 0)  # Impossible temp
+)
+
+# Analyze with reference range checking
+autoeda(
+  data = clinical_data,
+  vars = c("age", "weight", "systolic_bp", "temperature"),
+  analysis_type = "comprehensive",
+  advanced_options = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+**Validates Against:**
+- Age: 0-120 years
+- Weight: 0.5-500 kg
+- Height: 30-250 cm
+- Temperature: 35-42°C
+- Blood pressure: Systolic 70-250, Diastolic 40-150 mmHg
+- Heart rate: 30-200 bpm
+- Common lab values: Glucose, cholesterol ranges
+
+## Clinical Data Quality Scoring
+
+Automated assessment of clinical data quality:
+
+```{r quality-scoring, eval=FALSE}
+# Data Quality Assessment
+autoeda(
+  data = mydata,
+  vars = c("Age", "Sex", "Grade", "TStage", "Death", "OverallTime"),
+  analysis_type = "overview",
+  advanced_options = TRUE
+)
+```
+
+**Quality Score Factors:**
+- Sample size adequacy (penalty for <30 cases)
+- Variables with high missing values (>20%)
+- Critical variables missing (outcomes, diagnoses)
+- Overall completeness percentage
+
+**Scoring:**
+- **80-100**: Excellent - Ready for analysis
+- **60-79**: Good - Minor issues to address  
+- **0-59**: Needs Improvement - Significant data quality concerns
+
+# Parameter Reference
+
+## Core Parameters
+
+```{r params-demo, eval=FALSE}
+autoeda(
+  data = mydata,
+  
+  # Variable selection
+  vars = c("Age", "Sex", "Grade"),  # Required: variables to analyze
+  
+  # Analysis configuration  
+  analysis_type = "overview",  # "overview", "missing", "distributions", 
+                              # "correlation", "pca", "target", "comprehensive"
+  target_var = "Death",       # Optional: for supervised analysis
+  
+  # Missing value settings
+  missing_threshold = 5,      # Threshold % for flagging missing values
+  
+  # Correlation settings
+  correlation_method = "pearson",  # "pearson", "spearman", "kendall"
+  
+  # PCA settings
+  pca_components = 5,         # Number of components to analyze
+  
+  # Visualization settings
+  include_plots = TRUE,       # Include automated plots
+  plot_theme = "clinical",    # "default", "minimal", "classic", "clinical"
+  
+  # Output settings
+  output_format = "combined", # "html", "tables", "combined"
+  
+  # Advanced features
+  advanced_options = TRUE,    # Enable clinical insights
+  categorical_limit = 15,     # Max levels for categorical variables
+  generate_report = FALSE     # Generate comprehensive report file
+)
+```
+
+## Analysis Type Details
+
+| Type | Description | Best For |
+|------|-------------|----------|
+| `overview` | Dataset introduction and summary | Initial data exploration |
+| `missing` | Missing value patterns | Data quality assessment |
+| `distributions` | Univariate analysis | Variable characterization |
+| `correlation` | Relationship analysis | Feature selection prep |
+| `pca` | Dimensionality reduction | High-dimensional data |
+| `target` | Supervised EDA | Outcome prediction prep |
+| `comprehensive` | Complete automated report | Full analysis workflow |
+
+# Clinical Research Applications
+
+## Pathology Research Example
+
+```{r pathology-research, eval=FALSE}
+# Comprehensive analysis for pathology research
+autoeda(
+  data = histopathology,
+  vars = c("Age", "Sex", "Race", "Grade", "TStage", "NStage", 
+           "LVI", "PNI", "Death", "Recurrence", "OverallTime"),
+  analysis_type = "comprehensive",
+  target_var = "Death",
+  correlation_method = "spearman",  # More robust for ordinal data
+  missing_threshold = 5,
+  advanced_options = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+## Biomarker Discovery Workflow
+
+```{r biomarker-workflow, eval=FALSE}
+# Focus on measurement variables for biomarker analysis
+autoeda(
+  data = histopathology,
+  vars = c("MeasurementA", "MeasurementB", "Age", "Grade", "TStage", "Death"),
+  analysis_type = "target",
+  target_var = "Death",
+  correlation_method = "pearson",
+  include_plots = TRUE,
+  advanced_options = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+## Survival Analysis Preparation
+
+```{r survival-prep, eval=FALSE}
+# Prepare data for survival analysis
+autoeda(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI", 
+           "OverallTime", "Death"),
+  analysis_type = "comprehensive",
+  target_var = "OverallTime",  # Time to event
+  missing_threshold = 3,  # Strict threshold for survival data
+  advanced_options = TRUE,
+  plot_theme = "clinical"
+)
+```
+
+# Best Practices
+
+## Variable Selection Strategy
+
+1. **Start Broad**: Include all potentially relevant variables
+2. **Focus Analysis**: Use specific analysis types for targeted exploration
+3. **Target-Driven**: Always specify target variable when appropriate
+4. **Iterative Approach**: Use insights to refine variable selection
+
+## Clinical Data Considerations
+
+1. **Missing Data Strategy**: Consider clinical reasons for missingness
+2. **Reference Ranges**: Review flagged outliers for data entry errors
+3. **Variable Hierarchies**: Understand staging and grading systems
+4. **Temporal Relationships**: Consider treatment sequences and follow-up
+
+## Analysis Workflow
+
+1. **Overview First**: Start with dataset overview
+2. **Quality Assessment**: Check missing values and data quality
+3. **Target Analysis**: Focus on outcome relationships
+4. **Comprehensive Report**: Generate final automated report
+
+# Interpretation Guidelines
+
+## Data Quality Indicators
+
+- **Excellent (80-100)**: Ready for immediate analysis
+- **Good (60-79)**: Address minor data quality issues
+- **Poor (<60)**: Significant preprocessing required
+
+## Missing Value Thresholds
+
+- **<5%**: Generally acceptable for most analyses
+- **5-15%**: Consider imputation strategies
+- **15-30%**: Evaluate variable importance vs completeness
+- **>30%**: Consider excluding variable unless critical
+
+## Correlation Strength
+
+- **|r| > 0.7**: Strong correlation, check multicollinearity
+- **0.3 < |r| < 0.7**: Moderate correlation, meaningful relationship
+- **|r| < 0.3**: Weak correlation, limited linear relationship
+
+## Sample Size Guidelines
+
+- **n ≥ 100**: Adequate for most analyses
+- **30 ≤ n < 100**: Acceptable with careful interpretation
+- **n < 30**: Limited power, consider descriptive analysis only
+
+# Advanced Topics
+
+## Custom Clinical Patterns
+
+The module can be extended to detect custom clinical patterns by modifying the pattern detection logic.
+
+## Integration with Other Modules
+
+AutoEDA results inform:
+- **Survival Analysis**: Variable selection and preprocessing
+- **Decision Analysis**: Feature importance for decision trees
+- **Statistical Plots**: Variable characterization for visualization
+- **Cross-tabulation**: Categorical variable relationships
+
+## Computational Considerations
+
+- **Large Datasets**: Consider variable subset for initial exploration
+- **Memory Usage**: Monitor memory usage displayed in overview
+- **Processing Time**: Comprehensive analysis may take time with many variables
+
+# Troubleshooting
+
+## Common Issues
+
+**DataExplorer not installed:**
+```r
+install.packages("DataExplorer")
+```
+
+**Insufficient variables for correlation/PCA:**
+- Ensure at least 2 numeric variables selected
+- Check for complete cases after missing value removal
+
+**No target variable detected:**
+- Verify target variable name spelling
+- Ensure target variable exists in selected variables
+
+**Plot generation errors:**
+- Try different plot themes
+- Disable plots with `include_plots = FALSE`
+
+# References
+
+1. Staniak, M., & Biecek, P. (2019). The landscape of R packages for automated exploratory data analysis. *The R Journal*, 11(2), 249-269.
+
+2. DataExplorer package documentation: https://cran.r-project.org/package=DataExplorer
+
+3. ClinicoPath package documentation: Clinical and pathological research analysis tools
+
+---
+
+*This vignette demonstrates the comprehensive AutoEDA capabilities in ClinicoPath. The module provides intelligent automation while maintaining clinical relevance and interpretability for medical research applications.*

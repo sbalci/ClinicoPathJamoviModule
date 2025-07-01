@@ -68,4 +68,17 @@ items:
           title: Survival Rate
           type: number
           format: pc
+
+    - name: survivalPlot
+      title: Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotSurvival
+      visible: (survivalVar && showSurvival)
+      clearWith:
+        - survivalVar
+        - showSurvival
+        - stageVar
+        - treatmentVar
 ...
