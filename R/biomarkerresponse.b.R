@@ -156,65 +156,132 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         },
         
         .run = function() {
-            # Check required variables
+            # Enhanced guidance and documentation
             if (is.null(self$options$biomarker) || is.null(self$options$response)) {
                 todo <- "
-                <br>Welcome to ClinicoPath Biomarker Response Analysis
-                <br><br>
-                This tool analyzes relationships between biomarker levels and treatment responses.
-                <br><br>
-                <b>Required variables:</b>
-                <br>- Biomarker Variable: Continuous biomarker measurement
-                <br>- Response Variable: Treatment response (binary, categorical, or continuous)
-                <br><br>
-                <b>Optional variables:</b>
-                <br>- Grouping Variable: For stratified analysis (e.g., treatment arm)
-                <br><br>
-                <b>Analysis features:</b>
-                <br>- Multiple visualization options (box plots, scatter plots, violin plots)
-                <br>- Threshold analysis with ROC curve optimization
-                <br>- Statistical tests appropriate for data types
-                <br>- Correlation analysis for continuous responses
-                <br><br>
-                <b>Clinical applications:</b>
-                <br>- Identify predictive biomarkers
-                <br>- Determine optimal cutoff values
-                <br>- Assess biomarker performance
-                <hr>
+                <h3>🧬 ClinicoPath Biomarker Response Analysis</h3>
+                <p><strong>Purpose:</strong> Analyze biomarker-response relationships for precision medicine and clinical decision support.</p>
+                
+                <h4>📋 Required Variables:</h4>
+                <ul>
+                    <li><strong>Biomarker Variable:</strong> Continuous measurement (expression, concentration, score)</li>
+                    <li><strong>Response Variable:</strong> Treatment outcome (binary, categorical, or continuous)</li>
+                </ul>
+                
+                <h4>⚙️ Optional Variables:</h4>
+                <ul>
+                    <li><strong>Grouping Variable:</strong> Stratification factor (treatment arm, disease stage)</li>
+                </ul>
+                
+                <h4>🔬 Analysis Features:</h4>
+                <ul>
+                    <li><strong>ROC Analysis:</strong> Optimal threshold determination and performance metrics</li>
+                    <li><strong>Statistical Testing:</strong> Appropriate tests for different response types</li>
+                    <li><strong>Visualization:</strong> Box plots, scatter plots, violin plots with trend lines</li>
+                    <li><strong>Clinical Validation:</strong> Sensitivity, specificity, PPV, NPV calculations</li>
+                    <li><strong>Data Quality:</strong> Outlier handling and transformation options</li>
+                </ul>
+                
+                <h4>🏥 Clinical Applications:</h4>
+                <ul>
+                    <li><strong>Predictive Biomarkers:</strong> Treatment selection (HER2, PD-L1, EGFR)</li>
+                    <li><strong>Prognostic Biomarkers:</strong> Outcome prediction (Ki-67, p53)</li>
+                    <li><strong>Pharmacogenomics:</strong> Drug metabolism (CYP2D6, TPMT)</li>
+                    <li><strong>Companion Diagnostics:</strong> Regulatory-grade biomarker validation</li>
+                    <li><strong>Treatment Monitoring:</strong> Response assessment (PSA, HbA1c)</li>
+                </ul>
+                
+                <h4>📊 Interpretation Guide:</h4>
+                <ul>
+                    <li><strong>AUC > 0.8:</strong> Excellent biomarker performance</li>
+                    <li><strong>AUC 0.7-0.8:</strong> Good biomarker performance</li>
+                    <li><strong>AUC 0.6-0.7:</strong> Fair biomarker performance</li>
+                    <li><strong>p < 0.05:</strong> Statistically significant association</li>
+                </ul>
+                
+                <p><strong>Resources:</strong></p>
+                <ul>
+                    <li><a href='https://clinicopath.github.io/ClinicoPathJamoviModule/' target='_blank'>User Guide</a></li>
+                    <li><a href='https://www.fda.gov/drugs/cder-biomarker-qualification-program' target='_blank'>FDA Biomarker Guidance</a></li>
+                </ul>
                 "
                 self$results$todo$setContent(todo)
                 return()
             }
             
-            if (nrow(self$data) == 0)
-                stop("Data contains no (complete) rows")
+            # Enhanced error checking and validation
+            if (nrow(self$data) == 0) {
+                stop("Error: Dataset contains no rows. Please provide data for biomarker analysis.")
+            }
             
+            # Enhanced data validation and preprocessing
             data <- self$data
             biomarker_var <- self$options$biomarker
             response_var <- self$options$response
             response_type <- self$options$responseType
             conf_level <- as.numeric(self$options$confidenceLevel)
             
-            # Get data vectors
-            biomarker_values <- data[[biomarker_var]]
-            response_values <- data[[response_var]]
+            # Comprehensive data validation
+            raw_biomarker_values <- data[[biomarker_var]]
+            raw_response_values <- data[[response_var]]
             
-            # Apply log transformation if requested
-            if (self$options$logTransform) {
-                biomarker_values <- log(biomarker_values + 1)  # Add 1 to handle zeros
+            # Initial data validation
+            if (is.null(raw_biomarker_values)) {
+                stop("Error: Biomarker variable could not be found in the dataset.")
             }
+            
+            if (is.null(raw_response_values)) {
+                stop("Error: Response variable could not be found in the dataset.")
+            }
+            
+            if (all(is.na(raw_biomarker_values))) {
+                stop("Error: Biomarker variable contains only missing values.")
+            }
+            
+            if (all(is.na(raw_response_values))) {
+                stop("Error: Response variable contains only missing values.")
+            }
+            
+            # Convert biomarker to numeric if possible
+            if (!is.numeric(raw_biomarker_values)) {
+                tryCatch({
+                    raw_biomarker_values <- as.numeric(raw_biomarker_values)
+                }, error = function(e) {
+                    stop("Error: Biomarker variable must be numeric or convertible to numeric.")
+                })
+            }
+            
+            # Validate response variable based on type
+            if (response_type %in% c("binary", "categorical")) {
+                raw_response_values <- as.factor(raw_response_values)
+                if (response_type == "binary" && length(levels(raw_response_values)) != 2) {
+                    warning(paste("Binary response specified but", length(levels(raw_response_values)), 
+                                "levels found. Using first two levels for analysis."))
+                }
+            } else if (response_type == "continuous") {
+                if (!is.numeric(raw_response_values)) {
+                    tryCatch({
+                        raw_response_values <- as.numeric(raw_response_values)
+                    }, error = function(e) {
+                        stop("Error: Continuous response variable must be numeric or convertible to numeric.")
+                    })
+                }
+            }
+            
+            # Enhanced data preprocessing
+            biomarker_values <- private$.preprocessBiomarkerData(raw_biomarker_values)
+            response_values <- raw_response_values
             
             # Handle outliers if requested
             if (self$options$outlierHandling == "remove") {
-                q1 <- quantile(biomarker_values, 0.25, na.rm = TRUE)
-                q3 <- quantile(biomarker_values, 0.75, na.rm = TRUE)
-                iqr <- q3 - q1
-                lower_bound <- q1 - 1.5 * iqr
-                upper_bound <- q3 + 1.5 * iqr
-                
-                outliers <- biomarker_values < lower_bound | biomarker_values > upper_bound
-                biomarker_values[outliers] <- NA
-                response_values[outliers] <- NA
+                outlier_indices <- private$.detectOutliers(biomarker_values)
+                if (length(outlier_indices) > 0) {
+                    biomarker_values[outlier_indices] <- NA
+                    response_values[outlier_indices] <- NA
+                    
+                    outlier_pct <- round(length(outlier_indices) / length(biomarker_values) * 100, 1)
+                    warning(paste("Removed", length(outlier_indices), "outliers (", outlier_pct, "% of data)."))
+                }
             }
             
             # Remove rows with missing values
@@ -222,9 +289,33 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             biomarker_values <- biomarker_values[complete_cases]
             response_values <- response_values[complete_cases]
             
+            # Final data validation
             if (length(biomarker_values) == 0) {
-                stop("No complete cases found after removing missing values and outliers")
+                stop("Error: No valid data points remain after preprocessing. Check for missing values and outliers.")
             }
+            
+            if (length(biomarker_values) < 10) {
+                warning(paste("Small sample size (n =", length(biomarker_values), 
+                            "). Results may be unreliable. Recommend n ≥ 30 for robust analysis."))
+            }
+            
+            if (response_type %in% c("binary", "categorical")) {
+                response_factor <- as.factor(response_values)
+                min_group_size <- min(table(response_factor))
+                if (min_group_size < 5) {
+                    warning(paste("Small group size detected (n =", min_group_size, 
+                                "). Results may be unreliable for statistical testing."))
+                }
+            }
+            
+            # Check biomarker data quality
+            biomarker_range <- max(biomarker_values) - min(biomarker_values)
+            if (biomarker_range == 0) {
+                stop("Error: Biomarker values are constant. Cannot perform analysis.")
+            }
+            
+            # Data quality assessment
+            private$.assessDataQuality(biomarker_values, response_values, response_type)
             
             # Determine threshold
             threshold_value <- NULL
