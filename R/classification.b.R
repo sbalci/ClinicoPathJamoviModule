@@ -1,14 +1,21 @@
-# @import mlr3
-# @import mlr3measures
-# @import mlr3learners
-# @import mlr3extralearners
-# @import mlr3viz
-# @importFrom caret sensitivity specificity posPredValue negPredValue
-# @importFrom pROC roc auc ci.auc
-# @importFrom boot boot boot.ci
-# @importFrom kknn kknn
-# @importFrom naivebayes naive_bayes
-# @importFrom e1071 svm
+#' @title Enhanced Clinical Classification Analysis
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @import mlr3
+#' @import mlr3measures  
+#' @import mlr3learners
+#' @import mlr3extralearners
+#' @import mlr3viz
+#' @importFrom caret sensitivity specificity posPredValue negPredValue
+#' @importFrom pROC roc auc ci.auc
+#' @importFrom boot boot boot.ci
+#' @importFrom kknn kknn
+#' @importFrom naivebayes naive_bayes
+#' @importFrom e1071 svm
+#' @importFrom data.table as.data.table data.table rbind
+#' @importFrom ggpubr ggarrange
+#' @importFrom rpart.plot rpart.plot
+#' @importFrom stats complete.cases sample setdiff
 
 # Enhanced for clinical applications - based on https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
@@ -24,10 +31,33 @@ private = list(
     .run = function() {
         library('mlr3')
 
-        if (length(self$options$dep) == 0 || length(self$options$indep) == 0)
+        if (length(self$options$dep) == 0 || length(self$options$indep) == 0) {
+            # Display welcome message
+            welcome_msg <- "
+            <br>Welcome to ClinicoPath Clinical Classification Analysis
+            <br><br>
+            This tool provides comprehensive machine learning classification for clinical data:
+            <br>• Decision Trees and Random Forests
+            <br>• K-Nearest Neighbors (KNN)
+            <br>• Naive Bayes and Logistic Regression
+            <br>• Support Vector Machines (SVM)
+            <br>• Clinical performance metrics with confidence intervals
+            <br>• Class imbalance handling methods
+            <br><br>
+            Select a dependent variable (outcome) and independent variables (predictors) to begin analysis.
+            <hr><br>
+            "
+            self$results$text$setContent(welcome_msg)
             return()
+        }
+
+        if (nrow(self$data) == 0) 
+            stop('Data contains no (complete) rows')
 
         data <- as.data.table(self$data)
+
+        # Add checkpoint before data processing
+        private$.checkpoint()
 
         task <- TaskClassif$new(id = "clinical_task", backend = data[complete.cases(data),], target = self$options$dep)
 

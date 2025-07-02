@@ -1,6 +1,11 @@
 #' @title Chi-Square Post-Hoc Tests
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom chisq.posthoc.test chisq.posthoc.test
+#' @importFrom stats chisq.test qchisq p.adjust
+#' @importFrom vcd mosaic
+#' @importFrom grid gpar
+#' @importFrom grDevices hcl.colors
 #'
 
 chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -129,12 +134,15 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     adjustMethod <- "none"
                 }
 
+                # Add checkpoint before potentially long operation
+                private$.checkpoint()
+
                 # Perform post-hoc tests using chisq.posthoc.test package
                 posthocResults <- try({
                     chisq.posthoc.test::chisq.posthoc.test(contTable, method = adjustMethod)
                 }, silent = TRUE)
 
-                if (!inherits(posthocResults, "try-error")) {
+                if (!inherits(posthocResults, "try-error") && !is.null(posthocResults)) {
                     # Extract pairwise comparisons
                     pairwiseComparisons <- posthocResults$pairwise.p.values
                     rawPValues <- posthocResults$raw.p.values
@@ -154,7 +162,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         adjP <- pairwiseComparisons[i, "p adj"]
 
                         # Calculate chi-square value (approximate)
-                        chiVal <- qchisq(1 - rawP, df = 1)
+                        chiVal <- stats::qchisq(1 - rawP, df = 1)
 
                         # Determine significance
                         sigStatus <- ifelse(adjP < self$options$sig, "Yes", "No")
@@ -172,6 +180,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
 
                         rowKey <- rowKey + 1
+                        
+                        # Add checkpoint for each comparison
+                        private$.checkpoint(flush = FALSE)
                     }
                 } else {
                     # Fallback to manual pairwise calculations if package fails
@@ -180,6 +191,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     rowLevels <- rownames(contTable)
                     colLevels <- colnames(contTable)
                     rowKey <- 1
+                    allPValues <- c()  # Collect all p-values for proper adjustment
+                    allComparisons <- list()  # Store comparison details
 
                     # Perform all pairwise comparisons between row categories
                     if (length(rowLevels) >= 2) {
@@ -192,21 +205,22 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 if (any(dim(subtable) < 2)) next
 
                                 # Perform chi-square test on this 2x2 table
-                                subtest <- stats::chisq.test(subtable, correct=FALSE)
-
-                                # Store results
-                                self$results$posthocTable$addRow(
-                                    rowKey = rowKey,
-                                    values = list(
+                                subtest <- try(stats::chisq.test(subtable, correct=FALSE), silent = TRUE)
+                                
+                                if (!inherits(subtest, "try-error")) {
+                                    # Store comparison details
+                                    allComparisons[[length(allComparisons) + 1]] <- list(
                                         comparison = paste("Row:", rowLevels[i], "vs", rowLevels[j]),
                                         chi = subtest$statistic,
                                         p = subtest$p.value,
-                                        padj = p.adjust(subtest$p.value, method = adjustMethod),
-                                        sig = ifelse(p.adjust(subtest$p.value, method = adjustMethod) < self$options$sig, "Yes", "No")
+                                        rowKey = rowKey
                                     )
-                                )
-
-                                rowKey <- rowKey + 1
+                                    allPValues <- c(allPValues, subtest$p.value)
+                                    rowKey <- rowKey + 1
+                                }
+                                
+                                # Add checkpoint
+                                private$.checkpoint(flush = FALSE)
                             }
                         }
                     }
@@ -222,22 +236,45 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 if (any(dim(subtable) < 2)) next
 
                                 # Perform chi-square test on this 2x2 table
-                                subtest <- stats::chisq.test(subtable, correct=FALSE)
-
-                                # Store results
-                                self$results$posthocTable$addRow(
-                                    rowKey = rowKey,
-                                    values = list(
+                                subtest <- try(stats::chisq.test(subtable, correct=FALSE), silent = TRUE)
+                                
+                                if (!inherits(subtest, "try-error")) {
+                                    # Store comparison details
+                                    allComparisons[[length(allComparisons) + 1]] <- list(
                                         comparison = paste("Col:", colLevels[i], "vs", colLevels[j]),
                                         chi = subtest$statistic,
                                         p = subtest$p.value,
-                                        padj = p.adjust(subtest$p.value, method = adjustMethod),
-                                        sig = ifelse(p.adjust(subtest$p.value, method = adjustMethod) < self$options$sig, "Yes", "No")
+                                        rowKey = rowKey
                                     )
-                                )
-
-                                rowKey <- rowKey + 1
+                                    allPValues <- c(allPValues, subtest$p.value)
+                                    rowKey <- rowKey + 1
+                                }
+                                
+                                # Add checkpoint
+                                private$.checkpoint(flush = FALSE)
                             }
+                        }
+                    }
+                    
+                    # Apply p-value adjustment to all comparisons together
+                    if (length(allPValues) > 0) {
+                        adjustedPValues <- stats::p.adjust(allPValues, method = adjustMethod)
+                        
+                        # Add results to table with corrected p-values
+                        for (k in seq_along(allComparisons)) {
+                            comp <- allComparisons[[k]]
+                            adjP <- adjustedPValues[k]
+                            
+                            self$results$posthocTable$addRow(
+                                rowKey = comp$rowKey,
+                                values = list(
+                                    comparison = comp$comparison,
+                                    chi = comp$chi,
+                                    p = comp$p,
+                                    padj = adjP,
+                                    sig = ifelse(adjP < self$options$sig, "Yes", "No")
+                                )
+                            )
                         }
                     }
                 }
@@ -255,6 +292,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             rows <- self$options$rows
             cols <- self$options$cols
 
+            # Check for required variables
+            if (is.null(rows) || is.null(cols)) {
+                return(FALSE)
+            }
+
             # Exclude NA if selected
             excl <- self$options$excl
             if (excl) {
@@ -264,14 +306,27 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create the contingency table
             contTable <- table(data[[rows]], data[[cols]], useNA = if(excl) "no" else "ifany")
 
-            # Perform Chi-Square Test
-            chiSqTest <- stats::chisq.test(contTable, correct = FALSE)
+            # Check if table has sufficient data
+            if (any(dim(contTable) < 2)) {
+                return(FALSE)
+            }
 
-            # Create mosaic plot with residuals
-            # Use vcd package for visualization of standardized residuals
-            vcd::mosaic(contTable, shade = TRUE,
-                        legend = TRUE,
-                        gp = vcd::gpar(fill = vcd::hcl_palettes("Blue-Red", n = 5)))
+            # Perform Chi-Square Test for residuals
+            chiSqTest <- try(stats::chisq.test(contTable, correct = FALSE), silent = TRUE)
+            
+            if (inherits(chiSqTest, "try-error")) {
+                return(FALSE)
+            }
+
+            # Create mosaic plot with residuals using base graphics
+            # This integrates better with jamovi's plotting system
+            try({
+                vcd::mosaic(contTable, 
+                           shade = TRUE,
+                           legend = TRUE,
+                           main = paste("Standardized Residuals:", rows, "vs", cols),
+                           gp = grid::gpar(fill = grDevices::hcl.colors(5, "Blue-Red")))
+            }, silent = TRUE)
 
             # Return TRUE to indicate the plot was created successfully
             return(TRUE)

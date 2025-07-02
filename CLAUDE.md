@@ -46,11 +46,13 @@ crosstableClass <- R6::R6Class(
 The `decisiongraph` module supports both traditional decision trees and advanced Markov chain models:
 
 **Decision Trees**: One-time decisions with immediate outcomes
+
 - Acute medical conditions (surgery vs. conservative treatment)
 - Emergency decisions with clear cost/utility trade-offs
 - Point-in-time cost-effectiveness analysis
 
 **Markov Chain Models**: Long-term disease progression modeling
+
 - Chronic disease management with multiple health states
 - Transition probability matrices for state changes over time
 - Cohort trace analysis with discounted cost-effectiveness calculations
@@ -99,7 +101,9 @@ Rscript -e "jmvtools::install()"
 ```
 
 **CRITICAL**:
+
 - After adding a new function, always ensure `jmvtools::prepare()` and `devtools::document()` run without errors to verify module compilation success
+- After adding a new vignette, always ensure `pkgdown::build_articles()` run without errors to verify vignette, data, and function success
 - Before closing any GitHub issue, always ensure `jmvtools::prepare()` and `devtools::document()` run without errors to verify module compilation success
 
 ## Function Parameter Architecture
@@ -145,6 +149,7 @@ vartree(
 ### Deprecated Parameters
 
 Never use these parameters (removed from functions):
+
 - `title`, `subtitle`, `mytitle` - Not supported in most functions
 - `total`, `percentages` - Removed from crosstable
 - `group_comparisons` - Use other tableone parameters instead
@@ -163,25 +168,13 @@ Never use these parameters (removed from functions):
 ### Dataset Pattern
 
 All datasets include comprehensive variables for testing function parameters:
+
 - Demographics (Age, Sex, Race)
 - Pathological features (Grade, TStage, LVI, PNI)
 - Outcomes (Death, Outcome, OverallTime)
 - Biomarkers (MeasurementA, MeasurementB)
 
 ## Vignette Organization
-
-### Vignette Structure (100+ vignettes)
-
-1. **01-XX**: Getting started and user guides
-2. **02-XX**: ClinicoPath Descriptives modules
-3. **03-XX**: meddecide (medical decision analysis)
-4. **04-XX**: jsurvival (survival analysis)
-5. **05-XX**: jjstatsplot (statistical visualization)
-6. **06-XX**: Clinical workflows and examples
-7. **07-XX**: Diagnostic and specialized analysis
-8. **08-XX**: Individual function documentation
-9. **09-XX**: Advanced topics and galleries
-10. **10-XX**: Programming guides and references
 
 ### Vignette Requirements
 
@@ -209,11 +202,13 @@ All datasets include comprehensive variables for testing function parameters:
 ## Key Dependencies
 
 ### Core Dependencies
+
 - **jmvcore**: jamovi core framework
 - **R6**: Object-oriented programming
 - **magrittr**: Pipe operators
 
 ### Analysis Packages
+
 - **survival, survminer**: Survival analysis
 - **ggstatsplot**: Statistical plotting
 - **tableone, gtsummary**: Table generation
@@ -221,6 +216,7 @@ All datasets include comprehensive variables for testing function parameters:
 - **arsenal, janitor**: Data manipulation
 
 ### Visualization Packages
+
 - **ggplot2**: Core plotting
 - **alluvial, ggalluvial**: Alluvial diagrams
 - **ggvenn**: Venn diagrams
@@ -229,12 +225,14 @@ All datasets include comprehensive variables for testing function parameters:
 ## Module Menu Organization
 
 ### jamovi Menu Structure
+
 - **Exploration**: Descriptive analysis, cross-tables, visualizations
 - **Survival**: Survival analysis, Cox regression, person-time analysis
 - **meddecide**: Medical decision analysis, ROC curves, diagnostic tests
 - **JJStatsPlot**: Statistical plots and visualizations
 
 ### Analysis Distribution
+
 - **170+ analysis functions** across 5 main functional areas
 - Each analysis has 4-file jamovi structure (.a.yaml, .b.R, .u.yaml, .r.yaml)
 - Auto-generated .h.R header files from yaml definitions
@@ -248,6 +246,7 @@ All datasets include comprehensive variables for testing function parameters:
 ## Development Reminders
 
 ### Repository Management
+
 - Do not rename pkgnet-report users-of-clinicopath module-development-jamovi vignettes
 
 ## Code Analysis Tools
@@ -262,7 +261,7 @@ context window. Use `gemini -p` to leverage Google Gemini's large context capaci
 Use the `@` syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the
   gemini command:
 
-#### Examples:
+#### Examples
 
 **Single file analysis:**
 gemini -p "@src/main.py Explain this file's purpose and structure"
@@ -279,7 +278,8 @@ gemini -p "@src/ @tests/ Analyze test coverage for the source code"
 Current directory and subdirectories:
 gemini -p "@./ Give me an overview of this entire project"
 
-# Or use --all_files flag:
+# Or use --all_files flag
+
 gemini --all_files -p "Analyze the project structure and dependencies"
 
 ### Implementation Verification Examples
@@ -311,6 +311,7 @@ gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? 
 ### When to Use Gemini CLI
 
 Use gemini -p when:
+
 - Analyzing entire codebases or large directories
 - Comparing multiple large files
 - Need to understand project-wide patterns or architecture
@@ -333,36 +334,38 @@ Use gemini -p when:
 
 - **Default NULL Pattern**: For optional arguments in `.a.yaml` files, explicitly set `default: NULL`
 - **Example Configuration**:
-    - Add `default: NULL` for optional variables 
-    - Specify `allowNone: true` for level-based parameters
-    - Use `suggested` and `permitted` to control variable type selection
+  - Add `default: NULL` for optional variables
+  - Specify `allowNone: true` for level-based parameters
+  - Use `suggested` and `permitted` to control variable type selection
 
 ### Specific YAML Configuration Examples
 
 - **Percentage Variable**:
-    ```yaml
-    - name: percvar
-      title: Variable for Percentage
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-      default: NULL
 
-    - name: percvarLevel
-      title: Level
-      type: Level
-      variable: (percvar)
-      allowNone: true
+  ```yaml
+  - name: percvar
+    title: Variable for Percentage
+    type: Variable
+    suggested: [ ordinal, nominal ]
+    permitted: [ factor ]
+    default: NULL
 
-    - name: summaryvar
-      title: Continuous Variable for Summaries
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-      default: NULL
-    ```
+  - name: percvarLevel
+    title: Level
+    type: Level
+    variable: (percvar)
+    allowNone: true
+
+  - name: summaryvar
+    title: Continuous Variable for Summaries
+    type: Variable
+    suggested: [ continuous ]
+    permitted: [ numeric ]
+    default: NULL
+  ```
 
 ### Key Recommendations
+
 - Always provide clear, descriptive `title` for each parameter
 - Use `suggested` and `permitted` to guide appropriate variable selection
 - Set `default: NULL` for optional parameters
@@ -371,23 +374,136 @@ Use gemini -p when:
 ## Development Workflow Memories
 
 ### Testing Errors and Piping to Claude
+
 - Use bash command to test errors and pipe them to claude:
+
 ```bash
 RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64" \
 Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude
 ```
 
 ### Function Development Workflow
+
 - Checking function step by step:
-    - read .b.R file and associated yaml files for each function
-    - find relevant vignettes and documentation for this function
-    - check if the function has appropriate data to test it
+  - read .b.R file and associated yaml files for each function
+  - find relevant vignettes and documentation for this function
+  - check if the function has appropriate data to test it
     - if not, create a test dataset
-    - check if the vignettes and documentation reflect all the features of the function
+  - check if the vignettes and documentation reflect all the features of the function
     - if not, update the vignettes and documentation accordingly
-    - check if the function is tested in the tests folder
+  - check if the function is tested in the tests folder
     - if not, write tests for the function
+  - check if the vignettes rendered correctly
 
 ### YAML Development Memories
+
 - Add default: NULL to optional variables
 - Required variables should not be with default: NULL
+
+## Checkpoint Pattern in Jamovi Analyses
+
+### Using Checkpoints in Jamovi
+
+When the user updates any analysis option, results are streamed incrementally rather than waiting for the entire analysis to finish. This is handled by calling `private$.checkpoint()`, which:
+    1. Emits Progress
+    Pushes whatever results have been computed so far back to Jamovi, so the user sees the table fill in gradually.
+    2. Detects Changes
+    Checks whether the user has modified any settings since the last checkpoint. If so, it aborts the current run and restarts with the new parameters—avoiding wasted computation on analyses the user no longer wants.
+
+For example, in the non-parametric ANOVA, if you change an option while pairwise comparisons are still running, the remaining tests are skipped immediately when you hit your next checkpoint.
+
+To use it:
+
+```r
+# Push results and check for user changes:
+private$.checkpoint()   
+
+# If you only want to poll for changes without re-pushing identical results:
+private$.checkpoint(flush = FALSE)
+```
+
+**Best Practice**:
+
+- Don't sprinkle checkpoints everywhere—most R code returns almost instantly, so checkpoints would have no effect and only clutter your code.
+- Place checkpoints immediately before any expensive operation.
+- In the ANOVA example, only the `pSDCFlig()` calls take significant time, so that's where checkpoints belong.
+
+Example Implementation:
+
+```r
+for (pair in pairs) {
+    if (table$getCell(rowKey = pair, 'W')$isEmpty) {
+
+        table$setStatus('running')
+        private$.checkpoint()
+
+        pairData <- list(sdata[[pair[1]]], sdata[[pair[2]]])
+        result   <- pSDCFlig(pairData, method = "Asymptotic", n.g = nGroups)
+
+        table$setRow(
+            rowKey = pair,
+            list(
+                p1 = pair[1],
+                p2 = pair[2],
+                W  = result$obs.stat,
+                p  = result$p.val
+            )
+        )
+
+        table$setStatus('complete')
+    }
+}
+```
+
+## Internationalization and Weblate Translation
+
+### Integrating a jamovi Module with the Weblate Translation System
+
+To enable internationalization and integrate your jamovi module with the Weblate translation platform, follow these steps:
+
+1. Prepare the Code for Translation
+   • In the NAMESPACE file, include:
+
+importFrom(jmvcore, .)
+
+ • Wrap all translatable strings in your *.b.R files using the . function:
+
+.("Your translatable string here")
+
+ • Lines defined in YAML files will be handled and transferred automatically.
+
+2. Generate and Update Translation Files
+   • Run the following command to create the initial English translation file:
+
+jmvtools::i18nCreate("en")
+
+This will generate an en.po file in the jamovi/i18n/ directory.
+
+ • After any changes to the module that affect text, update the translation template:
+
+jmvtools::i18nUpdate("en")
+
+3. Add Additional Languages (Optional, Without Weblate)
+   • You can manually create and update translation files for other languages:
+
+jmvtools::i18nCreate("tr")   # Turkish
+jmvtools::i18nUpdate("tr")
+
+4. Prepare for Weblate Integration
+   • Copy the generated en.po file and rename it to catalog.pot.
+   • In the catalog.pot file, set the language header line to:
+
+Language: c\n
+
+5. Set Up a GitHub Repository for Translations
+   • Create a new repository named `<modulename>`-i18n.
+   • Add a README.md and a license file.
+   • Upload the catalog.pot file to this repository.
+6. Configure GitHub Repository for Weblate
+   • In your `<modulename>`-i18n repository:
+   • Go to Settings → Collaborators → Add People, and add Weblate (bot).
+   • Then go to Settings → Webhooks → Add webhook:
+   • Payload URL: [https://hosted.weblate.org/hooks/github/](https://hosted.weblate.org/hooks/github/)
+   • Complete the webhook creation.
+7. Finalize Integration
+   • Contact the jamovi development team and ask them to add your `<modulename>`-i18n repository to Weblate.

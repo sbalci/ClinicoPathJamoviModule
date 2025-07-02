@@ -433,6 +433,117 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             self$results$plot$setState(plot_data)
         },
         
+        .preprocessBiomarkerData = function(raw_data) {
+            # Enhanced biomarker data preprocessing
+            
+            # Apply log transformation if requested
+            if (self$options$logTransform) {
+                # Log(x+1) transformation to handle zeros
+                processed_data <- log(raw_data + 1)
+                
+                # Check for infinite values after transformation
+                if (any(is.infinite(processed_data), na.rm = TRUE)) {
+                    warning("Log transformation resulted in infinite values. Consider data cleaning.")
+                }
+            } else {
+                processed_data <- raw_data
+            }
+            
+            return(processed_data)
+        },
+        
+        .detectOutliers = function(data) {
+            # IQR-based outlier detection
+            Q1 <- quantile(data, 0.25, na.rm = TRUE)
+            Q3 <- quantile(data, 0.75, na.rm = TRUE)
+            IQR <- Q3 - Q1
+            
+            lower_bound <- Q1 - 1.5 * IQR
+            upper_bound <- Q3 + 1.5 * IQR
+            
+            outlier_indices <- which(data < lower_bound | data > upper_bound)
+            return(outlier_indices)
+        },
+        
+        .assessDataQuality = function(biomarker_values, response_values, response_type) {
+            # Comprehensive data quality assessment
+            
+            # Biomarker data quality
+            biomarker_missing_pct <- sum(is.na(biomarker_values)) / length(biomarker_values) * 100
+            biomarker_zeros_pct <- sum(biomarker_values == 0, na.rm = TRUE) / sum(!is.na(biomarker_values)) * 100
+            biomarker_cv <- sd(biomarker_values, na.rm = TRUE) / mean(biomarker_values, na.rm = TRUE)
+            
+            # Response data quality
+            if (response_type %in% c("binary", "categorical")) {
+                response_factor <- as.factor(response_values)
+                group_sizes <- table(response_factor)
+                min_group_size <- min(group_sizes)
+                group_balance <- min(group_sizes) / max(group_sizes)
+            }
+            
+            # Quality warnings
+            if (biomarker_missing_pct > 20) {
+                warning(paste("High missing data rate for biomarker (", round(biomarker_missing_pct, 1), "%)."))
+            }
+            
+            if (biomarker_zeros_pct > 30) {
+                warning(paste("High proportion of zero values in biomarker (", round(biomarker_zeros_pct, 1), "%)."))
+            }
+            
+            if (biomarker_cv > 2) {
+                warning("High coefficient of variation in biomarker data. Consider transformation.")
+            }
+            
+            if (response_type %in% c("binary", "categorical") && exists("group_balance") && group_balance < 0.2) {
+                warning("Severely imbalanced response groups detected. Results may be biased.")
+            }
+            
+            private$.checkpoint()
+        },
+        
+        .enhanceThresholdAnalysis = function(benford_obj, cleaned_data, threshold_value) {
+            # Enhanced threshold analysis with confidence intervals
+            
+            if (is.null(threshold_value)) {
+                return(NULL)
+            }
+            
+            tryCatch({
+                # Calculate confidence intervals for threshold metrics
+                n_bootstrap <- 1000
+                bootstrap_results <- replicate(n_bootstrap, {
+                    # Bootstrap sampling
+                    boot_indices <- sample(length(cleaned_data), replace = TRUE)
+                    boot_biomarker <- cleaned_data[boot_indices]
+                    boot_response <- response_values[boot_indices]
+                    
+                    # Calculate metrics for bootstrap sample
+                    boot_metrics <- private$.calculateThresholdMetrics(boot_biomarker, boot_response, threshold_value)
+                    return(c(boot_metrics$sensitivity, boot_metrics$specificity, 
+                            boot_metrics$ppv, boot_metrics$npv, boot_metrics$auc))
+                }, simplify = TRUE)
+                
+                # Calculate confidence intervals
+                ci_level <- as.numeric(self$options$confidenceLevel)
+                alpha <- 1 - ci_level
+                
+                ci_lower <- apply(bootstrap_results, 1, quantile, alpha/2, na.rm = TRUE)
+                ci_upper <- apply(bootstrap_results, 1, quantile, 1-alpha/2, na.rm = TRUE)
+                
+                return(list(
+                    sensitivity_ci = c(ci_lower[1], ci_upper[1]),
+                    specificity_ci = c(ci_lower[2], ci_upper[2]),
+                    ppv_ci = c(ci_lower[3], ci_upper[3]),
+                    npv_ci = c(ci_lower[4], ci_upper[4]),
+                    auc_ci = c(ci_lower[5], ci_upper[5])
+                ))
+                
+            }, error = function(e) {
+                warning("Could not calculate confidence intervals for threshold metrics.")
+                return(NULL)
+            })
+        },
+
         .plot = function(image, ggtheme, theme, ...) {
             plot_data <- image$state
             if (is.null(plot_data)) return()

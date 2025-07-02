@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Vignette: Visualizing Data Flows with Alluvial Diagrams • ClinicoPath</title>
+<title>Function Reference: alluvial() - Complete Parameter Guide • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Vignette: Visualizing Data Flows with Alluvial Diagrams">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Function Reference: alluvial() - Complete Parameter Guide">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.33</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.34</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,25 +34,30 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/clinicopath-descriptives-01-introduction.html">ClinicoPath Descriptives 01: Introduction to Descriptive Statistics for Pathologists</a></li>
+<li><a class="dropdown-item" href="../articles/clinicopath-biomarker-01-biomarkerresponse-comprehensive.html">Biomarker Response Association Analysis - Comprehensive Guide for Precision Medicine</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-checkdata-01-comprehensive-data-quality.html">Data Quality Assessment - Comprehensive Guide for Clinical Research</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-01-introduction.html">ClinicoPath Descriptives 01: Introduction to Descriptive Statistics for Pathologists</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-02-data-quality.html">Data Quality Assessment and Exploration</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-02-tableone.html">Vignette: Generating a 'Table 1' with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-03-data-summary.html">Summarising Clinicopathological Data</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-03-reportcat.html">Vignette: Generating Quick Summaries of Categorical Pathology Data</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-03-summarydata.html">Vignette: Descriptive Analysis of Continuous Variables in Clinical Data</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-04-benford-comprehensive.html">Benford's Law Analysis - Comprehensive Guide for Data Validation and Fraud Detection</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-04-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-04-data-quality-exploration.html">ClinicoPath Descriptives 04: Data Quality Assessment for Clinical Research</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-05-alluvial.html">Vignette: Visualizing Data Flows with Alluvial Diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-05-alluvial.html">Comprehensive Guide to Alluvial Diagrams in ClinicoPath</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-05-digital-pathology.html">Digital Pathology Validation: AI-Assisted Quantification and Method Comparison</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-06-agepyramid.html">Vignette: Creating an Age Pyramid with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-06-molecular-workflow.html">Modern Molecular Pathology Workflow: Integrated Morphologic and Molecular Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-07-ihcstats-comprehensive-guide.html">Comprehensive IHC Analysis Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-08-autoeda.html">Automated Exploratory Data Analysis with AutoEDA</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-08-function-agepyramid.html">Vignette: Creating an Age Pyramid with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Vignette: Visualizing Data Flows with Alluvial Diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-function-reportcat.html">Vignette: Generating Quick Summaries of Categorical Pathology Data</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-13-function-summarydata.html">Vignette: Descriptive Analysis of Continuous Variables in Clinical Data</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-14-function-tableone.html">Vignette: Generating a 'Table 1' with ClinicoPathDescriptives</a></li>
@@ -100,12 +105,14 @@
     <li><a class="dropdown-item" href="../articles/jjstatsplot-03-continuous-comparisons.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-04-continuous-comparisons-alt.html">Continuous Variable Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-05-correlations-scatterplots.html">Correlations and Scatter Plots</a></li>
+    <li><a class="dropdown-item" href="../articles/jjstatsplot-06-BBC-style-data-visualization.html">BBC-Style Data Visualization - Professional News Graphics</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-06-use-in-r.html">Use jjstatsplot in R</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-07-advancedbarplot.html">Advanced Bar Charts - 7 Professional Approaches</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-07-continuous-comparisons-legacy.html">Continuous Variable Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-08-advancedraincloud.html">Advanced Raincloud Plots - Enhanced Distribution Visualization</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-08-categorical-plots-legacy.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-09-advancedtree.html">Advanced Decision Tree Analysis in ClinicoPath</a></li>
+    <li><a class="dropdown-item" href="../articles/jjstatsplot-09-basegraphics.html">Base Graphics Visualization - Fast &amp; Customizable Base R Plots</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-09-continuous-comparisons-legacy.html">Categorical Plot Functions</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-10-correlations-scatterplots-legacy.html">Correlations and Scatter Plots</a></li>
     <li><a class="dropdown-item" href="../articles/jjstatsplot-11-introduction-legacy.html">jjstatsplot: Statistical Visualization for Clinical Research</a></li>
@@ -114,6 +121,7 @@
     <li><a class="dropdown-item" href="../articles/jsurvival-03-treatment-response.html">Treatment Response Analysis in Oncology</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-04-stage-migration-analysis.html">Stage Migration Analysis: Understanding the Will Rogers Phenomenon</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-05-function-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
+    <li><a class="dropdown-item" href="../articles/jsurvival-05-treatment-pathway-visualization.html">Treatment Pathway Visualization with alluvialSurvival</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-06-function-waterfall.html">Vignette: Creating Waterfall Plots to Show Patient Response to Therapy</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-07-use-in-r.html">Use jsurvival in R</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-08-stage-migration-analysis-legacy.html">Stage Migration Analysis: Understanding the Will Rogers Phenomenon</a></li>
@@ -130,6 +138,7 @@
     <li><a class="dropdown-item" href="../articles/meddecide-04-decision-tree-guide.html">Medical Decision Tree - Clinical Implementation Guide</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-05-decision-tree-analysis.html">Decision Tree Graph Analysis: Comprehensive Guide and Testing</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-06-decision-tree-vs-markov.html">Decision Tree vs Markov Chain Analysis: Complete Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-07-bayesian-decision-curve-analysis.html">Bayesian Decision Curve Analysis - Advanced Clinical Decision Making</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-07-decision-trees.html">Decision Tree and Markov Chain Analysis Examples</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-08-decision-panel-clinical.html">Clinical Applications of Decision Panel Optimization</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-09-decision-panel-advanced.html">Advanced Features and Customization in Decision Panel Optimization</a></li>
@@ -181,11 +190,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Vignette: Visualizing Data Flows with Alluvial Diagrams</h1>
-                        <h4 data-toc-skip class="author">Analysis by
-Gemini</h4>
+      <h1>Function Reference: alluvial() - Complete Parameter Guide</h1>
+                        <h4 data-toc-skip class="author">ClinicoPath
+Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-06-30</h4>
+            <h4 data-toc-skip class="date">2025-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-09-function-alluvial.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-09-function-alluvial.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-09-function-alluvial.Rmd</code></div>
@@ -193,82 +202,584 @@ Gemini</h4>
 
     
     
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>The <code><a href="../reference/alluvial.html">alluvial()</a></code> function in ClinicoPath creates
+comprehensive alluvial diagrams for visualizing categorical data flows.
+This reference document provides complete parameter documentation and
+usage examples.</p>
+</div>
+<div class="section level2">
+<h2 id="function-signature">Function Signature<a class="anchor" aria-label="anchor" href="#function-signature"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a sample data frame</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span> <span class="co"># for reproducibility</span></span>
-<span><span class="va">patient_flow</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Stage I"</span>, <span class="st">"Stage II"</span>, <span class="st">"Stage III"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>  Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chemo"</span>, <span class="st">"Radiation"</span>, <span class="st">"Combined"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>  Response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Complete"</span>, <span class="st">"Partial"</span>, <span class="st">"None"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                    prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View the first few rows</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">patient_flow</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      Stage Treatment Response</span></span>
-<span><span class="co">#&gt; 1  Stage I     Chemo     None</span></span>
-<span><span class="co">#&gt; 2  Stage I  Combined Complete</span></span>
-<span><span class="co">#&gt; 3  Stage I Radiation  Partial</span></span>
-<span><span class="co">#&gt; 4  Stage I     Chemo     None</span></span>
-<span><span class="co">#&gt; 5 Stage II     Chemo  Partial</span></span>
-<span><span class="co">#&gt; 6 Stage II Radiation     None</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">vars</span>,</span>
+<span>  condensationvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  excl <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  marg <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"first_variable"</span>,</span>
+<span>  bin <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
+<span>  usetitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mytitle <span class="op">=</span> <span class="st">"Alluvial Plot"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="parameters">Parameters<a class="anchor" aria-label="anchor" href="#parameters"></a>
+</h2>
+<div class="section level3">
+<h3 id="required-parameters">Required Parameters<a class="anchor" aria-label="anchor" href="#required-parameters"></a>
+</h3>
+<div class="section level4">
+<h4 id="data">
+<code>data</code><a class="anchor" aria-label="anchor" href="#data"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Data frame</li>
+<li>
+<strong>Description</strong>: The dataset containing the variables
+for analysis</li>
+<li>
+<strong>Example</strong>: <code>data = histopathology</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="vars">
+<code>vars</code><a class="anchor" aria-label="anchor" href="#vars"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Vector of variable names</li>
+<li>
+<strong>Description</strong>: 2-8 categorical variables for the
+alluvial diagram</li>
+<li>
+<strong>Example</strong>:
+<code>vars = c("Sex", "Grade_Level", "LVI", "PNI")</code>
+</li>
+</ul>
+</div>
+</div>
+<div class="section level3">
+<h3 id="optional-parameters">Optional Parameters<a class="anchor" aria-label="anchor" href="#optional-parameters"></a>
+</h3>
+<div class="section level4">
+<h4 id="condensationvar">
+<code>condensationvar</code><a class="anchor" aria-label="anchor" href="#condensationvar"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Variable name (string)</li>
+<li>
+<strong>Default</strong>: <code>NULL</code>
+</li>
+<li>
+<strong>Description</strong>: Variable used to create a condensation
+plot showing how this variable relates to the main flow patterns</li>
+<li>
+<strong>Example</strong>: <code>condensationvar = "Sex"</code>
+</li>
+<li>
+<strong>Note</strong>: When specified, generates a second plot
+alongside the main alluvial diagram</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="excl">
+<code>excl</code><a class="anchor" aria-label="anchor" href="#excl"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Boolean</li>
+<li>
+<strong>Default</strong>: <code>FALSE</code>
+</li>
+<li>
+<strong>Description</strong>: Whether to exclude missing values from
+the analysis</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>FALSE</code>: Include missing values (default)</li>
+<li>
+<code>TRUE</code>: Exclude missing values</li>
+</ul>
+</li>
+<li>
+<strong>Example</strong>: <code>excl = TRUE</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="marg">
+<code>marg</code><a class="anchor" aria-label="anchor" href="#marg"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Boolean</li>
+<li>
+<strong>Default</strong>: <code>FALSE</code>
+</li>
+<li>
+<strong>Description</strong>: Whether to add marginal histograms
+showing variable distributions</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>FALSE</code>: No marginal plots (default)</li>
+<li>
+<code>TRUE</code>: Add marginal histograms</li>
+</ul>
+</li>
+<li>
+<strong>Constraints</strong>:
+<ul>
+<li>Only available with vertical orientation
+(<code>orient = "vert"</code>)</li>
+<li>Cannot be used with custom titles
+(<code>usetitle = FALSE</code>)</li>
+</ul>
+</li>
+<li>
+<strong>Example</strong>: <code>marg = TRUE</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="fill">
+<code>fill</code><a class="anchor" aria-label="anchor" href="#fill"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: String</li>
+<li>
+<strong>Default</strong>: <code>"first_variable"</code>
+</li>
+<li>
+<strong>Description</strong>: Strategy for coloring the flows in the
+diagram</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>"first_variable"</code>: Color by the first variable in vars
+(default)</li>
+<li>
+<code>"last_variable"</code>: Color by the last variable in
+vars</li>
+<li>
+<code>"all_flows"</code>: Each unique flow path gets a different
+color</li>
+<li>
+<code>"values"</code>: Color by variable values</li>
+</ul>
+</li>
+<li>
+<strong>Example</strong>: <code>fill = "all_flows"</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="bin">
+<code>bin</code><a class="anchor" aria-label="anchor" href="#bin"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: String</li>
+<li>
+<strong>Default</strong>: <code>"default"</code>
+</li>
+<li>
+<strong>Description</strong>: Method for labeling bins when
+continuous variables are automatically binned</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>"default"</code>: Uses labels c(“LL”, “ML”, “M”, “MH”,
+“HH”)</li>
+<li>
+<code>"mean"</code>: Bin labels based on mean values</li>
+<li>
+<code>"median"</code>: Bin labels based on median values</li>
+<li>
+<code>"min_max"</code>: Bin labels showing min-max ranges</li>
+<li>
+<code>"cuts"</code>: Bin labels based on cut points</li>
+</ul>
+</li>
+<li>
+<strong>Example</strong>: <code>bin = "median"</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="orient">
+<code>orient</code><a class="anchor" aria-label="anchor" href="#orient"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: String</li>
+<li>
+<strong>Default</strong>: <code>"vert"</code>
+</li>
+<li>
+<strong>Description</strong>: Orientation of the alluvial
+diagram</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>"vert"</code>: Vertical flow (default)</li>
+<li>
+<code>"horr"</code>: Horizontal flow</li>
+</ul>
+</li>
+<li>
+<strong>Constraints</strong>: Marginal plots only work with vertical
+orientation</li>
+<li>
+<strong>Example</strong>: <code>orient = "horr"</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="usetitle">
+<code>usetitle</code><a class="anchor" aria-label="anchor" href="#usetitle"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: Boolean</li>
+<li>
+<strong>Default</strong>: <code>FALSE</code>
+</li>
+<li>
+<strong>Description</strong>: Whether to use a custom title for the
+plot</li>
+<li>
+<strong>Options</strong>:
+<ul>
+<li>
+<code>FALSE</code>: Use default title (default)</li>
+<li>
+<code>TRUE</code>: Use custom title specified in
+<code>mytitle</code>
+</li>
+</ul>
+</li>
+<li>
+<strong>Constraints</strong>: Cannot be used with marginal plots
+(<code>marg = FALSE</code>)</li>
+<li>
+<strong>Example</strong>: <code>usetitle = TRUE</code>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="mytitle">
+<code>mytitle</code><a class="anchor" aria-label="anchor" href="#mytitle"></a>
+</h4>
+<ul>
+<li>
+<strong>Type</strong>: String</li>
+<li>
+<strong>Default</strong>: <code>"Alluvial Plot"</code>
+</li>
+<li>
+<strong>Description</strong>: Custom title text for the plot</li>
+<li>
+<strong>Note</strong>: Only used when
+<code>usetitle = TRUE</code>
+</li>
+<li>
+<strong>Example</strong>:
+<code>mytitle = "Patient Flow Analysis"</code>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="parameter-constraints-and-interactions">Parameter Constraints and Interactions<a class="anchor" aria-label="anchor" href="#parameter-constraints-and-interactions"></a>
+</h2>
+<div class="section level3">
+<h3 id="mutual-exclusions">Mutual Exclusions<a class="anchor" aria-label="anchor" href="#mutual-exclusions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Marginal plots + Custom titles</strong>: Cannot use both
+simultaneously
+<ul>
+<li>If <code>marg = TRUE</code>, then <code>usetitle</code> must be
+<code>FALSE</code>
+</li>
+<li>If <code>usetitle = TRUE</code>, then <code>marg</code> must be
+<code>FALSE</code>
+</li>
+</ul>
+</li>
+<li>
+<strong>Marginal plots + Horizontal orientation</strong>: Cannot use
+both simultaneously
+<ul>
+<li>If <code>marg = TRUE</code>, then <code>orient</code> must be
+<code>"vert"</code>
+</li>
+<li>If <code>orient = "horr"</code>, then <code>marg</code> must be
+<code>FALSE</code>
+</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="valid-combinations">Valid Combinations<a class="anchor" aria-label="anchor" href="#valid-combinations"></a>
+</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># This code simulates how the jamovi module would be called in an R environment.</span></span>
-<span><span class="co"># You would need the ClinicoPathDescriptives package installed.</span></span>
+<code class="sourceCode R"><span><span class="co"># Valid: Marginal plots with vertical orientation</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">histopathology</span>, vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"LVI"</span><span class="op">)</span>, marg <span class="op">=</span> <span class="cn">TRUE</span>, orient <span class="op">=</span> <span class="st">"vert"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load the library</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Registered S3 method overwritten by 'future':</span></span>
-<span><span class="co">#&gt;   method               from      </span></span>
-<span><span class="co">#&gt;   all.equal.connection parallelly</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
-<span><span class="co">#&gt; 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::auc' by 'pROC::auc' when loading</span></span>
-<span><span class="co">#&gt; 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'magrittr::extract' by 'tidyr::extract' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning in check_dep_version(): ABI version mismatch: </span></span>
-<span><span class="co">#&gt; lme4 was built with Matrix ABI version 1</span></span>
-<span><span class="co">#&gt; Current Matrix ABI version is 0</span></span>
-<span><span class="co">#&gt; Please re-install lme4 from source or restore original 'Matrix' package</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'jmvcore::select' by 'dplyr::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Registered S3 methods overwritten by 'ggpp':</span></span>
-<span><span class="co">#&gt;   method                  from   </span></span>
-<span><span class="co">#&gt;   heightDetails.titleGrob ggplot2</span></span>
-<span><span class="co">#&gt;   widthDetails.titleGrob  ggplot2</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'DataExplorer::plot_histogram' by</span></span>
-<span><span class="co">#&gt; 'grafify::plot_histogram' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'ROCR::plot' by 'graphics::plot' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'tibble::view' by 'summarytools::view' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co"># Valid: Custom title with horizontal orientation  </span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">histopathology</span>, vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"LVI"</span><span class="op">)</span>, usetitle <span class="op">=</span> <span class="cn">TRUE</span>, orient <span class="op">=</span> <span class="st">"horr"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Run the alluvial analysis</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
-<span>    data <span class="op">=</span> <span class="va">patient_flow</span>,</span>
-<span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Stage"</span>, <span class="st">"Treatment"</span>, <span class="st">"Response"</span><span class="op">)</span>,</span>
-<span>    condensationvar <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># No condensation variable</span></span>
-<span>    fill <span class="op">=</span> <span class="st">"first_variable"</span>, <span class="co"># Color the flows based on initial cancer stage</span></span>
-<span>    marg <span class="op">=</span> <span class="cn">TRUE</span> <span class="co"># Include marginal histograms</span></span>
+<span><span class="co"># Invalid: This combination will cause issues</span></span>
+<span><span class="co"># alluvial(data = histopathology, vars = c("Sex", "LVI"), marg = TRUE, usetitle = TRUE)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="return-value">Return Value<a class="anchor" aria-label="anchor" href="#return-value"></a>
+</h2>
+<p>The function returns an <code>alluvialClass</code> object that
+inherits from <code>alluvialBase</code>. This object contains: - Plot
+rendering methods (<code>.plot</code> and <code>.plot2</code>) -
+Parameter settings - Data processing methods - jamovi-compatible
+analysis structure</p>
+</div>
+<div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
+<div class="section level3">
+<h3 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"histopathology"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Minimal example</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># To view the plot:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 27"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 27 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 10 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/basic-examples-1.png" width="700"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># With parameter customization</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span><span class="op">)</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"last_variable"</span>,</span>
+<span>  excl <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  orient <span class="op">=</span> <span class="st">"horr"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 49"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 19.9 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 8.5 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/basic-examples-2.png" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="advanced-usage">Advanced Usage<a class="anchor" aria-label="anchor" href="#advanced-usage"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Comprehensive parameter usage</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
+<span>  condensationvar <span class="op">=</span> <span class="st">"PNI"</span>,</span>
+<span>  excl <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  marg <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"all_flows"</span>,</span>
+<span>  bin <span class="op">=</span> <span class="st">"median"</span>,</span>
+<span>  orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
+<span>  usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  mytitle <span class="op">=</span> <span class="st">"Comprehensive Clinical Characteristics Flow"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 81"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 33.1 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 5.3 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-1.png" width="700"><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-2.png" width="700"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Marginal plots example</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
+<span>  marg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"first_variable"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-3.png" width="700"></p>
 <pre><code><span><span class="co">#&gt; TableGrob (10 x 1) "arrange": 4 grobs</span></span>
-<span><span class="co">#&gt;   z         cells    name                grob</span></span>
-<span><span class="co">#&gt; 1 1 ( 2- 2, 1- 1) arrange     gtable[arrange]</span></span>
-<span><span class="co">#&gt; 2 2 ( 3- 9, 1- 1) arrange      gtable[layout]</span></span>
-<span><span class="co">#&gt; 3 3 ( 1- 1, 1- 1) arrange text[GRID.text.221]</span></span>
-<span><span class="co">#&gt; 4 4 (10-10, 1- 1) arrange text[GRID.text.222]</span></span></code></pre>
+<span><span class="co">#&gt;   z         cells    name                 grob</span></span>
+<span><span class="co">#&gt; 1 1 ( 2- 2, 1- 1) arrange      gtable[arrange]</span></span>
+<span><span class="co">#&gt; 2 2 ( 3- 9, 1- 1) arrange       gtable[layout]</span></span>
+<span><span class="co">#&gt; 3 3 ( 1- 1, 1- 1) arrange text[GRID.text.1120]</span></span>
+<span><span class="co">#&gt; 4 4 (10-10, 1- 1) arrange text[GRID.text.1121]</span></span>
+<span></span>
+<span><span class="co"># Condensation analysis</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
+<span>  condensationvar <span class="op">=</span> <span class="st">"Sex"</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"values"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 14.8 %"</span></span></code></pre>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-4.png" width="700"><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-5.png" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="different-datasets">Different Datasets<a class="anchor" aria-label="anchor" href="#different-datasets"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Colon cancer analysis</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"colon"</span><span class="op">)</span></span>
+<span><span class="co"># Convert numeric variables to factors for alluvial plot</span></span>
+<span><span class="va">colon</span><span class="op">$</span><span class="va">sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">colon</span><span class="op">$</span><span class="va">sex</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Female"</span>, <span class="st">"Male"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">colon</span><span class="op">$</span><span class="va">differ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">colon</span><span class="op">$</span><span class="va">differ</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Well"</span>, <span class="st">"Moderate"</span>, <span class="st">"Poor"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">colon</span><span class="op">$</span><span class="va">extent</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">colon</span><span class="op">$</span><span class="va">extent</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Submucosa"</span>, <span class="st">"Muscle"</span>, <span class="st">"Serosa"</span>, <span class="st">"Contiguous"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">colon</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sex"</span>, <span class="st">"differ"</span>, <span class="st">"extent"</span><span class="op">)</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"first_variable"</span>,</span>
+<span>  usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  mytitle <span class="op">=</span> <span class="st">"Colon Cancer Characteristics"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 29"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 1.6 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 30 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/dataset-examples-1.png" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Using histopathology dataset for treatment analysis</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"histopathology"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"last_variable"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
+<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
+<span><span class="co">#&gt; [1] "Maximum weight of a single flow 13.6 %"</span></span></code></pre></div>
+<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/dataset-examples-2.png" width="700"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h2>
+<div class="section level3">
+<h3 id="underlying-implementation">Underlying Implementation<a class="anchor" aria-label="anchor" href="#underlying-implementation"></a>
+</h3>
+<ul>
+<li>Uses the <code>easyalluvial</code> R package for core
+functionality</li>
+<li>Supports up to 8 variables (<code>max_variables = 8</code> in
+easyalluvial)</li>
+<li>Integrates with jamovi’s R6 class system</li>
+<li>Provides dual plot functionality (main + condensation)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="data-requirements">Data Requirements<a class="anchor" aria-label="anchor" href="#data-requirements"></a>
+</h3>
+<ul>
+<li>Variables should be categorical (factors or character vectors)</li>
+<li>Continuous variables are automatically binned using the specified
+<code>bin</code> method</li>
+<li>Missing values are handled according to the <code>excl</code>
+parameter</li>
+<li>Minimum 2 variables, maximum 8 variables recommended</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="performance-considerations">Performance Considerations<a class="anchor" aria-label="anchor" href="#performance-considerations"></a>
+</h3>
+<ul>
+<li>Works best with moderate sample sizes (50-500 cases)</li>
+<li>Large datasets may produce cluttered visualizations</li>
+<li>Complex flows with many categories may be difficult to
+interpret</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
+</h2>
+<p>The function includes comprehensive error handling: - Empty datasets
+trigger appropriate error messages - Invalid parameter combinations are
+prevented through UI constraints - Missing required parameters show
+helpful todo messages</p>
+</div>
+<div class="section level2">
+<h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+</h2>
+<ul>
+<li>
+<a href="clinicopath-descriptives-05-alluvial.html">Comprehensive
+Alluvial Guide</a> - Complete usage examples</li>
+<li>
+<code>easyalluvial</code> package documentation</li>
+<li>Related ClinicoPath visualization functions:
+<code>jjalluvial()</code>, <code><a href="../reference/riverplot.html">riverplot()</a></code>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="version-information">Version Information<a class="anchor" aria-label="anchor" href="#version-information"></a>
+</h2>
+<p>This documentation is current as of ClinicoPath version 0.0.3.32.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

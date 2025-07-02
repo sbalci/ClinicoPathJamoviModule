@@ -9,13 +9,15 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.34"
-new_date <- "2024-07-01"
+new_version <- "0.0.3.36" # Update this to the new version you want to set
+new_date <- "2024-07-02" # Update this to the new date you want to set
+
 
 # Define WIP, check, extended status ----
-check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
-extended <- FALSE # Set to TRUE if you want to document and install submodules
-webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
+quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
+check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
+extended <- TRUE # Set to TRUE if you want to document and install submodules
+webpage <- TRUE # Set to TRUE if you want to build the pkgdown website for the modules
 commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
 
@@ -31,6 +33,13 @@ library(devtools)
 main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 setwd(main_repo_dir)
+
+if (quick) {
+  devtools::install(quick = TRUE)
+  stop()
+}
+
+
 
 jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
 meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
@@ -924,7 +933,9 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  # jmvtools::install()
+  if (WIP) {
+    jmvtools::install()
+  }
   if (check) {
     devtools::check()
   }
@@ -937,7 +948,9 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  # jmvtools::install()
+  if (WIP) {
+    jmvtools::install()
+  }
   if (check) {
     devtools::check()
   }
@@ -950,7 +963,9 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  # jmvtools::install()
+  if (WIP) {
+    jmvtools::install()
+  }
   if (check) {
     devtools::check()
   }
@@ -963,7 +978,9 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  # jmvtools::install()
+  if (WIP) {
+    jmvtools::install()
+  }
   if (check) {
     devtools::check()
   }
