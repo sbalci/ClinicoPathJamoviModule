@@ -12,10 +12,9 @@
 #' @importFrom kknn kknn
 #' @importFrom naivebayes naive_bayes
 #' @importFrom e1071 svm
-#' @importFrom data.table as.data.table data.table rbind
+#' @importFrom data.table as.data.table data.table
 #' @importFrom ggpubr ggarrange
 #' @importFrom rpart.plot rpart.plot
-#' @importFrom stats complete.cases sample setdiff
 
 # Enhanced for clinical applications - based on https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
@@ -68,6 +67,9 @@ private = list(
 
         # Set clinical cutoff if specified
         learner$param_set$values$cutoff <- self$options$clinicalCutoff
+
+        # Add checkpoint before model training
+        private$.checkpoint()
 
         private$.trainModel(task, learner)
     },
@@ -147,6 +149,9 @@ private = list(
             
             # Add bootstrap confidence intervals if requested
             if (self$options$reportConfidenceIntervals) {
+                # Add checkpoint before bootstrap operation
+                private$.checkpoint()
+                
                 boot_func <- function(data, indices) {
                     boot_pred <- pred_response[indices]
                     boot_truth <- truth_factor[indices]
@@ -255,7 +260,7 @@ private = list(
                 maxcompete = self$options$maxCompete,
                 maxsurrogate = self$options$maxSurrogate,
                 maxdepth = self$options$maxDepth,
-                cp = self$options$complecity
+                cp = self$options$complexity
             )
         } else if(self$options$classifier == 'randomForest') {
             options <- list(
@@ -302,7 +307,7 @@ private = list(
             learner$param_set$values <- list(
                 minsplit = self$options$minSplit,
                 maxdepth = self$options$maxDepth,
-                cp = self$options$complecity
+                cp = self$options$complexity
             )
             return(learner)
         })
@@ -313,7 +318,7 @@ private = list(
             "type" = "single decision tree",
             "min. split " = self$options$minSplit,
             "min. bucket" = self$options$minBucket,
-            "complecity" = self$options$complecity,
+            "complexity" = self$options$complexity,
             "max. compete" = self$options$maxCompete,
             "max. surrogate" = self$options$maxSurrogate,
             "unsurrogate" = self$options$unsurrogate,

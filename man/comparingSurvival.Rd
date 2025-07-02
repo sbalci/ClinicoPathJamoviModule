@@ -6,9 +6,9 @@
 \usage{
 comparingSurvival(
   data,
-  times,
-  status,
-  groups,
+  times = NULL,
+  status = NULL,
+  groups = NULL,
   ciyn = FALSE,
   loglogyn = FALSE,
   timeunits = "None"

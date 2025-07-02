@@ -119,7 +119,7 @@ children:
                 format: number
                 enable: (classifier_singleDecisionTree)
               - type: TextBox
-                name: complecity
+                name: complexity
                 format: number
                 enable: (classifier_singleDecisionTree)
               - type: TextBox

@@ -166,6 +166,9 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
                 
+                # Add checkpoint before analysis
+                private$.checkpoint()
+                
                 # Run clinmon analysis
                 tryCatch({
                     results <- clintools::clinmon(
@@ -182,6 +185,9 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                         output = self$options$output_level,
                         fast = self$options$fast_processing
                     )
+                    
+                    # Add checkpoint after analysis
+                    private$.checkpoint()
                     
                     # Generate summary if requested
                     if (self$options$show_summary) {

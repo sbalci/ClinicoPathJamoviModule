@@ -15,16 +15,19 @@ options:
       title: Time
       type: Variable
       suggested: [ continuous ]
+      default: NULL
 
     - name: status
       title: Event indicator
       type: Variable
       suggested: [ continuous ]
+      default: NULL
 
     - name: groups
       title: Grouping Variable
       type: Variable
       suggested: [ nominal ]
+      default: NULL
 
     - name: ciyn
       title: Add confidence intervals?

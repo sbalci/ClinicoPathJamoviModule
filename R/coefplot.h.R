@@ -48,7 +48,8 @@ coefplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..covs <- jmvcore::OptionVariables$new(
                 "covs",
                 covs,
@@ -58,7 +59,8 @@ coefplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..model_type <- jmvcore::OptionList$new(
                 "model_type",
                 model_type,
@@ -74,7 +76,8 @@ coefplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..include_intercept <- jmvcore::OptionBool$new(
                 "include_intercept",
                 include_intercept,
@@ -156,7 +159,8 @@ coefplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..model3_covs <- jmvcore::OptionVariables$new(
                 "model3_covs",
                 model3_covs,
@@ -166,7 +170,8 @@ coefplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..model_names <- jmvcore::OptionString$new(
                 "model_names",
                 model_names,
@@ -463,10 +468,10 @@ coefplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 coefplot <- function(
     data,
-    dep,
-    covs,
+    dep = NULL,
+    covs = NULL,
     model_type = "linear",
-    time_var,
+    time_var = NULL,
     include_intercept = FALSE,
     coef_selection = "all",
     specific_coefs = "",
@@ -481,8 +486,8 @@ coefplot <- function(
     robust_se = FALSE,
     exp_transform = FALSE,
     compare_models = FALSE,
-    model2_covs,
-    model3_covs,
+    model2_covs = NULL,
+    model3_covs = NULL,
     model_names = "Model 1, Model 2, Model 3",
     show_coefficient_plot = TRUE,
     show_model_summary = TRUE,

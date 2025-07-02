@@ -105,19 +105,28 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                 # Perform analysis
                 tryCatch({
 
+                    # Add checkpoint before model fitting
+                    private$.checkpoint()
+
                     # Fit primary model
                     model1 <- private$.fitModel(data, self$options$covs)
 
+                    # Add checkpoint after model fitting
+                    private$.checkpoint()
+
                     # Generate outputs
                     if (self$options$show_coefficient_plot) {
+                        private$.checkpoint()
                         private$.generateCoefficientPlot(model1, data)
                     }
 
                     if (self$options$show_model_summary) {
+                        private$.checkpoint()
                         private$.generateModelSummary(model1)
                     }
 
                     if (self$options$show_coefficient_table) {
+                        private$.checkpoint()
                         private$.generateCoefficientTable(model1)
                     }
 

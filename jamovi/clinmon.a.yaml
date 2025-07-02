@@ -32,6 +32,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Time variable in seconds. This should be the first column and contain 
         continuous time measurements from the monitoring system.
@@ -41,6 +42,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Arterial blood pressure measurements in mmHg. Used for calculating 
         multiple hemodynamic indices including PRx, Mx, Sx, Dx, CVRi, and COest.
@@ -50,6 +52,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Middle cerebral artery blood velocity measurements. Used for calculating
         Mx, Sx, Dx, CVRi, PI, and RI indices.
@@ -59,6 +62,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Intracranial pressure measurements in mmHg. Used for calculating
         PRx and CPPopt indices when combined with arterial blood pressure.
@@ -68,6 +72,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Cerebral perfusion pressure measurements in mmHg. Alternative to ICP
         for calculating Mx, Sx, and Dx indices.
@@ -77,6 +82,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Heart rate measurements in beats per minute. Used for calculating
         estimated cardiac output (COest).

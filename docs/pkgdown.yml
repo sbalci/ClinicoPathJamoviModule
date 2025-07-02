@@ -3,6 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   clinicopath-biomarker-01-biomarkerresponse-comprehensive: clinicopath-biomarker-01-biomarkerresponse-comprehensive.html
+  clinicopath-checkdata-01-comprehensive-data-quality: clinicopath-checkdata-01-comprehensive-data-quality.html
   clinicopath-descriptives-01-introduction: clinicopath-descriptives-01-introduction.html
   clinicopath-descriptives-02-data-quality: clinicopath-descriptives-02-data-quality.html
   clinicopath-descriptives-02-tableone: clinicopath-descriptives-02-tableone.html
@@ -24,7 +25,9 @@ articles:
   clinicopath-descriptives-10-function-benford: clinicopath-descriptives-10-function-benford.html
   clinicopath-descriptives-11-function-crosstable: clinicopath-descriptives-11-function-crosstable.html
   clinicopath-descriptives-11-swimmerplot: clinicopath-descriptives-11-swimmerplot.html
+  clinicopath-descriptives-12-chisqposttest: clinicopath-descriptives-12-chisqposttest.html
   clinicopath-descriptives-12-function-reportcat: clinicopath-descriptives-12-function-reportcat.html
+  clinicopath-descriptives-13-cisingle: clinicopath-descriptives-13-cisingle.html
   clinicopath-descriptives-13-function-summarydata: clinicopath-descriptives-13-function-summarydata.html
   clinicopath-descriptives-14-function-tableone: clinicopath-descriptives-14-function-tableone.html
   clinicopath-descriptives-15-function-venn: clinicopath-descriptives-15-function-venn.html
@@ -136,7 +139,7 @@ articles:
   pkgnet-report: pkgnet-report.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   users-of-clinicopath: users-of-clinicopath.html
-last_built: 2025-07-01T19:11Z
+last_built: 2025-07-02T14:27Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles
