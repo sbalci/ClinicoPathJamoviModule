@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.34</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.36</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/clinicopath-biomarker-01-biomarkerresponse-comprehensive.html">Biomarker Response Association Analysis - Comprehensive Guide for Precision Medicine</a></li>
+    <li><a class="dropdown-item" href="articles/clinicopath-checkdata-01-comprehensive-data-quality.html">Data Quality Assessment - Comprehensive Guide for Clinical Research</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-01-introduction.html">ClinicoPath Descriptives 01: Introduction to Descriptive Statistics for Pathologists</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-02-data-quality.html">Data Quality Assessment and Exploration</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-02-tableone.html">Vignette: Generating a 'Table 1' with ClinicoPathDescriptives</a></li>
@@ -41,7 +42,9 @@
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
+    <li><a class="dropdown-item" href="articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-12-function-reportcat.html">Vignette: Generating Quick Summaries of Categorical Pathology Data</a></li>
+    <li><a class="dropdown-item" href="articles/clinicopath-descriptives-13-cisingle.html">Confidence Intervals for Mean Values in Clinical Research</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-13-function-summarydata.html">Vignette: Descriptive Analysis of Continuous Variables in Clinical Data</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-14-function-tableone.html">Vignette: Generating a 'Table 1' with ClinicoPathDescriptives</a></li>
     <li><a class="dropdown-item" href="articles/clinicopath-descriptives-15-function-venn.html">Vignette: Visualizing Co-occurrence with Venn &amp; Upset Plots</a></li>
@@ -222,9 +225,16 @@
 <div class="section level3">
 <h3 id="advanced-decision-analysis-architecture">Advanced Decision Analysis Architecture<a class="anchor" aria-label="anchor" href="#advanced-decision-analysis-architecture"></a></h3>
 <p>The <code>decisiongraph</code> module supports both traditional decision trees and advanced Markov chain models:</p>
-<p><strong>Decision Trees</strong>: One-time decisions with immediate outcomes - Acute medical conditions (surgery vs. conservative treatment) - Emergency decisions with clear cost/utility trade-offs - Point-in-time cost-effectiveness analysis</p>
-<p><strong>Markov Chain Models</strong>: Long-term disease progression modeling - Chronic disease management with multiple health states - Transition probability matrices for state changes over time - Cohort trace analysis with discounted cost-effectiveness calculations - Multi-cycle analysis for lifetime economic evaluations</p>
-<p>The module automatically handles different analysis types based on <code>treeType</code> option (<code>simple</code>, <code>costeffectiveness</code>, <code>markov</code>).</p>
+<p><strong>Decision Trees</strong>: One-time decisions with immediate outcomes</p>
+<ul><li>Acute medical conditions (surgery vs. conservative treatment)</li>
+<li>Emergency decisions with clear cost/utility trade-offs</li>
+<li>Point-in-time cost-effectiveness analysis</li>
+</ul><p><strong>Markov Chain Models</strong>: Long-term disease progression modeling</p>
+<ul><li>Chronic disease management with multiple health states</li>
+<li>Transition probability matrices for state changes over time</li>
+<li>Cohort trace analysis with discounted cost-effectiveness calculations</li>
+<li>Multi-cycle analysis for lifetime economic evaluations</li>
+</ul><p>The module automatically handles different analysis types based on <code>treeType</code> option (<code>simple</code>, <code>costeffectiveness</code>, <code>markov</code>).</p>
 </div>
 </div>
 <div class="section level2">
@@ -260,8 +270,11 @@
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># Install module in jamovi for testing</span></span>
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># Copy .jmo file to jamovi modules directory</span></span></code></pre></div>
-<p><strong>CRITICAL</strong>: - After adding a new function, always ensure <code><a href="https://rdrr.io/pkg/jmvtools/man/prepare.html" class="external-link">jmvtools::prepare()</a></code> and <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> run without errors to verify module compilation success - Before closing any GitHub issue, always ensure <code><a href="https://rdrr.io/pkg/jmvtools/man/prepare.html" class="external-link">jmvtools::prepare()</a></code> and <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> run without errors to verify module compilation success</p>
-</div>
+<p><strong>CRITICAL</strong>:</p>
+<ul><li>After adding a new function, always ensure <code><a href="https://rdrr.io/pkg/jmvtools/man/prepare.html" class="external-link">jmvtools::prepare()</a></code> and <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> run without errors to verify module compilation success</li>
+<li>After adding a new vignette, always ensure <code><a href="https://pkgdown.r-lib.org/reference/build_articles.html" class="external-link">pkgdown::build_articles()</a></code> run without errors to verify vignette, data, and function success</li>
+<li>Before closing any GitHub issue, always ensure <code><a href="https://rdrr.io/pkg/jmvtools/man/prepare.html" class="external-link">jmvtools::prepare()</a></code> and <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> run without errors to verify module compilation success</li>
+</ul></div>
 </div>
 <div class="section level2">
 <h2 id="function-parameter-architecture">Function Parameter Architecture<a class="anchor" aria-label="anchor" href="#function-parameter-architecture"></a></h2>
@@ -310,8 +323,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="deprecated-parameters">Deprecated Parameters<a class="anchor" aria-label="anchor" href="#deprecated-parameters"></a></h3>
-<p>Never use these parameters (removed from functions): - <code>title</code>, <code>subtitle</code>, <code>mytitle</code> - Not supported in most functions - <code>total</code>, <code>percentages</code> - Removed from crosstable - <code>group_comparisons</code> - Use other tableone parameters instead</p>
-</div>
+<p>Never use these parameters (removed from functions):</p>
+<ul><li>
+<code>title</code>, <code>subtitle</code>, <code>mytitle</code> - Not supported in most functions</li>
+<li>
+<code>total</code>, <code>percentages</code> - Removed from crosstable</li>
+<li>
+<code>group_comparisons</code> - Use other tableone parameters instead</li>
+</ul></div>
 </div>
 <div class="section level2">
 <h2 id="data-architecture">Data Architecture<a class="anchor" aria-label="anchor" href="#data-architecture"></a></h2>
@@ -332,34 +351,15 @@
 </ul></div>
 <div class="section level3">
 <h3 id="dataset-pattern">Dataset Pattern<a class="anchor" aria-label="anchor" href="#dataset-pattern"></a></h3>
-<p>All datasets include comprehensive variables for testing function parameters: - Demographics (Age, Sex, Race) - Pathological features (Grade, TStage, LVI, PNI) - Outcomes (Death, Outcome, OverallTime) - Biomarkers (MeasurementA, MeasurementB)</p>
-</div>
+<p>All datasets include comprehensive variables for testing function parameters:</p>
+<ul><li>Demographics (Age, Sex, Race)</li>
+<li>Pathological features (Grade, TStage, LVI, PNI)</li>
+<li>Outcomes (Death, Outcome, OverallTime)</li>
+<li>Biomarkers (MeasurementA, MeasurementB)</li>
+</ul></div>
 </div>
 <div class="section level2">
 <h2 id="vignette-organization">Vignette Organization<a class="anchor" aria-label="anchor" href="#vignette-organization"></a></h2>
-<div class="section level3">
-<h3 id="vignette-structure-100-vignettes">Vignette Structure (100+ vignettes)<a class="anchor" aria-label="anchor" href="#vignette-structure-100-vignettes"></a></h3>
-<ol style="list-style-type: decimal"><li>
-<strong>01-XX</strong>: Getting started and user guides</li>
-<li>
-<strong>02-XX</strong>: ClinicoPath Descriptives modules</li>
-<li>
-<strong>03-XX</strong>: meddecide (medical decision analysis)</li>
-<li>
-<strong>04-XX</strong>: jsurvival (survival analysis)</li>
-<li>
-<strong>05-XX</strong>: jjstatsplot (statistical visualization)</li>
-<li>
-<strong>06-XX</strong>: Clinical workflows and examples</li>
-<li>
-<strong>07-XX</strong>: Diagnostic and specialized analysis</li>
-<li>
-<strong>08-XX</strong>: Individual function documentation</li>
-<li>
-<strong>09-XX</strong>: Advanced topics and galleries</li>
-<li>
-<strong>10-XX</strong>: Programming guides and references</li>
-</ol></div>
 <div class="section level3">
 <h3 id="vignette-requirements">Vignette Requirements<a class="anchor" aria-label="anchor" href="#vignette-requirements"></a></h3>
 <ul><li>Each function must have a comprehensive dataset for testing all arguments</li>
@@ -471,7 +471,7 @@
 <h3 id="file-and-directory-inclusion-syntax">File and Directory Inclusion Syntax<a class="anchor" aria-label="anchor" href="#file-and-directory-inclusion-syntax"></a></h3>
 <p>Use the <code>@</code> syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the gemini command:</p>
 <div class="section level4">
-<h4 id="examples">Examples:<a class="anchor" aria-label="anchor" href="#examples"></a></h4>
+<h4 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a></h4>
 <p><strong>Single file analysis:</strong> gemini -p “@src/main.py Explain this file’s purpose and structure”</p>
 <p>Multiple files: gemini -p “@package.json @src/index.js Analyze the dependencies used in the code”</p>
 <p>Entire directory: gemini -p “@src/ Summarize the architecture of this codebase”</p>
@@ -482,7 +482,7 @@
 </div>
 </div>
 <div class="section level1">
-<h1 id="or-use-all_files-flag">Or use –all_files flag:<a class="anchor" aria-label="anchor" href="#or-use-all_files-flag"></a></h1>
+<h1 id="or-use-all_files-flag">Or use –all_files flag<a class="anchor" aria-label="anchor" href="#or-use-all_files-flag"></a></h1>
 <p>gemini –all_files -p “Analyze the project structure and dependencies”</p>
 <div class="section level3">
 <h3 id="implementation-verification-examples">Implementation Verification Examples<a class="anchor" aria-label="anchor" href="#implementation-verification-examples"></a></h3>
@@ -497,8 +497,15 @@
 </div>
 <div class="section level3">
 <h3 id="when-to-use-gemini-cli">When to Use Gemini CLI<a class="anchor" aria-label="anchor" href="#when-to-use-gemini-cli"></a></h3>
-<p>Use gemini -p when: - Analyzing entire codebases or large directories - Comparing multiple large files - Need to understand project-wide patterns or architecture - Current context window is insufficient for the task - Working with files totaling more than 100KB - Verifying if specific features, patterns, or security measures are implemented - Checking for the presence of certain coding patterns across the entire codebase</p>
-</div>
+<p>Use gemini -p when:</p>
+<ul><li>Analyzing entire codebases or large directories</li>
+<li>Comparing multiple large files</li>
+<li>Need to understand project-wide patterns or architecture</li>
+<li>Current context window is insufficient for the task</li>
+<li>Working with files totaling more than 100KB</li>
+<li>Verifying if specific features, patterns, or security measures are implemented</li>
+<li>Checking for the presence of certain coding patterns across the entire codebase</li>
+</ul></div>
 <div class="section level3">
 <h3 id="important-notes">Important Notes<a class="anchor" aria-label="anchor" href="#important-notes"></a></h3>
 <ul><li>Paths in @ syntax are relative to your current working directory when invoking gemini</li>
@@ -524,11 +531,27 @@
 <div class="section level3">
 <h3 id="specific-yaml-configuration-examples">Specific YAML Configuration Examples<a class="anchor" aria-label="anchor" href="#specific-yaml-configuration-examples"></a></h3>
 <ul><li>
-<strong>Percentage Variable</strong>: ```yaml
-<ul><li><p>name: percvar title: Variable for Percentage type: Variable suggested: [ ordinal, nominal ] permitted: [ factor ] default: NULL</p></li>
-<li><p>name: percvarLevel title: Level type: Level variable: (percvar) allowNone: true</p></li>
-<li><p>name: summaryvar title: Continuous Variable for Summaries type: Variable suggested: [ continuous ] permitted: [ numeric ] default: NULL ```</p></li>
-</ul></li>
+<p><strong>Percentage Variable</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> percvar</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="at">  </span><span class="fu">title</span><span class="kw">:</span><span class="at"> Variable for Percentage</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> Variable</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">  </span><span class="fu">suggested</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> ordinal</span><span class="kw">,</span><span class="at"> nominal </span><span class="kw">]</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">  </span><span class="fu">permitted</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> factor </span><span class="kw">]</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="at">  </span><span class="fu">default</span><span class="kw">:</span><span class="at"> </span><span class="ch">NULL</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> percvarLevel</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="at">  </span><span class="fu">title</span><span class="kw">:</span><span class="at"> Level</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> Level</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="at">  </span><span class="fu">variable</span><span class="kw">:</span><span class="at"> (percvar)</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="at">  </span><span class="fu">allowNone</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> summaryvar</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="at">  </span><span class="fu">title</span><span class="kw">:</span><span class="at"> Continuous Variable for Summaries</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> Variable</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="at">  </span><span class="fu">suggested</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> continuous </span><span class="kw">]</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="at">  </span><span class="fu">permitted</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> numeric </span><span class="kw">]</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="at">  </span><span class="fu">default</span><span class="kw">:</span><span class="at"> </span><span class="ch">NULL</span></span></code></pre></div>
+</li>
 </ul></div>
 <div class="section level3">
 <h3 id="key-recommendations">Key Recommendations<a class="anchor" aria-label="anchor" href="#key-recommendations"></a></h3>
@@ -543,20 +566,24 @@
 <div class="section level3">
 <h3 id="testing-errors-and-piping-to-claude">Testing Errors and Piping to Claude<a class="anchor" aria-label="anchor" href="#testing-errors-and-piping-to-claude"></a></h3>
 <ul><li>Use bash command to test errors and pipe them to claude:</li>
-</ul><div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">RSTUDIO_PANDOC</span><span class="op">=</span><span class="st">"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64"</span> <span class="dt">\</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))'</span> <span class="kw">|</span> <span class="ex">claude</span></span></code></pre></div>
+</ul><div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="va">RSTUDIO_PANDOC</span><span class="op">=</span><span class="st">"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64"</span> <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))'</span> <span class="kw">|</span> <span class="ex">claude</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="function-development-workflow">Function Development Workflow<a class="anchor" aria-label="anchor" href="#function-development-workflow"></a></h3>
 <ul><li>Checking function step by step:
 <ul><li>read .b.R file and associated yaml files for each function</li>
 <li>find relevant vignettes and documentation for this function</li>
-<li>check if the function has appropriate data to test it</li>
-<li>if not, create a test dataset</li>
-<li>check if the vignettes and documentation reflect all the features of the function</li>
-<li>if not, update the vignettes and documentation accordingly</li>
-<li>check if the function is tested in the tests folder</li>
-<li>if not, write tests for the function</li>
+<li>check if the function has appropriate data to test it
+<ul><li>if not, create a test dataset</li>
+</ul></li>
+<li>check if the vignettes and documentation reflect all the features of the function
+<ul><li>if not, update the vignettes and documentation accordingly</li>
+</ul></li>
+<li>check if the function is tested in the tests folder
+<ul><li>if not, write tests for the function</li>
+</ul></li>
+<li>check if the vignettes rendered correctly</li>
 </ul></li>
 </ul></div>
 <div class="section level3">
@@ -564,6 +591,73 @@
 <ul><li>Add default: NULL to optional variables</li>
 <li>Required variables should not be with default: NULL</li>
 </ul></div>
+</div>
+<div class="section level2">
+<h2 id="checkpoint-pattern-in-jamovi-analyses">Checkpoint Pattern in Jamovi Analyses<a class="anchor" aria-label="anchor" href="#checkpoint-pattern-in-jamovi-analyses"></a></h2>
+<div class="section level3">
+<h3 id="using-checkpoints-in-jamovi">Using Checkpoints in Jamovi<a class="anchor" aria-label="anchor" href="#using-checkpoints-in-jamovi"></a></h3>
+<p>When the user updates any analysis option, results are streamed incrementally rather than waiting for the entire analysis to finish. This is handled by calling <code>private$.checkpoint()</code>, which: 1. Emits Progress Pushes whatever results have been computed so far back to Jamovi, so the user sees the table fill in gradually. 2. Detects Changes Checks whether the user has modified any settings since the last checkpoint. If so, it aborts the current run and restarts with the new parameters—avoiding wasted computation on analyses the user no longer wants.</p>
+<p>For example, in the non-parametric ANOVA, if you change an option while pairwise comparisons are still running, the remaining tests are skipped immediately when you hit your next checkpoint.</p>
+<p>To use it:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Push results and check for user changes:</span></span>
+<span><span class="va">private</span><span class="op">$</span><span class="fu">.checkpoint</span><span class="op">(</span><span class="op">)</span>   </span>
+<span></span>
+<span><span class="co"># If you only want to poll for changes without re-pushing identical results:</span></span>
+<span><span class="va">private</span><span class="op">$</span><span class="fu">.checkpoint</span><span class="op">(</span>flush <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Best Practice</strong>:</p>
+<ul><li>Don’t sprinkle checkpoints everywhere—most R code returns almost instantly, so checkpoints would have no effect and only clutter your code.</li>
+<li>Place checkpoints immediately before any expensive operation.</li>
+<li>In the ANOVA example, only the <code>pSDCFlig()</code> calls take significant time, so that’s where checkpoints belong.</li>
+</ul><p>Example Implementation:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">pair</span> <span class="kw">in</span> <span class="va">pairs</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">table</span><span class="op">$</span><span class="fu">getCell</span><span class="op">(</span>rowKey <span class="op">=</span> <span class="va">pair</span>, <span class="st">'W'</span><span class="op">)</span><span class="op">$</span><span class="va">isEmpty</span><span class="op">)</span> <span class="op">{</span></span>
+<span></span>
+<span>        <span class="va">table</span><span class="op">$</span><span class="fu">setStatus</span><span class="op">(</span><span class="st">'running'</span><span class="op">)</span></span>
+<span>        <span class="va">private</span><span class="op">$</span><span class="fu">.checkpoint</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>        <span class="va">pairData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">sdata</span><span class="op">[[</span><span class="va">pair</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">]</span>, <span class="va">sdata</span><span class="op">[[</span><span class="va">pair</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>        <span class="va">result</span>   <span class="op">&lt;-</span> <span class="fu">pSDCFlig</span><span class="op">(</span><span class="va">pairData</span>, method <span class="op">=</span> <span class="st">"Asymptotic"</span>, n.g <span class="op">=</span> <span class="va">nGroups</span><span class="op">)</span></span>
+<span></span>
+<span>        <span class="va">table</span><span class="op">$</span><span class="fu">setRow</span><span class="op">(</span></span>
+<span>            rowKey <span class="op">=</span> <span class="va">pair</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>                p1 <span class="op">=</span> <span class="va">pair</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>                p2 <span class="op">=</span> <span class="va">pair</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
+<span>                W  <span class="op">=</span> <span class="va">result</span><span class="op">$</span><span class="va">obs.stat</span>,</span>
+<span>                p  <span class="op">=</span> <span class="va">result</span><span class="op">$</span><span class="va">p.val</span></span>
+<span>            <span class="op">)</span></span>
+<span>        <span class="op">)</span></span>
+<span></span>
+<span>        <span class="va">table</span><span class="op">$</span><span class="fu">setStatus</span><span class="op">(</span><span class="st">'complete'</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="internationalization-and-weblate-translation">Internationalization and Weblate Translation<a class="anchor" aria-label="anchor" href="#internationalization-and-weblate-translation"></a></h2>
+<div class="section level3">
+<h3 id="integrating-a-jamovi-module-with-the-weblate-translation-system">Integrating a jamovi Module with the Weblate Translation System<a class="anchor" aria-label="anchor" href="#integrating-a-jamovi-module-with-the-weblate-translation-system"></a></h3>
+<p>To enable internationalization and integrate your jamovi module with the Weblate translation platform, follow these steps:</p>
+<ol style="list-style-type: decimal"><li>Prepare the Code for Translation • In the NAMESPACE file, include:</li>
+</ol><p>importFrom(jmvcore, .)</p>
+<p>• Wrap all translatable strings in your *.b.R files using the . function:</p>
+<p>.(“Your translatable string here”)</p>
+<p>• Lines defined in YAML files will be handled and transferred automatically.</p>
+<ol start="2" style="list-style-type: decimal"><li>Generate and Update Translation Files • Run the following command to create the initial English translation file:</li>
+</ol><p>jmvtools::i18nCreate(“en”)</p>
+<p>This will generate an en.po file in the jamovi/i18n/ directory.</p>
+<p>• After any changes to the module that affect text, update the translation template:</p>
+<p>jmvtools::i18nUpdate(“en”)</p>
+<ol start="3" style="list-style-type: decimal"><li>Add Additional Languages (Optional, Without Weblate) • You can manually create and update translation files for other languages:</li>
+</ol><p>jmvtools::i18nCreate(“tr”) # Turkish jmvtools::i18nUpdate(“tr”)</p>
+<ol start="4" style="list-style-type: decimal"><li>Prepare for Weblate Integration • Copy the generated en.po file and rename it to catalog.pot. • In the catalog.pot file, set the language header line to:</li>
+</ol><p>Language: c</p>
+<ol start="5" style="list-style-type: decimal"><li>Set Up a GitHub Repository for Translations • Create a new repository named <code>&lt;modulename&gt;</code>-i18n. • Add a README.md and a license file. • Upload the catalog.pot file to this repository.</li>
+<li>Configure GitHub Repository for Weblate • In your <code>&lt;modulename&gt;</code>-i18n repository: • Go to Settings → Collaborators → Add People, and add Weblate (bot). • Then go to Settings → Webhooks → Add webhook: • Payload URL: <a href="https://hosted.weblate.org/hooks/github/" class="external-link">https://hosted.weblate.org/hooks/github/</a> • Complete the webhook creation.</li>
+<li>Finalize Integration • Contact the jamovi development team and ask them to add your <code>&lt;modulename&gt;</code>-i18n repository to Weblate.</li>
+</ol></div>
 </div>
 </div>
 

@@ -34,6 +34,7 @@ options:
       type: Variable
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
+      default: NULL
       description: >-
         The outcome variable for regression analysis. Can be continuous 
         (linear regression), binary (logistic regression), or time-to-event.
@@ -43,6 +44,7 @@ options:
       type: Variables
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
+      default: NULL
       description: >-
         Independent variables (predictors) to include in the regression model.
         These will be displayed as coefficients in the plot.
@@ -72,6 +74,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description: >-
         Time-to-event variable for Cox regression. Only required when 
         model type is set to Cox regression.
@@ -218,6 +221,7 @@ options:
       type: Variables
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
+      default: NULL
       description: >-
         Covariates for second model comparison. Only used when comparing models.
 
@@ -226,6 +230,7 @@ options:
       type: Variables
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
+      default: NULL
       description: >-
         Covariates for third model comparison. Only used when comparing models.
 

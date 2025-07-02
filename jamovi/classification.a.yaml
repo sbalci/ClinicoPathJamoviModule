@@ -90,8 +90,8 @@ options:
       type: Number
       default: 0
 
-    - name: complecity
-      title: Complecity
+    - name: complexity
+      title: Complexity
       type: Number
       default: 0.01
 

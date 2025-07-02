@@ -15,7 +15,7 @@ classification(
   classifier,
   minSplit = 20,
   minBucket = 0,
-  complecity = 0.01,
+  complexity = 0.01,
   maxCompete = 4,
   maxSurrogate = 5,
   unsurrogate = 2,
@@ -63,7 +63,7 @@ classification(
 
 \item{minBucket}{.}
 
-\item{complecity}{.}
+\item{complexity}{.}
 
 \item{maxCompete}{.}
 

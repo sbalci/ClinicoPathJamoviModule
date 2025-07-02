@@ -23,17 +23,20 @@ comparingSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "times",
                 times,
                 suggested=list(
-                    "continuous"))
+                    "continuous"),
+                default=NULL)
             private$..status <- jmvcore::OptionVariable$new(
                 "status",
                 status,
                 suggested=list(
-                    "continuous"))
+                    "continuous"),
+                default=NULL)
             private$..groups <- jmvcore::OptionVariable$new(
                 "groups",
                 groups,
                 suggested=list(
-                    "nominal"))
+                    "nominal"),
+                default=NULL)
             private$..ciyn <- jmvcore::OptionBool$new(
                 "ciyn",
                 ciyn,
@@ -246,9 +249,9 @@ comparingSurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @export
 comparingSurvival <- function(
     data,
-    times,
-    status,
-    groups,
+    times = NULL,
+    status = NULL,
+    groups = NULL,
     ciyn = FALSE,
     loglogyn = FALSE,
     timeunits = "None") {

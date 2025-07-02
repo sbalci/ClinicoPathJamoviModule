@@ -6,12 +6,12 @@
 \usage{
 clinmon(
   data,
-  time_var,
-  abp,
-  mcav,
-  icp,
-  cpp,
-  hr,
+  time_var = NULL,
+  abp = NULL,
+  mcav = NULL,
+  icp = NULL,
+  cpp = NULL,
+  hr = NULL,
   freq = 1000,
   blocksize = 3,
   epochsize = 20,

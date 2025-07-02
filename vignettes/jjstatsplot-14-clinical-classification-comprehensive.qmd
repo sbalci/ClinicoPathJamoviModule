@@ -1,0 +1,771 @@
+---
+title: "Clinical Classification Analysis with Machine Learning"
+subtitle: "Comprehensive Guide to Classification Function for Medical Research"
+author: "ClinicoPath Module"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+  echo: true
+---
+
+# Introduction
+
+The `classification` function in ClinicoPath provides comprehensive machine learning capabilities for clinical and pathological research. This tool enables researchers to build predictive models for medical diagnosis, prognosis, and treatment response using various state-of-the-art algorithms.
+
+## Clinical Motivation
+
+Machine learning classification is crucial in modern medical research for:
+
+- **Diagnostic Support**: Automated diagnosis from pathological features
+- **Risk Stratification**: Patient classification into risk categories
+- **Treatment Selection**: Personalized medicine approaches
+- **Biomarker Discovery**: Identifying predictive molecular signatures
+- **Outcome Prediction**: Prognosis and survival classification
+- **Quality Control**: Automated detection of quality issues
+
+Classification algorithms help clinicians make data-driven decisions by identifying complex patterns in medical data that may not be apparent through traditional statistical methods.
+
+## Available Algorithms
+
+### Decision Trees
+- **Best for**: Interpretable rules, feature importance
+- **Advantages**: Easy to understand, handles missing values
+- **Use cases**: Clinical decision support, guideline development
+
+### Random Forests
+- **Best for**: High accuracy, robust predictions
+- **Advantages**: Handles overfitting, feature importance
+- **Use cases**: Biomarker panels, complex diagnoses
+
+### K-Nearest Neighbors (KNN)
+- **Best for**: Non-linear relationships, similarity-based classification
+- **Advantages**: No assumptions about data distribution
+- **Use cases**: Image analysis, pattern recognition
+
+### Naive Bayes
+- **Best for**: High-dimensional data, baseline models
+- **Advantages**: Fast, works well with small datasets
+- **Use cases**: Text classification, initial screening
+
+### Logistic Regression
+- **Best for**: Linear relationships, interpretability
+- **Advantages**: Provides probabilities, well-established
+- **Use cases**: Risk scores, traditional clinical models
+
+### Support Vector Machines (SVM)
+- **Best for**: High-dimensional data, complex boundaries
+- **Advantages**: Handles non-linear relationships well
+- **Use cases**: Genomic data, imaging analysis
+
+## Package Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Load the breast cancer dataset
+data("BreastCancer")
+
+# Display dataset structure
+cat("BreastCancer dataset structure:\\n")
+str(BreastCancer)
+cat("\\nClass distribution:\\n")
+table(BreastCancer$Class)
+```
+
+# Basic Classification Analysis
+
+## Example 1: Decision Tree Classification
+
+Let's start with a basic decision tree for breast cancer diagnosis:
+
+```{r basic-decision-tree, eval=FALSE}
+# Basic decision tree classification
+# Note: Function available in jamovi interface
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  classifier = "singleDecisionTree",
+  testing = "split",
+  testSize = 0.3,
+  complexity = 0.01,
+  maxDepth = 10,
+  reporting = c("confusionMatrix", "classifMetrices")
+)
+```
+
+### Interpretation
+
+The results show:
+- **Confusion Matrix**: Actual vs. predicted classifications
+- **Accuracy**: Overall prediction accuracy
+- **Precision/Recall**: Per-class performance metrics
+- **Tree Structure**: Decision rules for interpretation
+
+## Example 2: Random Forest Classification
+
+Building an ensemble model for improved accuracy:
+
+```{r random-forest, eval=FALSE}
+# Random forest classification
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion", 
+            "Epith.c.size", "Bare.nuclei"),
+  classifier = "randomForest",
+  testing = "crossValidation",
+  noOfFolds = 10,
+  noOfTrees = 100,
+  sampleFraction = 0.8,
+  splitRule = "gini",
+  reporting = c("confusionMatrix", "classifMetrices", "AUC"),
+  printRandForest = TRUE
+)
+```
+
+### Clinical Significance
+
+Random forests provide:
+- Higher accuracy through ensemble averaging
+- Feature importance rankings
+- Robust performance across different datasets
+- Reduced overfitting compared to single trees
+
+# Advanced Classification Methods
+
+## K-Nearest Neighbors (KNN)
+
+For similarity-based classification:
+
+```{r knn-classification, eval=FALSE}
+# KNN classification with different distance metrics
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "knn",
+  knnNeighbors = 5,
+  knnDistance = "euclidean",
+  testing = "split",
+  testSize = 0.25,
+  reporting = c("confusionMatrix", "AUC")
+)
+```
+
+### Distance Metrics Comparison
+
+```{r knn-distance-comparison, eval=FALSE}
+# Compare different distance metrics
+distance_metrics <- c("euclidean", "manhattan", "minkowski")
+
+for (metric in distance_metrics) {
+  cat(paste0("\\n", metric, " Distance Metric:\\n"))
+  classification(
+    data = BreastCancer,
+    dep = "Class",
+    indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+    classifier = "knn",
+    knnNeighbors = 5,
+    knnDistance = metric,
+    testing = "split",
+    testSize = 0.25
+  )
+}
+```
+
+## Support Vector Machines (SVM)
+
+For complex decision boundaries:
+
+```{r svm-classification, eval=FALSE}
+# SVM with radial basis function kernel
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  classifier = "svm",
+  svmKernel = "radial",
+  svmCost = 1.0,
+  svmGamma = 1.0,
+  testing = "crossValidation",
+  noOfFolds = 5,
+  reporting = c("confusionMatrix", "classifMetrices", "AUC")
+)
+```
+
+### Kernel Comparison
+
+```{r svm-kernel-comparison, eval=FALSE}
+# Compare different SVM kernels
+svm_kernels <- c("linear", "radial", "polynomial")
+
+for (kernel in svm_kernels) {
+  cat(paste0("\\n", kernel, " Kernel:\\n"))
+  classification(
+    data = BreastCancer,
+    dep = "Class",
+    indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+    classifier = "svm",
+    svmKernel = kernel,
+    svmCost = 1.0,
+    svmGamma = 1.0,
+    testing = "split"
+  )
+}
+```
+
+# Clinical Performance Metrics
+
+## Comprehensive Clinical Evaluation
+
+For medical applications, clinical metrics are essential:
+
+```{r clinical-metrics, eval=FALSE}
+# Classification with clinical performance metrics
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  classifier = "randomForest",
+  testing = "crossValidation",
+  noOfFolds = 10,
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE,
+  bootstrapSamples = 1000,
+  reporting = c("confusionMatrix", "classifMetrices", "AUC")
+)
+```
+
+### Clinical Metrics Interpretation
+
+**Sensitivity (True Positive Rate)**:
+- Proportion of actual positives correctly identified
+- Critical for screening: high sensitivity minimizes false negatives
+
+**Specificity (True Negative Rate)**:
+- Proportion of actual negatives correctly identified
+- Important for confirmatory tests: high specificity minimizes false positives
+
+**Positive Predictive Value (PPV)**:
+- Probability that positive result is truly positive
+- Depends on disease prevalence and test characteristics
+
+**Negative Predictive Value (NPV)**:
+- Probability that negative result is truly negative
+- High NPV important for ruling out disease
+
+**Likelihood Ratios**:
+- Positive LR: How much positive test increases disease odds
+- Negative LR: How much negative test decreases disease odds
+
+## Confidence Intervals for Clinical Metrics
+
+```{r confidence-intervals, eval=FALSE}
+# Bootstrap confidence intervals for clinical metrics
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "singleDecisionTree",
+  testing = "split",
+  testSize = 0.3,
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE,
+  bootstrapSamples = 1000
+)
+```
+
+# Class Imbalance Handling
+
+## Addressing Imbalanced Datasets
+
+Medical datasets often have class imbalance:
+
+```{r class-imbalance-upsample, eval=FALSE}
+# Handle class imbalance with upsampling
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "randomForest",
+  balancingMethod = "upsample",
+  testing = "crossValidation",
+  noOfFolds = 5,
+  reportClinicalMetrics = TRUE
+)
+```
+
+```{r class-imbalance-downsample, eval=FALSE}
+# Handle class imbalance with downsampling
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "randomForest",
+  balancingMethod = "downsample",
+  testing = "crossValidation",
+  noOfFolds = 5,
+  reportClinicalMetrics = TRUE
+)
+```
+
+### Balancing Method Selection
+
+**Upsampling**:
+- Replicates minority class samples
+- Preserves all original data
+- Risk of overfitting minority class
+
+**Downsampling**:
+- Reduces majority class samples
+- Balanced training set
+- Loss of potentially useful data
+
+**SMOTE** (Future implementation):
+- Generates synthetic minority samples
+- More sophisticated than simple replication
+- Better generalization
+
+# Validation Strategies
+
+## Cross-Validation for Robust Assessment
+
+```{r cross-validation, eval=FALSE}
+# Comprehensive cross-validation
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  classifier = "randomForest",
+  testing = "crossValidation",
+  noOfFolds = 10,
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE,
+  bootstrapSamples = 500
+)
+```
+
+## Bootstrap Validation
+
+```{r bootstrap-validation, eval=FALSE}
+# Bootstrap validation for confidence assessment
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "singleDecisionTree",
+  validateMethod = "bootstrap",
+  bootstrapSamples = 1000,
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE
+)
+```
+
+## Holdout Validation
+
+```{r holdout-validation, eval=FALSE}
+# Simple train-test split validation
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "logisticRegression",
+  validateMethod = "holdout",
+  testSize = 0.3,
+  reportClinicalMetrics = TRUE
+)
+```
+
+# Model Comparison and Selection
+
+## Algorithm Performance Comparison
+
+```{r algorithm-comparison, eval=FALSE}
+# Compare multiple algorithms
+algorithms <- c("singleDecisionTree", "randomForest", "knn", "naiveBayes", "logisticRegression")
+
+cat("Algorithm Performance Comparison:\\n\\n")
+
+for (algorithm in algorithms) {
+  cat(paste0("Algorithm: ", algorithm, "\\n"))
+  
+  result <- classification(
+    data = BreastCancer,
+    dep = "Class",
+    indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+    classifier = algorithm,
+    testing = "crossValidation",
+    noOfFolds = 5,
+    reportClinicalMetrics = TRUE,
+    knnNeighbors = if(algorithm == "knn") 5 else 5,  # Default for non-KNN
+    noOfTrees = if(algorithm == "randomForest") 50 else 10  # Default for non-RF
+  )
+  
+  cat("\\n")
+}
+```
+
+## Feature Selection Impact
+
+```{r feature-selection, eval=FALSE}
+# Compare performance with different feature sets
+feature_sets <- list(
+  "Basic" = c("Cl.thickness", "Cell.size"),
+  "Extended" = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  "Comprehensive" = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion", 
+                     "Epith.c.size", "Bare.nuclei", "Bl.cromatin")
+)
+
+for (set_name in names(feature_sets)) {
+  cat(paste0("\\nFeature Set: ", set_name, "\\n"))
+  
+  classification(
+    data = BreastCancer,
+    dep = "Class",
+    indep = feature_sets[[set_name]],
+    classifier = "randomForest",
+    testing = "crossValidation",
+    noOfFolds = 5,
+    reportClinicalMetrics = TRUE
+  )
+}
+```
+
+# Clinical Decision Thresholds
+
+## Optimizing Clinical Cutoffs
+
+```{r clinical-cutoffs, eval=FALSE}
+# Test different clinical decision thresholds
+cutoff_values <- c(0.3, 0.5, 0.7)
+
+cat("Clinical Cutoff Optimization:\\n\\n")
+
+for (cutoff in cutoff_values) {
+  cat(paste0("Clinical Cutoff: ", cutoff, "\\n"))
+  
+  classification(
+    data = BreastCancer,
+    dep = "Class",
+    indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+    classifier = "randomForest",
+    clinicalCutoff = cutoff,
+    testing = "split",
+    testSize = 0.3,
+    reportClinicalMetrics = TRUE
+  )
+  
+  cat("\\n")
+}
+```
+
+### Cutoff Selection Guidelines
+
+- **Low Cutoff (0.3)**: High sensitivity, more screening
+- **Standard Cutoff (0.5)**: Balanced sensitivity/specificity
+- **High Cutoff (0.7)**: High specificity, confirmatory testing
+
+# Visualization and Interpretation
+
+## ROC Curves and AUC
+
+```{r roc-analysis, eval=FALSE}
+# ROC curve analysis
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion"),
+  classifier = "randomForest",
+  testing = "split",
+  testSize = 0.3,
+  reporting = c("AUC", "confusionMatrix"),
+  noOfTrees = 100
+)
+```
+
+## Decision Tree Visualization
+
+```{r tree-visualization, eval=FALSE}
+# Visualize decision tree structure
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "singleDecisionTree",
+  testing = "split",
+  testSize = 0.3,
+  plotDecisionTree = TRUE,
+  complexity = 0.01,
+  maxDepth = 5
+)
+```
+
+## Prediction Frequencies
+
+```{r prediction-frequencies, eval=FALSE}
+# Visualize prediction distributions
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape"),
+  classifier = "randomForest",
+  testing = "split",
+  testSize = 0.3,
+  predictedFreqRF = TRUE,
+  printRandForest = TRUE
+)
+```
+
+# Clinical Applications and Case Studies
+
+## Case Study 1: Breast Cancer Diagnosis
+
+Automated pathological diagnosis from cellular features:
+
+```{r breast-cancer-diagnosis, eval=FALSE}
+# Comprehensive breast cancer classification
+classification(
+  data = BreastCancer,
+  dep = "Class",
+  indep = c("Cl.thickness", "Cell.size", "Cell.shape", "Marg.adhesion", 
+            "Epith.c.size", "Bare.nuclei", "Bl.cromatin", "Normal.nucleoli"),
+  classifier = "randomForest",
+  testing = "crossValidation",
+  noOfFolds = 10,
+  noOfTrees = 200,
+  balancingMethod = "none",  # Classes are reasonably balanced
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE,
+  bootstrapSamples = 1000,
+  reporting = c("confusionMatrix", "classifMetrices", "AUC")
+)
+```
+
+### Clinical Impact
+
+This model provides:
+- Objective diagnostic support for pathologists
+- Standardized assessment criteria
+- Quality control for diagnostic consistency
+- Training support for medical students
+
+## Case Study 2: Risk Stratification Model
+
+```{r risk-stratification, eval=FALSE}
+# Risk stratification using clinical features
+# Using histopathology dataset for demonstration
+data("histopathology")
+
+classification(
+  data = histopathology,
+  dep = "Outcome",
+  indep = c("Age", "Grade", "TStage", "LVI", "PNI"),
+  classifier = "randomForest",
+  testing = "crossValidation",
+  noOfFolds = 10,
+  balancingMethod = "upsample",  # Handle potential imbalance
+  reportClinicalMetrics = TRUE,
+  reportConfidenceIntervals = TRUE,
+  clinicalCutoff = 0.4,  # Conservative for screening
+  reporting = c("confusionMatrix", "classifMetrices", "AUC")
+)
+```
+
+### Research Applications
+
+Results inform:
+- Patient counseling about prognosis
+- Treatment intensity decisions
+- Clinical trial eligibility
+- Follow-up schedule planning
+
+# Best Practices and Guidelines
+
+## Algorithm Selection Guidelines
+
+```{r selection-guidelines}
+cat("Algorithm Selection Framework:\\n\\n")
+
+selection_guide <- data.frame(
+  Algorithm = c("Decision Tree", "Random Forest", "KNN", "Naive Bayes", "Logistic Regression", "SVM"),
+  Best_For = c("Interpretability", "Accuracy", "Non-linear patterns", "High dimensions", "Linear relationships", "Complex boundaries"),
+  Sample_Size = c("Any", "Medium-Large", "Medium-Large", "Small-Medium", "Any", "Medium-Large"),
+  Interpretability = c("High", "Medium", "Low", "Medium", "High", "Low"),
+  Training_Speed = c("Fast", "Medium", "Fast", "Fast", "Fast", "Slow"),
+  Prediction_Speed = c("Fast", "Fast", "Slow", "Fast", "Fast", "Fast")
+)
+
+kable(selection_guide, caption = "Algorithm Selection Guide")
+```
+
+## Model Validation Framework
+
+```{r validation-framework}
+cat("Model Validation Best Practices:\\n\\n")
+cat("1. Data Splitting:\\n")
+cat("   - Training: 60-70%\\n")
+cat("   - Validation: 15-20%\\n")
+cat("   - Testing: 15-20%\\n\\n")
+
+cat("2. Cross-Validation:\\n")
+cat("   - Use stratified k-fold (k=5 or 10)\\n")
+cat("   - Ensure class balance in folds\\n")
+cat("   - Report mean and standard deviation\\n\\n")
+
+cat("3. Performance Metrics:\\n")
+cat("   - Primary: AUC, Accuracy\\n")
+cat("   - Clinical: Sensitivity, Specificity, PPV, NPV\\n")
+cat("   - Report confidence intervals\\n\\n")
+
+cat("4. Model Interpretation:\\n")
+cat("   - Feature importance analysis\\n")
+cat("   - Decision boundary visualization\\n")
+cat("   - Clinical relevance assessment\\n")
+```
+
+## Reporting Guidelines
+
+### Essential Elements to Report
+
+```{r reporting-guidelines}
+cat("Classification Analysis Reporting Checklist:\\n\\n")
+cat("✓ Dataset characteristics and preprocessing\\n")
+cat("✓ Algorithm selection rationale\\n")
+cat("✓ Hyperparameter tuning methodology\\n")
+cat("✓ Validation strategy and results\\n")
+cat("✓ Performance metrics with confidence intervals\\n")
+cat("✓ Clinical interpretation of results\\n")
+cat("✓ Model limitations and assumptions\\n")
+cat("✓ Comparison with existing methods\\n")
+```
+
+### Example Results Section
+
+```{r results-example}
+cat("Example Results Reporting:\\n\\n")
+cat("A random forest classifier was trained on the breast cancer dataset\\n")
+cat("(n=699) to distinguish between benign and malignant tumors. The model\\n")
+cat("achieved an AUC of 0.98 (95% CI: 0.96-0.99) using 10-fold cross-validation.\\n")
+cat("Sensitivity was 95.2% (95% CI: 92.1-97.8%) and specificity was 96.8%\\n")
+cat("(95% CI: 94.2-98.6%), indicating excellent diagnostic performance.\\n")
+cat("The most important features were cell size uniformity, bare nuclei,\\n")
+cat("and clump thickness, consistent with pathological indicators of malignancy.\\n")
+```
+
+## Common Pitfalls and Solutions
+
+```{r common-pitfalls}
+cat("Common Classification Pitfalls:\\n\\n")
+
+cat("1. WRONG: Using accuracy alone for imbalanced classes\\n")
+cat("   RIGHT: Use AUC, precision, recall, and F1-score\\n\\n")
+
+cat("2. WRONG: Not validating on independent test set\\n")
+cat("   RIGHT: Use proper train/validation/test splits\\n\\n")
+
+cat("3. WRONG: Ignoring class imbalance\\n")
+cat("   RIGHT: Use appropriate balancing methods\\n\\n")
+
+cat("4. WRONG: Overfitting to training data\\n")
+cat("   RIGHT: Use cross-validation and regularization\\n\\n")
+
+cat("5. WRONG: Not reporting confidence intervals\\n")
+cat("   RIGHT: Use bootstrap or cross-validation CIs\\n\\n")
+
+cat("6. WRONG: Ignoring clinical relevance of cutoffs\\n")
+cat("   RIGHT: Optimize cutoffs for clinical utility\\n")
+```
+
+# Advanced Topics
+
+## Ensemble Methods
+
+```{r ensemble-example, eval=FALSE}
+# Example of ensemble approach using multiple algorithms
+# Note: This would require custom implementation
+cat("Ensemble Classification Approach:\\n")
+cat("• Combine predictions from multiple algorithms\\n")
+cat("• Weight by individual performance\\n")
+cat("• Improve robustness and accuracy\\n")
+cat("• Reduce overfitting risk\\n")
+```
+
+## Feature Engineering
+
+```{r feature-engineering}
+cat("Feature Engineering for Classification:\\n\\n")
+cat("• Normalization/Standardization\\n")
+cat("• Polynomial features for non-linear relationships\\n")
+cat("• Interaction terms between variables\\n")
+cat("• Domain-specific transformations\\n")
+cat("• Feature selection using importance scores\\n")
+```
+
+## Model Deployment Considerations
+
+```{r deployment-considerations}
+cat("Clinical Deployment Considerations:\\n\\n")
+cat("• Model interpretability requirements\\n")
+cat("• Real-time prediction capabilities\\n")
+cat("• Integration with existing systems\\n")
+cat("• Regulatory compliance (FDA, CE marking)\\n")
+cat("• Continuous monitoring and updating\\n")
+cat("• User training and acceptance\\n")
+```
+
+# Integration with Other Analyses
+
+## Combining with Survival Analysis
+
+```{r survival-integration}
+cat("Classification + Survival Analysis:\\n\\n")
+cat("• Use classification for risk group assignment\\n")
+cat("• Apply survival analysis within risk groups\\n")
+cat("• Validate prognostic value of classification\\n")
+cat("• Inform treatment stratification\\n")
+```
+
+## ROC Analysis Integration
+
+```{r roc-integration}
+cat("Classification + ROC Analysis:\\n\\n")
+cat("• Use ROC curves to optimize cutoffs\\n")
+cat("• Compare AUC between different models\\n")
+cat("• Assess diagnostic accuracy\\n")
+cat("• Clinical decision analysis\\n")
+```
+
+# Conclusion
+
+The `classification` function provides comprehensive machine learning capabilities essential for clinical and pathological research. Key takeaways:
+
+1. **Choose appropriate algorithms** based on data characteristics and research goals
+2. **Use proper validation strategies** to ensure reliable performance estimates
+3. **Report clinical metrics** with confidence intervals for medical relevance
+4. **Handle class imbalance** appropriately for realistic medical datasets
+5. **Optimize decision thresholds** for clinical utility rather than just accuracy
+6. **Interpret results** in clinical context with domain expertise
+
+Machine learning classification complements traditional statistical methods by identifying complex patterns in medical data, supporting evidence-based clinical decision-making and advancing personalized medicine approaches.
+
+## References
+
+- Breiman, L. (2001). *Random Forests*. Machine Learning, 45(1), 5-32.
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning*. Springer.
+- Kuhn, M., & Johnson, K. (2013). *Applied Predictive Modeling*. Springer.
+- Steyerberg, E. W. (2019). *Clinical Prediction Models*. Springer.
+
+---
+
+*This vignette was created for the ClinicoPath jamovi module. For more information and updates, visit [https://github.com/sbalci/ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule).*

@@ -35,42 +35,48 @@ clinmonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..abp <- jmvcore::OptionVariable$new(
                 "abp",
                 abp,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..mcav <- jmvcore::OptionVariable$new(
                 "mcav",
                 mcav,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..icp <- jmvcore::OptionVariable$new(
                 "icp",
                 icp,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..cpp <- jmvcore::OptionVariable$new(
                 "cpp",
                 cpp,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..hr <- jmvcore::OptionVariable$new(
                 "hr",
                 hr,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..freq <- jmvcore::OptionInteger$new(
                 "freq",
                 freq,
@@ -333,12 +339,12 @@ clinmonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 clinmon <- function(
     data,
-    time_var,
-    abp,
-    mcav,
-    icp,
-    cpp,
-    hr,
+    time_var = NULL,
+    abp = NULL,
+    mcav = NULL,
+    icp = NULL,
+    cpp = NULL,
+    hr = NULL,
     freq = 1000,
     blocksize = 3,
     epochsize = 20,
