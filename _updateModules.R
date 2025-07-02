@@ -9,15 +9,15 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.36" # Update this to the new version you want to set
-new_date <- "2024-07-02" # Update this to the new date you want to set
+new_version <- "0.0.3.37" # Update this to the new version you want to set
+new_date <- "2024-07-03" # Update this to the new date you want to set
 
 
 # Define WIP, check, extended status ----
 quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
 check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
 extended <- TRUE # Set to TRUE if you want to document and install submodules
-webpage <- TRUE # Set to TRUE if you want to build the pkgdown website for the modules
+webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
 commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
 
@@ -247,8 +247,8 @@ if (!WIP) {
     "psychopdaroc_utilities.R",
     "nomogrammer.R",
     "meddecide-utils.R",
-    "meddecide-package.R",
-    "meddecide-data.R",
+    # "meddecide-package.R",
+    # "meddecide-data.R",
     "meddecide_stats_utils.R",
     # "data-histopathology.R",
     "diagnostic_metrics.R"
@@ -455,7 +455,7 @@ tryCatch({
     # "tumor_response_examples.R"
     # "data-swimmer-plot-documentation.r"
 
-    "ClinicoPathDescriptives-package.R"
+    # "ClinicoPathDescriptives-package.R"
   )
 
 
@@ -891,11 +891,13 @@ if (!WIP) {
 }
 
 # --- Prepare, document, and install modules ----
+if (!extended) {
 jmvtools::prepare(main_repo_dir)
 devtools::document(main_repo_dir)
 jmvtools::prepare(main_repo_dir)
 devtools::document(main_repo_dir)
 jmvtools::install(main_repo_dir)
+}
 
 # --- Commit changes in each repository ----
 commit_message <- sprintf("WIP, update modules to version %s and date %s",
@@ -933,9 +935,8 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  if (WIP) {
-    jmvtools::install()
-  }
+  jmvtools::install()
+
   if (check) {
     devtools::check()
   }
@@ -948,9 +949,8 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  if (WIP) {
-    jmvtools::install()
-  }
+  jmvtools::install()
+
   if (check) {
     devtools::check()
   }
@@ -963,9 +963,8 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  if (WIP) {
-    jmvtools::install()
-  }
+  jmvtools::install()
+
   if (check) {
     devtools::check()
   }
@@ -978,9 +977,8 @@ if (extended) {
   devtools::document()
   jmvtools::prepare()
   devtools::document()
-  if (WIP) {
-    jmvtools::install()
-  }
+  jmvtools::install()
+
   if (check) {
     devtools::check()
   }
@@ -993,7 +991,7 @@ if (extended) {
 setwd(main_repo_dir)
 
 
-if (!WIP) {
+if (!WIP & !extended) {
   # Update the main repository
   jmvtools::prepare()
   devtools::document()
