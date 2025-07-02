@@ -1,0 +1,854 @@
+---
+title: "jSurvival 14: Comparing Survival Outcomes Between Groups"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{jSurvival 14: Comparing Survival Outcomes Between Groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Comparing survival outcomes between different groups is a fundamental aspect of clinical research and oncology studies. The **comparingsurvival** function in jSurvival provides comprehensive tools for performing group-wise survival comparisons using Kaplan-Meier estimation and log-rank tests, with enhanced visualization capabilities.
+
+**Learning Objectives:**
+
+- Master group-wise survival comparisons using Kaplan-Meier methods
+- Interpret log-rank test results and statistical significance
+- Create publication-ready survival curves with group stratification
+- Understand hazard ratios and median survival differences
+- Apply proper statistical methodology for survival group comparisons
+- Identify when survival differences are clinically meaningful
+
+## Module Overview
+
+The **comparingsurvival** function provides:
+
+### 1. **Statistical Methods**
+- **Kaplan-Meier Estimation**: Non-parametric survival curves for each group
+- **Log-rank Test**: Statistical comparison of survival distributions
+- **Hazard Ratio Estimation**: Measure of relative risk between groups
+- **Confidence Intervals**: Uncertainty quantification for survival estimates
+
+### 2. **Visualization Features**
+- **Survival Curves**: Group-stratified Kaplan-Meier plots
+- **Risk Tables**: Number at risk at specified time points
+- **Confidence Bands**: Visual representation of estimation uncertainty
+- **Statistical Annotations**: P-values and test statistics on plots
+
+### 3. **Clinical Applications**
+- **Treatment Comparisons**: Compare therapeutic interventions
+- **Biomarker Stratification**: Evaluate prognostic markers
+- **Risk Group Analysis**: Compare different risk categories
+- **Subgroup Analysis**: Examine specific patient populations
+
+```{r load-packages}
+library(ClinicoPath)
+library(survival)
+library(dplyr)
+```
+
+# Getting Started
+
+## Sample Data Overview
+
+We'll use comprehensive clinical datasets to demonstrate survival comparisons across different scenarios.
+
+```{r sample-data}
+# Load clinical survival data
+data(ihc_molecular_comprehensive)
+
+# Dataset overview
+cat("Dataset dimensions:", nrow(ihc_molecular_comprehensive), "×", ncol(ihc_molecular_comprehensive), "\n")
+
+# Key survival variables
+survival_vars <- c("Overall_Survival_Months", "Death_Event", "PFS_Months", "Progression_Event")
+cat("Survival variables:", paste(survival_vars, collapse = ", "), "\n")
+
+# Grouping variables for comparison
+grouping_vars <- c("EGFR_Mutation", "Grade", "MSI_Status", "HER2_IHC")
+cat("Grouping variables:", paste(grouping_vars, collapse = ", "), "\n")
+
+# Basic survival statistics by key groups
+survival_by_egfr <- ihc_molecular_comprehensive %>%
+  group_by(EGFR_Mutation) %>%
+  summarise(
+    n = n(),
+    events = sum(Death_Event),
+    event_rate = round(mean(Death_Event) * 100, 1),
+    median_survival = median(Overall_Survival_Months),
+    .groups = 'drop'
+  )
+
+cat("\nSurvival by EGFR Mutation Status:\n")
+print(survival_by_egfr)
+```
+
+# Core Functionality
+
+## 1. Basic Survival Comparison
+
+Fundamental two-group survival comparison.
+
+```{r basic-comparison}
+# Basic Survival Comparison Example
+# In jamovi: jsurvival > Comparing Survival
+
+cat("Basic Survival Comparison: EGFR Mutation Status\n")
+cat("===============================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  library(survival)
+  
+  # Create survival object
+  surv_obj <- Surv(ihc_molecular_comprehensive$Overall_Survival_Months,
+                   ihc_molecular_comprehensive$Death_Event)
+  
+  # Kaplan-Meier analysis by EGFR status
+  km_egfr <- survfit(surv_obj ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  
+  cat("Survival Summary by EGFR Status:\n")
+  summary_table <- summary(km_egfr, times = c(12, 24, 36, 48, 60))$table
+  print(summary_table)
+  
+  # Extract median survival times
+  median_survivals <- summary(km_egfr)$table[, "median"]
+  names(median_survivals) <- c("EGFR Negative", "EGFR Positive")
+  
+  cat("\nMedian Survival Times:\n")
+  for(i in 1:length(median_survivals)) {
+    cat(names(median_survivals)[i], ":", median_survivals[i], "months\n")
+  }
+  
+  # Calculate survival difference
+  survival_diff <- abs(diff(median_survivals))
+  cat("Difference in median survival:", round(survival_diff, 1), "months\n")
+  
+  # Log-rank test
+  logrank_test <- survdiff(surv_obj ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  chi_square <- logrank_test$chisq
+  p_value <- 1 - pchisq(chi_square, 1)
+  
+  cat("\nLog-rank Test Results:\n")
+  cat("Chi-square statistic:", round(chi_square, 3), "\n")
+  cat("P-value:", round(p_value, 4), "\n")
+  cat("Degrees of freedom: 1\n")
+  
+  # Statistical interpretation
+  if(p_value < 0.001) {
+    cat("Interpretation: Highly significant difference (p < 0.001)\n")
+  } else if(p_value < 0.01) {
+    cat("Interpretation: Highly significant difference (p < 0.01)\n")
+  } else if(p_value < 0.05) {
+    cat("Interpretation: Significant difference (p < 0.05)\n")
+  } else {
+    cat("Interpretation: No significant difference (p ≥ 0.05)\n")
+  }
+  
+  # Effect size (hazard ratio approximation)
+  cox_simple <- coxph(surv_obj ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  hr <- exp(cox_simple$coefficients)
+  hr_ci <- exp(confint(cox_simple))
+  
+  cat("\nHazard Ratio Analysis:\n")
+  cat("Hazard Ratio:", round(hr, 2), "\n")
+  cat("95% Confidence Interval:", round(hr_ci[1], 2), "-", round(hr_ci[2], 2), "\n")
+  
+  if(hr > 1) {
+    cat("Interpretation: EGFR positive patients have", round(hr, 2), "times higher hazard of death\n")
+  } else {
+    cat("Interpretation: EGFR positive patients have", round(1/hr, 2), "times lower hazard of death\n")
+  }
+}
+```
+
+## 2. Multi-Group Comparison
+
+Compare survival across multiple groups simultaneously.
+
+```{r multi-group-comparison}
+# Multi-Group Survival Comparison
+# Comparing across tumor grades
+
+cat("\nMulti-Group Survival Comparison: Tumor Grade\n")
+cat("===========================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  # Survival by tumor grade (3 groups)
+  km_grade <- survfit(surv_obj ~ Grade, data = ihc_molecular_comprehensive)
+  
+  cat("Survival Summary by Tumor Grade:\n")
+  grade_summary <- summary(km_grade, times = c(12, 24, 36, 48, 60))$table
+  print(grade_summary)
+  
+  # Median survival by grade
+  grade_medians <- summary(km_grade)$table[, "median"]
+  grade_names <- paste("Grade", 1:length(grade_medians))
+  names(grade_medians) <- grade_names
+  
+  cat("\nMedian Survival by Grade:\n")
+  for(i in 1:length(grade_medians)) {
+    cat(names(grade_medians)[i], ":", grade_medians[i], "months\n")
+  }
+  
+  # Overall log-rank test
+  logrank_grade <- survdiff(surv_obj ~ Grade, data = ihc_molecular_comprehensive)
+  chi_square_grade <- logrank_grade$chisq
+  df_grade <- length(unique(ihc_molecular_comprehensive$Grade)) - 1
+  p_value_grade <- 1 - pchisq(chi_square_grade, df_grade)
+  
+  cat("\nOverall Log-rank Test:\n")
+  cat("Chi-square statistic:", round(chi_square_grade, 3), "\n")
+  cat("Degrees of freedom:", df_grade, "\n")
+  cat("P-value:", round(p_value_grade, 4), "\n")
+  
+  # Pairwise comparisons (if overall test is significant)
+  if(p_value_grade < 0.05) {
+    cat("\nPairwise Comparisons:\n")
+    grades <- unique(ihc_molecular_comprehensive$Grade)
+    grades <- grades[!is.na(grades)]
+    
+    for(i in 1:(length(grades)-1)) {
+      for(j in (i+1):length(grades)) {
+        grade_subset <- ihc_molecular_comprehensive[ihc_molecular_comprehensive$Grade %in% c(grades[i], grades[j]), ]
+        if(nrow(grade_subset) > 0) {
+          surv_subset <- Surv(grade_subset$Overall_Survival_Months, grade_subset$Death_Event)
+          logrank_pair <- survdiff(surv_subset ~ Grade, data = grade_subset)
+          p_pair <- 1 - pchisq(logrank_pair$chisq, 1)
+          
+          cat(paste0("Grade ", grades[i], " vs Grade ", grades[j], ": p = ", round(p_pair, 4), "\n"))
+        }
+      }
+    }
+  }
+  
+  # Clinical significance assessment
+  max_diff <- max(grade_medians, na.rm = TRUE) - min(grade_medians, na.rm = TRUE)
+  cat("\nClinical Significance:\n")
+  cat("Range of median survivals:", round(max_diff, 1), "months\n")
+  
+  if(max_diff >= 12) {
+    cat("Interpretation: Clinically meaningful difference (≥12 months)\n")
+  } else if(max_diff >= 6) {
+    cat("Interpretation: Moderate clinical difference (6-12 months)\n")
+  } else {
+    cat("Interpretation: Limited clinical difference (<6 months)\n")
+  }
+}
+```
+
+## 3. Biomarker Stratification Analysis
+
+Evaluate survival differences by molecular biomarkers.
+
+```{r biomarker-stratification}
+# Biomarker-Based Survival Stratification
+cat("\nBiomarker Stratification Analysis\n")
+cat("=================================\n\n")
+
+# Multiple biomarker analysis
+biomarkers <- list(
+  "MSI_Status" = "Microsatellite Instability",
+  "HER2_IHC" = "HER2 Expression",
+  "EGFR_Mutation" = "EGFR Mutation Status"
+)
+
+biomarker_results <- list()
+
+for(biomarker in names(biomarkers)) {
+  cat(paste0("Analysis: ", biomarkers[[biomarker]], " (", biomarker, ")\n"))
+  cat(paste0(rep("-", nchar(biomarkers[[biomarker]]) + nchar(biomarker) + 12), collapse = ""), "\n")
+  
+  # Filter out missing values
+  complete_data <- ihc_molecular_comprehensive[!is.na(ihc_molecular_comprehensive[[biomarker]]), ]
+  
+  if(nrow(complete_data) > 0) {
+    # Survival analysis
+    surv_bio <- Surv(complete_data$Overall_Survival_Months, complete_data$Death_Event)
+    formula_str <- paste("surv_bio ~", biomarker)
+    km_bio <- survfit(as.formula(formula_str), data = complete_data)
+    
+    # Summary statistics
+    bio_summary <- summary(km_bio)$table
+    print(bio_summary)
+    
+    # Log-rank test
+    logrank_bio <- survdiff(as.formula(formula_str), data = complete_data)
+    p_bio <- 1 - pchisq(logrank_bio$chisq, nrow(bio_summary) - 1)
+    
+    cat("Log-rank test p-value:", round(p_bio, 4), "\n")
+    
+    # Cox regression for hazard ratio
+    cox_bio <- coxph(as.formula(formula_str), data = complete_data)
+    hr_bio <- exp(cox_bio$coefficients)
+    
+    if(length(hr_bio) == 1) {  # Binary biomarker
+      hr_ci_bio <- exp(confint(cox_bio))
+      cat("Hazard Ratio:", round(hr_bio, 2), "(95% CI:", round(hr_ci_bio[1], 2), "-", round(hr_ci_bio[2], 2), ")\n")
+    }
+    
+    # Store results
+    biomarker_results[[biomarker]] <- list(
+      p_value = p_bio,
+      significant = p_bio < 0.05,
+      summary = bio_summary
+    )
+    
+    # Interpretation
+    if(p_bio < 0.001) {
+      cat("Result: Highly significant prognostic biomarker (p < 0.001)\n")
+    } else if(p_bio < 0.01) {
+      cat("Result: Highly significant prognostic biomarker (p < 0.01)\n")
+    } else if(p_bio < 0.05) {
+      cat("Result: Significant prognostic biomarker (p < 0.05)\n")
+    } else {
+      cat("Result: Not a significant prognostic biomarker (p ≥ 0.05)\n")
+    }
+  } else {
+    cat("Insufficient data for analysis\n")
+    biomarker_results[[biomarker]] <- list(p_value = NA, significant = FALSE)
+  }
+  
+  cat("\n")
+}
+
+# Summary of biomarker findings
+cat("Biomarker Analysis Summary:\n")
+cat("===========================\n")
+significant_biomarkers <- names(biomarker_results)[sapply(biomarker_results, function(x) x$significant)]
+if(length(significant_biomarkers) > 0) {
+  cat("Significant prognostic biomarkers:\n")
+  for(bio in significant_biomarkers) {
+    p_val <- biomarker_results[[bio]]$p_value
+    cat(paste0("- ", biomarkers[[bio]], " (p = ", round(p_val, 4), ")\n"))
+  }
+} else {
+  cat("No significant prognostic biomarkers identified\n")
+}
+```
+
+# Advanced Applications
+
+## 4. Time-to-Progression Analysis
+
+Compare progression-free survival between groups.
+
+```{r progression-analysis}
+# Time-to-Progression Comparison
+cat("\nProgression-Free Survival Analysis\n")
+cat("==================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE)) {
+  # Create PFS survival object
+  pfs_surv <- Surv(ihc_molecular_comprehensive$PFS_Months,
+                   ihc_molecular_comprehensive$Progression_Event)
+  
+  # PFS by treatment-relevant biomarker (e.g., EGFR)
+  km_pfs <- survfit(pfs_surv ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  
+  cat("Progression-Free Survival by EGFR Status:\n")
+  pfs_summary <- summary(km_pfs, times = c(6, 12, 18, 24, 30))$table
+  print(pfs_summary)
+  
+  # Median PFS
+  pfs_medians <- summary(km_pfs)$table[, "median"]
+  cat("\nMedian PFS Times:\n")
+  cat("EGFR Negative:", pfs_medians[1], "months\n")
+  cat("EGFR Positive:", pfs_medians[2], "months\n")
+  
+  # Statistical test
+  logrank_pfs <- survdiff(pfs_surv ~ EGFR_Mutation, data = ihc_molecular_comprehensive)
+  p_pfs <- 1 - pchisq(logrank_pfs$chisq, 1)
+  
+  cat("\nLog-rank Test for PFS:\n")
+  cat("P-value:", round(p_pfs, 4), "\n")
+  
+  # Compare OS vs PFS findings
+  os_p <- biomarker_results[["EGFR_Mutation"]]$p_value
+  cat("\nOS vs PFS Comparison:\n")
+  cat("Overall Survival p-value:", round(os_p, 4), "\n")
+  cat("Progression-Free Survival p-value:", round(p_pfs, 4), "\n")
+  
+  if(os_p < 0.05 && p_pfs < 0.05) {
+    cat("Interpretation: EGFR status affects both OS and PFS\n")
+  } else if(p_pfs < 0.05) {
+    cat("Interpretation: EGFR status primarily affects PFS\n")
+  } else if(os_p < 0.05) {
+    cat("Interpretation: EGFR status primarily affects OS\n")
+  } else {
+    cat("Interpretation: EGFR status does not significantly affect survival outcomes\n")
+  }
+}
+```
+
+## 5. Subgroup Analysis
+
+Examine survival differences within specific patient subgroups.
+
+```{r subgroup-analysis}
+# Subgroup Survival Analysis
+cat("\nSubgroup Analysis: High-Grade Tumors\n")
+cat("===================================\n\n")
+
+# Focus on high-grade tumors (Grade 3)
+high_grade <- ihc_molecular_comprehensive[ihc_molecular_comprehensive$Grade == 3, ]
+
+if(nrow(high_grade) > 20) {  # Ensure adequate sample size
+  cat("High-grade tumor cohort size:", nrow(high_grade), "patients\n")
+  
+  # Survival in high-grade tumors by EGFR status
+  surv_hg <- Surv(high_grade$Overall_Survival_Months, high_grade$Death_Event)
+  km_hg <- survfit(surv_hg ~ EGFR_Mutation, data = high_grade)
+  
+  cat("\nSurvival in High-Grade Tumors by EGFR Status:\n")
+  hg_summary <- summary(km_hg, times = c(12, 24, 36))$table
+  print(hg_summary)
+  
+  # Statistical test in subgroup
+  logrank_hg <- survdiff(surv_hg ~ EGFR_Mutation, data = high_grade)
+  p_hg <- 1 - pchisq(logrank_hg$chisq, 1)
+  
+  cat("Log-rank test p-value in high-grade subgroup:", round(p_hg, 4), "\n")
+  
+  # Compare to overall population
+  overall_p <- biomarker_results[["EGFR_Mutation"]]$p_value
+  cat("\nSubgroup vs Overall Population:\n")
+  cat("Overall population p-value:", round(overall_p, 4), "\n")
+  cat("High-grade subgroup p-value:", round(p_hg, 4), "\n")
+  
+  if(p_hg < 0.05 && overall_p >= 0.05) {
+    cat("Interpretation: EGFR effect is significant only in high-grade tumors\n")
+  } else if(p_hg >= 0.05 && overall_p < 0.05) {
+    cat("Interpretation: EGFR effect is diluted in high-grade subgroup\n")
+  } else if(p_hg < overall_p) {
+    cat("Interpretation: EGFR effect is stronger in high-grade tumors\n")
+  } else {
+    cat("Interpretation: EGFR effect is consistent across grades\n")
+  }
+} else {
+  cat("Insufficient sample size for subgroup analysis\n")
+}
+```
+
+## 6. Risk-Based Stratification
+
+Create risk groups and compare survival outcomes.
+
+```{r risk-stratification}
+# Risk-Based Survival Stratification
+cat("\nRisk-Based Survival Stratification\n")
+cat("==================================\n\n")
+
+# Create composite risk score
+risk_data <- ihc_molecular_comprehensive %>%
+  mutate(
+    # Risk factors (higher = worse prognosis)
+    age_risk = ifelse(Age > 65, 1, 0),
+    grade_risk = ifelse(Grade == 3, 1, 0),
+    egfr_risk = ifelse(EGFR_Mutation == "Positive", 1, 0),
+    
+    # Protective factors (higher = better prognosis)
+    msi_protective = ifelse(MSI_Status == "MSI-High", 1, 0),
+    
+    # Composite risk score (0-3, higher = worse)
+    risk_score = age_risk + grade_risk + egfr_risk - msi_protective
+  ) %>%
+  mutate(
+    # Risk groups
+    risk_group = case_when(
+      risk_score <= 0 ~ "Low Risk",
+      risk_score == 1 ~ "Intermediate Risk", 
+      risk_score >= 2 ~ "High Risk"
+    ),
+    risk_group = factor(risk_group, levels = c("Low Risk", "Intermediate Risk", "High Risk"))
+  )
+
+# Risk group distribution
+cat("Risk Group Distribution:\n")
+risk_dist <- table(risk_data$risk_group)
+print(risk_dist)
+cat("Percentages:", round(prop.table(risk_dist) * 100, 1), "%\n")
+
+# Survival by risk group
+if(requireNamespace("survival", quietly = TRUE)) {
+  surv_risk <- Surv(risk_data$Overall_Survival_Months, risk_data$Death_Event)
+  km_risk <- survfit(surv_risk ~ risk_group, data = risk_data)
+  
+  cat("\nSurvival by Risk Group:\n")
+  risk_summary <- summary(km_risk, times = c(12, 24, 36, 48))$table
+  print(risk_summary)
+  
+  # Risk group medians
+  risk_medians <- summary(km_risk)$table[, "median"]
+  cat("\nMedian Survival by Risk Group:\n")
+  for(i in 1:length(risk_medians)) {
+    cat(levels(risk_data$risk_group)[i], ":", risk_medians[i], "months\n")
+  }
+  
+  # Statistical test for risk stratification
+  logrank_risk <- survdiff(surv_risk ~ risk_group, data = risk_data)
+  chi_sq_risk <- logrank_risk$chisq
+  df_risk <- length(levels(risk_data$risk_group)) - 1
+  p_risk <- 1 - pchisq(chi_sq_risk, df_risk)
+  
+  cat("\nRisk Stratification Test:\n")
+  cat("Chi-square:", round(chi_sq_risk, 3), "\n")
+  cat("P-value:", round(p_risk, 4), "\n")
+  
+  # Trend test
+  risk_numeric <- as.numeric(risk_data$risk_group)
+  cox_trend <- coxph(surv_risk ~ risk_numeric, data = risk_data)
+  trend_p <- summary(cox_trend)$coefficients[, "Pr(>|z|)"]
+  hr_trend <- exp(cox_trend$coefficients)
+  
+  cat("\nTrend Analysis:\n")
+  cat("Hazard ratio per risk level:", round(hr_trend, 2), "\n")
+  cat("Trend test p-value:", round(trend_p, 4), "\n")
+  
+  # Model performance
+  c_index <- summary(cox_trend)$concordance[1]
+  cat("Concordance index:", round(c_index, 3), "\n")
+  
+  if(c_index >= 0.7) {
+    cat("Risk model performance: Excellent (C-index ≥ 0.7)\n")
+  } else if(c_index >= 0.6) {
+    cat("Risk model performance: Good (C-index 0.6-0.7)\n")
+  } else {
+    cat("Risk model performance: Poor (C-index < 0.6)\n")
+  }
+}
+```
+
+# Statistical Considerations
+
+## Power and Sample Size
+
+Important considerations for survival comparisons.
+
+```{r power-considerations}
+# Sample Size and Power Considerations
+cat("Sample Size and Power Analysis\n")
+cat("==============================\n\n")
+
+# Current study characteristics
+total_n <- nrow(ihc_molecular_comprehensive)
+events <- sum(ihc_molecular_comprehensive$Death_Event)
+event_rate <- mean(ihc_molecular_comprehensive$Death_Event)
+
+cat("Current Study Characteristics:\n")
+cat("Total sample size:", total_n, "\n")
+cat("Total events:", events, "\n")
+cat("Overall event rate:", round(event_rate * 100, 1), "%\n")
+
+# Group sizes for major comparisons
+egfr_groups <- table(ihc_molecular_comprehensive$EGFR_Mutation)
+cat("\nEGFR Group Sizes:\n")
+print(egfr_groups)
+
+# Events per group
+egfr_events <- ihc_molecular_comprehensive %>%
+  group_by(EGFR_Mutation) %>%
+  summarise(
+    n = n(),
+    events = sum(Death_Event),
+    event_rate = round(mean(Death_Event) * 100, 1),
+    .groups = 'drop'
+  )
+
+cat("\nEvents by EGFR Status:\n")
+print(egfr_events)
+
+# Power estimation guidelines
+min_events_per_group <- 10
+adequate_events <- all(egfr_events$events >= min_events_per_group)
+
+cat("\nPower Assessment:\n")
+cat("Minimum events per group recommended:", min_events_per_group, "\n")
+cat("Adequate events per group:", adequate_events, "\n")
+
+if(adequate_events) {
+  cat("Conclusion: Adequate power for primary comparisons\n")
+} else {
+  cat("Conclusion: Limited power - consider pooling groups or longer follow-up\n")
+}
+
+# Effect size detectability
+median_diff_detectable <- sqrt(4 / min(egfr_events$events)) * 12  # Rough approximation
+cat("Approximately detectable median survival difference:", round(median_diff_detectable, 1), "months\n")
+```
+
+## Multiple Comparisons
+
+Addressing multiple testing in survival comparisons.
+
+```{r multiple-comparisons}
+# Multiple Comparisons Adjustment
+cat("\nMultiple Comparisons Consideration\n")
+cat("=================================\n\n")
+
+# Collect all p-values from biomarker analyses
+all_p_values <- sapply(biomarker_results, function(x) x$p_value)
+all_p_values <- all_p_values[!is.na(all_p_values)]
+
+cat("Raw P-values from Biomarker Analyses:\n")
+for(i in 1:length(all_p_values)) {
+  cat(names(all_p_values)[i], ":", round(all_p_values[i], 4), "\n")
+}
+
+# Bonferroni correction
+bonferroni_alpha <- 0.05 / length(all_p_values)
+bonferroni_significant <- all_p_values < bonferroni_alpha
+
+cat("\nBonferroni Correction:\n")
+cat("Adjusted alpha level:", round(bonferroni_alpha, 4), "\n")
+cat("Significant after Bonferroni correction:\n")
+if(any(bonferroni_significant)) {
+  for(i in which(bonferroni_significant)) {
+    cat(names(all_p_values)[i], ": p =", round(all_p_values[i], 4), "< α =", round(bonferroni_alpha, 4), "\n")
+  }
+} else {
+  cat("None remain significant after correction\n")
+}
+
+# False Discovery Rate (FDR) control
+if(requireNamespace("stats", quietly = TRUE)) {
+  fdr_adjusted <- p.adjust(all_p_values, method = "fdr")
+  fdr_significant <- fdr_adjusted < 0.05
+  
+  cat("\nFalse Discovery Rate (FDR) Adjustment:\n")
+  for(i in 1:length(all_p_values)) {
+    cat(names(all_p_values)[i], ": raw p =", round(all_p_values[i], 4), 
+        ", FDR p =", round(fdr_adjusted[i], 4), "\n")
+  }
+  
+  cat("\nSignificant after FDR correction:\n")
+  if(any(fdr_significant)) {
+    for(i in which(fdr_significant)) {
+      cat(names(all_p_values)[i], ": FDR p =", round(fdr_adjusted[i], 4), "< 0.05\n")
+    }
+  } else {
+    cat("None remain significant after FDR correction\n")
+  }
+}
+
+# Recommendation
+cat("\nRecommendation:\n")
+if(length(all_p_values) <= 3) {
+  cat("With", length(all_p_values), "comparisons, multiple testing adjustment may not be necessary\n")
+} else if(any(fdr_significant)) {
+  cat("Use FDR-adjusted p-values for interpretation\n")
+} else if(any(bonferroni_significant)) {
+  cat("Conservative Bonferroni correction identifies significant findings\n")
+} else {
+  cat("Consider exploratory interpretation due to multiple testing\n")
+}
+```
+
+# Best Practices and Interpretation
+
+## Clinical Significance
+
+Guidelines for interpreting survival differences.
+
+```{r clinical-significance}
+# Clinical Significance Assessment
+cat("Clinical Significance Guidelines\n")
+cat("===============================\n\n")
+
+# Establish clinical significance thresholds
+clinically_meaningful_months <- 6  # Minimum meaningful difference
+highly_meaningful_months <- 12     # Highly meaningful difference
+
+cat("Clinical Significance Thresholds:\n")
+cat("Meaningful difference: ≥", clinically_meaningful_months, "months\n")
+cat("Highly meaningful difference: ≥", highly_meaningful_months, "months\n\n")
+
+# Assess each comparison
+cat("Clinical Significance Assessment:\n")
+cat("=================================\n")
+
+# EGFR comparison example
+if("EGFR_Mutation" %in% names(biomarker_results) && biomarker_results[["EGFR_Mutation"]]$significant) {
+  egfr_medians <- summary(survfit(Surv(Overall_Survival_Months, Death_Event) ~ EGFR_Mutation, 
+                                 data = ihc_molecular_comprehensive))$table[, "median"]
+  egfr_diff <- abs(diff(egfr_medians))
+  
+  cat("EGFR Mutation Status:\n")
+  cat("Median survival difference:", round(egfr_diff, 1), "months\n")
+  cat("Statistical significance: Yes (p < 0.05)\n")
+  
+  if(egfr_diff >= highly_meaningful_months) {
+    cat("Clinical significance: Highly meaningful (≥12 months)\n")
+  } else if(egfr_diff >= clinically_meaningful_months) {
+    cat("Clinical significance: Meaningful (6-12 months)\n")
+  } else {
+    cat("Clinical significance: Limited (<6 months)\n")
+  }
+  
+  # Additional considerations
+  cat("Additional considerations:\n")
+  if(egfr_diff >= clinically_meaningful_months) {
+    cat("- Difference likely to be noticeable to patients and families\n")
+    cat("- May influence treatment decisions\n")
+    cat("- Consider for biomarker-guided therapy\n")
+  } else {
+    cat("- Difference may be too small to be clinically relevant\n")
+    cat("- Statistical significance may not translate to clinical utility\n")
+    cat("- Consider as prognostic information only\n")
+  }
+}
+
+# General interpretation framework
+cat("\nGeneral Interpretation Framework:\n")
+cat("- Statistical significance indicates reliable difference\n")
+cat("- Clinical significance requires meaningful survival benefit\n")
+cat("- Consider both statistical and clinical significance together\n")
+cat("- Account for confidence intervals and uncertainty\n")
+cat("- Evaluate biological plausibility of findings\n")
+```
+
+## Reporting Guidelines
+
+Comprehensive reporting of survival comparisons.
+
+```{r reporting-guidelines}
+# Reporting Guidelines for Survival Comparisons
+cat("Reporting Guidelines\n")
+cat("===================\n\n")
+
+cat("Essential Elements to Report:\n")
+cat("1. Study Population:\n")
+cat("   - Total sample size:", nrow(ihc_molecular_comprehensive), "\n")
+cat("   - Follow-up characteristics\n")
+cat("   - Censoring pattern\n\n")
+
+cat("2. Descriptive Statistics:\n")
+cat("   - Group sizes and event rates\n")
+cat("   - Median follow-up time\n")
+cat("   - Median survival times with confidence intervals\n\n")
+
+cat("3. Statistical Tests:\n")
+cat("   - Log-rank test statistics and p-values\n")
+cat("   - Hazard ratios with 95% confidence intervals\n")
+cat("   - Multiple comparison adjustments (if applicable)\n\n")
+
+cat("4. Visualization:\n")
+cat("   - Kaplan-Meier survival curves\n")
+cat("   - Number at risk tables\n")
+cat("   - Confidence bands (optional)\n\n")
+
+cat("5. Clinical Interpretation:\n")
+cat("   - Clinical significance assessment\n")
+cat("   - Biological plausibility\n")
+cat("   - Limitations and potential biases\n\n")
+
+# Example results summary
+cat("Example Results Summary:\n")
+cat("========================\n")
+cat("Among", nrow(ihc_molecular_comprehensive), "patients with comprehensive molecular profiling,")
+cat("survival comparisons were performed for key biomarkers.\n")
+
+significant_findings <- sum(sapply(biomarker_results, function(x) x$significant))
+cat("Of", length(biomarker_results), "biomarkers evaluated,", significant_findings, 
+    "showed statistically significant survival differences.\n")
+
+if(significant_findings > 0) {
+  cat("These findings suggest potential prognostic value for molecular stratification")
+  cat("in this patient population.\n")
+} else {
+  cat("No significant prognostic biomarkers were identified in this analysis.\n")
+}
+```
+
+# Integration with jamovi
+
+## Using comparingsurvival in jamovi
+
+Step-by-step guide for jamovi users.
+
+```{r jamovi-integration}
+# jamovi Integration Guide
+cat("Using comparingsurvival in jamovi\n")
+cat("=================================\n\n")
+
+cat("Step-by-Step Instructions:\n")
+cat("1. Data Preparation:\n")
+cat("   - Ensure survival time variable (continuous)\n")
+cat("   - Event indicator variable (0/1 or logical)\n")
+cat("   - Grouping variable (categorical)\n\n")
+
+cat("2. Access the Function:\n")
+cat("   - Navigate to: jSurvival → Comparing Survival\n")
+cat("   - Or use: Analyses → ClinicoPath → jSurvival → Comparing Survival\n\n")
+
+cat("3. Variable Assignment:\n")
+cat("   - Time Variable: Select survival time column\n")
+cat("   - Event Variable: Select event indicator\n")
+cat("   - Groups: Select grouping variable\n\n")
+
+cat("4. Output Options:\n")
+cat("   - Survival curves: Check for Kaplan-Meier plots\n")
+cat("   - Statistics: Check for detailed statistical output\n")
+cat("   - Risk tables: Check for number at risk tables\n\n")
+
+cat("5. Interpretation:\n")
+cat("   - Review log-rank test p-value\n")
+cat("   - Examine survival curves visually\n")
+cat("   - Check median survival differences\n")
+cat("   - Consider clinical significance\n\n")
+
+# Common variable formats
+cat("Common Variable Formats:\n")
+cat("- Time: months, days, years (numeric)\n")
+cat("- Event: 1=event, 0=censored (or TRUE/FALSE)\n")
+cat("- Groups: factor levels (e.g., 'Control', 'Treatment')\n\n")
+
+cat("Troubleshooting:\n")
+cat("- Ensure no missing values in key variables\n")
+cat("- Check that event rates are reasonable (>5% per group)\n")
+cat("- Verify adequate sample sizes per group\n")
+cat("- Confirm proper variable types\n")
+```
+
+# Conclusion
+
+The **comparingsurvival** function provides comprehensive tools for group-wise survival comparisons, from basic two-group analyses to complex multi-biomarker evaluations. Proper application requires attention to both statistical methodology and clinical interpretation.
+
+## Key Takeaways
+
+1. **Statistical Rigor**: Use appropriate methods (Kaplan-Meier, log-rank tests)
+2. **Clinical Relevance**: Consider both statistical and clinical significance
+3. **Multiple Comparisons**: Adjust for multiple testing when appropriate
+4. **Sample Size**: Ensure adequate power for meaningful comparisons
+5. **Interpretation**: Balance statistical findings with biological plausibility
+
+## Next Steps
+
+- Explore advanced survival modeling with Cox regression
+- Consider competing risks analysis for complex outcomes
+- Integrate findings with other ClinicoPath modules
+- Develop prognostic models based on significant biomarkers
+
+---
+
+*This vignette demonstrates comprehensive survival comparison methodology using the comparingsurvival function. Apply these principles to your own clinical datasets for robust survival analysis.*

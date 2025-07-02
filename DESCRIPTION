@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Analysis for Clinicopathological Research
-Version: 0.0.3.36
-Date: 2024-07-02
+Version: 0.0.3.37
+Date: 2024-07-03
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -172,7 +172,20 @@ Imports:
     ggeconodist,
     jtools,
     DescTools,
-    plotly
+    plotly,
+    ggfortify,
+    mlr3,
+    mlr3learners,
+    mlr3viz,
+    kknn,
+    naivebayes,
+    data.table,
+    ggpubr,
+    graphics,
+    grDevices,
+    grid,
+    mlr3extralearners,
+    mlr3measures
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -185,7 +198,8 @@ Remotes:
     jbengler/tidyplots,
     hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
-    alstockdale/sumvar
+    alstockdale/sumvar,
+    mlr-org/mlr3extralearners@v1.0.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

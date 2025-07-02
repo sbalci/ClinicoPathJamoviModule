@@ -507,3 +507,11 @@ Language: c\n
    • Complete the webhook creation.
 7. Finalize Integration
    • Contact the jamovi development team and ask them to add your `<modulename>`-i18n repository to Weblate.
+
+## Development Best Practices
+
+### R Package Structure Best Practices
+
+- **R/**: Function definitions only
+- **data-raw/**: Data generation scripts (run manually when needed)
+- **data/**: Final .rda datasets (committed to repository)

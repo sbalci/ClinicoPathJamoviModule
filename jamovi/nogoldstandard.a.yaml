@@ -1,7 +1,7 @@
 ---
 name: nogoldstandard
 title: Analysis Without Gold Standard
-menuGroup: meddecideD
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
 version: '0.0.3'

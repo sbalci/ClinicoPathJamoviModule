@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.36
+version: 0.0.3.37
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-07-02'
+date: '2024-07-03'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -20,6 +20,7 @@ analyses:
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
+    category: analyses
   - title: Eurostat Map
     name: eurostatmap
     ns: ClinicoPath
@@ -32,6 +33,7 @@ analyses:
       datasets by providing a Eurostat dataset ID, or import your own Eurostat
       CSV data.  For local data, ensure it contains a 'geo' column with NUTS
       geographic codes.
+    category: analyses
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
@@ -39,6 +41,7 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
+    category: analyses
   - title: Coefficient Plots
     name: coefplot
     ns: ClinicoPath
@@ -54,6 +57,7 @@ analyses:
       styling options. Essential  for presenting regression results in clinical
       research and epidemiological studies.
     ribbon: analyses
+    category: analyses
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
@@ -61,6 +65,7 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Benford Analysis
     ribbon: analyses
+    category: analyses
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
@@ -69,6 +74,7 @@ analyses:
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
     ribbon: analyses
+    category: analyses
   - title: Enhanced Cross Tables (Pivot)
     name: crosstablepivot
     ns: ClinicoPath
@@ -81,10 +87,11 @@ analyses:
       professional formatting. Non-breaking addition to existing crosstable
       functionality.
     ribbon: analyses
+    category: analyses
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -93,6 +100,7 @@ analyses:
       both textual and visual formats, making it easy to interpret the
       distribution of your data.
     ribbon: analyses
+    category: analyses
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
@@ -107,6 +115,7 @@ analyses:
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
     ribbon: analyses
+    category: analyses
   - title: Clinical Hemodynamic Monitoring
     name: clinmon
     ns: ClinicoPath
@@ -121,6 +130,7 @@ analyses:
       pressure, intracranial pressure,  middle cerebral artery blood velocity,
       and heart rate.
     ribbon: analyses
+    category: analyses
   - title: Advanced Statistical Tests
     name: desctools
     ns: ClinicoPath
@@ -135,6 +145,7 @@ analyses:
       Breslow-Day), and trend tests (Cochran-Armitage). Essential for clinical
       research, epidemiological studies, and advanced statistical analysis.
     ribbon: analyses
+    category: analyses
   - title: Automated Exploratory Data Analysis
     name: autoeda
     ns: ClinicoPath
@@ -154,6 +165,7 @@ analyses:
       Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
     menuSubtitle: DataExplorer AutoEDA Integration
     ribbon: analyses
+    category: analyses
   - title: Data Quality Assessment
     name: dataquality
     ns: ClinicoPath
@@ -167,6 +179,7 @@ analyses:
       missing value analysis, and data completeness summary (similar to sumvar's
       dup() function).
     ribbon: analyses
+    category: analyses
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
@@ -189,6 +202,7 @@ analyses:
 
       Perfect for clinical research data quality control and preprocessing.
     ribbon: analyses
+    category: analyses
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
@@ -205,6 +219,7 @@ analyses:
       assessment. Perfect for clinical research data preprocessing and database
       standardization workflows.
     ribbon: analyses
+    category: analyses
   - title: Statistical Distribution Generator
     name: tidydensity
     ns: ClinicoPath
@@ -226,6 +241,7 @@ analyses:
 
       distribution comparison, and statistical education in clinical research.
     ribbon: analyses
+    category: analyses
   - title: Table One
     name: tableone
     ns: ClinicoPath
@@ -237,6 +253,7 @@ analyses:
       frequently used in  clinicopathological research manuscripts. It supports
       multiple output styles for flexible formatting.
     ribbon: analyses
+    category: analyses
   - title: Enhanced Tables with gt
     name: enhancedtables
     ns: ClinicoPath
@@ -252,6 +269,7 @@ analyses:
       reports, and presentations. Features include conditional formatting,
       custom themes, statistical summaries, and multi-level grouping.
     ribbon: analyses
+    category: analyses
   - title: Modern Table Formatting
     name: tinytable
     ns: ClinicoPath
@@ -267,6 +285,7 @@ analyses:
       flexible formatting, and clean aesthetics. Perfect for enhancing data
       presentation in clinical research publications and reports.
     ribbon: analyses
+    category: analyses
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
@@ -274,6 +293,7 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
+    category: analyses
   - title: Subgroup Analysis Forest Plot
     name: subgroupforest
     ns: ClinicoPath
@@ -284,6 +304,7 @@ analyses:
       Creates forest plots for subgroup analysis showing treatment effects
       across patient subgroups.
     ribbon: analyses
+    category: analyses
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
@@ -294,6 +315,7 @@ analyses:
       Analyzes relationships between biomarker levels and treatment responses
       with visualization and statistical tests.
     ribbon: analyses
+    category: analyses
   - title: Treatment Toxicity Profile
     name: toxicityprofile
     ns: ClinicoPath
@@ -304,6 +326,7 @@ analyses:
       Creates comprehensive visualizations of adverse event profiles showing
       frequency and severity.
     ribbon: analyses
+    category: analyses
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
@@ -315,6 +338,7 @@ analyses:
       imbalance handling, and validation methods for medical research.
     ribbon: analyses
     menuSubtitle: Classification Analysis
+    category: analyses
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
@@ -334,6 +358,7 @@ analyses:
 
       Based on the geom_mark_hull() function from ggforce package.
     ribbon: analyses
+    category: analyses
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
@@ -359,6 +384,7 @@ analyses:
 
       and distribution shape. Based on the ggdist R-Bloggers tutorial.
     ribbon: analyses
+    category: analyses
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
@@ -384,6 +410,7 @@ analyses:
 
       for enhanced customization and connectivity features.
     ribbon: analyses
+    category: analyses
   - title: GraphPad Prism Style Plots
     name: ggprism
     ns: ClinicoPath
@@ -409,6 +436,7 @@ analyses:
 
       with seamless ggplot2 integration and Prism-style aesthetics.
     ribbon: analyses
+    category: analyses
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
@@ -417,6 +445,7 @@ analyses:
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
     ribbon: analyses
+    category: analyses
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
@@ -433,6 +462,7 @@ analyses:
       hazard function, which represents the instantaneous event rate per unit of
       person-time.
     ribbon: analyses
+    category: analyses
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
@@ -441,6 +471,7 @@ analyses:
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
     ribbon: analyses
+    category: analyses
   - title: Grouped Hazard Forest Plot
     name: groupedforest
     ns: ClinicoPath
@@ -463,6 +494,7 @@ analyses:
 
       across patient variants, genetic subtypes, or clinical subgroups.
     ribbon: analyses
+    category: analyses
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
@@ -481,6 +513,7 @@ analyses:
       these factors influence event rates relative to the person-time at risk in
       each subgroup.
     ribbon: analyses
+    category: analyses
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
@@ -490,6 +523,7 @@ analyses:
     menuSubtitle: Odds Ratio for Binary Outcomes
     description: Function for Odds Ratio Table and Plot.
     ribbon: analyses
+    category: analyses
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
@@ -498,6 +532,7 @@ analyses:
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
     ribbon: analyses
+    category: analyses
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
@@ -509,6 +544,7 @@ analyses:
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
     ribbon: analyses
+    category: analyses
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
@@ -518,6 +554,7 @@ analyses:
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: Function for Medical Decision Calculator.
     ribbon: analyses
+    category: analyses
   - title: Medical Decision Tree
     name: tree
     ns: ClinicoPath
@@ -531,6 +568,7 @@ analyses:
       decision-making.
     menuSubtitle: Diagnosis & Prognosis
     ribbon: analyses
+    category: analyses
   - title: Find Retracted Papers from DOI
     name: retracted
     ns: ClinicoPath
@@ -539,6 +577,7 @@ analyses:
     menuTitle: Find Retracted Papers from DOI
     menuSubtitle: Bibliometrics
     ribbon: analyses
+    category: analyses
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
@@ -547,6 +586,7 @@ analyses:
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
     ribbon: analyses
+    category: analyses
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
@@ -557,6 +597,7 @@ analyses:
       'Wrapper Function for ggstatsplot::gghistostats and
       ggstatsplot::grouped_gghistostats to generate Histogram.'
     ribbon: analyses
+    category: analyses
   - title: Data Quality Assessment
     name: checkdata
     ns: ClinicoPath
@@ -564,6 +605,7 @@ analyses:
     menuTitle: Data Quality Assessment
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
+    category: analyses
   - title: Confidence Intervals for Mean Values
     name: ciSingle
     ns: ClinicoPath
@@ -571,6 +613,7 @@ analyses:
     menuTitle: Confidence Intervals for Mean Values
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
+    category: analyses
   - title: Decision tree
     name: classification
     ns: ClinicoPath
@@ -587,6 +630,7 @@ analyses:
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
     ribbon: analyses
+    category: analyses
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
@@ -596,6 +640,7 @@ analyses:
     menuSubtitle: Survival for Different Outcomes
     description: Overall, Cause Specific, and Competing Survival.
     ribbon: analyses
+    category: analyses
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
@@ -609,6 +654,7 @@ analyses:
       associated. If the p-value is low, it suggests the variables are not
       independent, and that there is a relationship between the two variables.
     ribbon: analyses
+    category: analyses
   - title: Paired Samples Contingency Tables
     name: contTablesPaired
     ns: ClinicoPath
@@ -618,6 +664,7 @@ analyses:
     menuSubtitle: McNemar test
     description: McNemar test
     ribbon: analyses
+    category: analyses
   - title: Correlation
     name: correlation
     ns: ClinicoPath
@@ -627,6 +674,7 @@ analyses:
     description: Function for Correlation.
     menuSubtitle: Correlation
     ribbon: analyses
+    category: analyses
   - title: Decision 2 for using init
     name: decision2
     ns: ClinicoPath
@@ -638,6 +686,7 @@ analyses:
       Function for Medical Decision Analysis. Sensitivity, specificity, positive
       predictive value, negative predictive value.
     ribbon: analyses
+    category: analyses
   - title: Dendogram
     name: dendogram
     ns: ClinicoPath
@@ -645,6 +694,7 @@ analyses:
     menuTitle: Dendogram
     menuSubgroup: Drafts
     ribbon: analyses
+    category: analyses
   - title: Tables via gtsummary
     name: gtsummary
     ns: ClinicoPath
@@ -653,6 +703,7 @@ analyses:
     menuTitle: Tables via gtsummary
     menuSubtitle: Comparisons
     ribbon: analyses
+    category: analyses
   - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
@@ -669,6 +720,7 @@ analyses:
       and APA-style formatting for clinical research applications.
     menuSubtitle: Agreement
     ribbon: analyses
+    category: analyses
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
@@ -678,6 +730,7 @@ analyses:
     description: Function for Generating Plots and Graphs Based on Variable Types.
     menuSubtitle: Variable Type Based Graphs and Plots
     ribbon: analyses
+    category: analyses
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
@@ -688,6 +741,7 @@ analyses:
       'Wrapper Function for ggstatsplot::ggbarstats and
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
     ribbon: analyses
+    category: analyses
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
@@ -696,6 +750,7 @@ analyses:
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
     ribbon: analyses
+    category: analyses
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
@@ -703,6 +758,7 @@ analyses:
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
+    category: analyses
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
@@ -710,6 +766,7 @@ analyses:
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
+    category: analyses
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
@@ -717,6 +774,7 @@ analyses:
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
+    category: analyses
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
@@ -724,6 +782,7 @@ analyses:
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
+    category: analyses
   - title: Violin Plot
     name: jviolin
     ns: ClinicoPath
@@ -732,6 +791,7 @@ analyses:
     menuTitle: Violin Plot
     menuSubtitle: R Graph Gallery Violin
     ribbon: analyses
+    category: analyses
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
@@ -740,6 +800,7 @@ analyses:
     menuTitle: Line Chart
     menuSubtitle: Exploration
     ribbon: analyses
+    category: analyses
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
@@ -747,6 +808,7 @@ analyses:
     menuSubgroup: Drafts
     menuTitle: Lollipop Chart
     ribbon: analyses
+    category: analyses
   - title: Nomogram
     name: nomogram
     ns: ClinicoPath
@@ -754,6 +816,7 @@ analyses:
     menuTitle: Nomogram
     menuSubgroup: Drafts
     ribbon: analyses
+    category: analyses
   - title: One Survival Outcome
     name: oneSurvival
     ns: ClinicoPath
@@ -762,6 +825,7 @@ analyses:
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
     ribbon: analyses
+    category: analyses
   - title: Pairwise Chi-Square Test
     name: pairchi2
     ns: ClinicoPath
@@ -774,6 +838,7 @@ analyses:
       Performs post-hoc pairwise chi-square tests following a significant
       overall chi-square test of independence. Includes multiple testing
       correction and standardized residuals analysis.
+    category: analyses
   - title: Parallel Plot
     name: parallelplot
     ns: ClinicoPath
@@ -782,6 +847,7 @@ analyses:
     menuSubgroup: Drafts
     menuSubtitle: Exploration
     ribbon: analyses
+    category: analyses
   - title: Positive Predictive Value
     name: ppv
     ns: ClinicoPath
@@ -789,6 +855,7 @@ analyses:
     menuTitle: Positive Predictive Value
     menuSubgroup: Drafts
     ribbon: analyses
+    category: analyses
   - title: ROC Curve Analysis
     name: roc
     ns: ClinicoPath
@@ -800,6 +867,7 @@ analyses:
       Calculates sensitivity, specificity, AUC, Youden index, and more.
     menuSubtitle: Sensitivity, Specificity, AUC, ...
     ribbon: analyses
+    category: analyses
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath
@@ -814,6 +882,7 @@ analyses:
     menuTitle: Tools for data summary
     menuSubgroup: ClinicoPath Descriptives
     ribbon: analyses
+    category: analyses
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
@@ -824,6 +893,7 @@ analyses:
     description: |
       Power Analysis for Interobserver Agreement Analysis.
     ribbon: analyses
+    category: analyses
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
@@ -834,6 +904,7 @@ analyses:
     description: |
       Lowest Expected Value for a fixed sample size.
     ribbon: analyses
+    category: analyses
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
@@ -844,6 +915,7 @@ analyses:
     description: |
       Power Analysis for Interobserver Agreement Analysis.
     ribbon: analyses
+    category: analyses
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
@@ -860,6 +932,7 @@ analyses:
       study population - for example, to determine median  survival time or
       1/3/5-year survival rates for all patients collectively.
     ribbon: analyses
+    category: analyses
   - title: Test ROC
     name: TestROC
     ns: ClinicoPath
@@ -867,6 +940,7 @@ analyses:
     menuSubgroup: PPDA
     menuTitle: Test ROC
     ribbon: analyses
+    category: analyses
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
@@ -878,6 +952,7 @@ analyses:
       Performs Lasso-penalized Cox regression for variable selection in survival
       analysis.
     ribbon: analyses
+    category: analyses
   - title: Time-Dependent ROC Analysis
     name: timeroc
     ns: ClinicoPath
@@ -886,12 +961,14 @@ analyses:
     menuTitle: Time-Dependent ROC Analysis
     menuSubtitle: Predictive Performance Over Time
     ribbon: analyses
+    category: analyses
   - title: Treatment Pathway Alluvial Plot
     name: alluvialSurvival
     ns: ClinicoPath
     menuGroup: SurvivalD
     menuTitle: Treatment Pathway Alluvial Plot
     ribbon: analyses
+    category: analyses
   - title: CONSORT Flowchart
     name: consort
     ns: ClinicoPath
@@ -899,6 +976,7 @@ analyses:
     menuSubgroup: ClinicoPath Reports
     menuTitle: CONSORT Flowchart
     ribbon: analyses
+    category: analyses
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
@@ -907,6 +985,7 @@ analyses:
     menuTitle: Study Flowchart
     ribbon: analyses
     description: Creates CONSORT-style flowcharts showing participant flow through studies
+    category: analyses
   - title: ggFlowchart
     name: ggflowchart
     ns: ClinicoPath
@@ -926,6 +1005,7 @@ analyses:
 
       ggplot2 integration and customizable styling options.
     ribbon: analyses
+    category: analyses
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
@@ -933,6 +1013,7 @@ analyses:
     menuSubgroup: IHC Analysis
     menuTitle: IHC Expression Analysis
     ribbon: analyses
+    category: analyses
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
@@ -943,6 +1024,7 @@ analyses:
       'Creates arc diagrams for network visualization using the arcdiagram
       package.'
     ribbon: analyses
+    category: analyses
   - title: Ridgeline Plot
     name: jjridgestats
     ns: ClinicoPath
@@ -951,6 +1033,7 @@ analyses:
     menuTitle: Ridgeline Plot
     menuSubtitle: Distribution Comparison
     ribbon: analyses
+    category: analyses
   - title: StreamGraphs
     name: jjstreamgraph
     ns: ClinicoPath
@@ -960,6 +1043,7 @@ analyses:
     description: |
       'Create interactive StreamGraphs using R streamgraph package.'
     ribbon: analyses
+    category: analyses
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath
@@ -969,6 +1053,7 @@ analyses:
     description: |
       'Creates treemap visualizations for categorical data'
     ribbon: analyses
+    category: analyses
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
@@ -978,6 +1063,7 @@ analyses:
     description: |
       'Creates waffle charts to visualize distributions and proportions'
     ribbon: analyses
+    category: analyses
   - title: Ridge Plot Visualization
     name: jggridges
     ns: ClinicoPath
@@ -989,21 +1075,24 @@ analyses:
       groups. Ridge plots are particularly useful for comparing distributions of
       continuous variables across multiple categories or time periods.
     ribbon: analyses
+    category: analyses
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
     description: Analysis of diagnostic tests without a gold standard reference
     ribbon: analyses
+    category: analyses
   - title: Tidy Plots
     name: tidyplots
     ns: ClinicoPath
     menuGroup: JJStatsPlotD
     menuTitle: Tidy Plots
     ribbon: analyses
+    category: analyses
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
@@ -1015,6 +1104,7 @@ analyses:
       criteria.
     menuSubtitle: Waterfall Plot, Spider Plot
     ribbon: analyses
+    category: analyses
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
@@ -1025,6 +1115,7 @@ analyses:
       Creates a swimmer plot to visualize individual patient timelines and
       clinical events.
     ribbon: analyses
+    category: analyses
   - title: Swimmer Plot 2
     name: swimmerplot2
     ns: ClinicoPath
@@ -1033,6 +1124,7 @@ analyses:
     menuSubgroup: Patient Follow-Up Plots
     description: Creates a swimmer plot to visualize subject response data over time.
     ribbon: analyses
+    category: analyses
   - title: Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
@@ -1046,6 +1138,7 @@ analyses:
       after a staging system change, quantifies stage migration, and evaluates
       changes in prognostic performance.
     ribbon: analyses
+    category: analyses
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath
@@ -1057,12 +1150,13 @@ analyses:
       'Function for generating river plots (alluvial diagrams) to visualize
       flows and transitions over time or between categories.'
     ribbon: analyses
+    category: analyses
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
     menuGroup: meddecide
     menuTitle: Compare Medical Decision Tests
-    menuSubgroup: DecisionD
+    menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
     description: >
       Function for comparing multiple Medical Decision Tests. Compares
@@ -1071,6 +1165,7 @@ analyses:
       standard. Includes statistical comparison using McNemar's test and
       confidence intervals for differences.
     ribbon: analyses
+    category: analyses
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
@@ -1084,6 +1179,7 @@ analyses:
       value, negative predictive value for combined tests using different
       combination rules.
     ribbon: analyses
+    category: analyses
   - title: Screening Test Calculator
     name: screeningcalculator
     ns: ClinicoPath
@@ -1093,6 +1189,7 @@ analyses:
     menuSubtitle: Calculate disease probability based on test characteristics
     description: Function for Screening Test Probability Calculator.
     ribbon: analyses
+    category: analyses
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
@@ -1105,6 +1202,7 @@ analyses:
       tests. Calculates post-test probabilities based on various scenarios
       (either test positive, both positive, both negative).
     ribbon: analyses
+    category: analyses
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
@@ -1113,6 +1211,7 @@ analyses:
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
     ribbon: analyses
+    category: analyses
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
@@ -1125,6 +1224,7 @@ analyses:
       changes when applying two tests in sequence (screening followed by
       confirmation).
     ribbon: analyses
+    category: analyses
   - title: Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
@@ -1141,6 +1241,7 @@ analyses:
       interest, accounting for varying entry times and censoring. Person-time is
       typically expressed in person-days, person-months,  or person-years
       depending on the study duration and outcome frequency.
+    category: analyses
   - title: Enhanced Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
@@ -1153,6 +1254,7 @@ analyses:
       survival analysis including overall survival, cause-specific, competing
       risks, progression-free survival, and multistate models.
     ribbon: analyses
+    category: analyses
   - title: Power Analysis for Survival Studies
     name: powersurvival
     ns: ClinicoPath
@@ -1165,6 +1267,7 @@ analyses:
       survival studies. This helps researchers design adequately powered studies
       to detect meaningful differences in survival between groups.
     ribbon: analyses
+    category: analyses
   - title: ROC
     name: roc2
     ns: ClinicoPath
@@ -1174,6 +1277,7 @@ analyses:
     menuSubtitle: Decision
     description: Function for ROC Analysis.
     ribbon: analyses
+    category: analyses
   - title: ROC Analysis
     name: psychopdaroc
     ns: ClinicoPath
@@ -1185,6 +1289,7 @@ analyses:
       Receiver Operating Characteristic (ROC) curve analysis with optimal
       cutpoint determination.
     ribbon: analyses
+    category: analyses
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
@@ -1198,6 +1303,7 @@ analyses:
       probabilities to determine if using a model provides more benefit than
       default strategies.
     ribbon: analyses
+    category: analyses
   - title: Prediction Model Builder
     name: modelbuilder
     ns: ClinicoPath
@@ -1210,6 +1316,7 @@ analyses:
       multiple logistic regression models with predicted probabilities that can
       be directly used in Decision Curve Analysis.
     ribbon: analyses
+    category: analyses
   - title: Bayesian Decision Curve Analysis
     name: bayesdca
     ns: ClinicoPath
@@ -1218,6 +1325,7 @@ analyses:
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
     ribbon: analyses
+    category: analyses
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
@@ -1230,6 +1338,7 @@ analyses:
       decision nodes, chance nodes, and terminal nodes. Supports visualization
       of treatment pathways, probabilities, costs, and outcomes.
     ribbon: analyses
+    category: analyses
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
@@ -1243,6 +1352,7 @@ analyses:
       repeated tests. Creates decision trees to minimize cost while maximizing
       accuracy.
     ribbon: analyses
+    category: analyses
   - title: Variable Tree V3
     name: vtree3
     ns: ClinicoPath
@@ -1251,6 +1361,7 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     description: Function for Generating Enhanced Tree Summaries of Variables
     ribbon: analyses
+    category: analyses
   - title: Group and Summarize
     name: groupsummary
     ns: ClinicoPath
@@ -1259,6 +1370,7 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     description: Group data by categorical variables and calculate summary statistics
     ribbon: analyses
+    category: analyses
   - title: River Plots
     name: riverplot
     ns: ClinicoPath
@@ -1269,6 +1381,7 @@ analyses:
     description: |
       'Function for generating river plots (alluvial diagrams) to visualize
       flows and transitions over time or between categories.'
+    category: analyses
   - title: Missing Data Analysis and Imputation
     name: missingdata
     ns: ClinicoPath
@@ -1293,6 +1406,7 @@ analyses:
       handling is critical
 
       for valid statistical inference.
+    category: analyses
   - title: Advanced Decision Tree Analysis
     name: advancedtree
     ns: ClinicoPath
@@ -1315,6 +1429,7 @@ analyses:
 
       ClinicoPath decision tree modules with state-of-the-art algorithms.
     ribbon: analyses
+    category: analyses
   - title: Scientific Visualization with Grafify
     name: grafify
     ns: ClinicoPath
@@ -1337,6 +1452,7 @@ analyses:
 
       before-after comparisons, and factorial designs with professional styling.
     ribbon: analyses
+    category: analyses
   - title: Enhanced Cross Tables with danchaltiel/crosstable
     name: enhancedcrosstable
     ns: ClinicoPath
@@ -1347,6 +1463,7 @@ analyses:
     description: >-
       Enhanced cross-tabulation analysis using the danchaltiel/crosstable
       package for advanced clinical research functionality.
+    category: analyses
   - title: Cox Proportional Hazards Model Diagnostics
     name: coxdiagnostics
     ns: ClinicoPath
@@ -1357,6 +1474,7 @@ analyses:
     description: >-
       Cox proportional hazards model diagnostic plots using ggcoxdiagnostics
       from survminer package for comprehensive model validation.
+    category: analyses
   - title: Base Graphics Visualization
     name: basegraphics
     ns: ClinicoPath
@@ -1368,6 +1486,7 @@ analyses:
       Base R graphics visualization module providing fast, blazing fast, and
       extremely customizable data visualization solutions using pure base R
       graphics.
+    category: analyses
   - title: Advanced Bar Charts - 5 Ways
     name: advancedbarplot
     ns: ClinicoPath
@@ -1388,6 +1507,7 @@ analyses:
       designs. Each approach optimized for different use cases in clinical
       research.
     ribbon: analyses
+    category: analyses
   - title: Economist-Style Distribution Plots
     name: economistplots
     ns: ClinicoPath
@@ -1410,6 +1530,7 @@ analyses:
 
       visualizing any statistical distribution data in clinical research.
     ribbon: analyses
+    category: analyses
   - title: BBC-Style Data Visualization
     name: bbcplots
     ns: ClinicoPath
@@ -1421,6 +1542,7 @@ analyses:
       Creates professional BBC News-style data visualizations using the bbplot
       package design principles.
     ribbon: analyses
+    category: analyses
   - title: Survival Analysis Power & Sample Size
     name: survivalpower
     ns: ClinicoPath
@@ -1431,6 +1553,7 @@ analyses:
     description: >-
       Power analysis and sample size calculation for survival studies using
       Lachin-Foulkes and Schoenfeld methods from gsDesign package.
+    category: analyses
   - title: Clinical Research Visualization with visR
     name: jvisr
     ns: ClinicoPath
@@ -1442,6 +1565,7 @@ analyses:
       Clinical and medical research focused visualizations using the visR
       package with sensible defaults based on graphical principles.
     ribbon: analyses
+    category: analyses
   - title: High-Performance Scatter Plots
     name: jscattermore
     ns: ClinicoPath
@@ -1453,6 +1577,7 @@ analyses:
       High-performance scatter plots using the scattermore package for plotting
       millions of points efficiently with advanced customization options.
     ribbon: analyses
+    category: analyses
   - title: Social Science Statistical Visualization
     name: jsjplot
     ns: ClinicoPath
@@ -1464,6 +1589,7 @@ analyses:
       Social science statistical visualization using the sjPlot package for
       regression tables, model plots, and interaction visualizations.
     ribbon: analyses
+    category: analyses
   - title: Intuitive Survival Analysis
     name: jiwillsurvive
     ns: ClinicoPath
@@ -1475,6 +1601,7 @@ analyses:
       Intuitive survival analysis using the iwillsurvive package with
       user-friendly interface, automatic data preparation, and comprehensive
       visualization options.
+    category: analyses
   - title: Statistical Data Extraction from ggstatsplot
     name: jextractstats
     ns: ClinicoPath
@@ -1486,6 +1613,7 @@ analyses:
       Extract detailed statistical information from ggstatsplot analyses using
       statsExpressions package for comprehensive data frame outputs.
     ribbon: analyses
+    category: analyses
   - title: Sankey & Alluvial Diagrams
     name: jggsankeyfier
     ns: ClinicoPath
@@ -1498,6 +1626,7 @@ analyses:
       using the ggsankey package with ggplot2 integration for categorical data
       flow analysis.
     ribbon: analyses
+    category: analyses
   - title: Enhanced Statistical Visualization
     name: jggstats
     ns: ClinicoPath
@@ -1510,6 +1639,7 @@ analyses:
       coefficient plotting, survey analysis, Likert scales, and specialized
       statistical graphics with ggplot2 integration.
     ribbon: analyses
+    category: analyses
   - title: Advanced Heatmap Visualization
     name: jggheatmap
     ns: ClinicoPath
@@ -1522,6 +1652,7 @@ analyses:
       hierarchical clustering, multiple color schemes, and flexible matrix data
       handling for clinical research.
     ribbon: analyses
+    category: analyses
   - title: Complex UpSet Plot Visualization
     name: jcomplexupset
     ns: ClinicoPath
@@ -1533,6 +1664,7 @@ analyses:
       Superior to Venn diagrams for analyzing relationships between multiple
       sets, with support for intersection analysis and statistical annotations.
     ribbon: analyses
+    category: analyses
   - title: Statistical Data Extraction from ggstatsplot
     name: jextractggstats
     ns: ClinicoPath
@@ -1545,6 +1677,7 @@ analyses:
       pairwise comparisons, and descriptive statistics for custom reporting and
       further analysis workflows.
     ribbon: analyses
+    category: analyses
   - title: Parsnip Survival Model Wrappers
     name: jparsnipsurvival
     ns: ClinicoPath
@@ -1559,6 +1692,7 @@ analyses:
       Supports multiple survival model engines with standardized syntax
 
       for model fitting, prediction, and evaluation.
+    category: analyses
   - title: Forest Plot Visualization
     name: jforestmodel
     ns: ClinicoPath
@@ -1573,6 +1707,7 @@ analyses:
       intervals,
 
       and effect sizes with customizable formatting and layout options.
+    category: analyses
   - title: Predictive Power Score Analysis
     name: jpps
     ns: ClinicoPath
@@ -1588,6 +1723,7 @@ analyses:
       variables.
 
       PPS ranges from 0 (no predictive power) to 1 (perfect predictive power).
+    category: analyses
   - title: Forest Plot Visualization
     name: jforester
     ns: ClinicoPath
@@ -1603,6 +1739,7 @@ analyses:
       intervals
 
       in a professional format suitable for academic publications.
+    category: analyses
   - title: Summary Statistics with summarytools
     name: jsummarytools
     ns: ClinicoPath
@@ -1616,6 +1753,7 @@ analyses:
 
       descriptive statistics with publication-ready output for clinical
       research.
+    category: analyses
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

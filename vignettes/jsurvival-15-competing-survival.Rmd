@@ -1,0 +1,694 @@
+---
+title: "jSurvival 15: Competing Survival Analysis"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{jSurvival 15: Competing Survival Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Competing survival analysis is essential when patients can experience multiple types of events that prevent the occurrence of the primary event of interest. The **competingsurvival** function in jSurvival provides comprehensive tools for analyzing overall survival, cause-specific survival, and competing risks scenarios using advanced statistical methods.
+
+**Learning Objectives:**
+
+- Understand the differences between overall, cause-specific, and competing risks survival analysis
+- Master the application of Fine-Gray subdistribution hazard models
+- Interpret cumulative incidence functions in competing risks scenarios
+- Apply competing survival methods to real-world clinical datasets
+- Create publication-ready competing risks plots and tables
+- Understand when to use each type of survival analysis
+
+## Module Overview
+
+The **competingsurvival** function provides three complementary analysis approaches:
+
+### 1. **Overall Survival Analysis**
+- **Purpose**: Analyze all-cause mortality regardless of specific cause
+- **Event Definition**: Any death (disease-related or other causes) vs. alive
+- **Use Cases**: Primary endpoint in many clinical trials, population health studies
+- **Statistical Method**: Standard Kaplan-Meier and Cox regression
+
+### 2. **Cause-Specific Survival Analysis**  
+- **Purpose**: Focus exclusively on disease-specific deaths
+- **Event Definition**: Disease death vs. censored (including other deaths)
+- **Use Cases**: When other causes of death are considered nuisance events
+- **Limitation**: May overestimate survival if competing risks are substantial
+
+### 3. **Competing Risks Analysis**
+- **Purpose**: Account for multiple competing events simultaneously
+- **Event Definition**: Disease death vs. other death vs. alive outcomes
+- **Statistical Method**: Fine-Gray subdistribution hazard model with cumulative incidence functions
+- **Advantage**: Provides realistic probability estimates accounting for competition
+
+```{r load-packages}
+library(ClinicoPath)
+library(survival)
+library(dplyr)
+```
+
+# Getting Started
+
+## Sample Data Overview
+
+We'll use a comprehensive competing survival dataset designed specifically for this analysis type.
+
+```{r sample-data}
+# Load competing survival data
+data(competing_survival_data)
+
+# Dataset overview
+cat("Dataset dimensions:", nrow(competing_survival_data), "×", ncol(competing_survival_data), "\n")
+
+# Key survival variables
+survival_vars <- c("Overall_Time", "Outcome")
+cat("Survival variables:", paste(survival_vars, collapse = ", "), "\n")
+
+# Explanatory variables for stratification
+explanatory_vars <- c("Treatment", "Tumor_Stage", "EGFR_Status", "Grade")
+cat("Explanatory variables:", paste(explanatory_vars, collapse = ", "), "\n")
+
+# Outcome distribution
+outcome_summary <- competing_survival_data %>%
+  group_by(Outcome) %>%
+  summarise(
+    n = n(),
+    percentage = round(n() / nrow(competing_survival_data) * 100, 1),
+    median_time = round(median(Overall_Time), 1),
+    .groups = 'drop'
+  )
+
+cat("\nOutcome Distribution:\n")
+print(outcome_summary)
+
+# Treatment group summary
+treatment_outcome <- competing_survival_data %>%
+  group_by(Treatment, Outcome) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  tidyr::pivot_wider(names_from = Outcome, values_from = n, values_fill = 0)
+
+cat("\nTreatment by Outcome:\n")
+print(treatment_outcome)
+```
+
+# Core Competing Survival Analysis
+
+## 1. Overall Survival Analysis
+
+Analyze all-cause mortality treating any death as an event.
+
+```{r overall-survival}
+# Overall Survival Analysis Example
+# In jamovi: jsurvival > Competing Survival > Analysis Type: Overall
+
+cat("Overall Survival Analysis\n")
+cat("========================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE) && 
+   requireNamespace("finalfit", quietly = TRUE)) {
+  
+  # Create overall survival indicator
+  os_data <- competing_survival_data %>%
+    mutate(
+      death_overall = ifelse(Outcome %in% c("Dead_of_Disease", "Dead_of_Other"), 1, 0)
+    )
+  
+  # Kaplan-Meier analysis by treatment
+  surv_obj <- Surv(os_data$Overall_Time, os_data$death_overall)
+  km_overall <- survfit(surv_obj ~ Treatment, data = os_data)
+  
+  cat("Overall Survival Summary by Treatment:\n")
+  os_summary <- summary(km_overall, times = c(6, 12, 24, 36))$table
+  print(os_summary)
+  
+  # Log-rank test
+  logrank_test <- survdiff(surv_obj ~ Treatment, data = os_data)
+  p_value <- 1 - pchisq(logrank_test$chisq, 1)
+  
+  cat("\nLog-rank Test Results:\n")
+  cat("Chi-square statistic:", round(logrank_test$chisq, 3), "\n")
+  cat("P-value:", round(p_value, 4), "\n")
+  
+  if(p_value < 0.05) {
+    cat("Conclusion: Significant difference in overall survival by treatment\n")
+  } else {
+    cat("Conclusion: No significant difference in overall survival by treatment\n")
+  }
+  
+  # Cox regression for hazard ratio
+  cox_model <- coxph(surv_obj ~ Treatment, data = os_data)
+  hr <- exp(cox_model$coefficients)
+  hr_ci <- exp(confint(cox_model))
+  
+  cat("\nHazard Ratio Analysis:\n")
+  cat("Hazard Ratio:", round(hr, 2), "\n")
+  cat("95% Confidence Interval:", round(hr_ci[1], 2), "-", round(hr_ci[2], 2), "\n")
+  
+  treatment_levels <- levels(os_data$Treatment)
+  cat("Interpretation:", treatment_levels[2], "vs", treatment_levels[1], "\n")
+}
+```
+
+## 2. Cause-Specific Survival Analysis
+
+Focus exclusively on disease-specific deaths, treating other deaths as censored.
+
+```{r cause-specific-survival}
+# Cause-Specific Survival Analysis Example
+# In jamovi: jsurvival > Competing Survival > Analysis Type: Cause Specific
+
+cat("\nCause-Specific Survival Analysis\n")
+cat("=================================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE) && 
+   requireNamespace("finalfit", quietly = TRUE)) {
+  
+  # Create cause-specific survival indicator
+  css_data <- competing_survival_data %>%
+    mutate(
+      death_disease = ifelse(Outcome == "Dead_of_Disease", 1, 0)
+    )
+  
+  # Kaplan-Meier analysis for disease-specific survival
+  surv_css <- Surv(css_data$Overall_Time, css_data$death_disease)
+  km_css <- survfit(surv_css ~ Treatment, data = css_data)
+  
+  cat("Cause-Specific Survival Summary by Treatment:\n")
+  css_summary <- summary(km_css, times = c(6, 12, 24, 36))$table
+  print(css_summary)
+  
+  # Log-rank test for cause-specific survival
+  logrank_css <- survdiff(surv_css ~ Treatment, data = css_data)
+  p_css <- 1 - pchisq(logrank_css$chisq, 1)
+  
+  cat("\nCause-Specific Log-rank Test:\n")
+  cat("Chi-square statistic:", round(logrank_css$chisq, 3), "\n")
+  cat("P-value:", round(p_css, 4), "\n")
+  
+  # Cox regression for cause-specific hazard ratio
+  cox_css <- coxph(surv_css ~ Treatment, data = css_data)
+  hr_css <- exp(cox_css$coefficients)
+  hr_ci_css <- exp(confint(cox_css))
+  
+  cat("\nCause-Specific Hazard Ratio:\n")
+  cat("Hazard Ratio:", round(hr_css, 2), "\n")
+  cat("95% Confidence Interval:", round(hr_ci_css[1], 2), "-", round(hr_ci_css[2], 2), "\n")
+  
+  # Compare with overall survival
+  cat("\nComparison with Overall Survival:\n")
+  cat("Disease-specific deaths:", sum(css_data$death_disease), "of", nrow(css_data), 
+      "(", round(mean(css_data$death_disease) * 100, 1), "%)\n")
+  
+  other_deaths <- sum(competing_survival_data$Outcome == "Dead_of_Other")
+  cat("Other deaths:", other_deaths, "(", 
+      round(other_deaths / nrow(css_data) * 100, 1), "%)\n")
+  
+  if(other_deaths / nrow(css_data) > 0.1) {
+    cat("Note: Substantial competing mortality present - consider competing risks analysis\n")
+  }
+}
+```
+
+## 3. Competing Risks Analysis
+
+Account for multiple competing events using Fine-Gray subdistribution hazard models.
+
+```{r competing-risks}
+# Competing Risks Analysis Example  
+# In jamovi: jsurvival > Competing Survival > Analysis Type: Competing Risk
+
+cat("\nCompeting Risks Analysis\n")
+cat("=======================\n\n")
+
+if(requireNamespace("survival", quietly = TRUE) && 
+   requireNamespace("finalfit", quietly = TRUE) &&
+   requireNamespace("cmprsk", quietly = TRUE)) {
+  
+  # Create competing risks status variable
+  crr_data <- competing_survival_data %>%
+    mutate(
+      status_crr = case_when(
+        Outcome %in% c("Alive_w_Disease", "Alive_wo_Disease") ~ 0,  # censored
+        Outcome == "Dead_of_Disease" ~ 1,                          # disease death
+        Outcome == "Dead_of_Other" ~ 2,                            # competing death
+        TRUE ~ 0
+      ),
+      Treatment_numeric = as.numeric(Treatment) - 1  # for cmprsk
+    )
+  
+  cat("Competing Events Summary:\n")
+  event_summary <- crr_data %>%
+    group_by(status_crr) %>%
+    summarise(
+      n = n(),
+      percentage = round(n() / nrow(crr_data) * 100, 1),
+      .groups = 'drop'
+    ) %>%
+    mutate(
+      event_type = case_when(
+        status_crr == 0 ~ "Censored/Alive",
+        status_crr == 1 ~ "Disease Death", 
+        status_crr == 2 ~ "Other Death"
+      )
+    )
+  print(event_summary[, c("event_type", "n", "percentage")])
+  
+  # Fine-Gray competing risks regression
+  library(cmprsk)
+  cuminc_result <- cuminc(
+    ftime = crr_data$Overall_Time,
+    fstatus = crr_data$status_crr,
+    group = crr_data$Treatment
+  )
+  
+  cat("\nCumulative Incidence Function Results:\n")
+  
+  # Extract cumulative incidence estimates at key time points
+  time_points <- c(12, 24, 36)
+  
+  for (tp in time_points) {
+    cat(paste0("\nAt ", tp, " months:\n"))
+    
+    # Find closest time point in results
+    for (i in 1:length(cuminc_result)) {
+      group_name <- names(cuminc_result)[i]
+      times <- cuminc_result[[i]]$time
+      est <- cuminc_result[[i]]$est
+      
+      closest_idx <- which.min(abs(times - tp))
+      if (length(closest_idx) > 0) {
+        cat(paste0(group_name, ": ", round(est[closest_idx] * 100, 1), "%\n"))
+      }
+    }
+  }
+  
+  # Fine-Gray regression for treatment effect
+  crr_fit <- crr(
+    ftime = crr_data$Overall_Time,
+    fstatus = crr_data$status_crr, 
+    cov1 = crr_data$Treatment_numeric,
+    failcode = 1  # disease death
+  )
+  
+  cat("\nFine-Gray Regression Results (Disease Death):\n")
+  cat("Subdistribution Hazard Ratio:", round(exp(crr_fit$coef), 2), "\n")
+  cat("95% Confidence Interval:", round(exp(crr_fit$coef - 1.96*sqrt(crr_fit$var)), 2), 
+      "-", round(exp(crr_fit$coef + 1.96*sqrt(crr_fit$var)), 2), "\n")
+  cat("P-value:", round(2 * (1 - pnorm(abs(crr_fit$coef / sqrt(crr_fit$var)))), 4), "\n")
+  
+  # Clinical interpretation
+  cat("\nClinical Interpretation:\n")
+  if (exp(crr_fit$coef) > 1) {
+    cat("Experimental therapy associated with higher subdistribution hazard of disease death\n")
+  } else {
+    cat("Experimental therapy associated with lower subdistribution hazard of disease death\n")
+  }
+}
+```
+
+# Advanced Applications
+
+## 4. Stratified Analysis by Disease Stage
+
+Evaluate competing survival patterns across different disease stages.
+
+```{r stage-analysis}
+# Stratified Competing Risks Analysis by Tumor Stage
+cat("\nStratified Analysis by Tumor Stage\n")
+cat("==================================\n\n")
+
+# Stage distribution
+stage_dist <- competing_survival_data %>%
+  group_by(Tumor_Stage) %>%
+  summarise(
+    n = n(),
+    disease_deaths = sum(Outcome == "Dead_of_Disease"),
+    other_deaths = sum(Outcome == "Dead_of_Other"),
+    alive = sum(Outcome %in% c("Alive_w_Disease", "Alive_wo_Disease")),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    disease_death_rate = round(disease_deaths / n * 100, 1),
+    other_death_rate = round(other_deaths / n * 100, 1)
+  )
+
+cat("Disease and Other Death Rates by Stage:\n")
+print(stage_dist[, c("Tumor_Stage", "n", "disease_death_rate", "other_death_rate")])
+
+# Competing risks analysis by stage
+if(requireNamespace("cmprsk", quietly = TRUE)) {
+  stage_data <- competing_survival_data %>%
+    mutate(
+      status_crr = case_when(
+        Outcome %in% c("Alive_w_Disease", "Alive_wo_Disease") ~ 0,
+        Outcome == "Dead_of_Disease" ~ 1,
+        Outcome == "Dead_of_Other" ~ 2,
+        TRUE ~ 0
+      )
+    )
+  
+  # Cumulative incidence by stage
+  stage_cuminc <- cuminc(
+    ftime = stage_data$Overall_Time,
+    fstatus = stage_data$status_crr,
+    group = stage_data$Tumor_Stage
+  )
+  
+  cat("\nCumulative Incidence at 24 months by Stage:\n")
+  for (i in 1:length(stage_cuminc)) {
+    group_name <- names(stage_cuminc)[i]
+    times <- stage_cuminc[[i]]$time
+    est <- stage_cuminc[[i]]$est
+    
+    # Find 24-month estimate
+    closest_24m <- which.min(abs(times - 24))
+    if (length(closest_24m) > 0) {
+      cat(paste0(group_name, ": ", round(est[closest_24m] * 100, 1), "%\n"))
+    }
+  }
+  
+  # Trend analysis across stages
+  stage_numeric <- as.numeric(factor(stage_data$Tumor_Stage, 
+                                    levels = c("I", "II", "III", "IV")))
+  
+  stage_crr <- crr(
+    ftime = stage_data$Overall_Time,
+    fstatus = stage_data$status_crr,
+    cov1 = stage_numeric,
+    failcode = 1
+  )
+  
+  cat("\nTrend Analysis Across Stages (per stage increase):\n")
+  cat("Subdistribution HR:", round(exp(stage_crr$coef), 2), "\n")
+  cat("95% CI:", round(exp(stage_crr$coef - 1.96*sqrt(stage_crr$var)), 2), 
+      "-", round(exp(stage_crr$coef + 1.96*sqrt(stage_crr$var)), 2), "\n")
+  
+  trend_p <- 2 * (1 - pnorm(abs(stage_crr$coef / sqrt(stage_crr$var))))
+  cat("P for trend:", round(trend_p, 4), "\n")
+  
+  if (trend_p < 0.05) {
+    cat("Conclusion: Significant trend of increasing disease death risk with advancing stage\n")
+  }
+}
+```
+
+## 5. Biomarker-Based Competing Risks Analysis
+
+Evaluate prognostic biomarkers in the context of competing risks.
+
+```{r biomarker-analysis}
+# Biomarker Analysis in Competing Risks Context
+cat("\nBiomarker Analysis: EGFR Status\n")
+cat("===============================\n\n")
+
+# EGFR status distribution
+egfr_summary <- competing_survival_data %>%
+  group_by(EGFR_Status, Outcome) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  group_by(EGFR_Status) %>%
+  mutate(
+    total = sum(n),
+    percentage = round(n / total * 100, 1)
+  )
+
+cat("Outcome Distribution by EGFR Status:\n")
+print(egfr_summary[, c("EGFR_Status", "Outcome", "n", "percentage")])
+
+# Competing risks analysis by EGFR status
+if(requireNamespace("cmprsk", quietly = TRUE)) {
+  egfr_data <- competing_survival_data %>%
+    mutate(
+      status_crr = case_when(
+        Outcome %in% c("Alive_w_Disease", "Alive_wo_Disease") ~ 0,
+        Outcome == "Dead_of_Disease" ~ 1,
+        Outcome == "Dead_of_Other" ~ 2,
+        TRUE ~ 0
+      ),
+      EGFR_numeric = ifelse(EGFR_Status == "Positive", 1, 0)
+    )
+  
+  # Cumulative incidence by EGFR status
+  egfr_cuminc <- cuminc(
+    ftime = egfr_data$Overall_Time,
+    fstatus = egfr_data$status_crr,
+    group = egfr_data$EGFR_Status
+  )
+  
+  cat("\nCumulative Incidence Comparison (EGFR Positive vs Negative):\n")
+  
+  time_points <- c(12, 24, 36)
+  for (tp in time_points) {
+    cat(paste0("\nAt ", tp, " months:\n"))
+    
+    for (i in 1:length(egfr_cuminc)) {
+      group_name <- names(egfr_cuminc)[i]
+      times <- egfr_cuminc[[i]]$time
+      est <- egfr_cuminc[[i]]$est
+      
+      closest_idx <- which.min(abs(times - tp))
+      if (length(closest_idx) > 0) {
+        cat(paste0("  ", group_name, ": ", round(est[closest_idx] * 100, 1), "%\n"))
+      }
+    }
+  }
+  
+  # Fine-Gray regression for EGFR effect
+  egfr_crr <- crr(
+    ftime = egfr_data$Overall_Time,
+    fstatus = egfr_data$status_crr,
+    cov1 = egfr_data$EGFR_numeric,
+    failcode = 1
+  )
+  
+  cat("\nEGFR Status Effect on Disease Death (Positive vs Negative):\n")
+  cat("Subdistribution HR:", round(exp(egfr_crr$coef), 2), "\n")
+  cat("95% CI:", round(exp(egfr_crr$coef - 1.96*sqrt(egfr_crr$var)), 2), 
+      "-", round(exp(egfr_crr$coef + 1.96*sqrt(egfr_crr$var)), 2), "\n")
+  
+  egfr_p <- 2 * (1 - pnorm(abs(egfr_crr$coef / sqrt(egfr_crr$var))))
+  cat("P-value:", round(egfr_p, 4), "\n")
+  
+  if (egfr_p < 0.05) {
+    if (exp(egfr_crr$coef) > 1) {
+      cat("Interpretation: EGFR-positive tumors have significantly higher disease death risk\n")
+    } else {
+      cat("Interpretation: EGFR-positive tumors have significantly lower disease death risk\n")
+    }
+  } else {
+    cat("Interpretation: No significant association between EGFR status and disease death risk\n")
+  }
+}
+```
+
+# Statistical Considerations
+
+## Model Assumptions and Validation
+
+Important considerations for competing risks analysis.
+
+```{r assumptions}
+# Statistical Assumptions and Model Validation
+cat("Statistical Considerations for Competing Risks Analysis\n")
+cat("======================================================\n\n")
+
+# Sample size considerations
+total_events <- sum(competing_survival_data$Outcome %in% c("Dead_of_Disease", "Dead_of_Other"))
+disease_events <- sum(competing_survival_data$Outcome == "Dead_of_Disease")
+other_events <- sum(competing_survival_data$Outcome == "Dead_of_Other")
+
+cat("Sample Size Assessment:\n")
+cat("Total patients:", nrow(competing_survival_data), "\n")
+cat("Total events:", total_events, "(", round(total_events/nrow(competing_survival_data)*100, 1), "%)\n")
+cat("Disease deaths:", disease_events, "(", round(disease_events/nrow(competing_survival_data)*100, 1), "%)\n")
+cat("Other deaths:", other_events, "(", round(other_events/nrow(competing_survival_data)*100, 1), "%)\n")
+
+# Power considerations
+min_events_per_group <- 10
+groups <- length(unique(competing_survival_data$Treatment))
+cat("\nPower Considerations:\n")
+cat("Minimum events per group recommended:", min_events_per_group, "\n")
+cat("Number of treatment groups:", groups, "\n")
+
+disease_events_per_group <- disease_events / groups
+cat("Disease events per group:", round(disease_events_per_group, 1), "\n")
+
+if (disease_events_per_group >= min_events_per_group) {
+  cat("Assessment: Adequate power for disease death analysis\n")
+} else {
+  cat("Assessment: Limited power - consider longer follow-up or larger sample size\n")
+}
+
+# Competing risk proportion
+competing_proportion <- other_events / total_events
+cat("\nCompeting Risk Assessment:\n")
+cat("Proportion of deaths from other causes:", round(competing_proportion * 100, 1), "%\n")
+
+if (competing_proportion >= 0.2) {
+  cat("Recommendation: Competing risks analysis strongly recommended\n")
+  cat("Rationale: Substantial competing mortality may bias cause-specific analysis\n")
+} else if (competing_proportion >= 0.1) {
+  cat("Recommendation: Consider competing risks analysis\n")
+  cat("Rationale: Moderate competing mortality present\n")
+} else {
+  cat("Recommendation: Cause-specific analysis may be adequate\n")
+  cat("Rationale: Limited competing mortality\n")
+}
+
+# Follow-up adequacy
+median_followup <- median(competing_survival_data$Overall_Time)
+max_followup <- max(competing_survival_data$Overall_Time)
+
+cat("\nFollow-up Assessment:\n")
+cat("Median follow-up:", round(median_followup, 1), "months\n")
+cat("Maximum follow-up:", round(max_followup, 1), "months\n")
+
+if (median_followup >= 24) {
+  cat("Assessment: Adequate follow-up for survival analysis\n")
+} else {
+  cat("Assessment: Limited follow-up - interpret results cautiously\n")
+}
+```
+
+## Interpretation Guidelines
+
+Framework for interpreting competing risks results.
+
+```{r interpretation}
+# Interpretation Guidelines for Competing Risks Analysis
+cat("\nInterpretation Guidelines\n")
+cat("========================\n\n")
+
+cat("1. Overall vs Cause-Specific vs Competing Risks:\n")
+cat("   • Overall Survival: Most clinically relevant for patients\n")
+cat("   • Cause-Specific: Useful for understanding disease-specific effects\n") 
+cat("   • Competing Risks: Most appropriate when competing events are common\n\n")
+
+cat("2. Subdistribution Hazard Ratio Interpretation:\n")
+cat("   • HR > 1: Increased risk of the event of interest\n")
+cat("   • HR < 1: Decreased risk of the event of interest\n")
+cat("   • Accounts for competing events in the calculation\n\n")
+
+cat("3. Cumulative Incidence Function (CIF):\n")
+cat("   • Probability of experiencing the event by time t\n")
+cat("   • Accounts for competing events\n")
+cat("   • Sum of all CIFs ≤ 1 (remaining probability is survival)\n\n")
+
+cat("4. Clinical Decision Making:\n")
+cat("   • Use overall survival for prognosis discussions\n")
+cat("   • Use cause-specific for treatment effect evaluation\n")
+cat("   • Use competing risks for realistic risk prediction\n\n")
+
+cat("5. Reporting Requirements:\n")
+cat("   • Report number at risk and events for each time point\n")
+cat("   • Include confidence intervals for all estimates\n")
+cat("   • Specify the statistical method used\n")
+cat("   • Justify choice between cause-specific and competing risks\n")
+```
+
+# Integration with jamovi
+
+## Using competingsurvival in jamovi
+
+Step-by-step guide for jamovi users.
+
+```{r jamovi-guide}
+# jamovi Integration Guide for Competing Survival
+cat("Using competingsurvival in jamovi\n")
+cat("=================================\n\n")
+
+cat("Step-by-Step Instructions:\n\n")
+
+cat("1. Data Preparation:\n")
+cat("   • Ensure survival time variable (continuous, numeric)\n")
+cat("   • Create outcome variable with 4 levels:\n")
+cat("     - Dead of Disease\n")
+cat("     - Dead of Other Causes\n") 
+cat("     - Alive with Disease\n")
+cat("     - Alive without Disease\n")
+cat("   • Prepare explanatory variable (categorical)\n\n")
+
+cat("2. Access the Function:\n")
+cat("   • Navigate to: jSurvival → Competing Survival\n")
+cat("   • Or use: Analyses → ClinicoPath → jSurvival → Competing Survival\n\n")
+
+cat("3. Variable Assignment:\n")
+cat("   • Explanatory Variable: Select grouping variable\n")
+cat("   • Overall Time (in months): Select survival time column\n")
+cat("   • Outcome: Select outcome variable\n")
+cat("   • Configure outcome levels:\n")
+cat("     - Dead of Disease: Select appropriate level\n")
+cat("     - Dead of Other: Select appropriate level\n")
+cat("     - Alive w Disease: Select appropriate level\n")
+cat("     - Alive w/o Disease: Select appropriate level\n\n")
+
+cat("4. Analysis Selection:\n")
+cat("   • Overall: All-cause mortality analysis\n")
+cat("   • Cause Specific: Disease-specific mortality only\n")
+cat("   • Competing Risk: Full competing risks analysis\n\n")
+
+cat("5. Output Interpretation:\n")
+cat("   • Review analysis summary for methods used\n")
+cat("   • Examine survival table for hazard ratios\n")
+cat("   • For competing risks: review cumulative incidence table\n")
+cat("   • For competing risks: examine competing risks plot\n")
+cat("   • Read clinical interpretation section\n\n")
+
+cat("6. Troubleshooting:\n")
+cat("   • Ensure no missing values in key variables\n")
+cat("   • Verify outcome variable has exactly 4 levels\n")
+cat("   • Check that follow-up times are positive\n")
+cat("   • Ensure adequate sample sizes per group\n")
+cat("   • Verify appropriate level assignments\n")
+```
+
+# Conclusion
+
+The **competingsurvival** function provides comprehensive tools for analyzing survival data when multiple competing events can occur. The choice between overall survival, cause-specific survival, and competing risks analysis depends on the research question, the proportion of competing events, and the clinical context.
+
+## Key Takeaways
+
+1. **Method Selection**: Choose the appropriate analysis type based on research objectives and competing event frequency
+2. **Clinical Relevance**: Overall survival is most clinically relevant; competing risks provides most realistic probabilities
+3. **Statistical Rigor**: Use Fine-Gray models when competing events comprise >10-20% of total events
+4. **Interpretation**: Subdistribution hazard ratios account for competing events in their calculation
+5. **Visualization**: Cumulative incidence plots provide intuitive displays of competing risks
+
+## Best Practices
+
+- Always report the proportion of competing events
+- Justify the choice of analysis method
+- Present confidence intervals for all estimates
+- Consider sensitivity analyses using different methods
+- Validate findings with clinical domain experts
+
+## Next Steps
+
+- Explore multivariable competing risks models
+- Consider time-dependent covariates in competing risks
+- Integrate findings with other ClinicoPath survival modules
+- Develop prognostic models incorporating competing risks
+
+---
+
+*This vignette demonstrates comprehensive competing survival analysis methodology using the competingsurvival function. Apply these principles to your own clinical datasets for robust survival analysis accounting for competing events.*
