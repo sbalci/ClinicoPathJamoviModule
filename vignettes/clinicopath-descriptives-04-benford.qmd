@@ -30,26 +30,32 @@ head(payments)
 
 
 ```{r}
-# This code simulates how the jamovi module would be called in an R environment.
-# You would need the ClinicoPathDescriptives package installed.
+# This code shows how to use the benford.analysis package directly
+# The ClinicoPath::benford function is designed for jamovi and won't work in R Markdown
 
-# Load the library
-library(ClinicoPath)
+# Load required library
+library(benford.analysis)
 
-# Run the Benford analysis
-results <- benford(
-    data = payments,
-    var = "amount"
-)
+# Check the data structure
+str(payments)
+print(head(payments))
 
-# View the results:
-# 1. The main statistical analysis
-print(results$text)
+# Run the Benford analysis using the benford.analysis package directly
+bfd.cp <- benford(data = payments$amount)
 
-# 2. The list of suspicious data points
-print(results$text2)
+# View the results
+print(bfd.cp)
 
-# 3. The plot
-print(results$plot)
+# Create plot
+plot(bfd.cp)
+
+# Get suspects
+suspects <- getSuspects(bfd.cp, payments)
+if(length(suspects) > 0) {
+  print("Suspicious values:")
+  print(suspects)
+} else {
+  print("No suspicious values detected")
+}
 ```
 

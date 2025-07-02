@@ -1,6 +1,10 @@
-# Enhanced confidence intervals for mean values
-# @importFrom boot boot boot.ci
-# @importFrom ggplot2 ggplot aes geom_point geom_errorbar labs theme_minimal
+#' @title Enhanced confidence intervals for mean values
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @importFrom boot boot boot.ci
+#' @importFrom ggplot2 ggplot aes geom_point geom_errorbar labs theme_minimal element_text geom_hline
+#' @importFrom stats qt qnorm sd shapiro.test
+#'
 
 ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "ciSingleClass",
@@ -49,6 +53,7 @@ ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             } else if (method == "bootstrap") {
                 # Bootstrap method
+                # Add checkpoint before potentially long operation
                 tryCatch({
                     boot_means <- function(data, indices) {
                         return(mean(data[indices]))
@@ -106,8 +111,22 @@ ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .run = function() {
             # Input validation
-            if (length(self$options$deps) == 0)
+            if (length(self$options$deps) == 0) {
+                # Display welcome message
+                welcome_msg <- "
+                <br>Welcome to ClinicoPath Confidence Intervals for Mean Values
+                <br><br>
+                This tool calculates confidence intervals for continuous variables using multiple methods:
+                <br>• t-distribution (assumes normality)
+                <br>• Bootstrap (distribution-free)
+                <br>• Normal approximation (large samples)
+                <br><br>
+                Select continuous variables to analyze.
+                <hr><br>
+                "
+                self$results$conflevel$setContent(welcome_msg)
                 return()
+            }
             
             if (nrow(self$data) == 0) 
                 stop('Data contains no (complete) rows')
@@ -206,6 +225,8 @@ ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         n_group <- length(x_group[!is.na(x_group)])
                         
                         if (n_group >= 2) {
+                            # Add checkpoint for group calculations
+                            private$.checkpoint(flush = FALSE)
                             ci_result_group <- private$.calculateCI(x_group, ciLevel, method, bootstrap_samples)
                             
                             # Calculate CI width for group
@@ -289,7 +310,7 @@ ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggplot2::geom_errorbar(
                     ggplot2::aes(ymin = lb, ymax = ub),
                     width = 0.2,
-                    size = 1
+                    linewidth = 1
                 ) +
                 ggplot2::labs(
                     title = paste("Confidence Intervals (", self$options$ciWidth, "%)", sep = ""),

@@ -1,0 +1,637 @@
+---
+title: "Confidence Intervals for Mean Values in Clinical Research"
+subtitle: "Comprehensive Guide to ciSingle Function for Statistical Inference"
+author: "ClinicoPath Module"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+  echo: true
+---
+
+# Introduction
+
+The `ciSingle` function in ClinicoPath provides comprehensive confidence interval calculations for mean values of continuous variables. This is essential in clinical and pathological research where researchers need to quantify the uncertainty around sample means and make statistical inferences about population parameters.
+
+## Clinical Motivation
+
+In clinical research, confidence intervals are crucial for:
+
+- **Biomarker levels**: Establishing normal ranges and treatment thresholds
+- **Patient characteristics**: Age distributions, measurement precision
+- **Treatment effects**: Quantifying uncertainty in outcome measures
+- **Laboratory values**: Quality control and reference ranges
+- **Survival times**: Time-to-event analysis and prognosis
+- **Diagnostic accuracy**: Performance metrics with uncertainty bounds
+
+Confidence intervals provide more information than point estimates alone, helping clinicians understand the precision of their measurements and the reliability of their conclusions.
+
+## When to Use Confidence Intervals
+
+Use confidence intervals when:
+
+1. **Quantifying uncertainty** around sample means
+2. **Making population inferences** from sample data
+3. **Comparing groups** (though formal hypothesis testing may be preferred)
+4. **Establishing reference ranges** for clinical parameters
+5. **Planning sample sizes** for future studies
+6. **Reporting clinical trial results** with appropriate uncertainty bounds
+
+## Package Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Load the histopathology dataset
+data("histopathology")
+
+# Display dataset structure for continuous variables
+numeric_vars <- sapply(histopathology, is.numeric)
+cat("Available continuous variables:\n")
+print(names(histopathology)[numeric_vars])
+```
+
+# Basic Confidence Interval Analysis
+
+## Example 1: Single Variable Analysis
+
+Let's start with calculating confidence intervals for patient age:
+
+```{r basic-example, eval=FALSE}
+# Basic confidence interval for age
+# Note: Function available in jamovi interface
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  ciWidth = 95,
+  method = "t",
+  showPlot = FALSE,
+  showDiagnostics = FALSE
+)
+```
+
+The results would show:
+- **Mean**: Average age in the sample  
+- **Std. Dev**: Standard deviation measuring variability
+- **Std. Error**: Standard error of the mean
+- **Lower/Upper Bound**: 95% confidence interval limits
+- **CI Width**: Total width of the confidence interval
+
+### Interpretation
+
+The results show:
+- **Mean**: Average age in the sample
+- **Std. Dev**: Standard deviation measuring variability
+- **Std. Error**: Standard error of the mean
+- **Lower/Upper Bound**: 95% confidence interval limits
+- **CI Width**: Total width of the confidence interval
+
+## Example 2: Multiple Variables
+
+Analyzing multiple continuous variables simultaneously:
+
+```{r multiple-variables, eval=FALSE}
+# Multiple variables analysis
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
+  ciWidth = 95,
+  method = "t",
+  showPlot = FALSE,
+  showDiagnostics = FALSE
+)
+```
+
+### Clinical Significance
+
+This analysis helps:
+- Compare variability across different measurements
+- Identify which variables have more precise estimates
+- Plan future studies based on observed variance
+
+# Confidence Interval Methods
+
+## Understanding Different Methods
+
+### t-Distribution Method (Default)
+- **Best for**: Normal or approximately normal data
+- **Assumptions**: Data follows normal distribution
+- **Use when**: Sample size is moderate, normality is reasonable
+
+```{r t-method, eval=FALSE}
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Bootstrap Method
+- **Best for**: Non-normal data or small samples
+- **Assumptions**: Minimal distributional assumptions
+- **Use when**: Normality is questionable or robust estimates needed
+
+```{r bootstrap-method, eval=FALSE}
+ciSingle(
+  data = histopathology,
+  deps = "MeasurementA",
+  ciWidth = 95,
+  method = "bootstrap",
+  bootstrapSamples = 1000,
+  showDiagnostics = TRUE
+)
+```
+
+### Normal Approximation
+- **Best for**: Large samples (n > 30)
+- **Assumptions**: Central limit theorem applies
+- **Use when**: Sample size is large, faster computation needed
+
+```{r normal-method, eval=FALSE}
+ciSingle(
+  data = histopathology,
+  deps = "OverallTime",
+  ciWidth = 95,
+  method = "normal",
+  showDiagnostics = TRUE
+)
+```
+
+## Method Comparison
+
+```{r method-comparison, eval=FALSE}
+# Compare all three methods for the same variable
+cat("Method Comparison for Age Variable:\n\n")
+
+cat("1. t-Distribution Method:\n")
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  method = "t",
+  showPlot = FALSE
+)
+
+cat("\n2. Bootstrap Method:\n")
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  method = "bootstrap",
+  bootstrapSamples = 1000,
+  showPlot = FALSE
+)
+
+cat("\n3. Normal Approximation:\n")
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  method = "normal",
+  showPlot = FALSE
+)
+```
+
+# Group Analysis with Split-By
+
+## Example 1: Gender Differences
+
+Comparing confidence intervals between groups:
+
+```{r split-by-gender, eval=FALSE}
+# Analyze by gender
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "OverallTime"),
+  splitBy = "Sex",
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Clinical Interpretation
+
+This analysis reveals:
+- Gender-specific mean values and confidence intervals
+- Whether confidence intervals overlap (suggesting similar means)
+- Differences in precision between groups
+- Sample size effects on interval width
+
+## Example 2: Treatment Group Analysis
+
+Comparing treatment and control groups:
+
+```{r split-by-treatment, eval=FALSE}
+# Analyze by treatment group
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "MeasurementA", "MeasurementB"),
+  splitBy = "Group",
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Research Implications
+
+Results help determine:
+- Baseline characteristics between treatment groups
+- Biomarker differences between groups
+- Whether randomization was successful
+- Need for covariate adjustment in analysis
+
+# Different Confidence Levels
+
+## Choosing Appropriate Confidence Levels
+
+```{r confidence-levels, eval=FALSE}
+# Compare different confidence levels
+confidence_levels <- c(80, 90, 95, 99)
+
+for (level in confidence_levels) {
+  cat(paste0("\n", level, "% Confidence Interval:\n"))
+  result <- ciSingle(
+    data = histopathology,
+    deps = "Age",
+    ciWidth = level,
+    method = "t",
+    showPlot = FALSE
+  )
+}
+```
+
+### Level Selection Guidelines
+
+- **80%**: Exploratory analysis, screening studies
+- **90%**: Clinical decision-making, quality control
+- **95%**: Standard research reporting, most publications
+- **99%**: High-stakes decisions, regulatory submissions
+
+## Trade-offs in Confidence Level
+
+```{r confidence-tradeoffs}
+# Demonstrate width changes with confidence level
+cat("Effect of Confidence Level on Interval Width:\n")
+cat("Variable: Age\n\n")
+
+levels_demo <- data.frame(
+  Level = c("80%", "90%", "95%", "99%"),
+  Width_Factor = c("Narrowest", "Narrow", "Standard", "Widest"),
+  Use_Case = c("Screening", "Clinical", "Research", "Regulatory")
+)
+
+kable(levels_demo, caption = "Confidence Level Selection Guide")
+```
+
+# Diagnostic Features
+
+## Normality Assessment
+
+Understanding when different methods are appropriate:
+
+```{r normality-diagnostics, eval=FALSE}
+# Comprehensive diagnostics for multiple variables
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "OverallTime", "MeasurementA", "Anti-X-intensity"),
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Interpreting Diagnostics
+
+**Shapiro-Wilk Test**:
+- p > 0.05: Normal distribution (t-method appropriate)
+- p ≤ 0.05: Non-normal distribution (consider bootstrap)
+
+**Assumptions Met**:
+- "Met": Normal distribution, t-method recommended
+- "Violated": Non-normal distribution, bootstrap recommended
+- "Unknown": Cannot determine (very small samples)
+
+## Method Selection Based on Data
+
+```{r adaptive-method-selection, eval=FALSE}
+# Example of choosing methods based on data characteristics
+cat("Adaptive Method Selection Example:\n\n")
+
+# For normal data - use t-distribution
+cat("1. Normal Data (Age) - t-distribution method:\n")
+ciSingle(
+  data = histopathology,
+  deps = "Age",
+  method = "t",
+  showDiagnostics = TRUE
+)
+
+# For potentially non-normal data - use bootstrap
+cat("\n2. Potentially Non-normal Data - bootstrap method:\n")
+ciSingle(
+  data = histopathology,
+  deps = "MeasurementA",
+  method = "bootstrap",
+  bootstrapSamples = 1000,
+  showDiagnostics = TRUE
+)
+```
+
+# Visualization Features
+
+## Basic Confidence Interval Plots
+
+```{r basic-plotting, eval=FALSE}
+# Note: Plotting functionality available in jamovi interface
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "OverallTime", "MeasurementA"),
+  ciWidth = 95,
+  method = "t",
+  showPlot = TRUE
+)
+```
+
+## Group Comparison Plots
+
+```{r group-plotting, eval=FALSE}
+# Visualize group differences
+ciSingle(
+  data = histopathology,
+  deps = c("Age", "OverallTime"),
+  splitBy = "Sex",
+  ciWidth = 95,
+  method = "t",
+  showPlot = TRUE
+)
+```
+
+### Plot Interpretation
+
+Confidence interval plots help visualize:
+- **Point estimates**: Central values for each variable/group
+- **Uncertainty**: Width of intervals indicating precision
+- **Group differences**: Overlapping vs. non-overlapping intervals
+- **Sample size effects**: Larger samples have narrower intervals
+
+# Clinical Applications and Case Studies
+
+## Case Study 1: Biomarker Reference Ranges
+
+Establishing reference ranges for a new biomarker:
+
+```{r biomarker-reference, eval=FALSE}
+# Establish reference ranges for biomarkers
+ciSingle(
+  data = histopathology,
+  deps = c("MeasurementA", "MeasurementB"),
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Clinical Utility
+
+This analysis provides:
+- Mean values for healthy/disease populations
+- Confidence intervals for population means
+- Assessment of measurement variability
+- Basis for clinical decision thresholds
+
+## Case Study 2: Treatment Effect Precision
+
+Quantifying precision of treatment effects:
+
+```{r treatment-precision, eval=FALSE}
+# Analyze treatment effect precision
+ciSingle(
+  data = histopathology,
+  deps = "OverallTime",
+  splitBy = "Group",
+  ciWidth = 95,
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Research Implications
+
+Results inform:
+- Precision of treatment effect estimates
+- Sample size adequacy for detecting differences
+- Power calculations for future studies
+- Clinical significance of observed differences
+
+## Case Study 3: Quality Control Analysis
+
+Laboratory quality control and method validation:
+
+```{r quality-control, eval=FALSE}
+# Quality control for measurement precision
+ciSingle(
+  data = histopathology,
+  deps = c("Anti-X-intensity", "Anti-Y-intensity"),
+  ciWidth = 99,  # Higher confidence for QC
+  method = "t",
+  showDiagnostics = TRUE
+)
+```
+
+### Quality Metrics
+
+Analysis provides:
+- Measurement precision assessment
+- Control limits for quality control
+- Method comparison data
+- Validation of analytical procedures
+
+# Advanced Applications
+
+## Bootstrap Method Applications
+
+When to use bootstrap confidence intervals:
+
+```{r bootstrap-applications, eval=FALSE}
+# Bootstrap for potentially skewed data
+ciSingle(
+  data = histopathology,
+  deps = "OverallTime",  # Often skewed in survival data
+  ciWidth = 95,
+  method = "bootstrap",
+  bootstrapSamples = 2000,
+  showDiagnostics = TRUE
+)
+```
+
+### Bootstrap Advantages
+
+- **Robust**: Works with any distribution
+- **Flexible**: No normality assumptions
+- **Accurate**: Especially for skewed data
+- **Modern**: Computationally intensive but reliable
+
+## Sample Size Considerations
+
+Understanding how sample size affects confidence intervals:
+
+```{r sample-size-effects, eval=FALSE}
+# Demonstrate sample size effects
+# Using subsets of different sizes
+sample_sizes <- c(25, 50, 100, 250)
+
+cat("Effect of Sample Size on Confidence Interval Width:\n\n")
+
+for (n in sample_sizes) {
+  subset_data <- histopathology[1:n, ]
+  cat(paste0("Sample size n = ", n, ":\n"))
+  
+  result <- ciSingle(
+    data = subset_data,
+    deps = "Age",
+    ciWidth = 95,
+    method = "t",
+    showPlot = FALSE
+  )
+  cat("\n")
+}
+```
+
+### Sample Size Guidelines
+
+- **n < 30**: Use t-distribution or bootstrap
+- **30 ≤ n < 100**: t-distribution usually appropriate
+- **n ≥ 100**: Normal approximation acceptable
+- **Large n**: Narrower intervals, more precise estimates
+
+# Best Practices and Guidelines
+
+## Method Selection Flowchart
+
+```{r method-selection-guide}
+cat("Confidence Interval Method Selection Guide:\n\n")
+cat("1. Check sample size:\n")
+cat("   - n < 30: Consider bootstrap or t-distribution\n")
+cat("   - n ≥ 30: Any method acceptable\n\n")
+
+cat("2. Test normality (if using t-distribution):\n")
+cat("   - Normal: Use t-distribution\n")
+cat("   - Non-normal: Use bootstrap\n\n")
+
+cat("3. Consider computational constraints:\n")
+cat("   - Fast computation: Normal approximation\n")
+cat("   - Robust results: Bootstrap\n")
+cat("   - Standard approach: t-distribution\n\n")
+
+cat("4. Match method to research context:\n")
+cat("   - Exploratory: Bootstrap\n")
+cat("   - Confirmatory: t-distribution\n")
+cat("   - Large studies: Normal approximation\n")
+```
+
+## Reporting Guidelines
+
+### Essential Elements to Report
+
+```{r reporting-guidelines}
+cat("Confidence Interval Reporting Checklist:\n\n")
+cat("✓ Sample size for each group\n")
+cat("✓ Mean and standard deviation\n")
+cat("✓ Confidence level (e.g., 95%)\n")
+cat("✓ Method used (t-distribution, bootstrap, normal)\n")
+cat("✓ Confidence interval bounds\n")
+cat("✓ Missing data handling\n")
+cat("✓ Assumption checking results\n")
+cat("✓ Clinical interpretation\n")
+```
+
+### Example Results Section
+
+```{r results-example}
+cat("Example Results Reporting:\n\n")
+cat("Patient age showed a mean of 52.3 years (SD = 14.7, n = 250).\n")
+cat("The 95% confidence interval for the population mean age was\n")
+cat("50.5 to 54.1 years (t-distribution method). Normality\n")
+cat("assumption was met (Shapiro-Wilk p = 0.12). The confidence\n")
+cat("interval width of 3.6 years indicates adequate precision\n")
+cat("for clinical decision-making.\n")
+```
+
+## Common Pitfalls and Solutions
+
+### Avoiding Common Mistakes
+
+```{r common-pitfalls}
+cat("Common Pitfalls in Confidence Interval Analysis:\n\n")
+
+cat("1. WRONG: 'There's a 95% chance the true mean is in this interval'\n")
+cat("   RIGHT: 'We're 95% confident the true mean is in this interval'\n\n")
+
+cat("2. WRONG: Using normal approximation for small samples\n")
+cat("   RIGHT: Use t-distribution for n < 30\n\n")
+
+cat("3. WRONG: Ignoring normality assumptions\n")
+cat("   RIGHT: Test assumptions, use bootstrap if violated\n\n")
+
+cat("4. WRONG: Confusing confidence intervals with prediction intervals\n")
+cat("   RIGHT: CI estimates population mean, PI predicts individual values\n\n")
+
+cat("5. WRONG: Using overlapping CIs to test for differences\n")
+cat("   RIGHT: Use appropriate statistical tests for comparisons\n")
+```
+
+# Integration with Other Analyses
+
+## Combining with Hypothesis Testing
+
+```{r integration-testing}
+cat("Confidence Intervals and Hypothesis Testing:\n\n")
+cat("• CIs provide effect size information\n")
+cat("• Hypothesis tests provide p-values\n")
+cat("• Together: Complete statistical picture\n")
+cat("• Non-overlapping 95% CIs ≈ p < 0.05 for group differences\n")
+cat("• CI width indicates practical significance\n")
+```
+
+## Power Analysis Applications
+
+```{r power-analysis}
+cat("Using CIs for Power Analysis:\n\n")
+cat("• CI width indicates current precision\n")
+cat("• Narrow CIs suggest adequate sample size\n")
+cat("• Wide CIs may indicate need for larger samples\n")
+cat("• Bootstrap CIs help with non-normal power calculations\n")
+```
+
+# Conclusion
+
+The `ciSingle` function provides comprehensive confidence interval analysis essential for clinical and pathological research. Key takeaways:
+
+1. **Choose appropriate methods** based on data characteristics and sample size
+2. **Use diagnostics** to validate assumptions and guide method selection
+3. **Report comprehensively** including methods, assumptions, and interpretations
+4. **Consider clinical context** when interpreting interval width and precision
+5. **Integrate with other analyses** for complete statistical understanding
+
+Confidence intervals are fundamental to statistical inference, providing not just point estimates but crucial information about uncertainty and precision that guides clinical decision-making and research planning.
+
+## References
+
+- Altman, D. G. (2000). *Statistics in medical journals: Developments in the 1990s*. Statistics in Medicine, 19(23), 3275-3289.
+- Efron, B., & Tibshirani, R. J. (1993). *An Introduction to the Bootstrap*. Chapman and Hall.
+- Gardner, M. J., & Altman, D. G. (1986). Confidence intervals rather than P values. British Medical Journal, 292(6522), 746-750.
+- Morey, R. D., et al. (2016). The fallacy of placing confidence in confidence intervals. Psychonomic Bulletin & Review, 23(1), 103-123.
+
+---
+
+*This vignette was created for the ClinicoPath jamovi module. For more information and updates, visit [https://github.com/sbalci/ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule).*

@@ -228,6 +228,11 @@ alluvial(
 ```{r dataset-examples}
 # Colon cancer analysis
 data("colon")
+# Convert numeric variables to factors for alluvial plot
+colon$sex <- factor(colon$sex, levels = c(0, 1), labels = c("Female", "Male"))
+colon$differ <- factor(colon$differ, levels = c(1, 2, 3), labels = c("Well", "Moderate", "Poor"))
+colon$extent <- factor(colon$extent, levels = c(1, 2, 3, 4), labels = c("Submucosa", "Muscle", "Serosa", "Contiguous"))
+
 alluvial(
   data = colon,
   vars = c("sex", "differ", "extent"),
@@ -236,11 +241,11 @@ alluvial(
   mytitle = "Colon Cancer Characteristics"
 )
 
-# Treatment response analysis
-data("treatmentResponse") 
+# Using histopathology dataset for treatment analysis
+data("histopathology")
 alluvial(
-  data = treatmentResponse,
-  vars = c("PreTreatment", "Treatment", "Response"),
+  data = histopathology,
+  vars = c("Grade", "LVI", "PNI"),
   fill = "last_variable"
 )
 ```

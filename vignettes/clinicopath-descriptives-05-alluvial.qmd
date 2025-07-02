@@ -288,17 +288,26 @@ alluvial(
 ### Treatment Response Analysis
 
 ```{r treatment-response}
-# Load treatment response data
-data("treatmentResponse")
-
-# Analyze treatment pathways
-alluvial(
-    data = treatmentResponse,
-    vars = c("PreTreatment", "Treatment", "Response"),
-    fill = "first_variable",
-    usetitle = TRUE,
-    mytitle = "Treatment Response Pathways"
+# Create treatment response data for alluvial plot
+set.seed(123)
+treatment_data <- data.frame(
+  PreTreatment = sample(c("None", "Chemotherapy", "Radiation"), 100, replace = TRUE),
+  Treatment = sample(c("Surgery", "Chemotherapy", "Immunotherapy", "Combination"), 100, replace = TRUE),
+  Response = sample(c("Complete", "Partial", "Stable", "Progressive"), 100, replace = TRUE)
 )
+
+# Use ggalluvial directly since jamovi functions don't work well in R Markdown
+library(ggalluvial)
+library(ggplot2)
+
+ggplot(treatment_data, aes(axis1 = PreTreatment, axis2 = Treatment, axis3 = Response)) +
+  geom_alluvium(aes(fill = PreTreatment), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("PreTreatment", "Treatment", "Response"), expand = c(.05, .05)) +
+  scale_fill_brewer(type = "qual", palette = "Set1") +
+  ggtitle("Treatment Response Pathways") +
+  theme_minimal()
 ```
 
 ### Survival Analysis Flow

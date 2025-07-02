@@ -1,0 +1,472 @@
+---
+title: "Chi-Square Post-Hoc Tests for Clinicopathological Research"
+subtitle: "Comprehensive Guide to Pairwise Comparisons in Contingency Tables"
+author: "ClinicoPath Module"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+  echo: true
+---
+
+# Introduction
+
+The Chi-Square Post-Hoc Tests module in ClinicoPath provides comprehensive analysis for identifying specific group differences when an overall chi-square test of independence shows statistical significance. This is particularly valuable in clinicopathological research where researchers need to understand which specific combinations of categorical variables are driving significant associations.
+
+## Clinical Motivation
+
+In clinical and pathological research, we often encounter scenarios where:
+
+- **Treatment response varies by patient characteristics** (e.g., sex, age group, tumor stage)
+- **Biomarker expression differs across diagnostic categories** (e.g., hormone receptor status by tumor grade)
+- **Complications occur differentially across treatment modalities** (e.g., surgical complications by surgeon experience level)
+- **Survival outcomes vary by multiple pathological features** (e.g., lymph node status by tumor size categories)
+
+When an overall chi-square test indicates a significant association, post-hoc testing helps identify which specific group comparisons are driving this significance, while controlling for multiple comparisons.
+
+## When to Use Chi-Square Post-Hoc Tests
+
+Chi-square post-hoc tests are appropriate when:
+
+1. **Overall chi-square test is significant** (p < 0.05)
+2. **At least one variable has ≥3 categories** (otherwise, no post-hoc testing needed)
+3. **Sample sizes are adequate** (expected frequencies ≥5 in most cells)
+4. **Variables are categorical** (nominal or ordinal)
+5. **Observations are independent**
+
+## Package Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Load the histopathology dataset
+data("histopathology")
+
+# Display dataset structure
+str(histopathology[, c("Sex", "Race", "Group", "Grade_Level", "LVI", "PNI", "Mortality5yr")])
+```
+
+# Basic Chi-Square Post-Hoc Analysis
+
+## Example 1: Treatment Group by Sex
+
+Let's start with a basic example examining whether treatment group assignment varies by patient sex.
+
+```{r basic-example}
+# Basic chi-square post-hoc test
+chisqposttest(
+  data = histopathology,
+  rows = "Sex",
+  cols = "Group",
+  posthoc = "bonferroni",
+  sig = 0.05,
+  excl = TRUE,
+  exp = FALSE,
+  plot = FALSE
+)
+```
+
+### Interpretation
+
+The results show:
+1. **Overall Chi-Square Test**: Tests whether there's any association between sex and treatment group
+2. **Contingency Table**: Displays observed frequencies for each combination
+3. **Post-Hoc Tests**: If significant, shows pairwise comparisons with adjusted p-values
+
+## Example 2: Tumor Grade by Lymph Node Status
+
+A more clinically relevant example examining the relationship between tumor grade and lymph node metastasis:
+
+```{r grade-example}
+# Chi-square post-hoc test with clinical variables
+chisqposttest(
+  data = histopathology,
+  rows = "Grade_Level",
+  cols = "LVI",  # Lymphovascular invasion
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,
+  exp = TRUE,    # Show expected values
+  plot = FALSE
+)
+```
+
+### Clinical Significance
+
+This analysis helps determine:
+- Whether tumor grade is associated with lymphovascular invasion
+- Which specific grade categories show significant differences
+- Expected vs. observed frequencies for each combination
+
+# Multiple Comparison Adjustments
+
+## Understanding Adjustment Methods
+
+When performing multiple pairwise comparisons, we need to adjust p-values to control the family-wise error rate:
+
+### Bonferroni Correction
+- **Most conservative** approach
+- Multiplies each p-value by the number of comparisons
+- **Use when**: You want strong control of Type I error
+
+```{r bonferroni}
+chisqposttest(
+  data = histopathology,
+  rows = "Race",
+  cols = "Mortality5yr",
+  posthoc = "bonferroni",
+  sig = 0.05,
+  excl = TRUE,
+  exp = FALSE,
+  plot = FALSE
+)
+```
+
+### False Discovery Rate (FDR)
+- **Less conservative** than Bonferroni
+- Controls the expected proportion of false discoveries
+- **Use when**: You want to balance Type I and Type II errors
+
+```{r fdr}
+chisqposttest(
+  data = histopathology,
+  rows = "Race",
+  cols = "Mortality5yr",
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,
+  exp = FALSE,
+  plot = FALSE
+)
+```
+
+### Holm Method
+- **Step-down procedure**
+- More powerful than Bonferroni while maintaining family-wise error control
+- **Use when**: You want more power than Bonferroni but still strong control
+
+```{r holm}
+chisqposttest(
+  data = histopathology,
+  rows = "Race",
+  cols = "Mortality5yr",
+  posthoc = "holm",
+  sig = 0.05,
+  excl = TRUE,
+  exp = FALSE,
+  plot = FALSE
+)
+```
+
+## Comparison of Adjustment Methods
+
+```{r adjustment-comparison}
+# Create a comparison table of different methods
+adjustment_methods <- c("bonferroni", "holm", "fdr", "none")
+
+# Note: In practice, you would run these analyses and compare results
+# This is a conceptual example of how different methods affect conclusions
+
+cat("Adjustment Method Comparison:\n")
+cat("- Bonferroni: Most conservative, lowest power\n")
+cat("- Holm: Good balance of Type I error control and power\n") 
+cat("- FDR: Higher power, controls false discovery rate\n")
+cat("- None: Highest power, no multiple comparison adjustment\n")
+```
+
+# Advanced Features
+
+## Including Expected Values
+
+Expected values help assess the magnitude of deviations from independence:
+
+```{r expected-values}
+chisqposttest(
+  data = histopathology,
+  rows = "PNI",  # Perineural invasion
+  cols = "Grade_Level",
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,
+  exp = TRUE,     # Show expected values
+  plot = FALSE
+)
+```
+
+### Interpreting Expected Values
+
+- **Large deviations** indicate strong associations
+- **Values in parentheses** are expected frequencies under independence
+- **Observed >> Expected**: Positive association
+- **Observed << Expected**: Negative association
+
+## Standardized Residuals Plot
+
+The residuals plot feature is available in the jamovi interface and visualizes patterns of association:
+
+```{r residuals-plot-demo, eval=FALSE}
+# Plot functionality available in jamovi interface
+chisqposttest(
+  data = histopathology,
+  rows = "Grade_Level",
+  cols = "LVI",
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,
+  exp = FALSE,
+  plot = FALSE  # Plot available in jamovi interface     # Generate residuals plot
+)
+```
+
+### Plot Interpretation
+
+When using the plot option in jamovi:
+- **Blue cells**: Negative residuals (observed < expected)
+- **Red cells**: Positive residuals (observed > expected)
+- **Intensity**: Magnitude of standardized residuals
+- **|residual| > 2**: Suggests significant contribution to chi-square
+
+# Clinical Examples and Case Studies
+
+## Case Study 1: Biomarker Expression by Tumor Stage
+
+Investigating whether a biomarker's expression varies across tumor stages:
+
+```{r biomarker-case}
+# Create a more realistic clinical scenario
+# Using Grade and TStage as proxies for biomarker expression levels
+
+# First, let's create meaningful categories
+histopathology_clinical <- histopathology %>%
+  mutate(
+    TStage_Category = case_when(
+      TStage <= 1 ~ "Early (T1)",
+      TStage == 2 ~ "Intermediate (T2)", 
+      TStage >= 3 ~ "Advanced (T3-T4)"
+    ),
+    Grade_Category = case_when(
+      Grade == 1 ~ "Well Differentiated",
+      Grade == 2 ~ "Moderately Differentiated",
+      Grade == 3 ~ "Poorly Differentiated"
+    )
+  )
+
+# Analyze the relationship
+chisqposttest(
+  data = histopathology_clinical,
+  rows = "TStage_Category",
+  cols = "Grade_Category", 
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,
+  exp = TRUE,
+  plot = FALSE  # Plot available in jamovi interface
+)
+```
+
+### Clinical Interpretation
+
+This analysis reveals:
+- Whether tumor stage and grade are associated (overall chi-square)
+- Which specific stage-grade combinations are over/under-represented
+- Clinical implications for prognosis and treatment planning
+
+## Case Study 2: Treatment Response by Patient Characteristics
+
+Examining treatment efficacy across patient subgroups:
+
+```{r treatment-response}
+# Analyze treatment response by patient demographics
+chisqposttest(
+  data = histopathology,
+  rows = "Group",        # Treatment vs Control
+  cols = "Mortality5yr", # 5-year mortality outcome
+  posthoc = "bonferroni",
+  sig = 0.05,
+  excl = TRUE,
+  exp = TRUE,
+  plot = FALSE  # Plot available in jamovi interface
+)
+```
+
+### Clinical Implications
+
+Results help determine:
+- Overall treatment effectiveness
+- Whether treatment benefits are consistent across patient groups
+- Need for personalized treatment strategies
+
+## Case Study 3: Pathological Features Association
+
+Investigating relationships between multiple pathological features:
+
+```{r pathological-features}
+# Multiple pathological features analysis
+chisqposttest(
+  data = histopathology,
+  rows = "LVI",          # Lymphovascular invasion
+  cols = "PNI",          # Perineural invasion  
+  posthoc = "holm",
+  sig = 0.05,
+  excl = TRUE,
+  exp = TRUE,
+  plot = FALSE  # Plot available in jamovi interface
+)
+```
+
+# Handling Missing Data
+
+## Strategies for Missing Data
+
+```{r missing-data}
+# Create dataset with missing values for demonstration
+demo_data <- histopathology[1:100, ]
+demo_data$Sex[sample(1:100, 10)] <- NA
+demo_data$Group[sample(1:100, 8)] <- NA
+
+# Analysis excluding missing data
+cat("Analysis excluding missing data:\n")
+chisqposttest(
+  data = demo_data,
+  rows = "Sex",
+  cols = "Group",
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = TRUE,    # Exclude missing values
+  exp = FALSE,
+  plot = FALSE
+)
+
+# Analysis including missing data as category
+cat("\nAnalysis including missing data:\n")
+chisqposttest(
+  data = demo_data,
+  rows = "Sex", 
+  cols = "Group",
+  posthoc = "fdr",
+  sig = 0.05,
+  excl = FALSE,   # Include missing values
+  exp = FALSE,
+  plot = FALSE
+)
+```
+
+### Recommendations for Missing Data
+
+1. **Exclude missing data** when missingness is random
+2. **Include as category** when missingness might be informative
+3. **Consider imputation** for systematic missingness patterns
+4. **Report missing data patterns** in your analysis
+
+# Best Practices and Guidelines
+
+## Statistical Considerations
+
+### Sample Size Requirements
+- **Expected frequencies**: ≥5 in at least 80% of cells
+- **Minimum cell frequency**: ≥1 in all cells
+- **Large samples**: More stable results and better power
+
+### Effect Size Interpretation
+- **Cramér's V**: Measure of association strength
+  - 0.1 = small effect
+  - 0.3 = medium effect  
+  - 0.5 = large effect
+
+## Clinical Reporting Guidelines
+
+### Essential Elements to Report
+
+1. **Overall chi-square results**: χ², df, p-value
+2. **Sample sizes**: For each group and overall
+3. **Adjustment method**: Justification for choice
+4. **Significant comparisons**: With adjusted p-values
+5. **Effect sizes**: Clinical meaningfulness
+6. **Missing data handling**: Exclusions and rationale
+
+### Example Results Section
+
+```{r results-reporting}
+cat("Sample Results Reporting:\n\n")
+cat("The overall chi-square test revealed a significant association between\n")
+cat("tumor grade and lymphovascular invasion (χ² = X.XX, df = X, p < 0.05).\n")
+cat("Post-hoc pairwise comparisons using FDR adjustment showed that\n") 
+cat("poorly differentiated tumors had significantly higher rates of\n")
+cat("lymphovascular invasion compared to well differentiated tumors\n")
+cat("(adjusted p = 0.XXX). No other pairwise comparisons reached statistical\n")
+cat("significance after multiple comparison adjustment.\n")
+```
+
+# Advanced Applications
+
+## Integration with Other Analyses
+
+### Combining with Survival Analysis
+```{r integration-survival}
+# Chi-square post-hoc can inform survival analysis stratification
+cat("Use chi-square post-hoc results to:\n")
+cat("1. Identify meaningful subgroups for survival analysis\n")
+cat("2. Determine appropriate stratification variables\n") 
+cat("3. Guide covariate selection in Cox models\n")
+```
+
+### Biomarker Research Applications
+```{r biomarker-applications}
+cat("Common biomarker research applications:\n")
+cat("• Expression levels by tumor characteristics\n")
+cat("• Mutation status by histological features\n")
+cat("• Treatment response by biomarker profiles\n")
+cat("• Progression patterns by molecular subtypes\n")
+```
+
+## Quality Control and Validation
+
+### Assumption Checking
+```{r assumptions}
+cat("Key assumptions to verify:\n")
+cat("1. Independence of observations\n")
+cat("2. Adequate expected frequencies\n")
+cat("3. Appropriate variable coding\n")
+cat("4. Random sampling from population\n")
+```
+
+### Sensitivity Analyses
+```{r sensitivity}
+cat("Consider sensitivity analyses:\n")
+cat("• Different significance thresholds\n")
+cat("• Alternative adjustment methods\n")
+cat("• Missing data handling approaches\n")
+cat("• Subgroup analyses by key variables\n")
+```
+
+# Conclusion
+
+Chi-square post-hoc testing is a powerful tool for identifying specific patterns of association in categorical data. Key takeaways for clinicopathological research:
+
+1. **Use post-hoc tests** only when overall chi-square is significant
+2. **Choose adjustment methods** based on your research priorities
+3. **Report effect sizes** alongside statistical significance
+4. **Consider clinical context** when interpreting results
+5. **Validate findings** in independent datasets when possible
+
+The ClinicoPath chi-square post-hoc module provides comprehensive functionality for these analyses, supporting rigorous statistical practices in clinical and pathological research.
+
+## References
+
+- Agresti, A. (2018). *An Introduction to Categorical Data Analysis*. 3rd Edition.
+- Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate. *Journal of the Royal Statistical Society*, 57(1), 289-300.
+- Holm, S. (1979). A simple sequentially rejective multiple test procedure. *Scandinavian Journal of Statistics*, 6(2), 65-70.
+- Cramér, H. (1946). *Mathematical Methods of Statistics*. Princeton University Press.
+
+---
+
+*This vignette was created for the ClinicoPath jamovi module. For more information and updates, visit [https://github.com/sbalci/ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule).*
