@@ -1,0 +1,81 @@
+---
+name:  jcorrelation
+title: Correlation Analysis
+jrs:   '1.1'
+
+items:
+    - name: matrix
+      title: Correlation Matrix
+      type: Table
+      description: correlation matrix with significance tests
+      columns: [ ]
+      clearWith:
+        - vars
+        - group
+        - method
+        - alternative
+        - ci
+        - ciWidth
+
+    - name: tests
+      title: Pairwise Correlations
+      type: Table
+      description: detailed correlation tests for each pair of variables
+      columns: [ ]
+      clearWith:
+        - vars
+        - group
+        - method
+        - alternative
+        - ci
+        - ciWidth
+
+    - name: summary
+      title: Summary Statistics
+      type: Table
+      description: summary of correlation analysis
+      visible: true
+      columns:
+        - name: stat
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+
+    - name: report
+      title: Natural Language Report
+      type: Html
+      visible: (report)
+
+    - name: plot
+      title: Correlation Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot
+      visible: (plots)
+      
+    - name: plotMatrix
+      title: Correlation Matrix Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotMatrix
+      visible: (plots && plotType:matrix)
+
+    - name: plotPairs
+      title: Pairs Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotPairs
+      visible: (plots && plotType:pairs)
+
+refs:
+    - correlation
+    - report
+    - corrplot
+    - GGally
+    - ClinicoPathJamoviModule

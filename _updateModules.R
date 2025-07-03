@@ -17,6 +17,11 @@ new_date <- "2024-07-03" # Update this to the new date you want to set
 quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
 check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
 extended <- TRUE # Set to TRUE if you want to document and install submodules
+ClinicoPathDescriptives_module <- TRUE # Set to TRUE if you want to update the ClinicoPathDescriptives module
+jsurvival_module <- FALSE # Set to TRUE if you want to update the jsurvival module
+jjstatsplot_module <- FALSE # Set to TRUE if you want to update the jjstatsplot module
+meddecide_module <- FALSE # Set to TRUE if you want to update the meddecide module
+
 webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
 commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
@@ -290,15 +295,15 @@ if (!WIP) {
     dir.create(file.path(meddecide_dir, "vignettes"), recursive = TRUE)
   }
 
-tryCatch({
-  fs::file_copy(
-    file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
-    file.path(meddecide_dir, "vignettes"),
-    overwrite = TRUE
-  )
-}, error = function(e) {
-  message("Error copying meddecide vignette files: ", e$message)
-})
+  tryCatch({
+    fs::file_copy(
+      file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
+      file.path(meddecide_dir, "vignettes"),
+      overwrite = TRUE
+    )
+  }, error = function(e) {
+    message("Error copying meddecide vignette files: ", e$message)
+  })
 
 
 
@@ -437,12 +442,17 @@ tryCatch({
 
   tryCatch({
     fs::file_copy(
-      file.path(main_repo_dir, "data", ClinicoPathDescriptives_example_files),
+      file.path(
+        main_repo_dir,
+        "data",
+        ClinicoPathDescriptives_example_files
+      ),
       file.path(ClinicoPathDescriptives_dir, "data"),
       overwrite = TRUE
     )
   }, error = function(e) {
-    message("Error copying ClinicoPathDescriptives example files: ", e$message)
+    message("Error copying ClinicoPathDescriptives example files: ",
+            e$message)
   })
 
 
@@ -515,10 +525,7 @@ tryCatch({
   ## ClinicoPathDescriptives_vignettes ----
 
 
-  ClinicoPathDescriptives_vignette_files <- c(
-    "data-summary.Rmd",
-    "visualization.Rmd"
-  )
+  ClinicoPathDescriptives_vignette_files <- c("data-summary.Rmd", "visualization.Rmd")
 
   # Create directories if they do not exist
 
@@ -529,17 +536,18 @@ tryCatch({
 
 
   tryCatch({
-  fs::file_copy(
-    file.path(
-      main_repo_dir,
-      "vignettes",
-      ClinicoPathDescriptives_vignette_files
-    ),
-    file.path(ClinicoPathDescriptives_dir, "vignettes"),
-    overwrite = TRUE
-  )
+    fs::file_copy(
+      file.path(
+        main_repo_dir,
+        "vignettes",
+        ClinicoPathDescriptives_vignette_files
+      ),
+      file.path(ClinicoPathDescriptives_dir, "vignettes"),
+      overwrite = TRUE
+    )
   }, error = function(e) {
-    message("Error copying ClinicoPathDescriptives vignette files: ", e$message)
+    message("Error copying ClinicoPathDescriptives vignette files: ",
+            e$message)
   })
 
 
@@ -882,7 +890,7 @@ replace_clinicopath_with_module <- function(base_dir, module_name) {
   )
 }
 
-if (!WIP) {
+if (!WIP & webpage) {
   ## --- Replace ClinicoPath references in module code ----
   replace_clinicopath_with_module(jjstatsplot_dir, "jjstatsplot")
   replace_clinicopath_with_module(meddecide_dir, "meddecide")
@@ -892,11 +900,11 @@ if (!WIP) {
 
 # --- Prepare, document, and install modules ----
 if (!extended) {
-jmvtools::prepare(main_repo_dir)
-devtools::document(main_repo_dir)
-jmvtools::prepare(main_repo_dir)
-devtools::document(main_repo_dir)
-jmvtools::install(main_repo_dir)
+  jmvtools::prepare(main_repo_dir)
+  devtools::document(main_repo_dir)
+  jmvtools::prepare(main_repo_dir)
+  devtools::document(main_repo_dir)
+  jmvtools::install(main_repo_dir)
 }
 
 # --- Commit changes in each repository ----
@@ -930,60 +938,68 @@ message("Modules updated to version ", new_version, " and date ", new_date)
 
 
 if (extended) {
-  setwd(jjstatsplot_dir)
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::install()
+  if (jjstatsplot_module) {
+    setwd(jjstatsplot_dir)
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::install()
 
-  if (check) {
-    devtools::check()
-  }
-  if (webpage) {
-    pkgdown::build_site()
-  }
-
-  setwd(meddecide_dir)
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::install()
-
-  if (check) {
-    devtools::check()
-  }
-  if (webpage) {
-    pkgdown::build_site()
+    if (check) {
+      devtools::check()
+    }
+    if (webpage) {
+      pkgdown::build_site()
+    }
   }
 
-  setwd(jsurvival_dir)
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::install()
+  if (meddecide_module) {
+    setwd(meddecide_dir)
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::install()
 
-  if (check) {
-    devtools::check()
-  }
-  if (webpage) {
-    pkgdown::build_site()
+    if (check) {
+      devtools::check()
+    }
+    if (webpage) {
+      pkgdown::build_site()
+    }
   }
 
-  setwd(ClinicoPathDescriptives_dir)
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::install()
+  if (jsurvival_module) {
+    setwd(jsurvival_dir)
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::install()
 
-  if (check) {
-    devtools::check()
+    if (check) {
+      devtools::check()
+    }
+    if (webpage) {
+      pkgdown::build_site()
+    }
   }
-  if (webpage) {
-    pkgdown::build_site()
+
+  if (ClinicoPathDescriptives_module) {
+    setwd(ClinicoPathDescriptives_dir)
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::install()
+
+    if (check) {
+      devtools::check()
+    }
+    if (webpage) {
+      pkgdown::build_site()
+    }
   }
 
 }

@@ -103,6 +103,12 @@ contTablesPairedClass <- R6::R6Class(
 
             wocor <- try(stats::mcnemar.test(result, correct=FALSE), silent=TRUE)
             wcor  <- try(stats::mcnemar.test(result, correct=TRUE), silent=TRUE)
+            
+            # Checkpoint before potentially expensive exact test
+            if (self$options$exact) {
+                private$.checkpoint()
+            }
+            
             exact <- try(exact2x2::exact2x2(result, paired=TRUE), silent=TRUE)
 
             values <- list()

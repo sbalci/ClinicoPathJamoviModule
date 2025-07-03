@@ -1,0 +1,69 @@
+---
+title: "Vignette: Generating a Publication-Ready 'Table 1' with crosstable"
+author: "Analysis by Gemini"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Creating a Publication-Ready 'Table 1'}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE
+)
+```
+
+
+```{r}
+# Create a sample data frame for a cancer trial
+set.seed(123)
+n_patients <- 200
+cancer_trial <- data.frame(
+  Age = rnorm(n_patients, mean = 65, sd = 10),
+  Gender = factor(sample(c("Male", "Female"), n_patients, replace = TRUE)),
+  Tumor_Grade = factor(sample(c("I", "II", "III"), n_patients, replace = TRUE, 
+                              prob = c(0.3, 0.5, 0.2)), ordered = TRUE),
+  Biomarker_X = rnorm(n_patients, mean = 100, sd = 25),
+  Treatment_Group = factor(sample(c("Therapy", "Placebo"), n_patients, replace = TRUE))
+)
+
+# Ensure Age is numeric and integer
+cancer_trial$Age <- as.integer(cancer_trial$Age)
+
+head(cancer_trial)
+```
+
+
+```{r}
+# This code simulates how the jamovi module would be called in an R environment.
+# You would need the ClinicoPathDescriptives package installed.
+
+# Load the library
+library(ClinicoPath)
+
+# Run the crosstable analysis with NEJM style
+results <- crosstable(
+    data = cancer_trial,
+    vars = c("Age", "Gender", "Tumor_Grade", "Biomarker_X"),
+    group = "Treatment_Group",
+    sty = "nejm" # Specify the New England Journal of Medicine style
+)
+
+# The result is an HTML table, which would render directly in jamovi.
+# In R, you would access it like this:
+# results$tablestyle4
+```
+
+
+
+```{r results='asis'}
+htmltools::HTML(results$tablestyle4$content)
+
+```
+
+
+
+

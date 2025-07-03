@@ -1,0 +1,154 @@
+---
+name:  jcorrelation
+title: Correlation Analysis
+menuGroup: ExplorationD
+menuSubgroup: Correlation
+menuSubtitle: Correlation matrix and pairwise correlations
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >
+        Comprehensive correlation analysis including Pearson, Spearman, and Kendall 
+        correlations with significance tests, confidence intervals, and natural language 
+        reporting. Suitable for exploring relationships between continuous variables.
+    R:
+        dontrun: false
+        usage: |
+            # Basic correlation analysis
+            jcorrelation(
+                data = histopathology,
+                vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+            )
+            
+            # With grouping variable
+            jcorrelation(
+                data = histopathology,
+                vars = c("Age", "OverallTime", "MeasurementA"),
+                group = "Sex"
+            )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            A vector of strings naming the variables to correlate.
+
+    - name: group
+      title: Split by
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+          R: >
+            Variable to split the analysis by.
+
+    - name: method
+      title: Correlation method
+      type: List
+      options:
+        - name: pearson
+          title: Pearson
+        - name: spearman  
+          title: Spearman
+        - name: kendall
+          title: Kendall
+      default: pearson
+      description:
+          R: >
+            The correlation method to use: 'pearson' (default), 'spearman', or 'kendall'.
+
+    - name: alternative
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: two.sided
+          title: Two-sided
+        - name: greater
+          title: Greater than
+        - name: less
+          title: Less than
+      default: two.sided
+      description:
+          R: >
+            The alternative hypothesis: 'two.sided' (default), 'greater', or 'less'.
+
+    - name: ci
+      title: Confidence intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            TRUE (default) or FALSE, provide confidence intervals.
+
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            Confidence interval level (default: 95%).
+
+    - name: flag
+      title: Flag significant
+      type: Bool
+      default: true
+      description:
+          R: >
+            TRUE (default) or FALSE, flag significant correlations.
+
+    - name: flagAlpha
+      title: Significance level
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.05
+      description:
+          R: >
+            Alpha level for flagging significant correlations (default: 0.05).
+
+    - name: plots
+      title: Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            TRUE (default) or FALSE, provide correlation plots.
+
+    - name: plotType
+      title: Plot type
+      type: List
+      options:
+        - name: matrix
+          title: Matrix
+        - name: pairs
+          title: Pairs
+        - name: network
+          title: Network
+      default: matrix
+      description:
+          R: >
+            Type of correlation plot: 'matrix' (default), 'pairs', or 'network'.
+
+    - name: report
+      title: Natural language report
+      type: Bool
+      default: true
+      description:
+          R: >
+            TRUE (default) or FALSE, provide natural language interpretation.

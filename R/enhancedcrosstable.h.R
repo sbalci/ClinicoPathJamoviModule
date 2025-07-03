@@ -232,7 +232,6 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="crosstable_main",
                 title="Enhanced Cross Table",
-                visible="(vars && by_var)",
                 clearWith=list(
                     "vars",
                     "by_var",
@@ -247,7 +246,7 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="statistics_table",
                 title="Statistical Tests",
-                visible="(vars && by_var && test_auto)",
+                visible="(test_auto)",
                 clearWith=list(
                     "vars",
                     "by_var",
@@ -258,7 +257,7 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="effect_sizes",
                 title="Effect Sizes",
-                visible="(vars && by_var && effect_size)",
+                visible="(effect_size)",
                 clearWith=list(
                     "vars",
                     "by_var",
@@ -267,7 +266,7 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="interpretation",
                 title="Statistical Interpretation",
-                visible="(vars && by_var && show_interpretation)",
+                visible="(show_interpretation)",
                 clearWith=list(
                     "vars",
                     "by_var",
@@ -278,7 +277,7 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="export_data",
                 title="Export Data",
-                visible="(vars && by_var && export_format:csv)",
+                visible="(export_format:csv)",
                 clearWith=list(
                     "vars",
                     "by_var",
@@ -287,7 +286,6 @@ enhancedcrosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="summary_stats",
                 title="Summary Statistics",
-                visible="(vars && by_var)",
                 clearWith=list(
                     "vars",
                     "by_var",

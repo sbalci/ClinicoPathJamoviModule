@@ -243,9 +243,42 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic co-testing analysis with independent tests
+#' cotest(
+#'     test1_sens = 0.80,
+#'     test1_spec = 0.90,
+#'     test2_sens = 0.75,
+#'     test2_spec = 0.95,
+#'     prevalence = 0.10,
+#'     indep = TRUE,
+#'     fagan = TRUE
+#' )
+#'
+#' # Co-testing with dependent tests
+#' cotest(
+#'     test1_sens = 0.85,
+#'     test1_spec = 0.88,
+#'     test2_sens = 0.82,
+#'     test2_spec = 0.92,
+#'     prevalence = 0.05,
+#'     indep = FALSE,
+#'     cond_dep_pos = 0.15,
+#'     cond_dep_neg = 0.10,
+#'     fnote = TRUE
+#' )
+#'
+#' # High-stakes screening scenario
+#' cotest(
+#'     test1_sens = 0.95,
+#'     test1_spec = 0.85,
+#'     test2_sens = 0.90,
+#'     test2_spec = 0.90,
+#'     prevalence = 0.02,
+#'     indep = TRUE,
+#'     fagan = TRUE,
+#'     fnote = TRUE
+#' )
+#'
 #' @param test1_sens Sensitivity (true positive rate) of Test 1.
 #' @param test1_spec Specificity (true negative rate) of Test 1.
 #' @param test2_sens Sensitivity (true positive rate) of Test 2.

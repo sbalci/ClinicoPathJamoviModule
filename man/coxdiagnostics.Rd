@@ -9,7 +9,7 @@ coxdiagnostics(
   time,
   event,
   covariates,
-  strata_var,
+  strata_var = NULL,
   show_martingale = TRUE,
   show_deviance = TRUE,
   show_score = FALSE,

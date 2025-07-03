@@ -35,6 +35,29 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 cond_dep_pos <- self$options$cond_dep_pos
                 cond_dep_neg <- self$options$cond_dep_neg
                 prevalence <- self$options$prevalence
+                
+                # Validate inputs
+                if (test1_sens <= 0 || test1_sens >= 1) {
+                    stop("Test 1 sensitivity must be between 0 and 1")
+                }
+                if (test1_spec <= 0 || test1_spec >= 1) {
+                    stop("Test 1 specificity must be between 0 and 1")
+                }
+                if (test2_sens <= 0 || test2_sens >= 1) {
+                    stop("Test 2 sensitivity must be between 0 and 1")
+                }
+                if (test2_spec <= 0 || test2_spec >= 1) {
+                    stop("Test 2 specificity must be between 0 and 1")
+                }
+                if (prevalence <= 0 || prevalence >= 1) {
+                    stop("Disease prevalence must be between 0 and 1")
+                }
+                if (!indep && (cond_dep_pos < 0 || cond_dep_pos > 1)) {
+                    stop("Conditional dependence for positive cases must be between 0 and 1")
+                }
+                if (!indep && (cond_dep_neg < 0 || cond_dep_neg > 1)) {
+                    stop("Conditional dependence for negative cases must be between 0 and 1")
+                }
 
                 # Calculate likelihood ratios
                 test1_plr <- test1_sens / (1 - test1_spec)  # Positive likelihood ratio
@@ -349,6 +372,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 # Store data for Fagan nomogram if requested
                 if (self$options$fagan) {
+                    # Checkpoint before potentially expensive nomogram calculation
+                    private$.checkpoint()
+                    
                     plotData <- list(
                         "Prevalence" = prevalence,
                         "Test1Sens" = test1_sens,

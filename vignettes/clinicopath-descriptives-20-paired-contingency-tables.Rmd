@@ -1,0 +1,380 @@
+---
+title: "Vignette: Paired Samples Contingency Tables and McNemar's Test with ClinicoPath"
+author: "Analysis by Claude"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Paired Samples Contingency Tables and McNemar's Test with ClinicoPath}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Introduction
+
+The `contTablesPaired` function in ClinicoPath provides specialized analysis for paired samples contingency tables using McNemar's test. This function is designed for situations where the same subjects or matched pairs are measured on two occasions or by two different methods, making it ideal for inter-rater agreement studies, before-after comparisons, and diagnostic test evaluations.
+
+## When to Use Paired Contingency Tables
+
+Paired contingency tables are used when:
+- The same subjects are measured twice (before-after studies)
+- Two raters evaluate the same cases (inter-rater agreement)
+- Comparing two diagnostic tests on the same patients
+- Analyzing matched pairs or twins
+- Testing for marginal homogeneity in square tables
+
+**Key Difference from Independent Samples**: Unlike regular contingency tables, paired samples account for the correlation between measurements on the same subjects.
+
+```{r}
+# Load required libraries
+library(ClinicoPath)
+
+# Load datasets
+data(histopathology, package = "ClinicoPath")
+data(prostate_agreement_data, package = "ClinicoPath")
+
+# Examine the rater variables in histopathology
+str(histopathology[c("Rater 1", "Rater 2", "Rater 3")])
+```
+
+# Basic Inter-Rater Agreement Analysis
+
+Let's start with a basic inter-rater agreement analysis comparing two pathologists:
+
+```{r}
+# Basic McNemar test for inter-rater agreement
+basic_agreement <- contTablesPaired(
+  data = histopathology,
+  rows = "Rater 1",
+  cols = "Rater 2",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Display the basic agreement results
+print(basic_agreement)
+```
+
+## Understanding McNemar's Test
+
+McNemar's test specifically examines the **disagreement** between paired measurements. It focuses on the off-diagonal cells:
+- Cases where Rater 1 = 0 and Rater 2 = 1 
+- Cases where Rater 1 = 1 and Rater 2 = 0
+
+If there's no systematic bias between raters, these disagreements should be equally distributed.
+
+# Multi-Level Agreement Analysis
+
+For ordinal or multi-category variables, we can still use McNemar's test:
+
+```{r}
+# Multi-level agreement analysis with Gleason scores
+gleason_agreement <- contTablesPaired(
+  data = prostate_agreement_data,
+  rows = "Urologist_A",
+  cols = "Urologist_B",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Display the Gleason agreement results
+print(gleason_agreement)
+
+# Check the structure of the Gleason score data
+table(prostate_agreement_data$Urologist_A)
+table(prostate_agreement_data$Urologist_B)
+```
+
+# Gold Standard Comparison
+
+A common application is comparing a new rater or method against a gold standard:
+
+```{r}
+# Compare Urologist A against the true Gleason score
+gold_standard_comparison <- contTablesPaired(
+  data = prostate_agreement_data,
+  rows = "Urologist_A",
+  cols = "True_Gleason",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Display the gold standard comparison
+print(gold_standard_comparison)
+
+# This helps assess the accuracy of Urologist A's diagnoses
+```
+
+# Working with Count Data
+
+The function can handle pre-aggregated count data, useful for published data or summary tables:
+
+```{r}
+# Example from the documentation: Survey data
+survey_data <- data.frame(
+  `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
+  `2nd survey` = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),
+  `Counts` = c(794, 150, 86, 570),
+  check.names = FALSE
+)
+
+# Analysis using count data
+survey_analysis <- contTablesPaired(
+  data = survey_data,
+  rows = "1st survey",
+  cols = "2nd survey",
+  counts = "Counts",
+  chiSq = TRUE,
+  chiSqCorr = TRUE
+)
+
+# Display the survey data structure
+print(survey_data)
+```
+
+# Formula Interface
+
+The function supports formula notation for convenience:
+
+```{r}
+# Using formula interface with the same survey data
+formula_analysis <- contTablesPaired(
+  formula = Counts ~ `1st survey`:`2nd survey`,
+  data = survey_data,
+  chiSq = TRUE,
+  chiSqCorr = TRUE
+)
+
+# Alternative without counts (each row = one observation)
+# contTablesPaired(formula = ~ `1st survey`:`2nd survey`, data = expanded_data)
+```
+
+# Before-After Analysis
+
+A classic use case is analyzing treatment effects or changes over time:
+
+```{r}
+# Create simulated before-after treatment data
+set.seed(123)
+treatment_data <- data.frame(
+  patient_id = 1:100,
+  before_treatment = factor(sample(c("Poor", "Good"), 100, replace = TRUE, prob = c(0.7, 0.3))),
+  after_treatment = factor(sample(c("Poor", "Good"), 100, replace = TRUE, prob = c(0.4, 0.6)))
+)
+
+# McNemar test for treatment effect
+treatment_effect <- contTablesPaired(
+  data = treatment_data,
+  rows = "before_treatment",
+  cols = "after_treatment",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Show the simulated data structure
+head(treatment_data)
+table(treatment_data$before_treatment, treatment_data$after_treatment)
+```
+
+# Exact Tests for Small Samples
+
+For small samples or when assumptions are violated, exact tests can be useful:
+
+```{r}
+# Exact log odds ratio (requires exact2x2 package)
+if (require(exact2x2, quietly = TRUE)) {
+  exact_analysis <- contTablesPaired(
+    data = histopathology,
+    rows = "Rater 1",
+    cols = "Rater 2",
+    chiSq = TRUE,
+    chiSqCorr = TRUE,
+    exact = TRUE
+  )
+  
+  message("Exact test analysis completed")
+} else {
+  message("exact2x2 package not available - using standard tests only")
+  
+  # Standard analysis without exact test
+  exact_analysis <- contTablesPaired(
+    data = histopathology,
+    rows = "Rater 1",
+    cols = "Rater 2",
+    chiSq = TRUE,
+    chiSqCorr = TRUE,
+    exact = FALSE
+  )
+}
+```
+
+# Multiple Rater Comparisons
+
+Often we need to compare multiple raters against each other:
+
+```{r}
+# Example: Compare Urologist A vs C directly
+urol_a_vs_c <- contTablesPaired(
+  data = prostate_agreement_data,
+  rows = "Urologist_A",
+  cols = "Urologist_C",
+  chiSq = TRUE,
+  chiSqCorr = TRUE
+)
+
+# Display the comparison
+print(urol_a_vs_c)
+```
+
+# Clinical Examples
+
+## Example 1: Diagnostic Test Agreement
+
+```{r}
+# Simulate diagnostic test data
+set.seed(456)
+diagnostic_data <- data.frame(
+  patient_id = 1:150,
+  test_method_1 = factor(sample(c("Positive", "Negative"), 150, replace = TRUE, prob = c(0.3, 0.7))),
+  test_method_2 = factor(sample(c("Positive", "Negative"), 150, replace = TRUE, prob = c(0.25, 0.75)))
+)
+
+# McNemar test for diagnostic agreement
+diagnostic_agreement <- contTablesPaired(
+  data = diagnostic_data,
+  rows = "test_method_1",
+  cols = "test_method_2",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Cross-tabulation of diagnostic results
+table(diagnostic_data$test_method_1, diagnostic_data$test_method_2)
+```
+
+## Example 2: Observer Variability in Pathology
+
+```{r}
+# Using the actual rater data for pathology scoring
+pathology_agreement <- contTablesPaired(
+  data = histopathology,
+  rows = "Rater 1",
+  cols = "Rater 3",  # Different pair for variety
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# This assesses inter-observer variability in pathological assessment
+```
+
+# Interpreting Results
+
+## McNemar's Test Statistics
+
+1. **χ² (chi-square)**: Tests the null hypothesis that disagreements are equally distributed
+   - Low p-value suggests systematic bias between raters/methods
+   - High p-value suggests no systematic bias (good agreement)
+
+2. **χ² with continuity correction**: Yates' correction for small samples
+   - More conservative than standard χ²
+   - Recommended for 2×2 tables with small expected frequencies
+
+3. **Exact log odds ratio**: Provides exact confidence intervals
+   - Useful for small samples or when normal approximation is questionable
+   - Requires exact2x2 package
+
+## Agreement vs. Association
+
+- **McNemar's test**: Tests for *systematic bias* or *marginal homogeneity*
+- **Not the same as**: Overall agreement or correlation
+- **Use additionally**: Kappa statistics or ICC for agreement strength
+
+## Clinical Interpretation Guidelines
+
+1. **Significant McNemar test (p < 0.05)**: 
+   - Systematic bias exists between raters/methods
+   - One consistently rates higher/lower than the other
+   - Need to investigate source of bias
+
+2. **Non-significant McNemar test (p ≥ 0.05)**:
+   - No systematic bias detected
+   - Disagreements are balanced
+   - Still need to assess overall agreement level
+
+3. **Contingency Table Patterns**:
+   - **High diagonal values**: Good overall agreement
+   - **High off-diagonal values**: Poor agreement
+   - **Asymmetric off-diagonals**: Systematic bias
+
+# Sample Size Considerations
+
+```{r}
+# Example of how sample size affects power
+small_sample <- histopathology[1:30, ]
+
+small_sample_test <- contTablesPaired(
+  data = small_sample,
+  rows = "Rater 1",
+  cols = "Rater 2",
+  chiSq = TRUE,
+  chiSqCorr = TRUE  # Continuity correction especially important for small samples
+)
+
+# With small samples, consider exact tests
+```
+
+# Best Practices for Clinical Research
+
+1. **Pre-specify hypotheses**: Define what constitutes acceptable agreement
+2. **Power calculations**: Ensure adequate sample size for detecting meaningful differences
+3. **Multiple comparisons**: Adjust for multiple testing when comparing many rater pairs
+4. **Context matters**: Consider clinical significance, not just statistical significance
+5. **Report effect sizes**: Include measures of agreement strength (kappa, ICC)
+6. **Validate findings**: Use independent datasets when possible
+
+# Troubleshooting Common Issues
+
+## Non-2×2 Tables
+For tables larger than 2×2, McNemar's test becomes a test of marginal homogeneity but may have reduced power.
+
+## Small Expected Frequencies
+Use continuity correction or exact tests when expected frequencies are small.
+
+## Missing Data
+The function uses complete cases only. Consider multiple imputation for missing data patterns.
+
+## Multiple Categories
+For ordinal data, consider alternative approaches like weighted kappa or ordinal McNemar tests.
+
+# Conclusion
+
+The `contTablesPaired` function provides a comprehensive toolkit for analyzing paired samples contingency tables in clinical research. From basic inter-rater agreement to complex diagnostic test comparisons, it handles the unique challenges of paired data while providing appropriate statistical tests.
+
+Key advantages:
+- Accounts for within-subject correlation
+- Multiple test options (standard, continuity correction, exact)
+- Flexible data input (individual observations or counts)
+- Formula interface for convenience
+- Comprehensive error handling
+
+This makes it an essential tool for quality assurance, method comparison, and reliability studies in clinical pathology and medical research.

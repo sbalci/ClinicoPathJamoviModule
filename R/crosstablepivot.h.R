@@ -101,13 +101,11 @@ crosstablepivotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Instructions",
-                visible="(vars && group)"))
+                title="Instructions"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pivot_table",
                 title="Pivot Cross Table",
-                visible="(vars && group)",
                 clearWith=list(
                     "vars",
                     "group",
@@ -127,7 +125,7 @@ crosstablepivotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="summary_stats",
                 title="Summary Statistics",
-                visible="(vars && group && statistics)",
+                visible="(statistics)",
                 clearWith=list(
                     "vars",
                     "group",

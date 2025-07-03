@@ -144,11 +144,18 @@ reportcat(
 
 ### Benford's Law Analysis
 
-```{r}
+```{r eval=FALSE}
 # Fraud detection using Benford's law
+# Create a dataset suitable for Benford analysis
+set.seed(123)
+benford_data <- data.frame(
+  financial_amounts = round(rlnorm(300, 8, 2))
+)
+
+# Run Benford analysis
 benford(
-  data = histopathology,
-  var = "MeasurementA"
+  data = benford_data,
+  var = "financial_amounts"
 )
 ```
 

@@ -1,0 +1,618 @@
+---
+title: "jSurvival 16: Cox Proportional Hazards Model Diagnostics"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{jSurvival 16: Cox Proportional Hazards Model Diagnostics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+  eval = FALSE
+)
+```
+
+# Introduction
+
+The Cox proportional hazards model is one of the most widely used statistical methods in survival analysis for clinical research. However, like all statistical models, the validity of Cox regression results depends on certain assumptions being met. The **coxdiagnostics** function in ClinicoPath provides comprehensive diagnostic tools to validate Cox model assumptions and assess model adequacy.
+
+**Learning Objectives:**
+
+- Understand the key assumptions of Cox proportional hazards models
+- Learn to interpret diagnostic plots for Cox model validation
+- Master the use of residual analysis for model assessment
+- Apply multicollinearity detection using VIF analysis
+- Develop skills in identifying influential observations
+- Create comprehensive diagnostic reports for clinical publications
+
+## Why Cox Model Diagnostics Matter
+
+Cox model diagnostics are essential for:
+
+- **Model Validation**: Ensuring model assumptions are met
+- **Clinical Validity**: Confirming results can be trusted for medical decisions
+- **Publication Quality**: Meeting standards for peer-reviewed research
+- **Regulatory Compliance**: Satisfying FDA and other regulatory requirements
+- **Patient Safety**: Ensuring reliable prognostic models
+
+# Cox Model Assumptions
+
+The Cox proportional hazards model relies on several key assumptions:
+
+## 1. Proportional Hazards Assumption
+
+The hazard ratio between any two individuals remains constant over time. This is the most critical assumption of the Cox model.
+
+## 2. Log-linearity
+
+The relationship between continuous covariates and the log hazard is linear.
+
+## 3. Independence
+
+Observations should be independent of each other.
+
+## 4. No Multicollinearity
+
+Covariates should not be highly correlated with each other.
+
+# Diagnostic Plot Types
+
+## Martingale Residuals
+
+- **Purpose**: Detect non-linear relationships and outliers
+- **Interpretation**: Should be randomly scattered around zero
+- **Warning Signs**: Patterns suggest non-linear relationships
+
+## Deviance Residuals
+
+- **Purpose**: Identify poorly fitted observations
+- **Interpretation**: Should be approximately normally distributed
+- **Warning Signs**: Values > 2 or < -2 indicate poor fit
+
+## Schoenfeld Residuals
+
+- **Purpose**: Test proportional hazards assumption
+- **Interpretation**: Should show no trend over time
+- **Warning Signs**: Slopes indicate time-varying effects
+
+## Score Residuals
+
+- **Purpose**: Assess influential observations
+- **Interpretation**: Identify observations with high influence on parameter estimates
+
+## DFBeta Plots
+
+- **Purpose**: Evaluate influence of individual observations
+- **Interpretation**: Values > 2/√n suggest influential observations
+
+# Getting Started
+
+```{r load-packages}
+# Load required packages
+library(ClinicoPath)
+library(survival)
+library(survminer)
+
+# Load example datasets
+data("melanoma")
+data("colon") 
+data("histopathology")
+```
+
+# Basic Cox Model Diagnostics
+
+## Example 1: Melanoma Dataset
+
+Let's start with a basic Cox model diagnostic analysis using the melanoma dataset.
+
+```{r basic-melanoma}
+# Basic Cox diagnostics for melanoma data
+coxdiagnostics(
+  data = melanoma,
+  time = "time",
+  event = "status", 
+  covariates = c("age", "sex"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_ph_test = TRUE,
+  show_model_summary = TRUE
+)
+```
+
+### Key Features:
+
+- **Model Summary**: Provides coefficient estimates and model statistics
+- **Proportional Hazards Test**: Tests the key assumption using Schoenfeld residuals
+- **Martingale Residuals**: Checks for non-linear relationships
+- **Deviance Residuals**: Identifies poorly fitted observations
+
+## Example 2: Multiple Covariates with VIF Analysis
+
+```{r melanoma-vif}
+# Cox diagnostics with VIF analysis for multicollinearity
+coxdiagnostics(
+  data = melanoma,
+  time = "time",
+  event = "status",
+  covariates = c("age", "sex", "thickness", "ulcer"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_vif = TRUE,
+  vif_threshold = 5.0,
+  show_interpretation = TRUE
+)
+```
+
+### VIF Analysis:
+
+- **VIF < 2.5**: No multicollinearity concern
+- **VIF 2.5-5**: Moderate multicollinearity (monitor)
+- **VIF ≥ 5**: High multicollinearity (problematic)
+
+# Advanced Diagnostic Analysis
+
+## Example 3: Comprehensive Diagnostic Panel
+
+```{r comprehensive-colon}
+# Comprehensive Cox diagnostics with all plot types
+coxdiagnostics(
+  data = colon,
+  time = "time",
+  event = "status",
+  covariates = c("age", "sex", "nodes", "differ"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_score = TRUE,
+  show_schoenfeld = TRUE,
+  show_dfbeta = TRUE,
+  show_ph_test = TRUE,
+  show_vif = TRUE,
+  show_model_summary = TRUE,
+  show_interpretation = TRUE
+)
+```
+
+### Comprehensive Analysis Includes:
+
+- **All Residual Types**: Martingale, Deviance, Score, Schoenfeld, DFBeta
+- **Statistical Tests**: Proportional hazards test with p-values
+- **Multicollinearity Assessment**: VIF analysis with recommendations
+- **Clinical Interpretation**: Detailed guidance for each diagnostic
+
+## Example 4: Stratified Cox Model Diagnostics
+
+```{r stratified-colon}
+# Cox diagnostics with stratification
+coxdiagnostics(
+  data = colon,
+  time = "time",
+  event = "status",
+  covariates = c("age", "nodes"),
+  strata_var = "rx",  # Stratify by treatment
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_ph_test = TRUE,
+  exclude_missing = TRUE
+)
+```
+
+### Stratification Benefits:
+
+- **Handles Non-proportional Hazards**: For stratification variables
+- **Adjusted Analysis**: Controls for stratification factors
+- **Flexible Modeling**: Allows different baseline hazards
+
+# Clinical Research Applications
+
+## Example 5: Pathology Research with Histopathology Data
+
+```{r pathology-research}
+# Cox diagnostics for pathology research
+coxdiagnostics(
+  data = histopathology,
+  time = "OverallTime",
+  event = "Outcome",
+  covariates = c("Age", "Sex", "Grade", "TStage"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_schoenfeld = TRUE,
+  show_vif = TRUE,
+  show_ph_test = TRUE,
+  show_model_summary = TRUE,
+  exclude_missing = TRUE,
+  confidence_level = 0.95
+)
+```
+
+### Clinical Considerations:
+
+- **Missing Data Handling**: Exclude incomplete cases for clean analysis
+- **Confidence Levels**: Standard 95% confidence intervals
+- **Multiple Covariates**: Age, sex, pathological grade and stage
+- **Outcome Variables**: Overall survival time and event status
+
+## Example 6: Biomarker Validation Study
+
+```{r biomarker-validation}
+# Create biomarker validation dataset
+set.seed(123)
+n_patients <- 200
+
+biomarker_data <- data.frame(
+  patient_id = 1:n_patients,
+  survival_time = rweibull(n_patients, shape = 1.5, scale = 24),
+  event_occurred = rbinom(n_patients, 1, 0.65),
+  age = round(rnorm(n_patients, 65, 12)),
+  sex = factor(sample(c("Male", "Female"), n_patients, replace = TRUE)),
+  biomarker_score = rnorm(n_patients, 50, 15),
+  tumor_stage = factor(sample(c("I", "II", "III", "IV"), n_patients, 
+                             replace = TRUE, prob = c(0.2, 0.3, 0.3, 0.2)))
+)
+
+# Ensure realistic ranges
+biomarker_data$age <- pmax(18, pmin(85, biomarker_data$age))
+biomarker_data$survival_time <- pmax(1, pmin(60, biomarker_data$survival_time))
+biomarker_data$biomarker_score <- pmax(0, pmin(100, biomarker_data$biomarker_score))
+
+# Cox diagnostics for biomarker validation
+coxdiagnostics(
+  data = biomarker_data,
+  time = "survival_time",
+  event = "event_occurred",
+  covariates = c("age", "sex", "biomarker_score", "tumor_stage"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_schoenfeld = TRUE,
+  show_vif = TRUE,
+  show_ph_test = TRUE,
+  show_model_summary = TRUE,
+  vif_threshold = 5.0,
+  show_interpretation = TRUE
+)
+```
+
+# Plot Customization Options
+
+## Example 7: Custom Plot Settings
+
+```{r custom-plots}
+# Customized diagnostic plots
+coxdiagnostics(
+  data = melanoma,
+  time = "time",
+  event = "status",
+  covariates = c("age", "thickness"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  ox_scale = "observation.id",  # Different x-axis scale
+  add_smooth = TRUE,            # Add smoothing line
+  add_reference = TRUE,         # Add reference line at y=0
+  point_size = 1.5,            # Larger points
+  alpha_level = 0.7,           # Semi-transparent points
+  show_interpretation = TRUE
+)
+```
+
+### Plot Customization Options:
+
+- **X-axis Scale**: Linear predictions, observation ID, or time
+- **Point Size**: Adjustable from 0.5 to 3.0
+- **Transparency**: Alpha levels from 0.1 to 1.0
+- **Reference Lines**: Horizontal line at y=0
+- **Smooth Lines**: LOESS smoothing to identify patterns
+
+# Interpretation Guidelines
+
+## Martingale Residuals
+
+**Normal Pattern:**
+- Randomly scattered around zero
+- No obvious patterns or trends
+- Most values between -2 and +2
+
+**Warning Signs:**
+- Systematic patterns (curved relationships)
+- Outliers with extreme values (>3 or <-3)
+- Funnel shapes suggesting heteroscedasticity
+
+## Deviance Residuals
+
+**Normal Pattern:**
+- Approximately symmetric around zero
+- Most values between -2 and +2
+- No systematic patterns
+
+**Warning Signs:**
+- Values > 2 or < -2 (poorly fitted observations)
+- Asymmetric distribution
+- Systematic patterns
+
+## Schoenfeld Residuals
+
+**Normal Pattern:**
+- No trend over time
+- Random scatter around zero
+- Flat smoothing line
+
+**Warning Signs:**
+- Significant slope (p < 0.05)
+- Systematic trends over time
+- Non-random patterns
+
+## VIF Analysis
+
+**Interpretation:**
+- **VIF < 2.5**: No concern
+- **VIF 2.5-5**: Moderate concern, monitor
+- **VIF ≥ 5**: High concern, take action
+
+**Actions for High VIF:**
+- Remove highly correlated variables
+- Use principal component analysis
+- Apply regularization (ridge/lasso)
+- Create composite scores
+
+# Clinical Decision Making
+
+## When Assumptions Are Met
+
+**Proceed with confidence:**
+- Report Cox model results
+- Use for clinical predictions
+- Include in publications
+- Apply to clinical practice
+
+## When Assumptions Are Violated
+
+**Consider alternatives:**
+- **Stratified Cox Model**: For non-proportional hazards
+- **Time-dependent Covariates**: For time-varying effects
+- **Parametric Models**: Weibull, log-normal, etc.
+- **Machine Learning**: Random forests, neural networks
+
+# Publication-Ready Analysis
+
+## Example 8: Complete Diagnostic Report
+
+```{r publication-ready}
+# Complete diagnostic analysis for publication
+results <- coxdiagnostics(
+  data = colon,
+  time = "time",
+  event = "status",
+  covariates = c("age", "sex", "nodes", "differ", "extent"),
+  show_martingale = TRUE,
+  show_deviance = TRUE,
+  show_schoenfeld = TRUE,
+  show_dfbeta = TRUE,
+  show_ph_test = TRUE,
+  show_vif = TRUE,
+  show_model_summary = TRUE,
+  show_interpretation = TRUE,
+  confidence_level = 0.95,
+  exclude_missing = TRUE
+)
+```
+
+### Publication Checklist:
+
+- ✅ **Model Summary**: Coefficients, hazard ratios, confidence intervals
+- ✅ **Assumption Testing**: Proportional hazards test results
+- ✅ **Residual Analysis**: All diagnostic plots included
+- ✅ **Multicollinearity**: VIF analysis performed
+- ✅ **Missing Data**: Handling strategy documented
+- ✅ **Sample Size**: Adequate for number of covariates
+- ✅ **Clinical Interpretation**: Results explained in clinical context
+
+# Quality Control Guidelines
+
+## Sample Size Requirements
+
+**Rule of thumb:** Minimum 10 events per covariate
+
+```{r sample-size-check}
+# Check sample size adequacy
+cat("Sample size guidelines:\n")
+cat("- Events per covariate: ≥ 10\n")
+cat("- Total events: ≥ 50 for stable estimates\n")
+cat("- Follow-up completeness: ≥ 80%\n")
+```
+
+## Model Selection Strategy
+
+1. **Start Simple**: Begin with clinically important variables
+2. **Check Assumptions**: Run diagnostics after each addition
+3. **Address Violations**: Fix problems before proceeding
+4. **Final Validation**: Complete diagnostic panel
+5. **Clinical Review**: Ensure biological plausibility
+
+# Common Issues and Solutions
+
+## Issue 1: Non-Proportional Hazards
+
+**Detection:**
+- Significant Schoenfeld test (p < 0.05)
+- Trends in Schoenfeld residual plots
+
+**Solutions:**
+- Stratify by offending variable
+- Use time-dependent covariates
+- Consider parametric models
+
+## Issue 2: Non-Linear Relationships
+
+**Detection:**
+- Patterns in martingale residuals
+- Curved relationships in plots
+
+**Solutions:**
+- Add polynomial terms
+- Use splines or smoothing
+- Transform continuous variables
+
+## Issue 3: Influential Observations
+
+**Detection:**
+- Extreme DFBeta values (> 2/√n)
+- Outliers in residual plots
+
+**Solutions:**
+- Investigate data quality
+- Consider robust methods
+- Sensitivity analysis
+
+## Issue 4: Multicollinearity
+
+**Detection:**
+- High VIF values (≥ 5)
+- Unstable coefficient estimates
+
+**Solutions:**
+- Remove correlated variables
+- Use regularization methods
+- Create composite scores
+
+# Best Practices
+
+## Data Preparation
+
+```{r data-prep-example}
+# Example of proper data preparation
+clean_data <- function(data) {
+  # Remove invalid time values
+  data <- data[data$time > 0, ]
+  
+  # Check event coding (should be 0/1)
+  data$status <- ifelse(data$status == 2, 1, data$status)
+  
+  # Handle missing values appropriately
+  complete_vars <- c("time", "status", "age", "sex")
+  data <- data[complete.cases(data[complete_vars]), ]
+  
+  return(data)
+}
+
+# Apply to melanoma data
+melanoma_clean <- clean_data(melanoma)
+```
+
+## Systematic Diagnostic Approach
+
+1. **Model Summary**: Review coefficient estimates and model fit
+2. **Proportional Hazards**: Test the key assumption first
+3. **Residual Analysis**: Examine all residual types systematically
+4. **Influence Analysis**: Identify potentially problematic observations
+5. **Multicollinearity**: Check for correlation among predictors
+6. **Clinical Review**: Ensure results make biological sense
+
+## Documentation Standards
+
+```{r documentation-template}
+# Template for documenting Cox diagnostics
+diagnostic_report <- function(model_name, dataset, findings) {
+  cat("=== Cox Model Diagnostic Report ===\n")
+  cat("Model:", model_name, "\n")
+  cat("Dataset:", dataset, "\n")
+  cat("Date:", Sys.Date(), "\n\n")
+  
+  cat("Diagnostic Findings:\n")
+  cat("- Proportional Hazards:", findings$ph_test, "\n")
+  cat("- Linearity:", findings$linearity, "\n")
+  cat("- Influential Observations:", findings$influence, "\n")
+  cat("- Multicollinearity:", findings$vif, "\n\n")
+  
+  cat("Recommendations:\n")
+  cat("- Model Adequacy:", findings$adequacy, "\n")
+  cat("- Required Actions:", findings$actions, "\n")
+}
+```
+
+# Advanced Topics
+
+## Time-Dependent Covariates
+
+When proportional hazards assumption is violated, consider time-dependent covariates:
+
+```{r time-dependent-example, eval=FALSE}
+# Example of time-dependent covariate approach
+# (This would require additional data preparation)
+# cox_model_td <- coxph(Surv(start, stop, event) ~ age + sex + 
+#                       covariate * log(time), data = long_format_data)
+```
+
+## Stratified Analysis
+
+For variables that don't meet proportional hazards:
+
+```{r stratified-example}
+# Stratified Cox model diagnostics
+coxdiagnostics(
+  data = colon,
+  time = "time",
+  event = "status",
+  covariates = c("age", "nodes"),
+  strata_var = "differ",  # Stratify by differentiation
+  show_ph_test = TRUE,
+  show_martingale = TRUE
+)
+```
+
+## Regularized Cox Models
+
+For high-dimensional data or multicollinearity issues:
+
+```{r regularized-note, eval=FALSE}
+# Note: Regularized Cox models (lasso, ridge) would require
+# additional packages like glmnet
+# These can be useful when standard Cox models show
+# multicollinearity issues
+```
+
+# Summary
+
+The **coxdiagnostics** function provides a comprehensive toolkit for validating Cox proportional hazards models in clinical research. Key takeaways:
+
+## Essential Diagnostics
+
+1. **Proportional Hazards Test**: Most critical assumption
+2. **Residual Analysis**: Multiple types for different purposes
+3. **VIF Analysis**: Detect multicollinearity
+4. **Influence Diagnostics**: Identify problematic observations
+
+## Clinical Applications
+
+- **Biomarker Validation**: Ensure reliable prognostic models
+- **Treatment Efficacy**: Validate survival endpoints
+- **Risk Stratification**: Develop clinical prediction tools
+- **Regulatory Submissions**: Meet statistical requirements
+
+## Quality Assurance
+
+- **Assumption Checking**: Systematic validation approach
+- **Documentation**: Complete diagnostic reports
+- **Interpretation**: Clinical significance assessment
+- **Publication Standards**: Peer-review ready analysis
+
+## Next Steps
+
+1. **Practice**: Apply to your own survival datasets
+2. **Iterate**: Refine models based on diagnostic findings
+3. **Validate**: Use external datasets when possible
+4. **Collaborate**: Work with biostatisticians for complex cases
+
+The robust diagnostic capabilities of **coxdiagnostics** ensure that your Cox regression analyses meet the highest standards for clinical research and publication.

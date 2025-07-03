@@ -515,3 +515,7 @@ Language: c\n
 - **R/**: Function definitions only
 - **data-raw/**: Data generation scripts (run manually when needed)
 - **data/**: Final .rda datasets (committed to repository)
+
+## Development Workflow Memories
+
+- Inside .run function if you are calling another function from private group, call it as `private$.functionName()`

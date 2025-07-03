@@ -317,7 +317,7 @@ enhancedtablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="summary_stats",
                 title="Summary Statistics",
-                visible="(vars && table_type:summary)",
+                visible="(table_type:summary)",
                 clearWith=list(
                     "vars",
                     "group_var",
@@ -327,7 +327,7 @@ enhancedtablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="group_comparison",
                 title="Group Comparison Results",
-                visible="(vars && group_var && include_pvalues)",
+                visible="(include_pvalues)",
                 clearWith=list(
                     "vars",
                     "group_var",
@@ -337,7 +337,7 @@ enhancedtablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible="(show_interpretation && vars)",
+                visible="(show_interpretation)",
                 clearWith=list(
                     "vars",
                     "group_var",
@@ -346,7 +346,7 @@ enhancedtablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="export_table",
                 title="Export Ready Table",
-                visible="(vars && export_format)",
+                visible="(export_format)",
                 clearWith=list(
                     "vars",
                     "export_format",

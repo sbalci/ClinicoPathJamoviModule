@@ -63,6 +63,7 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..strata_var <- jmvcore::OptionVariable$new(
                 "strata_var",
                 strata_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -461,7 +462,7 @@ coxdiagnostics <- function(
     time,
     event,
     covariates,
-    strata_var,
+    strata_var = NULL,
     show_martingale = TRUE,
     show_deviance = TRUE,
     show_score = FALSE,
