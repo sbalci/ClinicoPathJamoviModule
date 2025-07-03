@@ -6,12 +6,10 @@ items:
     - name: instructions
       title: Instructions
       type: Html
-      visible: (vars && group)
 
     - name: pivot_table
       title: Pivot Cross Table
       type: Table
-      visible: (vars && group)
       clearWith:
         - vars
         - group
@@ -29,7 +27,7 @@ items:
     - name: summary_stats
       title: Summary Statistics
       type: Table
-      visible: (vars && group && statistics)
+      visible: (statistics)
       clearWith:
         - vars
         - group

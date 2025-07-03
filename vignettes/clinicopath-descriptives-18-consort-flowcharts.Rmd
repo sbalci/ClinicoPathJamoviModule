@@ -1,0 +1,436 @@
+---
+title: "CONSORT Flow Charts for Clinical Trial Reporting"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_width: 8
+    fig_height: 10
+vignette: >
+  %\VignetteIndexEntry{CONSORT Flow Charts for Clinical Trial Reporting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "vignettes/",
+  warning = FALSE,
+  message = FALSE
+)
+
+# Load required libraries
+# library(ClinicoPath)  # Commented out for vignette building
+library(DiagrammeR)
+```
+
+# Introduction to CONSORT Flow Charts
+
+The **CONSORT (Consolidated Standards of Reporting Trials)** statement provides evidence-based recommendations for reporting randomized controlled trials (RCTs). A key component is the flow diagram that tracks participants through each stage of the trial, from initial assessment through final analysis.
+
+## Why CONSORT Flow Charts Matter
+
+CONSORT flow diagrams are essential for:
+
+- **Transparency**: Showing exactly how many participants entered and completed the study
+- **Quality Assessment**: Allowing readers to evaluate potential bias from dropout patterns
+- **Reproducibility**: Providing clear documentation of study conduct
+- **Journal Requirements**: Most medical journals require CONSORT-compliant reporting
+- **Regulatory Compliance**: FDA and EMA expect CONSORT-style reporting
+
+## The ClinicoPath CONSORT Function
+
+The `consort()` function in ClinicoPath generates publication-ready CONSORT flow diagrams automatically. Simply input your trial numbers, and it creates both visual flowcharts and summary statistics.
+
+# Basic CONSORT Flow Chart
+
+Let's start with a simple two-arm trial example:
+
+```{r basic-example, eval=FALSE}
+# Basic cardiovascular trial
+basic_consort <- consort(
+  data = data.frame(),  # consort doesn't analyze patient data
+  initialN = 1000,
+  notEligibleN = 300,
+  notEligibleText = "Age >80 years (n=150), Prior MI <6 months (n=100), Other (n=50)",
+  randomizedN = 700,
+  arm1Label = "ACE Inhibitor",
+  arm1N = 350,
+  arm1ReceivedN = 340,
+  arm1LostN = 45,
+  arm1AnalyzedN = 295,
+  arm2Label = "Placebo",
+  arm2N = 350,
+  arm2ReceivedN = 345,
+  arm2LostN = 40,
+  arm2AnalyzedN = 305,
+  excludedText = "Lost to follow-up, protocol violations"
+)
+```
+
+The function produces:
+1. **Summary Table**: Key numbers with percentages
+2. **Flow Diagram**: Visual CONSORT chart
+3. **Text Summary**: Detailed narrative description
+
+# Real-World Examples Using Sample Data
+
+ClinicoPath includes the `consort_examples_data` dataset with realistic trial scenarios:
+
+```{r load-data, eval=FALSE}
+# Load the example data
+data(consort_examples_data)
+str(consort_examples_data)
+
+# View the different trial types
+consort_examples_data$trial_name
+```
+
+## Example 1: Large Cardiovascular Outcomes Trial
+
+```{r cv-trial, eval=FALSE}
+# Extract cardiovascular trial data
+cv_trial <- consort_examples_data[1, ]
+
+# Create CONSORT flowchart
+cv_consort <- consort(
+  data = data.frame(),
+  initialN = cv_trial$initial_assessed,
+  notEligibleN = cv_trial$not_eligible,
+  notEligibleText = cv_trial$not_eligible_reasons,
+  randomizedN = cv_trial$randomized,
+  arm1Label = cv_trial$arm1_label,
+  arm1N = cv_trial$arm1_allocated,
+  arm1ReceivedN = cv_trial$arm1_received,
+  arm1LostN = cv_trial$arm1_lost_followup,
+  arm1AnalyzedN = cv_trial$arm1_analyzed,
+  arm2Label = cv_trial$arm2_label,
+  arm2N = cv_trial$arm2_allocated,
+  arm2ReceivedN = cv_trial$arm2_received,
+  arm2LostN = cv_trial$arm2_lost_followup,
+  arm2AnalyzedN = cv_trial$arm2_analyzed,
+  excludedText = cv_trial$exclusion_reasons
+)
+```
+
+This represents a typical large-scale cardiovascular outcomes trial with:
+- 5,000 patients initially screened
+- 30% exclusion rate (typical for cardiovascular studies)
+- Balanced randomization
+- ~10% dropout rate (acceptable for long-term studies)
+
+## Example 2: Cancer Immunotherapy Trial
+
+```{r cancer-trial, eval=FALSE}
+# Extract cancer trial data
+cancer_trial <- consort_examples_data[2, ]
+
+cancer_consort <- consort(
+  data = data.frame(),
+  initialN = cancer_trial$initial_assessed,
+  notEligibleN = cancer_trial$not_eligible,
+  notEligibleText = cancer_trial$not_eligible_reasons,
+  randomizedN = cancer_trial$randomized,
+  arm1Label = cancer_trial$arm1_label,
+  arm1N = cancer_trial$arm1_allocated,
+  arm1ReceivedN = cancer_trial$arm1_received,
+  arm1LostN = cancer_trial$arm1_lost_followup,
+  arm1AnalyzedN = cancer_trial$arm1_analyzed,
+  arm2Label = cancer_trial$arm2_label,
+  arm2N = cancer_trial$arm2_allocated,
+  arm2ReceivedN = cancer_trial$arm2_received,
+  arm2LostN = cancer_trial$arm2_lost_followup,
+  arm2AnalyzedN = cancer_trial$arm2_analyzed,
+  excludedText = cancer_trial$exclusion_reasons
+)
+```
+
+Cancer trials often have:
+- Strict inclusion criteria (29% exclusion here)
+- Higher dropout rates due to disease progression
+- Time-to-event endpoints requiring careful follow-up
+
+## Example 3: Small Pilot Study
+
+```{r pilot-trial, eval=FALSE}
+# Extract pilot study data
+pilot_trial <- consort_examples_data[5, ]
+
+pilot_consort <- consort(
+  data = data.frame(),
+  initialN = pilot_trial$initial_assessed,
+  notEligibleN = pilot_trial$not_eligible,
+  notEligibleText = pilot_trial$not_eligible_reasons,
+  randomizedN = pilot_trial$randomized,
+  arm1Label = pilot_trial$arm1_label,
+  arm1N = pilot_trial$arm1_allocated,
+  arm1ReceivedN = pilot_trial$arm1_received,
+  arm1LostN = pilot_trial$arm1_lost_followup,
+  arm1AnalyzedN = pilot_trial$arm1_analyzed,
+  arm2Label = pilot_trial$arm2_label,
+  arm2N = pilot_trial$arm2_allocated,
+  arm2ReceivedN = pilot_trial$arm2_received,
+  arm2LostN = pilot_trial$arm2_lost_followup,
+  arm2AnalyzedN = pilot_trial$arm2_analyzed,
+  excludedText = pilot_trial$exclusion_reasons
+)
+```
+
+Pilot studies typically have:
+- Smaller sample sizes (150 assessed, 100 randomized)
+- Focus on feasibility and safety
+- Higher proportional exclusions due to strict criteria
+
+# Advanced Usage Scenarios
+
+## Unequal Randomization (2:1 Ratio)
+
+Some trials use unequal randomization to get more safety data on the experimental treatment:
+
+```{r unequal-randomization, eval=FALSE}
+unequal_consort <- consort(
+  data = data.frame(),
+  initialN = 900,
+  notEligibleN = 300,
+  notEligibleText = "Failed eligibility criteria",
+  randomizedN = 600,
+  arm1Label = "Experimental Drug (2:1)",
+  arm1N = 400,  # 2/3 of randomized patients
+  arm1ReceivedN = 390,
+  arm1LostN = 60,
+  arm1AnalyzedN = 330,
+  arm2Label = "Standard Care (2:1)",
+  arm2N = 200,  # 1/3 of randomized patients
+  arm2ReceivedN = 195,
+  arm2LostN = 25,
+  arm2AnalyzedN = 170,
+  excludedText = "Lost to follow-up, adverse events"
+)
+```
+
+## High Dropout Scenario
+
+Some studies face high dropout rates that need careful documentation:
+
+```{r high-dropout, eval=FALSE}
+high_dropout_consort <- consort(
+  data = data.frame(),
+  initialN = 500,
+  notEligibleN = 100,
+  notEligibleText = "High-risk population with multiple comorbidities",
+  randomizedN = 400,
+  arm1Label = "Intensive Intervention",
+  arm1N = 200,
+  arm1ReceivedN = 185,
+  arm1LostN = 75,  # 40% dropout
+  arm1AnalyzedN = 110,
+  arm2Label = "Standard Care",
+  arm2N = 200,
+  arm2ReceivedN = 195,
+  arm2LostN = 45,  # 23% dropout
+  arm2AnalyzedN = 150,
+  excludedText = "High burden intervention, patient withdrawal, adverse events"
+)
+```
+
+# CONSORT Guidelines and Best Practices
+
+## Essential Elements
+
+Every CONSORT flow diagram should include:
+
+1. **Enrollment**:
+   - Number assessed for eligibility
+   - Number excluded (with reasons)
+   - Number randomized
+
+2. **Allocation**:
+   - Number allocated to each intervention
+   - Number receiving intended treatment
+
+3. **Follow-up**:
+   - Number lost to follow-up (with reasons)
+   - Number discontinuing intervention
+
+4. **Analysis**:
+   - Number analyzed for primary outcome
+   - Exclusions from analysis
+
+## Common Patterns by Study Type
+
+### Phase I Dose Escalation
+```{r phase1-example, eval=FALSE}
+# Small numbers, safety focus
+phase1_consort <- consort(
+  data = data.frame(),
+  initialN = 60,
+  notEligibleN = 15,
+  notEligibleText = "Strict safety criteria",
+  randomizedN = 45,
+  arm1Label = "Dose Level 1",
+  arm1N = 15,
+  arm1ReceivedN = 15,
+  arm1LostN = 1,
+  arm1AnalyzedN = 14,
+  arm2Label = "Dose Level 2", 
+  arm2N = 15,
+  arm2ReceivedN = 14,
+  arm2LostN = 2,
+  arm2AnalyzedN = 12
+)
+```
+
+### Phase II Efficacy Studies
+```{r phase2-example, eval=FALSE}
+# Moderate size, efficacy focus
+phase2_consort <- consort(
+  data = data.frame(),
+  initialN = 300,
+  notEligibleN = 80,
+  randomizedN = 220,
+  arm1Label = "Experimental",
+  arm1N = 110,
+  arm1AnalyzedN = 95,
+  arm2Label = "Control",
+  arm2N = 110,
+  arm2AnalyzedN = 98
+)
+```
+
+### Phase III Confirmatory Trials
+```{r phase3-example, eval=FALSE}
+# Large scale, definitive evidence
+phase3_consort <- consort(
+  data = data.frame(),
+  initialN = 3000,
+  notEligibleN = 1000,
+  randomizedN = 2000,
+  arm1Label = "New Treatment",
+  arm1N = 1000,
+  arm1AnalyzedN = 850,
+  arm2Label = "Standard Care",
+  arm2N = 1000,
+  arm2AnalyzedN = 875
+)
+```
+
+# Integration with jamovi
+
+The CONSORT function integrates seamlessly with jamovi:
+
+1. **Open jamovi** and load your module
+2. **Navigate** to Exploration → ClinicoPath Reports → CONSORT Flowchart
+3. **Enter your trial numbers** in the interface:
+   - Enrollment numbers
+   - Randomization details
+   - Arm-specific data
+   - Exclusion reasons
+4. **Review outputs**:
+   - Summary statistics table
+   - Visual flow diagram
+   - Text summary
+
+## Tips for jamovi Users
+
+- **Start with estimates**: Begin with approximate numbers and refine
+- **Use descriptive labels**: Clear arm names improve readability
+- **Include detailed reasons**: Specific exclusion text enhances transparency
+- **Export for publication**: Use the generated diagrams directly in manuscripts
+
+# Statistical Considerations
+
+## Sample Size and Power
+CONSORT diagrams help readers assess whether the study had adequate power:
+
+```{r power-assessment, eval=FALSE}
+# Calculate effective sample sizes from our examples
+cv_effective_n <- cv_trial$arm1_analyzed + cv_trial$arm2_analyzed
+cancer_effective_n <- cancer_trial$arm1_analyzed + cancer_trial$arm2_analyzed
+
+cat("Cardiovascular trial analyzed N:", cv_effective_n, "\n")
+cat("Cancer trial analyzed N:", cancer_effective_n, "\n")
+
+# Dropout rates
+cv_dropout_rate <- (cv_trial$arm1_lost_followup + cv_trial$arm2_lost_followup) / cv_trial$randomized * 100
+cancer_dropout_rate <- (cancer_trial$arm1_lost_followup + cancer_trial$arm2_lost_followup) / cancer_trial$randomized * 100
+
+cat("CV trial dropout rate:", round(cv_dropout_rate, 1), "%\n")
+cat("Cancer trial dropout rate:", round(cancer_dropout_rate, 1), "%\n")
+```
+
+## Bias Assessment
+
+CONSORT diagrams help identify potential sources of bias:
+
+- **Imbalanced dropout**: Unequal loss between arms
+- **High overall dropout**: >20% may compromise validity
+- **Differential reasons**: Different dropout reasons between arms
+- **Post-randomization exclusions**: Should be minimal and balanced
+
+## Reporting Standards
+
+Different journals may have specific requirements:
+
+- **High-impact journals**: Often require detailed CONSORT compliance
+- **Specialty journals**: May have field-specific modifications
+- **Regulatory submissions**: FDA/EMA have specific formatting expectations
+
+# Troubleshooting Common Issues
+
+## Inconsistent Numbers
+
+Ensure logical flow:
+```{r number-checks, eval=FALSE}
+# Check: randomized = arm1 + arm2
+randomized_check <- arm1N + arm2N == randomizedN
+
+# Check: analyzed <= received <= allocated
+arm1_logic <- arm1AnalyzedN <= arm1ReceivedN & arm1ReceivedN <= arm1N
+arm2_logic <- arm2AnalyzedN <= arm2ReceivedN & arm2ReceivedN <= arm2N
+```
+
+## Missing Data Handling
+
+Be explicit about:
+- Patients with missing primary endpoint data
+- Protocol violations
+- Consent withdrawals
+- Lost to follow-up vs. study discontinuation
+
+## Complex Study Designs
+
+For crossover, cluster randomized, or adaptive designs:
+- Modify the standard CONSORT template
+- Add additional flowchart elements as needed
+- Consult CONSORT extensions for specific designs
+
+# Conclusion
+
+The ClinicoPath CONSORT function provides:
+
+✅ **Easy generation** of publication-ready flow diagrams  
+✅ **Automatic calculations** of percentages and summaries  
+✅ **Professional formatting** meeting journal standards  
+✅ **Comprehensive examples** for different trial types  
+✅ **Integration with jamovi** for interactive use  
+
+## Next Steps
+
+1. **Practice** with the provided examples
+2. **Adapt** the parameters to your own trial data
+3. **Export** diagrams for your publications
+4. **Combine** with other ClinicoPath functions for complete trial reporting
+
+## References
+
+- Schulz KF, Altman DG, Moher D, for the CONSORT Group. CONSORT 2010 Statement: updated guidelines for reporting parallel group randomised trials. BMJ 2010;340:c332.
+- CONSORT website: http://www.consort-statement.org/
+- Clinical trial reporting guidelines: https://www.equator-network.org/
+
+---
+
+*For more information about ClinicoPath, visit our documentation at [ClinicoPath Guide](https://www.serdarbalci.com/ClinicoPathJamoviModule/)*

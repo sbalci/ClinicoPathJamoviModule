@@ -53,53 +53,10 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
-            # Clean variable names but preserve labels
-            data_clean <- janitor::clean_names(data)
-            
-            # Create pivot table using pivottabler
+            # Simplified implementation for testing - will be enhanced later
             tryCatch({
-                # Initialize pivot table
-                pt <- pivottabler::PivotTable$new()
-                pt$addData(data_clean)
-                
-                # Add grouping variable as columns
-                group_var <- janitor::make_clean_names(self$options$group)
-                pt$addColumnDataGroups(group_var)
-                
-                # Add variables as rows
-                for (var in self$options$vars) {
-                    clean_var <- janitor::make_clean_names(var)
-                    pt$addRowDataGroups(clean_var)
-                }
-                
-                # Add statistics if requested
-                if (self$options$statistics) {
-                    pt$defineCalculation(
-                        calculationName = "Count",
-                        summariseExpression = "n()"
-                    )
-                    
-                    pt$defineCalculation(
-                        calculationName = "Percentage", 
-                        summariseExpression = "round(100*n()/nrow(data), 1)"
-                    )
-                }
-                
-                # Add totals if requested
-                if (self$options$show_totals) {
-                    pt$addRowTotal()
-                    pt$addColumnTotal()
-                }
-                
-                # Apply formatting based on style
-                styling <- self$get_table_styling()
-                pt$theme <- styling
-                
-                # Render pivot table
-                pt$renderPivot()
-                
-                # Convert to format suitable for jamovi table
-                self$populate_pivot_table(pt)
+                # Basic table creation without pivottabler for now
+                self$populate_basic_table()
                 
                 # Generate summary statistics
                 if (self$options$statistics) {
@@ -113,7 +70,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste("<p style='color: red;'>Error creating pivot table:", e$message, "</p>")
+                    paste("<p style='color: red;'>Error creating table:", e$message, "</p>")
                 )
             })
         },
@@ -143,23 +100,43 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(style)
         },
         
-        populate_pivot_table = function(pt) {
-            # Convert pivottabler output to jamovi table format
-            # This is a simplified version - would need full implementation
+        populate_basic_table = function() {
+            # Basic table implementation to test the infrastructure
             pivot_table <- self$results$pivot_table
             
-            # Clear existing columns and add new ones based on pivot structure
-            pivot_table$deleteColumns()
+            # Add sample data showing variables and group
+            vars_text <- paste(self$options$vars, collapse = ", ")
+            group_text <- self$options$group
             
-            # Add basic columns (simplified implementation)
-            pivot_table$addColumn(name = "variable", title = "Variable", type = "text")
-            pivot_table$addColumn(name = "value", title = "Value", type = "text")
+            # Clear any existing rows
+            pivot_table$deleteRows()
             
-            # Add sample rows (would need full pivot conversion logic)
+            # Add basic summary information
             pivot_table$addRow(rowKey = 1, values = list(
-                variable = "Sample Pivot Data",
-                value = "Implementation in progress"
+                variable = "Variables (Rows)",
+                value = vars_text
             ))
+            
+            pivot_table$addRow(rowKey = 2, values = list(
+                variable = "Grouping Variable (Columns)",
+                value = group_text
+            ))
+            
+            pivot_table$addRow(rowKey = 3, values = list(
+                variable = "Data Rows",
+                value = as.character(nrow(self$data))
+            ))
+            
+            pivot_table$addRow(rowKey = 4, values = list(
+                variable = "Status",
+                value = "Basic implementation - pivot functionality to be added"
+            ))
+        },
+        
+        populate_pivot_table = function(pt) {
+            # Future implementation for full pivottabler integration
+            # Currently using populate_basic_table for testing
+            self$populate_basic_table()
         },
         
         generate_summary_stats = function() {

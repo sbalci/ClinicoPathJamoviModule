@@ -48,6 +48,70 @@
 #' @examples
 #' data(histopathology)
 #' str(histopathology)
+
+#' @title CONSORT Flow Chart Examples
+#'
+#' @description A dataset containing example CONSORT flow chart parameters for different types of clinical trials.
+#' This dataset provides realistic numbers for creating CONSORT flowcharts and demonstrates
+#' typical scenarios in clinical research.
+#' @usage data(consort_examples_data)
+#' @format A data frame with 5 rows and 18 variables:
+#' \describe{
+#'   \item{trial_name}{Character. Name of the clinical trial.}
+#'   \item{trial_type}{Character. Type of trial (e.g., "Phase III RCT", "Pilot RCT").}
+#'   \item{initial_assessed}{Numeric. Total number of participants initially assessed for eligibility.}
+#'   \item{not_eligible}{Numeric. Number of participants who were not eligible.}
+#'   \item{not_eligible_reasons}{Character. Detailed reasons for exclusion during screening.}
+#'   \item{randomized}{Numeric. Total number of participants randomized to treatment arms.}
+#'   \item{arm1_label}{Character. Label for the first treatment arm.}
+#'   \item{arm1_allocated}{Numeric. Number of participants allocated to arm 1.}
+#'   \item{arm1_received}{Numeric. Number of participants who received arm 1 intervention.}
+#'   \item{arm1_lost_followup}{Numeric. Number of participants lost to follow-up in arm 1.}
+#'   \item{arm1_analyzed}{Numeric. Number of participants analyzed in arm 1.}
+#'   \item{arm2_label}{Character. Label for the second treatment arm.}
+#'   \item{arm2_allocated}{Numeric. Number of participants allocated to arm 2.}
+#'   \item{arm2_received}{Numeric. Number of participants who received arm 2 intervention.}
+#'   \item{arm2_lost_followup}{Numeric. Number of participants lost to follow-up in arm 2.}
+#'   \item{arm2_analyzed}{Numeric. Number of participants analyzed in arm 2.}
+#'   \item{exclusion_reasons}{Character. Reasons for post-randomization exclusions.}
+#'   \item{study_id}{Character. Unique study identifier.}
+#'   \item{duration_months}{Numeric. Study duration in months.}
+#'   \item{primary_endpoint}{Character. Primary endpoint of the study.}
+#'   \item{study_population}{Character. Description of the study population.}
+#' }
+#' @source Simulated data based on typical clinical trial designs and CONSORT reporting standards.
+#' @references 
+#' Schulz KF, Altman DG, Moher D, for the CONSORT Group (2010). 
+#' CONSORT 2010 Statement: updated guidelines for reporting parallel group randomised trials. 
+#' BMJ 2010;340:c332.
+#' @examples
+#' data(consort_examples_data)
+#' str(consort_examples_data)
+#' 
+#' # Example usage with consort function:
+#' # Large cardiovascular trial example
+#' cv_trial <- consort_examples_data[1, ]
+#' 
+#' \dontrun{
+#' consort(
+#'   data = data.frame(),
+#'   initialN = cv_trial$initial_assessed,
+#'   notEligibleN = cv_trial$not_eligible,
+#'   notEligibleText = cv_trial$not_eligible_reasons,
+#'   randomizedN = cv_trial$randomized,
+#'   arm1Label = cv_trial$arm1_label,
+#'   arm1N = cv_trial$arm1_allocated,
+#'   arm1ReceivedN = cv_trial$arm1_received,
+#'   arm1LostN = cv_trial$arm1_lost_followup,
+#'   arm1AnalyzedN = cv_trial$arm1_analyzed,
+#'   arm2Label = cv_trial$arm2_label,
+#'   arm2N = cv_trial$arm2_allocated,
+#'   arm2ReceivedN = cv_trial$arm2_received,
+#'   arm2LostN = cv_trial$arm2_lost_followup,
+#'   arm2AnalyzedN = cv_trial$arm2_analyzed,
+#'   excludedText = cv_trial$exclusion_reasons
+#' )
+#' }
 #' head(histopathology)
 #' summary(histopathology$Age)
 #' hist(histopathology$TStage)

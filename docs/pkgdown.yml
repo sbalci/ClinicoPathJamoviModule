@@ -35,9 +35,13 @@ articles:
   clinicopath-descriptives-16-coefficient-plots: clinicopath-descriptives-16-coefficient-plots.html
   clinicopath-descriptives-16-data-summary-legacy: clinicopath-descriptives-16-data-summary-legacy.html
   clinicopath-descriptives-17-introduction-legacy: clinicopath-descriptives-17-introduction-legacy.html
+  clinicopath-descriptives-18-consort-flowcharts: clinicopath-descriptives-18-consort-flowcharts.html
   clinicopath-descriptives-18-digital-pathology-validation-legacy: clinicopath-descriptives-18-digital-pathology-validation-legacy.html
+  clinicopath-descriptives-19-contingency-tables: clinicopath-descriptives-19-contingency-tables.html
   clinicopath-descriptives-19-molecular-pathology-workflow-legacy: clinicopath-descriptives-19-molecular-pathology-workflow-legacy.html
   clinicopath-descriptives-20-ihcstats-comprehensive-legacy: clinicopath-descriptives-20-ihcstats-comprehensive-legacy.html
+  clinicopath-descriptives-20-paired-contingency-tables: clinicopath-descriptives-20-paired-contingency-tables.html
+  clinicopath-descriptives-21-correlation-analysis: clinicopath-descriptives-21-correlation-analysis.html
   clinicopath-descriptives-21-use-in-r-legacy: clinicopath-descriptives-21-use-in-r-legacy.html
   clinicopath-descriptives-22-venn-legacy: clinicopath-descriptives-22-venn-legacy.html
   general-01-getting-started: general-01-getting-started.html
@@ -102,6 +106,8 @@ articles:
   jsurvival-11-person-time-analysis-legacy: jsurvival-11-person-time-analysis-legacy.html
   jsurvival-12-treatment-response-analysis-legacy: jsurvival-12-treatment-response-analysis-legacy.html
   jsurvival-13-use-in-r-legacy: jsurvival-13-use-in-r-legacy.html
+  jsurvival-14-comparing-survival: jsurvival-14-comparing-survival.html
+  jsurvival-15-competing-survival: jsurvival-15-competing-survival.html
   meddecide-01-introduction: meddecide-01-introduction.html
   meddecide-02-comprehensive-guide: meddecide-02-comprehensive-guide.html
   meddecide-03-agreement-advanced-features: meddecide-03-agreement-advanced-features.html
@@ -138,11 +144,12 @@ articles:
   meddecide-31-precision-oncology-biomarkers-legacy: meddecide-31-precision-oncology-biomarkers-legacy.html
   meddecide-32-vignettes-legacy: meddecide-32-vignettes-legacy.html
   meddecide-33-use-in-r-legacy: meddecide-33-use-in-r-legacy.html
+  meddecide-34-cotest-analysis: meddecide-34-cotest-analysis.html
   module-development-jamovi: module-development-jamovi.html
   pkgnet-report: pkgnet-report.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   users-of-clinicopath: users-of-clinicopath.html
-last_built: 2025-07-02T16:46Z
+last_built: 2025-07-03T17:19Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

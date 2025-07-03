@@ -185,7 +185,8 @@ Imports:
     grDevices,
     grid,
     mlr3extralearners,
-    mlr3measures
+    mlr3measures,
+    vcdExtra
 VignetteBuilder: 
     knitr, 
     tiff, 

@@ -1,0 +1,303 @@
+---
+title: "Vignette: Contingency Tables and Association Tests with ClinicoPath"
+author: "Analysis by Claude"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette: Contingency Tables and Association Tests with ClinicoPath}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Introduction
+
+The `contTables` function in ClinicoPath provides comprehensive contingency table analysis for examining associations between categorical variables. This function performs χ² tests of association and provides various measures of association, including phi coefficients, Cramer's V, odds ratios, relative risk, and ordinal measures like Gamma and Kendall's tau-b.
+
+## When to Use Contingency Tables
+
+Contingency tables are used to:
+- Test independence between two categorical variables
+- Examine associations in 2×2 tables (e.g., exposure vs. outcome)
+- Analyze multi-way tables with stratification variables
+- Calculate measures of association strength
+- Perform exact tests for small samples
+
+```{r}
+# Load required libraries
+library(ClinicoPath)
+
+# Use the histopathology dataset included with ClinicoPath
+# For demonstration, ensure we have the data
+if (!exists("histopathology")) {
+  data(histopathology, package = "ClinicoPath")
+}
+
+# Examine the structure of relevant categorical variables
+str(histopathology[c("Sex", "Mortality5yr", "Grade", "TStage", "Group", "LVI", "PNI")])
+```
+
+# Basic 2×2 Contingency Table
+
+Let's start with a basic 2×2 table examining the association between sex and 5-year mortality:
+
+```{r}
+# Basic contingency table analysis
+basic_result <- contTables(
+  data = histopathology,
+  rows = "Sex",
+  cols = "Mortality5yr",
+  chiSq = TRUE,
+  fisher = TRUE,
+  obs = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Display basic result structure
+print(basic_result)
+```
+
+For 2×2 tables, we can also calculate odds ratios and relative risk:
+
+```{r}
+# 2×2 table with comparative measures
+measures_result <- contTables(
+  data = histopathology,
+  rows = "Sex",
+  cols = "Mortality5yr",
+  chiSq = TRUE,
+  fisher = TRUE,
+  odds = TRUE,
+  logOdds = TRUE,
+  relRisk = TRUE,
+  ci = TRUE,
+  ciWidth = 95,
+  obs = TRUE,
+  exp = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE,
+  pcTot = TRUE
+)
+
+# Display measures result
+print(measures_result)
+```
+
+# Larger Contingency Tables
+
+For variables with more than two categories, we can examine association patterns:
+
+```{r}
+# Multi-category contingency table
+multi_result <- contTables(
+  data = histopathology,
+  rows = "Grade",
+  cols = "TStage",
+  chiSq = TRUE,
+  likeRat = TRUE,
+  contCoef = TRUE,
+  phiCra = TRUE,
+  obs = TRUE,
+  exp = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Display multi-category result
+print(multi_result)
+```
+
+# Ordinal Association Measures
+
+When dealing with ordinal variables, we can use measures that account for ordering:
+
+```{r}
+# Ordinal measures for Grade (ordinal) vs TStage (ordinal)
+ordinal_result <- contTables(
+  data = histopathology,
+  rows = "Grade",
+  cols = "TStage",
+  gamma = TRUE,
+  taub = TRUE,
+  ci = TRUE,
+  ciWidth = 95,
+  obs = TRUE
+)
+
+# Display ordinal result
+print(ordinal_result)
+```
+
+# Stratified Analysis
+
+We can stratify our analysis by additional variables using layers:
+
+```{r}
+# Stratified analysis by treatment group
+stratified_result <- contTables(
+  data = histopathology,
+  rows = "Sex",
+  cols = "Mortality5yr",
+  layers = "Group",
+  chiSq = TRUE,
+  fisher = TRUE,
+  odds = TRUE,
+  ci = TRUE,
+  obs = TRUE,
+  pcRow = TRUE
+)
+
+# Display stratified result
+print(stratified_result)
+```
+
+# Working with Count Data
+
+The function can also handle aggregated count data, similar to the classic HairEyeColor dataset:
+
+```{r}
+# Example with HairEyeColor data (if available)
+if (require(datasets, quietly = TRUE)) {
+  data(HairEyeColor)
+  hair_eye_data <- as.data.frame(HairEyeColor)
+  
+  # Using count data
+  count_result <- contTables(
+    data = hair_eye_data,
+    rows = "Hair",
+    cols = "Eye", 
+    counts = "Freq",
+    chiSq = TRUE,
+    contCoef = TRUE,
+    phiCra = TRUE,
+    obs = TRUE
+  )
+  
+  # Alternative: using formula interface
+  formula_result <- contTables(
+    formula = Freq ~ Hair:Eye,
+    data = hair_eye_data,
+    chiSq = TRUE
+  )
+  
+  head(hair_eye_data)
+}
+```
+
+# Multiple Association Tests
+
+For a comprehensive analysis, we can request multiple association measures:
+
+```{r}
+# Comprehensive analysis
+comprehensive_result <- contTables(
+  data = histopathology,
+  rows = "LVI",
+  cols = "PNI",
+  chiSq = TRUE,
+  chiSqCorr = TRUE,
+  likeRat = TRUE,
+  fisher = TRUE,
+  contCoef = TRUE,
+  phiCra = TRUE,
+  odds = TRUE,
+  relRisk = TRUE,
+  ci = TRUE,
+  ciWidth = 95,
+  obs = TRUE,
+  exp = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE,
+  pcTot = TRUE
+)
+
+# Display comprehensive result
+print(comprehensive_result)
+```
+
+# Interpreting Results
+
+## Chi-square Tests
+- **χ²**: Tests the null hypothesis of independence
+- **χ² with continuity correction**: Yates' correction for 2×2 tables
+- **Likelihood ratio**: Alternative to Pearson's χ²
+- **Fisher's exact test**: Exact p-value for small samples
+
+## Association Measures
+- **Phi coefficient**: For 2×2 tables (ranges from -1 to 1)
+- **Cramer's V**: Standardized measure for larger tables (0 to 1)
+- **Contingency coefficient**: Alternative association measure
+
+## Comparative Measures (2×2 tables only)
+- **Odds ratio**: Ratio of odds of outcome in exposed vs. unexposed
+- **Relative risk**: Ratio of risk in exposed vs. unexposed groups
+- **Log odds ratio**: Natural logarithm of odds ratio
+
+## Ordinal Measures
+- **Gamma**: Measure for ordinal variables (ranges from -1 to 1)
+- **Kendall's tau-b**: Alternative ordinal correlation measure
+
+# Clinical Examples
+
+## Example 1: Biomarker and Treatment Response
+
+```{r}
+# Analyzing lymphovascular invasion and outcome
+lvi_outcome <- contTables(
+  data = histopathology,
+  rows = "LVI",
+  cols = "Mortality5yr",
+  chiSq = TRUE,
+  fisher = TRUE,
+  odds = TRUE,
+  relRisk = TRUE,
+  ci = TRUE,
+  ciWidth = 95,
+  obs = TRUE,
+  pcRow = TRUE
+)
+
+# This analysis helps determine if LVI is associated with poor prognosis
+```
+
+## Example 2: Grading System Validation
+
+```{r}
+# Testing association between grade and stage
+grade_stage <- contTables(
+  data = histopathology,
+  rows = "Grade",
+  cols = "TStage", 
+  chiSq = TRUE,
+  gamma = TRUE,
+  taub = TRUE,
+  obs = TRUE,
+  pcRow = TRUE,
+  pcCol = TRUE
+)
+
+# Gamma and tau-b are particularly useful for ordinal variables like grade and stage
+```
+
+# Tips for Clinical Research
+
+1. **Choose appropriate tests**: Use Fisher's exact test for small samples, especially when expected counts < 5
+2. **Report effect sizes**: P-values alone are insufficient; include odds ratios, relative risks, or correlation coefficients
+3. **Consider confidence intervals**: They provide information about precision and clinical significance
+4. **Use stratified analysis**: Control for confounding variables using layers
+5. **Check assumptions**: Ensure adequate sample sizes and appropriate variable types
+
+# Conclusion
+
+The `contTables` function provides a comprehensive toolkit for analyzing associations between categorical variables in clinical research. From basic χ² tests to sophisticated measures of association, it supports the full range of contingency table analyses needed in pathology and clinical studies.
+
+The function integrates seamlessly with the ClinicoPath package ecosystem and can handle both individual-level and aggregated count data, making it versatile for various research scenarios.

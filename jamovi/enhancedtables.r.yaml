@@ -25,7 +25,7 @@ items:
     - name: summary_stats
       title: Summary Statistics
       type: Html
-      visible: (vars && table_type:summary)
+      visible: (table_type:summary)
       clearWith:
         - vars
         - group_var
@@ -35,7 +35,7 @@ items:
     - name: group_comparison
       title: Group Comparison Results
       type: Html
-      visible: (vars && group_var && include_pvalues)
+      visible: (include_pvalues)
       clearWith:
         - vars
         - group_var
@@ -45,7 +45,7 @@ items:
     - name: interpretation
       title: Clinical Interpretation
       type: Html
-      visible: (show_interpretation && vars)
+      visible: (show_interpretation)
       clearWith:
         - vars
         - group_var
@@ -54,7 +54,7 @@ items:
     - name: export_table
       title: Export Ready Table
       type: Html
-      visible: (vars && export_format)
+      visible: (export_format)
       clearWith:
         - vars
         - export_format

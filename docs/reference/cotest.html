@@ -11,7 +11,7 @@ positive, both positive, both negative)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.36</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.37</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,9 +56,13 @@ positive, both positive, both negative)."></head><body>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-16-coefficient-plots.html">Coefficient Plots for Regression Models</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-16-data-summary-legacy.html">Summarising Clinicopathological Data</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-17-introduction-legacy.html">ClinicoPathDescriptives: Introduction to Clinical and Pathological Descriptive Statistics</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-18-consort-flowcharts.html">CONSORT Flow Charts for Clinical Trial Reporting</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-18-digital-pathology-validation-legacy.html">Digital Pathology Validation: AI-Assisted Quantification and Method Comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-19-contingency-tables.html">Vignette: Contingency Tables and Association Tests with ClinicoPath</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-19-molecular-pathology-workflow-legacy.html">Modern Molecular Pathology Workflow: Integrated Morphologic and Molecular Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-20-ihcstats-comprehensive-legacy.html">Comprehensive Guide to IHC Expression Analysis with ihcstats</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-20-paired-contingency-tables.html">Vignette: Paired Samples Contingency Tables and McNemar's Test with ClinicoPath</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-21-correlation-analysis.html">Vignette: Comprehensive Correlation Analysis with ClinicoPath</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-21-use-in-r-legacy.html">Use ClinicoPathDescriptives in R</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-22-venn-legacy.html">Vignette: Visualizing Co-occurrence with Venn &amp; Upset Plots</a></li>
     <li><a class="dropdown-item" href="../articles/general-01-getting-started.html">Getting Started with ClinicoPathDescriptives</a></li>
@@ -123,6 +127,8 @@ positive, both positive, both negative)."></head><body>
     <li><a class="dropdown-item" href="../articles/jsurvival-11-person-time-analysis-legacy.html">Person-Time Analysis in jsurvival Module</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-12-treatment-response-analysis-legacy.html">Treatment Response Analysis in Oncology</a></li>
     <li><a class="dropdown-item" href="../articles/jsurvival-13-use-in-r-legacy.html">Use jsurvival in R</a></li>
+    <li><a class="dropdown-item" href="../articles/jsurvival-14-comparing-survival.html">jSurvival 14: Comparing Survival Outcomes Between Groups</a></li>
+    <li><a class="dropdown-item" href="../articles/jsurvival-15-competing-survival.html">jSurvival 15: Competing Survival Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-01-introduction.html">MedDecide 01: Introduction to Medical Decision Analysis for Pathologists</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-02-comprehensive-guide.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-03-agreement-advanced-features.html">Advanced Features in Interrater Agreement Analysis</a></li>
@@ -159,6 +165,7 @@ positive, both positive, both negative)."></head><body>
     <li><a class="dropdown-item" href="../articles/meddecide-31-precision-oncology-biomarkers-legacy.html">Precision Oncology: Biomarker-Guided Treatment Selection and Outcome Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Module Development for Jamovi</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,9 +266,502 @@ Requires a value between 0.001 and 0.999.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># example will be added</span></span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Basic co-testing analysis with independent tests</span></span></span>
+<span class="r-in"><span><span class="fu">cotest</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    test1_sens <span class="op">=</span> <span class="fl">0.80</span>,</span></span>
+<span class="r-in"><span>    test1_spec <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
+<span class="r-in"><span>    test2_sens <span class="op">=</span> <span class="fl">0.75</span>,</span></span>
+<span class="r-in"><span>    test2_spec <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
+<span class="r-in"><span>    prevalence <span class="op">=</span> <span class="fl">0.10</span>,</span></span>
+<span class="r-in"><span>    indep <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    fagan <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  CO-TESTING ANALYSIS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test Parameters                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test      Sensitivity    Specificity    Positive LR    Negative LR   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1       80.00000       90.00000       8.000000      0.2222222   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2       75.00000       95.00000      15.000000      0.2631579   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Co-Testing Results                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Scenario                Post-test Probability    Relative to Prevalence    Odds Ratio     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1 Positive Only                 47.05882                4.70588235     0.888888889   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2 Positive Only                 62.50000                6.25000000     1.666666667   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Positive                  93.02326                9.30232558    13.333333333   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Negative                   0.64558                0.06455778     0.006497726   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="max-width: 800px;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Understanding Test Dependence in Diagnostic Testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What is conditional independence vs. dependence?</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two diagnostic tests are conditionally independent if the result of</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  one test does not influence the result of the other test, *given the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  disease status*. In other words, within the diseased population, the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probability of Test 1 being positive is not affected by knowing the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  result of Test 2, and vice versa. The same applies within the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  non-diseased population.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are conditionally dependent when the result of one test affects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the probability of the other test result, even when we know the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  patient's true disease status.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Mathematical Formulation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Independent Tests: When tests are independent, joint probabilities are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  simply the product of individual probabilities:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = Sens₁ × Sens₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = P(Test1+ | Disease−) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = (1−Spec₁) × (1−Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease+) = P(Test1− | Disease+) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = (1−Sens₁) × (1−Sens₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease−) = P(Test1− | Disease−) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = Spec₁ × Spec₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Dependent Tests: When tests are dependent, we adjust these</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probabilities using a correlation parameter (denoted as ρ or ψ) that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ranges from 0 (independence) to 1 (maximum possible dependence):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = (Sens₁ × Sens₂) + ρᵨₒₛ × √(Sens₁ ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (1−Sens₁) × Sens₂ × (1−Sens₂))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = ((1−Spec₁) × (1−Spec₂)) + ρₙₑ𝑔 ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  √((1−Spec₁) × Spec₁ × (1−Spec₂) × Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Note: Similar adjustments are made for the other joint probabilities.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When to Use Dependent vs. Independent Models</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the independence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure completely different biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests use different biological specimens or mechanisms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have no evidence of correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have limited information about how the tests interact</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the dependence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure the same or similar biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are based on the same biological specimen or mechanism</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Previous studies indicate correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Both tests are affected by the same confounding factors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have observed that knowing one test result predicts the other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Real-World Examples of Dependent Tests</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two imaging tests (e.g., MRI and CT) looking at the same anatomical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  structure</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two serological tests that detect different antibodies but against the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests that may both be affected by the same confounding factor (e.g.,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflammation)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Multiple readings of the same test by different observers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two different molecular tests detecting different genes of the same</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Estimating Dependency Parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The conditional dependence parameters (ρᵨₒₛ for diseased subjects and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ρₙₑ𝑔 for non-diseased subjects) ideally should be estimated from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  paired testing data with known disease status. Values typically range</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  from 0 to 0.5 in practice, with higher values indicating stronger</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence. When no data is available, sensitivity analyses using a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence affects results.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Impact of Ignoring Dependence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ignoring conditional dependence when it exists tends to:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Overestimate the benefit of combined testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Exaggerate post-test probabilities (either too high for positive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  results or too low for negative results)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Produce unrealistically narrow confidence intervals</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Lead to overly optimistic assessment of diagnostic accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Interpretation:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The disease prevalence (pre-test probability) in this population is</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  10.0%.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are positive, the probability of disease increases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  93.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (9.3 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are negative, the probability of disease decreases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (0.06 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When only one test is positive, the post-test probabilities are:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 1 positive only: 47.1%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 2 positive only: 62.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prevalence: 0.1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sensitivity: 0.9 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Specificity: 0.8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Positive LR: 120 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Negative LR: 0.05847953 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Post-test Probability (Positive test): 0.9302326 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Post-test Probability (Negative test): 0.006455778 </span>
+<span class="r-plt img"><img src="cotest-1.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Co-testing with dependent tests</span></span></span>
+<span class="r-in"><span><span class="fu">cotest</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    test1_sens <span class="op">=</span> <span class="fl">0.85</span>,</span></span>
+<span class="r-in"><span>    test1_spec <span class="op">=</span> <span class="fl">0.88</span>,</span></span>
+<span class="r-in"><span>    test2_sens <span class="op">=</span> <span class="fl">0.82</span>,</span></span>
+<span class="r-in"><span>    test2_spec <span class="op">=</span> <span class="fl">0.92</span>,</span></span>
+<span class="r-in"><span>    prevalence <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
+<span class="r-in"><span>    indep <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    cond_dep_pos <span class="op">=</span> <span class="fl">0.15</span>,</span></span>
+<span class="r-in"><span>    cond_dep_neg <span class="op">=</span> <span class="fl">0.10</span>,</span></span>
+<span class="r-in"><span>    fnote <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  CO-TESTING ANALYSIS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test Parameters                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test      Sensitivity    Specificity    Positive LR    Negative LR   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1     85.00000 ᵃ     88.00000 ᵇ     7.083333 ᵈ    0.1704545 ᵉ   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2     82.00000       92.00000      10.250000      0.1956522     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Proportion of diseased patients correctly identified by Test 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ Proportion of non-diseased patients correctly identified by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵈ Positive Likelihood Ratio: how much more likely a positive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    result is in diseased vs. non-diseased patients</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵉ Negative Likelihood Ratio: how much more likely a negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    result is in diseased vs. non-diseased patients</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Co-Testing Results                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Scenario                Post-test Probability    Relative to Prevalence    Odds Ratio    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1 Positive Only                6.42043                1.28408660      0.068609347   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2 Positive Only                8.04881                1.60976225      0.087533520   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Positive                67.22155 ᵃ             13.44431051 ᵇ    2.050785129   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Negative                 0.30503                0.06100646      0.003059656   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Probability of disease after obtaining this test result combination</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ How many times more (or less) likely disease is after testing compared to before</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are modeled with conditional dependence:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Dependence for subjects with disease: 0.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Dependence for subjects without disease: 0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Joint probabilities after accounting for dependence:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+,Test2+ | Disease+): 0.7176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+,Test2+ | Disease-): 0.0184</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1-,Test2- | Disease+): 0.0476</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1-,Test2- | Disease-): 0.8184</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="max-width: 800px;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Understanding Test Dependence in Diagnostic Testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What is conditional independence vs. dependence?</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two diagnostic tests are conditionally independent if the result of</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  one test does not influence the result of the other test, *given the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  disease status*. In other words, within the diseased population, the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probability of Test 1 being positive is not affected by knowing the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  result of Test 2, and vice versa. The same applies within the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  non-diseased population.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are conditionally dependent when the result of one test affects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the probability of the other test result, even when we know the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  patient's true disease status.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Mathematical Formulation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Independent Tests: When tests are independent, joint probabilities are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  simply the product of individual probabilities:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = Sens₁ × Sens₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = P(Test1+ | Disease−) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = (1−Spec₁) × (1−Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease+) = P(Test1− | Disease+) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = (1−Sens₁) × (1−Sens₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease−) = P(Test1− | Disease−) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = Spec₁ × Spec₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Dependent Tests: When tests are dependent, we adjust these</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probabilities using a correlation parameter (denoted as ρ or ψ) that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ranges from 0 (independence) to 1 (maximum possible dependence):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = (Sens₁ × Sens₂) + ρᵨₒₛ × √(Sens₁ ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (1−Sens₁) × Sens₂ × (1−Sens₂))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = ((1−Spec₁) × (1−Spec₂)) + ρₙₑ𝑔 ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  √((1−Spec₁) × Spec₁ × (1−Spec₂) × Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Note: Similar adjustments are made for the other joint probabilities.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When to Use Dependent vs. Independent Models</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the independence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure completely different biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests use different biological specimens or mechanisms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have no evidence of correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have limited information about how the tests interact</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the dependence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure the same or similar biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are based on the same biological specimen or mechanism</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Previous studies indicate correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Both tests are affected by the same confounding factors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have observed that knowing one test result predicts the other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Real-World Examples of Dependent Tests</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two imaging tests (e.g., MRI and CT) looking at the same anatomical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  structure</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two serological tests that detect different antibodies but against the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests that may both be affected by the same confounding factor (e.g.,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflammation)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Multiple readings of the same test by different observers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two different molecular tests detecting different genes of the same</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Estimating Dependency Parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The conditional dependence parameters (ρᵨₒₛ for diseased subjects and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ρₙₑ𝑔 for non-diseased subjects) ideally should be estimated from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  paired testing data with known disease status. Values typically range</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  from 0 to 0.5 in practice, with higher values indicating stronger</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence. When no data is available, sensitivity analyses using a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence affects results.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Impact of Ignoring Dependence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ignoring conditional dependence when it exists tends to:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Overestimate the benefit of combined testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Exaggerate post-test probabilities (either too high for positive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  results or too low for negative results)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Produce unrealistically narrow confidence intervals</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Lead to overly optimistic assessment of diagnostic accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Interpretation:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The disease prevalence (pre-test probability) in this population is</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5.0%.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are positive, the probability of disease increases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  67.2%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (13.4 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are negative, the probability of disease decreases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.3%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (0.06 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When only one test is positive, the post-test probabilities are:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 1 positive only: 6.4%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 2 positive only: 8.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># High-stakes screening scenario</span></span></span>
+<span class="r-in"><span><span class="fu">cotest</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    test1_sens <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
+<span class="r-in"><span>    test1_spec <span class="op">=</span> <span class="fl">0.85</span>,</span></span>
+<span class="r-in"><span>    test2_sens <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
+<span class="r-in"><span>    test2_spec <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
+<span class="r-in"><span>    prevalence <span class="op">=</span> <span class="fl">0.02</span>,</span></span>
+<span class="r-in"><span>    indep <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    fagan <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    fnote <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  CO-TESTING ANALYSIS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test Parameters                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test      Sensitivity    Specificity    Positive LR    Negative LR    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1     95.00000 ᵃ     85.00000 ᵇ     6.333333 ᵈ    0.05882353 ᵉ   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2     90.00000       90.00000       9.000000      0.11111111     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Proportion of diseased patients correctly identified by Test 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ Proportion of non-diseased patients correctly identified by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵈ Positive Likelihood Ratio: how much more likely a positive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    result is in diseased vs. non-diseased patients</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵉ Negative Likelihood Ratio: how much more likely a negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    result is in diseased vs. non-diseased patients</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Co-Testing Results                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Scenario                Post-test Probability    Relative to Prevalence    Odds Ratio    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 1 Positive Only               11.44578               5.722891566        0.1292517   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test 2 Positive Only               15.51724               7.758620690        0.1836735   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Positive                53.77358 ᵃ            26.886792453 ᵇ      1.1632653   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Both Tests Negative             1.333689e-4               0.006668445      1.333867e-4   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Probability of disease after obtaining this test result combination</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ How many times more (or less) likely disease is after testing compared to before</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="max-width: 800px;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Understanding Test Dependence in Diagnostic Testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What is conditional independence vs. dependence?</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two diagnostic tests are conditionally independent if the result of</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  one test does not influence the result of the other test, *given the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  disease status*. In other words, within the diseased population, the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probability of Test 1 being positive is not affected by knowing the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  result of Test 2, and vice versa. The same applies within the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  non-diseased population.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are conditionally dependent when the result of one test affects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the probability of the other test result, even when we know the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  patient's true disease status.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Mathematical Formulation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Independent Tests: When tests are independent, joint probabilities are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  simply the product of individual probabilities:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = Sens₁ × Sens₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = P(Test1+ | Disease−) × P(Test2+ |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = (1−Spec₁) × (1−Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease+) = P(Test1− | Disease+) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease+) = (1−Sens₁) × (1−Sens₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1− and Test2− | Disease−) = P(Test1− | Disease−) × P(Test2− |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease−) = Spec₁ × Spec₂</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Dependent Tests: When tests are dependent, we adjust these</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  probabilities using a correlation parameter (denoted as ρ or ψ) that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ranges from 0 (independence) to 1 (maximum possible dependence):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease+) = (Sens₁ × Sens₂) + ρᵨₒₛ × √(Sens₁ ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (1−Sens₁) × Sens₂ × (1−Sens₂))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  P(Test1+ and Test2+ | Disease−) = ((1−Spec₁) × (1−Spec₂)) + ρₙₑ𝑔 ×</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  √((1−Spec₁) × Spec₁ × (1−Spec₂) × Spec₂)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Note: Similar adjustments are made for the other joint probabilities.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When to Use Dependent vs. Independent Models</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the independence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure completely different biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests use different biological specimens or mechanisms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have no evidence of correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have limited information about how the tests interact</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Use the dependence model when:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests measure the same or similar biological phenomena</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests are based on the same biological specimen or mechanism</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Previous studies indicate correlation between test results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Both tests are affected by the same confounding factors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  You have observed that knowing one test result predicts the other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Real-World Examples of Dependent Tests</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two imaging tests (e.g., MRI and CT) looking at the same anatomical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  structure</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two serological tests that detect different antibodies but against the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Tests that may both be affected by the same confounding factor (e.g.,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflammation)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Multiple readings of the same test by different observers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Two different molecular tests detecting different genes of the same</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pathogen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Estimating Dependency Parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The conditional dependence parameters (ρᵨₒₛ for diseased subjects and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ρₙₑ𝑔 for non-diseased subjects) ideally should be estimated from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  paired testing data with known disease status. Values typically range</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  from 0 to 0.5 in practice, with higher values indicating stronger</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence. When no data is available, sensitivity analyses using a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  dependence affects results.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Impact of Ignoring Dependence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ignoring conditional dependence when it exists tends to:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Overestimate the benefit of combined testing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Exaggerate post-test probabilities (either too high for positive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  results or too low for negative results)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Produce unrealistically narrow confidence intervals</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Lead to overly optimistic assessment of diagnostic accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Interpretation:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The disease prevalence (pre-test probability) in this population is</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2.0%.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are positive, the probability of disease increases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  53.8%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (26.9 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  If both tests are negative, the probability of disease decreases to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (0.01 times the pre-test probability).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  When only one test is positive, the post-test probabilities are:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 1 positive only: 11.4%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 2 positive only: 15.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prevalence: 0.02 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sensitivity: 0.9 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Specificity: 0.8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Positive LR: 57 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Negative LR: 0.006535948 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Post-test Probability (Positive test): 0.5377358 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Post-test Probability (Negative test): 0.0001333689 </span>
+<span class="r-plt img"><img src="cotest-2.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

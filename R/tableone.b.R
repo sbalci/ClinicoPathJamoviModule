@@ -152,7 +152,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             } else if (table_style == "t5") {
                 # --- Using pivottabler package for enhanced tables ---
                 mytable <- tryCatch({
-                    self$create_pivot_tableone(data, selected_vars)
+                    private$.create_pivot_tableone(data, selected_vars)
                 }, error = function(e) {
                     paste0("<div style='color: red;'>Error creating pivot table: ", e$message, "</div>")
                 })
