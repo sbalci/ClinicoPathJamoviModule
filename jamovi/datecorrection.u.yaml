@@ -14,3 +14,49 @@ children:
           - type: VariablesListBox
             name: date_vars
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: correction_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: date_format
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: day_impute
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: month_impute
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: handle_excel
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: timezone
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_correction_table
+      - type: CheckBox
+        name: show_quality_assessment
+      - type: CheckBox
+        name: show_format_analysis
+      - type: CheckBox
+        name: show_correction_summary
+      - type: CheckBox
+        name: show_interpretation

@@ -11,6 +11,7 @@ tableone(
   excl = FALSE,
   pivot_format = "clinical",
   include_statistics = TRUE,
+  group_var,
   group_comparisons = FALSE
 )
 }
@@ -30,6 +31,8 @@ analysis. Note: Exclusion may remove entire cases.}
 
 \item{include_statistics}{Include advanced statistical summaries in pivot
 format.}
+
+\item{group_var}{Variable to use for group comparisons in the analysis.}
 
 \item{group_comparisons}{Enable group comparison features in pivot table.}
 }

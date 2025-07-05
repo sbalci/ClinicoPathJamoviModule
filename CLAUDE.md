@@ -278,7 +278,7 @@ gemini -p "@src/ @tests/ Analyze test coverage for the source code"
 Current directory and subdirectories:
 gemini -p "@./ Give me an overview of this entire project"
 
-# Or use --all_files flag
+Or use --all_files flag
 
 gemini --all_files -p "Analyze the project structure and dependencies"
 
@@ -389,11 +389,16 @@ Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:"
   - find relevant vignettes and documentation for this function
   - check if the function has appropriate data to test it
     - if not, create a test dataset
-  - check if the vignettes and documentation reflect all the features of the function
-    - if not, update the vignettes and documentation accordingly
+  - check if the function has appropriate vignette to explain it
+    - if not, create an explanatory vignette
+  - check if the data, vignettes and documentation reflect all the features of the function
+    - if not, update the data, vignettes and documentation accordingly
   - check if the function is tested in the tests folder
     - if not, write tests for the function
-  - check if the vignettes rendered correctly
+  - run `jmvtools::prepare()` and `devtools::document()` to see if the function compiles correctly
+    - if not, fix the issues
+  - run `pkgdown::build_articles()` to see if the vignettes render correctly
+    - if not, fix the issues
 
 ### YAML Development Memories
 
@@ -519,3 +524,9 @@ Language: c\n
 ## Development Workflow Memories
 
 - Inside .run function if you are calling another function from private group, call it as `private$.functionName()`
+
+## Development Memories
+
+### Warnings and File Management
+
+- **do not change these files: .Rd, .h.R, 00jmv.R. They are auto-generated during documentation and installation.**

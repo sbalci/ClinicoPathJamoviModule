@@ -11,6 +11,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             excl = FALSE,
             pivot_format = "clinical",
             include_statistics = TRUE,
+            group_var = NULL,
             group_comparisons = FALSE, ...) {
 
             super$initialize(
@@ -48,6 +49,12 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "include_statistics",
                 include_statistics,
                 default=TRUE)
+            private$..group_var <- jmvcore::OptionVariable$new(
+                "group_var",
+                group_var,
+                suggested=list(
+                    "ordinal",
+                    "nominal"))
             private$..group_comparisons <- jmvcore::OptionBool$new(
                 "group_comparisons",
                 group_comparisons,
@@ -58,6 +65,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..excl)
             self$.addOption(private$..pivot_format)
             self$.addOption(private$..include_statistics)
+            self$.addOption(private$..group_var)
             self$.addOption(private$..group_comparisons)
         }),
     active = list(
@@ -66,6 +74,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         excl = function() private$..excl$value,
         pivot_format = function() private$..pivot_format$value,
         include_statistics = function() private$..include_statistics$value,
+        group_var = function() private$..group_var$value,
         group_comparisons = function() private$..group_comparisons$value),
     private = list(
         ..vars = NA,
@@ -73,6 +82,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..excl = NA,
         ..pivot_format = NA,
         ..include_statistics = NA,
+        ..group_var = NA,
         ..group_comparisons = NA)
 )
 
@@ -197,6 +207,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pivot_format Formatting style for pivottabler enhanced tables.
 #' @param include_statistics Include advanced statistical summaries in pivot
 #'   format.
+#' @param group_var Variable to use for group comparisons in the analysis.
 #' @param group_comparisons Enable group comparison features in pivot table.
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -216,16 +227,19 @@ tableone <- function(
     excl = FALSE,
     pivot_format = "clinical",
     include_statistics = TRUE,
+    group_var,
     group_comparisons = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(group_var)) group_var <- jmvcore::resolveQuo(jmvcore::enquo(group_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(group_var), group_var, NULL))
 
 
     options <- tableoneOptions$new(
@@ -234,6 +248,7 @@ tableone <- function(
         excl = excl,
         pivot_format = pivot_format,
         include_statistics = include_statistics,
+        group_var = group_var,
         group_comparisons = group_comparisons)
 
     analysis <- tableoneClass$new(

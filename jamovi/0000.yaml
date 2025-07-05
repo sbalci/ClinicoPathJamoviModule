@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.37
+version: 0.0.3.39
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-07-03'
+date: '2024-07-05'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -753,17 +753,23 @@ analyses:
     name: datecorrection
     ns: ClinicoPath
     menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Descriptives
+    menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
     description: >
       Comprehensive date field correction and standardization using multiple R
-      packages (datefixR, anytime, lubridate). This module handles messy date
-      formats commonly found in clinical databases: different separators, month
-      representations, missing components, and ambiguous formats. Provides
-      standardized date outputs with detailed correction reports and quality
-      assessment. Perfect for clinical research data preprocessing and database
-      standardization workflows.
+      packages (datefixR, anytime, lubridate).
+
+      This module handles messy date formats commonly found in clinical
+      databases: different separators, 
+
+      month representations, missing components, and ambiguous formats. Provides
+      standardized date outputs
+
+      with detailed correction reports and quality assessment. Perfect for
+      clinical research data preprocessing
+
+      and database standardization workflows.
     ribbon: analyses
     category: analyses
   - title: Subgroup Analysis Forest Plot
@@ -988,7 +994,14 @@ analyses:
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-    description: Function for Medical Decision Calculator.
+    description: |
+      Medical Decision Calculator for diagnostic test evaluation when you have 
+      the four key counts: True Positives (TP), False Positives (FP), True 
+      Negatives (TN), and False Negatives (FN). Calculates comprehensive 
+      diagnostic performance metrics including sensitivity, specificity, 
+      positive and negative predictive values, likelihood ratios, and 
+      post-test probabilities. Supports confidence interval estimation and 
+      Fagan nomogram visualization for clinical decision making.
     ribbon: analyses
     category: analyses
   - title: Analysis Without Gold Standard
@@ -1083,10 +1096,28 @@ analyses:
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
     description: >
-      Function for combining multiple Medical Decision Tests and evaluating
-      their performance. Calculate sensitivity, specificity, positive predictive
-      value, negative predictive value for combined tests using different
-      combination rules.
+      Combines multiple medical diagnostic tests and evaluates their collective 
+
+      performance using different combination rules. This function is essential 
+
+      for optimizing diagnostic accuracy when multiple tests are available for 
+
+      the same condition. Supports OR logic (positive if any test is positive), 
+
+      AND logic (positive only if all tests are positive), and majority rule 
+
+      (positive if more than half of tests are positive). Calculates
+      comprehensive 
+
+      diagnostic performance metrics including sensitivity, specificity,
+      positive 
+
+      and negative predictive values, likelihood ratios, and post-test
+      probabilities 
+
+      for the combined test strategy. Useful for developing optimal test panels 
+
+      and understanding how multiple diagnostic tests perform together.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
@@ -1241,11 +1272,11 @@ analyses:
       predictive value, negative predictive value.
     ribbon: analyses
     category: analyses
-  - title: Dendogram
-    name: dendogram
+  - title: Dendrogram
+    name: dendrogram
     ns: ClinicoPath
     menuGroup: meddecideD
-    menuTitle: Dendogram
+    menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
     category: analyses

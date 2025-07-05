@@ -87,13 +87,47 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$cTable)}
 }
 \description{
-Function for combining multiple Medical Decision Tests and evaluating their
-performance. Calculate sensitivity, specificity, positive predictive value,
-negative predictive value for combined tests using different combination
-rules.
+Combines multiple medical diagnostic tests and evaluates their collective
+performance using different combination rules. This function is essential
+for optimizing diagnostic accuracy when multiple tests are available for
+the same condition. Supports OR logic (positive if any test is positive),
+AND logic (positive only if all tests are positive), and majority rule
+(positive if more than half of tests are positive). Calculates
+comprehensive
+diagnostic performance metrics including sensitivity, specificity, positive
+and negative predictive values, likelihood ratios, and post-test
+probabilities
+for the combined test strategy. Useful for developing optimal test panels
+and understanding how multiple diagnostic tests perform together.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic two-test combination with OR rule
+result1 <- decisioncombine(
+  data = histopathology,
+  gold = "Golden Standart",
+  goldPositive = "1",
+  test1 = "New Test",
+  test1Positive = "1",
+  test2 = "Rater 1",
+  test2Positive = "1",
+  test3 = NULL,
+  test3Positive = NULL,
+  combRule = "any"
+)
+
+# Three-test combination with AND rule
+result2 <- decisioncombine(
+  data = histopathology,
+  gold = "Golden Standart",
+  goldPositive = "1",
+  test1 = "New Test",
+  test1Positive = "1",
+  test2 = "Rater 1",
+  test2Positive = "1",
+  test3 = "Rater 2",
+  test3Positive = "1",
+  combRule = "all",
+  ci = TRUE, fagan = TRUE
+)
+
 }

@@ -154,6 +154,83 @@ accuracy.
 }
 \examples{
 \donttest{
-# example will be added
+# Load COVID-19 screening data
+data("covid_screening_data", package = "ClinicoPath")
+
+# Basic decision panel optimization
+# Compare rapid antigen and PCR tests
+basic_panel <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr"),
+  testLevels = "Positive,Positive",
+  gold = "covid_status",
+  goldPositive = "Positive",
+  strategies = "all",
+  optimizationCriteria = "accuracy"
+)
+
+# Cost-effectiveness analysis
+# Include test costs and false positive/negative costs
+cost_panel <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr", "chest_ct"),
+  testLevels = "Positive,Positive,Abnormal",
+  gold = "covid_status",
+  goldPositive = "Positive",
+  strategies = "all",
+  useCosts = TRUE,
+  testCosts = "5,50,200",
+  fpCost = 500,
+  fnCost = 5000,
+  optimizationCriteria = "utility"
+)
+
+# Sequential testing with decision tree
+sequential_panel <- decisionpanel(
+  data = covid_screening_data,
+  tests = c("rapid_antigen", "pcr"),
+  testLevels = "Positive,Positive",
+  gold = "covid_status",
+  goldPositive = "Positive",
+  strategies = "sequential",
+  sequentialStop = "positive",
+  createTree = TRUE,
+  treeMethod = "cart"
+)
+
+# Load breast cancer screening data
+data("breast_cancer_data", package = "ClinicoPath")
+
+# Advanced panel with validation
+# Multiple tests with bootstrap confidence intervals
+advanced_panel <- decisionpanel(
+  data = breast_cancer_data,
+  tests = c("clinical_exam", "mammography", "ultrasound"),
+  testLevels = "Abnormal,BIRADS 3-5,Suspicious",
+  gold = "cancer_status",
+  goldPositive = "Cancer",
+  strategies = "all",
+  optimizationCriteria = "sensitivity",
+  minSensitivity = 0.90,
+  minSpecificity = 0.80,
+  bootstrap = TRUE,
+  bootReps = 1000,
+  crossValidate = TRUE,
+  nFolds = 5
+)
+
+# Parallel testing strategies
+# Compare different combination rules
+parallel_panel <- decisionpanel(
+  data = breast_cancer_data,
+  tests = c("clinical_exam", "mammography", "ultrasound"),
+  testLevels = "Abnormal,BIRADS 3-5,Suspicious",
+  gold = "cancer_status",
+  goldPositive = "Cancer",
+  strategies = "parallel",
+  parallelRules = "any",
+  compareStrategies = TRUE,
+  plotComparison = TRUE
+)
 }
 }

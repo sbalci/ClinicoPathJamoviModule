@@ -98,6 +98,18 @@ options:
       jamovi: >
         Include enhanced statistics for pivot tables.
 
+  - name: group_var
+    title: "Grouping Variable"
+    type: Variable
+    suggested:
+      - ordinal
+      - nominal
+    description:
+      R: >
+        Variable to use for group comparisons in the analysis.
+      jamovi: >
+        Select a variable to group by for comparisons.
+        
   - name: group_comparisons
     title: "Group Comparisons"
     type: Bool

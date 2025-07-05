@@ -1,0 +1,141 @@
+
+---
+name:  dendrogram
+title: Dendrogram
+menuGroup: meddecideD
+menuSubgroup: Drafts
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables for Clustering
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: clusterMethod
+      title: Clustering Method
+      type: List
+      options:
+        - title: Complete Linkage
+          name: complete
+        - title: Single Linkage
+          name: single
+        - title: Average Linkage
+          name: average
+        - title: Ward D2
+          name: ward.D2
+        - title: Ward D
+          name: ward.D
+        - title: McQuitty
+          name: mcquitty
+        - title: Median
+          name: median
+        - title: Centroid
+          name: centroid
+      default: ward.D2
+
+    - name: distanceMethod
+      title: Distance Method
+      type: List
+      options:
+        - title: Euclidean
+          name: euclidean
+        - title: Maximum
+          name: maximum
+        - title: Manhattan
+          name: manhattan
+        - title: Canberra
+          name: canberra
+        - title: Binary
+          name: binary
+        - title: Minkowski
+          name: minkowski
+      default: euclidean
+
+    - name: showLabels
+      title: Show sample labels
+      type: Bool
+      default: true
+
+    - name: colorGroups
+      title: Color by groups
+      type: Bool
+      default: false
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+
+    - name: plotHeight
+      title: Plot Height
+      type: Number
+      min: 200
+      max: 2000
+      default: 600
+
+    - name: plotWidth
+      title: Plot Width  
+      type: Number
+      min: 200
+      max: 2000
+      default: 800
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - title: Linear Dendrogram
+          name: linear
+        - title: Circular Dendrogram
+          name: circular
+        - title: Basic R Plot
+          name: base
+      default: linear
+
+    - name: edgeType
+      title: Edge Type
+      type: List
+      options:
+        - title: Diagonal
+          name: diagonal
+        - title: Link
+          name: link
+        - title: Elbow
+          name: elbow
+      default: diagonal
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: RdYlBu
+          name: RdYlBu
+        - title: Set1
+          name: Set1
+        - title: Dark2
+          name: Dark2
+      default: default
+
+    - name: highlightClusters
+      title: Highlight clusters
+      type: Bool
+      default: false
+
+    - name: nClusters
+      title: Number of clusters to highlight
+      type: Number
+      min: 2
+      max: 10
+      default: 3
+...
