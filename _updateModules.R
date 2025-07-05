@@ -9,7 +9,7 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.40" # Update this to the new version you want to set
+new_version <- "0.0.3.41" # Update this to the new version you want to set
 new_date <- "2024-07-05" # Update this to the new date you want to set
 
 
@@ -18,9 +18,9 @@ quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which 
 check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
 extended <- TRUE # Set to TRUE if you want to document and install submodules
 ClinicoPathDescriptives_module <- TRUE # Set to TRUE if you want to update the ClinicoPathDescriptives module
-jsurvival_module <- TRUE # Set to TRUE if you want to update the jsurvival module
-jjstatsplot_module <- TRUE # Set to TRUE if you want to update the jjstatsplot module
-meddecide_module <- TRUE # Set to TRUE if you want to update the meddecide module
+jsurvival_module <- FALSE # Set to TRUE if you want to update the jsurvival module
+jjstatsplot_module <- FALSE # Set to TRUE if you want to update the jjstatsplot module
+meddecide_module <- FALSE # Set to TRUE if you want to update the meddecide module
 
 webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
 commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories

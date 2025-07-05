@@ -1,0 +1,783 @@
+---
+title: "Creating European Statistical Maps with eurostatmap"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    code-fold: false
+    toc: true
+    number-sections: true
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+# Introduction to Eurostat Maps
+
+The `eurostatmap` function in ClinicoPath allows researchers to create choropleth maps using European statistical data. This powerful visualization tool can display various health, demographic, and economic indicators across European countries and regions using official Eurostat data or your own datasets.
+
+## Key Features
+
+- **Dual Data Sources**: Use either Eurostat API data or import your own CSV files
+- **Multiple Geographic Levels**: Support for NUTS 0 (countries), NUTS 1, NUTS 2, and NUTS 3 regions
+- **Interactive and Static Maps**: Choose between static plots or interactive visualizations
+- **Customizable Styling**: Various color palettes and classification methods
+- **Comprehensive Statistics**: Automatic generation of summary statistics and dataset information
+
+## Prerequisites
+
+Before using the eurostatmap function, ensure you have the required packages installed:
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Load the sample data
+data("eurostat_health_data")
+data("eurostat_comprehensive_data") 
+data("eurostat_timeseries_data")
+
+# Load real Turkey data from Eurostat
+data("turkey_nuts2_eurostat")
+data("turkey_eastern_anatolia")
+data("turkey_nuts1_aggregated")
+data("turkey_timeseries_nuts2")
+```
+
+# Using Sample Eurostat Data
+
+## Basic Map with Default Settings
+
+The simplest way to create a eurostat map is to use a sample dataset with default settings:
+
+```{r basic-map, eval=FALSE}
+# Create a basic map using local sample data
+result <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "life_expectancy", # Use life expectancy indicator
+  geo_level = "nuts0",          # Country level
+  year = 2022,                  # Data year
+  map_type = "static",          # Static map
+  use_local_data = TRUE         # Use local data
+)
+```
+
+This creates a map showing life expectancy across European countries using the included sample data.
+
+## Customizing Map Appearance
+
+You can customize various aspects of your map:
+
+```{r custom-appearance, eval=FALSE}
+# Create a customized map with different styling
+result_custom <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "population_density",
+  geo_level = "nuts0",
+  year = 2022,
+  map_type = "static",
+  color_palette = "blues",           # Blue color scheme
+  classification_method = "jenks",   # Natural breaks classification
+  n_classes = 6,                     # 6 color classes
+  map_title = "Population Density in Europe 2022",
+  use_local_data = TRUE,
+  cache_data = FALSE                 # Disable caching for example
+)
+```
+
+## Different Geographic Levels
+
+The function supports different administrative levels:
+
+```{r geographic-levels, eval=FALSE}
+# Country level (NUTS 0)
+country_map <- eurostatmap(
+  dataset_id = "demo_r_gind3",
+  geo_level = "nuts0",
+  year = 2022,
+  map_title = "Countries (NUTS 0)"
+)
+
+# Major regions (NUTS 1)
+region_map <- eurostatmap(
+  dataset_id = "demo_r_gind3",
+  geo_level = "nuts1",
+  year = 2022,
+  map_title = "Major Regions (NUTS 1)"
+)
+
+# Basic regions (NUTS 2)
+basic_map <- eurostatmap(
+  dataset_id = "demo_r_gind3",
+  geo_level = "nuts2",
+  year = 2022,
+  map_title = "Basic Regions (NUTS 2)"
+)
+```
+
+# Using Your Own Data
+
+## Data Format Requirements
+
+When using your own data, it must include:
+
+1. A `geo` column with valid NUTS geographic codes (e.g., 'DE', 'FR', 'ES' for countries)
+2. One or more indicator variables with numeric values
+3. Optionally, a `TIME_PERIOD` column for year filtering
+
+```{r load-sample-data, eval=FALSE}
+# Load the sample eurostat data included with ClinicoPath
+data("eurostat_health_data")
+
+# Display the structure of the data
+knitr::kable(head(eurostat_health_data), 
+             caption = "Sample Eurostat Health Data Structure")
+```
+
+The eurostat_health_data contains the following columns:
+- `geo`: NUTS country codes (AT, BE, DE, FR, etc.)
+- `country_name`: Full country names
+- `life_expectancy`: Life expectancy at birth (years)
+- `population_density`: Population per km²
+- `gdp_per_capita`: GDP per capita (thousands of euros)
+- `healthcare_expenditure`: Healthcare expenditure as % of GDP
+- `TIME_PERIOD`: Year of data (2022)
+
+## Creating Maps with Local Data
+
+```{r local-data-map, eval=FALSE}
+# Create a map using local health data
+health_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "life_expectancy",
+  geo_level = "nuts0",
+  year = 2022,
+  map_type = "static",
+  color_palette = "viridis",
+  classification_method = "quantile",
+  n_classes = 5,
+  map_title = "Life Expectancy in Europe",
+  use_local_data = TRUE,
+  cache_data = FALSE,
+  add_to_data = FALSE
+)
+```
+
+## Multiple Indicators Analysis
+
+You can analyze different health indicators using the same dataset:
+
+```{r multiple-indicators, eval=FALSE}
+# Healthcare expenditure map
+expenditure_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "healthcare_expenditure",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "reds",
+  map_title = "Healthcare Expenditure (% of GDP)",
+  use_local_data = TRUE
+)
+
+# Hospital beds per capita
+beds_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "hospital_beds",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "greens",
+  map_title = "Hospital Beds per 100,000 Inhabitants",
+  use_local_data = TRUE
+)
+
+# Cancer incidence rates
+cancer_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "cancer_incidence",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "plasma",
+  map_title = "Cancer Incidence Rate per 100,000",
+  use_local_data = TRUE
+)
+```
+
+# Advanced Features
+
+## Interactive Maps
+
+Create interactive maps for enhanced exploration:
+
+```{r interactive-map, eval=FALSE}
+# Create an interactive map
+interactive_result <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "life_expectancy",
+  geo_level = "nuts0",
+  year = 2022,
+  map_type = "interactive",        # Enable interactivity
+  color_palette = "viridis",
+  map_title = "Interactive Life Expectancy Map",
+  use_local_data = TRUE
+)
+```
+
+Interactive maps allow users to:
+- Hover over regions to see exact values
+- Zoom in and out
+- Pan across the map
+- Toggle layers on and off
+
+## Color Palettes and Classification Methods
+
+### Available Color Palettes
+
+```{r color-palettes, eval=FALSE}
+# Test different color palettes
+palettes <- c("viridis", "plasma", "blues", "reds", "greens")
+
+for (palette in palettes) {
+  map_result <- eurostatmap(
+    data = eurostat_health_data,
+    indicator = "gdp_per_capita",
+    color_palette = palette,
+    map_title = paste("GDP per Capita -", palette, "palette"),
+    use_local_data = TRUE
+  )
+}
+```
+
+### Classification Methods
+
+```{r classification-methods, eval=FALSE}
+# Test different classification methods
+methods <- c("quantile", "equal", "jenks", "pretty")
+
+for (method in methods) {
+  map_result <- eurostatmap(
+    data = eurostat_health_data,
+    indicator = "population_density",
+    classification_method = method,
+    map_title = paste("Population Density -", method, "classification"),
+    use_local_data = TRUE
+  )
+}
+```
+
+## Time Series Analysis
+
+Working with multiple years of data:
+
+```{r time-series, eval=FALSE}
+# Load time series data
+data("eurostat_timeseries_data")
+
+knitr::kable(head(eurostat_timeseries_data), 
+             caption = "Time Series Data Structure")
+
+# Create maps for different years
+years <- c(2018, 2020, 2022)
+
+for (year in years) {
+  yearly_data <- eurostat_timeseries_data[eurostat_timeseries_data$TIME_PERIOD == year, ]
+  
+  if (nrow(yearly_data) > 0) {
+    map_result <- eurostatmap(
+      data = yearly_data,
+      indicator = "life_expectancy",
+      geo_level = "nuts0",
+      year = year,
+      map_title = paste("Life Expectancy", year),
+      use_local_data = TRUE
+    )
+  }
+}
+```
+
+# Practical Applications
+
+## Public Health Research
+
+### Example 1: Health System Performance
+
+```{r health-system, eval=FALSE}
+# Analyze healthcare system performance across Europe
+healthcare_analysis <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "doctors_per_capita",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "blues",
+  classification_method = "quantile",
+  n_classes = 5,
+  map_title = "Doctors per 100,000 Inhabitants",
+  use_local_data = TRUE
+)
+```
+
+### Example 2: Disease Burden Mapping
+
+```{r disease-burden, eval=FALSE}
+# Map cardiovascular mortality rates
+cvd_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "cardiovascular_mortality",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "reds",
+  classification_method = "jenks",
+  n_classes = 6,
+  map_title = "Cardiovascular Mortality Rate per 100,000",
+  use_local_data = TRUE
+)
+```
+
+## Epidemiological Studies
+
+### Example 3: Risk Factor Analysis
+
+```{r risk-factors, eval=FALSE}
+# Analyze smoking prevalence across Europe
+smoking_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "smoking_prevalence",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "plasma",
+  classification_method = "equal",
+  n_classes = 5,
+  map_title = "Smoking Prevalence (%)",
+  use_local_data = TRUE
+)
+
+# Analyze alcohol consumption patterns
+alcohol_map <- eurostatmap(
+  data = eurostat_health_data,
+  indicator = "alcohol_consumption",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "greens",
+  classification_method = "quantile",
+  n_classes = 4,
+  map_title = "Alcohol Consumption (Liters per Capita)",
+  use_local_data = TRUE
+)
+```
+
+# Preparing Your Own Data
+
+## Data Collection Guidelines
+
+When preparing your own eurostat-compatible data:
+
+1. **Geographic Codes**: Use official NUTS codes from Eurostat
+2. **Data Quality**: Ensure numeric indicators are properly formatted
+3. **Missing Values**: Handle missing data appropriately
+4. **Standardization**: Use consistent units and scales
+
+## Example Data Preparation
+
+```{r data-preparation, eval=FALSE}
+# Create a custom dataset for mapping
+custom_health_data <- data.frame(
+  geo = c("AT", "BE", "DE", "FR", "IT", "ES", "NL", "PL", "SE", "DK"),
+  country_name = c("Austria", "Belgium", "Germany", "France", "Italy", 
+                   "Spain", "Netherlands", "Poland", "Sweden", "Denmark"),
+  hospital_readmission_rate = c(8.2, 7.5, 9.1, 6.8, 7.9, 8.5, 6.2, 10.3, 5.8, 7.1),
+  patient_satisfaction = c(85, 78, 82, 79, 76, 81, 88, 72, 91, 86),
+  wait_time_days = c(45, 38, 52, 41, 67, 58, 28, 89, 22, 34),
+  TIME_PERIOD = rep(2022, 10)
+)
+
+# Display the custom data
+knitr::kable(custom_health_data, 
+             caption = "Custom Health Data for Mapping")
+
+# Create maps with custom data
+readmission_map <- eurostatmap(
+  data = custom_health_data,
+  indicator = "hospital_readmission_rate",
+  geo_level = "nuts0",
+  year = 2022,
+  color_palette = "reds",
+  map_title = "Hospital Readmission Rate (%)",
+  use_local_data = TRUE
+)
+```
+
+# Data Output and Analysis
+
+## Understanding the Results
+
+The eurostatmap function provides several outputs:
+
+1. **Map Visualization**: The main choropleth map
+2. **Dataset Information**: Metadata about the data source
+3. **Summary Statistics**: Descriptive statistics for the indicator
+4. **Downloaded Data**: Optional table of the raw data (when using Eurostat API)
+
+## Statistical Summary
+
+```{r summary-stats, eval=FALSE}
+# The function automatically generates summary statistics
+# These include: Min, Max, Mean, Median, Standard Deviation, Count
+
+# Example of manually calculating similar statistics
+indicator_stats <- eurostat_health_data %>%
+  summarise(
+    Min = min(life_expectancy, na.rm = TRUE),
+    Max = max(life_expectancy, na.rm = TRUE),
+    Mean = mean(life_expectancy, na.rm = TRUE),
+    Median = median(life_expectancy, na.rm = TRUE),
+    `Std Dev` = sd(life_expectancy, na.rm = TRUE),
+    Count = sum(!is.na(life_expectancy))
+  )
+
+knitr::kable(indicator_stats, 
+             caption = "Life Expectancy Statistics",
+             digits = 2)
+```
+
+# Tips and Best Practices
+
+## Performance Optimization
+
+1. **Use Caching**: Enable `cache_data = TRUE` for repeated analyses
+2. **Appropriate Geographic Level**: Choose the right NUTS level for your research question
+3. **Data Size**: Be mindful of large datasets when using interactive maps
+
+## Data Quality Considerations
+
+1. **Missing Data**: Check for missing values in your geographic codes
+2. **Outliers**: Consider outlier treatment before mapping
+3. **Units**: Ensure consistent units across your indicators
+
+## Visualization Best Practices
+
+1. **Color Choice**: Select colorblind-friendly palettes
+2. **Classification**: Choose appropriate classification methods for your data distribution
+3. **Title and Labels**: Use clear, descriptive titles and labels
+
+# Troubleshooting
+
+## Common Issues and Solutions
+
+### Issue 1: Missing geo column
+```{r troubleshoot-geo, eval=FALSE}
+# This will cause an error
+faulty_data <- eurostat_health_data
+faulty_data$geo <- NULL
+
+# The function will detect this and provide a helpful error message
+tryCatch({
+  eurostatmap(
+    data = faulty_data,
+    indicator = "life_expectancy",
+    use_local_data = TRUE
+  )
+}, error = function(e) {
+  cat("Error:", e$message, "\n")
+})
+```
+
+### Issue 2: Invalid geographic codes
+- Ensure NUTS codes are current and valid
+- Check for typos in country codes
+- Verify that codes match the selected geographic level
+
+### Issue 3: Network issues with Eurostat API
+- Check internet connection
+- Try enabling caching for large datasets
+- Consider using local data for offline analysis
+
+# Turkey Data Analysis with Real Eurostat Data
+
+Turkey, as a candidate country of the European Union, is included in the Eurostat NUTS classification system. This section demonstrates how to use **real Turkey data** downloaded from Eurostat to create comprehensive regional analyses.
+
+## Turkey NUTS Classification Overview
+
+Turkey's NUTS system consists of:
+- **NUTS-1**: 12 regions (TR1, TR2, ..., TR9, TRA, TRB, TRC)
+- **NUTS-2**: 26 subregions (TR10, TR21, TR22, ..., TRA1, TRA2, TRB1, TRB2, TRC1, TRC2, TRC3)
+- **NUTS-3**: 81 provinces
+
+The eastern regions **TRA (Northeast Anatolia)**, **TRB (Central East Anatolia)**, and **TRC (Southeast Anatolia)** are of particular interest for regional development studies.
+
+## Real Turkey Data Examples
+
+### Example 1: Turkey NUTS-2 Population Analysis
+
+```{r turkey-nuts2-population, eval=FALSE}
+# Display real Turkey NUTS-2 data structure
+knitr::kable(head(turkey_nuts2_eurostat, 8), 
+             caption = "Real Turkey NUTS-2 Data from Eurostat")
+
+# Create population map for all Turkey NUTS-2 regions
+turkey_population_map <- eurostatmap(
+  data = turkey_nuts2_eurostat,
+  indicator = "population",
+  geo_level = "nuts2",
+  year = 2023,
+  map_type = "static",
+  color_palette = "viridis",
+  classification_method = "quantile",
+  n_classes = 5,
+  map_title = "Population Distribution in Turkey (NUTS-2 Regions, 2023)",
+  use_local_data = TRUE
+)
+```
+
+### Example 2: Economic Development Analysis (GDP per Capita)
+
+```{r turkey-gdp-analysis, eval=FALSE}
+# GDP per capita analysis across Turkey
+turkey_gdp_map <- eurostatmap(
+  data = turkey_nuts2_eurostat,
+  indicator = "gdp_per_capita_pps",
+  geo_level = "nuts2", 
+  year = 2023,
+  map_type = "static",
+  color_palette = "reds",
+  classification_method = "jenks",
+  n_classes = 6,
+  map_title = "GDP per Capita (PPS) in Turkey - NUTS-2 Regions",
+  use_local_data = TRUE
+)
+
+# Summary statistics for GDP
+gdp_summary <- turkey_nuts2_eurostat %>%
+  summarise(
+    Min_GDP = min(gdp_per_capita_pps, na.rm = TRUE),
+    Max_GDP = max(gdp_per_capita_pps, na.rm = TRUE),
+    Mean_GDP = mean(gdp_per_capita_pps, na.rm = TRUE),
+    Median_GDP = median(gdp_per_capita_pps, na.rm = TRUE),
+    `Std Dev` = sd(gdp_per_capita_pps, na.rm = TRUE)
+  )
+
+knitr::kable(gdp_summary, 
+             caption = "GDP per Capita Statistics for Turkey",
+             digits = 1)
+```
+
+### Example 3: Eastern Anatolia Regions Focus (TRA, TRB, TRC)
+
+```{r eastern-anatolia-analysis, eval=FALSE}
+# Display eastern regions data
+knitr::kable(turkey_eastern_anatolia, 
+             caption = "Eastern Anatolia Regions (Real Eurostat Data)")
+
+# Create map focusing on eastern regions
+eastern_population_map <- eurostatmap(
+  data = turkey_eastern_anatolia,
+  indicator = "population",
+  geo_level = "nuts2",
+  year = 2023,
+  map_type = "static",
+  color_palette = "plasma",
+  classification_method = "equal",
+  n_classes = 4,
+  map_title = "Population in Eastern Anatolia (TRA, TRB, TRC Regions)",
+  use_local_data = TRUE
+)
+
+# Economic comparison of eastern regions
+eastern_gdp_comparison <- turkey_eastern_anatolia %>%
+  select(geo, subregion_name, population, gdp_per_capita_pps) %>%
+  arrange(desc(gdp_per_capita_pps))
+
+knitr::kable(eastern_gdp_comparison,
+             caption = "Economic Indicators - Eastern Anatolia Comparison",
+             col.names = c("NUTS Code", "Region", "Population", "GDP per Capita (PPS)"))
+```
+
+### Example 4: Regional Development Disparities
+
+```{r regional-disparities, eval=FALSE}
+# Compare Western vs Eastern Turkey using aggregated NUTS-1 data
+regional_comparison <- turkey_nuts1_aggregated %>%
+  mutate(
+    region_category = case_when(
+      geo %in% c("TR1", "TR2", "TR3", "TR4", "TR5") ~ "Western Turkey",
+      geo %in% c("TR6", "TR7", "TR8", "TR9") ~ "Central Turkey", 
+      geo %in% c("TRA", "TRB", "TRC") ~ "Eastern Turkey",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  group_by(region_category) %>%
+  summarise(
+    total_population = sum(population_total),
+    avg_gdp_per_capita = weighted.mean(gdp_per_capita_weighted, population_total, na.rm = TRUE),
+    avg_employment_rate = weighted.mean(employment_rate_weighted, population_total, na.rm = TRUE),
+    regions_count = n(),
+    .groups = "drop"
+  )
+
+knitr::kable(regional_comparison,
+             caption = "Turkey Regional Development Comparison",
+             digits = 1)
+
+# Create aggregated NUTS-1 map
+turkey_nuts1_map <- eurostatmap(
+  data = turkey_nuts1_aggregated,
+  indicator = "gdp_per_capita_weighted",
+  geo_level = "nuts1",
+  year = 2023,
+  map_type = "static",
+  color_palette = "blues",
+  classification_method = "quantile",
+  n_classes = 4,
+  map_title = "GDP per Capita by NUTS-1 Regions in Turkey",
+  use_local_data = TRUE
+)
+```
+
+### Example 5: Time Series Analysis (2018-2023)
+
+```{r turkey-timeseries, eval=FALSE}
+# Display time series data structure
+knitr::kable(head(turkey_timeseries_nuts2, 10),
+             caption = "Turkey Population Time Series (2018-2023)")
+
+# Population growth analysis
+population_growth <- turkey_timeseries_nuts2 %>%
+  group_by(geo, city_name, region_type) %>%
+  summarise(
+    pop_2018 = population[TIME_PERIOD == 2018],
+    pop_2023 = population[TIME_PERIOD == 2023],
+    growth_rate = ((pop_2023 - pop_2018) / pop_2018) * 100,
+    .groups = "drop"
+  ) %>%
+  arrange(desc(growth_rate))
+
+knitr::kable(population_growth,
+             caption = "Population Growth Rates (2018-2023)",
+             digits = 2)
+
+# Create maps for different years
+years <- c(2018, 2020, 2023)
+for (year in years) {
+  yearly_data <- turkey_timeseries_nuts2 %>%
+    filter(TIME_PERIOD == year)
+  
+  yearly_map <- eurostatmap(
+    data = yearly_data,
+    indicator = "population",
+    geo_level = "nuts2",
+    year = year,
+    map_type = "static",
+    color_palette = "viridis",
+    map_title = paste("Turkey Population", year),
+    use_local_data = TRUE
+  )
+}
+```
+
+## Using Live Eurostat Data for Turkey
+
+The eurostatmap function can also download real-time Turkey data directly from Eurostat:
+
+```{r live-eurostat-turkey, eval=FALSE}
+# Download live population data for Turkey
+live_turkey_map <- eurostatmap(
+  dataset_id = "tgs00096",  # Population by NUTS-2 regions
+  geo_level = "nuts2",
+  year = 2023,
+  map_type = "static",
+  color_palette = "viridis",
+  map_title = "Live Turkey Population Data from Eurostat",
+  use_local_data = FALSE,  # Download from Eurostat API
+  cache_data = TRUE
+)
+
+# Download GDP data for Turkey
+live_gdp_map <- eurostatmap(
+  dataset_id = "tgs00006",  # GDP per capita by NUTS-2
+  geo_level = "nuts2", 
+  year = 2022,
+  map_type = "static",
+  color_palette = "reds",
+  map_title = "Live Turkey GDP Data from Eurostat",
+  use_local_data = FALSE,
+  cache_data = TRUE
+)
+```
+
+## Turkey Data Insights
+
+Based on the real Eurostat data, key findings include:
+
+1. **Population Distribution**: İstanbul (TR10) dominates with ~16 million people
+2. **Economic Disparities**: Western regions show higher GDP per capita than eastern regions
+3. **Regional Development**: TRA, TRB, TRC regions show lower economic indicators
+4. **Growth Patterns**: Different growth trajectories between western and eastern Turkey
+
+## Available Turkey Datasets in Eurostat
+
+Real Turkey data is available in these Eurostat datasets:
+- **tgs00096**: Population by NUTS-2 regions (2013-2024)
+- **tgs00006**: GDP per capita by NUTS-2 (2012-2023)  
+- **tgs00007**: Employment rates by NUTS-2 (2013-2024)
+- **demo_r_gind3**: Demographic balance (2000-2024)
+- **demo_r_d3dens**: Population density (2001-2023)
+- **demo_r_mlifexp**: Life expectancy (2009-2023)
+
+# Advanced Examples
+
+## Comparative Analysis
+
+```{r comparative-analysis, eval=FALSE}
+# Create comprehensive data for comparison
+data("eurostat_comprehensive_data")
+
+# Show structure of comprehensive data
+knitr::kable(head(eurostat_comprehensive_data[, 1:8]), 
+             caption = "Comprehensive Eurostat Data (First 8 Columns)")
+
+# Multiple indicator comparison maps would be created here
+# This demonstrates the versatility of the eurostatmap function
+```
+
+## Regional Analysis
+
+```{r regional-analysis, eval=FALSE}
+# Load NUTS1 regional data
+data("eurostat_nuts1_data")
+
+# Create regional-level maps
+regional_map <- eurostatmap(
+  data = eurostat_nuts1_data,
+  indicator = "life_expectancy",
+  geo_level = "nuts1",
+  year = 2022,
+  color_palette = "viridis",
+  map_title = "Regional Life Expectancy (NUTS 1)",
+  use_local_data = TRUE
+)
+```
+
+# Conclusion
+
+The `eurostatmap` function provides a powerful and flexible tool for creating European statistical maps. Whether you're conducting public health research, epidemiological studies, or policy analysis, this function enables you to:
+
+- Visualize complex spatial patterns in health and demographic data
+- Compare indicators across European countries and regions
+- Create both static and interactive maps for different audiences
+- Integrate official Eurostat data or use your own datasets
+- Generate publication-ready visualizations with minimal code
+
+## Next Steps
+
+1. Explore different Eurostat datasets using the API functionality
+2. Experiment with various visualization options and color schemes
+3. Combine eurostatmap with other ClinicoPath functions for comprehensive analysis
+4. Consider time-series analysis for longitudinal studies
+
+## Additional Resources
+
+- [Eurostat Database](https://ec.europa.eu/eurostat/data/database)
+- [NUTS Classification](https://ec.europa.eu/eurostat/web/nuts/nuts-maps)
+- [ClinicoPath Documentation](https://serdarbalci.github.io/ClinicoPathJamoviModule/)
+
+For more examples and advanced usage, refer to the ClinicoPath package documentation and other vignettes in this series.
