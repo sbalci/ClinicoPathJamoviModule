@@ -4,7 +4,21 @@
 \alias{datecorrection}
 \title{Date Field Correction}
 \usage{
-datecorrection(data, date_vars)
+datecorrection(
+  data,
+  date_vars,
+  correction_method = "datefixr",
+  date_format = "auto",
+  day_impute = 1,
+  month_impute = 7,
+  handle_excel = TRUE,
+  timezone = "UTC",
+  show_correction_table = TRUE,
+  show_quality_assessment = TRUE,
+  show_format_analysis = TRUE,
+  show_correction_summary = TRUE,
+  show_interpretation = TRUE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,13 +26,71 @@ datecorrection(data, date_vars)
 \item{date_vars}{Variables containing date information in various formats
 that need correction and standardization. Can handle character strings,
 numeric values, factors with date representations.}
+
+\item{correction_method}{Method for date correction. datefixR provides
+robust format detection, anytime offers flexible parsing, lubridate allows
+format specification, and consensus combines methods for maximum
+reliability.}
+
+\item{date_format}{Expected date format for ambiguous cases. Auto-detect
+tries to determine the most likely format based on the data patterns.}
+
+\item{day_impute}{Day of month to impute when day is missing (1-31).
+Default is 1st of month. If value exceeds days in month, last day of month
+will be used.}
+
+\item{month_impute}{Month to impute when month is missing (1-12). Default
+is 7 (July). Commonly used middle-year value for clinical research.}
+
+\item{handle_excel}{Whether to convert Excel numeric date values (days
+since 1900-01-01). Useful for data exported from Excel spreadsheets.}
+
+\item{timezone}{Timezone for output dates. Use UTC for standardization, or
+local timezone if time-of-day information is critical.}
+
+\item{show_correction_table}{Display detailed table showing original
+values, corrected values, and correction status for each observation.}
+
+\item{show_quality_assessment}{Provide quality assessment including success
+rates, common problems, and recommendations for further correction.}
+
+\item{show_format_analysis}{Analyze detected date formats and patterns in
+the original data.}
+
+\item{show_correction_summary}{Summary statistics of the correction process
+including before/after comparison and data quality metrics.}
+
+\item{show_interpretation}{Display guidance on date correction methods,
+best practices, and recommendations for clinical research data.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$correction_table} \tab \tab \tab \tab \tab a html \cr
+\code{results$quality_assessment} \tab \tab \tab \tab \tab a html \cr
+\code{results$format_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$correction_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
-Date Field Correction
+Comprehensive date field correction and standardization using multiple R
+packages (datefixR, anytime, lubridate).
+This module handles messy date formats commonly found in clinical
+databases: different separators,
+month representations, missing components, and ambiguous formats. Provides
+standardized date outputs
+with detailed correction reports and quality assessment. Perfect for
+clinical research data preprocessing
+and database standardization workflows.
+}
+\examples{
+\donttest{
+# Example:
+# 1. Select variables containing date information that need correction.
+# 2. Choose correction method (automatic detection or specific format).
+# 3. Configure missing value imputation settings.
+# 4. Review correction results and quality assessment.
+}
 }

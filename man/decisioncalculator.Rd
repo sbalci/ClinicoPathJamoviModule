@@ -54,10 +54,33 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$cTable)}
 }
 \description{
-Function for Medical Decision Calculator.
+Medical Decision Calculator for diagnostic test evaluation when you have
+the four key counts: True Positives (TP), False Positives (FP), True
+Negatives (TN), and False Negatives (FN). Calculates comprehensive
+diagnostic performance metrics including sensitivity, specificity,
+positive and negative predictive values, likelihood ratios, and
+post-test probabilities. Supports confidence interval estimation and
+Fagan nomogram visualization for clinical decision making.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic diagnostic test evaluation with known counts
+result1 <- decisioncalculator(
+  TP = 90,  # True positives
+  FN = 10,  # False negatives
+  TN = 80,  # True negatives
+  FP = 20   # False positives
+)
+
+# Include 95\\% confidence intervals
+result2 <- decisioncalculator(
+  TP = 90, FN = 10, TN = 80, FP = 20,
+  ci = TRUE
+)
+
+# Complete analysis with Fagan nomogram
+result3 <- decisioncalculator(
+  TP = 90, FN = 10, TN = 80, FP = 20,
+  ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
+)
+
 }

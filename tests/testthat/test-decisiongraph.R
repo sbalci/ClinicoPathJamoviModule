@@ -96,7 +96,7 @@ test_that("All tree types work correctly", {
     expect_no_error({
       analysis <- decisiongraphClass$new(options)
       analysis$run()
-    }, info = paste("Tree type:", tree_type))
+    })
   }
 })
 
@@ -118,7 +118,7 @@ test_that("All layout options work correctly", {
     expect_no_error({
       analysis <- decisiongraphClass$new(options)
       analysis$run()
-    }, info = paste("Layout:", layout))
+    })
   }
 })
 
@@ -154,7 +154,7 @@ test_that("Display options work correctly", {
       expect_no_error({
         analysis <- decisiongraphClass$new(test_options)
         analysis$run()
-      }, info = paste(option_name, "=", option_value))
+      })
     }
   }
 })
@@ -176,7 +176,7 @@ test_that("All color schemes work correctly", {
     expect_no_error({
       analysis <- decisiongraphClass$new(options)
       analysis$run()
-    }, info = paste("Color scheme:", scheme))
+    })
   }
 })
 
@@ -236,7 +236,7 @@ test_that("Economic parameters work correctly", {
     expect_no_error({
       analysis <- decisiongraphClass$new(options)
       analysis$run()
-    }, info = paste("Discount rate:", rate))
+    })
   }
   
   # Test different time horizons
@@ -253,7 +253,7 @@ test_that("Economic parameters work correctly", {
     expect_no_error({
       analysis <- decisiongraphClass$new(options)
       analysis$run()
-    }, info = paste("Time horizon:", horizon))
+    })
   }
 })
 

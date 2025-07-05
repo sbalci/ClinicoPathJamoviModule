@@ -336,9 +336,66 @@ desctoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' research, epidemiological studies, and advanced statistical analysis.
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Load example data
+#' data("histopathology")
+#' data("dca_test_data")
+#' data("BreastCancer")
+#'
+#' # Example 1: Effect Size Analysis - Compare age between treatment groups
+#' desctools(
+#'     data = histopathology,
+#'     effect_size_analysis = TRUE,
+#'     group_var = "Group",
+#'     continuous_var = "Age",
+#'     pooled_sd = TRUE,
+#'     hedges_correction = FALSE,
+#'     effect_ci_level = 0.95
+#' )
+#'
+#' # Example 2: Goodness of Fit - Hosmer-Lemeshow test for model validation
+#' desctools(
+#'     data = dca_test_data,
+#'     goodness_of_fit = TRUE,
+#'     fitted_probs = "basic_model",
+#'     observed_outcomes = "cardiac_event_numeric",
+#'     hl_groups = 10
+#' )
+#'
+#' # Example 3: Categorical Analysis - Test for trend across tumor grades
+#' desctools(
+#'     data = histopathology,
+#'     categorical_tests = TRUE,
+#'     ordered_exposure = "Grade",
+#'     binary_outcome = "Death"
+#' )
+#'
+#' # Example 4: Comprehensive Analysis - All three analysis types
+#' desctools(
+#'     data = histopathology,
+#'     effect_size_analysis = TRUE,
+#'     group_var = "Group",
+#'     continuous_var = "Age",
+#'     goodness_of_fit = TRUE,
+#'     normality_var = "MeasurementA",
+#'     categorical_tests = TRUE,
+#'     ordered_exposure = "Grade",
+#'     binary_outcome = "Death",
+#'     multiple_testing = "BH",
+#'     show_interpretations = TRUE
+#' )
+#'
+#' # Example 5: Clinical Application - Biomarker validation
+#' desctools(
+#'     data = BreastCancer,
+#'     effect_size_analysis = TRUE,
+#'     group_var = "Class",
+#'     continuous_var = "Cl.thickness",
+#'     hedges_correction = TRUE,
+#'     goodness_of_fit = TRUE,
+#'     normality_var = "Cell.size",
+#'     multiple_testing = "BH"
+#' )
+#'
 #' @param data The data as a data frame for statistical analysis.
 #' @param effect_size_analysis Calculate effect sizes including Cohen's D for
 #'   comparing group means. Essential for determining practical significance in

@@ -9,8 +9,8 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.37" # Update this to the new version you want to set
-new_date <- "2024-07-03" # Update this to the new date you want to set
+new_version <- "0.0.3.39" # Update this to the new version you want to set
+new_date <- "2024-07-05" # Update this to the new date you want to set
 
 
 # Define WIP, check, extended status ----
@@ -631,7 +631,7 @@ if (WIP) {
     "cotest",
     "sequentialtests",
     "decisioncurve",
-    "dendogram",
+    "dendrogram",
     "icccoeff",
     "modelbuilder",
     "nomogram",

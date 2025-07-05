@@ -1,0 +1,44 @@
+---
+name:  dendrogram
+title: Dendrogram
+jrs:   '1.1'
+
+items:
+    - name:  plot
+      title: Dendrogram Plot
+      type:  Image
+      width:  800
+      height: 600
+      renderFun: .plot
+
+    - name:  clusterInfo
+      title: Cluster Information
+      type:  Html
+
+    - name:  summary
+      title: Summary Statistics
+      type:  Table
+      rows:  (vars)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: mean
+          title: Mean
+          type: number
+          format: zto
+        - name: sd
+          title: SD
+          type: number
+          format: zto
+        - name: missing
+          title: Missing
+          type: integer
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

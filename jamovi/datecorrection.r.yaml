@@ -8,58 +8,57 @@ items:
       title: Instructions
       type: Html
 
-    # - name: correction_table
-    #   title: Date Correction Results
-    #   type: Html
-    #   visible: (show_correction_table)
-    #   clearWith:
-    #     - date_vars
-    #     - correction_method
-    #     - date_format
-    #     - day_impute
-    #     - month_impute
-    #     - year_threshold
-    #     - handle_excel
-    #     - timezone
+    - name: correction_table
+      title: Date Correction Results
+      type: Html
+      visible: (show_correction_table)
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
+        - day_impute
+        - month_impute
+        - handle_excel
+        - timezone
 
-    # - name: quality_assessment
-    #   title: Quality Assessment
-    #   type: Html
-    #   visible: (show_quality_assessment)
-    #   clearWith:
-    #     - date_vars
-    #     - correction_method
-    #     - date_format
-    #     - day_impute
-    #     - month_impute
-    #     - year_threshold
-    #     - handle_excel
+    - name: quality_assessment
+      title: Quality Assessment
+      type: Html
+      visible: (show_quality_assessment)
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
+        - day_impute
+        - month_impute
+        - handle_excel
 
-    # - name: format_analysis
-    #   title: Format Analysis
-    #   type: Html
-    #   visible: (show_format_analysis)
-    #   clearWith:
-    #     - date_vars
-    #     - correction_method
-    #     - date_format
+    - name: format_analysis
+      title: Format Analysis
+      type: Html
+      visible: (show_format_analysis)
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
 
-    # - name: correction_summary
-    #   title: Correction Summary
-    #   type: Html
-    #   visible: (show_correction_summary)
-    #   clearWith:
-    #     - date_vars
-    #     - correction_method
-    #     - date_format
-    #     - day_impute
-    #     - month_impute
-    #     - year_threshold
-    #     - handle_excel
+    - name: correction_summary
+      title: Correction Summary
+      type: Html
+      visible: (show_correction_summary)
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
+        - day_impute
+        - month_impute
+        - handle_excel
 
-    # - name: interpretation
-    #   title: Usage Guide
-    #   type: Html
-    #   visible: (show_interpretation)
-    #   clearWith:
-    #     - correction_method
+    - name: interpretation
+      title: Usage Guide
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+        - correction_method
+
+...

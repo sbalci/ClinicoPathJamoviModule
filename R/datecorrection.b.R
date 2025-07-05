@@ -139,7 +139,12 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
         .perform_date_correction = function(data, date_vars) {
             
-            correction_method <- self$options$correction_method
+            # Defensive options access
+            correction_method <- if (!is.null(self$options$correction_method)) {
+                self$options$correction_method
+            } else {
+                "datefixr"  # Default fallback
+            }
             results <- list()
             
             for (var in date_vars) {

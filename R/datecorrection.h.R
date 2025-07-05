@@ -6,7 +6,18 @@ datecorrectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            date_vars = NULL, ...) {
+            date_vars = NULL,
+            correction_method = "datefixr",
+            date_format = "auto",
+            day_impute = 1,
+            month_impute = 7,
+            handle_excel = TRUE,
+            timezone = "UTC",
+            show_correction_table = TRUE,
+            show_quality_assessment = TRUE,
+            show_format_analysis = TRUE,
+            show_correction_summary = TRUE,
+            show_interpretation = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,20 +28,116 @@ datecorrectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..date_vars <- jmvcore::OptionVariables$new(
                 "date_vars",
                 date_vars)
+            private$..correction_method <- jmvcore::OptionList$new(
+                "correction_method",
+                correction_method,
+                options=list(
+                    "datefixr",
+                    "anytime",
+                    "lubridate",
+                    "consensus"),
+                default="datefixr")
+            private$..date_format <- jmvcore::OptionList$new(
+                "date_format",
+                date_format,
+                options=list(
+                    "dmy",
+                    "mdy",
+                    "ymd",
+                    "auto"),
+                default="auto")
+            private$..day_impute <- jmvcore::OptionNumber$new(
+                "day_impute",
+                day_impute,
+                min=1,
+                max=31,
+                default=1)
+            private$..month_impute <- jmvcore::OptionNumber$new(
+                "month_impute",
+                month_impute,
+                min=1,
+                max=12,
+                default=7)
+            private$..handle_excel <- jmvcore::OptionBool$new(
+                "handle_excel",
+                handle_excel,
+                default=TRUE)
+            private$..timezone <- jmvcore::OptionString$new(
+                "timezone",
+                timezone,
+                default="UTC")
+            private$..show_correction_table <- jmvcore::OptionBool$new(
+                "show_correction_table",
+                show_correction_table,
+                default=TRUE)
+            private$..show_quality_assessment <- jmvcore::OptionBool$new(
+                "show_quality_assessment",
+                show_quality_assessment,
+                default=TRUE)
+            private$..show_format_analysis <- jmvcore::OptionBool$new(
+                "show_format_analysis",
+                show_format_analysis,
+                default=TRUE)
+            private$..show_correction_summary <- jmvcore::OptionBool$new(
+                "show_correction_summary",
+                show_correction_summary,
+                default=TRUE)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=TRUE)
 
             self$.addOption(private$..date_vars)
+            self$.addOption(private$..correction_method)
+            self$.addOption(private$..date_format)
+            self$.addOption(private$..day_impute)
+            self$.addOption(private$..month_impute)
+            self$.addOption(private$..handle_excel)
+            self$.addOption(private$..timezone)
+            self$.addOption(private$..show_correction_table)
+            self$.addOption(private$..show_quality_assessment)
+            self$.addOption(private$..show_format_analysis)
+            self$.addOption(private$..show_correction_summary)
+            self$.addOption(private$..show_interpretation)
         }),
     active = list(
-        date_vars = function() private$..date_vars$value),
+        date_vars = function() private$..date_vars$value,
+        correction_method = function() private$..correction_method$value,
+        date_format = function() private$..date_format$value,
+        day_impute = function() private$..day_impute$value,
+        month_impute = function() private$..month_impute$value,
+        handle_excel = function() private$..handle_excel$value,
+        timezone = function() private$..timezone$value,
+        show_correction_table = function() private$..show_correction_table$value,
+        show_quality_assessment = function() private$..show_quality_assessment$value,
+        show_format_analysis = function() private$..show_format_analysis$value,
+        show_correction_summary = function() private$..show_correction_summary$value,
+        show_interpretation = function() private$..show_interpretation$value),
     private = list(
-        ..date_vars = NA)
+        ..date_vars = NA,
+        ..correction_method = NA,
+        ..date_format = NA,
+        ..day_impute = NA,
+        ..month_impute = NA,
+        ..handle_excel = NA,
+        ..timezone = NA,
+        ..show_correction_table = NA,
+        ..show_quality_assessment = NA,
+        ..show_format_analysis = NA,
+        ..show_correction_summary = NA,
+        ..show_interpretation = NA)
 )
 
 datecorrectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "datecorrectionResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]]),
+        todo = function() private$.items[["todo"]],
+        correction_table = function() private$.items[["correction_table"]],
+        quality_assessment = function() private$.items[["quality_assessment"]],
+        format_analysis = function() private$.items[["format_analysis"]],
+        correction_summary = function() private$.items[["correction_summary"]],
+        interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -41,7 +148,60 @@ datecorrectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Instructions"))}))
+                title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="correction_table",
+                title="Date Correction Results",
+                visible="(show_correction_table)",
+                clearWith=list(
+                    "date_vars",
+                    "correction_method",
+                    "date_format",
+                    "day_impute",
+                    "month_impute",
+                    "handle_excel",
+                    "timezone")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="quality_assessment",
+                title="Quality Assessment",
+                visible="(show_quality_assessment)",
+                clearWith=list(
+                    "date_vars",
+                    "correction_method",
+                    "date_format",
+                    "day_impute",
+                    "month_impute",
+                    "handle_excel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="format_analysis",
+                title="Format Analysis",
+                visible="(show_format_analysis)",
+                clearWith=list(
+                    "date_vars",
+                    "correction_method",
+                    "date_format")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="correction_summary",
+                title="Correction Summary",
+                visible="(show_correction_summary)",
+                clearWith=list(
+                    "date_vars",
+                    "correction_method",
+                    "date_format",
+                    "day_impute",
+                    "month_impute",
+                    "handle_excel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Usage Guide",
+                visible="(show_interpretation)",
+                clearWith=list(
+                    "correction_method")))}))
 
 datecorrectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "datecorrectionBase",
@@ -66,20 +226,79 @@ datecorrectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Date Field Correction
 #'
+#' Comprehensive date field correction and standardization using multiple R 
+#' packages (datefixR, anytime, lubridate).
+#' This module handles messy date formats commonly found in clinical 
+#' databases: different separators, 
+#' month representations, missing components, and ambiguous formats. Provides 
+#' standardized date outputs
+#' with detailed correction reports and quality assessment. Perfect for 
+#' clinical research data preprocessing
+#' and database standardization workflows.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Example:
+#' # 1. Select variables containing date information that need correction.
+#' # 2. Choose correction method (automatic detection or specific format).
+#' # 3. Configure missing value imputation settings.
+#' # 4. Review correction results and quality assessment.
+#'}
 #' @param data The data as a data frame.
 #' @param date_vars Variables containing date information in various formats
 #'   that need correction and standardization. Can handle character strings,
 #'   numeric values, factors with date representations.
+#' @param correction_method Method for date correction. datefixR provides
+#'   robust format detection, anytime offers flexible parsing, lubridate allows
+#'   format specification, and consensus combines methods for maximum
+#'   reliability.
+#' @param date_format Expected date format for ambiguous cases. Auto-detect
+#'   tries to determine the most likely format based on the data patterns.
+#' @param day_impute Day of month to impute when day is missing (1-31).
+#'   Default is 1st of month. If value exceeds days in month, last day of month
+#'   will be used.
+#' @param month_impute Month to impute when month is missing (1-12). Default
+#'   is 7 (July). Commonly used middle-year value for clinical research.
+#' @param handle_excel Whether to convert Excel numeric date values (days
+#'   since 1900-01-01). Useful for data exported from Excel spreadsheets.
+#' @param timezone Timezone for output dates. Use UTC for standardization, or
+#'   local timezone if time-of-day information is critical.
+#' @param show_correction_table Display detailed table showing original
+#'   values, corrected values, and correction status for each observation.
+#' @param show_quality_assessment Provide quality assessment including success
+#'   rates, common problems, and recommendations for further correction.
+#' @param show_format_analysis Analyze detected date formats and patterns in
+#'   the original data.
+#' @param show_correction_summary Summary statistics of the correction process
+#'   including before/after comparison and data quality metrics.
+#' @param show_interpretation Display guidance on date correction methods,
+#'   best practices, and recommendations for clinical research data.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$correction_table} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$quality_assessment} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$format_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$correction_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
 datecorrection <- function(
     data,
-    date_vars) {
+    date_vars,
+    correction_method = "datefixr",
+    date_format = "auto",
+    day_impute = 1,
+    month_impute = 7,
+    handle_excel = TRUE,
+    timezone = "UTC",
+    show_correction_table = TRUE,
+    show_quality_assessment = TRUE,
+    show_format_analysis = TRUE,
+    show_correction_summary = TRUE,
+    show_interpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("datecorrection requires jmvcore to be installed (restart may be required)")
@@ -92,7 +311,18 @@ datecorrection <- function(
 
 
     options <- datecorrectionOptions$new(
-        date_vars = date_vars)
+        date_vars = date_vars,
+        correction_method = correction_method,
+        date_format = date_format,
+        day_impute = day_impute,
+        month_impute = month_impute,
+        handle_excel = handle_excel,
+        timezone = timezone,
+        show_correction_table = show_correction_table,
+        show_quality_assessment = show_quality_assessment,
+        show_format_analysis = show_format_analysis,
+        show_correction_summary = show_correction_summary,
+        show_interpretation = show_interpretation)
 
     analysis <- datecorrectionClass$new(
         options = options,

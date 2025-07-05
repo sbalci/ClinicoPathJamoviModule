@@ -35,7 +35,8 @@
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"cat('Testing vignette compilation...\\n'); if (file.exists('vignettes/jjstatsplot-08-advancedraincloud.qmd')) { cat('Vignette file created successfully\\n'); lines <- readLines('vignettes/jjstatsplot-08-advancedraincloud.qmd', n = 10); cat('First 5 lines of vignette:\\n'); cat(paste(lines[1:5], collapse = '\\n'), '\\n'); cat('SUCCESS: Vignette file is valid\\n') } else { cat('ERROR: Vignette file not found\\n') }\")",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"jmvtools::prepare()\")",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"devtools::document()\")",
-      "Bash(R:*)"
+      "Bash(R:*)",
+      "WebFetch(domain:r-graph-gallery.com)"
     ],
     "deny": []
   }
