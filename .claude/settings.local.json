@@ -36,7 +36,8 @@
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"jmvtools::prepare()\")",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"devtools::document()\")",
       "Bash(R:*)",
-      "WebFetch(domain:r-graph-gallery.com)"
+      "WebFetch(domain:r-graph-gallery.com)",
+      "Bash(quarto render:*)"
     ],
     "deny": []
   }

@@ -1,7 +1,7 @@
 ---
 name:  vartree
 title: Variable Tree
-menuGroup: Exploration
+menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '0.0.3'
 jas: '1.2'

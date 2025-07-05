@@ -82,7 +82,7 @@ Rscript -e "devtools::check()"
 Rscript -e "devtools::build()"
 
 # Install development version
-Rscript -e "devtools::install()"
+Rscript -e "devtools::install(quick=TRUE)"
 
 # Test vignette rendering
 Rscript -e "pkgdown::build_articles()"
@@ -393,12 +393,13 @@ Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:"
     - if not, create an explanatory vignette
   - check if the data, vignettes and documentation reflect all the features of the function
     - if not, update the data, vignettes and documentation accordingly
-  - check if the function is tested in the tests folder
-    - if not, write tests for the function
   - run `jmvtools::prepare()` and `devtools::document()` to see if the function compiles correctly
     - if not, fix the issues
-  - run `pkgdown::build_articles()` to see if the vignettes render correctly
+  - run `devtools::install(quick=TRUE);pkgdown::build_articles()` to see if the vignettes render correctly
     - if not, fix the issues
+  - check if the function is tested in the tests folder
+    - if not, write tests for the function
+  - Fix any issues found in the process
 
 ### YAML Development Memories
 
