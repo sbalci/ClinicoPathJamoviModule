@@ -9,22 +9,34 @@
 # Rscript _updateModules.R
 
 # Define the new version and date ----
-new_version <- "0.0.3.39" # Update this to the new version you want to set
+new_version <- "0.0.3.40" # Update this to the new version you want to set
 new_date <- "2024-07-05" # Update this to the new date you want to set
 
 
 # Define WIP, check, extended status ----
 quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
-check <- TRUE # Set to TRUE if you want to run devtools::check() on the modules
+check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
 extended <- TRUE # Set to TRUE if you want to document and install submodules
 ClinicoPathDescriptives_module <- TRUE # Set to TRUE if you want to update the ClinicoPathDescriptives module
-jsurvival_module <- FALSE # Set to TRUE if you want to update the jsurvival module
-jjstatsplot_module <- FALSE # Set to TRUE if you want to update the jjstatsplot module
-meddecide_module <- FALSE # Set to TRUE if you want to update the meddecide module
+jsurvival_module <- TRUE # Set to TRUE if you want to update the jsurvival module
+jjstatsplot_module <- TRUE # Set to TRUE if you want to update the jjstatsplot module
+meddecide_module <- TRUE # Set to TRUE if you want to update the meddecide module
 
 webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
 commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
 WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
+
+if (WIP) {
+  quick <- FALSE
+  check <- FALSE
+  extended <- TRUE
+  ClinicoPathDescriptives_module <- TRUE
+  jsurvival_module <- TRUE
+  jjstatsplot_module <- TRUE
+  meddecide_module <- TRUE
+  webpage <- FALSE
+  commit_modules <- FALSE
+}
 
 
 
@@ -33,6 +45,8 @@ library(xfun)
 library(fs)
 library(jmvtools)
 library(devtools)
+library(purrr)
+
 
 # Define base directories (adjust these absolute paths as needed) ----
 main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
@@ -561,113 +575,99 @@ if (!WIP) {
 
 #  Module files ----
 
-## jjstatsplot module functions ----
-jjstatsplot_modules <- c(
-  # ggstatsplot functions
-  "jjhistostats",
-  #
-  "jjscatterstats",
-  "jjcorrmat",
-  #
-  "jjbetweenstats",
-  "jjwithinstats",
-  "jjdotplotstats",
-  #
-  "jjbarstats",
-  "jjpiestats",
-
-  # non-ggstatsplot functions
-  "jwaffle"
+a_yaml_files <- list.files(
+  path = "./jamovi",
+  pattern = "\\.a\\.yaml$",
+  recursive = TRUE,
+  full.names = TRUE
 )
+## jjstatsplot module functions ----
+
+jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+  any(grepl("menuGroup: JJStatsPlot$", readLines(f, warn = FALSE)))
+})
+
+jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                 replacement = "",
+                                 x = jjstatsplot_a_yaml_files)
+jjstatsplot_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                 replacement = "",
+                                 x = jjstatsplot_a_yaml_files)
+
+jjstatsplot_modules <- jjstatsplot_a_yaml_files
 
 if (WIP) {
-  jjstatsplot_modules <- c(
-    jjstatsplot_modules,
-    "jjarcdiagram",
-    "jjridgestats",
-    "jjstreamgraph",
-    "jjtreemap",
-    "jviolin",
-    "lollipop",
-    "parallelplot",
-    "statsplot2",
-    "riverplot",
-    "tidyplots"
-  )
+  jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: JJStatsPlot", readLines(f, warn = FALSE)))
+  })
+
+  jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                   replacement = "",
+                                   x = jjstatsplot_a_yaml_files)
+  jjstatsplot_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                   replacement = "",
+                                   x = jjstatsplot_a_yaml_files)
+
+  jjstatsplot_modules <- jjstatsplot_a_yaml_files
 }
 
 
 ## meddecide module functions ----
-meddecide_modules <- c(
-  # Decision
-  "agreement",
-  "decision",
-  "decisioncalculator",
-  "nogoldstandard",
-  "decisioncompare",
 
-  # ROC
-  "psychopdaroc",
-
-  # Decision Curve Analysis
-
-
-  # Power
-  "kappasizeci",
-  "kappasizefixedn",
-  "kappasizepower"
-)
+meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+  any(grepl("menuGroup: meddecide$", readLines(f, warn = FALSE)))
+})
+meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
+                               replacement = "",
+                               x = meddecide_a_yaml_files)
+meddecide_a_yaml_files <- gsub(pattern = ".a.yaml",
+                               replacement = "",
+                               x = meddecide_a_yaml_files)
+meddecide_modules <- meddecide_a_yaml_files
 
 if (WIP) {
-  meddecide_modules <- c(
-    meddecide_modules,
-    "bayesdca",
-    "decisioncombine",
-    "decisionpanel",
-    "classification",
-    "correlation",
-    "decision2",
-    "screeningcalculator",
-    "cotest",
-    "sequentialtests",
-    "decisioncurve",
-    "dendrogram",
-    "icccoeff",
-    "modelbuilder",
-    "nomogram",
-    "outcomeorganizer",
-    "ppv",
-    "roc",
-    "roc2",
-    "screeningcalculator",
-    "sequentialtests",
-    "tree"
-  )
+  meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: meddecide", readLines(f, warn = FALSE)))
+  })
+
+  meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                 replacement = "",
+                                 x = meddecide_a_yaml_files)
+  meddecide_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                 replacement = "",
+                                 x = meddecide_a_yaml_files)
+
+  meddecide_modules <- meddecide_a_yaml_files
 }
 
 
 
 ## jsurvival module functions ----
-jsurvival_modules <- c(
-  "timeinterval",
-  # "outcomeorganizer",
-  "singlearm",
-  "survival",
-  "survivalcont",
-  "multisurvival",
-  "oddsratio"
-)
+
+jsurvival_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+  any(grepl("menuGroup: Survival$", readLines(f, warn = FALSE)))
+})
+jsurvival_a_yaml_files <- gsub(pattern = "./jamovi/",
+                               replacement = "",
+                               x = jsurvival_a_yaml_files)
+jsurvival_a_yaml_files <- gsub(pattern = ".a.yaml",
+                               replacement = "",
+                               x = jsurvival_a_yaml_files)
+jsurvival_modules <- jsurvival_a_yaml_files
 
 if (WIP) {
-  jsurvival_modules <- c(
-    jsurvival_modules,
-    "alluvialsurvival",
-    "comparingsurvival",
-    "competingsurvival",
-    "lassocox",
-    "powersurvival",
-    "stagemigration"
-  )
+  jsurvival_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: Survival", readLines(f, warn = FALSE)))
+  })
+
+  jsurvival_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                 replacement = "",
+                                 x = jsurvival_a_yaml_files)
+  jsurvival_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                 replacement = "",
+                                 x = jsurvival_a_yaml_files)
+
+  jsurvival_modules <- jsurvival_a_yaml_files
 }
 
 
@@ -675,45 +675,31 @@ if (WIP) {
 
 
 ## ClinicoPathDescriptives module functions ----
-ClinicoPathDescriptives_modules <- c(
-  # Descriptives
-  "tableone",
-  "summarydata",
-  "reportcat",
-  "benford",
-  # Plots
-  "agepyramid",
-  "alluvial",
-  "venn",
-  "vartree",
 
-  # Patient Follow-up
-  "waterfall",
-  "swimmerplot",
-
-  # Comparisons
-  "crosstable"
-)
+ClinicoPathDescriptives_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+  any(grepl("menuGroup: Exploration$", readLines(f, warn = FALSE)))
+})
+ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                             replacement = "",
+                                             x = ClinicoPathDescriptives_a_yaml_files)
+ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                             replacement = "",
+                                             x = ClinicoPathDescriptives_a_yaml_files)
+ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
 
 if (WIP) {
-  ClinicoPathDescriptives_modules <- c(
-    ClinicoPathDescriptives_modules,
-    "checkdata",
-    "chisqposttest",
-    "cisingle",
-    "consort",
-    "conttables",
-    "conttablespaired",
-    "groupsummary",
-    "gtsummary",
-    "ihcstats",
-    "pairchi2",
-    "retracted",
-    "summarydata",
-    "swimmerplot2",
-    "toolssummary",
-    "vtree3"
-  )
+  ClinicoPathDescriptives_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: Exploration", readLines(f, warn = FALSE)))
+  })
+
+  ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                               replacement = "",
+                                               x = ClinicoPathDescriptives_a_yaml_files)
+  ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                               replacement = "",
+                                               x = ClinicoPathDescriptives_a_yaml_files)
+
+  ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
 }
 
 
