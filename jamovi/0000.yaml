@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.42
+version: 0.0.3.44
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-07-06'
+date: '2025-07-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -452,13 +452,13 @@ analyses:
     menuSubtitle: Correlation matrix and pairwise correlations
     ribbon: analyses
     category: analyses
-  - title: Tables via gtsummary
+  - title: Publication-Ready Tables with gtsummary
     name: gtsummary
     ns: ClinicoPath
     menuGroup: ExplorationD
-    menuSubgroup: Drafts
-    menuTitle: Tables via gtsummary
-    menuSubtitle: Comparisons
+    menuSubgroup: Enhanced Tables
+    menuTitle: Publication-Ready Tables with gtsummary
+    menuSubtitle: Summary Tables
     ribbon: analyses
     category: analyses
   - title: Pairwise Chi-Square Test

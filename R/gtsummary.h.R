@@ -6,10 +6,39 @@ gtsummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            vars = NULL,
+            byvar = NULL,
+            tableType = "summary",
+            statistics = list(
+                "mean_sd",
+                "median_iqr",
+                "n_percent"),
+            includeOverall = TRUE,
+            includeMissing = "ifany",
+            addPValue = FALSE,
+            testMethod = "auto",
+            pairedTest = FALSE,
+            addQ = FALSE,
+            boldLabels = TRUE,
+            boldLevels = FALSE,
+            boldPValues = FALSE,
+            pValueThreshold = 0.05,
+            italicizeLabels = FALSE,
+            italicizeLevels = FALSE,
+            addSpanningHeader = FALSE,
+            spanningHeaderText = "",
+            sortVariables = "original",
+            showNHeader = TRUE,
+            percentType = "column",
+            digitsOverall = 1,
+            digitsByGroup = 1,
+            digitsPValue = 3,
+            outputFormat = "html",
+            tableTitle = "",
+            tableCaption = "",
+            footnote = "",
+            exportTable = FALSE,
+            showCode = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,60 +46,330 @@ gtsummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
+            private$..byvar <- jmvcore::OptionVariable$new(
+                "byvar",
+                byvar,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..tableType <- jmvcore::OptionList$new(
+                "tableType",
+                tableType,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+                    "summary",
+                    "cross",
+                    "regression",
+                    "survival"),
+                default="summary")
+            private$..statistics <- jmvcore::OptionNMXList$new(
+                "statistics",
+                statistics,
+                options=list(
+                    "mean_sd",
+                    "median_iqr",
+                    "range",
+                    "n_percent",
+                    "missing"),
+                default=list(
+                    "mean_sd",
+                    "median_iqr",
+                    "n_percent"))
+            private$..includeOverall <- jmvcore::OptionBool$new(
+                "includeOverall",
+                includeOverall,
                 default=TRUE)
+            private$..includeMissing <- jmvcore::OptionList$new(
+                "includeMissing",
+                includeMissing,
+                options=list(
+                    "no",
+                    "ifany",
+                    "always"),
+                default="ifany")
+            private$..addPValue <- jmvcore::OptionBool$new(
+                "addPValue",
+                addPValue,
+                default=FALSE)
+            private$..testMethod <- jmvcore::OptionList$new(
+                "testMethod",
+                testMethod,
+                options=list(
+                    "auto",
+                    "chisq.test",
+                    "fisher.test",
+                    "t.test",
+                    "wilcox.test",
+                    "kruskal.test",
+                    "aov"),
+                default="auto")
+            private$..pairedTest <- jmvcore::OptionBool$new(
+                "pairedTest",
+                pairedTest,
+                default=FALSE)
+            private$..addQ <- jmvcore::OptionBool$new(
+                "addQ",
+                addQ,
+                default=FALSE)
+            private$..boldLabels <- jmvcore::OptionBool$new(
+                "boldLabels",
+                boldLabels,
+                default=TRUE)
+            private$..boldLevels <- jmvcore::OptionBool$new(
+                "boldLevels",
+                boldLevels,
+                default=FALSE)
+            private$..boldPValues <- jmvcore::OptionBool$new(
+                "boldPValues",
+                boldPValues,
+                default=FALSE)
+            private$..pValueThreshold <- jmvcore::OptionNumber$new(
+                "pValueThreshold",
+                pValueThreshold,
+                default=0.05,
+                min=0.001,
+                max=0.1)
+            private$..italicizeLabels <- jmvcore::OptionBool$new(
+                "italicizeLabels",
+                italicizeLabels,
+                default=FALSE)
+            private$..italicizeLevels <- jmvcore::OptionBool$new(
+                "italicizeLevels",
+                italicizeLevels,
+                default=FALSE)
+            private$..addSpanningHeader <- jmvcore::OptionBool$new(
+                "addSpanningHeader",
+                addSpanningHeader,
+                default=FALSE)
+            private$..spanningHeaderText <- jmvcore::OptionString$new(
+                "spanningHeaderText",
+                spanningHeaderText,
+                default="")
+            private$..sortVariables <- jmvcore::OptionList$new(
+                "sortVariables",
+                sortVariables,
+                options=list(
+                    "original",
+                    "alphabetical",
+                    "pvalue"),
+                default="original")
+            private$..showNHeader <- jmvcore::OptionBool$new(
+                "showNHeader",
+                showNHeader,
+                default=TRUE)
+            private$..percentType <- jmvcore::OptionList$new(
+                "percentType",
+                percentType,
+                options=list(
+                    "column",
+                    "row",
+                    "cell"),
+                default="column")
+            private$..digitsOverall <- jmvcore::OptionInteger$new(
+                "digitsOverall",
+                digitsOverall,
+                default=1,
+                min=0,
+                max=5)
+            private$..digitsByGroup <- jmvcore::OptionInteger$new(
+                "digitsByGroup",
+                digitsByGroup,
+                default=1,
+                min=0,
+                max=5)
+            private$..digitsPValue <- jmvcore::OptionInteger$new(
+                "digitsPValue",
+                digitsPValue,
+                default=3,
+                min=1,
+                max=5)
+            private$..outputFormat <- jmvcore::OptionList$new(
+                "outputFormat",
+                outputFormat,
+                options=list(
+                    "html",
+                    "latex",
+                    "rtf",
+                    "markdown"),
+                default="html")
+            private$..tableTitle <- jmvcore::OptionString$new(
+                "tableTitle",
+                tableTitle,
+                default="")
+            private$..tableCaption <- jmvcore::OptionString$new(
+                "tableCaption",
+                tableCaption,
+                default="")
+            private$..footnote <- jmvcore::OptionString$new(
+                "footnote",
+                footnote,
+                default="")
+            private$..exportTable <- jmvcore::OptionBool$new(
+                "exportTable",
+                exportTable,
+                default=FALSE)
+            private$..showCode <- jmvcore::OptionBool$new(
+                "showCode",
+                showCode,
+                default=FALSE)
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..vars)
+            self$.addOption(private$..byvar)
+            self$.addOption(private$..tableType)
+            self$.addOption(private$..statistics)
+            self$.addOption(private$..includeOverall)
+            self$.addOption(private$..includeMissing)
+            self$.addOption(private$..addPValue)
+            self$.addOption(private$..testMethod)
+            self$.addOption(private$..pairedTest)
+            self$.addOption(private$..addQ)
+            self$.addOption(private$..boldLabels)
+            self$.addOption(private$..boldLevels)
+            self$.addOption(private$..boldPValues)
+            self$.addOption(private$..pValueThreshold)
+            self$.addOption(private$..italicizeLabels)
+            self$.addOption(private$..italicizeLevels)
+            self$.addOption(private$..addSpanningHeader)
+            self$.addOption(private$..spanningHeaderText)
+            self$.addOption(private$..sortVariables)
+            self$.addOption(private$..showNHeader)
+            self$.addOption(private$..percentType)
+            self$.addOption(private$..digitsOverall)
+            self$.addOption(private$..digitsByGroup)
+            self$.addOption(private$..digitsPValue)
+            self$.addOption(private$..outputFormat)
+            self$.addOption(private$..tableTitle)
+            self$.addOption(private$..tableCaption)
+            self$.addOption(private$..footnote)
+            self$.addOption(private$..exportTable)
+            self$.addOption(private$..showCode)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        vars = function() private$..vars$value,
+        byvar = function() private$..byvar$value,
+        tableType = function() private$..tableType$value,
+        statistics = function() private$..statistics$value,
+        includeOverall = function() private$..includeOverall$value,
+        includeMissing = function() private$..includeMissing$value,
+        addPValue = function() private$..addPValue$value,
+        testMethod = function() private$..testMethod$value,
+        pairedTest = function() private$..pairedTest$value,
+        addQ = function() private$..addQ$value,
+        boldLabels = function() private$..boldLabels$value,
+        boldLevels = function() private$..boldLevels$value,
+        boldPValues = function() private$..boldPValues$value,
+        pValueThreshold = function() private$..pValueThreshold$value,
+        italicizeLabels = function() private$..italicizeLabels$value,
+        italicizeLevels = function() private$..italicizeLevels$value,
+        addSpanningHeader = function() private$..addSpanningHeader$value,
+        spanningHeaderText = function() private$..spanningHeaderText$value,
+        sortVariables = function() private$..sortVariables$value,
+        showNHeader = function() private$..showNHeader$value,
+        percentType = function() private$..percentType$value,
+        digitsOverall = function() private$..digitsOverall$value,
+        digitsByGroup = function() private$..digitsByGroup$value,
+        digitsPValue = function() private$..digitsPValue$value,
+        outputFormat = function() private$..outputFormat$value,
+        tableTitle = function() private$..tableTitle$value,
+        tableCaption = function() private$..tableCaption$value,
+        footnote = function() private$..footnote$value,
+        exportTable = function() private$..exportTable$value,
+        showCode = function() private$..showCode$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..vars = NA,
+        ..byvar = NA,
+        ..tableType = NA,
+        ..statistics = NA,
+        ..includeOverall = NA,
+        ..includeMissing = NA,
+        ..addPValue = NA,
+        ..testMethod = NA,
+        ..pairedTest = NA,
+        ..addQ = NA,
+        ..boldLabels = NA,
+        ..boldLevels = NA,
+        ..boldPValues = NA,
+        ..pValueThreshold = NA,
+        ..italicizeLabels = NA,
+        ..italicizeLevels = NA,
+        ..addSpanningHeader = NA,
+        ..spanningHeaderText = NA,
+        ..sortVariables = NA,
+        ..showNHeader = NA,
+        ..percentType = NA,
+        ..digitsOverall = NA,
+        ..digitsByGroup = NA,
+        ..digitsPValue = NA,
+        ..outputFormat = NA,
+        ..tableTitle = NA,
+        ..tableCaption = NA,
+        ..footnote = NA,
+        ..exportTable = NA,
+        ..showCode = NA)
 )
 
 gtsummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "gtsummaryResults",
     inherit = jmvcore::Group,
     active = list(
-        gtsum1 = function() private$.items[["gtsum1"]]),
+        todo = function() private$.items[["todo"]],
+        maintable = function() private$.items[["maintable"]],
+        stats_summary = function() private$.items[["stats_summary"]],
+        table_notes = function() private$.items[["table_notes"]],
+        export_info = function() private$.items[["export_info"]],
+        code_output = function() private$.items[["code_output"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Tables via gtsummary",
+                title="Publication-Ready Tables with gtsummary",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "gtsummary"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="gtsum1",
-                title="Tables via gtsummary"))}))
+                name="todo",
+                title="Instructions",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="maintable",
+                title="Summary Table",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stats_summary",
+                title="Statistical Summary",
+                visible="(addPValue)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="table_notes",
+                title="Table Notes",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="export_info",
+                title="Export Information",
+                visible="(exportTable)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="code_output",
+                title="R Code",
+                visible="(showCode)"))}))
 
 gtsummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "gtsummaryBase",
@@ -93,44 +392,131 @@ gtsummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Tables via gtsummary
+#' Publication-Ready Tables with gtsummary
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param vars .
+#' @param byvar .
+#' @param tableType .
+#' @param statistics .
+#' @param includeOverall .
+#' @param includeMissing .
+#' @param addPValue .
+#' @param testMethod .
+#' @param pairedTest .
+#' @param addQ .
+#' @param boldLabels .
+#' @param boldLevels .
+#' @param boldPValues .
+#' @param pValueThreshold .
+#' @param italicizeLabels .
+#' @param italicizeLevels .
+#' @param addSpanningHeader .
+#' @param spanningHeaderText .
+#' @param sortVariables .
+#' @param showNHeader .
+#' @param percentType .
+#' @param digitsOverall .
+#' @param digitsByGroup .
+#' @param digitsPValue .
+#' @param outputFormat .
+#' @param tableTitle .
+#' @param tableCaption .
+#' @param footnote .
+#' @param exportTable .
+#' @param showCode .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$gtsum1} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$maintable} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stats_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$table_notes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$export_info} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$code_output} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
 gtsummary <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    vars,
+    byvar = NULL,
+    tableType = "summary",
+    statistics = list(
+                "mean_sd",
+                "median_iqr",
+                "n_percent"),
+    includeOverall = TRUE,
+    includeMissing = "ifany",
+    addPValue = FALSE,
+    testMethod = "auto",
+    pairedTest = FALSE,
+    addQ = FALSE,
+    boldLabels = TRUE,
+    boldLevels = FALSE,
+    boldPValues = FALSE,
+    pValueThreshold = 0.05,
+    italicizeLabels = FALSE,
+    italicizeLevels = FALSE,
+    addSpanningHeader = FALSE,
+    spanningHeaderText = "",
+    sortVariables = "original",
+    showNHeader = TRUE,
+    percentType = "column",
+    digitsOverall = 1,
+    digitsByGroup = 1,
+    digitsPValue = 3,
+    outputFormat = "html",
+    tableTitle = "",
+    tableCaption = "",
+    footnote = "",
+    exportTable = FALSE,
+    showCode = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("gtsummary requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(byvar)) byvar <- jmvcore::resolveQuo(jmvcore::enquo(byvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(byvar), byvar, NULL))
 
+    for (v in byvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- gtsummaryOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        vars = vars,
+        byvar = byvar,
+        tableType = tableType,
+        statistics = statistics,
+        includeOverall = includeOverall,
+        includeMissing = includeMissing,
+        addPValue = addPValue,
+        testMethod = testMethod,
+        pairedTest = pairedTest,
+        addQ = addQ,
+        boldLabels = boldLabels,
+        boldLevels = boldLevels,
+        boldPValues = boldPValues,
+        pValueThreshold = pValueThreshold,
+        italicizeLabels = italicizeLabels,
+        italicizeLevels = italicizeLevels,
+        addSpanningHeader = addSpanningHeader,
+        spanningHeaderText = spanningHeaderText,
+        sortVariables = sortVariables,
+        showNHeader = showNHeader,
+        percentType = percentType,
+        digitsOverall = digitsOverall,
+        digitsByGroup = digitsByGroup,
+        digitsPValue = digitsPValue,
+        outputFormat = outputFormat,
+        tableTitle = tableTitle,
+        tableCaption = tableCaption,
+        footnote = footnote,
+        exportTable = exportTable,
+        showCode = showCode)
 
     analysis <- gtsummaryClass$new(
         options = options,

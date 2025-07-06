@@ -2,27 +2,116 @@
 % Please edit documentation in R/gtsummary.h.R
 \name{gtsummary}
 \alias{gtsummary}
-\title{Tables via gtsummary}
+\title{Publication-Ready Tables with gtsummary}
 \usage{
-gtsummary(data, dep, group, alt = "notequal", varEq = TRUE)
+gtsummary(
+  data,
+  vars,
+  byvar = NULL,
+  tableType = "summary",
+  statistics = list("mean_sd", "median_iqr", "n_percent"),
+  includeOverall = TRUE,
+  includeMissing = "ifany",
+  addPValue = FALSE,
+  testMethod = "auto",
+  pairedTest = FALSE,
+  addQ = FALSE,
+  boldLabels = TRUE,
+  boldLevels = FALSE,
+  boldPValues = FALSE,
+  pValueThreshold = 0.05,
+  italicizeLabels = FALSE,
+  italicizeLevels = FALSE,
+  addSpanningHeader = FALSE,
+  spanningHeaderText = "",
+  sortVariables = "original",
+  showNHeader = TRUE,
+  percentType = "column",
+  digitsOverall = 1,
+  digitsByGroup = 1,
+  digitsPValue = 3,
+  outputFormat = "html",
+  tableTitle = "",
+  tableCaption = "",
+  footnote = "",
+  exportTable = FALSE,
+  showCode = FALSE
+)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
+\item{vars}{.}
 
-\item{group}{.}
+\item{byvar}{.}
 
-\item{alt}{.}
+\item{tableType}{.}
 
-\item{varEq}{.}
+\item{statistics}{.}
+
+\item{includeOverall}{.}
+
+\item{includeMissing}{.}
+
+\item{addPValue}{.}
+
+\item{testMethod}{.}
+
+\item{pairedTest}{.}
+
+\item{addQ}{.}
+
+\item{boldLabels}{.}
+
+\item{boldLevels}{.}
+
+\item{boldPValues}{.}
+
+\item{pValueThreshold}{.}
+
+\item{italicizeLabels}{.}
+
+\item{italicizeLevels}{.}
+
+\item{addSpanningHeader}{.}
+
+\item{spanningHeaderText}{.}
+
+\item{sortVariables}{.}
+
+\item{showNHeader}{.}
+
+\item{percentType}{.}
+
+\item{digitsOverall}{.}
+
+\item{digitsByGroup}{.}
+
+\item{digitsPValue}{.}
+
+\item{outputFormat}{.}
+
+\item{tableTitle}{.}
+
+\item{tableCaption}{.}
+
+\item{footnote}{.}
+
+\item{exportTable}{.}
+
+\item{showCode}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$gtsum1} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$maintable} \tab \tab \tab \tab \tab a html \cr
+\code{results$stats_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$table_notes} \tab \tab \tab \tab \tab a html \cr
+\code{results$export_info} \tab \tab \tab \tab \tab a html \cr
+\code{results$code_output} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }
 \description{
-Tables via gtsummary
+Publication-Ready Tables with gtsummary
 }
