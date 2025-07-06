@@ -1,0 +1,996 @@
+---
+title: "Group and Summarize: Data Aggregation and Analysis"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+execute:
+  warning: false
+  message: false
+  echo: true
+  eval: true
+---
+
+# Introduction to Group and Summarize
+
+The Group and Summarize module provides powerful data aggregation capabilities for grouping data by categorical variables and calculating summary statistics. This tool is essential for exploratory data analysis, reporting, and understanding patterns in complex datasets.
+
+## Key Features
+
+- **Flexible Grouping**: Group by one or multiple categorical variables
+- **Multiple Statistics**: Calculate sum, mean, median, and count for each group
+- **Date Handling**: Advanced date parsing and time-based aggregation
+- **Visual Analytics**: Automatic generation of appropriate charts and plots
+- **Missing Data Management**: Options for handling missing values
+- **Export Ready**: Professional tables and visualizations for reports
+
+## Applications
+
+### Business Analytics
+- Sales performance by region and product
+- Customer segmentation analysis
+- Financial reporting and KPI tracking
+
+### Clinical Research
+- Patient outcomes by treatment group
+- Multi-center study summaries
+- Longitudinal data analysis
+
+### Quality Control
+- Manufacturing metrics by shift and line
+- Defect analysis by production parameters
+- Performance monitoring over time
+
+---
+
+# Getting Started
+
+## Required Data Structure
+
+Your dataset should contain:
+
+1. **Grouping Variables**: Categorical variables to group by (factors, characters, or dates)
+2. **Summary Variables**: Numeric variables to calculate statistics for
+3. **Optional Date Variables**: For time-based aggregation and trend analysis
+
+## Example Datasets
+
+Let's explore the structure of our test datasets:
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+
+# Load example datasets
+data("groupsummary_simple")
+data("groupsummary_sales_data")
+data("medical_research_data")
+
+# Examine simple dataset structure
+str(groupsummary_simple)
+```
+
+```{r data-preview}
+# Preview different datasets
+head(groupsummary_simple) %>%
+  knitr::kable(caption = "Simple Grouping Dataset")
+```
+
+---
+
+# Basic Grouping and Summarization
+
+## Simple Single-Variable Grouping
+
+Let's start with basic grouping by a single categorical variable:
+
+```{r basic-grouping}
+# Basic grouping by category
+result_basic <- groupsummary(
+  data = groupsummary_simple,
+  groupVars = "category",
+  sumVars = c("value1", "value2"),
+  statistics = c("sum", "mean", "n")
+)
+
+# The result object contains the analysis
+class(result_basic)
+```
+
+## Multiple Statistics Calculation
+
+Calculate different summary statistics for the same data:
+
+```{r multiple-stats}
+# All available statistics
+result_all_stats <- groupsummary(
+  data = groupsummary_simple,
+  groupVars = "category",
+  sumVars = "value1",
+  statistics = c("sum", "mean", "median", "n"),
+  addPercentage = TRUE,
+  sortBy = "first_desc"
+)
+```
+
+## Multi-Variable Grouping
+
+Group by multiple categorical variables simultaneously:
+
+```{r multi-group}
+# Group by category and group
+result_multi <- groupsummary(
+  data = groupsummary_simple,
+  groupVars = c("category", "group"),
+  sumVars = c("value1", "value2"),
+  statistics = c("sum", "mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+---
+
+# Business Analytics Applications
+
+## Sales Performance Analysis
+
+Analyze sales data by region and product category:
+
+```{r sales-data}
+# Examine sales data structure
+str(groupsummary_sales_data)
+```
+
+```{r sales-analysis}
+# Sales by region and product category
+result_sales <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = c("region", "product_category"),
+  sumVars = c("sales_amount", "quantity_sold"),
+  statistics = c("sum", "mean", "median", "n"),
+  addPercentage = TRUE,
+  sortBy = "first_desc"
+)
+```
+
+## Customer Segmentation
+
+Analyze customer behavior patterns:
+
+```{r customer-analysis}
+# Customer analysis by channel and type
+result_customer <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = c("sales_channel", "customer_type"),
+  sumVars = c("sales_amount", "profit_margin"),
+  statistics = c("mean", "median", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Regional Performance Comparison
+
+Compare performance across different regions:
+
+```{r regional-analysis}
+# Regional performance summary
+result_regional <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = c("sales_amount", "quantity_sold", "profit_margin"),
+  statistics = c("sum", "mean", "n"),
+  addPercentage = TRUE
+)
+```
+
+---
+
+# Time-Based Analysis and Date Handling
+
+## Monthly Sales Trends
+
+Analyze sales trends over time using date aggregation:
+
+```{r monthly-trends}
+# Monthly sales aggregation
+result_monthly <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "sale_date",
+  sumVars = c("sales_amount", "quantity_sold"),
+  statistics = c("sum", "mean", "n"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "month",
+  sortBy = "groups"
+)
+```
+
+## Weekly Performance Patterns
+
+Examine weekly patterns in sales data:
+
+```{r weekly-patterns}
+# Weekly sales patterns
+result_weekly <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "sale_date",
+  sumVars = "sales_amount",
+  statistics = c("sum", "n"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "week"
+)
+```
+
+## Time Series with Grouping
+
+Combine time aggregation with categorical grouping:
+
+```{r time-series-grouped}
+# Monthly sales by region
+result_time_grouped <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = c("sale_date", "region"),
+  sumVars = "sales_amount",
+  statistics = c("sum", "mean"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "month"
+)
+```
+
+---
+
+# Advanced Date and Time Handling
+
+## Financial Data with Timestamps
+
+Work with precise timestamp data for financial analysis:
+
+```{r financial-data}
+# Load financial data
+data("groupsummary_financial_data")
+
+# Examine timestamp structure
+head(groupsummary_financial_data$transaction_time)
+```
+
+```{r hourly-financial}
+# Hourly trading activity
+result_hourly <- groupsummary(
+  data = groupsummary_financial_data,
+  groupVars = "transaction_time",
+  sumVars = c("transaction_amount", "volume_traded"),
+  statistics = c("sum", "mean", "n"),
+  dateVar = "transaction_time",
+  dateFormat = "ymd_hms",
+  timeAggregation = "hour"
+)
+```
+
+## Daily Market Analysis
+
+Aggregate financial data by day and market sector:
+
+```{r daily-market}
+# Daily market sector analysis
+result_daily_market <- groupsummary(
+  data = groupsummary_financial_data,
+  groupVars = c("transaction_time", "market_sector"),
+  sumVars = c("transaction_amount", "portfolio_value"),
+  statistics = c("sum", "mean", "n"),
+  dateVar = "transaction_time",
+  dateFormat = "ymd_hms",
+  timeAggregation = "day"
+)
+```
+
+---
+
+# Survey and Social Science Research
+
+## Demographic Analysis
+
+Analyze survey responses by demographic groups:
+
+```{r survey-data}
+# Load survey data
+data("groupsummary_survey_data")
+
+# Demographic summary
+str(groupsummary_survey_data)
+```
+
+```{r demographic-analysis}
+# Satisfaction by age group and gender
+result_demographics <- groupsummary(
+  data = groupsummary_survey_data,
+  groupVars = c("age_group", "gender"),
+  sumVars = c("satisfaction_score", "trust_score", "likelihood_recommend"),
+  statistics = c("mean", "median", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Education Level Impact
+
+Examine the relationship between education and survey responses:
+
+```{r education-analysis}
+# Education level analysis
+result_education <- groupsummary(
+  data = groupsummary_survey_data,
+  groupVars = "education",
+  sumVars = c("satisfaction_score", "trust_score", "time_spent_minutes"),
+  statistics = c("mean", "median", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Income Bracket Analysis
+
+Analyze responses by income levels:
+
+```{r income-analysis}
+# Income bracket analysis
+result_income <- groupsummary(
+  data = groupsummary_survey_data,
+  groupVars = c("income_bracket", "location"),
+  sumVars = c("satisfaction_score", "likelihood_recommend"),
+  statistics = c("mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+---
+
+# Manufacturing and Quality Control
+
+## Production Line Analysis
+
+Analyze manufacturing data by production parameters:
+
+```{r manufacturing-data}
+# Load manufacturing data
+data("groupsummary_manufacturing_data")
+
+# Production line performance
+result_production <- groupsummary(
+  data = groupsummary_manufacturing_data,
+  groupVars = c("production_line", "shift"),
+  sumVars = c("units_produced", "defect_count", "efficiency_percent"),
+  statistics = c("sum", "mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Quality Analysis by Grade
+
+Examine quality metrics across different grades:
+
+```{r quality-analysis}
+# Quality grade analysis
+result_quality <- groupsummary(
+  data = groupsummary_manufacturing_data,
+  groupVars = c("quality_grade", "operator_experience"),
+  sumVars = c("units_produced", "defect_count", "cycle_time_minutes"),
+  statistics = c("mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Monthly Production Trends
+
+Track production trends over time:
+
+```{r production-trends}
+# Monthly production trends
+result_production_trends <- groupsummary(
+  data = groupsummary_manufacturing_data,
+  groupVars = "production_date",
+  sumVars = c("units_produced", "defect_count", "efficiency_percent"),
+  statistics = c("sum", "mean"),
+  dateVar = "production_date",
+  dateFormat = "ymd",
+  timeAggregation = "month"
+)
+```
+
+---
+
+# Web Analytics and Digital Marketing
+
+## Traffic Source Analysis
+
+Analyze website traffic by source and device:
+
+```{r web-analytics-data}
+# Load web analytics data
+data("groupsummary_web_analytics")
+
+# Traffic source performance
+result_traffic <- groupsummary(
+  data = groupsummary_web_analytics,
+  groupVars = c("traffic_source", "device_type"),
+  sumVars = c("page_views", "session_duration_minutes", "conversion_value"),
+  statistics = c("sum", "mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## User Behavior Analysis
+
+Examine user behavior patterns:
+
+```{r user-behavior}
+# User type and country analysis
+result_users <- groupsummary(
+  data = groupsummary_web_analytics,
+  groupVars = c("user_type", "country"),
+  sumVars = c("page_views", "session_duration_minutes", "bounce_rate_percent"),
+  statistics = c("mean", "n"),
+  sortBy = "first_desc"
+)
+```
+
+## Daily Traffic Patterns
+
+Analyze daily traffic patterns:
+
+```{r daily-traffic}
+# Daily traffic analysis
+result_daily_traffic <- groupsummary(
+  data = groupsummary_web_analytics,
+  groupVars = "session_time",
+  sumVars = c("page_views", "conversion_value"),
+  statistics = c("sum", "mean", "n"),
+  dateVar = "session_time",
+  dateFormat = "ymd_hms",
+  timeAggregation = "day"
+)
+```
+
+---
+
+# Clinical Research Applications
+
+## Multi-Center Study Analysis
+
+Analyze clinical trial data across multiple centers:
+
+```{r clinical-data}
+# Examine medical research data
+str(medical_research_data)
+```
+
+```{r multicenter-analysis}
+# Multi-center treatment analysis
+result_clinical <- groupsummary(
+  data = medical_research_data,
+  groupVars = c("StudyCenter", "TreatmentGroup"),
+  sumVars = c("ClinicalScore", "SystolicBP", "HbA1c"),
+  statistics = c("mean", "n"),
+  showMissing = FALSE,
+  sortBy = "first_desc"
+)
+```
+
+## Disease Stage Analysis
+
+Examine outcomes by disease stage:
+
+```{r disease-stage}
+# Disease stage analysis
+result_disease <- groupsummary(
+  data = medical_research_data,
+  groupVars = c("DiseaseStage", "TreatmentGroup"),
+  sumVars = c("ClinicalScore", "PainScore", "QualityOfLife"),
+  statistics = c("mean", "median", "n"),
+  showMissing = FALSE
+)
+```
+
+## Longitudinal Visit Patterns
+
+Analyze visit patterns over time:
+
+```{r visit-patterns}
+# Monthly visit patterns
+result_visits <- groupsummary(
+  data = medical_research_data,
+  groupVars = "VisitDate",
+  sumVars = "PatientID",
+  statistics = c("n"),
+  dateVar = "VisitDate",
+  dateFormat = "ymd",
+  timeAggregation = "month"
+)
+```
+
+## Hospital Hourly Monitoring
+
+Analyze hourly patient monitoring data:
+
+```{r hospital-hourly}
+# Load hospital hourly data
+data("hospital_admission_hourly")
+
+# Hourly vital signs by department
+result_hourly_vitals <- groupsummary(
+  data = hospital_admission_hourly,
+  groupVars = c("AdmissionTime", "Department"),
+  sumVars = c("HeartRate", "SystolicBP", "OxygenSaturation", "PainScore"),
+  statistics = c("mean", "n"),
+  dateVar = "AdmissionTime",
+  dateFormat = "ymd_hms",
+  timeAggregation = "hour"
+)
+```
+
+---
+
+# Advanced Features and Customization
+
+## Handling Missing Values
+
+Control how missing values are handled in your analysis:
+
+```{r missing-values}
+# Create data with missing values for demonstration
+test_data <- medical_research_data
+test_data$ClinicalScore[1:10] <- NA
+
+# Analysis excluding missing values
+result_exclude_missing <- groupsummary(
+  data = test_data,
+  groupVars = "TreatmentGroup",
+  sumVars = "ClinicalScore",
+  statistics = c("mean", "n"),
+  showMissing = FALSE
+)
+
+# Analysis including missing values
+result_include_missing <- groupsummary(
+  data = test_data,
+  groupVars = "TreatmentGroup",
+  sumVars = "ClinicalScore",
+  statistics = c("mean", "n"),
+  showMissing = TRUE
+)
+```
+
+## Sorting and Display Options
+
+Customize how results are sorted and displayed:
+
+```{r sorting-options}
+# Sort by group names (alphabetical)
+result_sort_groups <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = "sales_amount",
+  statistics = c("sum", "mean"),
+  sortBy = "groups"
+)
+
+# Sort by first summary variable (descending)
+result_sort_desc <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = "sales_amount",
+  statistics = c("sum", "mean"),
+  sortBy = "first_desc"
+)
+
+# Sort by first summary variable (ascending)
+result_sort_asc <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = "sales_amount",
+  statistics = c("sum", "mean"),
+  sortBy = "first_asc"
+)
+```
+
+## Percentage Calculations
+
+Add percentage calculations to your summaries:
+
+```{r percentages}
+# Sales by region with percentages
+result_percentages <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = c("sales_amount", "quantity_sold"),
+  statistics = c("sum", "mean", "n"),
+  addPercentage = TRUE,
+  sortBy = "first_desc"
+)
+```
+
+---
+
+# Date Format and Time Aggregation Options
+
+## Multiple Date Formats
+
+Handle different date formats in your data:
+
+```{r date-formats}
+# Create test data with different date formats
+date_test_data <- data.frame(
+  date_ymd = as.Date(c("2023-01-15", "2023-02-20", "2023-03-10", "2023-04-05")),
+  value = c(100, 200, 150, 300),
+  category = c("A", "B", "A", "B"),
+  stringsAsFactors = FALSE
+)
+
+# YMD format analysis
+result_ymd <- groupsummary(
+  data = date_test_data,
+  groupVars = "date_ymd",
+  sumVars = "value",
+  statistics = c("sum", "mean"),
+  dateVar = "date_ymd",
+  dateFormat = "ymd",
+  timeAggregation = "month"
+)
+```
+
+## Time Aggregation Levels
+
+Explore different time aggregation options:
+
+```{r time-aggregation}
+# Daily aggregation
+result_daily <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "sale_date",
+  sumVars = "sales_amount",
+  statistics = c("sum"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "day"
+)
+
+# Weekly aggregation
+result_weekly_agg <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "sale_date",
+  sumVars = "sales_amount",
+  statistics = c("sum"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "week"
+)
+
+# Yearly aggregation
+result_yearly <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "sale_date",
+  sumVars = "sales_amount",
+  statistics = c("sum"),
+  dateVar = "sale_date",
+  dateFormat = "ymd",
+  timeAggregation = "year"
+)
+```
+
+---
+
+# Statistical Considerations
+
+## Understanding Summary Statistics
+
+### Sum
+- **Use Case**: Total values, cumulative metrics
+- **Example**: Total sales revenue, total production units
+- **Interpretation**: Represents the aggregate amount across all observations in each group
+
+### Mean
+- **Use Case**: Average performance, typical values
+- **Example**: Average customer satisfaction, mean response time
+- **Interpretation**: Central tendency that can be influenced by outliers
+
+### Median
+- **Use Case**: Robust central tendency, skewed distributions
+- **Example**: Median income, median processing time
+- **Interpretation**: Middle value that is less affected by extreme values
+
+### Count (n)
+- **Use Case**: Sample sizes, frequency analysis
+- **Example**: Number of customers, number of transactions
+- **Interpretation**: Shows the number of observations in each group
+
+## Sample Size Considerations
+
+Understanding the impact of group sizes on analysis:
+
+```{r sample-sizes}
+# Analyze sample sizes across groups
+sample_size_analysis <- groupsummary(
+  data = medical_research_data,
+  groupVars = c("StudyCenter", "TreatmentGroup"),
+  sumVars = "PatientID",
+  statistics = c("n"),
+  sortBy = "first_desc"
+)
+```
+
+## Dealing with Skewed Data
+
+Strategies for handling skewed distributions:
+
+```{r skewed-data}
+# Compare mean vs median for potentially skewed data
+skewness_check <- groupsummary(
+  data = groupsummary_financial_data,
+  groupVars = "market_sector",
+  sumVars = c("transaction_amount", "portfolio_value"),
+  statistics = c("mean", "median", "n"),
+  sortBy = "first_desc"
+)
+```
+
+---
+
+# Visualization and Interpretation
+
+## Understanding the Generated Plots
+
+The Group and Summarize module automatically generates appropriate visualizations based on your data:
+
+### Bar Charts
+- **When**: Categorical grouping variables
+- **Shows**: Comparison of summary statistics across groups
+- **Best For**: Regional comparisons, category analysis
+
+### Time Series Plots
+- **When**: Date variables with time aggregation
+- **Shows**: Trends over time with connecting lines
+- **Best For**: Temporal patterns, seasonal analysis
+
+### Reading the Visualizations
+
+Key elements to focus on:
+
+1. **Axis Labels**: Understand what's being measured
+2. **Value Labels**: Exact numbers on bars or points
+3. **Scale**: Notice the range and magnitude of differences
+4. **Trends**: Look for patterns, increases, or decreases
+
+## Interpretation Guidelines
+
+### Comparing Groups
+- **Large Differences**: May indicate significant operational or strategic variations
+- **Small Differences**: Could suggest consistency or need for more targeted analysis
+- **Outliers**: Identify groups that perform unusually well or poorly
+
+### Time-Based Analysis
+- **Trends**: Increasing, decreasing, or stable patterns
+- **Seasonality**: Regular periodic patterns
+- **Anomalies**: Unusual spikes or drops that may need investigation
+
+---
+
+# Best Practices and Recommendations
+
+## Data Preparation
+
+### Before Analysis
+1. **Check Data Quality**: Verify data types and handle missing values appropriately
+2. **Validate Grouping Variables**: Ensure categorical variables have meaningful levels
+3. **Understand Your Data**: Know the business context and expected patterns
+
+### Variable Selection
+1. **Meaningful Groups**: Choose grouping variables that align with business questions
+2. **Relevant Metrics**: Select summary variables that answer your research questions
+3. **Appropriate Statistics**: Choose statistics that make sense for your data type
+
+## Analysis Strategy
+
+### Start Simple
+1. **Single Variable Grouping**: Begin with one grouping variable
+2. **Essential Statistics**: Start with basic statistics (mean, count)
+3. **Build Complexity**: Gradually add more variables and statistics
+
+### Validate Results
+1. **Sanity Checks**: Verify results make business sense
+2. **Cross-Validation**: Check results against known benchmarks
+3. **Sample Sizes**: Ensure adequate sample sizes for reliable statistics
+
+## Reporting and Communication
+
+### Clear Presentation
+1. **Descriptive Titles**: Use clear, descriptive analysis titles
+2. **Context**: Provide background information for stakeholders
+3. **Actionable Insights**: Focus on findings that can drive decisions
+
+### Statistical Literacy
+1. **Explain Methods**: Help stakeholders understand the analysis approach
+2. **Highlight Limitations**: Discuss data limitations and caveats
+3. **Provide Recommendations**: Translate findings into actionable recommendations
+
+---
+
+# Troubleshooting Common Issues
+
+## Data Type Issues
+
+### Factor vs Character Variables
+```{r data-type-issues}
+# Ensure proper data types
+groupsummary_sales_data$region <- as.factor(groupsummary_sales_data$region)
+groupsummary_sales_data$product_category <- as.factor(groupsummary_sales_data$product_category)
+```
+
+### Date Formatting Problems
+```{r date-formatting}
+# Check date formats before analysis
+str(groupsummary_sales_data$sale_date)
+
+# Convert if necessary
+# groupsummary_sales_data$sale_date <- as.Date(groupsummary_sales_data$sale_date, format = "%Y-%m-%d")
+```
+
+## Missing Data Strategies
+
+### Understanding Missing Patterns
+```{r missing-patterns}
+# Check missing data patterns
+missing_summary <- medical_research_data %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+print(missing_summary)
+```
+
+### Handling Missing Values
+1. **Exclude Missing**: Use `showMissing = FALSE` for complete case analysis
+2. **Include Missing**: Use `showMissing = TRUE` to see missing value patterns
+3. **Imputation**: Handle missing values before analysis if appropriate
+
+## Performance Considerations
+
+### Large Datasets
+- Consider filtering data to relevant time periods
+- Use appropriate date aggregation levels
+- Focus on key grouping variables
+
+### Memory Management
+- Process large datasets in chunks if necessary
+- Use efficient data types (factors for categories)
+- Remove unnecessary variables before analysis
+
+---
+
+# Integration with Other Modules
+
+## Workflow Integration
+
+The Group and Summarize module works well with other ClinicoPath modules:
+
+### Preprocessing
+1. **Data Quality**: Use data quality modules to clean data first
+2. **Variable Creation**: Create derived variables before grouping
+
+### Follow-up Analysis
+1. **Statistical Testing**: Use appropriate statistical tests for group comparisons
+2. **Visualization**: Create additional plots for detailed exploration
+3. **Reporting**: Export results for integration into reports
+
+## Export and Sharing
+
+### Table Export
+- Results tables can be copied and pasted into reports
+- Use professional formatting for presentations
+- Include metadata about analysis parameters
+
+### Visualization Export
+- Save plots for inclusion in presentations
+- Adjust plot dimensions for optimal display
+- Consider color-blind friendly palettes for wider accessibility
+
+---
+
+# Advanced Use Cases
+
+## Quality Control Monitoring
+
+Set up regular quality monitoring using groupsummary:
+
+```{r quality-monitoring}
+# Daily quality metrics
+quality_monitoring <- groupsummary(
+  data = groupsummary_manufacturing_data,
+  groupVars = "production_date",
+  sumVars = c("defect_count", "efficiency_percent"),
+  statistics = c("mean", "sum"),
+  dateVar = "production_date",
+  dateFormat = "ymd",
+  timeAggregation = "day"
+)
+```
+
+## Customer Segmentation
+
+Create customer segments based on behavior:
+
+```{r customer-segmentation}
+# Customer value segmentation
+customer_segments <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = c("customer_type", "sales_channel"),
+  sumVars = c("sales_amount", "profit_margin"),
+  statistics = c("mean", "sum", "n"),
+  addPercentage = TRUE,
+  sortBy = "first_desc"
+)
+```
+
+## Performance Benchmarking
+
+Compare performance across different dimensions:
+
+```{r performance-benchmarking}
+# Regional performance benchmarking
+regional_benchmark <- groupsummary(
+  data = groupsummary_sales_data,
+  groupVars = "region",
+  sumVars = c("sales_amount", "profit_margin", "customer_satisfaction"),
+  statistics = c("mean", "median", "n"),
+  sortBy = "first_desc"
+)
+```
+
+---
+
+# Summary
+
+The Group and Summarize module provides a powerful and flexible tool for data aggregation and analysis. Key benefits include:
+
+## Analytical Power
+- **Flexible Grouping**: Support for single and multiple grouping variables
+- **Multiple Statistics**: Comprehensive statistical summaries
+- **Time Intelligence**: Advanced date handling and aggregation
+
+## Practical Applications
+- **Business Analytics**: Sales, customer, and performance analysis
+- **Clinical Research**: Multi-center studies and patient outcomes
+- **Quality Control**: Manufacturing and process monitoring
+- **Digital Analytics**: Web traffic and user behavior analysis
+
+## User-Friendly Features
+- **Automatic Visualization**: Context-appropriate charts and plots
+- **Professional Output**: Publication-ready tables and graphics
+- **Flexible Options**: Customizable sorting, formatting, and display
+
+This module serves as a cornerstone for exploratory data analysis and reporting, enabling users to quickly understand patterns, trends, and relationships in their data across various domains and applications.
+
+---
+
+# References and Further Reading
+
+## Statistical Methods
+- Descriptive Statistics
+- Data Aggregation Techniques
+- Time Series Analysis
+- Missing Data Handling
+
+## Application Domains
+- Business Intelligence and Analytics
+- Clinical Research Methodology
+- Quality Control Systems
+- Digital Marketing Analytics
+
+## Software and Tools
+- dplyr for Data Manipulation
+- ggplot2 for Visualization
+- lubridate for Date Handling
+- jamovi Integration Framework

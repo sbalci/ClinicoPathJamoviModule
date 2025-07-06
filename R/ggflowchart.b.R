@@ -163,16 +163,38 @@ ggflowchartClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggflowchartCla
             }
             
             # Create flowchart
-            if (!is.null(group_var) && group_var != "") {
-                p <- ggflowchart::ggflowchart(flowchart_data, ggplot2::aes(fill = fill))
-            } else {
-                p <- ggflowchart::ggflowchart(flowchart_data)
-            }
-            
-            # Apply color palette
-            if (!is.null(group_var) && group_var != "") {
+            if (!is.null(group_var) && group_var != "" && "fill" %in% names(flowchart_data)) {
+                # Create node_data for coloring based on groups
+                all_nodes <- unique(c(flowchart_data$from, flowchart_data$to))
+                node_colors <- data.frame(
+                    name = all_nodes,
+                    stringsAsFactors = FALSE
+                )
+                
+                # Assign colors based on groups
                 colors <- private$.get_color_palette()
-                p <- p + ggplot2::scale_fill_manual(values = colors)
+                unique_groups <- unique(flowchart_data$fill)
+                n_groups <- length(unique_groups)
+                
+                # Map groups to colors
+                group_color_map <- setNames(colors[1:min(n_groups, length(colors))], unique_groups)
+                
+                # Assign colors to nodes based on their groups
+                node_colors$fill <- "#FFFFFF"  # Default white
+                for (i in 1:nrow(flowchart_data)) {
+                    from_node <- flowchart_data$from[i]
+                    to_node <- flowchart_data$to[i]
+                    group_color <- group_color_map[flowchart_data$fill[i]]
+                    
+                    node_colors[node_colors$name == from_node, "fill"] <- group_color
+                    node_colors[node_colors$name == to_node, "fill"] <- group_color
+                }
+                
+                # Create flowchart with node_data
+                p <- ggflowchart::ggflowchart(flowchart_data, node_data = node_colors)
+            } else {
+                # Create basic flowchart without grouping
+                p <- ggflowchart::ggflowchart(flowchart_data)
             }
             
             # Apply modern theme

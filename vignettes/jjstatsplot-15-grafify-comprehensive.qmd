@@ -1,0 +1,561 @@
+---
+title: "Scientific Visualization with Grafify: Comprehensive Guide"
+subtitle: "Color-blind friendly plots for clinical research and experimental data"
+date: "`r Sys.Date()`"
+author: "ClinicoPath"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+vignette: >
+  %\VignetteIndexEntry{Scientific Visualization with Grafify: Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8,
+  dpi = 300,
+  out.width = "100%"
+)
+
+# Load required libraries
+suppressMessages({
+  library(ClinicoPath)
+  library(dplyr)
+  library(ggplot2)
+})
+```
+
+# Introduction to Grafify Scientific Plots
+
+The `grafify` function in ClinicoPath provides access to the powerful grafify R package for creating beautiful, color-blind friendly scientific visualizations. This module is specifically designed for clinical research, experimental data analysis, and scientific publications.
+
+## Key Features
+
+- **12+ Color-blind friendly palettes** optimized for scientific visualization
+- **Multiple plot types** including scatter plots, box plots, violin plots, and specialized designs
+- **Integrated statistical analysis** with ANOVA, t-tests, correlations, and post-hoc comparisons
+- **Experimental design support** for randomized blocks, repeated measures, and factorial designs
+- **Before-after analysis** for paired data and longitudinal studies
+- **Publication-ready styling** with professional themes and customization options
+
+# Comprehensive Test Dataset
+
+Let's create a comprehensive dataset that demonstrates all grafify features:
+
+```{r create-data}
+# Set seed for reproducibility
+set.seed(42)
+
+# Create comprehensive grafify test data
+grafify_comprehensive_data <- data.frame(
+  # Subject identifiers
+  subject_id = rep(1:60, each = 2),
+  
+  # Treatment groups
+  treatment = rep(c("Control", "Treatment_A", "Treatment_B"), each = 40),
+  
+  # Timepoints for before-after analysis
+  timepoint = rep(c("Before", "After"), 60),
+  
+  # Blocking variables
+  block = rep(c("Block_1", "Block_2", "Block_3", "Block_4"), 30),
+  center = rep(c("Center_A", "Center_B", "Center_C"), 40),
+  
+  # Continuous variables for Y-axis
+  biomarker_level = c(
+    # Control group
+    rnorm(40, mean = 10, sd = 2),
+    # Treatment A group  
+    rnorm(40, mean = 15, sd = 2.5),
+    # Treatment B group
+    rnorm(40, mean = 18, sd = 3)
+  ),
+  
+  # Secondary continuous variable
+  response_score = c(
+    rnorm(40, mean = 25, sd = 5),
+    rnorm(40, mean = 35, sd = 6),
+    rnorm(40, mean = 42, sd = 7)
+  ),
+  
+  # Categorical variables for grouping
+  gender = rep(c("Male", "Female"), 60),
+  age_group = sample(c("Young", "Middle", "Elderly"), 120, replace = TRUE),
+  
+  # Additional variables for multidimensional plots
+  dose_level = sample(c("Low", "Medium", "High"), 120, replace = TRUE),
+  response_category = sample(c("Responder", "Non-responder"), 120, replace = TRUE)
+)
+
+# Add some realistic variation for before-after effect
+grafify_comprehensive_data$biomarker_level[grafify_comprehensive_data$timepoint == "After"] <- 
+  grafify_comprehensive_data$biomarker_level[grafify_comprehensive_data$timepoint == "After"] + 
+  rnorm(60, mean = 3, sd = 1)
+
+# Display data structure
+str(grafify_comprehensive_data)
+head(grafify_comprehensive_data, 10)
+```
+
+# Basic Plot Types
+
+## Scatter Plot with Error Bars
+
+The classic scientific visualization showing individual data points with summary statistics:
+
+```{r scatterbar-basic}
+# Basic scatter plot with error bars
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "biomarker_level",
+  plot_type = "scatterbar",
+  color_palette = "vibrant",
+  error_type = "sd",
+  show_summary_stats = TRUE
+)
+```
+
+## Box Plots with Individual Points
+
+Excellent for showing distribution shape and identifying outliers:
+
+```{r scatterbox}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment", 
+  y_var = "response_score",
+  groups = "gender",
+  plot_type = "scatterbox",
+  color_palette = "contrast",
+  transparency = 0.6,
+  show_summary_stats = TRUE
+)
+```
+
+## Violin Plots for Distribution Analysis
+
+Perfect for visualizing data density and identifying multimodal distributions:
+
+```{r scatterviolin}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "age_group",
+  y_var = "biomarker_level", 
+  groups = "treatment",
+  plot_type = "scatterviolin",
+  color_palette = "earth",
+  jitter_width = 0.2,
+  show_summary_stats = TRUE
+)
+```
+
+# Advanced Plot Types
+
+## Before-After Analysis
+
+Specialized plots for paired data and longitudinal studies:
+
+```{r befafter-box}
+grafify(
+  data = grafify_comprehensive_data,
+  y_var = "biomarker_level",
+  groups = "treatment",
+  befafter_shape_var = "timepoint",
+  befafter_id_var = "subject_id", 
+  plot_type = "befafter_box",
+  color_palette = "spring",
+  show_summary_stats = TRUE
+)
+```
+
+```{r befafter-colors}
+grafify(
+  data = grafify_comprehensive_data,
+  y_var = "response_score",
+  groups = "gender",
+  befafter_shape_var = "timepoint",
+  befafter_id_var = "subject_id",
+  plot_type = "befafter_colors", 
+  color_palette = "summer",
+  point_size = 2,
+  show_summary_stats = TRUE
+)
+```
+
+## 3D and 4D Scatter Plots
+
+For complex multidimensional data exploration:
+
+```{r scatter-3d}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "biomarker_level",
+  y_var = "response_score",
+  groups = "treatment",
+  plot_type = "scatter_3d",
+  color_palette = "autumn",
+  transparency = 0.7,
+  show_summary_stats = TRUE
+)
+```
+
+```{r scatter-4d}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "biomarker_level", 
+  y_var = "response_score",
+  groups = "treatment",
+  facet_var = "gender",
+  plot_type = "scatter_4d",
+  color_palette = "winter",
+  point_size = 3,
+  show_summary_stats = TRUE
+)
+```
+
+# Distribution Analysis
+
+## Density Plots
+
+Ideal for comparing distributions between groups:
+
+```{r density-plot}
+grafify(
+  data = grafify_comprehensive_data,
+  vars = "biomarker_level",
+  groups = "treatment",
+  plot_type = "density",
+  color_palette = "fishy",
+  show_summary_stats = TRUE
+)
+```
+
+## Histograms
+
+Classic frequency distribution visualization:
+
+```{r histogram}
+grafify(
+  data = grafify_comprehensive_data,
+  vars = "response_score", 
+  groups = "age_group",
+  plot_type = "histogram",
+  color_palette = "bright",
+  show_summary_stats = TRUE
+)
+```
+
+# Statistical Analysis Integration
+
+## ANOVA with Post-hoc Comparisons
+
+```{r anova-analysis}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "biomarker_level",
+  plot_type = "scatterbar",
+  color_palette = "default",
+  error_type = "ci95",
+  add_statistics = TRUE,
+  stat_method = "anova_1way",
+  posthoc_comparisons = TRUE,
+  comparison_method = "pairwise",
+  show_summary_stats = TRUE
+)
+```
+
+## Two-way ANOVA with Blocking
+
+```{r two-way-anova}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "response_score", 
+  groups = "gender",
+  blocks = "center",
+  plot_type = "scatterbox",
+  color_palette = "pale",
+  add_statistics = TRUE,
+  stat_method = "anova_2way",
+  experimental_design = "rbd",
+  posthoc_comparisons = TRUE,
+  comparison_method = "levelwise",
+  show_summary_stats = TRUE
+)
+```
+
+## Correlation Analysis
+
+```{r correlation}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "biomarker_level",
+  y_var = "response_score",
+  groups = "treatment",
+  plot_type = "xy_catgroup", 
+  color_palette = "dark",
+  add_statistics = TRUE,
+  stat_method = "correlation",
+  show_summary_stats = TRUE
+)
+```
+
+# Color Palette Showcase
+
+Grafify provides 12+ carefully designed color-blind friendly palettes:
+
+```{r palette-comparison, fig.height=12}
+# Create a dataset for palette comparison
+palette_data <- data.frame(
+  group = rep(c("A", "B", "C", "D", "E"), each = 20),
+  value = c(rnorm(20, 10, 2), rnorm(20, 12, 2), rnorm(20, 14, 2), 
+            rnorm(20, 16, 2), rnorm(20, 18, 2))
+)
+
+palettes <- c("default", "vibrant", "contrast", "bright", "pale", 
+              "dark", "earth", "spring", "summer", "autumn", "winter", "fishy")
+
+# Note: In actual implementation, you would create multiple plots
+# This is a conceptual example showing palette variety
+for(i in 1:3) {
+  grafify(
+    data = palette_data,
+    x_var = "group",
+    y_var = "value", 
+    plot_type = "scatterbar",
+    color_palette = palettes[i],
+    title_text = paste("Color Palette:", palettes[i]),
+    error_type = "sem"
+  )
+}
+```
+
+# Experimental Design Features
+
+## Randomized Block Design
+
+```{r rbd-design}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "biomarker_level",
+  groups = "gender", 
+  blocks = "block",
+  plot_type = "scatterviolin",
+  color_palette = "vibrant",
+  experimental_design = "rbd", 
+  add_statistics = TRUE,
+  stat_method = "anova_2way",
+  show_summary_stats = TRUE
+)
+```
+
+## Factorial Design
+
+```{r factorial-design}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "response_score",
+  groups = "gender",
+  facet_var = "age_group",
+  plot_type = "scatterbox",
+  color_palette = "contrast",
+  experimental_design = "factorial",
+  add_statistics = TRUE,
+  posthoc_comparisons = TRUE,
+  show_summary_stats = TRUE
+)
+```
+
+# Customization Options
+
+## Plot Styling and Themes
+
+```{r custom-styling}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "biomarker_level",
+  groups = "gender",
+  plot_type = "scatterbar",
+  color_palette = "earth",
+  reverse_palette = TRUE,
+  use_grafify_theme = TRUE,
+  title_text = "Custom Scientific Plot",
+  x_label = "Treatment Groups",
+  y_label = "Biomarker Level (ng/mL)", 
+  legend_position = "bottom",
+  point_size = 4,
+  transparency = 0.8,
+  error_type = "ci95",
+  show_summary_stats = TRUE
+)
+```
+
+## Log Scale Transformations
+
+```{r log-transformation}
+# Add some positive values for log transformation
+log_data <- grafify_comprehensive_data
+log_data$biomarker_level <- abs(log_data$biomarker_level) + 1
+
+grafify(
+  data = log_data,
+  x_var = "treatment", 
+  y_var = "biomarker_level",
+  groups = "gender",
+  plot_type = "scatterviolin",
+  color_palette = "winter",
+  log_transform = "log10_y",
+  y_label = "Biomarker Level (log10 scale)",
+  show_summary_stats = TRUE
+)
+```
+
+# Clinical Research Applications
+
+## Biomarker Analysis
+
+```{r biomarker-analysis}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "dose_level",
+  y_var = "biomarker_level",
+  groups = "response_category", 
+  plot_type = "scatterbox",
+  color_palette = "vibrant",
+  title_text = "Dose-Response Biomarker Analysis",
+  x_label = "Dose Level",
+  y_label = "Biomarker Concentration",
+  add_statistics = TRUE,
+  stat_method = "anova_1way",
+  posthoc_comparisons = TRUE,
+  show_summary_stats = TRUE
+)
+```
+
+## Treatment Response Monitoring
+
+```{r treatment-response}
+grafify(
+  data = grafify_comprehensive_data,
+  y_var = "response_score",
+  groups = "treatment",
+  befafter_shape_var = "timepoint",
+  befafter_id_var = "subject_id",
+  plot_type = "befafter_colors",
+  color_palette = "spring",
+  title_text = "Treatment Response Over Time", 
+  y_label = "Clinical Response Score",
+  add_statistics = TRUE,
+  stat_method = "ttest",
+  show_summary_stats = TRUE
+)
+```
+
+# Best Practices and Interpretation
+
+## Data Quality Considerations
+
+1. **Sample Size**: Ensure adequate sample sizes for statistical power
+2. **Distribution Assessment**: Use density/histogram plots to check normality
+3. **Outlier Detection**: Box plots and violin plots help identify outliers
+4. **Missing Data**: Handle missing data appropriately before visualization
+
+## Statistical Analysis Guidelines
+
+1. **Choose Appropriate Tests**: Match statistical method to experimental design
+2. **Multiple Comparisons**: Use appropriate correction methods for post-hoc tests
+3. **Effect Sizes**: Consider clinical significance alongside statistical significance
+4. **Assumptions**: Verify ANOVA assumptions (normality, homoscedasticity)
+
+## Visualization Best Practices
+
+1. **Color-blind Accessibility**: Always use grafify's color-blind friendly palettes
+2. **Error Bar Types**: Choose appropriate error representation (SD, SEM, CI)
+3. **Point Transparency**: Adjust alpha values for clarity with overlapping points
+4. **Publication Readiness**: Use grafify themes for professional appearance
+
+# Advanced Features
+
+## Model Diagnostics
+
+```{r model-diagnostics}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment",
+  y_var = "biomarker_level",
+  groups = "gender",
+  plot_type = "scatterbar",
+  color_palette = "default",
+  add_statistics = TRUE,
+  stat_method = "anova_2way",
+  show_model_diagnostics = TRUE,
+  experimental_design = "factorial",
+  show_summary_stats = TRUE
+)
+```
+
+## Data Export Features
+
+```{r data-export}
+grafify(
+  data = grafify_comprehensive_data,
+  x_var = "treatment", 
+  y_var = "response_score",
+  groups = "gender",
+  plot_type = "scatterviolin",
+  color_palette = "contrast",
+  export_data = TRUE,
+  add_statistics = TRUE,
+  posthoc_comparisons = TRUE,
+  show_summary_stats = TRUE
+)
+```
+
+# Summary and Conclusions
+
+The grafify function in ClinicoPath provides a comprehensive solution for scientific data visualization with the following key advantages:
+
+## Key Strengths
+
+1. **Accessibility**: Color-blind friendly palettes ensure inclusive visualization
+2. **Scientific Rigor**: Integrated statistical analysis with proper experimental design support
+3. **Flexibility**: Multiple plot types for different data structures and research questions
+4. **Professional Quality**: Publication-ready plots with customizable styling
+5. **Clinical Focus**: Specialized features for medical and clinical research applications
+
+## Recommended Workflow
+
+1. **Data Exploration**: Start with basic scatter plots and distribution plots
+2. **Statistical Analysis**: Add appropriate statistical tests based on experimental design
+3. **Customization**: Apply professional styling and color schemes
+4. **Validation**: Use diagnostic plots to verify model assumptions
+5. **Publication**: Export high-quality figures for manuscripts
+
+## Next Steps
+
+- Explore additional grafify package functions for specialized visualizations
+- Integrate with other ClinicoPath modules for comprehensive analysis workflows
+- Consider power analysis for sample size determination
+- Implement reproducible analysis pipelines with documented code
+
+The grafify module represents a powerful tool for creating publication-quality scientific visualizations that meet the highest standards of accessibility, statistical rigor, and visual appeal in clinical research.
+
+---
+
+*This comprehensive guide demonstrates the full capabilities of the grafify function. For additional examples and advanced features, explore the grafify package documentation and ClinicoPath module ecosystem.*

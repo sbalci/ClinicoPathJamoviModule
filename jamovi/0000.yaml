@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.41
+version: 0.0.3.42
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2024-07-05'
+date: '2024-07-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
@@ -97,7 +97,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -106,7 +106,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >-
@@ -118,7 +118,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >-

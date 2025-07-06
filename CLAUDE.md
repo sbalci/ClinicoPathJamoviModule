@@ -82,7 +82,7 @@ Rscript -e "devtools::check()"
 Rscript -e "devtools::build()"
 
 # Install development version
-Rscript -e "devtools::install(quick=TRUE)"
+Rscript -e "devtools::install(quick = TRUE, reload = TRUE, quiet = FALSE, upgrade = FALSE, build_vignettes = FALSE)"
 
 # Test vignette rendering
 Rscript -e "pkgdown::build_articles()"
@@ -395,7 +395,7 @@ Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:"
     - if not, update the data, vignettes and documentation accordingly
   - run `jmvtools::prepare()` and `devtools::document()` to see if the function compiles correctly
     - if not, fix the issues
-  - run `devtools::install(quick=TRUE);pkgdown::build_articles()` to see if the vignettes render correctly
+  - run `devtools::install(quick = TRUE, reload = TRUE, quiet = FALSE, upgrade = FALSE, build_vignettes = FALSE);pkgdown::build_articles()` to see if the vignettes render correctly
     - if not, fix the issues
   - check if the function is tested in the tests folder
     - if not, write tests for the function
