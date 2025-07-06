@@ -8,9 +8,12 @@
 # # Usage:
 # Rscript _updateModules.R
 
+
+# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+
 # Define the new version and date ----
-new_version <- "0.0.3.42" # Update this to the new version you want to set
-new_date <- "2024-07-06" # Update this to the new date you want to set
+new_version <- "0.0.3.44" # Update this to the new version you want to set
+new_date <- "2025-07-06" # Update this to the new date you want to set
 
 
 # Define WIP, check, extended status ----

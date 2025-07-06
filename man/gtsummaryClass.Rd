@@ -2,11 +2,11 @@
 % Please edit documentation in R/gtsummary.b.R
 \name{gtsummaryClass}
 \alias{gtsummaryClass}
-\title{Tables via gtsummary}
+\title{Publication-Ready Tables with gtsummary}
 \description{
-Tables via gtsummary
+Publication-Ready Tables with gtsummary
 
-Tables via gtsummary
+Publication-Ready Tables with gtsummary
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::gtsummaryBase} -> \code{gtsummaryClass}

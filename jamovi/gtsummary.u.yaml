@@ -29,46 +29,97 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: CheckBox
-        name: includeOverall
+      - type: Label
+        label: Statistics to Include
+        children:
+          - name: statistics_mean_sd
+            type: CheckBox
+            optionName: statistics
+            optionPart: mean_sd
+          - name: statistics_median_iqr
+            type: CheckBox
+            optionName: statistics
+            optionPart: median_iqr
+          - name: statistics_range
+            type: CheckBox
+            optionName: statistics
+            optionPart: range
+          - name: statistics_n_percent
+            type: CheckBox
+            optionName: statistics
+            optionPart: n_percent
+          - name: statistics_missing
+            type: CheckBox
+            optionName: statistics
+            optionPart: missing
+        name: statistics
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: includeOverall
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: includeMissing
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: addPValue
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: testMethod
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: pairedTest
       - type: CheckBox
         name: addQ
-  - type: LayoutBox
-    margin: large
-    children:
       - type: CheckBox
         name: boldLabels
       - type: CheckBox
         name: boldLevels
       - type: CheckBox
         name: boldPValues
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: pValueThreshold
         format: number
-      - type: CheckBox
-        name: italicizeLabels
-      - type: CheckBox
-        name: italicizeLevels
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
+        name: italicizeLabels
+      - type: CheckBox
+        name: italicizeLevels
+      - type: CheckBox
         name: addSpanningHeader
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: spanningHeaderText
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: sortVariables
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: showNHeader
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: percentType
   - type: LayoutBox
@@ -77,9 +128,15 @@ children:
       - type: TextBox
         name: digitsOverall
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: digitsByGroup
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: digitsPValue
         format: number
@@ -88,12 +145,21 @@ children:
     children:
       - type: ComboBox
         name: outputFormat
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: tableTitle
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: tableCaption
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: footnote
         format: string
