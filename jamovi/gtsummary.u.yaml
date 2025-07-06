@@ -1,4 +1,4 @@
-title: Tables via gtsummary
+title: Publication-Ready Tables with gtsummary
 name: gtsummary
 jus: '3.0'
 stage: 0
@@ -9,26 +9,98 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Variables for Table
         children:
           - type: VariablesListBox
-            name: dep
-            maxItemCount: 1
+            name: vars
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping Variable
+        label: Grouping Variable (By)
         children:
           - type: VariablesListBox
-            name: group
+            name: byvar
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: alt
+        name: tableType
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: varEq
+        name: includeOverall
+      - type: ComboBox
+        name: includeMissing
+      - type: CheckBox
+        name: addPValue
+      - type: ComboBox
+        name: testMethod
+      - type: CheckBox
+        name: pairedTest
+      - type: CheckBox
+        name: addQ
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: boldLabels
+      - type: CheckBox
+        name: boldLevels
+      - type: CheckBox
+        name: boldPValues
+      - type: TextBox
+        name: pValueThreshold
+        format: number
+      - type: CheckBox
+        name: italicizeLabels
+      - type: CheckBox
+        name: italicizeLevels
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: addSpanningHeader
+      - type: TextBox
+        name: spanningHeaderText
+        format: string
+      - type: ComboBox
+        name: sortVariables
+      - type: CheckBox
+        name: showNHeader
+      - type: ComboBox
+        name: percentType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: digitsOverall
+        format: number
+      - type: TextBox
+        name: digitsByGroup
+        format: number
+      - type: TextBox
+        name: digitsPValue
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: outputFormat
+      - type: TextBox
+        name: tableTitle
+        format: string
+      - type: TextBox
+        name: tableCaption
+        format: string
+      - type: TextBox
+        name: footnote
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: exportTable
+      - type: CheckBox
+        name: showCode

@@ -1,23 +1,41 @@
 ---
 name:  gtsummary
-title: Tables via gtsummary
+title: Publication-Ready Tables with gtsummary
 jrs:   '1.1'
 
 items:
-    # - name:  gtsum1pre
-    #   title: Tables via gtsummary
-    #   type:  Preformatted
-
-    - name:  gtsum1
-      title: Tables via gtsummary
+    - name:  todo
+      title: Instructions
       type:  Html
+      visible: false
 
+    - name:  maintable
+      title: Summary Table
+      type:  Html
+      visible: true
 
-    # - name:  gtsum1html
-    #   title: Tables via gtsummary
-    #   type:  Html
+    - name:  stats_summary
+      title: Statistical Summary
+      type:  Html
+      visible: "(addPValue)"
+
+    - name:  table_notes
+      title: Table Notes
+      type:  Html
+      visible: true
+
+    - name:  export_info
+      title: Export Information
+      type:  Html
+      visible: "(exportTable)"
+
+    - name:  code_output
+      title: R Code
+      type:  Preformatted
+      visible: "(showCode)"
 
 refs:
     - ClinicoPathJamoviModule
+    - gtsummary
 
 ...

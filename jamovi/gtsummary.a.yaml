@@ -1,9 +1,9 @@
 ---
 name:  gtsummary
-title: Tables via gtsummary
+title: Publication-Ready Tables with gtsummary
 menuGroup: ExplorationD
-menuSubgroup: Drafts
-menuSubtitle: Comparisons
+menuSubgroup: Enhanced Tables
+menuSubtitle: Summary Tables
 version: '0.0.3'
 jas: '1.2'
 
@@ -11,28 +11,229 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
-      type: Variable
+    - name: vars
+      title: Variables for Table
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
 
-    - name: group
-      title: Grouping Variable
+    - name: byvar
+      title: Grouping Variable (By)
       type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
 
-    - name: alt
-      title: Alternative hypothesis
+    - name: tableType
+      title: Table Type
       type: List
       options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
+        - title: Summary Table (tbl_summary)
+          name: summary
+        - title: Cross Table (tbl_cross)
+          name: cross
+        - title: Regression Table (tbl_regression)
+          name: regression
+        - title: Survival Table (tbl_survfit)
+          name: survival
+      default: summary
 
-    - name: varEq
-      title: Assume equal variances
+    - name: statistics
+      title: Statistics to Include
+      type: NMXList
+      options:
+        - name: mean_sd
+          title: Mean (SD)
+        - name: median_iqr
+          title: Median (IQR)
+        - name: range
+          title: Range (Min, Max)
+        - name: n_percent
+          title: N (%)
+        - name: missing
+          title: Missing values
+      default: [ mean_sd, median_iqr, n_percent ]
+
+    - name: includeOverall
+      title: Include Overall Column
       type: Bool
       default: true
+
+    - name: includeMissing
+      title: Include Missing Values
+      type: List
+      options:
+        - title: No
+          name: no
+        - title: If any
+          name: ifany
+        - title: Always
+          name: always
+      default: ifany
+
+    - name: addPValue
+      title: Add P-values
+      type: Bool
+      default: false
+
+    - name: testMethod
+      title: Test Method
+      type: List
+      options:
+        - title: Automatic
+          name: auto
+        - title: Chi-square test
+          name: chisq.test
+        - title: Fisher's exact test  
+          name: fisher.test
+        - title: t-test
+          name: t.test
+        - title: Wilcoxon test
+          name: wilcox.test
+        - title: Kruskal-Wallis test
+          name: kruskal.test
+        - title: ANOVA
+          name: aov
+      default: auto
+
+    - name: pairedTest
+      title: Use Paired Tests
+      type: Bool
+      default: false
+
+    - name: addQ
+      title: Add Q-values (FDR)
+      type: Bool
+      default: false
+
+    - name: boldLabels
+      title: Bold Variable Labels
+      type: Bool
+      default: true
+
+    - name: boldLevels
+      title: Bold Level Labels
+      type: Bool
+      default: false
+
+    - name: boldPValues
+      title: Bold Significant P-values
+      type: Bool
+      default: false
+
+    - name: pValueThreshold
+      title: P-value Threshold for Bolding
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.1
+
+    - name: italicizeLabels
+      title: Italicize Variable Labels
+      type: Bool
+      default: false
+
+    - name: italicizeLevels
+      title: Italicize Level Labels
+      type: Bool
+      default: false
+
+    - name: addSpanningHeader
+      title: Add Spanning Header
+      type: Bool
+      default: false
+
+    - name: spanningHeaderText
+      title: Spanning Header Text
+      type: String
+      default: ""
+
+    - name: sortVariables
+      title: Sort Variables
+      type: List
+      options:
+        - title: Original order
+          name: original
+        - title: Alphabetical
+          name: alphabetical
+        - title: By p-value
+          name: pvalue
+      default: original
+
+    - name: showNHeader
+      title: Show N in Header
+      type: Bool
+      default: true
+
+    - name: percentType
+      title: Percentage Type
+      type: List
+      options:
+        - title: Column percent
+          name: column
+        - title: Row percent
+          name: row
+        - title: Cell percent
+          name: cell
+      default: column
+
+    - name: digitsOverall
+      title: Digits for Overall Statistics
+      type: Integer
+      default: 1
+      min: 0
+      max: 5
+
+    - name: digitsByGroup
+      title: Digits for By-Group Statistics
+      type: Integer
+      default: 1
+      min: 0
+      max: 5
+
+    - name: digitsPValue
+      title: Digits for P-values
+      type: Integer
+      default: 3
+      min: 1
+      max: 5
+
+    - name: outputFormat
+      title: Output Format
+      type: List
+      options:
+        - title: HTML
+          name: html
+        - title: LaTeX
+          name: latex
+        - title: Word/RTF
+          name: rtf
+        - title: Markdown
+          name: markdown
+      default: html
+
+    - name: tableTitle
+      title: Table Title
+      type: String
+      default: ""
+
+    - name: tableCaption
+      title: Table Caption
+      type: String
+      default: ""
+
+    - name: footnote
+      title: Footnote
+      type: String
+      default: ""
+
+    - name: exportTable
+      title: Export Table Data
+      type: Bool
+      default: false
+
+    - name: showCode
+      title: Show R Code
+      type: Bool
+      default: false
 ...
