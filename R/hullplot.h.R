@@ -63,14 +63,16 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..size_var <- jmvcore::OptionVariable$new(
                 "size_var",
                 size_var,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..hull_concavity <- jmvcore::OptionNumber$new(
                 "hull_concavity",
                 hull_concavity,
@@ -342,8 +344,8 @@ hullplot <- function(
     x_var,
     y_var,
     group_var,
-    color_var,
-    size_var,
+    color_var = NULL,
+    size_var = NULL,
     hull_concavity = 2,
     hull_alpha = 0.3,
     show_labels = TRUE,

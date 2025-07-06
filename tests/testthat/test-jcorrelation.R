@@ -2,45 +2,45 @@
 library(ClinicoPath)
 data(histopathology, package = "ClinicoPath")
 
-test_that("correlation module loads correctly", {
-  expect_true(exists("correlationClass"))
-  expect_true(is.function(correlation))
+test_that("jcorrelation module loads correctly", {
+  expect_true(exists("jcorrelationClass"))
+  expect_true(is.function(jcorrelation))
 })
 
 test_that("correlation handles basic input validation", {
   # Test with insufficient variables
   expect_error(
-    correlation(data = histopathology, vars = "Age"),
+    jcorrelation(data = histopathology, vars = "Age"),
     NA  # Should not error during initialization, only during run
   )
   
   # Test with no variables
   expect_error(
-    correlation(data = histopathology, vars = character(0)),
+    jcorrelation(data = histopathology, vars = character(0)),
     NA  # Should not error during initialization
   )
 })
 
 test_that("correlation works with basic numeric variables", {
   # Test basic functionality with numeric variables
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime")
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   expect_true("Age" %in% names(histopathology))
   expect_true("OverallTime" %in% names(histopathology))
 })
 
 test_that("correlation handles multiple variables", {
   # Test with multiple numeric variables
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Check that results contain expected components
   expect_true("matrix" %in% names(result$results))
@@ -50,175 +50,185 @@ test_that("correlation handles multiple variables", {
 
 test_that("correlation handles different correlation methods", {
   # Test Pearson correlation
-  result_pearson <- correlation(
+  result_pearson <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     method = "pearson"
   )
   
-  expect_s3_class(result_pearson, "correlationClass")
+  expect_s3_class(result_pearson, "jcorrelationClass")
   
   # Test Spearman correlation
-  result_spearman <- correlation(
+  result_spearman <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     method = "spearman"
   )
   
-  expect_s3_class(result_spearman, "correlationClass")
+  expect_s3_class(result_spearman, "jcorrelationClass")
   
   # Test Kendall correlation
-  result_kendall <- correlation(
+  result_kendall <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     method = "kendall"
   )
   
-  expect_s3_class(result_kendall, "correlationClass")
+  expect_s3_class(result_kendall, "jcorrelationClass")
 })
 
 test_that("correlation handles confidence intervals", {
   # Test with confidence intervals
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     ci = TRUE,
     ciWidth = 95
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test different confidence levels
-  result_99 <- correlation(
+  result_99 <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     ci = TRUE,
     ciWidth = 99
   )
   
-  expect_s3_class(result_99, "correlationClass")
+  expect_s3_class(result_99, "jcorrelationClass")
 })
 
 test_that("correlation handles alternative hypotheses", {
   # Test two-sided hypothesis
-  result_two <- correlation(
+  result_two <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     alternative = "two.sided"
   )
   
-  expect_s3_class(result_two, "correlationClass")
+  expect_s3_class(result_two, "jcorrelationClass")
   
   # Test greater hypothesis
-  result_greater <- correlation(
+  result_greater <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     alternative = "greater"
   )
   
-  expect_s3_class(result_greater, "correlationClass")
+  expect_s3_class(result_greater, "jcorrelationClass")
   
   # Test less hypothesis
-  result_less <- correlation(
+  result_less <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     alternative = "less"
   )
   
-  expect_s3_class(result_less, "correlationClass")
+  expect_s3_class(result_less, "jcorrelationClass")
 })
 
 test_that("correlation handles significance flagging", {
   # Test with significance flagging enabled
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
     flag = TRUE,
     flagAlpha = 0.05
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test with different alpha levels
-  result_strict <- correlation(
+  result_strict <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     flag = TRUE,
     flagAlpha = 0.01
   )
   
-  expect_s3_class(result_strict, "correlationClass")
+  expect_s3_class(result_strict, "jcorrelationClass")
 })
 
 test_that("correlation handles grouping variables", {
   # Test with grouping variable
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     group = "Sex"
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test with another grouping variable
-  result_group2 <- correlation(
+  result_group2 <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     group = "Group"
   )
   
-  expect_s3_class(result_group2, "correlationClass")
+  expect_s3_class(result_group2, "jcorrelationClass")
 })
 
 test_that("correlation handles plot options", {
   # Test with plots enabled
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     plots = TRUE,
     plotType = "matrix"
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test different plot types
-  result_pairs <- correlation(
+  result_pairs <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     plots = TRUE,
     plotType = "pairs"
   )
   
-  expect_s3_class(result_pairs, "correlationClass")
+  expect_s3_class(result_pairs, "jcorrelationClass")
+  
+  # Test network plot type
+  result_network <- jcorrelation(
+    data = histopathology,
+    vars = c("Age", "OverallTime", "MeasurementA"),
+    plots = TRUE,
+    plotType = "network"
+  )
+  
+  expect_s3_class(result_network, "jcorrelationClass")
   
   # Test with plots disabled
-  result_no_plots <- correlation(
+  result_no_plots <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     plots = FALSE
   )
   
-  expect_s3_class(result_no_plots, "correlationClass")
+  expect_s3_class(result_no_plots, "jcorrelationClass")
 })
 
 test_that("correlation handles natural language reporting", {
   # Test with reporting enabled
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA"),
     report = TRUE
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test with reporting disabled
-  result_no_report <- correlation(
+  result_no_report <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime"),
     report = FALSE
   )
   
-  expect_s3_class(result_no_report, "correlationClass")
+  expect_s3_class(result_no_report, "jcorrelationClass")
 })
 
 test_that("correlation handles edge cases", {
@@ -226,7 +236,7 @@ test_that("correlation handles edge cases", {
   small_data <- histopathology[1:10, ]
   
   expect_error({
-    result <- correlation(
+    result <- jcorrelation(
       data = small_data,
       vars = c("Age", "OverallTime")
     )
@@ -240,7 +250,7 @@ test_that("correlation handles edge cases", {
   )
   
   expect_error({
-    result <- correlation(
+    result <- jcorrelation(
       data = perfect_data,
       vars = c("x", "y", "z")
     )
@@ -254,7 +264,7 @@ test_that("correlation handles missing data appropriately", {
   test_data$OverallTime[6:10] <- NA
   
   expect_error({
-    result <- correlation(
+    result <- jcorrelation(
       data = test_data,
       vars = c("Age", "OverallTime", "MeasurementA")
     )
@@ -263,20 +273,20 @@ test_that("correlation handles missing data appropriately", {
 
 test_that("correlation handles different measurement scales", {
   # Test with measurement variables (continuous)
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("MeasurementA", "MeasurementB", "Measurement1", "Measurement2")
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Test with mixed scales (age, time, measurements)
-  result_mixed <- correlation(
+  result_mixed <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA", "Anti-X-intensity")
   )
   
-  expect_s3_class(result_mixed, "correlationClass")
+  expect_s3_class(result_mixed, "jcorrelationClass")
 })
 
 test_that("correlation handles large number of variables", {
@@ -284,17 +294,17 @@ test_that("correlation handles large number of variables", {
   numeric_vars <- c("Age", "Grade", "TStage", "Anti-X-intensity", "Anti-Y-intensity", 
                    "OverallTime", "MeasurementA", "MeasurementB", "Measurement1", "Measurement2")
   
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = numeric_vars[1:6]  # Use first 6 to ensure summary table appears
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
 })
 
 test_that("correlation comprehensive test with all options", {
   # Test with all options enabled
-  result <- correlation(
+  result <- jcorrelation(
     data = histopathology,
     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
     method = "pearson",
@@ -308,7 +318,7 @@ test_that("correlation comprehensive test with all options", {
     report = TRUE
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
   
   # Verify the structure of results
   expect_true("matrix" %in% names(result$results))
@@ -327,14 +337,14 @@ test_that("correlation handles special correlation scenarios", {
   )
   correlated_data$w <- correlated_data$x + rnorm(100, 0, 0.1)  # Highly correlated with x
   
-  result <- correlation(
+  result <- jcorrelation(
     data = correlated_data,
     vars = c("x", "y", "z", "w"),
     flag = TRUE,
     flagAlpha = 0.05
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
 })
 
 test_that("correlation validates input types", {
@@ -342,12 +352,12 @@ test_that("correlation validates input types", {
   mixed_data <- histopathology
   
   # Should work with numeric variables
-  result <- correlation(
+  result <- jcorrelation(
     data = mixed_data,
     vars = c("Age", "OverallTime")  # These are numeric
   )
   
-  expect_s3_class(result, "correlationClass")
+  expect_s3_class(result, "jcorrelationClass")
 })
 
 test_that("correlation handles zero variance variables", {
@@ -359,7 +369,7 @@ test_that("correlation handles zero variance variables", {
   )
   
   expect_error({
-    result <- correlation(
+    result <- jcorrelation(
       data = constant_data,
       vars = c("x", "y", "z")
     )
@@ -374,7 +384,7 @@ test_that("correlation performance with different sample sizes", {
   
   # Small sample
   expect_error({
-    result_small <- correlation(
+    result_small <- jcorrelation(
       data = small_sample,
       vars = c("Age", "OverallTime", "MeasurementA")
     )
@@ -382,7 +392,7 @@ test_that("correlation performance with different sample sizes", {
   
   # Medium sample
   expect_error({
-    result_medium <- correlation(
+    result_medium <- jcorrelation(
       data = medium_sample,
       vars = c("Age", "OverallTime", "MeasurementA")
     )
@@ -390,7 +400,7 @@ test_that("correlation performance with different sample sizes", {
   
   # Large sample
   expect_error({
-    result_large <- correlation(
+    result_large <- jcorrelation(
       data = large_sample,
       vars = c("Age", "OverallTime", "MeasurementA")
     )

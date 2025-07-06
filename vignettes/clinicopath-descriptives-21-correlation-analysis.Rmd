@@ -135,13 +135,15 @@ two_sided <- jcorrelation(
 # One-sided test - tests if correlation > 0
 positive_test <- jcorrelation(
   data = histopathology,
-  vars = c("Age", "OverallTime")
+  vars = c("Age", "OverallTime"),
+  alternative = "greater"
 )
 
-# Test for negative correlation
+# Test for negative correlation (correlation < 0)
 negative_test <- jcorrelation(
   data = histopathology,
-  vars = c("Age", "OverallTime")
+  vars = c("Age", "OverallTime"),
+  alternative = "less"
 )
 ```
 
@@ -156,10 +158,20 @@ ci_95 <- jcorrelation(
 
 ci_99 <- jcorrelation(
   data = histopathology,
-  vars = c("MeasurementA", "MeasurementB")
+  vars = c("MeasurementA", "MeasurementB"),
+  ciWidth = 99
 )
 
 # 99% CI will be wider, indicating more uncertainty
+
+# Test narrow confidence intervals  
+ci_90 <- jcorrelation(
+  data = histopathology,
+  vars = c("MeasurementA", "MeasurementB"),
+  ciWidth = 90
+)
+
+# 90% CI will be narrower but less conservative
 ```
 
 # Significance Flagging and Multiple Comparisons
@@ -167,16 +179,25 @@ ci_99 <- jcorrelation(
 When analyzing multiple correlations, it's important to consider multiple comparison issues:
 
 ```{r}
-# Conservative significance testing
+# Conservative significance testing with strict alpha
 conservative_analysis <- jcorrelation(
   data = histopathology,
-  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "Measurement1")
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "Measurement1"),
+  flagAlpha = 0.01  # Bonferroni-adjusted alpha
 )
 
-# Standard significance testing
+# Standard significance testing  
 standard_analysis <- jcorrelation(
   data = histopathology,
-  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "Measurement1")
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "Measurement1"),
+  flagAlpha = 0.05  # Standard alpha level
+)
+
+# Very conservative testing for exploratory analysis
+very_conservative <- jcorrelation(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
+  flagAlpha = 0.001  # Very strict significance threshold
 )
 ```
 

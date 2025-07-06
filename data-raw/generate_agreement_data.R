@@ -91,6 +91,21 @@ breast_agreement_data <- tibble(
                       replace = TRUE, prob = c(0.4, 0.4, 0.2))
 )
 
+# Add continuous ICC variables (Ki-67 percentages)
+# Generate true Ki-67 values with realistic distribution
+true_ki67 <- pmax(0, pmin(100, rnorm(n_cases_breast, 25, 15)))
+
+# Generate Ki-67 measurements with realistic inter-rater variability
+generate_ki67_measurement <- function(true_values, measurement_error = 5) {
+  # Add measurement error but keep within 0-100 range
+  measured <- true_values + rnorm(length(true_values), 0, measurement_error)
+  pmax(0, pmin(100, measured))
+}
+
+breast_agreement_data$Ki67_Pathologist_1 <- generate_ki67_measurement(true_ki67, 4)
+breast_agreement_data$Ki67_Pathologist_2 <- generate_ki67_measurement(true_ki67, 5) 
+breast_agreement_data$Ki67_Pathologist_3 <- generate_ki67_measurement(true_ki67, 6)
+
 # Dataset 2: Prostate Cancer Gleason Scoring (4 urological pathologists)
 n_cases_prostate <- 120
 
