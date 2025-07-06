@@ -189,9 +189,9 @@ plot(category_agreement, type = "category")
 # For continuous measurements like Ki-67 percentages
 icc_result <- icccoeff(
   data = breast_agreement_data,
-  rater_vars = c("Ki67_Pathologist_1", "Ki67_Pathologist_2", "Ki67_Pathologist_3"),
-  icc_type = "ICC(2,k)",  # Two-way random effects, average measures
-  conf_level = 0.95
+  vars = c("Ki67_Pathologist_1", "Ki67_Pathologist_2", "Ki67_Pathologist_3"),
+  icc_type = "icc2_k",  # Two-way random effects, average measures
+  confidence_level = "0.95"
 )
 
 print(icc_result)

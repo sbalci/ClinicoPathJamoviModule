@@ -19,8 +19,8 @@ new_date <- "2025-07-06" # Update this to the new date you want to set
 # Define WIP, check, extended status ----
 quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
 check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
-extended <- TRUE # Set to TRUE if you want to document and install submodules
-ClinicoPathDescriptives_module <- TRUE # Set to TRUE if you want to update the ClinicoPathDescriptives module
+extended <- FALSE # Set to TRUE if you want to document and install submodules
+ClinicoPathDescriptives_module <- FALSE # Set to TRUE if you want to update the ClinicoPathDescriptives module
 jsurvival_module <- FALSE # Set to TRUE if you want to update the jsurvival module
 jjstatsplot_module <- FALSE # Set to TRUE if you want to update the jjstatsplot module
 meddecide_module <- FALSE # Set to TRUE if you want to update the meddecide module
@@ -53,8 +53,8 @@ main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 setwd(main_repo_dir)
 
 if (quick) {
-  devtools::install(quick = TRUE)
-  stop()
+  devtools::install(quick = TRUE, reload = TRUE, quiet = FALSE, upgrade = FALSE, build_vignettes = FALSE, keep_source = TRUE)
+  stop("Quick mode is enabled. Exiting without further actions.")
 }
 
 

@@ -75,6 +75,7 @@ options:
       permitted:
         - factor
         - numeric
+      default: NULL
       description:
         R: >
           Optional variable for coloring points. If not specified, uses the grouping variable.
@@ -86,6 +87,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
       description:
         R: >
           Optional continuous variable for sizing points based on values.

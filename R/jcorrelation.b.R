@@ -49,6 +49,7 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$plot$setState(plotData)
                 self$results$plotMatrix$setState(plotData)
                 self$results$plotPairs$setState(plotData)
+                self$results$plotNetwork$setState(plotData)
             }
         },
 
@@ -409,6 +410,84 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <- plot + ggtheme
             
             print(plot)
+            TRUE
+        },
+
+        .plotNetwork = function(image, ggtheme, theme, ...) {
+            if (length(self$options$vars) < 2 || !self$options$plots)
+                return()
+
+            plotData <- image$state
+            
+            if (is.null(plotData) || nrow(plotData) == 0)
+                return()
+
+            # Calculate correlation matrix
+            cor_matrix <- cor(plotData, method = self$options$method, use = "complete.obs")
+            
+            # Check if qgraph package is available for network plots
+            if (requireNamespace("qgraph", quietly = TRUE)) {
+                # Use qgraph for network visualization
+                qgraph::qgraph(cor_matrix, 
+                              graph = "cor", 
+                              layout = "spring",
+                              title = paste("Correlation Network:", stringr::str_to_title(self$options$method)),
+                              minimum = 0.1,  # Only show correlations > 0.1
+                              maximum = 1,
+                              cut = 0.3,      # Thicker edges for correlations > 0.3
+                              vsize = 8,
+                              esize = 15,
+                              posCol = "darkgreen",
+                              negCol = "darkred")
+            } else if (requireNamespace("igraph", quietly = TRUE) && requireNamespace("ggraph", quietly = TRUE)) {
+                # Fallback to igraph + ggraph
+                # Convert correlation matrix to adjacency matrix (absolute values)
+                adj_matrix <- abs(cor_matrix)
+                diag(adj_matrix) <- 0  # Remove self-loops
+                
+                # Create graph object
+                graph <- igraph::graph_from_adjacency_matrix(adj_matrix, 
+                                                           mode = "undirected", 
+                                                           weighted = TRUE,
+                                                           diag = FALSE)
+                
+                # Remove weak correlations
+                graph <- igraph::delete_edges(graph, igraph::E(graph)[weight < 0.3])
+                
+                # Create network plot
+                plot <- ggraph::ggraph(graph, layout = "nicely") +
+                    ggraph::geom_edge_link(ggplot2::aes(width = weight, alpha = weight), 
+                                          colour = "steelblue") +
+                    ggraph::geom_node_point(size = 8, colour = "darkred") +
+                    ggraph::geom_node_text(ggplot2::aes(label = name), colour = "white", size = 3) +
+                    ggplot2::labs(title = paste("Correlation Network:", stringr::str_to_title(self$options$method))) +
+                    ggplot2::theme_void() +
+                    ggtheme
+                
+                print(plot)
+            } else {
+                # Basic fallback: create a simple correlation plot with text
+                cor_df <- as.data.frame(as.table(cor_matrix))
+                names(cor_df) <- c("Var1", "Var2", "Correlation")
+                cor_df <- cor_df[cor_df$Var1 != cor_df$Var2, ]  # Remove diagonal
+                
+                plot <- ggplot2::ggplot(cor_df, ggplot2::aes(x = Var1, y = Var2)) +
+                    ggplot2::geom_point(ggplot2::aes(size = abs(Correlation), 
+                                                    color = Correlation)) +
+                    ggplot2::geom_text(ggplot2::aes(label = round(Correlation, 2)), 
+                                      size = 3, color = "white") +
+                    ggplot2::scale_color_gradient2(low = "red", mid = "white", high = "blue", 
+                                                  midpoint = 0, limits = c(-1, 1)) +
+                    ggplot2::scale_size_continuous(range = c(3, 15)) +
+                    ggplot2::labs(title = paste("Correlation Network (Basic):", 
+                                               stringr::str_to_title(self$options$method))) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                    ggtheme
+                
+                print(plot)
+            }
+            
             TRUE
         }
     )
