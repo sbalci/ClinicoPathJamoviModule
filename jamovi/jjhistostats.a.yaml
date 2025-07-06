@@ -1,7 +1,7 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotD
 menuSubgroup: Continuous
 # menuSubtitle: Histogram
 version: '0.0.3'

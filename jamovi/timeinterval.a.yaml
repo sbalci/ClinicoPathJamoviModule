@@ -1,7 +1,7 @@
 ---
 name: timeinterval
 title: Time Interval Calculator
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: Calculate time intervals from dates or values
 version: '0.0.3'

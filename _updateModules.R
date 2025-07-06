@@ -12,7 +12,7 @@
 # install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 
 # Define the new version and date ----
-new_version <- "0.0.3.44" # Update this to the new version you want to set
+new_version <- "0.0.3.45" # Update this to the new version you want to set
 new_date <- "2025-07-06" # Update this to the new date you want to set
 
 
@@ -33,10 +33,6 @@ if (WIP) {
   quick <- FALSE
   check <- FALSE
   extended <- TRUE
-  ClinicoPathDescriptives_module <- TRUE
-  jsurvival_module <- TRUE
-  jjstatsplot_module <- TRUE
-  meddecide_module <- TRUE
   webpage <- FALSE
   commit_modules <- FALSE
 }
@@ -71,6 +67,20 @@ ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathD
 
 
 if (WIP) {
+  # Delete existing WIP directories if they exist
+  if (dir.exists(paste0(jjstatsplot_dir, "-WIP"))) {
+    fs::dir_delete(paste0(jjstatsplot_dir, "-WIP"))
+  }
+  if (dir.exists(paste0(meddecide_dir, "-WIP"))) {
+    fs::dir_delete(paste0(meddecide_dir, "-WIP"))
+  }
+  if (dir.exists(paste0(jsurvival_dir, "-WIP"))) {
+    fs::dir_delete(paste0(jsurvival_dir, "-WIP"))
+  }
+  if (dir.exists(paste0(ClinicoPathDescriptives_dir, "-WIP"))) {
+    fs::dir_delete(paste0(ClinicoPathDescriptives_dir, "-WIP"))
+  }
+
   # Create WIP directories if they do not exist
   fs::dir_copy(path = jjstatsplot_dir,
                new_path = file.path(paste0(jjstatsplot_dir, "-WIP")),
