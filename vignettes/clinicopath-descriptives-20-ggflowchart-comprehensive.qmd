@@ -1,0 +1,703 @@
+---
+title: "Modern Flowcharts with ggFlowchart"
+subtitle: "Creating Publication-Ready Flowcharts with ggplot2 Aesthetics"
+author: "ClinicoPath Module"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    theme: cosmo
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+  echo: true
+---
+
+# Introduction to ggFlowchart
+
+The `ggflowchart` function in ClinicoPath provides a modern alternative to traditional flowcharts by leveraging the power and aesthetics of ggplot2. This function complements the existing DiagrammeR-based flowchart module by offering contemporary styling and seamless integration with the ggplot2 ecosystem.
+
+## Key Features
+
+- **ggplot2 Integration**: Native ggplot2 aesthetics and theming support
+- **Modern Styling**: Clean, contemporary flowchart appearance
+- **Simple Data Structure**: Requires only 'from' and 'to' node connections
+- **Customizable Colors**: Multiple color palette options for different contexts
+- **Group Support**: Optional node grouping for categorical visualization
+- **Publication Ready**: High-quality output suitable for academic publications
+
+## When to Use ggFlowchart vs. DiagrammeR Flowchart
+
+### Choose ggFlowchart for:
+- **Modern Aesthetics**: When you need contemporary, ggplot2-style visualization
+- **Simple Workflows**: Basic process flows and decision trees
+- **ggplot2 Integration**: When working within the ggplot2 ecosystem
+- **Quick Prototyping**: Simple edge-based flowchart creation
+
+### Choose DiagrammeR Flowchart for:
+- **CONSORT Diagrams**: Complex clinical trial reporting with participant counts
+- **Detailed Statistics**: When you need percentage calculations and exclusion tracking
+- **Complex Layouts**: Multi-level hierarchical structures with detailed annotations
+
+# Package Setup and Data Loading
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Load comprehensive ggflowchart test datasets
+data("simple_process_flow")
+data("clinical_decision_flow")
+data("research_pipeline_flow")
+data("lab_workflow_flow")
+data("data_analysis_pipeline")
+data("patient_care_pathway")
+data("software_dev_flow")
+data("minimal_ggflow")
+data("complex_decision_tree")
+data("manufacturing_process")
+data("multi_group_workflow")
+data("ggflowchart_comprehensive_data")
+```
+
+# Basic ggFlowchart Creation
+
+## Simple Process Flow
+
+Let's start with a basic process flowchart:
+
+```{r basic-process-flow, eval=FALSE}
+# Display the simple process flow data structure
+knitr::kable(simple_process_flow, 
+             caption = "Simple Process Flow Data Structure")
+
+# Create a basic ggflowchart
+basic_ggflow <- ggflowchart(
+  data = simple_process_flow,
+  from_var = "from_node",
+  to_var = "to_node",
+  group_var = "process_type",
+  node_fill_palette = "clinical_blue",
+  plot_title = "Basic Process Workflow",
+  show_interpretation = TRUE
+)
+```
+
+This creates a modern flowchart showing:
+- **Start**: Initial process entry point
+- **Process A & B**: Sequential analysis steps
+- **Decision**: Decision point with branching
+- **Process C**: Final processing step
+- **End**: Process termination
+
+## Clinical Decision Flow
+
+```{r clinical-decision-flow, eval=FALSE}
+# Display clinical decision data
+knitr::kable(clinical_decision_flow,
+             caption = "Clinical Decision Flow Data Structure")
+
+# Create clinical decision flowchart
+clinical_ggflow <- ggflowchart(
+  data = clinical_decision_flow,
+  from_var = "from_step",
+  to_var = "to_step",
+  group_var = "decision_type",
+  node_fill_palette = "modern_gray",
+  plot_title = "Clinical Trial Decision Flow",
+  show_interpretation = TRUE
+)
+```
+
+This demonstrates a clinical trial workflow with:
+- **Screening Process**: Initial patient assessment
+- **Eligibility Decisions**: Inclusion/exclusion criteria
+- **Randomization**: Treatment allocation
+- **Follow-up**: Patient monitoring and analysis
+
+# Advanced ggFlowchart Features
+
+## Research Pipeline Workflow
+
+```{r research-pipeline, eval=FALSE}
+# Display research pipeline data
+knitr::kable(research_pipeline_flow,
+             caption = "Research Pipeline Flow Structure")
+
+# Create research pipeline flowchart with viridis colors
+research_ggflow <- ggflowchart(
+  data = research_pipeline_flow,
+  from_var = "pipeline_from",
+  to_var = "pipeline_to",
+  group_var = "phase",
+  node_fill_palette = "viridis",
+  plot_title = "Complete Research Pipeline",
+  show_interpretation = TRUE
+)
+```
+
+This shows the complete research workflow from concept to publication:
+- **Planning Phase**: Literature review and study design
+- **Approval Phase**: Ethics review and regulatory compliance
+- **Execution Phase**: Data collection and cleaning
+- **Analysis Phase**: Primary and secondary analysis
+- **Dissemination Phase**: Manuscript preparation and publication
+
+## Laboratory Workflow
+
+```{r lab-workflow, eval=FALSE}
+# Display lab workflow data
+knitr::kable(lab_workflow_flow,
+             caption = "Laboratory Processing Workflow")
+
+# Create lab workflow flowchart
+lab_ggflow <- ggflowchart(
+  data = lab_workflow_flow,
+  from_var = "lab_from",
+  to_var = "lab_to",
+  group_var = "workflow_type",
+  node_fill_palette = "pastel",
+  plot_title = "Laboratory Sample Processing",
+  show_interpretation = FALSE
+)
+```
+
+# Color Palette Options
+
+## Available Color Schemes
+
+```{r color-palettes, eval=FALSE}
+# Test all available color palettes
+palettes <- c("clinical_blue", "modern_gray", "viridis", "set1", "pastel")
+
+for (palette in palettes) {
+  cat("Testing palette:", palette, "\n")
+  
+  palette_flow <- ggflowchart(
+    data = simple_process_flow,
+    from_var = "from_node",
+    to_var = "to_node",
+    group_var = "process_type",
+    node_fill_palette = palette,
+    plot_title = paste("Flowchart with", palette, "palette"),
+    show_interpretation = FALSE
+  )
+}
+```
+
+### Palette Descriptions
+
+- **clinical_blue**: Professional medical/clinical appearance with blue tones
+- **modern_gray**: Contemporary neutral appearance with gray gradients
+- **viridis**: Colorblind-friendly viridis color scale
+- **set1**: Bright, distinct colors from RColorBrewer Set1
+- **pastel**: Soft, gentle colors for subtle visualization
+
+# Specialized Applications
+
+## Data Analysis Pipeline
+
+```{r data-analysis-pipeline, eval=FALSE}
+# Display data analysis pipeline
+knitr::kable(data_analysis_pipeline,
+             caption = "Data Science Workflow")
+
+# Create data analysis flowchart
+analysis_ggflow <- ggflowchart(
+  data = data_analysis_pipeline,
+  from_var = "analysis_from",
+  to_var = "analysis_to",
+  group_var = "analysis_phase",
+  node_fill_palette = "set1",
+  plot_title = "Data Science Pipeline",
+  show_interpretation = TRUE
+)
+```
+
+## Patient Care Pathway
+
+```{r patient-care-pathway, eval=FALSE}
+# Display patient care pathway
+knitr::kable(patient_care_pathway,
+             caption = "Healthcare Process Flow")
+
+# Create patient care flowchart
+care_ggflow <- ggflowchart(
+  data = patient_care_pathway,
+  from_var = "care_from",
+  to_var = "care_to",
+  group_var = "care_category",
+  node_fill_palette = "clinical_blue",
+  plot_title = "Patient Care Pathway",
+  show_interpretation = TRUE
+)
+```
+
+This healthcare workflow demonstrates:
+- **Intake Process**: Patient admission and initial assessment
+- **Assessment Phase**: Diagnosis and treatment planning
+- **Implementation**: Treatment delivery and monitoring
+- **Review Phase**: Evaluation and outcome assessment
+
+## Software Development Lifecycle
+
+```{r software-development, eval=FALSE}
+# Display software development flow
+knitr::kable(software_dev_flow,
+             caption = "Software Development Lifecycle")
+
+# Create software development flowchart
+dev_ggflow <- ggflowchart(
+  data = software_dev_flow,
+  from_var = "dev_from",
+  to_var = "dev_to",
+  group_var = "dev_stage",
+  node_fill_palette = "modern_gray",
+  plot_title = "Software Development Process",
+  show_interpretation = TRUE
+)
+```
+
+# Complex Workflow Examples
+
+## Manufacturing Process Flow
+
+```{r manufacturing-process, eval=FALSE}
+# Display manufacturing process
+knitr::kable(manufacturing_process,
+             caption = "Industrial Manufacturing Workflow")
+
+# Create manufacturing flowchart
+manufacturing_ggflow <- ggflowchart(
+  data = manufacturing_process,
+  from_var = "process_from",
+  to_var = "process_to",
+  group_var = "manufacturing_type",
+  node_fill_palette = "viridis",
+  plot_title = "Manufacturing Process Flow",
+  show_interpretation = TRUE
+)
+```
+
+## Complex Decision Tree
+
+```{r complex-decision-tree, eval=FALSE}
+# Display complex decision structure
+knitr::kable(complex_decision_tree,
+             caption = "Multi-Level Decision Tree")
+
+# Create complex decision flowchart
+decision_ggflow <- ggflowchart(
+  data = complex_decision_tree,
+  from_var = "decision_from",
+  to_var = "decision_to",
+  group_var = "decision_level",
+  node_fill_palette = "pastel",
+  plot_title = "Complex Decision Tree Structure",
+  show_interpretation = TRUE
+)
+```
+
+# Multi-Group Workflows
+
+## Group-Based Visualization
+
+```{r multi-group-workflow, eval=FALSE}
+# Display multi-group workflow
+knitr::kable(multi_group_workflow,
+             caption = "Multi-Group Workflow Structure")
+
+# Create multi-group flowchart
+multigroup_ggflow <- ggflowchart(
+  data = multi_group_workflow,
+  from_var = "workflow_from",
+  to_var = "workflow_to",
+  group_var = "group_category",
+  node_fill_palette = "clinical_blue",
+  plot_title = "Multi-Group Workflow Visualization",
+  show_interpretation = TRUE
+)
+```
+
+This example demonstrates how to visualize parallel workflows:
+- **Group A**: Independent workflow stream
+- **Group B**: Parallel processing path
+- **Group C**: Concurrent operation flow
+
+# Data Structure Requirements
+
+## Basic Requirements
+
+For ggFlowchart to work properly, your data must contain:
+
+1. **From Variable**: Source nodes for connections
+2. **To Variable**: Target nodes for connections
+3. **Optional Grouping Variable**: Categories for color coding
+
+```{r data-requirements, eval=FALSE}
+# Example of minimal data structure
+minimal_example <- data.frame(
+  source = c("Start", "Process"),
+  target = c("Process", "End"),
+  category = c("Begin", "Finish")
+)
+
+knitr::kable(minimal_example,
+             caption = "Minimal Data Structure for ggFlowchart")
+
+# Create minimal flowchart
+minimal_ggflow_example <- ggflowchart(
+  data = minimal_example,
+  from_var = "source",
+  to_var = "target",
+  group_var = "category",
+  node_fill_palette = "clinical_blue",
+  plot_title = "Minimal ggFlowchart Example"
+)
+```
+
+## Data Preparation Guidelines
+
+```{r data-preparation, eval=FALSE}
+# Function to validate ggflowchart data
+validate_ggflowchart_data <- function(data, from_var, to_var, group_var = NULL) {
+  issues <- c()
+  
+  # Check required variables exist
+  if (!from_var %in% names(data)) {
+    issues <- c(issues, paste("Missing 'from' variable:", from_var))
+  }
+  
+  if (!to_var %in% names(data)) {
+    issues <- c(issues, paste("Missing 'to' variable:", to_var))
+  }
+  
+  # Check optional grouping variable
+  if (!is.null(group_var) && !group_var %in% names(data)) {
+    issues <- c(issues, paste("Missing 'group' variable:", group_var))
+  }
+  
+  # Check for missing values
+  if (from_var %in% names(data)) {
+    missing_from <- sum(is.na(data[[from_var]]))
+    if (missing_from > 0) {
+      issues <- c(issues, paste("Missing values in 'from' variable:", missing_from))
+    }
+  }
+  
+  if (to_var %in% names(data)) {
+    missing_to <- sum(is.na(data[[to_var]]))
+    if (missing_to > 0) {
+      issues <- c(issues, paste("Missing values in 'to' variable:", missing_to))
+    }
+  }
+  
+  # Check for self-loops
+  if (from_var %in% names(data) && to_var %in% names(data)) {
+    self_loops <- sum(data[[from_var]] == data[[to_var]], na.rm = TRUE)
+    if (self_loops > 0) {
+      issues <- c(issues, paste("Self-loops detected:", self_loops))
+    }
+  }
+  
+  return(issues)
+}
+
+# Example validation
+validation_result <- validate_ggflowchart_data(
+  simple_process_flow,
+  "from_node", 
+  "to_node", 
+  "process_type"
+)
+
+if (length(validation_result) == 0) {
+  cat("✓ Data validation passed successfully\n")
+} else {
+  cat("✗ Data validation issues:\n")
+  for (issue in validation_result) {
+    cat("  -", issue, "\n")
+  }
+}
+```
+
+# Comprehensive Dataset Analysis
+
+## Multi-Type Workflow Comparison
+
+```{r comprehensive-analysis, eval=FALSE}
+# Display comprehensive dataset structure
+knitr::kable(ggflowchart_comprehensive_data,
+             caption = "Comprehensive Multi-Workflow Dataset")
+
+# Analyze each workflow type
+workflow_types <- unique(ggflowchart_comprehensive_data$workflow_type)
+
+for (workflow_type in workflow_types) {
+  cat("\n### ", workflow_type, " Analysis\n")
+  
+  # Subset data for this workflow type
+  subset_data <- ggflowchart_comprehensive_data[
+    ggflowchart_comprehensive_data$workflow_type == workflow_type, 
+  ]
+  
+  # Calculate workflow statistics
+  n_connections <- nrow(subset_data)
+  unique_nodes <- length(unique(c(subset_data$from_var, subset_data$to_var)))
+  unique_groups <- length(unique(subset_data$group_var))
+  
+  cat("Connections:", n_connections, "\n")
+  cat("Unique nodes:", unique_nodes, "\n")
+  cat("Group categories:", unique_groups, "\n")
+  
+  # Create flowchart for this workflow type
+  workflow_ggflow <- ggflowchart(
+    data = subset_data,
+    from_var = "from_var",
+    to_var = "to_var",
+    group_var = "group_var",
+    node_fill_palette = "clinical_blue",
+    plot_title = paste("ggFlowchart:", workflow_type),
+    show_interpretation = FALSE
+  )
+}
+```
+
+# Integration with jamovi
+
+## Using ggFlowchart in jamovi
+
+The ggflowchart function integrates seamlessly with jamovi:
+
+1. **Open jamovi** and load your dataset
+2. **Navigate** to Exploration → ClinicoPath Reports → ggFlowchart
+3. **Configure your flowchart**:
+   - Select 'From Node' variable (source connections)
+   - Select 'To Node' variable (target connections)
+   - Optionally select 'Node Grouping' variable for color coding
+   - Choose color palette and customize title
+4. **Review outputs**:
+   - Modern ggplot2-styled flowchart
+   - Optional usage guide and interpretation
+
+## Data Preparation for jamovi
+
+```{r jamovi-data-prep, eval=FALSE}
+# Example of preparing data for jamovi ggflowchart
+jamovi_workflow_data <- data.frame(
+  process_from = c("Data Import", "Data Cleaning", "Analysis", "Reporting"),
+  process_to = c("Data Cleaning", "Analysis", "Reporting", "Publication"),
+  stage_type = c("Input", "Preparation", "Analysis", "Output"),
+  workflow_id = 1:4
+)
+
+knitr::kable(jamovi_workflow_data,
+             caption = "Data Structure Ready for jamovi ggFlowchart")
+```
+
+# Comparison with Other Flowchart Methods
+
+## ggFlowchart vs. DiagrammeR Flowchart
+
+```{r comparison-table, eval=FALSE}
+comparison_features <- data.frame(
+  Feature = c("Aesthetic Style", "Data Structure", "Complexity Support", 
+              "Color Options", "Statistics", "Use Case", "Learning Curve"),
+  ggFlowchart = c("Modern ggplot2", "Simple edges", "Basic to moderate", 
+                  "Multiple palettes", "Basic counts", "Simple workflows", "Easy"),
+  DiagrammeR_Flowchart = c("Traditional", "Node + count pairs", "High complexity", 
+                           "Custom schemes", "Percentages + exclusions", "CONSORT diagrams", "Moderate"),
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(comparison_features,
+             caption = "Feature Comparison: ggFlowchart vs. DiagrammeR Flowchart")
+```
+
+## When to Choose Each Method
+
+### Use ggFlowchart for:
+- Modern, publication-ready aesthetics
+- Simple process documentation
+- Integration with ggplot2 ecosystem
+- Quick workflow visualization
+- Contemporary design requirements
+
+### Use DiagrammeR Flowchart for:
+- CONSORT trial reporting
+- Complex hierarchical structures
+- Detailed statistical annotations
+- Traditional flowchart formats
+- Comprehensive participant tracking
+
+# Best Practices and Guidelines
+
+## Design Principles
+
+1. **Keep It Simple**: ggFlowchart works best with clear, straightforward workflows
+2. **Use Grouping Wisely**: Color coding should enhance understanding, not complicate it
+3. **Choose Appropriate Palettes**: Match colors to your context (clinical, technical, etc.)
+4. **Clear Node Names**: Use concise, descriptive labels for nodes
+
+## Common Patterns
+
+```{r common-patterns, eval=FALSE}
+# Linear workflow pattern
+linear_pattern <- data.frame(
+  from = c("Step 1", "Step 2", "Step 3"),
+  to = c("Step 2", "Step 3", "Step 4"),
+  type = "Sequential"
+)
+
+# Branching pattern
+branching_pattern <- data.frame(
+  from = c("Decision", "Decision", "Option A", "Option B"),
+  to = c("Option A", "Option B", "Outcome A", "Outcome B"),
+  type = c("Branch", "Branch", "Result", "Result")
+)
+
+# Convergent pattern
+convergent_pattern <- data.frame(
+  from = c("Input A", "Input B", "Process A", "Process B"),
+  to = c("Process A", "Process B", "Final Result", "Final Result"),
+  type = c("Input", "Input", "Convergence", "Convergence")
+)
+
+# Display patterns
+knitr::kable(linear_pattern, caption = "Linear Workflow Pattern")
+knitr::kable(branching_pattern, caption = "Branching Decision Pattern")
+knitr::kable(convergent_pattern, caption = "Convergent Process Pattern")
+```
+
+# Troubleshooting Common Issues
+
+## Edge Case Handling
+
+```{r edge-cases, eval=FALSE}
+# Test various edge cases
+edge_case_tests <- list(
+  # Case 1: Self-loops
+  self_loop = data.frame(
+    from = c("A", "B", "B"),
+    to = c("B", "C", "B"),
+    category = "Test"
+  ),
+  
+  # Case 2: Disconnected components
+  disconnected = data.frame(
+    from = c("A", "C", "E"),
+    to = c("B", "D", "F"),
+    category = c("Group1", "Group1", "Group2")
+  ),
+  
+  # Case 3: Multiple edges between same nodes
+  multiple_edges = data.frame(
+    from = c("Start", "Start", "Process"),
+    to = c("Process", "Process", "End"),
+    category = c("Type1", "Type2", "Type1")
+  )
+)
+
+# Test each edge case
+for (case_name in names(edge_case_tests)) {
+  cat("\nTesting edge case:", case_name, "\n")
+  
+  tryCatch({
+    result <- ggflowchart(
+      data = edge_case_tests[[case_name]],
+      from_var = "from",
+      to_var = "to",
+      group_var = "category",
+      plot_title = paste("Edge Case:", case_name)
+    )
+    cat("✓ Edge case handled successfully\n")
+  }, error = function(e) {
+    cat("✗ Error:", e$message, "\n")
+  })
+}
+```
+
+## Data Quality Checks
+
+```{r data-quality, eval=FALSE}
+# Function to assess flowchart data quality
+assess_flowchart_quality <- function(data, from_var, to_var) {
+  quality_report <- list()
+  
+  # Basic statistics
+  quality_report$n_edges <- nrow(data)
+  quality_report$n_nodes <- length(unique(c(data[[from_var]], data[[to_var]])))
+  quality_report$connectivity <- quality_report$n_edges / quality_report$n_nodes
+  
+  # Missing data
+  quality_report$missing_from <- sum(is.na(data[[from_var]]))
+  quality_report$missing_to <- sum(is.na(data[[to_var]]))
+  
+  # Complexity metrics
+  from_counts <- table(data[[from_var]])
+  to_counts <- table(data[[to_var]])
+  quality_report$max_out_degree <- max(from_counts)
+  quality_report$max_in_degree <- max(to_counts)
+  
+  # Self-loops
+  quality_report$self_loops <- sum(data[[from_var]] == data[[to_var]], na.rm = TRUE)
+  
+  return(quality_report)
+}
+
+# Example quality assessment
+quality_result <- assess_flowchart_quality(
+  simple_process_flow, 
+  "from_node", 
+  "to_node"
+)
+
+cat("Flow Quality Assessment:\n")
+cat("Edges:", quality_result$n_edges, "\n")
+cat("Nodes:", quality_result$n_nodes, "\n")
+cat("Connectivity ratio:", round(quality_result$connectivity, 2), "\n")
+cat("Self-loops:", quality_result$self_loops, "\n")
+```
+
+# Conclusion
+
+The ClinicoPath ggflowchart function provides a powerful, modern alternative for creating flowcharts with contemporary aesthetics. Key advantages include:
+
+✅ **Modern Design**: ggplot2-native styling for contemporary appearance  
+✅ **Simple Data Structure**: Requires only 'from' and 'to' connections  
+✅ **Flexible Grouping**: Optional color coding for categorical workflows  
+✅ **Multiple Palettes**: Professional color schemes for different contexts  
+✅ **jamovi Integration**: Seamless interface with interactive parameter adjustment  
+✅ **Publication Ready**: High-quality output suitable for academic publications  
+
+## Key Takeaways
+
+1. **Choose the Right Tool**: Use ggflowchart for modern aesthetics, DiagrammeR for complex CONSORT diagrams
+2. **Prepare Data Properly**: Ensure clean 'from' and 'to' connections with appropriate grouping
+3. **Select Appropriate Colors**: Match palette to context and audience
+4. **Keep It Simple**: ggflowchart excels with straightforward workflows
+5. **Validate Your Data**: Check for missing values and logical flow patterns
+
+## Next Steps
+
+1. **Experiment** with different color palettes and grouping options
+2. **Integrate** with other ClinicoPath functions for comprehensive reporting
+3. **Customize** styling using ggplot2 ecosystem extensions
+4. **Export** flowcharts for presentations and publications
+
+## Additional Resources
+
+- [ggflowchart Package Documentation](https://nrennie.rbind.io/ggflowchart/)
+- [ggplot2 Documentation](https://ggplot2.tidyverse.org/)
+- [ClinicoPath Documentation](https://serdarbalci.github.io/ClinicoPathJamoviModule/)
+
+For advanced workflows and integration with other analysis functions, explore the complete ClinicoPath vignette series.
+
+---
+
+*This vignette demonstrates the modern capabilities of the ClinicoPath ggflowchart function for contemporary workflow visualization with ggplot2 aesthetics.*
