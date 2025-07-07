@@ -18,7 +18,13 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             horizontal = TRUE,
             arcWidth = "fixed",
             arcWidthValue = 1,
-            arcTransparency = 0.5, ...) {
+            arcTransparency = 0.5,
+            directed = TRUE,
+            colorByGroup = TRUE,
+            showStats = TRUE,
+            showLegend = TRUE,
+            labelSize = 0.8,
+            plotTitle = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -107,6 +113,32 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=0.5,
                 min=0,
                 max=1)
+            private$..directed <- jmvcore::OptionBool$new(
+                "directed",
+                directed,
+                default=TRUE)
+            private$..colorByGroup <- jmvcore::OptionBool$new(
+                "colorByGroup",
+                colorByGroup,
+                default=TRUE)
+            private$..showStats <- jmvcore::OptionBool$new(
+                "showStats",
+                showStats,
+                default=TRUE)
+            private$..showLegend <- jmvcore::OptionBool$new(
+                "showLegend",
+                showLegend,
+                default=TRUE)
+            private$..labelSize <- jmvcore::OptionNumber$new(
+                "labelSize",
+                labelSize,
+                default=0.8,
+                min=0.1,
+                max=2)
+            private$..plotTitle <- jmvcore::OptionString$new(
+                "plotTitle",
+                plotTitle,
+                default="")
 
             self$.addOption(private$..source)
             self$.addOption(private$..target)
@@ -121,6 +153,12 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..arcWidth)
             self$.addOption(private$..arcWidthValue)
             self$.addOption(private$..arcTransparency)
+            self$.addOption(private$..directed)
+            self$.addOption(private$..colorByGroup)
+            self$.addOption(private$..showStats)
+            self$.addOption(private$..showLegend)
+            self$.addOption(private$..labelSize)
+            self$.addOption(private$..plotTitle)
         }),
     active = list(
         source = function() private$..source$value,
@@ -135,7 +173,13 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         horizontal = function() private$..horizontal$value,
         arcWidth = function() private$..arcWidth$value,
         arcWidthValue = function() private$..arcWidthValue$value,
-        arcTransparency = function() private$..arcTransparency$value),
+        arcTransparency = function() private$..arcTransparency$value,
+        directed = function() private$..directed$value,
+        colorByGroup = function() private$..colorByGroup$value,
+        showStats = function() private$..showStats$value,
+        showLegend = function() private$..showLegend$value,
+        labelSize = function() private$..labelSize$value,
+        plotTitle = function() private$..plotTitle$value),
     private = list(
         ..source = NA,
         ..target = NA,
@@ -149,15 +193,23 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..horizontal = NA,
         ..arcWidth = NA,
         ..arcWidthValue = NA,
-        ..arcTransparency = NA)
+        ..arcTransparency = NA,
+        ..directed = NA,
+        ..colorByGroup = NA,
+        ..showStats = NA,
+        ..showLegend = NA,
+        ..labelSize = NA,
+        ..plotTitle = NA)
 )
 
 jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjarcdiagramResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        networkStats = function() private$.items[["networkStats"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -168,11 +220,17 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "arcdiagram",
                     "igraph",
-                    "dplyr"))
+                    "RColorBrewer",
+                    "scales"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do",
+                title="Status",
                 clearWith=list(
                     "source",
                     "target",
@@ -185,7 +243,12 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 width=600,
                 height=400,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="networkStats",
+                title="Network Statistics",
+                visible="(showStats)"))}))
 
 jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjarcdiagramBase",
@@ -232,10 +295,18 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param arcWidth .
 #' @param arcWidthValue .
 #' @param arcTransparency .
+#' @param directed .
+#' @param colorByGroup .
+#' @param showStats .
+#' @param showLegend .
+#' @param labelSize .
+#' @param plotTitle .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$networkStats} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -253,7 +324,13 @@ jjarcdiagram <- function(
     horizontal = TRUE,
     arcWidth = "fixed",
     arcWidthValue = 1,
-    arcTransparency = 0.5) {
+    arcTransparency = 0.5,
+    directed = TRUE,
+    colorByGroup = TRUE,
+    showStats = TRUE,
+    showLegend = TRUE,
+    labelSize = 0.8,
+    plotTitle = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjarcdiagram requires jmvcore to be installed (restart may be required)")
@@ -287,7 +364,13 @@ jjarcdiagram <- function(
         horizontal = horizontal,
         arcWidth = arcWidth,
         arcWidthValue = arcWidthValue,
-        arcTransparency = arcTransparency)
+        arcTransparency = arcTransparency,
+        directed = directed,
+        colorByGroup = colorByGroup,
+        showStats = showStats,
+        showLegend = showLegend,
+        labelSize = labelSize,
+        plotTitle = plotTitle)
 
     analysis <- jjarcdiagramClass$new(
         options = options,

@@ -215,14 +215,40 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'
 #' @examples
 #' \donttest{
-#' # example will be added
+#' # Load test data
+#' data(jjdotplotstats_test_data)
+#'
+#' # Basic dot plot
+#' jjdotplotstats(
+#'   data = jjdotplotstats_test_data,
+#'   dep = "crp_level",
+#'   group = "disease_severity",
+#'   typestatistics = "parametric"
+#' )
+#'
+#' # Grouped dot plot by treatment center
+#' jjdotplotstats(
+#'   data = jjdotplotstats_test_data,
+#'   dep = "esr_level",
+#'   group = "disease_severity",
+#'   grvar = "treatment_center",
+#'   typestatistics = "nonparametric",
+#'   centralityplotting = TRUE
+#' )
 #'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
-#' @param typestatistics .
-#' @param effsizetype .
+#' @param dep A continuous numeric variable for which the distribution will be
+#'   displayed across different groups using dot plots.
+#' @param group A categorical variable that defines the groups for comparison.
+#'   Each level will be displayed as a separate group in the dot plot.
+#' @param grvar Optional grouping variable to create separate dot plots for
+#'   each level of this variable (grouped analysis).
+#' @param typestatistics Type of statistical test to perform. 'parametric' for
+#'   t-tests, 'nonparametric' for Mann-Whitney U test, 'robust' for robust
+#'   tests, 'bayes' for Bayesian analysis.
+#' @param effsizetype Type of effect size calculation for parametric tests.
+#'   'biased' for Cohen's d, 'unbiased' for Hedge's g, 'eta' for eta-squared,
+#'   'omega' for omega-squared.
 #' @param centralityplotting .
 #' @param centralitytype .
 #' @param mytitle .

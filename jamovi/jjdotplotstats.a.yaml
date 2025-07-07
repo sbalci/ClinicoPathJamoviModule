@@ -16,7 +16,26 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load test data
+            data(jjdotplotstats_test_data)
+            
+            # Basic dot plot
+            jjdotplotstats(
+              data = jjdotplotstats_test_data,
+              dep = "crp_level",
+              group = "disease_severity",
+              typestatistics = "parametric"
+            )
+            
+            # Grouped dot plot by treatment center
+            jjdotplotstats(
+              data = jjdotplotstats_test_data,
+              dep = "esr_level",
+              group = "disease_severity",
+              grvar = "treatment_center",
+              typestatistics = "nonparametric",
+              centralityplotting = TRUE
+            )
 
 options:
     - name: data
@@ -31,6 +50,10 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            A continuous numeric variable for which the distribution will be
+            displayed across different groups using dot plots.
 
 
     - name: group
@@ -38,12 +61,20 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            A categorical variable that defines the groups for comparison.
+            Each level will be displayed as a separate group in the dot plot.
 
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable to create separate dot plots for each
+            level of this variable (grouped analysis).
 
 
     - name: typestatistics
@@ -59,6 +90,11 @@ options:
         - title: Bayes
           name: bayes
       default: parametric
+      description:
+          R: >
+            Type of statistical test to perform. 'parametric' for t-tests,
+            'nonparametric' for Mann-Whitney U test, 'robust' for robust tests,
+            'bayes' for Bayesian analysis.
 
     - name: effsizetype
       title: 'Effect Size Needed for Parametric Tests'
@@ -73,6 +109,11 @@ options:
         - title: omega
           name: omega
       default: biased
+      description:
+          R: >
+            Type of effect size calculation for parametric tests. 'biased' for
+            Cohen's d, 'unbiased' for Hedge's g, 'eta' for eta-squared,
+            'omega' for omega-squared.
 
 
     - name: centralityplotting

@@ -9,11 +9,15 @@ jjcorrmat(data, dep, grvar, typestatistics = "parametric")
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{List of continuous variables for which the correlation matrix
+will be computed and visualized. All variables must be numeric.}
 
-\item{grvar}{.}
+\item{grvar}{Optional grouping variable to create separate correlation
+matrices for each level of the grouping variable.}
 
-\item{typestatistics}{.}
+\item{typestatistics}{Type of correlation analysis to perform. 'parametric'
+uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
+uses percentage bend correlation, 'bayes' computes Bayes factors.}
 }
 \value{
 A results object containing:
@@ -28,6 +32,6 @@ Correlation Matrix
 }
 \examples{
 \donttest{
-# example will be added
+# Load test data\n            data(jjcorrmat_test_data)\n            \n            # Basic correlation matrix\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\", \"tumor_size_mm\"),\n              typestatistics = \"parametric\"\n            )\n            \n            # Grouped correlation matrix by tumor grade\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\"),\n              grvar = \"tumor_grade\",\n              typestatistics = \"nonparametric\"\n            )
 }
 }

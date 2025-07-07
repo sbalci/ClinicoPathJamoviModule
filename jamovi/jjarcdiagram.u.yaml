@@ -96,3 +96,48 @@ children:
               - type: TextBox
                 name: arcTransparency
                 format: number
+  - type: CollapseBox
+    label: Appearance
+    collapsed: true
+    children:
+      - type: Label
+        label: Network Settings
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: directed
+              - type: CheckBox
+                name: colorByGroup
+                enable: (group)
+              - type: CheckBox
+                name: showLegend
+                enable: (group && colorByGroup)
+      - type: Label
+        label: Labels and Title
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: labelSize
+                format: number
+              - type: TextBox
+                name: plotTitle
+                format: string
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Statistics
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showStats

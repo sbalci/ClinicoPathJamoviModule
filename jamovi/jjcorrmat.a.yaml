@@ -16,7 +16,7 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load test data\n            data(jjcorrmat_test_data)\n            \n            # Basic correlation matrix\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\", \"tumor_size_mm\"),\n              typestatistics = \"parametric\"\n            )\n            \n            # Grouped correlation matrix by tumor grade\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\"),\n              grvar = \"tumor_grade\",\n              typestatistics = \"nonparametric\"\n            )
 
 options:
     - name: data
@@ -31,12 +31,20 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            List of continuous variables for which the correlation matrix
+            will be computed and visualized. All variables must be numeric.
 
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable to create separate correlation matrices
+            for each level of the grouping variable.
 
 
 
@@ -53,6 +61,11 @@ options:
         - title: Bayes
           name: bayes
       default: parametric
+      description:
+          R: >
+            Type of correlation analysis to perform. 'parametric' uses Pearson
+            correlation, 'nonparametric' uses Spearman's rho, 'robust' uses
+            percentage bend correlation, 'bayes' computes Bayes factors.
 
 
 ...

@@ -9,6 +9,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjdotplotstatsBase,
     private = list(
 
+        # Cache for processed data and options to avoid redundant computation
+        .processedData = NULL,
+        .processedOptions = NULL,
 
         # init ----
 
@@ -35,8 +38,83 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         }
 
+
+,
+        # Optimized data preparation with caching
+        .prepareData = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedData) && !force_refresh) {
+                return(private$.processedData)
+            }
+
+            # Prepare data with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Processing data for dot plot analysis...<br><hr>")
+            )
+
+            mydata <- self$data
+            
+            # Convert variables to numeric
+            vars <- self$options$dep
+            if (!is.null(vars)) {
+                for (var in vars) {
+                    mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+                }
+            }
+
+            # Exclude NA with checkpoint
+            private$.checkpoint()
+            mydata <- jmvcore::naOmit(mydata)
+
+            # Cache the processed data
+            private$.processedData <- mydata
+            return(mydata)
+        },
+
+        # Optimized options preparation with caching
+        .prepareOptions = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedOptions) && !force_refresh) {
+                return(private$.processedOptions)
+            }
+
+            # Prepare options with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Preparing dot plot analysis options...<br><hr>")
+            )
+
+            # Process type of statistics
+            typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+
+            # Process variables
+            dep <- self$options$dep
+            group <- self$options$group
+            
+            # Process titles
+            mytitle <- self$options$mytitle
+            if (mytitle == '') mytitle <- NULL
+            
+            xtitle <- self$options$xtitle
+            if (xtitle == '') xtitle <- NULL
+            
+            ytitle <- self$options$ytitle
+            if (ytitle == '') ytitle <- NULL
+            
+            # Cache the processed options
+            options_list <- list(
+                typestatistics = typestatistics,
+                dep = dep,
+                group = group,
+                mytitle = mytitle,
+                xtitle = xtitle,
+                ytitle = ytitle,
+                effsizetype = self$options$effsizetype,
+                centralityplotting = self$options$centralityplotting,
+                centralitytype = self$options$centralitytype
+            )
+            private$.processedOptions <- options_list
+            return(options_list)
+        },
+
         # run ----
-        ,
         .run = function() {
 
             # Initial Message ----
@@ -47,7 +125,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
                 <br><br>
-                This tool will help you generate Bar Charts.
+                This tool will help you generate Dot Charts.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html' target='_blank'>ggdotplotstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html' target='_blank'>grouped_ggdotplotstats</a>.
                 <br>
@@ -70,6 +148,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
+                # Pre-process data and options for performance
+                private$.prepareData()
+                private$.prepareOptions()
+
             }
         }
 
@@ -85,65 +167,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-
-            vars <- self$options$dep
-
-
-            for (var in vars)
-                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-
-            # Exclude NA ----
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-
-            # define main arguments ----
-
-            dep <- self$options$dep
-
-            group <- self$options$group
-
-
-            # read arguments ----
-
-            mytitle <- self$options$mytitle
-
-            if (mytitle == '') {
-                mytitle <- NULL
-            }
-
-
-            xtitle <- self$options$xtitle
-
-            if (xtitle == '') {
-                xtitle <- NULL
-            }
-
-            ytitle <- self$options$ytitle
-
-            if (ytitle == '') {
-                ytitle <- NULL
-            }
-
-            effsizetype <- self$options$effsizetype
-
-            centralityplotting <- self$options$centralityplotting
-
-            centralitytype <- self$options$centralitytype
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
+            
+            typestatistics <- options_data$typestatistics
+            dep <- options_data$dep
+            group <- options_data$group
+            mytitle <- options_data$mytitle
+            xtitle <- options_data$xtitle
+            ytitle <- options_data$ytitle
+            effsizetype <- options_data$effsizetype
+            centralityplotting <- options_data$centralityplotting
+            centralitytype <- options_data$centralitytype
 
 
             # ggdotplotstats ----
@@ -197,43 +233,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-
-            vars <- self$options$dep
-
-
-            for (var in vars)
-                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-            # Exclude NA ----
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-            # define main arguments ----
-
-
-            dep <- self$options$dep
-
-            group <- self$options$group
-
-
-            effsizetype <- self$options$effsizetype
-
-            centralityplotting <- self$options$centralityplotting
-
-            centralitytype <- self$options$centralitytype
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
+            
+            typestatistics <- options_data$typestatistics
+            dep <- options_data$dep
+            group <- options_data$group
+            effsizetype <- options_data$effsizetype
+            centralityplotting <- options_data$centralityplotting
+            centralitytype <- options_data$centralitytype
 
 
             # grouped_ggdotplotstats ----

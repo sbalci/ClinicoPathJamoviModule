@@ -114,4 +114,37 @@ options:
       default: 0.5
       min: 0
       max: 1
+
+    - name: directed
+      title: Directed Network
+      type: Bool
+      default: true
+
+    - name: colorByGroup
+      title: Color Nodes by Group
+      type: Bool
+      default: true
+
+    - name: showStats
+      title: Show Network Statistics
+      type: Bool
+      default: true
+
+    - name: showLegend
+      title: Show Legend
+      type: Bool
+      default: true
+
+    - name: labelSize
+      title: Label Size
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 2
+
+    - name: plotTitle
+      title: Plot Title
+      type: String
+      default: ""
+
 ...

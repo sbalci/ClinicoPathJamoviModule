@@ -306,6 +306,251 @@ clean_old_backups <- function(backup_base_dir = "backups", retention_days = 30) 
   return(TRUE)
 }
 
+# Enhanced vignette copying with domain-based logic
+copy_vignettes_by_domain <- function(config, main_repo_dir, module_configs) {
+  vignette_config <- config$vignette_domains
+  copy_settings <- vignette_config$copy_settings
+  
+  # Check if domain-based copying is enabled
+  if (!copy_settings$use_domain_based) {
+    message("ℹ️ Domain-based vignette copying is disabled")
+    return(TRUE)
+  }
+  
+  message("📄 Starting domain-based vignette copying...")
+  
+  # Get all vignette files
+  vignette_files <- c()
+  vignette_dir <- file.path(main_repo_dir, "vignettes")
+  
+  if (!dir.exists(vignette_dir)) {
+    warning("Vignettes directory does not exist: ", vignette_dir)
+    return(FALSE)
+  }
+  
+  for (ext in vignette_config$extensions) {
+    pattern <- paste0("\\", ext, "$")
+    files <- list.files(
+      path = vignette_dir,
+      pattern = pattern,
+      full.names = FALSE
+    )
+    vignette_files <- c(vignette_files, files)
+  }
+  
+  if (length(vignette_files) == 0) {
+    message("ℹ️ No vignette files found")
+    return(TRUE)
+  }
+  
+  message("📊 Found ", length(vignette_files), " vignette files")
+  
+  # Track copying statistics
+  copy_stats <- list(
+    total_files = length(vignette_files),
+    copied_files = 0,
+    skipped_files = 0,
+    error_files = 0,
+    excluded_files = 0
+  )
+  
+  # Process each vignette file
+  for (vignette_file in vignette_files) {
+    
+    # Check exclusion patterns
+    if (is_file_excluded(vignette_file, vignette_config$exclude_patterns)) {
+      copy_stats$excluded_files <- copy_stats$excluded_files + 1
+      next
+    }
+    
+    target_modules <- get_target_modules_for_vignette(vignette_file, vignette_config)
+    
+    if (length(target_modules) == 0) {
+      message("⚠️ No target modules found for: ", vignette_file)
+      copy_stats$skipped_files <- copy_stats$skipped_files + 1
+      next
+    }
+    
+    # Copy to target modules
+    file_copied <- FALSE
+    for (module_name in target_modules) {
+      if (module_name %in% names(module_configs)) {
+        module_dir <- module_configs[[module_name]]$directory
+        
+        if (copy_vignette_to_module(
+          vignette_file, vignette_dir, module_dir, copy_settings
+        )) {
+          file_copied <- TRUE
+        } else {
+          copy_stats$error_files <- copy_stats$error_files + 1
+        }
+      }
+    }
+    
+    if (file_copied) {
+      copy_stats$copied_files <- copy_stats$copied_files + 1
+    }
+  }
+  
+  # Report statistics
+  message("📈 Vignette copying completed:")
+  message("   📄 Total files: ", copy_stats$total_files)
+  message("   ✅ Copied: ", copy_stats$copied_files)
+  message("   ⏭️ Skipped: ", copy_stats$skipped_files)
+  message("   🚫 Excluded: ", copy_stats$excluded_files)
+  message("   ❌ Errors: ", copy_stats$error_files)
+  
+  return(copy_stats$error_files == 0)
+}
+
+# Helper function to check if file should be excluded
+is_file_excluded <- function(filename, exclude_patterns) {
+  for (pattern in exclude_patterns) {
+    # Convert shell pattern to regex
+    regex_pattern <- glob2rx(pattern)
+    if (grepl(regex_pattern, filename)) {
+      return(TRUE)
+    }
+  }
+  return(FALSE)
+}
+
+# Helper function to determine target modules for a vignette
+get_target_modules_for_vignette <- function(vignette_file, vignette_config) {
+  domain_mapping <- vignette_config$domain_mapping
+  special_files <- vignette_config$special_files
+  
+  # Check special files first
+  if (vignette_file %in% names(special_files)) {
+    return(special_files[[vignette_file]])
+  }
+  
+  # Extract domain prefix (everything before first number)
+  domain_match <- regexpr("^[a-zA-Z-]+(?=-[0-9])", vignette_file, perl = TRUE)
+  
+  if (domain_match > 0) {
+    domain_prefix <- substr(vignette_file, 1, domain_match + attr(domain_match, "match.length") - 1)
+    
+    if (domain_prefix %in% names(domain_mapping)) {
+      return(domain_mapping[[domain_prefix]])
+    }
+  }
+  
+  # Check for module-specific patterns without numbers
+  for (domain in names(domain_mapping)) {
+    if (startsWith(vignette_file, paste0(domain, "-")) || 
+        startsWith(vignette_file, domain)) {
+      return(domain_mapping[[domain]])
+    }
+  }
+  
+  return(character(0))
+}
+
+# Helper function to copy a single vignette to a module
+copy_vignette_to_module <- function(vignette_file, source_dir, module_dir, copy_settings) {
+  if (!dir.exists(module_dir)) {
+    warning("Module directory does not exist: ", module_dir)
+    return(FALSE)
+  }
+  
+  # Create vignettes directory if needed
+  target_vignette_dir <- file.path(module_dir, "vignettes")
+  if (copy_settings$create_directories && !dir.exists(target_vignette_dir)) {
+    tryCatch({
+      fs::dir_create(target_vignette_dir)
+    }, error = function(e) {
+      warning("Failed to create vignettes directory: ", e$message)
+      return(FALSE)
+    })
+  }
+  
+  # Copy the file
+  source_path <- file.path(source_dir, vignette_file)
+  target_path <- file.path(target_vignette_dir, vignette_file)
+  
+  # Check if target exists and overwrite setting
+  if (file.exists(target_path) && !copy_settings$overwrite_existing) {
+    return(TRUE)  # Skip but don't treat as error
+  }
+  
+  tryCatch({
+    fs::file_copy(
+      path = source_path,
+      new_path = target_path,
+      overwrite = copy_settings$overwrite_existing
+    )
+    return(TRUE)
+  }, error = function(e) {
+    warning("Error copying ", vignette_file, " to ", basename(module_dir), ": ", e$message)
+    return(FALSE)
+  })
+}
+
+# Enhanced vignette copying with both domain-based and manual options
+copy_vignettes_enhanced <- function(config, main_repo_dir, module_configs) {
+  vignette_config <- config$vignette_domains
+  copy_settings <- vignette_config$copy_settings
+  
+  success <- TRUE
+  
+  # Domain-based copying
+  if (copy_settings$use_domain_based) {
+    success <- copy_vignettes_by_domain(config, main_repo_dir, module_configs) && success
+  }
+  
+  # Manual copying (if enabled)
+  if (copy_settings$use_manual_lists) {
+    success <- copy_vignettes_manual(config, main_repo_dir, module_configs) && success
+  }
+  
+  return(success)
+}
+
+# Legacy manual vignette copying (kept for backward compatibility)
+copy_vignettes_manual <- function(config, main_repo_dir, module_configs) {
+  message("📄 Starting manual vignette copying...")
+  
+  vignette_dir <- file.path(main_repo_dir, "vignettes")
+  success <- TRUE
+  
+  for (module_name in names(module_configs)) {
+    module_config <- module_configs[[module_name]]
+    
+    if (length(module_config$vignette_files) == 0) {
+      next
+    }
+    
+    module_dir <- module_config$directory
+    target_vignette_dir <- file.path(module_dir, "vignettes")
+    
+    # Create directory if needed
+    if (!dir.exists(target_vignette_dir)) {
+      fs::dir_create(target_vignette_dir)
+    }
+    
+    # Copy each specified vignette file
+    for (vignette_file in module_config$vignette_files) {
+      source_path <- file.path(vignette_dir, vignette_file)
+      target_path <- file.path(target_vignette_dir, vignette_file)
+      
+      if (file.exists(source_path)) {
+        tryCatch({
+          fs::file_copy(source_path, target_path, overwrite = TRUE)
+        }, error = function(e) {
+          warning("Error copying ", vignette_file, " to ", module_name, ": ", e$message)
+          success <- FALSE
+        })
+      } else {
+        warning("Vignette file not found: ", source_path)
+        success <- FALSE
+      }
+    }
+  }
+  
+  return(success)
+}
+
 # Testing integration: Run module tests
 run_module_tests <- function(module_dir, test_level = "basic") {
   if (!dir.exists(module_dir)) {
@@ -441,7 +686,7 @@ safe_copy_files <- function(source_files, dest_dir, check_integrity = TRUE, max_
 }
 
 # Load configuration from YAML
-load_config <- function(config_file = "config.yaml") {
+load_config <- function(config_file = "updateModules_config.yaml") {
   if (!file.exists(config_file)) {
     stop("Configuration file not found: ", config_file)
   }

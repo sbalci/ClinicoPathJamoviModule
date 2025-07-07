@@ -18,7 +18,13 @@ jjarcdiagram(
   horizontal = TRUE,
   arcWidth = "fixed",
   arcWidthValue = 1,
-  arcTransparency = 0.5
+  arcTransparency = 0.5,
+  directed = TRUE,
+  colorByGroup = TRUE,
+  showStats = TRUE,
+  showLegend = TRUE,
+  labelSize = 0.8,
+  plotTitle = ""
 )
 }
 \arguments{
@@ -49,12 +55,26 @@ jjarcdiagram(
 \item{arcWidthValue}{.}
 
 \item{arcTransparency}{.}
+
+\item{directed}{.}
+
+\item{colorByGroup}{.}
+
+\item{showStats}{.}
+
+\item{showLegend}{.}
+
+\item{labelSize}{.}
+
+\item{plotTitle}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$networkStats} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

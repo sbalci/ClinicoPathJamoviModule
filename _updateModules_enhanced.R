@@ -17,7 +17,7 @@
 
 # Command line argument handling
 args <- commandArgs(trailingOnly = TRUE)
-config_file <- if (length(args) > 0) args[1] else "config.yaml"
+config_file <- if (length(args) > 0) args[1] else "updateModules_config.yaml"
 
 cat("🚀 Starting Enhanced Module Update Process\n")
 cat("Configuration file:", config_file, "\n")
@@ -557,8 +557,9 @@ if (!WIP) {
       safe_copy_files(r_sources, r_dir)
     }
 
-    # Copy vignette files
-    if (length(module_cfg$vignette_files) > 0) {
+    # Copy vignette files (legacy manual approach - only used if domain-based is disabled)
+    if (length(module_cfg$vignette_files) > 0 &&
+        (!config$vignette_domains$copy_settings$use_domain_based %||% FALSE)) {
       vignette_dir <- file.path(module_dir, "vignettes")
       if (!dir.exists(vignette_dir)) {
         dir.create(vignette_dir, recursive = TRUE)
@@ -612,6 +613,17 @@ for (module_name in names(modules)) {
     dest_dir = jamovi_dir,
     file_extensions = config$jamovi_extensions %||% c(".a.yaml", ".r.yaml", ".u.yaml")
   )
+}
+
+# Enhanced vignette copying with domain-based logic
+cat("\n📄 Copying vignettes with domain-based logic...\n")
+
+vignette_copy_result <- with_error_handling({
+  copy_vignettes_enhanced(config, main_repo_dir, modules_config)
+}, "copying vignettes with domain-based logic", continue_on_error = TRUE)
+
+if (!vignette_copy_result$success) {
+  warning("⚠️ Some vignettes may not have been copied correctly")
 }
 
 # Run tests if enabled
