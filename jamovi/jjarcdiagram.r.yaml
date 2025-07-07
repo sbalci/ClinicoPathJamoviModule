@@ -4,8 +4,13 @@ title: Arc Diagram
 jrs: '1.1'
 
 items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
     - name: todo
-      title: To Do
+      title: Status
       type: Html
       clearWith:
           - source
@@ -21,9 +26,15 @@ items:
       renderFun: .plot
       requiresData: true
 
+    - name: networkStats
+      title: Network Statistics
+      type: Html
+      visible: (showStats)
+
 refs:
     - arcdiagram
     - igraph
-    - dplyr
+    - RColorBrewer
+    - scales
 
 ...

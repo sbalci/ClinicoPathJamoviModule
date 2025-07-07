@@ -132,3 +132,6 @@ datageneration
 .venv
 
 \.sh$
+_updateModules.R
+_updateModules_enhanced.R
+updateModules_config.yaml

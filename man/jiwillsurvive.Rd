@@ -96,8 +96,24 @@ survival curves.}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalStats} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$kmPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$kmStats} \tab \tab \tab \tab \tab a html \cr
+\code{results$kmTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$followupPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$prepText} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataOutput} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$survivalTable$asDF}
+
+\code{as.data.frame(results$survivalTable)}
 }
 \description{
 Intuitive survival analysis using the iwillsurvive package with

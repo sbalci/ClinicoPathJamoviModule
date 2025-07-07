@@ -1,8 +1,8 @@
 ---
-title: "Module Development for Jamovi"
+title: "Comprehensive Guide to jamovi Module Development"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Module Development for Jamovi}
+  %\VignetteIndexEntry{Comprehensive Guide to jamovi Module Development}
   %\VignetteEngineknitr::rmarkdown
   %\VignetteEncodingUTF-8
 ---
@@ -71,6 +71,1246 @@ https://dev.jamovi.org/tuts0105-debugging-an-analysis.html
 - run `jmvtools::install()` again.
 
 Let me know how it goes :)
+
+---
+
+## 🏗️ Advanced Development Patterns & Best Practices
+
+### Enhanced Module Distribution System
+
+This project uses a sophisticated module distribution system with the following features:
+
+```r
+# Use the enhanced update system
+Rscript _updateModules_enhanced.R
+
+# Configuration-driven development
+# Edit updateModules_config.yaml for module settings
+```
+
+**Key Features**:
+- ✅ **Automated testing** and validation
+- ✅ **Backup and rollback** capabilities  
+- ✅ **Multi-module distribution** to specialized repos
+- ✅ **Configuration management** via YAML
+- ✅ **Security validation** and integrity checks
+
+### Modern Development Workflow
+
+```r
+# Enhanced build process for production-ready modules
+development_cycle <- function() {
+    
+    # 1. Create/modify analysis
+    jmvtools::addAnalysis(name='myanalysis', title='My Analysis')
+    
+    # 2. Edit implementation files
+    # R/myanalysis.b.R - Add your analysis logic
+    # jamovi/*.yaml - Configure UI and results
+    
+    # 3. Enhanced build process
+    jmvtools::prepare()
+    devtools::document() 
+    jmvtools::prepare()    # Critical: run twice for complex modules
+    devtools::document()
+    
+    # 4. Test and validate
+    devtools::test()       # Run unit tests
+    jmvtools::install()    # Install to jamovi
+    
+    # 5. Distribution (for multi-module projects)
+    system("Rscript _updateModules_enhanced.R")
+}
+```
+
+---
+
+## 💡 Developer Tips & Production Patterns
+
+### 1. **Error Handling & User Experience**
+
+```r
+.run = function() {
+    # Always validate inputs first
+    if (is.null(self$options$dependent)) {
+        self$results$instructions$setContent(
+            "Please select a dependent variable to continue."
+        )
+        return()
+    }
+    
+    # Graceful error handling
+    tryCatch({
+        # Your analysis code here
+    }, error = function(e) {
+        self$results$instructions$setContent(
+            paste("Analysis failed:", e$message)
+        )
+        return()
+    })
+}
+```
+
+### 2. **Performance Optimization with Checkpoints**
+
+```r
+.run = function() {
+    # Use checkpoints for long operations
+    for (i in seq_along(large_dataset)) {
+        # Check for user interruption every 100 iterations
+        if (i %% 100 == 0) {
+            private$.checkpoint()
+        }
+        
+        # Process data...
+    }
+}
+```
+
+### 3. **Dynamic UI Patterns**
+
+```r
+.init = function() {
+    # Dynamic variable selection based on data types
+    continuous_vars <- self$data %>%
+        select_if(is.numeric) %>%
+        names()
+    
+    # Update UI options programmatically
+    self$results$instructions$setContent(
+        paste("Available continuous variables:", 
+              paste(continuous_vars, collapse = ", "))
+    )
+}
+```
+
+### 4. **Advanced Configuration Management**
+
+The project uses `updateModules_config.yaml` for sophisticated module management:
+
+```yaml
+# Example configuration
+modules:
+  mymodule:
+    enabled: true
+    directory: "/path/to/submodule"
+    menuGroup_pattern: "menuGroup: MyModule$"
+    
+    data_files:
+      - "example_data.rda"
+      - "test_data.csv"
+    
+    vignette_files:
+      - "introduction.Rmd"
+      - "advanced_usage.Rmd"
+    
+    test_files:
+      - "test-mymodule.R"
+```
+
+### 5. **Debugging Techniques**
+
+```r
+# 1. Use browser() for interactive debugging
+.run = function() {
+    browser()  # Pauses execution for inspection
+    # Your code here
+}
+
+# 2. Log intermediate results
+.run = function() {
+    message("Starting analysis with ", nrow(self$data), " observations")
+    
+    # Analysis steps with logging
+    result1 <- step1(self$data)
+    message("Step 1 completed, result has ", nrow(result1), " rows")
+}
+
+# 3. Use conditional debugging
+.run = function() {
+    if (self$options$debug_mode) {
+        # Detailed debugging information
+        str(self$data)
+        str(self$options)
+    }
+}
+```
+
+---
+
+## 🚨 Common Pitfalls & Solutions
+
+### 1. **Module Not Loading**
+```r
+# Always clean and rebuild
+jmvtools::prepare()
+devtools::clean_dll()
+devtools::document()
+jmvtools::install()
+```
+
+### 2. **UI Not Updating**
+```r
+# Clear jamovi cache
+# Close jamovi completely
+# Reinstall module
+jmvtools::install()
+```
+
+### 3. **Data Type Issues**
+```r
+# Explicit type conversion
+numeric_var <- jmvcore::toNumeric(data[[var_name]])
+factor_var <- as.factor(data[[var_name]])
+```
+
+### 4. **Memory Management for Large Datasets**
+```r
+.run = function() {
+    # Process data in chunks
+    chunk_size <- 1000
+    results <- list()
+    
+    for (i in seq(1, nrow(data), chunk_size)) {
+        chunk <- data[i:min(i + chunk_size - 1, nrow(data)), ]
+        results[[length(results) + 1]] <- process_chunk(chunk)
+        
+        # Clean up memory
+        gc()
+        
+        # Checkpoint for user interruption
+        private$.checkpoint()
+    }
+}
+```
+
+---
+
+## 🎯 Production Deployment Workflow
+
+### Quality Assurance Checklist
+
+- [ ] All tests pass (`devtools::test()`)
+- [ ] Documentation is complete and accurate
+- [ ] Examples work with provided datasets
+- [ ] Error messages are user-friendly
+- [ ] Performance is acceptable for typical datasets
+- [ ] UI is intuitive and follows jamovi conventions
+- [ ] Module builds without warnings
+- [ ] Memory usage is reasonable
+
+### Module Distribution Commands
+
+```r
+# 1. Prepare for distribution
+jmvtools::prepare()
+devtools::document()
+devtools::test()
+
+# 2. Update module configurations
+# Edit updateModules_config.yaml
+
+# 3. Distribute to submodules
+system("Rscript _updateModules_enhanced.R")
+
+# 4. Commit changes
+system("git add .")
+system("git commit -m 'Update modules for release'")
+system("git push")
+```
+
+---
+
+## 📚 Documentation Best Practices
+
+### When Adding New Data and Vignettes
+
+**Important**: When generating new example data and vignettes, always add them to the appropriate place in `updateModules_config.yaml`:
+
+```yaml
+modules:
+  mymodule:
+    data_files:
+      - "new_example_data.rda"    # Add here
+    
+    vignette_files:
+      - "new_comprehensive_guide.qmd"  # Add here
+    
+    test_files:
+      - "test-new-function.R"    # Add here
+```
+
+This ensures your new files are distributed to submodules during the build process.
+
+### Comprehensive Documentation Pattern
+
+```r
+#' Advanced Statistical Analysis
+#'
+#' @description
+#' Performs comprehensive statistical analysis with modern methods
+#' and publication-ready output.
+#'
+#' @details
+#' This function implements state-of-the-art statistical methods with
+#' proper error handling and user-friendly output.
+#'
+#' @examples
+#' \dontrun{
+#' # Basic usage
+#' result <- advanced_analysis(
+#'     data = mtcars,
+#'     dependent = "mpg",
+#'     covariates = c("hp", "wt")
+#' )
+#' }
+#'
+#' @export
+advanced_analysis <- function(data, dependent, covariates, method = "standard") {
+    # Implementation here
+}
+```
+
+---
+
+## 🏛️ .b.R Function Architecture Deep Dive
+
+### Understanding the jamovi R6 Class Structure
+
+Every jamovi analysis is implemented as an R6 class in a `.b.R` file that inherits from an auto-generated base class. Here's the complete anatomy:
+
+```r
+# Standard jamovi analysis structure
+myanalysisClass <- if (requireNamespace('jmvcore'))
+    R6::R6Class(
+        "myanalysisClass",
+        inherit = myanalysisBase,  # Auto-generated from .yaml files
+        private = list(
+            .init = function() { },        # Initialize UI and state
+            .run = function() { },         # Main analysis logic
+            .plot = function(image, ...) { }, # Plot generation
+            .getData = function() { },     # Data preprocessing (optional)
+            .labelData = function() { }    # Label management (optional)
+        )
+    )
+```
+
+### Core Function Patterns & Lifecycle
+
+#### 1. **`.init()` - Initialization & UI Setup**
+
+This function runs when the analysis is first created or options change:
+
+```r
+.init = function() {
+    # Dynamic UI sizing based on data
+    deplen <- length(self$options$dep)
+    self$results$plot$setSize(650, deplen * 450)
+    
+    # Conditional visibility of results elements
+    if (self$options$advanced_options) {
+        self$results$advanced_table$setVisible(TRUE)
+    } else {
+        self$results$advanced_table$setVisible(FALSE)
+    }
+    
+    # Data-driven UI updates
+    if (!is.null(self$options$grvar)) {
+        mydata <- self$data
+        grvar <- self$options$grvar
+        num_levels <- nlevels(as.factor(mydata[[grvar]]))
+        self$results$plot2$setSize(num_levels * 650, deplen * 450)
+    }
+}
+```
+
+**Key Patterns:**
+- 🎯 **Dynamic sizing**: Adjust plot dimensions based on data
+- 🔄 **Conditional visibility**: Show/hide UI elements based on options
+- 📊 **Data-responsive UI**: Adapt interface to data characteristics
+
+#### 2. **`.run()` - Main Analysis Logic**
+
+The heart of every jamovi analysis with sophisticated error handling:
+
+```r
+.run = function() {
+    # 1. Input Validation
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        # User guidance with rich HTML
+        todo <- glue::glue("
+            <br>Welcome to ClinicoPath
+            <br><br>
+            This tool will help you generate [Analysis Name].
+            <br><br>
+            Please select:
+            <ul>
+            <li>Dependent variable</li>
+            <li>Grouping variable</li>
+            </ul>
+            <br>See documentation: <a href='...' target='_blank'>link</a>
+            <br><hr>
+        ")
+        self$results$todo$setContent(todo)
+        return()
+    }
+    
+    # 2. Data Validation
+    if (nrow(self$data) == 0) {
+        stop('Data contains no (complete) rows')
+    }
+    
+    # 3. Progress Updates for Long Operations
+    self$results$todo$setContent("Processing analysis...")
+    
+    # 4. Main Analysis with Checkpoints
+    for (i in seq_along(large_operation)) {
+        if (i %% 100 == 0) {
+            private$.checkpoint()  # Allow user interruption
+        }
+        # Analysis steps...
+    }
+    
+    # 5. Results Population
+    self$results$main_table$setContent(analysis_results)
+    self$results$plot$setState(plot_data)
+}
+```
+
+**Key Patterns:**
+- ✅ **Progressive validation**: Check inputs, then data, then proceed
+- 📝 **Rich user guidance**: HTML instructions with links and formatting
+- ⏱️ **Checkpoint integration**: Allow user interruption for long operations
+- 🔄 **State management**: Proper data flow to plots and tables
+
+#### 3. **`.plot()` - Advanced Plot Generation**
+
+Sophisticated plot generation with state management:
+
+```r
+.plot = function(image, ggtheme, theme, ...) {
+    # 1. Validation
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        return()
+    }
+    
+    # 2. Retrieve plot data from state
+    plotData <- image$state
+    if (is.null(plotData)) {
+        return()
+    }
+    
+    # 3. Theme handling
+    ggtheme <- private$.ggtheme()
+    theme_options <- private$.themeOptions()
+    
+    # 4. Plot generation with error handling
+    tryCatch({
+        p <- ggplot2::ggplot(plotData, aes(x = x, y = y)) +
+            geom_point() +
+            ggtheme +
+            theme_options +
+            labs(
+                title = self$options$title,
+                subtitle = paste("n =", nrow(plotData)),
+                caption = "Generated by ClinicoPath"
+            )
+        
+        # 5. Print and return
+        print(p)
+        TRUE
+        
+    }, error = function(e) {
+        stop("Plot generation failed: ", e$message)
+    })
+}
+```
+
+#### 4. **`.getData()` - Data Preprocessing Pipeline**
+
+Sophisticated data preprocessing with label management:
+
+```r
+.getData = function() {
+    # 1. Get raw data
+    mydata <- self$data
+    mydata$row_names <- rownames(mydata)
+    
+    # 2. Preserve original labels
+    original_names <- names(mydata)
+    labels <- setNames(original_names, original_names)
+    
+    # 3. Clean variable names
+    mydata <- mydata %>% janitor::clean_names()
+    
+    # 4. Restore labels after cleaning
+    corrected_labels <- setNames(original_names, names(mydata))
+    mydata <- labelled::set_variable_labels(
+        .data = mydata,
+        .labels = corrected_labels
+    )
+    
+    # 5. Extract specific variables by label
+    all_labels <- labelled::var_label(mydata)
+    
+    mytime <- names(all_labels)[all_labels == self$options$elapsedtime]
+    myoutcome <- names(all_labels)[all_labels == self$options$outcome]
+    
+    # 6. Return structured data
+    return(list(
+        "mydata_labelled" = mydata,
+        "mytime_labelled" = mytime,
+        "myoutcome_labelled" = myoutcome
+    ))
+}
+```
+
+### Advanced Patterns & Best Practices
+
+#### 1. **Label Management System**
+
+```r
+.labelData = function() {
+    mydata <- self$data
+    original_names <- names(mydata)
+    
+    # Save original names as labels
+    labels <- setNames(original_names, original_names)
+    
+    # Clean variable names
+    mydata <- mydata %>% janitor::clean_names()
+    
+    # Apply original labels to cleaned names
+    cleaned_names <- names(mydata)
+    corrected_labels <- setNames(original_names, cleaned_names)
+    
+    mydata <- labelled::set_variable_labels(
+        .data = mydata,
+        .labels = corrected_labels
+    )
+    
+    return(mydata)
+}
+```
+
+#### 2. **Conditional Namespace Loading**
+
+All jamovi classes use conditional namespace loading for safety:
+
+```r
+myanalysisClass <- if (requireNamespace('jmvcore'))
+    R6::R6Class(
+        # Class definition
+    )
+```
+
+This prevents errors if core jamovi packages aren't available.
+
+#### 3. **Error Handling Patterns**
+
+```r
+# Pattern 1: Early return for missing inputs
+if (is.null(self$options$required_var)) {
+    self$results$instructions$setContent("Please select required variable")
+    return()
+}
+
+# Pattern 2: Graceful error handling with user feedback
+tryCatch({
+    analysis_result <- complex_analysis(data)
+}, error = function(e) {
+    self$results$instructions$setContent(
+        paste("Analysis failed:", e$message, 
+              "Please check your data and try again.")
+    )
+    return()
+})
+
+# Pattern 3: Data validation with specific messages
+if (nrow(clean_data) < 10) {
+    self$results$instructions$setContent(
+        "Insufficient data. Need at least 10 complete observations."
+    )
+    return()
+}
+```
+
+#### 4. **State Management for Plots**
+
+```r
+# In .run() - prepare and transfer data to plot
+plotData <- prepare_plot_data(analysis_results)
+image <- self$results$plot
+image$setState(plotData)
+
+# In .plot() - retrieve and use the data
+plotData <- image$state
+if (is.null(plotData)) return()
+
+# Generate plot using the transferred data
+plot <- create_publication_plot(plotData)
+print(plot)
+TRUE
+```
+
+#### 5. **Documentation Integration**
+
+```r
+#' @title Advanced Statistical Analysis
+#' @description Comprehensive analysis with modern methods
+#' @param data Data frame containing variables
+#' @param dependent Character. Name of dependent variable  
+#' @param covariates Character vector. Covariate names
+#' @details This function implements state-of-the-art methods...
+#' @examples
+#' \dontrun{
+#' result <- myanalysis(data = mtcars, dependent = "mpg")
+#' }
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @importFrom package function_name
+```
+
+### Performance Optimization Patterns
+
+#### 1. **Chunked Processing**
+
+```r
+.run = function() {
+    large_data <- self$data
+    chunk_size <- 1000
+    results <- list()
+    
+    for (i in seq(1, nrow(large_data), chunk_size)) {
+        chunk_end <- min(i + chunk_size - 1, nrow(large_data))
+        chunk <- large_data[i:chunk_end, ]
+        
+        # Process chunk
+        chunk_result <- process_chunk(chunk)
+        results[[length(results) + 1]] <- chunk_result
+        
+        # Checkpoint for user interruption
+        private$.checkpoint()
+        
+        # Memory cleanup
+        gc()
+    }
+    
+    # Combine results
+    final_result <- do.call(rbind, results)
+}
+```
+
+#### 2. **Lazy Evaluation**
+
+```r
+.run = function() {
+    # Only compute expensive operations when needed
+    if (self$options$include_advanced) {
+        advanced_results <- expensive_computation(self$data)
+        self$results$advanced_table$setContent(advanced_results)
+    }
+    
+    # Basic results are always computed
+    basic_results <- basic_analysis(self$data)
+    self$results$basic_table$setContent(basic_results)
+}
+```
+
+### Integration with Enhanced Module System
+
+When developing .b.R functions for the ClinicoPath ecosystem:
+
+```r
+# Always follow the enhanced workflow
+development_workflow <- function() {
+    # 1. Implement .b.R with proper structure
+    edit_analysis_file("R/myanalysis.b.R")
+    
+    # 2. Update configuration
+    update_config_yaml("updateModules_config.yaml")
+    
+    # 3. Enhanced build process
+    jmvtools::prepare()
+    devtools::document()
+    jmvtools::prepare()    # Critical: run twice
+    devtools::document()
+    
+    # 4. Test and distribute
+    devtools::test()
+    jmvtools::install()
+    system("Rscript _updateModules_enhanced.R")
+}
+```
+
+---
+
+## 📋 .a.yaml Analysis Definition: Complete Architecture Guide
+
+### Understanding the .a.yaml Structure
+
+The `.a.yaml` file defines the analysis metadata, options, and interface behavior. It's the blueprint for your jamovi analysis module. Here's the complete anatomy:
+
+```yaml
+---
+name: myanalysis              # Internal analysis ID (must match .b.R filename)
+title: My Statistical Analysis # Display name in jamovi menu
+menuGroup: Exploration        # Main menu category
+menuSubgroup: Advanced Stats  # Optional submenu
+menuSubtitle: 'Detailed descriptive text' # Optional menu tooltip
+version: '0.0.3'             # Analysis version
+jas: '1.2'                   # jamovi analysis specification version
+
+description:
+    main: |                  # Main description (markdown supported)
+        Performs comprehensive statistical analysis with modern methods.
+        This analysis provides publication-ready output with effect sizes.
+    R:                       # R-specific documentation
+        dontrun: false       # Whether to skip in R CMD check
+        usage: |             # R usage examples
+            # Example usage:
+            ClinicoPath::myanalysis(
+                data = mtcars,
+                dep = "mpg",
+                group = "cyl"
+            )
+
+options:                     # Analysis parameters/inputs
+    # ... detailed below
+...
+```
+
+### Core Components Deep Dive
+
+#### 1. **Menu System Architecture**
+
+```yaml
+# Menu positioning and organization
+menuGroup: ExplorationD      # Main menu category
+menuSubgroup: ClinicoPath Comparisons  # Submenu grouping
+menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier'  # Tooltip
+
+# Menu groups used in ClinicoPath:
+# - ExplorationD: Descriptive statistics
+# - SurvivalD: Survival analysis
+# - meddecideD: Medical decision making
+# - JJStatsPlotD: Statistical visualizations
+```
+
+**Best Practices:**
+- Use descriptive `menuGroup` names ending with 'D' for consistency
+- Keep `menuSubgroup` concise but informative
+- Use `menuSubtitle` for detailed descriptions that appear on hover
+
+#### 2. **Option Types & Patterns**
+
+##### **Data Input Option**
+```yaml
+- name: data
+  type: Data
+  description:
+      R: >
+        The data as a data frame.
+```
+
+##### **Variable Selection Options**
+```yaml
+# Single variable selection
+- name: dependent
+  title: Dependent Variable
+  type: Variable
+  suggested: [ continuous ]      # Guides users to appropriate types
+  permitted: [ numeric ]         # Enforces type restrictions
+  description: >
+    The outcome variable for analysis.
+
+# Multiple variable selection
+- name: covariates
+  title: Covariates
+  type: Variables               # Note: Variables (plural) for multiple
+  suggested: [ ordinal, nominal, continuous ]
+  permitted: [ factor, numeric ]
+  default: NULL
+
+# Variable with level selection
+- name: outcome
+  title: Outcome Variable
+  type: Variable
+  suggested: [ ordinal, nominal ]
+  permitted: [ factor ]
+
+- name: outcomeLevel
+  title: Event Level
+  type: Level
+  variable: (outcome)          # Links to parent variable
+  description: >
+    Select which level represents the event of interest.
+
+# Optional level selection
+- name: referenceLevel
+  title: Reference Level (Optional)
+  type: Level
+  variable: (groupVar)
+  allowNone: true             # Makes selection optional
+```
+
+##### **Boolean Options**
+```yaml
+- name: excludeMissing
+  title: Exclude Missing Values
+  type: Bool
+  default: false
+  description:
+      R: >
+        If TRUE, cases with missing values will be excluded from analysis.
+```
+
+##### **List/Dropdown Options**
+```yaml
+- name: method
+  title: Analysis Method
+  type: List
+  options:
+    - title: Parametric (t-test)
+      name: parametric
+    - title: Non-parametric (Mann-Whitney U)
+      name: nonparametric
+    - title: Robust (Yuen's test)
+      name: robust
+    - title: Bayesian
+      name: bayes
+  default: parametric
+  description: >
+    Statistical method for group comparisons.
+```
+
+##### **Numeric Input Options**
+```yaml
+# Integer input
+- name: bootstrapSamples
+  title: Bootstrap Samples
+  type: Integer
+  default: 1000
+  min: 100
+  max: 10000
+
+# Decimal number input
+- name: confidenceLevel
+  title: Confidence Level
+  type: Number
+  default: 0.95
+  min: 0.00
+  max: 1.00
+  description: >
+    Confidence level for intervals (e.g., 0.95 for 95% CI).
+```
+
+##### **String Input Options**
+```yaml
+- name: customTitle
+  title: Plot Title (Optional)
+  type: String
+  default: ''
+  description: >
+    Custom title for the plot. Leave empty for automatic title.
+
+# String with specific format
+- name: cutpoints
+  title: Time Cutpoints
+  type: String
+  default: '12, 36, 60'
+  description: >
+    Comma-separated time points for survival analysis (e.g., "12, 36, 60").
+```
+
+##### **Output Variables**
+```yaml
+# Creates new variable in dataset
+- name: predictedValues
+  title: Save Predicted Values
+  type: Output
+  description: >
+    Adds predicted values as a new column in the dataset.
+```
+
+##### **Advanced Pattern: Conditional Options**
+```yaml
+# Parent option that controls visibility
+- name: useAdvanced
+  title: Advanced Options
+  type: Bool
+  default: false
+
+# Child option only visible when parent is true
+- name: advancedMethod
+  title: Advanced Method
+  type: List
+  options:
+    - title: Method A
+      name: methodA
+    - title: Method B
+      name: methodB
+  default: methodA
+  visible: (useAdvanced)    # Conditional visibility
+```
+
+### 3. **Complex Real-World Examples**
+
+#### **Example 1: Survival Analysis Options**
+```yaml
+options:
+    # Time calculation options
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate survival time from date variables.
+    
+    - name: dxdate
+      title: Diagnosis Date
+      type: Variable
+      visible: (tint)          # Only show when tint is true
+      description: >
+        Date of initial diagnosis.
+    
+    - name: fudate
+      title: Follow-up Date
+      type: Variable
+      visible: (tint)
+      description: >
+        Most recent follow-up date.
+    
+    # Analysis type with complex dependencies
+    - name: analysistype
+      title: Survival Type
+      type: List
+      options:
+        - title: Overall Survival
+          name: overall
+        - title: Cause Specific
+          name: cause
+        - title: Competing Risk
+          name: compete
+      default: overall
+    
+    # Conditional level selections based on analysis type
+    - name: dod
+      title: Dead of Disease
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      visible: (analysistype:cause || analysistype:compete)
+    
+    - name: dooc
+      title: Dead of Other Causes
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      visible: (analysistype:compete)
+```
+
+#### **Example 2: Statistical Test Configuration**
+```yaml
+options:
+    # Main test selection
+    - name: testType
+      title: Statistical Test
+      type: List
+      options:
+        - title: Automatic Selection
+          name: auto
+        - title: Chi-square Test
+          name: chisq
+        - title: Fisher's Exact Test
+          name: fisher
+        - title: Custom Test
+          name: custom
+      default: auto
+    
+    # Conditional options for custom test
+    - name: customTestName
+      title: Custom Test Function
+      type: String
+      visible: (testType:custom)
+      default: ''
+    
+    # Pairwise comparisons
+    - name: pairwise
+      title: Pairwise Comparisons
+      type: Bool
+      default: false
+    
+    - name: pairwiseMethod
+      title: Adjustment Method
+      type: List
+      visible: (pairwise)
+      options:
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: Bonferroni
+          name: bonferroni
+        - title: FDR
+          name: fdr
+        - title: None
+          name: none
+      default: holm
+```
+
+### 4. **Best Practices & Tips**
+
+#### **Variable Type Specifications**
+```yaml
+# Complete type system reference
+suggested: [ continuous, ordinal, nominal, id ]
+permitted: [ numeric, factor, character, logical ]
+
+# Common patterns:
+# Continuous outcomes
+suggested: [ continuous ]
+permitted: [ numeric ]
+
+# Categorical predictors
+suggested: [ ordinal, nominal ]
+permitted: [ factor ]
+
+# Mixed types (flexible)
+suggested: [ ordinal, nominal, continuous ]
+permitted: [ factor, numeric ]
+
+# ID variables
+suggested: [ id ]
+permitted: [ character, factor ]
+```
+
+#### **Description Best Practices**
+```yaml
+# Good: Clear, actionable description
+- name: excludeOutliers
+  title: Exclude Outliers
+  type: Bool
+  default: false
+  description: >
+    Remove observations more than 3 standard deviations from the mean.
+    This uses the median absolute deviation (MAD) method for robust
+    outlier detection.
+
+# Bad: Vague description
+- name: option1
+  title: Option 1
+  type: Bool
+  description: >
+    Enable option 1.
+```
+
+#### **Default Value Guidelines**
+```yaml
+# Always provide sensible defaults
+- name: confidenceLevel
+  type: Number
+  default: 0.95      # Standard 95% CI
+
+- name: method
+  type: List
+  default: auto      # Let analysis choose
+
+- name: missing
+  type: List
+  options:
+    - title: Exclude listwise
+      name: exclude
+    - title: Include as NA
+      name: include
+  default: exclude   # Safe default
+```
+
+### 5. **Advanced Patterns & Tricks**
+
+#### **Dynamic UI Updates**
+```yaml
+# Options that trigger UI updates in .init()
+- name: groupingVar
+  title: Grouping Variable
+  type: Variable
+  description: >
+    Variable for stratified analysis.
+    
+# In .b.R .init():
+# if (!is.null(self$options$groupingVar)) {
+#     levels <- levels(self$data[[self$options$groupingVar]])
+#     self$results$groupTables$setTitle(
+#         paste("Results by", self$options$groupingVar)
+#     )
+# }
+```
+
+#### **Complex Validation Patterns**
+```yaml
+# Date format handling
+- name: dateFormat
+  title: Date Format in Data
+  type: List
+  options:
+    - title: YYYY-MM-DD
+      name: ymd
+    - title: MM/DD/YYYY
+      name: mdy
+    - title: DD/MM/YYYY
+      name: dmy
+  default: ymd
+
+# Time unit conversion
+- name: timeUnit
+  title: Time Unit
+  type: List
+  options:
+    - title: Days
+      name: days
+    - title: Weeks
+      name: weeks
+    - title: Months
+      name: months
+    - title: Years
+      name: years
+  default: months
+```
+
+#### **Performance Optimization Options**
+```yaml
+# Computation control
+- name: enableBootstrap
+  title: Bootstrap Confidence Intervals
+  type: Bool
+  default: false
+  description: >
+    Enable bootstrap CIs (slower but more accurate for small samples).
+
+- name: bootstrapSamples
+  title: Bootstrap Iterations
+  type: Integer
+  visible: (enableBootstrap)
+  default: 1000
+  min: 100
+  max: 10000
+
+- name: parallelProcessing
+  title: Use Parallel Processing
+  type: Bool
+  default: false
+  visible: (enableBootstrap)
+```
+
+### 6. **Integration with Module System**
+
+When creating .a.yaml files for the ClinicoPath system:
+
+```yaml
+# 1. Follow naming conventions
+name: myanalysis          # Must match R/myanalysis.b.R
+
+# 2. Use consistent menu groups
+menuGroup: ExplorationD   # Or SurvivalD, meddecideD, JJStatsPlotD
+
+# 3. Version alignment
+version: '0.0.3'         # Match module version
+
+# 4. Complete documentation
+description:
+    main: |
+        Comprehensive description with markdown support.
+        - Feature 1: Description
+        - Feature 2: Description
+    R:
+        usage: |
+            # Complete R example
+            result <- ClinicoPath::myanalysis(
+                data = histopathology,
+                dependent = "outcome",
+                covariates = c("age", "stage"),
+                method = "robust"
+            )
+```
+
+### 7. **Common Pitfalls & Solutions**
+
+#### **Pitfall 1: Missing Default Values**
+```yaml
+# Bad: No default for optional parameter
+- name: customLabel
+  type: String
+  
+# Good: Explicit default
+- name: customLabel
+  type: String
+  default: ''
+```
+
+#### **Pitfall 2: Incorrect Variable Linking**
+```yaml
+# Bad: Typo in variable reference
+- name: level1
+  type: Level
+  variable: (grouppVar)  # Typo!
+
+# Good: Correct reference
+- name: level1
+  type: Level
+  variable: (groupVar)
+```
+
+#### **Pitfall 3: Complex Visibility Logic**
+```yaml
+# Bad: Overly complex
+visible: ((method:auto && pairwise) || (method:custom && !pairwise))
+
+# Good: Simplify with intermediate options
+- name: showAdvanced
+  type: Bool
+  default: false
+
+- name: advancedOption
+  visible: (showAdvanced)
+```
+
+### 8. **Testing Your .a.yaml**
+
+```r
+# Validate yaml syntax
+yaml::yaml.load_file("jamovi/myanalysis.a.yaml")
+
+# Check in jamovi
+jmvtools::install()
+# Open jamovi and verify:
+# 1. Analysis appears in correct menu
+# 2. All options are visible
+# 3. Conditional visibility works
+# 4. Defaults are sensible
+```
+
+---
+
+## 📞 Getting Help & Resources
+
+### Development Resources
+
+- **Official Documentation**: https://dev.jamovi.org/
+- **jamovi Community Forum**: https://forum.jamovi.org/
+- **R Package Development**: https://r-pkgs.org/
+- **Project Repository**: Check GitHub issues and discussions
+
+### Contributing Guidelines
+
+1. **Fork** the repository
+2. **Create** a feature branch
+3. **Write** comprehensive tests
+4. **Document** your changes thoroughly
+5. **Update** `updateModules_config.yaml` if needed
+6. **Submit** a pull request with clear description
+
+---
 
 
 
@@ -1545,6 +2785,1425 @@ mypairwisedescription)
 
 
 
+
+## 📊 Deep Dive: .a.yaml Analysis Definition Architecture
+
+The `.a.yaml` files define the analysis options and parameters for jamovi modules. They serve as the configuration blueprint that controls what options users see and how they interact with your analysis.
+
+### Complete .a.yaml Anatomy
+
+```yaml
+---
+name: jjbarstats                    # Function identifier (must match .b.R class)
+title: Bar Charts                  # Display name in jamovi menu
+menuGroup: JJStatsPlotD            # Top-level menu category
+menuSubgroup: 'Categorical vs Categorical'  # Sub-menu organization
+version: '0.0.3'                   # Module version
+jas: '1.2'                         # jamovi Analysis Specification version
+
+description:
+    main: |                        # Main description for help system
+        'Wrapper Function for ggstatsplot::ggbarstats...'
+    R:                             # R-specific documentation
+        dontrun: true              # Skip examples in R CMD check
+        usage: |                   # Example usage code
+            # example will be added
+
+options:                           # Core configuration section
+    - name: data                   # Required data parameter
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+```
+
+### Core Option Types and Patterns
+
+#### 1. **Variable Selection Options**
+
+**Single Variable**:
+```yaml
+- name: explanatory
+  title: Explanatory Variable
+  type: Variable                   # Single variable selection
+  suggested: [ ordinal, nominal ]  # Preferred variable types
+  permitted: [ factor ]            # Allowed variable types
+  description:
+      R: >
+        The explanatory variable for group comparison.
+```
+
+**Multiple Variables**:
+```yaml
+- name: vars
+  title: Dependent Variable(s)
+  type: Variables                  # Multiple variable selection
+  description: >
+        The variable(s) that will appear as rows in the cross table.
+```
+
+**Optional Variables with NULL Default**:
+```yaml
+- name: grvar
+  title: 'Split By (Optional)'
+  type: Variable
+  suggested: [ ordinal, nominal ]
+  permitted: [ factor ]
+  default: NULL                    # Explicitly set NULL for optional params
+```
+
+#### 2. **Level Selection for Categorical Variables**
+
+```yaml
+- name: outcomeLevel
+  title: Event Level
+  type: Level                      # Level selector for categorical var
+  variable: (outcome)              # References another option
+  description:
+      R: >
+        The level of the outcome variable that will be used as the event level.
+
+- name: dod
+  title: Dead of Disease
+  type: Level
+  variable: (outcome)
+  allowNone: true                  # Allow no selection
+```
+
+#### 3. **Boolean Options**
+
+```yaml
+- name: excl
+  title: Exclude Missing (NA)
+  type: Bool
+  default: true                    # Clear default value
+
+- name: pairwisecomparisons
+  title: Pairwise Comparisons
+  type: Bool
+  default: true
+```
+
+#### 4. **List/Dropdown Options**
+
+```yaml
+- name: typestatistics
+  title: 'Type of Statistic'
+  type: List
+  options:
+    - title: Parametric             # User-friendly display name
+      name: parametric              # Internal value
+    - title: Nonparametric
+      name: nonparametric
+    - title: Robust
+      name: robust
+    - title: Bayes
+      name: bayes
+  default: parametric               # Must match one of the 'name' values
+
+- name: analysistype
+  title: 'Survival Type'
+  type: List
+  options:
+    - title: Overall
+      name: overall
+    - title: Cause Specific
+      name: cause
+    - title: Competing Risk
+      name: compete
+  default: overall
+```
+
+#### 5. **Numeric Input Options**
+
+```yaml
+- name: endplot
+  title: Plot End Time
+  type: Integer                    # Whole numbers only
+  default: 60
+
+- name: ybegin_plot
+  title: Start y-axis
+  type: Number                     # Decimal numbers allowed
+  default: 0.00
+  min: 0.00                        # Optional constraints
+  max: 1.00
+
+- name: rate_multiplier
+  title: "Rate Multiplier"
+  type: Integer
+  default: 100
+  description: >
+    Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years).
+```
+
+#### 6. **String Input Options**
+
+```yaml
+- name: cutp
+  title: Cutpoints
+  type: String
+  default: '12, 36, 60'           # Default as string
+
+- name: time_intervals
+  title: "Time Interval Stratification"
+  type: String
+  default: '12, 36, 60'
+  description: >
+    Specify time intervals for stratified analysis. Enter a 
+    comma-separated list of time points.
+```
+
+#### 7. **Output Options**
+
+```yaml
+- name: calculatedtime
+  title: Add Calculated Time to Data
+  type: Output                     # For computed variables
+  description:
+      R: >
+        Calculated time will be added to the data frame.
+
+- name: outcomeredefined
+  title: Add Redefined Outcome to Data
+  type: Output
+```
+
+### Real-World Complex Examples
+
+#### Example 1: Survival Analysis Configuration
+
+```yaml
+# From survival.a.yaml - Advanced survival analysis options
+- name: tint
+  title: Using Dates to Calculate Survival Time
+  type: Bool
+  default: false
+  description:
+      R: >
+        If the time is in date format, select this option to calculate survival time.
+
+- name: dxdate
+  title: 'Diagnosis Date'
+  type: Variable
+  description:
+      R: >
+        The date of diagnosis for time calculation.
+
+- name: timetypedata
+  title: 'Time Type in Data (e.g., YYYY-MM-DD)'
+  type: List
+  options:
+    - title: ymdhms
+      name: ymdhms
+    - title: ymd
+      name: ymd
+    - title: dmy
+      name: dmy
+  default: ymd
+  description:
+      R: select the time type in data
+```
+
+#### Example 2: Statistical Test Configuration
+
+```yaml
+# From jjbarstats.a.yaml - Statistical test options
+- name: padjustmethod
+  title: 'Adjustment Method'
+  type: List
+  options:
+    - title: holm
+      name: holm
+    - title: bonferroni
+      name: bonferroni
+    - title: BH
+      name: BH
+    - title: fdr
+      name: fdr
+    - title: none
+      name: none
+  default: holm
+
+- name: pairwisedisplay
+  title: 'Pairwise Display'
+  type: List
+  options:
+    - title: significant
+      name: significant
+    - title: non-significant
+      name: non-significant
+    - title: everything
+      name: everything
+  default: significant
+```
+
+### Best Practices for .a.yaml Development
+
+#### 1. **Variable Type Guidelines**
+- Use `suggested` to guide users toward appropriate variable types
+- Use `permitted` to enforce data type requirements
+- Always specify both for Variable and Variables types
+
+#### 2. **Default Value Strategy**
+- Set `default: NULL` for optional parameters
+- Provide sensible defaults for required parameters
+- Use `allowNone: true` for optional Level parameters
+
+#### 3. **Option Naming Conventions**
+- Use descriptive, clear `title` fields for user display
+- Keep `name` fields concise and programmatically friendly
+- Follow camelCase or snake_case consistently
+
+#### 4. **Documentation Standards**
+```yaml
+description:
+    R: >                           # Use > for multi-line descriptions
+      Clear, comprehensive description of what this option does
+      and how it affects the analysis.
+```
+
+### Advanced Patterns
+
+#### 1. **Conditional Visibility**
+```yaml
+# Option only appears when another option is selected
+- name: landmark
+  title: Landmark Time
+  type: Integer
+  default: 3
+  # Note: Conditional visibility typically handled in .b.R via setVisible()
+```
+
+#### 2. **Dynamic UI Updates**
+```yaml
+# Level options that update based on variable selection
+- name: outcomeLevel
+  title: Event Level
+  type: Level
+  variable: (outcome)              # Parentheses reference another option
+```
+
+#### 3. **Complex Data Relationships**
+```yaml
+# Multiple outcome levels for competing risks analysis
+- name: dod
+  title: Dead of Disease
+  type: Level
+  variable: (outcome)
+  allowNone: true
+
+- name: dooc
+  title: Dead of Other
+  type: Level
+  variable: (outcome)
+  allowNone: true
+```
+
+### Integration with ClinicoPath Module System
+
+#### 1. **MenuGroup Organization**
+```yaml
+menuGroup: SurvivalD              # Maps to survival analysis section
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier'
+```
+
+Available MenuGroups in ClinicoPath:
+- `ExplorationD`: Descriptive analysis and data exploration
+- `SurvivalD`: Survival analysis and time-to-event modeling
+- `JJStatsPlotD`: Statistical plots and visualizations
+- `meddecideD`: Medical decision analysis and ROC curves
+
+#### 2. **Version Management**
+```yaml
+version: '0.0.3'                  # Module version - update with changes
+jas: '1.2'                        # jamovi Analysis Specification version
+```
+
+### Common Pitfalls and Solutions
+
+#### 1. **Default Value Mismatches**
+❌ **Wrong**:
+```yaml
+- name: method
+  type: List
+  options:
+    - title: Method A
+      name: methodA
+  default: Method A               # Should be 'methodA', not 'Method A'
+```
+
+✅ **Correct**:
+```yaml
+- name: method
+  type: List
+  options:
+    - title: Method A
+      name: methodA
+  default: methodA               # Matches the 'name', not 'title'
+```
+
+#### 2. **Missing NULL Defaults**
+❌ **Wrong**:
+```yaml
+- name: grvar
+  title: 'Split By (Optional)'
+  type: Variable
+  # Missing default: NULL
+```
+
+✅ **Correct**:
+```yaml
+- name: grvar
+  title: 'Split By (Optional)'
+  type: Variable
+  default: NULL                  # Explicit NULL for optional parameters
+```
+
+#### 3. **Variable Reference Syntax**
+❌ **Wrong**:
+```yaml
+- name: outcomeLevel
+  type: Level
+  variable: outcome              # Missing parentheses
+```
+
+✅ **Correct**:
+```yaml
+- name: outcomeLevel
+  type: Level
+  variable: (outcome)            # Parentheses required for references
+```
+
+### Testing Your .a.yaml Files
+
+```r
+# Always test compilation after .a.yaml changes
+jmvtools::prepare()
+devtools::document()
+
+# Test in jamovi interface
+jmvtools::install()
+```
+
+The `.a.yaml` files are the foundation of user interaction in jamovi modules. They must be precise, well-documented, and thoroughly tested to ensure a smooth user experience and proper integration with the underlying R analysis code.
+
+## 📋 Deep Dive: .r.yaml Results Definition Architecture
+
+The `.r.yaml` files define the output structure and presentation for jamovi modules. They specify what results users will see, how they're organized, and how they're displayed. This is where you define tables, plots, and text outputs that will be generated by your analysis.
+
+### Complete .r.yaml Anatomy
+
+```yaml
+---
+name: survival                     # Must match .a.yaml and .b.R
+title: Survival Analysis          # Display title for results panel
+jrs: '1.1'                       # jamovi Results Specification version
+
+# Global clear conditions (optional)
+clearWith:
+    - dep
+    - group
+    - grvar
+
+items:                           # Core results structure
+    - name: subtitle
+      title: '`Survival Analysis - ${explanatory}`'
+      type: Preformatted
+      
+    - name: medianTable
+      title: '`Median Survival Table: Levels for ${explanatory}`'
+      type: Table
+      # ... table definition
+      
+refs:                           # References section
+    - finalfit
+    - survival
+    - survminer
+```
+
+### Core Result Types and Patterns
+
+#### 1. **Text and Preformatted Output**
+
+**Simple Preformatted Text**:
+```yaml
+- name: medianSummary
+  title: '`Median Survival Summary and Table - ${explanatory}`'
+  type: Preformatted
+  clearWith:
+      - explanatory
+      - outcome
+      - outcomeLevel
+```
+
+**HTML Output**:
+```yaml
+- name: todo
+  title: To Do
+  type: Html
+  clearWith:
+      - explanatory
+      - outcome
+
+- name: tablestyle2
+  title: '`Cross Table - ${group}`'
+  type: Html
+  visible: (sty:finalfit)        # Conditional visibility
+  refs: finalfit                 # Package reference
+```
+
+**Dynamic Titles with Variable Interpolation**:
+```yaml
+- name: subtitle
+  title: '`Survival Analysis - ${explanatory}`'  # Variable substitution
+  type: Preformatted
+
+- name: calculatedtime
+  title: Add Calculated Time to Data
+  type: Output
+  varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+  varDescription: '`Calculated Time from Given Dates`'
+```
+
+#### 2. **Table Definitions**
+
+**Basic Table Structure**:
+```yaml
+- name: medianTable
+  title: '`Median Survival Table: Levels for ${explanatory}`'
+  type: Table
+  rows: 0                        # Dynamic row count
+  columns:
+    - name: factor
+      title: "Levels"
+      type: text
+    - name: records
+      title: "Records"
+      type: integer
+    - name: median
+      title: "Median"
+      type: number
+```
+
+**Advanced Table with Formatting**:
+```yaml
+- name: survTable
+  title: '`1, 3, 5 year Survival - ${explanatory}`'
+  type: Table
+  rows: 0
+  columns:
+    - name: surv
+      title: "Survival"
+      type: number
+      format: pc                 # Percentage formatting
+    - name: lower
+      title: "Lower"
+      superTitle: '95% Confidence Interval'  # Column grouping
+      type: number
+      format: pc
+    - name: upper
+      title: "Upper"
+      superTitle: '95% Confidence Interval'
+      type: number
+      format: pc
+```
+
+**Transposed Table**:
+```yaml
+- name: nTable
+  title: 'n'
+  type: Table
+  swapRowsColumns: true          # Transpose rows and columns
+  rows: 1
+  columns:
+    - name: TotalPop
+      title: 'Total'
+      type: number
+    - name: DiseaseP
+      title: 'Diseased'
+      type: number
+```
+
+#### 3. **Image/Plot Outputs**
+
+**Basic Plot Definition**:
+```yaml
+- name: plot
+  title: '`Survival Plot - ${explanatory}`'
+  type: Image
+  width: 600
+  height: 450
+  renderFun: .plot               # Function name in .b.R
+  visible: (sc)                  # Conditional visibility
+  requiresData: true
+```
+
+**Plot with Comprehensive Clear Conditions**:
+```yaml
+- name: plot8
+  title: '`Proportional Hazards Assumption - ${explanatory}`'
+  type: Image
+  width: 600
+  height: 450
+  renderFun: .plot8
+  visible: (ph_cox)
+  requiresData: true
+  clearWith:
+      - ph_cox
+      - endplot
+      - byplot
+      - explanatory
+      - outcome
+  refs:
+      - KMunicate
+      - KMunicate2
+```
+
+#### 4. **Output Variables (Data Addition)**
+
+```yaml
+- name: calculatedtime
+  title: Add Calculated Time to Data
+  type: Output
+  varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+  varDescription: '`Calculated Time from Given Dates`'
+  measureType: continuous
+  clearWith:
+      - tint
+      - dxdate
+      - fudate
+
+- name: outcomeredefined
+  title: Add Redefined Outcome to Data
+  type: Output
+  varTitle: '`Redefined Outcome - from ${ outcome }`'
+  varDescription: Redefined Outcome from Analysis Type
+```
+
+### Real-World Complex Examples
+
+#### Example 1: Survival Analysis Results Structure
+
+```yaml
+# From survival.r.yaml - Comprehensive survival analysis outputs
+items:
+    - name: medianSummary
+      title: '`Median Survival Summary and Table - ${explanatory}`'
+      type: Preformatted
+      clearWith: [explanatory, outcome, outcomeLevel, overalltime]
+
+    - name: medianTable
+      title: '`Median Survival Table: Levels for ${explanatory}`'
+      type: Table
+      rows: 0
+      columns:
+        - name: factor
+          title: "Levels"
+          type: text
+        - name: records
+          title: "Records"
+          type: integer
+        - name: events
+          title: "Events"
+          type: integer
+        - name: median
+          title: "Median"
+          type: number
+        - name: x0_95lcl
+          title: "Lower"
+          superTitle: '95% Confidence Interval'
+          type: number
+        - name: x0_95ucl
+          title: "Upper"
+          superTitle: '95% Confidence Interval'
+          type: number
+
+    - name: cox_ph
+      title: 'Proportional Hazards Assumption'
+      type: Preformatted
+      visible: (ph_cox)                    # Only show when option enabled
+
+    - name: plot
+      title: '`Survival Plot - ${explanatory}`'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot
+      visible: (sc)
+      requiresData: true
+```
+
+#### Example 2: Medical Decision Analysis Results
+
+```yaml
+# From decision.r.yaml - Decision analysis outputs
+items:
+    - name: cTable
+      title: 'Recoded Data for Decision Test Statistics'
+      type: Table
+      rows: 0
+      columns:
+        - name: newtest
+          title: ''
+          type: text
+        - name: GP
+          title: 'Gold Positive'
+          type: number
+        - name: GN
+          title: 'Gold Negative'
+          type: number
+
+    - name: ratioTable
+      title: ''
+      type: Table
+      swapRowsColumns: true
+      rows: 1
+      columns:
+        - name: Sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'Positive Predictive Value'
+          type: number
+          format: pc
+        - name: LRP
+          title: Positive Likelihood Ratio
+          type: number
+
+    - name: plot1
+      title: 'Fagan nomogram'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      refs: [Fagan, Fagan2]
+```
+
+### Advanced Patterns and Features
+
+#### 1. **Conditional Visibility**
+
+```yaml
+# Single condition
+visible: (sc)                    # Show when 'sc' option is true
+
+# Multiple conditions with OR
+visible: (sty:nejm || sty:lancet || sty:hmisc)
+
+# Specific value matching
+visible: (sty:finalfit)          # Show when sty equals 'finalfit'
+```
+
+#### 2. **Dynamic Titles with Variable Substitution**
+
+```yaml
+# Single variable
+title: '`Survival Plot - ${explanatory}`'
+
+# Multiple variables
+title: '`Bar Chart ${group} - {dep} by {grvar}`'
+
+# Complex interpolation
+varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+```
+
+#### 3. **Column Formatting Options**
+
+```yaml
+columns:
+    - name: pvalue
+      title: p-value
+      type: number
+      format: zto,pvalue         # Zero-to formatting with p-value styling
+    
+    - name: percentage
+      title: "Survival"
+      type: number
+      format: pc                 # Percentage formatting
+    
+    - name: estimate
+      title: "Estimate"
+      type: number
+      format: zto                # Zero-to formatting
+```
+
+#### 4. **Grouped Columns (SuperTitles)**
+
+```yaml
+columns:
+    - name: lower
+      title: "Lower"
+      superTitle: '95% Confidence Interval'
+      type: number
+    - name: upper
+      title: "Upper"  
+      superTitle: '95% Confidence Interval'
+      type: number
+```
+
+### Global vs Local Clear Conditions
+
+#### Global Clear Conditions
+```yaml
+# At the top level - affects all items
+clearWith:
+    - dep
+    - group
+    - grvar
+```
+
+#### Local Clear Conditions
+```yaml
+# For specific items
+- name: medianTable
+  type: Table
+  clearWith:
+      - explanatory
+      - outcome
+      - outcomeLevel
+```
+
+### Integration with ClinicoPath Module System
+
+#### 1. **Result Organization**
+```yaml
+items:
+    - name: todo              # Instructions/guidance
+      type: Html
+    
+    - name: summary           # Summary information
+      type: Preformatted
+    
+    - name: mainTable         # Primary results table
+      type: Table
+    
+    - name: plot             # Main visualization
+      type: Image
+```
+
+#### 2. **Reference Management**
+```yaml
+refs:
+    - finalfit               # R packages used
+    - survival
+    - survminer
+    - ClinicoPathJamoviModule  # Always include main module
+```
+
+### Common Patterns by Analysis Type
+
+#### 1. **Statistical Tests**
+```yaml
+items:
+    - name: instructions     # User guidance
+      type: Html
+    - name: mainTable       # Test results
+      type: Table
+    - name: plot           # Visualization
+      type: Image
+```
+
+#### 2. **Descriptive Analysis**
+```yaml
+items:
+    - name: summary        # Descriptive summary
+      type: Preformatted
+    - name: table          # Detailed table
+      type: Table
+```
+
+#### 3. **Complex Analysis (Survival)**
+```yaml
+items:
+    - name: medianSummary  # Summary statistics
+    - name: medianTable    # Median survival table
+    - name: coxSummary     # Cox regression summary
+    - name: coxTable       # Cox regression table
+    - name: survTable      # Time-specific survival
+    - name: plot           # Survival curve
+    - name: calculatedtime # Output variable
+```
+
+### Best Practices for .r.yaml Development
+
+#### 1. **Result Organization**
+- Order items logically (instructions → summaries → tables → plots)
+- Use descriptive names that reflect the content
+- Group related outputs together
+
+#### 2. **Clear Conditions Strategy**
+- Include all relevant options that affect the output
+- Be comprehensive but not excessive
+- Test thoroughly to ensure proper clearing
+
+#### 3. **Naming Conventions**
+- Use consistent naming patterns across similar analyses
+- Make names descriptive and meaningful
+- Follow camelCase or snake_case consistently
+
+#### 4. **Visibility Management**
+```yaml
+# Good: Clear conditional logic
+visible: (ph_cox)
+
+# Good: Multiple conditions
+visible: (sty:nejm || sty:lancet)
+
+# Avoid: Complex nested conditions that are hard to understand
+```
+
+### Testing Your .r.yaml Files
+
+```r
+# Test results generation
+jmvtools::prepare()
+devtools::document()
+jmvtools::install()
+
+# Test in jamovi interface to verify:
+# - All tables display correctly
+# - Plots render properly
+# - Clear conditions work as expected
+# - Conditional visibility functions properly
+```
+
+### Common Pitfalls and Solutions
+
+#### 1. **Missing Clear Conditions**
+❌ **Problem**: Results don't update when options change
+✅ **Solution**: Include all relevant options in `clearWith`
+
+#### 2. **Incorrect Column Types**
+❌ **Problem**: Numbers displayed as text
+✅ **Solution**: Use correct `type` (number, integer, text)
+
+#### 3. **Render Function Mismatch**
+❌ **Problem**: Plot doesn't display
+✅ **Solution**: Ensure `renderFun` matches function name in .b.R
+
+The `.r.yaml` files define the user experience for viewing results. They must be carefully designed to present information clearly, update appropriately, and integrate seamlessly with the analysis logic in the .b.R files.
+
+## 🎨 Deep Dive: .u.yaml User Interface Definition Architecture
+
+The `.u.yaml` files define the user interface layout and interaction patterns for jamovi modules. They specify how options are organized, displayed, and interact with each other in the analysis panel. This is where you create the user experience that researchers will interact with.
+
+### Complete .u.yaml Anatomy
+
+```yaml
+title: Survival Analysis           # Display title in jamovi menu
+name: survival                     # Must match .a.yaml, .b.R, .r.yaml
+jus: '3.0'                        # jamovi UI Specification version
+stage: 0                          # Development stage (0=development, 1=release)
+compilerMode: tame                # Compiler optimization mode
+
+children:                         # Root UI container
+  - type: VariableSupplier        # Main variable selection area
+    persistentItems: false        # Don't persist selections across datasets
+    stretchFactor: 1             # Layout weight
+    children:
+      - type: TargetLayoutBox     # Variable drop zone
+        label: Time Elapsed
+        children:
+          - type: VariablesListBox
+            name: elapsedtime     # Must match .a.yaml option name
+            maxItemCount: 1       # Single variable only
+            isTarget: true        # Can receive dropped variables
+```
+
+### Core UI Component Types and Patterns
+
+#### 1. **Variable Selection Components**
+
+**Variable Supplier (Main Container)**:
+```yaml
+- type: VariableSupplier
+  persistentItems: false          # Reset on new dataset
+  stretchFactor: 1               # Layout proportion
+  children:
+    - type: TargetLayoutBox      # Variable category container
+      label: Dependent Variable
+      children:
+        - type: VariablesListBox # Actual variable selector
+          name: vars             # Links to .a.yaml option
+          isTarget: true         # Accepts dropped variables
+          maxItemCount: 1        # Single variable limit
+```
+
+**Multiple Variables vs Single Variable**:
+```yaml
+# Multiple variables allowed
+- type: VariablesListBox
+  name: dep
+  isTarget: true                # No maxItemCount = unlimited
+
+# Single variable only  
+- type: VariablesListBox
+  name: group
+  maxItemCount: 1              # Restricts to one variable
+  isTarget: true
+```
+
+**Level Selectors for Categorical Variables**:
+```yaml
+- type: LevelSelector
+  name: outcomeLevel
+  enable: (outcome && !multievent)  # Conditional enabling
+```
+
+#### 2. **Organizational Components**
+
+**Collapsible Sections**:
+```yaml
+- type: CollapseBox
+  label: Advanced Elapsed Time Options
+  collapsed: true               # Starts collapsed
+  stretchFactor: 1             # Layout weight
+  children:
+    # ... nested components
+```
+
+**Layout Containers**:
+```yaml
+- type: LayoutBox
+  margin: large                 # Spacing around contents
+  fitToGrid: true              # Align to grid
+  stretchFactor: 1             # Layout weight
+  children:
+    # ... child components
+```
+
+**Labels and Groups**:
+```yaml
+- type: Label
+  label: Time Interval
+  fitToGrid: true
+  stretchFactor: 1
+  children:
+    # ... components grouped under this label
+```
+
+#### 3. **Input Controls**
+
+**Checkboxes**:
+```yaml
+- type: CheckBox
+  name: tint                    # Links to .a.yaml option
+  fitToGrid: true
+
+# Checkbox with nested controls
+- type: CheckBox
+  name: pairwisecomparisons
+  children:
+    - type: ComboBox
+      name: pairwisedisplay
+      enable: (pairwisecomparisons)  # Only enabled when parent checked
+```
+
+**Dropdown Menus**:
+```yaml
+- type: ComboBox
+  name: analysistype
+  enable: (outcome && multievent)  # Conditional enabling
+```
+
+**Text Input Boxes**:
+```yaml
+- type: TextBox
+  name: landmark
+  format: number               # Numeric input only
+  enable: (uselandmark)        # Conditional enabling
+
+- type: TextBox
+  name: cutp
+  format: string               # Text input
+  width: large                 # Wider input box
+```
+
+**Output Variables**:
+```yaml
+- type: Output
+  name: calculatedtime
+  enable: (tint)               # Only enabled when condition met
+```
+
+### Real-World Complex Examples
+
+#### Example 1: Survival Analysis UI Structure
+
+```yaml
+# From survival.u.yaml - Comprehensive survival analysis interface
+children:
+  # Main variable selection area
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Elapsed
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      
+      - type: TargetLayoutBox
+        label: Outcome
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            fitToGrid: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome && !multievent)
+
+  # Advanced options in collapsible sections
+  - type: CollapseBox
+    label: Advanced Elapsed Time Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: tint
+      - type: ComboBox
+        name: timetypedata
+        enable: (tint)
+      
+  - type: CollapseBox
+    label: Analysis with Multiple Outcomes
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: multievent
+        enable: (outcome)
+      - type: LevelSelector
+        name: dod
+        enable: (outcome && multievent)
+```
+
+#### Example 2: Statistical Test Configuration
+
+```yaml
+# From jjbarstats.u.yaml - Bar chart analysis interface
+children:
+  - type: VariableSupplier
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dep
+            isTarget: true
+      
+      - type: TargetLayoutBox
+        label: Split By (Optional)
+        children:
+          - type: VariablesListBox
+            name: grvar
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    label: Analysis
+    collapsed: false              # Starts expanded
+    children:
+      - type: ComboBox
+        name: typestatistics
+      - type: CheckBox
+        name: pairwisecomparisons
+        children:                 # Nested controls
+          - type: ComboBox
+            name: pairwisedisplay
+            enable: (pairwisecomparisons)
+          - type: ComboBox
+            name: padjustmethod
+            enable: (pairwisecomparisons)
+```
+
+#### Example 3: Medical Decision Analysis
+
+```yaml
+# From decision.u.yaml - Decision analysis interface
+children:
+  - type: VariableSupplier
+    children:
+      - type: TargetLayoutBox
+        label: Golden Standard
+        children:
+          - type: VariablesListBox
+            name: gold
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: goldPositive
+            enable: (gold)           # Only enabled when variable selected
+      
+      - type: TargetLayoutBox
+        label: New Test
+        children:
+          - type: VariablesListBox
+            name: newtest
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: testPositive
+            enable: (newtest)
+
+  - type: Label
+    label: Prior Probability
+    children:
+      - type: CheckBox
+        name: pp
+        enable: (!ci)              # Disabled when ci is checked
+      - type: TextBox
+        name: pprob
+        format: number
+        enable: (!ci && pp)        # Multiple conditions
+```
+
+### Advanced UI Patterns and Features
+
+#### 1. **Conditional Enabling**
+
+```yaml
+# Simple condition
+enable: (outcome)                # Enabled when outcome is selected
+
+# Multiple conditions with AND
+enable: (outcome && multievent)  # Both conditions must be true
+
+# Multiple conditions with OR
+enable: (sty:finalfit || sty:nejm)  # Either condition can be true
+
+# Negation
+enable: (!ci)                    # Enabled when ci is NOT checked
+
+# Complex conditions
+enable: (!ci && pp)              # NOT ci AND pp is checked
+```
+
+#### 2. **Nested Component Hierarchies**
+
+```yaml
+- type: CheckBox
+  name: pairwisecomparisons
+  children:                      # Nested under checkbox
+    - type: ComboBox
+      name: pairwisedisplay
+      enable: (pairwisecomparisons)
+    - type: ComboBox
+      name: padjustmethod
+      enable: (pairwisecomparisons)
+```
+
+#### 3. **Layout Control Properties**
+
+```yaml
+# Spacing and alignment
+margin: large                    # large, medium, small
+fitToGrid: true                 # Align to layout grid
+stretchFactor: 1                # Relative size weight
+
+# Width control for text inputs
+width: large                    # large, medium, small
+```
+
+#### 4. **Variable List Constraints**
+
+```yaml
+# Single variable only
+maxItemCount: 1
+
+# Unlimited variables (default)
+# No maxItemCount specified
+
+# Variable persistence
+persistentItems: false          # Reset on dataset change
+persistentItems: true           # Keep selections
+```
+
+### UI Organization Patterns by Analysis Type
+
+#### 1. **Simple Statistical Tests**
+```yaml
+children:
+  - type: VariableSupplier      # Variable selection
+  - type: CollapseBox           # Data options
+    label: Data
+    collapsed: false
+  - type: CollapseBox           # Analysis options  
+    label: Analysis
+    collapsed: false
+  - type: CollapseBox           # Plot options
+    label: Plot
+    collapsed: false
+```
+
+#### 2. **Complex Multi-Step Analysis**
+```yaml
+children:
+  - type: VariableSupplier      # Main variables
+  - type: CollapseBox           # Advanced data options
+    label: Advanced Options
+    collapsed: true
+  - type: CollapseBox           # Multiple outcomes
+    label: Multiple Outcomes
+    collapsed: true
+  - type: CollapseBox           # Pairwise comparisons
+    label: Pairwise Comparisons
+    collapsed: true
+  - type: CollapseBox           # Plots
+    label: Plots
+    collapsed: true
+```
+
+#### 3. **Descriptive Analysis**
+```yaml
+children:
+  - type: VariableSupplier      # Variable selection
+  - type: CollapseBox           # Options
+    label: Options
+    collapsed: true
+```
+
+### Integration with ClinicoPath Module System
+
+#### 1. **Standard Layout Patterns**
+- **Variable Supplier**: Always first, contains main variable selections
+- **Collapsible Sections**: Group related options, start collapsed for advanced features
+- **Logical Grouping**: Data → Analysis → Visualization → Advanced
+
+#### 2. **Naming Conventions**
+```yaml
+# Variable names must match .a.yaml exactly
+name: explanatory              # Matches .a.yaml option name
+name: outcomeLevel             # Matches .a.yaml option name
+```
+
+#### 3. **User Experience Principles**
+- Essential options visible by default
+- Advanced options in collapsed sections
+- Clear labeling and logical grouping
+- Conditional enabling to prevent invalid combinations
+
+### Best Practices for .u.yaml Development
+
+#### 1. **Layout Organization**
+- Place most important options at the top
+- Group related options together
+- Use descriptive labels
+- Start advanced sections collapsed
+
+#### 2. **Conditional Logic**
+```yaml
+# Good: Clear, simple conditions
+enable: (outcome)
+enable: (outcome && multievent)
+
+# Avoid: Overly complex conditions
+enable: ((outcome && multievent) || (singleevent && !advanced))
+```
+
+#### 3. **Variable Selection Design**
+```yaml
+# Good: Clear constraints
+maxItemCount: 1               # When only one variable allowed
+isTarget: true               # Always for variable drop zones
+
+# Good: Descriptive labels
+label: Dependent Variable    # Clear purpose
+label: Split By (Optional)   # Indicates optionality
+```
+
+#### 4. **Responsive Layout**
+```yaml
+# Use stretchFactor for proportional sizing
+stretchFactor: 1             # Equal weight
+stretchFactor: 2             # Double weight
+
+# Use fitToGrid for alignment
+fitToGrid: true              # Align to layout grid
+```
+
+### Common UI Patterns
+
+#### 1. **Variable + Level Selection**
+```yaml
+- type: VariablesListBox
+  name: outcome
+  maxItemCount: 1
+  isTarget: true
+- type: LevelSelector
+  name: outcomeLevel
+  enable: (outcome)            # Only enabled when variable selected
+```
+
+#### 2. **Checkbox with Nested Options**
+```yaml
+- type: CheckBox
+  name: advanced_analysis
+  children:
+    - type: TextBox
+      name: parameter1
+      enable: (advanced_analysis)
+    - type: ComboBox
+      name: method
+      enable: (advanced_analysis)
+```
+
+#### 3. **Mutually Exclusive Options**
+```yaml
+- type: CheckBox
+  name: option_a
+  enable: (!option_b)          # Disabled when option_b is checked
+- type: CheckBox
+  name: option_b
+  enable: (!option_a)          # Disabled when option_a is checked
+```
+
+### Testing Your .u.yaml Files
+
+```r
+# Test UI compilation
+jmvtools::prepare()
+devtools::document()
+jmvtools::install()
+
+# Test in jamovi interface to verify:
+# - All components display correctly
+# - Conditional enabling works properly
+# - Layout is intuitive and responsive
+# - Variable selection behaves as expected
+```
+
+### Common Pitfalls and Solutions
+
+#### 1. **Name Mismatches**
+❌ **Problem**: UI component doesn't link to option
+✅ **Solution**: Ensure `name` exactly matches .a.yaml option name
+
+#### 2. **Incorrect Conditional Logic**
+❌ **Problem**: Components enabled/disabled incorrectly
+✅ **Solution**: Test all condition combinations thoroughly
+
+#### 3. **Poor Layout Organization**
+❌ **Problem**: Confusing or cluttered interface
+✅ **Solution**: Use logical grouping and collapsible sections
+
+#### 4. **Missing Variable Constraints**
+❌ **Problem**: Users can select inappropriate variable types
+✅ **Solution**: Use `maxItemCount` and proper `suggested`/`permitted` in .a.yaml
+
+The `.u.yaml` files define the user interface that researchers interact with. They must be intuitive, responsive, and guide users toward making appropriate analysis choices while preventing invalid option combinations.
 
 ## Diagrams
 

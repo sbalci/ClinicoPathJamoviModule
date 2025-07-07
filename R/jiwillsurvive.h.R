@@ -285,18 +285,149 @@ jiwillsurviveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "jiwillsurviveResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        survivalPlot = function() private$.items[["survivalPlot"]],
+        survivalStats = function() private$.items[["survivalStats"]],
+        survivalTable = function() private$.items[["survivalTable"]],
+        interpretation = function() private$.items[["interpretation"]],
+        kmPlot = function() private$.items[["kmPlot"]],
+        kmStats = function() private$.items[["kmStats"]],
+        kmTable = function() private$.items[["kmTable"]],
+        followupPlot = function() private$.items[["followupPlot"]],
+        prepText = function() private$.items[["prepText"]],
+        dataOutput = function() private$.items[["dataOutput"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Survival")
-            self$add(jmvcore::Preformatted$new(
+                title="Intuitive Survival Analysis")
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Survival"))}))
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survivalPlot",
+                title="Survival Plot",
+                width=600,
+                height=400,
+                visible="(analysis_type:survival_model)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalStats",
+                title="Statistical Tests",
+                visible="(analysis_type:survival_model && show_statistics)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="survivalTable",
+                title="Survival Summary Table",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="Time", 
+                        `title`="Time", 
+                        `type`="number"),
+                    list(
+                        `name`="N_Risk", 
+                        `title`="N at Risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Event", 
+                        `title`="N Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="Survival", 
+                        `title`="Survival", 
+                        `type`="number"),
+                    list(
+                        `name`="SE", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="Lower_CI", 
+                        `title`="Lower CI", 
+                        `type`="number"),
+                    list(
+                        `name`="Upper_CI", 
+                        `title`="Upper CI", 
+                        `type`="number"),
+                    list(
+                        `name`="Group", 
+                        `title`="Group", 
+                        `type`="text")),
+                visible="(analysis_type:survival_model && show_survival_table)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interpretation",
+                title="Clinical Interpretation",
+                visible="(analysis_type:survival_model && show_interpretation)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="kmPlot",
+                title="Kaplan-Meier Plot",
+                width=600,
+                height=400,
+                visible="(analysis_type:kaplan_meier)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="kmStats",
+                title="Kaplan-Meier Statistics",
+                visible="(analysis_type:kaplan_meier)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="kmTable",
+                title="Kaplan-Meier Summary Table",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="Time", 
+                        `title`="Time", 
+                        `type`="number"),
+                    list(
+                        `name`="N_Risk", 
+                        `title`="N at Risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Event", 
+                        `title`="N Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="Survival", 
+                        `title`="Survival", 
+                        `type`="number"),
+                    list(
+                        `name`="Lower_CI", 
+                        `title`="Lower CI", 
+                        `type`="number"),
+                    list(
+                        `name`="Upper_CI", 
+                        `title`="Upper CI", 
+                        `type`="number"),
+                    list(
+                        `name`="Group", 
+                        `title`="Group", 
+                        `type`="text")),
+                visible="(analysis_type:kaplan_meier)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="followupPlot",
+                title="Follow-up Visualization",
+                width=600,
+                height=400,
+                visible="(analysis_type:followup_plot)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="prepText",
+                title="Data Preparation Summary",
+                visible="(analysis_type:data_prep)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataOutput",
+                title="Processed Data",
+                visible="(analysis_type:data_prep && export_data)"))}))
 
 jiwillsurviveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jiwillsurviveBase",
@@ -369,8 +500,24 @@ jiwillsurviveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param export_data Whether to include processed data in output.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$survivalStats} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$kmPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$kmStats} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$kmTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$followupPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$prepText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataOutput} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$survivalTable$asDF}
+#'
+#' \code{as.data.frame(results$survivalTable)}
 #'
 #' @export
 jiwillsurvive <- function(

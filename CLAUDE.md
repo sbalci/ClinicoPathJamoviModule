@@ -88,9 +88,9 @@ This is completely normal and acceptable. Many R packages have descriptive repos
 Installation scenarios where this occurs:
 
 1. Local Development Installation:
-devtools::install()  # Uses folder name if in root directory
+   devtools::install()  # Uses folder name if in root directory
 2. GitHub Installation with Full Repo Name:
-devtools::install_github("user/ClinicoPathJamoviModule")
+   devtools::install_github("user/ClinicoPathJamoviModule")
 3. Manual Installation from Source: Using folder name
 
 ✅ Correct Installation Methods:
@@ -98,13 +98,15 @@ devtools::install_github("user/ClinicoPathJamoviModule")
 To ensure "ClinicoPath" namespace is used:
 
 1. From CRAN (future):
-install.packages("ClinicoPath")
+   install.packages("ClinicoPath")
 2. From GitHub with Package Name:
-devtools::install_github("user/ClinicoPathJamoviModule",
-                         subdir = ".",
-                         build_vignettes = FALSE)
+   devtools::install_github("user/ClinicoPathJamoviModule",
+   subdir = ".",
+   build_vignettes = FALSE)
 3. Development Installation:
+
 # From package root directory
+
 devtools::install(pkg = ".", quick = TRUE)
 
 🚀 Recommendations:
@@ -112,12 +114,16 @@ devtools::install(pkg = ".", quick = TRUE)
 Your current setup is correct! However, to avoid confusion:
 
 1. Documentation: Always refer to the package as "ClinicoPath" in:
-  - README files
-  - Documentation
-  - Installation instructions
-  - User guides
+
+- README files
+- Documentation
+- Installation instructions
+- User guides
+
 2. Installation Instructions: Provide clear installation commands:
+
 # Correct installation
+
 devtools::install_github("sbalci/ClinicoPathJamoviModule")
 library(ClinicoPath)  # Always loads as ClinicoPath
 3. Repository Description: Update GitHub repository description to clarify:
@@ -127,10 +133,55 @@ library(ClinicoPath)  # Always loads as ClinicoPath
 
 - ✅ Package namespace is correctly configured as "ClinicoPath"
 - ✅ All jamovi analyses use ns: ClinicoPath
-- ✅ DESCRIPTION and NAMESPACE files are correct
 - 📁 Repository name ClinicoPathJamoviModule is just the container name
 - 🎯 Users should always library(ClinicoPath) regardless of installation method
 
 The confusion comes from folder/repository naming vs package naming, which is a common and acceptable practice in R package development.
 
-[... rest of the existing file content remains unchanged ...]
+## Development Memories
+
+### Vignette Management System
+
+The project now uses a sophisticated domain-based vignette copying system in updateModules:
+
+**Domain-Based Vignette Distribution**:
+- Vignettes are automatically copied to modules based on domain prefixes in filenames
+- Domain patterns: `clinicopath-descriptives-*`, `jjstatsplot-*`, `meddecide-*`, `jsurvival-*`, `general-*`
+- Configuration: `updateModules_config.yaml` > `vignette_domains` section
+- Special files and exclude patterns are handled via configuration
+
+**Domain-to-Module Mapping**:
+```yaml
+domain_mapping:
+  clinicopath-descriptives: ["ClinicoPathDescriptives"]
+  jjstatsplot: ["jjstatsplot"]
+  meddecide: ["meddecide"] 
+  jsurvival: ["jsurvival"]
+  general: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+```
+
+**Key Features**:
+- Automatic discovery of all vignette files (.qmd, .Rmd, .md)
+- Pattern-based exclusion of legacy/temp files
+- Special file handling for cross-module content
+- Statistical reporting of copy operations
+- Backward compatibility with manual vignette lists
+
+**When Creating New Vignettes**:
+- Use domain prefixes in filenames: `{domain}-{number}-{description}.{ext}`
+- For comprehensive guides: `{domain}-{number}-{function}-comprehensive.qmd`
+- For legacy versions: `{domain}-{number}-{description}-legacy.Rmd`
+- General content goes to all modules: `general-{number}-{topic}.Rmd`
+
+**Configuration Control**:
+- `use_domain_based: true` - Enable automatic domain-based copying
+- `use_manual_lists: false` - Disable manual vignette file lists
+- `include_general: true` - Copy general domain to all modules
+- `overwrite_existing: true` - Overwrite existing vignette files
+
+This replaces the previous manual approach where vignette files had to be individually listed in each module's configuration.
+
+### Other Development Notes
+
+- When generating new example data and vignettes add them to appropriate place in updateModules configuration
+- Use gemini CLI for large codebase analysis. See instructions here: @use-claude-and-gemini-together.md 

@@ -1,11 +1,117 @@
 ---
 name:  jiwillsurvive
-title: Survival
+title: Intuitive Survival Analysis
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: Survival
-      type:  Preformatted
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: survivalPlot
+      title: Survival Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (analysis_type:survival_model)
+
+    - name: survivalStats
+      title: Statistical Tests
+      type: Html
+      visible: (analysis_type:survival_model && show_statistics)
+
+    - name: survivalTable
+      title: Survival Summary Table
+      type: Table
+      rows: 0
+      columns:
+        - name: Time
+          title: "Time"
+          type: number
+        - name: N_Risk
+          title: "N at Risk"
+          type: integer
+        - name: N_Event
+          title: "N Events"
+          type: integer
+        - name: Survival
+          title: "Survival"
+          type: number
+        - name: SE
+          title: "SE"
+          type: number
+        - name: Lower_CI
+          title: "Lower CI"
+          type: number
+        - name: Upper_CI
+          title: "Upper CI"
+          type: number
+        - name: Group
+          title: "Group"
+          type: text
+      visible: (analysis_type:survival_model && show_survival_table)
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (analysis_type:survival_model && show_interpretation)
+
+    - name: kmPlot
+      title: Kaplan-Meier Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (analysis_type:kaplan_meier)
+
+    - name: kmStats
+      title: Kaplan-Meier Statistics
+      type: Html
+      visible: (analysis_type:kaplan_meier)
+
+    - name: kmTable
+      title: Kaplan-Meier Summary Table
+      type: Table
+      rows: 0
+      columns:
+        - name: Time
+          title: "Time"
+          type: number
+        - name: N_Risk
+          title: "N at Risk"
+          type: integer
+        - name: N_Event
+          title: "N Events"
+          type: integer
+        - name: Survival
+          title: "Survival"
+          type: number
+        - name: Lower_CI
+          title: "Lower CI"
+          type: number
+        - name: Upper_CI
+          title: "Upper CI"
+          type: number
+        - name: Group
+          title: "Group"
+          type: text
+      visible: (analysis_type:kaplan_meier)
+
+    - name: followupPlot
+      title: Follow-up Visualization
+      type: Image
+      width: 600
+      height: 400
+      visible: (analysis_type:followup_plot)
+
+    - name: prepText
+      title: Data Preparation Summary
+      type: Html
+      visible: (analysis_type:data_prep)
+
+    - name: dataOutput
+      title: Processed Data
+      type: Html
+      visible: (analysis_type:data_prep && export_data)
 
 ...

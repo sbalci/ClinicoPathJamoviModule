@@ -17,7 +17,7 @@
 
 # Command line argument handling
 args <- commandArgs(trailingOnly = TRUE)
-config_file <- if (length(args) > 0) args[1] else "config.yaml"
+config_file <- if (length(args) > 0) args[1] else "updateModules_config.yaml"
 
 cat("🚀 Starting Enhanced Module Update Process\n")
 cat("Configuration file:", config_file, "\n")
