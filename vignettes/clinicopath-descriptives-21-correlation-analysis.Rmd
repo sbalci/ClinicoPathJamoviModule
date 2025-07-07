@@ -239,10 +239,66 @@ matrix_plot <- jcorrelation(
 # Pairs plot with correlations and distributions
 pairs_plot <- jcorrelation(
   data = histopathology,
-  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
+  plots = TRUE,
+  plotType = "pairs"
 )
 
 # Shows scatterplots, correlations, and distributions
+```
+
+## Network Plot
+
+The network plot visualizes correlations as a network where strong correlations appear as thicker connections:
+
+```{r}
+# Network visualization of correlations
+network_plot <- jcorrelation(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "Anti-X-intensity"),
+  plots = TRUE,
+  plotType = "network"
+)
+
+# Creates a network graph showing correlation relationships
+# Strong correlations (>0.3) appear as thicker edges
+# Positive correlations in green, negative in red
+```
+
+## Comprehensive Plot Type Comparison
+
+```{r}
+# Compare all three plot types for the same data
+test_vars <- c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+
+# Matrix plot - hierarchical clustering of correlation matrix
+matrix_visualization <- jcorrelation(
+  data = histopathology,
+  vars = test_vars,
+  plots = TRUE,
+  plotType = "matrix"
+)
+
+# Pairs plot - scatterplot matrix with correlation coefficients  
+pairs_visualization <- jcorrelation(
+  data = histopathology,
+  vars = test_vars,
+  plots = TRUE,
+  plotType = "pairs"
+)
+
+# Network plot - graph-based correlation visualization
+network_visualization <- jcorrelation(
+  data = histopathology,
+  vars = test_vars,
+  plots = TRUE,
+  plotType = "network"
+)
+
+# Each plot type offers different insights:
+# - Matrix: Overall pattern identification
+# - Pairs: Individual relationship examination  
+# - Network: Correlation strength visualization
 ```
 
 # Clinical Examples

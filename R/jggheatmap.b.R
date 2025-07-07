@@ -61,7 +61,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_heatmap = function(data) {
             # Load required packages
-            packages <- c('ggplot2', 'ggheatmap', 'dplyr', 'stats')
+            packages <- c('ggplot2', 'tidyr', 'dplyr', 'stats')
             for (pkg in packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
                     stop(paste0("Package '", pkg, "' is required but not installed"))
@@ -71,8 +71,8 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Prepare matrix data
             matrix_data <- self$.prepare_matrix_data(data)
             
-            # Create ggheatmap plot
-            plot <- self$.build_ggheatmap(matrix_data)
+            # Create ggplot2 heatmap
+            plot <- self$.build_ggplot_heatmap(matrix_data)
             
             return(plot)
         },
@@ -135,17 +135,33 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(matrix_data)
         },
         
-        .build_ggheatmap = function(matrix_data) {
-            # Convert matrix to data frame for ggheatmap
+        .build_ggplot_heatmap = function(matrix_data) {
+            # Convert matrix to data frame for ggplot2
             heatmap_data <- expand.grid(
-                Row = rownames(matrix_data),
-                Column = colnames(matrix_data)
+                Row = factor(rownames(matrix_data), levels = rownames(matrix_data)),
+                Column = factor(colnames(matrix_data), levels = colnames(matrix_data))
             )
             heatmap_data$Value <- as.vector(matrix_data)
             
-            # Create base plot
-            plot <- ggplot2::ggplot(heatmap_data, ggplot2::aes(x = Column, y = Row, fill = Value)) +
-                ggplot2::geom_tile()
+            # Create base plot with geom_tile
+            base_aes <- ggplot2::aes(x = Column, y = Row, fill = Value)
+            
+            # Apply cell shape
+            if (self$options$cell_shape == "square") {
+                geom_func <- ggplot2::geom_tile(color = self$options$border_color, size = 0.5)
+            } else if (self$options$cell_shape == "circle") {
+                geom_func <- ggplot2::geom_point(ggplot2::aes(size = abs(Value)), 
+                                                shape = 21, color = self$options$border_color, 
+                                                stroke = 0.5)
+            } else if (self$options$cell_shape == "triangle") {
+                geom_func <- ggplot2::geom_point(ggplot2::aes(size = abs(Value)), 
+                                                shape = 24, color = self$options$border_color, 
+                                                stroke = 0.5)
+            } else {
+                geom_func <- ggplot2::geom_tile(color = self$options$border_color, size = 0.5)
+            }
+            
+            plot <- ggplot2::ggplot(heatmap_data, base_aes) + geom_func
             
             # Apply color scheme
             plot <- self$.apply_color_scheme(plot)
@@ -153,15 +169,27 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Apply clustering if requested
             if (self$options$cluster_rows || self$options$cluster_cols) {
                 plot <- self$.apply_clustering(plot, matrix_data)
+                
+                # Add dendrograms if requested
+                if (self$options$show_dendrograms) {
+                    plot <- self$.add_dendrograms(plot, matrix_data)
+                }
             }
             
             # Add cell values if requested
             if (self$options$show_values) {
+                formatted_values <- self$.format_values(heatmap_data$Value)
                 plot <- plot + ggplot2::geom_text(
-                    ggplot2::aes(label = self$.format_values(Value)),
+                    ggplot2::aes(label = formatted_values),
                     size = self$options$text_size / 3,
                     color = "black"
                 )
+            }
+            
+            # Add annotations if specified
+            if (!is.null(self$options$annotation_var) && 
+                length(self$options$annotation_var) > 0) {
+                plot <- self$.add_annotations(plot, data)
             }
             
             # Apply styling
@@ -174,26 +202,32 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             color_scale <- switch(self$options$color_scheme,
                 "blue_red" = ggplot2::scale_fill_gradient2(
                     low = "blue", mid = "white", high = "red",
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 ),
                 "viridis" = ggplot2::scale_fill_viridis_c(
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 ),
                 "plasma" = ggplot2::scale_fill_viridis_c(
                     option = "plasma",
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 ),
                 "rdylbu" = ggplot2::scale_fill_distiller(
                     palette = "RdYlBu",
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 ),
                 "spectral" = ggplot2::scale_fill_distiller(
                     palette = "Spectral",
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 ),
                 ggplot2::scale_fill_gradient2(
                     low = "blue", mid = "white", high = "red",
-                    name = self$options$colorbar_title
+                    name = self$options$colorbar_title,
+                    na.value = self$options$na_color
                 )
             )
             
@@ -206,14 +240,18 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Perform hierarchical clustering
             if (self$options$cluster_rows) {
                 row_dist <- self$.calculate_distance(matrix_data, "row")
-                row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
-                plot <- plot + ggplot2::scale_y_discrete(limits = rownames(matrix_data)[row_clust$order])
+                if (inherits(row_dist, "dist")) {
+                    row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
+                    plot <- plot + ggplot2::scale_y_discrete(limits = rownames(matrix_data)[row_clust$order])
+                }
             }
             
             if (self$options$cluster_cols) {
                 col_dist <- self$.calculate_distance(matrix_data, "column")
-                col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
-                plot <- plot + ggplot2::scale_x_discrete(limits = colnames(matrix_data)[col_clust$order])
+                if (inherits(col_dist, "dist")) {
+                    col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
+                    plot <- plot + ggplot2::scale_x_discrete(limits = colnames(matrix_data)[col_clust$order])
+                }
             }
             
             return(plot)
@@ -240,7 +278,8 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             if (dist_method %in% c("pearson", "spearman")) {
-                return(dist_method)  # Already calculated above
+                # Already calculated and returned above
+                return(stats::dist(data_for_dist, method = "euclidean"))  # fallback
             } else {
                 return(stats::dist(data_for_dist, method = dist_method))
             }
@@ -364,6 +403,49 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
         
+        .add_dendrograms = function(plot, matrix_data) {
+            # Add dendrogram information as plot annotations
+            # This is a simplified implementation; full dendrograms would require additional packages
+            if (self$options$cluster_rows) {
+                row_dist <- self$.calculate_distance(matrix_data, "row")
+                if (inherits(row_dist, "dist")) {
+                    row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
+                    plot <- plot + ggplot2::labs(caption = paste("Row clustering:", self$options$clustering_method, "method"))
+                }
+            }
+            
+            if (self$options$cluster_cols) {
+                col_dist <- self$.calculate_distance(matrix_data, "column")
+                if (inherits(col_dist, "dist")) {
+                    col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
+                    current_caption <- if (is.null(plot$labels$caption)) "" else paste0(plot$labels$caption, "\n")
+                    plot <- plot + ggplot2::labs(caption = paste0(current_caption, "Column clustering:", self$options$clustering_method, "method"))
+                }
+            }
+            
+            return(plot)
+        },
+        
+        .add_annotations = function(plot, data) {
+            # Add color annotations based on annotation variable
+            if (self$options$annotation_var %in% names(data)) {
+                annotation_data <- data[[self$options$annotation_var]]
+                
+                # Apply annotation colors - simplified version without RColorBrewer dependency
+                color_palette <- switch(self$options$annotation_colors,
+                    "set1" = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF"),
+                    "dark2" = c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02", "#A6761D", "#666666"),
+                    "paired" = c("#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00"),
+                    scales::hue_pal()(length(unique(annotation_data)))  # default
+                )
+                
+                # This is a simplified annotation implementation
+                plot <- plot + ggplot2::labs(subtitle = paste("Annotation:", self$options$annotation_var))
+            }
+            
+            return(plot)
+        },
+        
         .generate_interpretation = function(data) {
             matrix_data <- self$.prepare_matrix_data(data)
             
@@ -400,7 +482,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             interpretation <- paste0(interpretation,
-                "<p>The ggheatmap package provides advanced heatmap visualization capabilities ",
+                "<p>The jggheatmap function provides advanced heatmap visualization capabilities ",
                 "with flexible clustering, color schemes, and annotation options, making it ideal ",
                 "for clinical research data analysis and visualization.</p>"
             )

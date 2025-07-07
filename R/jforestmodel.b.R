@@ -442,35 +442,82 @@ jforestmodelClass <- R6::R6Class(
             }
             
             tryCatch({
-                # Create forest plot using forestmodel
-                plot <- forestmodel::forest_model(
+                # Prepare forestmodel arguments
+                forest_args <- list(
                     model = private$.model,
                     exponentiate = self$options$exponentiate,
                     factor_separate_line = self$options$factor_separate_line
                 )
                 
-                # Customize plot appearance
-                if (self$options$plot_title != "Forest Plot") {
-                    plot <- plot + ggplot2::ggtitle(self$options$plot_title)
+                # Handle covariates selection
+                if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
+                    forest_args$covariates <- self$options$covariates
                 }
                 
-                if (self$options$x_axis_label != "") {
-                    plot <- plot + ggplot2::xlab(self$options$x_axis_label)
+                # Create base forest plot
+                plot <- do.call(forestmodel::forest_model, forest_args)
+                
+                # Apply sorting if specified (post-process the data)
+                if (self$options$sort_variables != "none") {
+                    plot <- private$.applySorting(plot)
                 }
                 
-                # Apply color scheme
-                color_scheme <- self$options$color_scheme
-                if (color_scheme != "default") {
-                    color_value <- switch(color_scheme,
-                        "blue" = "#2196F3",
-                        "red" = "#F44336",
-                        "green" = "#4CAF50",
-                        "purple" = "#9C27B0",
-                        "custom" = self$options$custom_color,
-                        "#2196F3"
+                # Auto-adjust reference line based on exponentiation
+                reference_value <- if (self$options$exponentiate) 1 else 0
+                if (!is.null(self$options$reference_value)) {
+                    reference_value <- self$options$reference_value
+                }
+                
+                # Add reference line if requested
+                if (self$options$show_reference_line) {
+                    plot <- plot + ggplot2::geom_vline(
+                        xintercept = reference_value, 
+                        linetype = "dashed", 
+                        color = "gray50", 
+                        size = 0.7
                     )
-                    # Note: forestmodel has limited customization options
-                    # Additional styling would require manual ggplot2 modifications
+                }
+                
+                # Customize plot appearance
+                plot_title <- if (self$options$plot_title != "Forest Plot") {
+                    self$options$plot_title
+                } else {
+                    if (self$options$exponentiate) {
+                        switch(self$options$model_type,
+                            "glm" = "Odds Ratios",
+                            "coxph" = "Hazard Ratios",
+                            "Forest Plot"
+                        )
+                    } else {
+                        "Model Coefficients"
+                    }
+                }
+                
+                x_axis_label <- if (self$options$x_axis_label != "") {
+                    self$options$x_axis_label
+                } else {
+                    if (self$options$exponentiate) {
+                        switch(self$options$model_type,
+                            "glm" = "Odds Ratio",
+                            "coxph" = "Hazard Ratio",
+                            "lm" = "Coefficient",
+                            "Effect Size"
+                        )
+                    } else {
+                        "Coefficient"
+                    }
+                }
+                
+                plot <- plot + 
+                    ggplot2::ggtitle(plot_title) +
+                    ggplot2::xlab(x_axis_label)
+                
+                # Apply color scheme and styling
+                plot <- private$.applyColorScheme(plot)
+                
+                # Apply panel width ratio if specified
+                if (self$options$panel_width_ratio != "1:1:1") {
+                    plot <- private$.applyPanelRatio(plot)
                 }
                 
                 print(plot)
@@ -489,6 +536,87 @@ jforestmodelClass <- R6::R6Class(
                 
                 print(plot)
                 TRUE
+            })
+        },
+        
+        .applySorting = function(plot) {
+            # Note: Due to forestmodel package limitations, sorting is limited
+            # This is a placeholder for future enhancement
+            tryCatch({
+                sort_type <- self$options$sort_variables
+                
+                if (sort_type %in% c("coefficient", "pvalue", "alphabetical")) {
+                    # Extract plot data if possible
+                    plot_data <- ggplot2::ggplot_build(plot)$data[[1]]
+                    
+                    # For now, return original plot
+                    # Future enhancement could reorder the plot data
+                    return(plot)
+                }
+                
+                return(plot)
+                
+            }, error = function(e) {
+                return(plot)  # Return original plot if sorting fails
+            })
+        },
+        
+        .applyColorScheme = function(plot) {
+            color_scheme <- self$options$color_scheme
+            
+            if (color_scheme != "default") {
+                color_value <- switch(color_scheme,
+                    "blue" = "#2196F3",
+                    "red" = "#F44336", 
+                    "green" = "#4CAF50",
+                    "purple" = "#9C27B0",
+                    "custom" = self$options$custom_color,
+                    "#2196F3"
+                )
+                
+                # Apply color modifications where possible
+                # Note: forestmodel has limited color customization
+                tryCatch({
+                    # Modify point colors if geom_point layers exist
+                    plot$layers <- lapply(plot$layers, function(layer) {
+                        if (inherits(layer$geom, "GeomPoint")) {
+                            if (is.null(layer$aes_params$colour)) {
+                                layer$aes_params$colour <- color_value
+                            }
+                            # Apply point size if specified
+                            if (is.null(layer$aes_params$size) && self$options$point_size != 2) {
+                                layer$aes_params$size <- self$options$point_size
+                            }
+                        }
+                        return(layer)
+                    })
+                    
+                }, error = function(e) {
+                    # If color modification fails, continue with original plot
+                })
+            }
+            
+            return(plot)
+        },
+        
+        .applyPanelRatio = function(plot) {
+            # Panel width ratio implementation
+            # Note: This is complex with forestmodel and may require plot reconstruction
+            tryCatch({
+                ratio_string <- self$options$panel_width_ratio
+                
+                # Parse ratio string (e.g., "2:3:1")
+                if (grepl("^\\d+:\\d+:\\d+$", ratio_string)) {
+                    ratios <- as.numeric(strsplit(ratio_string, ":")[[1]])
+                    
+                    # For now, add a note about panel ratios
+                    # Future enhancement could implement custom panel layouts
+                }
+                
+                return(plot)
+                
+            }, error = function(e) {
+                return(plot)  # Return original plot if panel ratio fails
             })
         }
     )

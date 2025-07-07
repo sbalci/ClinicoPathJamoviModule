@@ -8,6 +8,7 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         initialize = function(
             dep_var = NULL,
             group_var = NULL,
+            test_value = 0,
             analysis_type = "between_stats",
             extract_components = "all",
             statistical_test = "parametric",
@@ -45,6 +46,10 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..test_value <- jmvcore::OptionNumber$new(
+                "test_value",
+                test_value,
+                default=0)
             private$..analysis_type <- jmvcore::OptionList$new(
                 "analysis_type",
                 analysis_type,
@@ -54,7 +59,9 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "correlation",
                     "histogram",
                     "scatterplot",
-                    "bar_chart"),
+                    "bar_chart",
+                    "contingency_stats",
+                    "one_sample_stats"),
                 default="between_stats")
             private$..extract_components <- jmvcore::OptionList$new(
                 "extract_components",
@@ -147,6 +154,7 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 
             self$.addOption(private$..dep_var)
             self$.addOption(private$..group_var)
+            self$.addOption(private$..test_value)
             self$.addOption(private$..analysis_type)
             self$.addOption(private$..extract_components)
             self$.addOption(private$..statistical_test)
@@ -166,6 +174,7 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     active = list(
         dep_var = function() private$..dep_var$value,
         group_var = function() private$..group_var$value,
+        test_value = function() private$..test_value$value,
         analysis_type = function() private$..analysis_type$value,
         extract_components = function() private$..extract_components$value,
         statistical_test = function() private$..statistical_test$value,
@@ -184,6 +193,7 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     private = list(
         ..dep_var = NA,
         ..group_var = NA,
+        ..test_value = NA,
         ..analysis_type = NA,
         ..extract_components = NA,
         ..statistical_test = NA,
@@ -268,6 +278,7 @@ jextractggstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param data R object to use
 #' @param dep_var Dependent variable for analysis
 #' @param group_var Grouping variable for comparisons
+#' @param test_value Reference value for one-sample test
 #' @param analysis_type Type of ggstatsplot analysis to perform
 #' @param extract_components Which statistical components to extract
 #' @param statistical_test Type of statistical test to use
@@ -297,6 +308,7 @@ jextractggstats <- function(
     data,
     dep_var,
     group_var,
+    test_value = 0,
     analysis_type = "between_stats",
     extract_components = "all",
     statistical_test = "parametric",
@@ -329,6 +341,7 @@ jextractggstats <- function(
     options <- jextractggstatsOptions$new(
         dep_var = dep_var,
         group_var = group_var,
+        test_value = test_value,
         analysis_type = analysis_type,
         extract_components = extract_components,
         statistical_test = statistical_test,

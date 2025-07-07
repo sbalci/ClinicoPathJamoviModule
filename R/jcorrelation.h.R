@@ -141,7 +141,8 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         report = function() private$.items[["report"]],
         plot = function() private$.items[["plot"]],
         plotMatrix = function() private$.items[["plotMatrix"]],
-        plotPairs = function() private$.items[["plotPairs"]]),
+        plotPairs = function() private$.items[["plotPairs"]],
+        plotNetwork = function() private$.items[["plotNetwork"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -154,6 +155,9 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "report",
                     "corrplot",
                     "GGally",
+                    "qgraph",
+                    "igraph",
+                    "ggraph",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -222,7 +226,15 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 width=800,
                 height=600,
                 renderFun=".plotPairs",
-                visible="(plots && plotType:pairs)"))}))
+                visible="(plots && plotType:pairs)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotNetwork",
+                title="Network Plot",
+                width=600,
+                height=600,
+                renderFun=".plotNetwork",
+                visible="(plots && plotType:network)"))}))
 
 jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jcorrelationBase",
@@ -293,6 +305,7 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotMatrix} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotPairs} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotNetwork} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

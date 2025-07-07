@@ -9,6 +9,19 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
         .init = function() {
             if (is.null(self$data) || is.null(self$options$x_var) || is.null(self$options$y_var)) {
+                self$results$instructions$setContent(
+                    "<h3>Ridge Plot Instructions</h3>
+                    <p>To create a ridge plot, you need to specify:</p>
+                    <ul>
+                        <li><strong>X Variable:</strong> A continuous variable for the distribution</li>
+                        <li><strong>Y Variable:</strong> A grouping variable for separate ridges</li>
+                    </ul>
+                    <p>Optional variables:</p>
+                    <ul>
+                        <li><strong>Color Variable:</strong> Variable for color mapping</li>
+                        <li><strong>Facet Variable:</strong> Variable for creating separate panels</li>
+                    </ul>"
+                )
                 self$results$instructions$setVisible(visible = TRUE)
                 self$results$plot$setVisible(visible = FALSE)
                 self$results$statistics$setVisible(visible = FALSE)
@@ -97,8 +110,12 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .createRidgePlot = function(data) {
-            # Create base plot
-            p <- ggplot2::ggplot(data, ggplot2::aes(x = x, y = y))
+            # Create base plot with appropriate aesthetics
+            if (!is.null(self$options$color_var) && "color" %in% names(data)) {
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = x, y = y, fill = color))
+            } else {
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = x, y = y))
+            }
             
             # Add ridge layer based on plot type
             p <- private$.addRidgeLayer(p, data)
@@ -125,7 +142,7 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             p <- private$.applyColorPalette(p, data)
             
             # Add faceting if specified
-            if (!is.null(self$options$facet_var)) {
+            if (!is.null(self$options$facet_var) && "facet" %in% names(data)) {
                 p <- p + ggplot2::facet_wrap(~ facet, scales = "free")
             }
             
@@ -155,12 +172,25 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     bandwidth = private$.getBandwidth()
                 )
             } else if (plot_type == "density_ridges_gradient") {
-                plot <- plot + ggridges::geom_density_ridges_gradient(
-                    scale = scale,
-                    alpha = alpha,
-                    rel_min_height = rel_min_height,
-                    bandwidth = private$.getBandwidth()
-                )
+                # For gradient density ridges, we need to adjust the aesthetics
+                if (!is.null(self$options$color_var)) {
+                    # With color variable, use group fill
+                    plot <- plot + ggridges::geom_density_ridges_gradient(
+                        scale = scale,
+                        alpha = alpha,
+                        rel_min_height = rel_min_height,
+                        bandwidth = private$.getBandwidth()
+                    )
+                } else {
+                    # Without color variable, map density to fill
+                    plot <- ggplot2::ggplot(data, ggplot2::aes(x = x, y = y, fill = stat(x))) +
+                        ggridges::geom_density_ridges_gradient(
+                            scale = scale,
+                            alpha = alpha,
+                            rel_min_height = rel_min_height,
+                            bandwidth = private$.getBandwidth()
+                        )
+                }
             } else if (plot_type == "violin_ridges") {
                 plot <- plot + ggridges::geom_violin_ridges(
                     scale = scale,
@@ -173,13 +203,19 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .addQuantileLines = function(plot, data) {
-            quantiles <- self$options$quantiles
-            if (length(quantiles) > 0) {
-                plot <- plot + ggridges::stat_density_ridges(
-                    quantile_lines = TRUE,
-                    quantiles = quantiles,
-                    alpha = 0
-                )
+            quantiles_str <- self$options$quantiles
+            if (!is.null(quantiles_str) && nchar(trimws(quantiles_str)) > 0) {
+                # Parse comma-separated quantiles string
+                quantiles <- as.numeric(unlist(strsplit(trimws(quantiles_str), "[,\\s]+")))
+                quantiles <- quantiles[!is.na(quantiles)]
+                
+                if (length(quantiles) > 0) {
+                    plot <- plot + ggridges::stat_density_ridges(
+                        quantile_lines = TRUE,
+                        quantiles = quantiles,
+                        alpha = 0
+                    )
+                }
             }
             return(plot)
         },
@@ -240,9 +276,19 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .applyColorPalette = function(plot, data) {
-            if (!is.null(self$options$color_var)) {
-                palette <- self$options$color_palette
-                
+            palette <- self$options$color_palette
+            plot_type <- self$options$plot_type
+            
+            if (plot_type == "density_ridges_gradient" && is.null(self$options$color_var)) {
+                # For gradient density ridges without color variable, use continuous scale
+                if (palette %in% c("viridis", "plasma", "inferno", "magma")) {
+                    plot <- plot + ggplot2::scale_fill_viridis_c(option = palette)
+                } else {
+                    # Use gradient for other palettes
+                    plot <- plot + ggplot2::scale_fill_gradient(low = "darkblue", high = "darkred")
+                }
+            } else if (!is.null(self$options$color_var)) {
+                # For categorical color variables
                 if (palette %in% c("viridis", "plasma", "inferno", "magma")) {
                     plot <- plot + ggplot2::scale_fill_viridis_d(option = palette)
                 } else {

@@ -59,6 +59,7 @@ A results object containing:
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotMatrix} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotPairs} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotNetwork} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

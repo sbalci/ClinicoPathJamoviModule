@@ -1,0 +1,597 @@
+---
+title: "Ridge Plot Visualization with jggridges"
+subtitle: "Creating Distribution Comparisons Across Groups"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 10
+    fig_height: 8
+vignette: >
+  %\VignetteIndexEntry{Ridge Plot Visualization with jggridges}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig_height = 8,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r}
+library(ClinicoPath)
+library(ggplot2)
+library(dplyr)
+```
+
+# Introduction
+
+The `jggridges` function provides comprehensive ridge plot visualization capabilities for comparing distributions across multiple groups. Ridge plots (also known as joy plots) are particularly effective for visualizing the distribution of a continuous variable across different categories, making them ideal for clinical research applications.
+
+Ridge plots are superior to traditional methods like box plots or violin plots when:
+
+- **Multiple Groups**: You need to compare distributions across many groups (>5)
+- **Distribution Shape**: The shape of the distribution is important, not just summary statistics
+- **Space Efficiency**: You need to display many distributions in a compact format
+- **Pattern Recognition**: You want to identify trends or patterns across ordered categories
+- **Visual Appeal**: You need publication-quality, aesthetically pleasing visualizations
+
+# Key Features
+
+The `jggridges` function supports:
+
+- **Multiple Plot Types**: Basic ridgelines, density ridges, gradient density ridges, and violin ridges
+- **Flexible Aesthetics**: Customizable colors, transparency, and scaling
+- **Statistical Overlays**: Quantile lines, mean lines, and jittered data points
+- **Advanced Options**: Multiple bandwidth methods, theme styles, and faceting
+- **Statistical Output**: Summary statistics and interpretations for each group
+- **Publication Ready**: Professional themes and customizable labels
+
+# Basic Ridge Plots
+
+## Simple Distribution Comparison
+
+Let's start with a basic ridge plot comparing age distributions across tumor grades:
+
+```{r}
+# Load histopathology data
+data(histopathology, package = "ClinicoPath")
+
+# Basic ridge plot of age by tumor grade
+basic_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  plot_type = "density_ridges",
+  plot_title = "Age Distribution by Tumor Grade",
+  x_label = "Age (years)",
+  y_label = "Tumor Grade"
+)
+
+# The plot will be displayed in jamovi interface
+```
+
+## Understanding the Output
+
+Ridge plots display:
+- **X-axis**: The continuous variable being analyzed
+- **Y-axis**: Categories or groups for comparison
+- **Ridge Height**: Probability density at each point
+- **Overlap**: Shows how distributions overlap between groups
+
+# Plot Types
+
+## Density Ridges
+
+The most common type, showing smooth density estimates:
+
+```{r}
+# Density ridges with custom scaling
+density_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  plot_type = "density_ridges",
+  scale = 1.5,  # Increase ridge height
+  alpha = 0.8,  # Slight transparency
+  plot_title = "Density Ridge Plot of Age by Grade"
+)
+```
+
+## Gradient Density Ridges
+
+Add color gradients to show density variation:
+
+```{r}
+# Gradient density ridges
+gradient_ridge <- jggridges(
+  data = histopathology,
+  x_var = "MeasurementA",
+  y_var = "TStage",
+  plot_type = "density_ridges_gradient",
+  color_palette = "viridis",
+  plot_title = "Gradient Ridge Plot: Biomarker A by T-Stage"
+)
+```
+
+## Basic Ridgelines
+
+For pre-computed densities or simple line plots:
+
+```{r}
+# Basic ridgeline plot
+ridgeline <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  plot_type = "ridgeline",
+  plot_title = "Basic Ridgeline Plot"
+)
+```
+
+## Violin Ridges
+
+Combination of ridge plots and violin plots:
+
+```{r}
+# Violin ridge plot
+violin_ridge <- jggridges(
+  data = histopathology,
+  x_var = "OverallTime",
+  y_var = "Group",
+  plot_type = "violin_ridges",
+  plot_title = "Violin Ridge Plot: Survival Time by Treatment Group"
+)
+```
+
+# Statistical Overlays
+
+## Quantile Lines
+
+Show specific quantiles within each distribution:
+
+```{r}
+# Ridge plot with quantile lines
+quantile_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  plot_type = "density_ridges",
+  quantile_lines = TRUE,
+  quantiles = "0.25, 0.5, 0.75",
+  plot_title = "Age Distribution with Quartiles"
+)
+```
+
+## Mean Lines
+
+Add vertical lines showing group means:
+
+```{r}
+# Ridge plot with mean lines
+mean_ridge <- jggridges(
+  data = histopathology,
+  x_var = "MeasurementB",
+  y_var = "Grade_Level",
+  plot_type = "density_ridges",
+  show_mean = TRUE,
+  plot_title = "Biomarker B Distribution with Mean Lines"
+)
+```
+
+## Jittered Points
+
+Show individual data points below ridges:
+
+```{r}
+# Ridge plot with jittered points (raincloud style)
+points_ridge <- jggridges(
+  data = histopathology[sample(nrow(histopathology), 100), ],  # Subset for clarity
+  x_var = "Age",
+  y_var = "Sex",
+  plot_type = "density_ridges",
+  jittered_points = TRUE,
+  point_alpha = 0.4,
+  plot_title = "Age Distribution by Sex with Raw Data"
+)
+```
+
+# Aesthetic Customization
+
+## Color Variables
+
+Use a third variable to color ridges:
+
+```{r}
+# Ridge plot with color mapping
+color_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "TStage",
+  color_var = "LVI",
+  color_palette = "Set1",
+  plot_type = "density_ridges",
+  plot_title = "Age by T-Stage, Colored by LVI Status"
+)
+```
+
+## Scale and Transparency
+
+Control ridge height and opacity:
+
+```{r}
+# Customized scale and transparency
+custom_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  scale = 2.0,      # Double the ridge height
+  alpha = 0.6,      # 60% opacity
+  rel_min_height = 0.02,  # Minimum height threshold
+  plot_title = "Customized Ridge Heights and Transparency"
+)
+```
+
+## Theme Styles
+
+Apply different ggplot2 themes:
+
+```{r}
+# Ridge plot with minimal theme
+minimal_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  theme_style = "theme_minimal",
+  plot_title = "Minimal Theme Ridge Plot"
+)
+
+# Ridge plot with classic theme
+classic_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  theme_style = "theme_classic",
+  plot_title = "Classic Theme Ridge Plot"
+)
+```
+
+# Advanced Features
+
+## Bandwidth Selection
+
+Control density estimation smoothness:
+
+```{r}
+# Different bandwidth methods
+bandwidth_methods <- c("nrd0", "nrd", "ucv", "SJ")
+
+for (method in bandwidth_methods) {
+  ridge_plot <- jggridges(
+    data = histopathology,
+    x_var = "Age",
+    y_var = "Grade_Level",
+    plot_type = "density_ridges",
+    bandwidth = method,
+    plot_title = paste("Bandwidth Method:", method)
+  )
+}
+```
+
+## Faceting
+
+Create separate panels for subgroups:
+
+```{r}
+# Faceted ridge plot
+facet_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  facet_var = "Sex",
+  plot_type = "density_ridges",
+  plot_title = "Age Distribution by Grade, Faceted by Sex"
+)
+```
+
+## Reverse Order
+
+Reverse the order of groups on Y-axis:
+
+```{r}
+# Reversed order ridge plot
+reverse_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  reverse_order = TRUE,
+  plot_title = "Reversed Order: Low Grade at Top"
+)
+```
+
+# Clinical Research Applications
+
+## Biomarker Analysis
+
+Compare biomarker distributions across disease stages:
+
+```{r}
+# Biomarker comparison across stages
+biomarker_ridge <- jggridges(
+  data = histopathology,
+  x_var = "MeasurementA",
+  y_var = "TStage",
+  plot_type = "density_ridges_gradient",
+  color_palette = "plasma",
+  quantile_lines = TRUE,
+  quantiles = "0.5",
+  plot_title = "Biomarker A Levels by Tumor Stage",
+  x_label = "Biomarker A Expression",
+  y_label = "T Stage",
+  show_statistics = TRUE
+)
+```
+
+## Treatment Response
+
+Visualize continuous outcomes across treatment groups:
+
+```{r}
+# Treatment response visualization
+treatment_ridge <- jggridges(
+  data = histopathology,
+  x_var = "OverallTime",
+  y_var = "Group",
+  color_var = "Death",
+  plot_type = "density_ridges",
+  show_mean = TRUE,
+  plot_title = "Survival Time Distribution by Treatment Group",
+  x_label = "Overall Survival Time (months)",
+  y_label = "Treatment Group"
+)
+```
+
+## Multi-category Comparisons
+
+Compare distributions across multiple categorical variables:
+
+```{r}
+# Complex multi-category comparison
+complex_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  color_var = "LVI",
+  facet_var = "Sex",
+  plot_type = "density_ridges",
+  scale = 1.5,
+  alpha = 0.7,
+  quantile_lines = TRUE,
+  quantiles = "0.25, 0.5, 0.75",
+  plot_title = "Comprehensive Age Distribution Analysis",
+  plot_subtitle = "By Grade, LVI Status, and Sex"
+)
+```
+
+# Color Palettes
+
+## Viridis Family
+
+Perceptually uniform color scales:
+
+```{r}
+# Viridis palette options
+viridis_palettes <- c("viridis", "plasma", "inferno", "magma")
+
+for (palette in viridis_palettes) {
+  ridge_plot <- jggridges(
+    data = histopathology,
+    x_var = "Age",
+    y_var = "Grade_Level",
+    plot_type = "density_ridges_gradient",
+    color_palette = palette,
+    plot_title = paste("Color Palette:", palette)
+  )
+}
+```
+
+## ColorBrewer Palettes
+
+Qualitative color schemes for categorical data:
+
+```{r}
+# ColorBrewer palette examples
+brewer_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  color_var = "Sex",
+  color_palette = "Set2",
+  plot_type = "density_ridges",
+  plot_title = "ColorBrewer Set2 Palette"
+)
+```
+
+# Statistical Analysis
+
+## Summary Statistics
+
+Generate detailed statistics for each group:
+
+```{r}
+# Ridge plot with statistics
+stats_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  plot_type = "density_ridges",
+  show_statistics = TRUE,
+  show_interpretation = TRUE,
+  plot_title = "Age Distribution with Statistical Summary"
+)
+
+# Statistics table includes:
+# - N (sample size)
+# - Mean and SD
+# - Median and quartiles
+# - Min and Max values
+```
+
+## Interpretation Output
+
+Get automated interpretation of results:
+
+```{r}
+# Ridge plot with interpretation
+interpret_ridge <- jggridges(
+  data = histopathology,
+  x_var = "MeasurementA",
+  y_var = "TStage",
+  show_interpretation = TRUE,
+  plot_title = "Biomarker Analysis with Interpretation"
+)
+
+# Interpretation includes:
+# - Dataset overview
+# - Overall distribution characteristics
+# - Group comparisons
+# - Visual insights
+```
+
+# Best Practices
+
+## Data Preparation
+
+1. **Check Data Types**: Ensure X variable is numeric and Y variable is categorical
+2. **Handle Missing Data**: Function removes incomplete cases automatically
+3. **Group Sizes**: Ensure adequate sample size per group (n > 10 recommended)
+4. **Outliers**: Consider impact on density estimation
+
+## Visual Design
+
+1. **Scale Selection**: 
+   - Use scale = 1.0 for minimal overlap
+   - Use scale > 1.5 for emphasized differences
+   - Use scale < 1.0 for many groups
+
+2. **Color Choice**:
+   - Use gradient for continuous density representation
+   - Use categorical colors for group comparisons
+   - Consider colorblind-friendly palettes
+
+3. **Label Clarity**:
+   - Use descriptive axis labels
+   - Add informative titles and subtitles
+   - Consider rotating long group labels
+
+## Statistical Considerations
+
+1. **Bandwidth Selection**:
+   - "nrd0" (default): Good general purpose
+   - "SJ": Better for multimodal distributions
+   - "ucv": Unbiased cross-validation
+
+2. **Quantile Display**:
+   - Show median (0.5) for central tendency
+   - Show quartiles (0.25, 0.75) for spread
+   - Consider deciles for detailed analysis
+
+# Troubleshooting
+
+## Common Issues
+
+### Too Many Groups
+```r
+# If you have many groups, adjust scale and consider ordering
+many_groups_ridge <- jggridges(
+  data = data_with_many_groups,
+  x_var = "value",
+  y_var = "group",
+  scale = 0.9,  # Reduce overlap
+  rel_min_height = 0.01,  # Show smaller ridges
+  expand_panel = FALSE  # Compact display
+)
+```
+
+### Sparse Data
+```r
+# For sparse data, adjust bandwidth
+sparse_ridge <- jggridges(
+  data = sparse_data,
+  x_var = "value",
+  y_var = "group",
+  bandwidth = "SJ",  # Adaptive bandwidth
+  plot_type = "density_ridges"
+)
+```
+
+### Overlapping Labels
+```r
+# Handle overlapping Y-axis labels
+label_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  theme_style = "theme_minimal",
+  expand_panel = TRUE
+)
+```
+
+# Complete Example
+
+Here's a comprehensive example using all major features:
+
+```{r}
+# Comprehensive ridge plot analysis
+comprehensive_ridge <- jggridges(
+  data = histopathology,
+  x_var = "Age",
+  y_var = "Grade_Level",
+  color_var = "LVI",
+  plot_type = "density_ridges_gradient",
+  scale = 1.8,
+  alpha = 0.8,
+  rel_min_height = 0.01,
+  bandwidth = "nrd0",
+  quantile_lines = TRUE,
+  quantiles = "0.1, 0.25, 0.5, 0.75, 0.9",
+  show_mean = TRUE,
+  color_palette = "viridis",
+  reverse_order = FALSE,
+  expand_panel = TRUE,
+  theme_style = "theme_ridges",
+  x_label = "Patient Age (years)",
+  y_label = "Tumor Grade Category",
+  plot_title = "Age Distribution Analysis by Tumor Grade",
+  plot_subtitle = "Colored by Lymphovascular Invasion Status",
+  show_statistics = TRUE,
+  show_interpretation = TRUE
+)
+```
+
+# Conclusion
+
+The `jggridges` function provides a powerful and flexible tool for creating ridge plots in clinical research. Key benefits include:
+
+- **Efficient Visualization**: Compare many distributions in a single plot
+- **Pattern Recognition**: Easily identify trends across ordered categories
+- **Statistical Integration**: Built-in summary statistics and interpretations
+- **Publication Quality**: Professional themes and customization options
+- **Clinical Relevance**: Designed for medical research applications
+
+Ridge plots are particularly valuable when traditional methods like box plots fail to capture the full complexity of your data distributions, making them an essential tool for modern clinical data visualization.
+
+# References
+
+1. Wilke, C.O. (2017). ggridges: Ridgeline plots in ggplot2. R package version 0.5.3.
+2. Hintze, J. L., & Nelson, R. D. (1998). Violin plots: a box plot-density trace synergism. The American Statistician, 52(2), 181-184.
+3. Kampstra, P. (2008). Beanplot: A boxplot alternative for visual comparison of distributions. Journal of Statistical Software, 28(1), 1-9.
