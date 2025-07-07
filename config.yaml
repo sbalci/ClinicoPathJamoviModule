@@ -1,0 +1,169 @@
+# Configuration file for _updateModules.R
+# This file defines module settings, file mappings, and deployment parameters
+
+# Global settings
+global:
+  new_version: "0.0.3.45"
+  new_date: "2025-07-06"
+  base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
+
+# Operation modes
+modes:
+  quick: false
+  check: false
+  extended: false
+  webpage: false
+  commit_modules: false
+  WIP: false
+
+# Required packages for validation
+required_packages:
+  - xfun
+  - fs
+  - jmvtools
+  - devtools
+  - purrr
+  - digest
+  - yaml
+  - future
+
+# Module definitions
+modules:
+  jjstatsplot:
+    enabled: true
+    directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
+    menuGroup_pattern: "menuGroup: JJStatsPlot$"
+    menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
+
+    data_files:
+      - "histopathology.rda"
+
+    r_files: []
+
+    vignette_files:
+      - "jjstatsplot-introduction.Rmd"
+      - "correlations-scatterplots.Rmd"
+      - "continuous-comparisons.Rmd"
+      - "categorical-plots.Rmd"
+
+    test_files: []
+
+    required_directories:
+      - "data"
+      - "R"
+      - "vignettes"
+      - "jamovi"
+
+  meddecide:
+    enabled: true
+    directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
+    menuGroup_pattern: "menuGroup: meddecide$"
+    menuGroup_pattern_wip: "menuGroup: meddecide"
+
+    data_files:
+      - "histopathology.rda"
+      - "roc_analysis_test_data.RData"
+      - "cancer_biomarker_data.csv"
+      - "cardiac_troponin_data.csv"
+      - "sepsis_biomarker_data.csv"
+      - "thyroid_function_data.csv"
+
+    r_files:
+      - "psychopdaroc_utilities.R"
+      - "nomogrammer.R"
+      - "meddecide-utils.R"
+      - "meddecide_stats_utils.R"
+      - "diagnostic_metrics.R"
+
+    vignette_files:
+      - "nogoldstandard.Rmd"
+      - "diagnostic-tests.Rmd"
+      - "decisionpanel_advanced.Rmd"
+      - "decisionpanel_optimisation.Rmd"
+      - "decisionpanel_clinical.Rmd"
+      - "meddecide-vignettes.Rmd"
+      - "medical_decision_tree_guide.Rmd"
+
+    test_files:
+      - "test-decision.R"
+      - "test-roc.R"
+
+    required_directories:
+      - "data"
+      - "R"
+      - "vignettes"
+      - "jamovi"
+      - "tests/testthat"
+
+  jsurvival:
+    enabled: true
+    directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
+    menuGroup_pattern: "menuGroup: Survival$"
+    menuGroup_pattern_wip: "menuGroup: Survival"
+
+    data_files:
+      - "histopathology.rda"
+
+    r_files: []
+
+    vignette_files:
+      - "jsurvival.Rmd"
+
+    test_files: []
+
+    required_directories:
+      - "data"
+      - "R"
+      - "vignettes"
+      - "jamovi"
+
+  ClinicoPathDescriptives:
+    enabled: true
+    directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
+    menuGroup_pattern: "menuGroup: Exploration$"
+    menuGroup_pattern_wip: "menuGroup: Exploration"
+
+    data_files:
+      - "histopathology.rda"
+      - "histopathologyDescriptives.omv"
+      - "treatmentResponse.omv"
+      - "treatmentResponse.rda"
+
+    r_files: []
+
+    vignette_files:
+      - "data-summary.Rmd"
+      - "visualization.Rmd"
+
+    test_files: []
+
+    required_directories:
+      - "data"
+      - "R"
+      - "vignettes"
+      - "jamovi"
+
+# File extensions to copy for jamovi modules
+jamovi_extensions:
+  - ".b.R"
+  - ".a.yaml"
+  - ".r.yaml"
+  - ".u.yaml"
+
+# Security settings
+security:
+  validate_paths: true
+  verify_checksums: true
+  max_file_size_mb: 100
+
+# Performance settings
+performance:
+  parallel_processing: false
+  max_workers: 4
+  incremental_updates: true
+
+# Backup settings
+backup:
+  enabled: true
+  retention_days: 30
+  backup_location: "backups"

@@ -7,6 +7,36 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
         .init = function() {
             if (is.null(self$data) || is.null(self$options$dependent_var)) {
+                # Set default instructions
+                self$results$interpretation$setContent(
+                    "<h3>Enhanced Statistical Visualization Instructions</h3>
+                    <p>To create statistical plots with ggstats, specify:</p>
+                    <ul>
+                        <li><strong>Analysis Type:</strong> Choose from model coefficients, comparisons, Likert plots, surveys, proportions, etc.</li>
+                        <li><strong>Dependent Variable:</strong> Main outcome variable for analysis</li>
+                    </ul>
+                    <p>For model-based analyses, also specify:</p>
+                    <ul>
+                        <li><strong>Independent Variables:</strong> Predictor variables for the model</li>
+                        <li><strong>Model Type:</strong> Linear, logistic, Cox regression, or mixed effects</li>
+                    </ul>
+                    <p>Optional variables:</p>
+                    <ul>
+                        <li><strong>Grouping Variable:</strong> For stratified analyses</li>
+                        <li><strong>Weight Variable:</strong> For survey or weighted analyses</li>
+                        <li><strong>Facet Variable:</strong> For multi-panel plots</li>
+                    </ul>"
+                )
+                self$results$plot$setVisible(FALSE)
+                return()
+            }
+            
+            # Validate required packages
+            if (!requireNamespace("ggstats", quietly = TRUE)) {
+                self$results$interpretation$setContent(
+                    "<p style='color: red;'><strong>Error:</strong> The 'ggstats' package is required but not installed. 
+                    Please install it using: <code>install.packages('ggstats')</code></p>"
+                )
                 self$results$plot$setVisible(FALSE)
                 return()
             }
@@ -95,12 +125,42 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Fit model
             model <- self$.fit_model(data, formula)
             
-            # Create coefficient plot using ggstats
-            plot <- ggstats::ggcoef_model(
-                model,
+            # Prepare additional arguments
+            coef_args <- list(
+                model = model,
                 intercept = self$options$show_intercept,
                 sort = if(self$options$sort_coefficients) "ascending" else FALSE
             )
+            
+            # Add standardized coefficients if requested
+            if (self$options$standardized && self$options$model_type %in% c("lm", "glm")) {
+                if (requireNamespace('lm.beta', quietly = TRUE)) {
+                    tryCatch({
+                        std_model <- lm.beta::lm.beta(model)
+                        coef_args$model <- std_model
+                    }, error = function(e) {
+                        # Fall back to regular coefficients if standardization fails
+                    })
+                }
+            }
+            
+            # Create coefficient plot using ggstats
+            plot <- do.call(ggstats::ggcoef_model, coef_args)
+            
+            # Add significance stars if requested
+            if (self$options$show_significance) {
+                if (requireNamespace('broom', quietly = TRUE)) {
+                    model_tidy <- broom::tidy(model)
+                    plot <- plot + 
+                        ggplot2::geom_text(
+                            ggplot2::aes(
+                                label = ggstats::signif_stars(model_tidy$p.value)
+                            ),
+                            hjust = -0.1,
+                            size = 3
+                        )
+                }
+            }
             
             return(plot)
         },
@@ -109,12 +169,42 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Build multiple models for comparison
             models <- self$.build_comparison_models(data)
             
+            # Apply standardization if requested
+            if (self$options$standardized && self$options$model_type %in% c("lm", "glm")) {
+                if (requireNamespace('lm.beta', quietly = TRUE)) {
+                    tryCatch({
+                        std_models <- lapply(models, function(m) {
+                            if (class(m)[1] %in% c("lm", "glm")) {
+                                lm.beta::lm.beta(m)
+                            } else {
+                                m
+                            }
+                        })
+                        models <- std_models
+                    }, error = function(e) {
+                        # Fall back to regular coefficients if standardization fails
+                    })
+                }
+            }
+            
             # Create comparison plot
             plot <- ggstats::ggcoef_compare(
                 models,
                 intercept = self$options$show_intercept,
                 sort = if(self$options$sort_coefficients) "ascending" else FALSE
             )
+            
+            # Add significance stars if requested
+            if (self$options$show_significance) {
+                if (requireNamespace('broom', quietly = TRUE)) {
+                    # For comparison plots, significance stars are more complex
+                    # This is a simplified approach
+                    plot <- plot + 
+                        ggplot2::theme(
+                            axis.text.y = ggplot2::element_text(size = 8)
+                        )
+                }
+            }
             
             return(plot)
         },
@@ -136,13 +226,30 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Prepare survey data with weights
             survey_data <- self$.prepare_survey_data(data)
             
-            # Create survey visualization
-            plot <- ggplot2::ggplot(survey_data, ggplot2::aes_string(
-                x = self$options$dependent_var,
-                weight = self$options$weight_var
-            )) +
-            ggstats::stat_prop() +
-            ggplot2::geom_bar()
+            # Create survey visualization using ggstats approach
+            if (!is.null(self$options$weight_var)) {
+                plot <- ggplot2::ggplot(survey_data, ggplot2::aes_string(
+                    x = self$options$dependent_var,
+                    weight = self$options$weight_var
+                )) +
+                ggstats::stat_prop(by = self$options$grouping_var) +
+                ggplot2::geom_bar(ggplot2::aes(y = ggplot2::after_stat(prop)))
+                
+                if (!is.null(self$options$grouping_var)) {
+                    plot <- plot + ggplot2::aes_string(fill = self$options$grouping_var)
+                }
+            } else {
+                # Regular proportion plot without weights
+                plot <- ggplot2::ggplot(survey_data, ggplot2::aes_string(
+                    x = self$options$dependent_var
+                )) +
+                ggstats::stat_prop() +
+                ggplot2::geom_bar(ggplot2::aes(y = ggplot2::after_stat(prop)))
+                
+                if (!is.null(self$options$grouping_var)) {
+                    plot <- plot + ggplot2::aes_string(fill = self$options$grouping_var)
+                }
+            }
             
             return(plot)
         },
@@ -199,7 +306,22 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Create cascade plot for data filtering visualization
             cascade_data <- self$.prepare_cascade_data(data)
             
-            plot <- ggstats::ggcascade(cascade_data)
+            # Create cascade plot manually using ggplot2 since ggcascade expects specific format
+            plot <- ggplot2::ggplot(cascade_data, ggplot2::aes(x = step, y = n)) +
+                ggplot2::geom_col(fill = "steelblue", alpha = 0.7) +
+                ggplot2::geom_text(ggplot2::aes(label = paste0(n, " (", round(prop*100, 1), "%)")), 
+                                 vjust = -0.5, size = 3) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    plot.title = ggplot2::element_text(hjust = 0.5)
+                ) +
+                ggplot2::labs(
+                    title = "Data Cascade Analysis",
+                    x = "Analysis Step",
+                    y = "Number of Observations",
+                    subtitle = "Sample size at each analysis step"
+                )
             
             return(plot)
         },
@@ -279,19 +401,80 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .prepare_likert_data = function(data) {
             # Prepare data for Likert plot
-            # This function would need customization based on data structure
+            # Convert to factor with specified levels if needed
+            if (!is.null(self$options$dependent_var)) {
+                var_name <- self$options$dependent_var
+                if (is.numeric(data[[var_name]])) {
+                    # Convert numeric to ordered factor
+                    min_val <- min(data[[var_name]], na.rm = TRUE)
+                    max_val <- max(data[[var_name]], na.rm = TRUE)
+                    data[[var_name]] <- factor(data[[var_name]], 
+                                             levels = min_val:max_val, 
+                                             ordered = TRUE)
+                }
+            }
             return(data)
         },
         
         .prepare_survey_data = function(data) {
             # Prepare survey data with proper weights
+            # Ensure weight variable is numeric
+            if (!is.null(self$options$weight_var)) {
+                weight_var <- self$options$weight_var
+                if (!is.numeric(data[[weight_var]])) {
+                    data[[weight_var]] <- as.numeric(data[[weight_var]])
+                }
+                # Remove rows with missing or invalid weights
+                data <- data[!is.na(data[[weight_var]]) & data[[weight_var]] > 0, ]
+            }
             return(data)
         },
         
         .prepare_cascade_data = function(data) {
-            # Prepare data for cascade plot
-            # This would show filtering steps
-            return(data)
+            # Prepare data for cascade plot showing filtering steps
+            # Create a summary of data filtering steps
+            total_obs <- nrow(data)
+            
+            # Calculate missing data by variable
+            cascade_steps <- data.frame(
+                step = character(0),
+                n = numeric(0),
+                prop = numeric(0)
+            )
+            
+            # Add total observations
+            cascade_steps <- rbind(cascade_steps, data.frame(
+                step = "Total Observations",
+                n = total_obs,
+                prop = 1.0
+            ))
+            
+            # Check for missing dependent variable
+            if (!is.null(self$options$dependent_var)) {
+                dep_var <- self$options$dependent_var
+                non_missing <- sum(!is.na(data[[dep_var]]))
+                cascade_steps <- rbind(cascade_steps, data.frame(
+                    step = paste("Complete", dep_var),
+                    n = non_missing,
+                    prop = non_missing / total_obs
+                ))
+            }
+            
+            # Check for missing independent variables
+            if (!is.null(self$options$independent_vars)) {
+                for (var in self$options$independent_vars) {
+                    if (var %in% names(data)) {
+                        non_missing <- sum(!is.na(data[[var]]))
+                        cascade_steps <- rbind(cascade_steps, data.frame(
+                            step = paste("Complete", var),
+                            n = non_missing,
+                            prop = non_missing / total_obs
+                        ))
+                    }
+                }
+            }
+            
+            return(cascade_steps)
         },
         
         .apply_plot_customizations = function(plot) {

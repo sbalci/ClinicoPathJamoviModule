@@ -25,6 +25,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: TextBox
+        name: test_value
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: analysis_type
   - type: LayoutBox

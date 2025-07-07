@@ -255,15 +255,32 @@ jforesterClass <- R6::R6Class(
             }
             
             if (self$options$show_heterogeneity) {
-                # Calculate basic heterogeneity statistics
+                # Calculate comprehensive heterogeneity statistics
                 estimates <- data$estimate
                 n_studies <- length(estimates)
                 
                 if (n_studies > 1) {
-                    # Simple heterogeneity measures
-                    mean_est <- mean(estimates, na.rm = TRUE)
-                    var_est <- var(estimates, na.rm = TRUE)
+                    # Calculate weights (inverse variance if sample sizes available)
+                    weights <- if (any(!is.na(data$sample_size))) {
+                        data$sample_size / sum(data$sample_size, na.rm = TRUE)
+                    } else {
+                        rep(1/n_studies, n_studies)  # Equal weights
+                    }
                     
+                    # Calculate weighted mean
+                    weighted_mean <- sum(estimates * weights, na.rm = TRUE)
+                    
+                    # Calculate Q statistic (Cochran's Q test)
+                    Q <- sum(weights * (estimates - weighted_mean)^2, na.rm = TRUE)
+                    df <- n_studies - 1
+                    
+                    # Calculate I² statistic
+                    I_squared <- max(0, (Q - df) / Q) * 100
+                    
+                    # P-value for Q test (approximate)
+                    Q_p_value <- if (df > 0) pchisq(Q, df, lower.tail = FALSE) else NA
+                    
+                    # Add statistics to table
                     table$addRow(rowKey = "n_studies", values = list(
                         statistic = "Number of Studies",
                         value = as.character(n_studies)
@@ -271,15 +288,41 @@ jforesterClass <- R6::R6Class(
                     
                     table$addRow(rowKey = "range", values = list(
                         statistic = "Range of Estimates",
-                        value = sprintf("%.3f to %.3f", min(estimates), max(estimates))
+                        value = sprintf("%.3f to %.3f", min(estimates, na.rm = TRUE), max(estimates, na.rm = TRUE))
                     ))
                     
-                    if (!is.na(var_est) && var_est > 0) {
-                        table$addRow(rowKey = "heterogeneity", values = list(
-                            statistic = "Heterogeneity",
-                            value = "Present (variance > 0)"
+                    table$addRow(rowKey = "q_statistic", values = list(
+                        statistic = "Q Statistic",
+                        value = sprintf("%.2f (df = %d)", Q, df)
+                    ))
+                    
+                    if (!is.na(Q_p_value)) {
+                        table$addRow(rowKey = "q_p_value", values = list(
+                            statistic = "Q Test P-value",
+                            value = if (Q_p_value < 0.001) "< 0.001" else sprintf("%.3f", Q_p_value)
                         ))
                     }
+                    
+                    table$addRow(rowKey = "i_squared", values = list(
+                        statistic = "I² (Heterogeneity)",
+                        value = sprintf("%.1f%%", I_squared)
+                    ))
+                    
+                    # Interpretation of I²
+                    i_squared_interpretation <- if (I_squared < 25) {
+                        "Low heterogeneity"
+                    } else if (I_squared < 50) {
+                        "Moderate heterogeneity"
+                    } else if (I_squared < 75) {
+                        "Substantial heterogeneity"
+                    } else {
+                        "Considerable heterogeneity"
+                    }
+                    
+                    table$addRow(rowKey = "heterogeneity_interpretation", values = list(
+                        statistic = "Heterogeneity Assessment",
+                        value = i_squared_interpretation
+                    ))
                 }
             }
         },
@@ -440,15 +483,30 @@ jforesterClass <- R6::R6Class(
                 
                 # Add arrows if requested
                 if (self$options$arrow_labels) {
-                    plot <- plot + ggplot2::annotation_custom(
-                        grid::textGrob(self$options$left_arrow_label, 
-                                     gp = grid::gpar(fontsize = 10)),
-                        xmin = -Inf, xmax = -Inf, ymin = -Inf, ymax = -Inf
-                    ) + ggplot2::annotation_custom(
-                        grid::textGrob(self$options$right_arrow_label, 
-                                     gp = grid::gpar(fontsize = 10)),
-                        xmin = Inf, xmax = Inf, ymin = -Inf, ymax = -Inf
-                    )
+                    # Calculate plot limits for arrow positioning
+                    x_range <- range(c(data$estimate, data$ci_lower, data$ci_upper), na.rm = TRUE)
+                    x_span <- x_range[2] - x_range[1]
+                    y_bottom <- -0.8
+                    
+                    # Position arrows at the bottom of the plot
+                    left_x <- x_range[1] + 0.1 * x_span
+                    right_x <- x_range[2] - 0.1 * x_span
+                    
+                    plot <- plot + 
+                        ggplot2::annotate("text", 
+                                        x = left_x, 
+                                        y = y_bottom, 
+                                        label = paste0("← ", self$options$left_arrow_label),
+                                        hjust = 0, 
+                                        size = 3.5, 
+                                        color = "gray40") +
+                        ggplot2::annotate("text", 
+                                        x = right_x, 
+                                        y = y_bottom, 
+                                        label = paste0(self$options$right_arrow_label, " →"),
+                                        hjust = 1, 
+                                        size = 3.5, 
+                                        color = "gray40")
                 }
                 
                 print(plot)

@@ -109,6 +109,21 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         plotgrid.args = list(title = "Statistical Analysis"),
                         return.type = "plot"
                     )
+                } else if (analysis_type == "within_stats" && "x" %in% names(data)) {
+                    # For within-subjects analysis, assume paired data
+                    ggstatsplot::ggwithinstats(
+                        data = data,
+                        x = x,
+                        y = y,
+                        type = type,
+                        conf.level = conf_level,
+                        pairwise.comparisons = self$options$pairwise_comparisons,
+                        p.adjust.method = self$options$pairwise_correction,
+                        effsize.type = private$.getEffectSizeType(),
+                        bf.prior = self$options$bf_prior,
+                        centrality.plotting = self$options$centrality_plotting,
+                        return.type = "plot"
+                    )
                 } else if (analysis_type == "histogram") {
                     ggstatsplot::gghistostats(
                         data = data,
@@ -127,6 +142,55 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         type = type,
                         conf.level = conf_level,
                         bf.prior = self$options$bf_prior,
+                        return.type = "plot"
+                    )
+                } else if (analysis_type == "scatterplot" && "x" %in% names(data)) {
+                    # Same as correlation but emphasizing scatterplot visualization
+                    ggstatsplot::ggscatterstats(
+                        data = data,
+                        x = x,
+                        y = y,
+                        type = type,
+                        conf.level = conf_level,
+                        bf.prior = self$options$bf_prior,
+                        marginal = TRUE,  # Add marginal plots
+                        return.type = "plot"
+                    )
+                } else if (analysis_type == "bar_chart" && "x" %in% names(data)) {
+                    # For categorical data analysis
+                    ggstatsplot::ggbarstats(
+                        data = data,
+                        x = x,
+                        y = y,
+                        type = type,
+                        conf.level = conf_level,
+                        bf.prior = self$options$bf_prior,
+                        return.type = "plot"
+                    )
+                } else if (analysis_type == "contingency_stats" && "x" %in% names(data)) {
+                    # For contingency table analysis (two categorical variables)
+                    ggstatsplot::ggbarstats(
+                        data = data,
+                        x = x,
+                        y = y,
+                        type = type,
+                        conf.level = conf_level,
+                        pairwise.comparisons = self$options$pairwise_comparisons,
+                        p.adjust.method = self$options$pairwise_correction,
+                        bf.prior = self$options$bf_prior,
+                        return.type = "plot"
+                    )
+                } else if (analysis_type == "one_sample_stats") {
+                    # For one-sample test against a reference value
+                    test_value <- self$options$test_value
+                    ggstatsplot::gghistostats(
+                        data = data,
+                        x = y,
+                        test.value = test_value,
+                        type = type,
+                        conf.level = conf_level,
+                        bf.prior = self$options$bf_prior,
+                        centrality.plotting = self$options$centrality_plotting,
                         return.type = "plot"
                     )
                 } else {
@@ -346,8 +410,13 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "<p><strong>Analysis Type:</strong> ", 
                 switch(analysis_type,
                     "between_stats" = "Between-groups comparison analysis suitable for comparing means or distributions across groups.",
+                    "within_stats" = "Within-subjects comparison analysis for paired or repeated measures data.",
                     "histogram" = "Single variable distribution analysis with statistical tests for normality and central tendency.",
                     "correlation" = "Correlation analysis examining the relationship between two continuous variables.",
+                    "scatterplot" = "Scatterplot visualization with marginal distributions and correlation analysis.",
+                    "bar_chart" = "Categorical data analysis with chi-square tests and proportion comparisons.",
+                    "contingency_stats" = "Contingency table analysis examining associations between two categorical variables using chi-square tests.",
+                    "one_sample_stats" = "One-sample test comparing a variable against a reference value or theoretical mean.",
                     "General statistical analysis"
                 ), "</p>"
             )

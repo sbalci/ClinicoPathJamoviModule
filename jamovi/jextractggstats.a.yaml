@@ -25,6 +25,12 @@ options:
       permitted: [factor]
       description: Grouping variable for comparisons
     
+    - name: test_value
+      title: Test Value (for one-sample test)
+      type: Number
+      default: 0
+      description: Reference value for one-sample test
+    
     - name: analysis_type
       title: Analysis Type
       type: List
@@ -41,6 +47,10 @@ options:
           title: Scatterplot Analysis
         - name: bar_chart
           title: Bar Chart Analysis
+        - name: contingency_stats
+          title: Contingency Table Analysis
+        - name: one_sample_stats
+          title: One Sample Test
       default: between_stats
       description: Type of ggstatsplot analysis to perform
     

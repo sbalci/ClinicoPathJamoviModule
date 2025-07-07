@@ -48,3 +48,5 @@ inst/doc
 **/.quarto/
 /.claude
 .venv/
+backups/
+

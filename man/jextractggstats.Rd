@@ -8,6 +8,7 @@ jextractggstats(
   data,
   dep_var,
   group_var,
+  test_value = 0,
   analysis_type = "between_stats",
   extract_components = "all",
   statistical_test = "parametric",
@@ -31,6 +32,8 @@ jextractggstats(
 \item{dep_var}{Dependent variable for analysis}
 
 \item{group_var}{Grouping variable for comparisons}
+
+\item{test_value}{Reference value for one-sample test}
 
 \item{analysis_type}{Type of ggstatsplot analysis to perform}
 

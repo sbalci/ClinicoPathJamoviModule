@@ -1,106 +1,198 @@
 #!/usr/bin/env Rscript
-# Update modules script for ClinicoPathJamoviModule
-# This script updates the ClinicoPathJamoviModule and its dependencies to a new version and date.
-# It copies example files, updates DESCRIPTION and YAML files, and commits changes to the repositories.
-# It also prepares, documents, and installs the modules.
-# It is designed to be run in a development environment and can be set to work-in-progress (WIP) mode.
-# It requires the `xfun`, `fs`, `jmvtools`, and `devtools` packages to be installed.
-# # Usage:
-# Rscript _updateModules.R
+# Enhanced Update Modules Script for ClinicoPathJamoviModule
+#
+# This script provides a comprehensive solution for distributing production-ready functions
+# from the main ClinicoPathJamoviModule to specialized submodules with enhanced:
+# - Error handling and validation
+# - Security measures
+# - Performance optimization
+# - Testing integration
+# - Backup and rollback capabilities
+# - Configuration management
+#
+# Usage: Rscript _updateModules.R [config_file]
+#
+# Author: Enhanced version with enterprise-grade features
+# Requires: R >= 4.0.0, yaml, future, digest packages
 
+# Command line argument handling
+args <- commandArgs(trailingOnly = TRUE)
+config_file <- if (length(args) > 0) args[1] else "config.yaml"
 
-# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+cat("🚀 Starting Enhanced Module Update Process\n")
+cat("Configuration file:", config_file, "\n")
 
-# Define the new version and date ----
-new_version <- "0.0.3.45" # Update this to the new version you want to set
-new_date <- "2025-07-06" # Update this to the new date you want to set
+# Get script directory and set working directory
+script_dir <- tryCatch({
+  # Try to get script directory from command line execution
+  dirname(normalizePath(sys.frame(1)$ofile))
+}, error = function(e) {
+  # Fallback for interactive execution
+  getwd()
+})
+setwd(script_dir)
 
+# Source utility functions
+if (!file.exists("module_utils.R")) {
+  stop("❌ module_utils.R not found. Please ensure all required files are present.")
+}
 
-# Define WIP, check, extended status ----
-quick <- FALSE # Set to TRUE if you want to run the script in quick mode, which skips some steps
-check <- FALSE # Set to TRUE if you want to run devtools::check() on the modules
-extended <- FALSE # Set to TRUE if you want to document and install submodules
-ClinicoPathDescriptives_module <- FALSE # Set to TRUE if you want to update the ClinicoPathDescriptives module
-jsurvival_module <- FALSE # Set to TRUE if you want to update the jsurvival module
-jjstatsplot_module <- FALSE # Set to TRUE if you want to update the jjstatsplot module
-meddecide_module <- FALSE # Set to TRUE if you want to update the meddecide module
+source("module_utils.R")
 
-webpage <- FALSE # Set to TRUE if you want to build the pkgdown website for the modules
-commit_modules <- FALSE # Set to TRUE if you want to commit changes in submodule repositories
-WIP <- FALSE # Set to TRUE if this is a work-in-progress update, this will prepare WIP submodules for testing. If WIP is TRUE, the script will use WIP directories for submodules.
+# Load and validate configuration
+cat("\n📋 Loading configuration...\n")
+config <- load_config(config_file)
+config <- validate_config(config)
 
+# Extract configuration values
+global <- config$global
+modes <- config$modes
+modules_config <- config$modules
+required_packages <- config$required_packages %||% c("xfun", "fs", "jmvtools", "devtools", "purrr", "yaml", "digest")
+
+# Override configuration with any manual settings (for backward compatibility)
+# You can still manually override these if needed
+new_version <- global$new_version
+new_date <- global$new_date
+main_repo_dir <- global$base_repo_dir
+
+# Operation modes
+quick <- modes$quick %||% FALSE
+check <- modes$check %||% FALSE
+extended <- modes$extended %||% FALSE
+webpage <- modes$webpage %||% FALSE
+commit_modules <- modes$commit_modules %||% FALSE
+WIP <- modes$WIP %||% FALSE
+
+# Module-specific flags (extracted from config)
+ClinicoPathDescriptives_module <- modules_config$ClinicoPathDescriptives$enabled %||% FALSE
+jsurvival_module <- modules_config$jsurvival$enabled %||% FALSE
+jjstatsplot_module <- modules_config$jjstatsplot$enabled %||% FALSE
+meddecide_module <- modules_config$meddecide$enabled %||% FALSE
+
+# Apply WIP mode overrides
 if (WIP) {
   quick <- FALSE
   check <- FALSE
   extended <- TRUE
   webpage <- FALSE
   commit_modules <- FALSE
+  cat("🔧 WIP mode enabled - using sandbox environment\n")
 }
 
+# Load required packages with validation
+cat("\n📦 Loading required packages...\n")
+load_required_packages(required_packages)
 
+# Setup parallel processing if enabled
+parallel_enabled <- setup_parallel_processing(
+  enabled = config$performance$parallel_processing %||% FALSE,
+  max_workers = config$performance$max_workers %||% 4
+)
 
-# Load required packages ----
-library(xfun)
-library(fs)
-library(jmvtools)
-library(devtools)
-library(purrr)
-
-
-# Define base directories (adjust these absolute paths as needed) ----
-main_repo_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
-
+# Validate main repository directory
+main_repo_dir <- validate_path(main_repo_dir, dirname(main_repo_dir), "main repository")
 setwd(main_repo_dir)
 
+# Clean old backups if backup is enabled
+if (config$backup$enabled %||% TRUE) {
+  cat("\n🧹 Cleaning old backups...\n")
+  clean_old_backups(
+    backup_base_dir = config$backup$backup_location %||% "backups",
+    retention_days = config$backup$retention_days %||% 30
+  )
+}
+
+# Quick mode handling
 if (quick) {
-  devtools::install(quick = TRUE, reload = TRUE, quiet = FALSE, upgrade = FALSE, build_vignettes = FALSE, keep_source = TRUE)
-  stop("Quick mode is enabled. Exiting without further actions.")
+  cat("⚡ Quick mode enabled - performing fast installation\n")
+  with_error_handling({
+    devtools::install(quick = TRUE, reload = TRUE, quiet = FALSE,
+                     upgrade = FALSE, build_vignettes = FALSE, keep_source = TRUE)
+  }, "quick installation")
+  cat("✅ Quick mode completed successfully\n")
+  quit("no", status = 0)
 }
 
 
 
-jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
-meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide"
-jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival"
-ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
+# Extract module directories from configuration
+module_dirs <- list()
+for (module_name in names(modules_config)) {
+  if (modules_config[[module_name]]$enabled) {
+    module_dirs[[module_name]] <- modules_config[[module_name]]$directory
+  }
+}
 
+# Legacy variable assignments for backward compatibility
+jjstatsplot_dir <- module_dirs$jjstatsplot %||% "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
+meddecide_dir <- module_dirs$meddecide %||% "/Users/serdarbalci/Documents/GitHub/meddecide"
+jsurvival_dir <- module_dirs$jsurvival %||% "/Users/serdarbalci/Documents/GitHub/jsurvival"
+ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
 
-
+# Enhanced WIP mode with backup and validation
 if (WIP) {
-  # Delete existing WIP directories if they exist
-  if (dir.exists(paste0(jjstatsplot_dir, "-WIP"))) {
-    fs::dir_delete(paste0(jjstatsplot_dir, "-WIP"))
-  }
-  if (dir.exists(paste0(meddecide_dir, "-WIP"))) {
-    fs::dir_delete(paste0(meddecide_dir, "-WIP"))
-  }
-  if (dir.exists(paste0(jsurvival_dir, "-WIP"))) {
-    fs::dir_delete(paste0(jsurvival_dir, "-WIP"))
-  }
-  if (dir.exists(paste0(ClinicoPathDescriptives_dir, "-WIP"))) {
-    fs::dir_delete(paste0(ClinicoPathDescriptives_dir, "-WIP"))
+  cat("\n🔧 Setting up WIP (Work-In-Progress) environment...\n")
+
+  wip_setup_success <- TRUE
+
+  for (module_name in names(module_dirs)) {
+    original_dir <- module_dirs[[module_name]]
+    wip_dir <- paste0(original_dir, "-WIP")
+
+    # Validate original directory exists
+    if (!dir.exists(original_dir)) {
+      warning("⚠️ Original module directory does not exist: ", original_dir)
+      wip_setup_success <- FALSE
+      next
+    }
+
+    cat("🔧 Setting up WIP environment for", module_name, "\n")
+
+    # Delete existing WIP directory if it exists
+    if (dir.exists(wip_dir)) {
+      cat("  🗑️ Removing existing WIP directory:", wip_dir, "\n")
+      with_error_handling({
+        fs::dir_delete(wip_dir)
+      }, paste("removing existing WIP directory for", module_name), continue_on_error = TRUE)
+    }
+
+    # Create backup of original directory
+    backup_path <- create_backup(original_dir, "wip_backups")
+    if (is.null(backup_path)) {
+      warning("⚠️ Failed to create backup for ", module_name, ", skipping WIP setup")
+      wip_setup_success <- FALSE
+      next
+    }
+
+    # Copy original to WIP directory
+    cat("  📁 Creating WIP copy:", wip_dir, "\n")
+    copy_result <- with_error_handling({
+      fs::dir_copy(path = original_dir, new_path = wip_dir, overwrite = TRUE)
+    }, paste("creating WIP directory for", module_name), continue_on_error = TRUE)
+
+    if (!copy_result$success) {
+      wip_setup_success <- FALSE
+      next
+    }
+
+    # Update module directory reference
+    module_dirs[[module_name]] <- wip_dir
+
+    cat("  ✅ WIP environment ready for", module_name, "\n")
   }
 
-  # Create WIP directories if they do not exist
-  fs::dir_copy(path = jjstatsplot_dir,
-               new_path = file.path(paste0(jjstatsplot_dir, "-WIP")),
-               overwrite = TRUE)
-  fs::dir_copy(path = meddecide_dir,
-               new_path = file.path(paste0(meddecide_dir, "-WIP")),
-               overwrite = TRUE)
-  fs::dir_copy(path = jsurvival_dir,
-               new_path = file.path(paste0(jsurvival_dir, "-WIP")),
-               overwrite = TRUE)
-  fs::dir_copy(path = ClinicoPathDescriptives_dir,
-               new_path = file.path(paste0(ClinicoPathDescriptives_dir, "-WIP")),
-               overwrite = TRUE)
+  # Update legacy variables for WIP
+  jjstatsplot_dir <- module_dirs$jjstatsplot %||% jjstatsplot_dir
+  meddecide_dir <- module_dirs$meddecide %||% meddecide_dir
+  jsurvival_dir <- module_dirs$jsurvival %||% jsurvival_dir
+  ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% ClinicoPathDescriptives_dir
 
-  # Update the directories to WIP versions
-  jjstatsplot_dir <- "/Users/serdarbalci/Documents/GitHub/jjstatsplot-WIP"
-  meddecide_dir <- "/Users/serdarbalci/Documents/GitHub/meddecide-WIP"
-  jsurvival_dir <- "/Users/serdarbalci/Documents/GitHub/jsurvival-WIP"
-  ClinicoPathDescriptives_dir <- "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives-WIP"
+  if (!wip_setup_success) {
+    stop("❌ WIP setup failed for one or more modules. Check warnings above.")
+  }
 
+  cat("✅ WIP environment setup completed successfully\n")
 }
 
 
