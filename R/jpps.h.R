@@ -45,16 +45,20 @@ jppsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="predictors")
             private$..target_var <- jmvcore::OptionVariable$new(
                 "target_var",
-                target_var)
+                target_var,
+                default=NULL)
             private$..predictor_var <- jmvcore::OptionVariable$new(
                 "predictor_var",
-                predictor_var)
+                predictor_var,
+                default=NULL)
             private$..predictor_vars <- jmvcore::OptionVariables$new(
                 "predictor_vars",
-                predictor_vars)
+                predictor_vars,
+                default=NULL)
             private$..matrix_vars <- jmvcore::OptionVariables$new(
                 "matrix_vars",
-                matrix_vars)
+                matrix_vars,
+                default=NULL)
             private$..algorithm <- jmvcore::OptionList$new(
                 "algorithm",
                 algorithm,
@@ -451,10 +455,10 @@ jppsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jpps <- function(
     data,
     analysis_type = "predictors",
-    target_var,
-    predictor_var,
-    predictor_vars,
-    matrix_vars,
+    target_var = NULL,
+    predictor_var = NULL,
+    predictor_vars = NULL,
+    matrix_vars = NULL,
     algorithm = "auto",
     cv_folds = 4,
     sample_size = 5000,

@@ -8,11 +8,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sty = "t1",
-            excl = FALSE,
-            pivot_format = "clinical",
-            include_statistics = TRUE,
-            group_var = NULL,
-            group_comparisons = FALSE, ...) {
+            excl = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -30,60 +26,25 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "t1",
                     "t2",
                     "t3",
-                    "t4",
-                    "t5"),
+                    "t4"),
                 default="t1")
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
                 default=FALSE)
-            private$..pivot_format <- jmvcore::OptionList$new(
-                "pivot_format",
-                pivot_format,
-                options=list(
-                    "clinical",
-                    "publication",
-                    "detailed"),
-                default="clinical")
-            private$..include_statistics <- jmvcore::OptionBool$new(
-                "include_statistics",
-                include_statistics,
-                default=TRUE)
-            private$..group_var <- jmvcore::OptionVariable$new(
-                "group_var",
-                group_var,
-                suggested=list(
-                    "ordinal",
-                    "nominal"))
-            private$..group_comparisons <- jmvcore::OptionBool$new(
-                "group_comparisons",
-                group_comparisons,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sty)
             self$.addOption(private$..excl)
-            self$.addOption(private$..pivot_format)
-            self$.addOption(private$..include_statistics)
-            self$.addOption(private$..group_var)
-            self$.addOption(private$..group_comparisons)
         }),
     active = list(
         vars = function() private$..vars$value,
         sty = function() private$..sty$value,
-        excl = function() private$..excl$value,
-        pivot_format = function() private$..pivot_format$value,
-        include_statistics = function() private$..include_statistics$value,
-        group_var = function() private$..group_var$value,
-        group_comparisons = function() private$..group_comparisons$value),
+        excl = function() private$..excl$value),
     private = list(
         ..vars = NA,
         ..sty = NA,
-        ..excl = NA,
-        ..pivot_format = NA,
-        ..include_statistics = NA,
-        ..group_var = NA,
-        ..group_comparisons = NA)
+        ..excl = NA)
 )
 
 tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -94,8 +55,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
-        tablestyle4 = function() private$.items[["tablestyle4"]],
-        tablestyle5 = function() private$.items[["tablestyle5"]]),
+        tablestyle4 = function() private$.items[["tablestyle4"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -145,18 +105,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "excl"),
                 visible="(sty:t4)",
-                refs="janitor"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="tablestyle5",
-                title="Enhanced Table One (pivottabler)",
-                clearWith=list(
-                    "vars",
-                    "excl",
-                    "pivot_format",
-                    "include_statistics",
-                    "group_comparisons"),
-                visible="(sty:t5)"))}))
+                refs="janitor"))}))
 
 tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "tableoneBase",
@@ -166,7 +115,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "tableone",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = tableoneResults$new(options=options),
                 data = data,
@@ -191,7 +140,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # Example usage:
 #' # data('histopathology')
 #' # dat <- as.data.frame(histopathology)
-#' # ClinicoPath::tableone(
+#' # ClinicoPathDescriptives::tableone(
 #' #   data = dat,
 #' #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
 #' #   sty = "t3",
@@ -204,11 +153,6 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   different package for formatting.
 #' @param excl Boolean option to exclude missing values (NA) from the
 #'   analysis. Note: Exclusion may remove entire cases.
-#' @param pivot_format Formatting style for pivottabler enhanced tables.
-#' @param include_statistics Include advanced statistical summaries in pivot
-#'   format.
-#' @param group_var Variable to use for group comparisons in the analysis.
-#' @param group_comparisons Enable group comparison features in pivot table.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -216,7 +160,6 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$tablestyle5} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -224,32 +167,22 @@ tableone <- function(
     data,
     vars,
     sty = "t1",
-    excl = FALSE,
-    pivot_format = "clinical",
-    include_statistics = TRUE,
-    group_var,
-    group_comparisons = FALSE) {
+    excl = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
-    if ( ! missing(group_var)) group_var <- jmvcore::resolveQuo(jmvcore::enquo(group_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(group_var), group_var, NULL))
+            `if`( ! missing(vars), vars, NULL))
 
 
     options <- tableoneOptions$new(
         vars = vars,
         sty = sty,
-        excl = excl,
-        pivot_format = pivot_format,
-        include_statistics = include_statistics,
-        group_var = group_var,
-        group_comparisons = group_comparisons)
+        excl = excl)
 
     analysis <- tableoneClass$new(
         options = options,

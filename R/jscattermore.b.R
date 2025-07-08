@@ -8,11 +8,150 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jscattermoreClass",
     inherit = jscattermoreBase,
     private = list(
+        # Performance optimization: cache variables
+        .prepared_data = NULL,
+        .prepared_options = NULL,
+        .data_hash = NULL,
+        .options_hash = NULL,
+        .cached_plot = NULL,
+        .cached_summary = NULL,
+        .cached_performance = NULL,
+        
         .init = function() {
             # Initialize plot dimensions for high-performance rendering
             self$results$plot$setSize(800, 600)
             self$results$summary$setVisible(TRUE)
             self$results$performance$setVisible(FALSE)
+        },
+        
+        # Performance optimization methods
+        .calculateDataHash = function() {
+            if (is.null(self$data) || nrow(self$data) == 0) {
+                return(NULL)
+            }
+            
+            # Create hash based on relevant data columns and size
+            relevant_vars <- c(self$options$x_var, self$options$y_var, 
+                             self$options$color_var, self$options$size_var, 
+                             self$options$facet_var)
+            relevant_vars <- relevant_vars[!sapply(relevant_vars, is.null)]
+            
+            if (length(relevant_vars) == 0) {
+                return(NULL)
+            }
+            
+            # Create a simple hash string
+            data_summary <- paste(
+                nrow(self$data),
+                ncol(self$data),
+                paste(relevant_vars, collapse = "_"),
+                if (length(relevant_vars) > 0) {
+                    paste(sapply(relevant_vars, function(var) {
+                        if (var %in% names(self$data)) {
+                            paste(range(self$data[[var]], na.rm = TRUE), collapse = "_")
+                        } else {
+                            "missing"
+                        }
+                    }), collapse = "_")
+                } else {
+                    "no_vars"
+                },
+                sep = "_"
+            )
+            
+            return(data_summary)
+        },
+        
+        .calculateOptionsHash = function() {
+            # Create hash of all relevant options
+            options_list <- list(
+                plot_type = self$options$plot_type,
+                point_size = self$options$point_size,
+                alpha = self$options$alpha,
+                pixels = self$options$pixels,
+                pointsize = self$options$pointsize,
+                interpolate = self$options$interpolate,
+                color_palette = self$options$color_palette,
+                show_smooth = self$options$show_smooth,
+                smooth_method = self$options$smooth_method,
+                show_density = self$options$show_density,
+                log_transform_x = self$options$log_transform_x,
+                log_transform_y = self$options$log_transform_y,
+                x_label = self$options$x_label,
+                y_label = self$options$y_label,
+                plot_title = self$options$plot_title,
+                show_correlation = self$options$show_correlation,
+                show_performance = self$options$show_performance,
+                theme_style = self$options$theme_style
+            )
+            
+            return(paste(options_list, collapse = "_"))
+        },
+        
+        .canUseCache = function() {
+            current_data_hash <- private$.calculateDataHash()
+            current_options_hash <- private$.calculateOptionsHash()
+            
+            return(!is.null(private$.cached_plot) &&
+                   !is.null(private$.data_hash) &&
+                   !is.null(private$.options_hash) &&
+                   !is.null(current_data_hash) &&
+                   !is.null(current_options_hash) &&
+                   current_data_hash == private$.data_hash &&
+                   current_options_hash == private$.options_hash)
+        },
+        
+        .prepareData = function() {
+            current_hash <- private$.calculateDataHash()
+            
+            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+                # Data has changed, prepare new data
+                data <- self$data
+                options <- self$options
+                
+                # Check for minimum required data
+                if (is.null(data) || nrow(data) == 0) {
+                    private$.prepared_data <- NULL
+                    private$.data_hash <- current_hash
+                    return(NULL)
+                }
+                
+                # Check required variables
+                if (is.null(options$x_var) || is.null(options$y_var)) {
+                    private$.prepared_data <- NULL
+                    private$.data_hash <- current_hash
+                    return(NULL)
+                }
+                
+                x_var <- options$x_var
+                y_var <- options$y_var
+                
+                # Clean data and remove missing values
+                data_clean <- data[!is.na(data[[x_var]]) & !is.na(data[[y_var]]), ]
+                
+                if (nrow(data_clean) == 0) {
+                    private$.prepared_data <- NULL
+                    private$.data_hash <- current_hash
+                    return(NULL)
+                }
+                
+                private$.prepared_data <- data_clean
+                private$.data_hash <- current_hash
+            }
+            
+            return(private$.prepared_data)
+        },
+        
+        .prepareOptions = function() {
+            current_hash <- private$.calculateOptionsHash()
+            
+            if (is.null(private$.options_hash) || private$.options_hash != current_hash) {
+                # Options have changed, update cache
+                private$.prepared_options <- self$options
+                private$.options_hash <- current_hash
+            }
+            
+            return(private$.prepared_options)
         },
         
         .run = function() {
@@ -22,16 +161,29 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 stop('The scattermore package is required but not installed. Please install it using install.packages("scattermore")')
             }
             
-            # Get data and options
-            data <- self$data
-            options <- self$options
-            
-            # Check for minimum required data
-            if (is.null(data) || nrow(data) == 0) {
+            # Performance optimization: check if we can use cached results
+            if (private$.canUseCache()) {
+                # Use cached results
+                self$results$plot$setState(private$.cached_plot)
+                self$results$summary$setContent(private$.cached_summary)
+                
+                if (self$options$show_performance && !is.null(private$.cached_performance)) {
+                    self$results$performance$setVisible(TRUE)
+                    self$results$performance$setContent(private$.cached_performance)
+                } else {
+                    self$results$performance$setVisible(FALSE)
+                }
                 return()
             }
             
-            # Check required variables
+            # Prepare data with caching
+            data_clean <- private$.prepareData()
+            options <- private$.prepareOptions()
+            
+            if (is.null(data_clean) || nrow(data_clean) == 0) {
+                return()
+            }
+            
             if (is.null(options$x_var) || is.null(options$y_var)) {
                 return()
             }
@@ -39,21 +191,11 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             x_var <- options$x_var
             y_var <- options$y_var
             
-            # Clean data and remove missing values
-            data_clean <- data[!is.na(data[[x_var]]) & !is.na(data[[y_var]]), ]
-            
-            if (nrow(data_clean) == 0) {
-                return()
-            }
-            
             # Record start time for performance measurement
             start_time <- Sys.time()
             
             # Generate high-performance scatter plot
             plot_obj <- self$.createScatterPlot(data_clean, x_var, y_var)
-            
-            # Set the plot
-            self$results$plot$setState(plot_obj)
             
             # Calculate performance metrics
             end_time <- Sys.time()
@@ -61,13 +203,28 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Generate summary
             summary_text <- self$.generateSummary(data_clean, x_var, y_var, render_time)
+            
+            # Generate performance info if needed
+            performance_text <- NULL
+            if (options$show_performance) {
+                performance_text <- self$.generatePerformanceInfo(data_clean, render_time)
+            }
+            
+            # Cache the results for future use
+            private$.cached_plot <- plot_obj
+            private$.cached_summary <- summary_text
+            private$.cached_performance <- performance_text
+            
+            # Set the results
+            self$results$plot$setState(plot_obj)
             self$results$summary$setContent(summary_text)
             
             # Show performance info if requested
             if (options$show_performance) {
                 self$results$performance$setVisible(TRUE)
-                performance_text <- self$.generatePerformanceInfo(data_clean, render_time)
                 self$results$performance$setContent(performance_text)
+            } else {
+                self$results$performance$setVisible(FALSE)
             }
         },
         

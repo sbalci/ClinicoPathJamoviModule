@@ -2,17 +2,33 @@
 % Please edit documentation in R/jviolin.h.R
 \name{jviolin}
 \alias{jviolin}
-\title{Violin Plot}
+\title{Professional Violin Plot}
 \usage{
 jviolin(
   data,
-  dep,
-  group,
-  col,
-  fill,
+  dep = NULL,
+  group = NULL,
+  col = NULL,
+  fill = NULL,
   excl = FALSE,
   flip = FALSE,
-  themex = "ipsum",
+  add_boxplot = FALSE,
+  add_points = FALSE,
+  add_mean = FALSE,
+  draw_quantiles = FALSE,
+  quantile_lines = "0.25,0.5,0.75",
+  trim_violin = TRUE,
+  scale_violin = "area",
+  violin_width = 1,
+  violin_alpha = 0.7,
+  boxplot_width = 0.1,
+  boxplot_alpha = 0.8,
+  point_size = 1.5,
+  point_alpha = 0.6,
+  point_jitter = TRUE,
+  color_palette = "default",
+  manual_colors = "",
+  themex = "minimal",
   usexlabel = FALSE,
   xlabel = "",
   useylabel = FALSE,
@@ -20,29 +36,63 @@ jviolin(
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data to be analyzed}
 
-\item{dep}{.}
+\item{dep}{Continuous variable for y-axis (violin height)}
 
-\item{group}{.}
+\item{group}{Categorical variable for x-axis (groups)}
 
-\item{col}{.}
+\item{col}{Optional variable for color mapping (uses grouping variable if
+empty)}
 
-\item{fill}{.}
+\item{fill}{Optional variable for fill mapping (uses grouping variable if
+empty)}
 
-\item{excl}{.}
+\item{excl}{Exclude observations with missing data from analysis}
 
-\item{flip}{.}
+\item{flip}{Swap x and y axes for horizontal violin plots}
 
-\item{themex}{.}
+\item{add_boxplot}{Add boxplot inside violin for summary statistics}
 
-\item{usexlabel}{.}
+\item{add_points}{Add individual data points over violin}
 
-\item{xlabel}{.}
+\item{add_mean}{Add mean values as red diamond points}
 
-\item{useylabel}{.}
+\item{draw_quantiles}{Draw horizontal lines at specified quantiles}
 
-\item{ylabel}{.}
+\item{quantile_lines}{Comma-separated quantile values (e.g., 0.25,0.5,0.75)}
+
+\item{trim_violin}{Trim violin tails to data range}
+
+\item{scale_violin}{How to scale violin widths}
+
+\item{violin_width}{Width multiplier for violins}
+
+\item{violin_alpha}{Transparency level for violin fill}
+
+\item{boxplot_width}{Width of boxplot overlay}
+
+\item{boxplot_alpha}{Transparency level for boxplot}
+
+\item{point_size}{Size of individual data points}
+
+\item{point_alpha}{Transparency level for points}
+
+\item{point_jitter}{Add horizontal jitter to prevent point overlap}
+
+\item{color_palette}{Color palette for violin fills and outlines}
+
+\item{manual_colors}{Comma-separated color values (e.g., red,blue,green)}
+
+\item{themex}{Overall plot theme style}
+
+\item{usexlabel}{Override default x-axis label}
+
+\item{xlabel}{Custom label for x-axis}
+
+\item{useylabel}{Override default y-axis label}
+
+\item{ylabel}{Custom label for y-axis}
 }
 \value{
 A results object containing:
@@ -52,5 +102,9 @@ A results object containing:
 }
 }
 \description{
-Violin Plot
+Create professional violin plots for visualizing the distribution of
+continuous
+data across groups. Violin plots combine density estimation with boxplot
+elements
+to show both distribution shape and summary statistics.
 }

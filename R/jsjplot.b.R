@@ -8,12 +8,159 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jsjplotClass",
     inherit = jsjplotBase,
     private = list(
+        # Performance optimization: cache variables
+        .prepared_data = NULL,
+        .prepared_options = NULL,
+        .data_hash = NULL,
+        .options_hash = NULL,
+        .cached_model = NULL,
+        .cached_plot = NULL,
+        .cached_table = NULL,
+        .cached_statistics = NULL,
+        .cached_summary = NULL,
+        
         .init = function() {
             # Initialize with appropriate plot dimensions
             self$results$plot$setSize(800, 600)
             self$results$model_table$setVisible(TRUE)
             self$results$statistics$setVisible(TRUE)
             self$results$summary$setVisible(TRUE)
+        },
+        
+        # Performance optimization methods
+        .calculateDataHash = function() {
+            if (is.null(self$data) || nrow(self$data) == 0) {
+                return(NULL)
+            }
+            
+            # Create hash based on relevant data columns and analysis type
+            analysis_type <- self$options$analysis_type
+            
+            relevant_vars <- c(self$options$dependent_var, 
+                             self$options$independent_vars,
+                             self$options$grouping_var,
+                             self$options$interaction_vars)
+            relevant_vars <- relevant_vars[!sapply(relevant_vars, is.null)]
+            
+            if (length(relevant_vars) == 0 && !analysis_type %in% c("frequency_table", "correlation_matrix", "pca_plot")) {
+                return(NULL)
+            }
+            
+            # For frequency/correlation/PCA, use all variables
+            if (analysis_type %in% c("frequency_table", "correlation_matrix", "pca_plot")) {
+                relevant_vars <- names(self$data)
+            }
+            
+            # Create a simple hash string
+            data_summary <- paste(
+                analysis_type,
+                nrow(self$data),
+                ncol(self$data),
+                paste(relevant_vars, collapse = "_"),
+                if (length(relevant_vars) > 0) {
+                    paste(sapply(relevant_vars, function(var) {
+                        if (var %in% names(self$data)) {
+                            if (is.numeric(self$data[[var]])) {
+                                paste(range(self$data[[var]], na.rm = TRUE), collapse = "_")
+                            } else {
+                                paste(length(unique(self$data[[var]])), "levels")
+                            }
+                        } else {
+                            "missing"
+                        }
+                    }), collapse = "_")
+                } else {
+                    "no_vars"
+                },
+                sep = "_"
+            )
+            
+            return(data_summary)
+        },
+        
+        .calculateOptionsHash = function() {
+            # Create hash of all relevant options
+            options_list <- list(
+                analysis_type = self$options$analysis_type,
+                model_type = self$options$model_type,
+                family = self$options$family,
+                plot_type = self$options$plot_type,
+                confidence_level = self$options$confidence_level,
+                standardized = self$options$standardized,
+                show_values = self$options$show_values,
+                show_p_values = self$options$show_p_values,
+                sort_estimates = self$options$sort_estimates,
+                remove_intercept = self$options$remove_intercept,
+                grid_breaks = self$options$grid_breaks,
+                dot_size = self$options$dot_size,
+                line_size = self$options$line_size,
+                colors = self$options$colors,
+                theme_style = self$options$theme_style,
+                title = self$options$title,
+                axis_labels = self$options$axis_labels,
+                transform_axis = self$options$transform_axis,
+                show_data = self$options$show_data,
+                show_statistics = self$options$show_statistics,
+                show_summary = self$options$show_summary,
+                html_output = self$options$html_output
+            )
+            
+            return(paste(options_list, collapse = "_"))
+        },
+        
+        .canUseCache = function() {
+            current_data_hash <- private$.calculateDataHash()
+            current_options_hash <- private$.calculateOptionsHash()
+            
+            return(!is.null(private$.data_hash) &&
+                   !is.null(private$.options_hash) &&
+                   !is.null(current_data_hash) &&
+                   !is.null(current_options_hash) &&
+                   current_data_hash == private$.data_hash &&
+                   current_options_hash == private$.options_hash)
+        },
+        
+        .prepareData = function() {
+            current_hash <- private$.calculateDataHash()
+            
+            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+                # Data has changed, prepare new data
+                data <- self$data
+                
+                # Basic data validation
+                if (is.null(data) || nrow(data) == 0) {
+                    private$.prepared_data <- NULL
+                    private$.data_hash <- current_hash
+                    return(NULL)
+                }
+                
+                # Store cleaned data
+                private$.prepared_data <- data
+                private$.data_hash <- current_hash
+            }
+            
+            return(private$.prepared_data)
+        },
+        
+        .prepareOptions = function() {
+            current_hash <- private$.calculateOptionsHash()
+            
+            if (is.null(private$.options_hash) || private$.options_hash != current_hash) {
+                # Options have changed, update cache
+                private$.prepared_options <- self$options
+                private$.options_hash <- current_hash
+                
+                # Clear model cache when options change
+                private$.cached_model <- NULL
+            }
+            
+            return(private$.prepared_options)
+        },
+        
+        .canUseModelCache = function() {
+            # Check if we can reuse the fitted model
+            return(!is.null(private$.cached_model) && 
+                   private$.canUseCache())
         },
         
         .run = function() {
@@ -23,9 +170,27 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 stop('The sjPlot package is required but not installed. Please install it using install.packages("sjPlot")')
             }
             
-            # Get data and options
-            data <- self$data
-            options <- self$options
+            # Performance optimization: check if we can use cached results
+            if (private$.canUseCache()) {
+                # Use cached results
+                if (!is.null(private$.cached_plot)) {
+                    self$results$plot$setState(private$.cached_plot)
+                }
+                if (!is.null(private$.cached_table)) {
+                    self$results$model_table$setContent(private$.cached_table)
+                }
+                if (!is.null(private$.cached_statistics)) {
+                    self$results$statistics$setContent(private$.cached_statistics)
+                }
+                if (!is.null(private$.cached_summary)) {
+                    self$results$summary$setContent(private$.cached_summary)
+                }
+                return()
+            }
+            
+            # Prepare data and options with caching
+            data <- private$.prepareData()
+            options <- private$.prepareOptions()
             
             # Check for minimum required data
             if (is.null(data) || nrow(data) == 0) {
@@ -35,7 +200,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Get analysis type
             analysis_type <- options$analysis_type
             
-            # Execute analysis based on type
+            # Execute analysis based on type with caching
             if (analysis_type == 'regression_table') {
                 self$.runRegressionTable(data)
             } else if (analysis_type == 'coefficient_plot') {
@@ -51,6 +216,12 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (analysis_type == 'pca_plot') {
                 self$.runPCAPlot(data)
             }
+            
+            # Cache the results for future use
+            private$.cached_plot <- self$results$plot$state
+            private$.cached_table <- if (self$results$model_table$visible) self$results$model_table$content else NULL
+            private$.cached_statistics <- if (self$results$statistics$visible) self$results$statistics$content else NULL
+            private$.cached_summary <- if (self$results$summary$visible) self$results$summary$content else NULL
         },
         
         .runRegressionTable = function(data) {
@@ -308,46 +479,86 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # sjPlot wrapper functions with j-prefix to avoid namespace conflicts
         .buildModel = function(data) {
             
+            # Performance optimization: check if we can reuse cached model
+            if (private$.canUseModelCache()) {
+                return(private$.cached_model)
+            }
+            
             options <- self$options
             dep_var <- options$dependent_var
             indep_vars <- options$independent_vars
             model_type <- options$model_type
             
-            # Clean data
-            model_data <- data[c(dep_var, indep_vars)]
-            model_data <- model_data[complete.cases(model_data), ]
-            
-            if (nrow(model_data) == 0) {
+            # Validate variables exist
+            if (is.null(dep_var) || length(indep_vars) == 0) {
                 return(NULL)
             }
             
-            # Build formula
-            formula_str <- paste(dep_var, "~", paste(indep_vars, collapse = " + "))
-            model_formula <- as.formula(formula_str)
-            
-            # Fit model based on type
-            if (model_type == "lm") {
-                model <- lm(model_formula, data = model_data)
-            } else if (model_type == "glm") {
-                family_name <- options$family
-                family_obj <- switch(family_name,
-                    "gaussian" = gaussian(),
-                    "binomial" = binomial(),
-                    "poisson" = poisson(),
-                    "gamma" = Gamma(),
-                    gaussian()
-                )
-                model <- glm(model_formula, data = model_data, family = family_obj)
-            } else if (model_type == "logistic") {
-                model <- glm(model_formula, data = model_data, family = binomial())
-            } else if (model_type == "poisson") {
-                model <- glm(model_formula, data = model_data, family = poisson())
-            } else {
-                # Default to linear model
-                model <- lm(model_formula, data = model_data)
+            all_vars <- c(dep_var, indep_vars)
+            missing_vars <- setdiff(all_vars, names(data))
+            if (length(missing_vars) > 0) {
+                jmvcore::reject(paste("Variables not found in data:", paste(missing_vars, collapse = ", ")))
+                return(NULL)
             }
             
-            return(model)
+            # Clean data
+            model_data <- data[all_vars]
+            model_data <- model_data[complete.cases(model_data), ]
+            
+            if (nrow(model_data) == 0) {
+                jmvcore::reject("No complete cases available for model fitting after removing missing values")
+                return(NULL)
+            }
+            
+            if (nrow(model_data) < length(indep_vars) + 2) {
+                jmvcore::reject("Insufficient data points for model fitting. Need more observations than predictors.")
+                return(NULL)
+            }
+            
+            tryCatch({
+                # Build formula
+                formula_str <- paste(dep_var, "~", paste(indep_vars, collapse = " + "))
+                model_formula <- as.formula(formula_str)
+                
+                # Fit model based on type
+                if (model_type == "lm") {
+                    model <- lm(model_formula, data = model_data)
+                } else if (model_type == "glm") {
+                    family_name <- options$family
+                    family_obj <- switch(family_name,
+                        "gaussian" = gaussian(),
+                        "binomial" = binomial(),
+                        "poisson" = poisson(),
+                        "gamma" = Gamma(),
+                        gaussian()
+                    )
+                    model <- glm(model_formula, data = model_data, family = family_obj)
+                } else if (model_type == "logistic") {
+                    model <- glm(model_formula, data = model_data, family = binomial())
+                } else if (model_type == "poisson") {
+                    model <- glm(model_formula, data = model_data, family = poisson())
+                } else if (model_type == "lmer") {
+                    # Check if lme4 is available for mixed models
+                    if (!requireNamespace('lme4', quietly = TRUE)) {
+                        jmvcore::reject('lme4 package required for mixed effects models. Please install it using install.packages("lme4")')
+                        return(NULL)
+                    }
+                    # For now, fallback to lm - proper mixed model implementation would need grouping structure
+                    model <- lm(model_formula, data = model_data)
+                } else {
+                    # Default to linear model
+                    model <- lm(model_formula, data = model_data)
+                }
+                
+                # Cache the model
+                private$.cached_model <- model
+                
+                return(model)
+                
+            }, error = function(e) {
+                jmvcore::reject(paste("Error fitting model:", e$message))
+                return(NULL)
+            })
         },
         
         .buildInteractionModel = function(data) {

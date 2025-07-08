@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -192,7 +192,7 @@ analyses:
     menuSubtitle: Statistical Tests from DescTools Package
     description: >-
       Advanced statistical tests using functions from the DescTools package.
-      Includes effect size calculations (Cohen's D), goodness-of-fit tests
+      Includes effect size calculations (Cohen's D), goodness-of-fit tests 
       (Hosmer-Lemeshow, Anderson-Darling), agreement tests (Barnard,
       Breslow-Day), and trend tests (Cochran-Armitage). Essential for clinical
       research, epidemiological studies, and advanced statistical analysis.
@@ -266,10 +266,10 @@ analyses:
       Statistical distribution generator and analyzer using TidyDensity package.
 
       Generate random data from various statistical distributions with
-      comprehensive
+      comprehensive 
 
       visualization and analysis capabilities. Create density plots, quantile
-      plots,
+      plots, 
 
       probability plots, and Q-Q plots. Perfect for simulation studies, power
       analysis,
@@ -287,7 +287,7 @@ analyses:
     description: |
       Creates professional, publication-ready tables using the gt package.
       This module provides comprehensive table formatting with advanced styling,
-      grouping, summary statistics, and clinical research optimizations.
+      grouping, summary statistics, and clinical research optimizations. 
       Designed for high-quality table presentation in medical publications,
       reports, and presentations. Features include conditional formatting,
       custom themes, statistical summaries, and multi-level grouping.
@@ -302,7 +302,7 @@ analyses:
     menuSubtitle: TinyTable - Zero Dependencies
     description: |
       Creates modern, publication-ready tables using the tinytable package.
-      This module provides lightweight, zero-dependency table formatting with
+      This module provides lightweight, zero-dependency table formatting with 
       multiple output formats including HTML, LaTeX, PDF, and Word. Designed
       to complement existing ClinicoPath table modules with modern styling,
       flexible formatting, and clean aesthetics. Perfect for enhancing data
@@ -375,13 +375,13 @@ analyses:
       package.
 
       Raincloud plots combine three visualization techniques: half-violin plots
-      showing
+      showing 
 
       distribution density, box plots showing summary statistics, and dot plots
-      showing
+      showing 
 
       individual data points. This provides a comprehensive view of data
-      distribution
+      distribution 
 
       that reveals patterns traditional box plots might miss, including
       multimodality
@@ -496,11 +496,11 @@ analyses:
       Creates modern flowcharts using ggflowchart package with ggplot2 styling.
 
       This module provides an alternative flowchart approach using the
-      ggflowchart
+      ggflowchart 
 
       package for creating publication-ready flowcharts with ggplot2 aesthetics.
 
-      Complements the existing DiagrammeR-based flowchart module with modern
+      Complements the existing DiagrammeR-based flowchart module with modern 
 
       ggplot2 integration and customizable styling options.
     ribbon: analyses
@@ -614,10 +614,10 @@ analyses:
       annotations
 
       to create professional scientific visualizations. Perfect for clinical
-      research
+      research 
 
       publications, biostatistics, and academic presentations. Supports various
-      plot
+      plot 
 
       types including violin plots, box plots, scatter plots, and dose-response
       curves
@@ -747,7 +747,7 @@ analyses:
       packages (datefixR, anytime, lubridate).
 
       This module handles messy date formats commonly found in clinical
-      databases: different separators,
+      databases: different separators, 
 
       month representations, missing components, and ambiguous formats. Provides
       standardized date outputs
@@ -781,13 +781,13 @@ analyses:
       ggrain package.
 
       This module complements the existing Raincloud Plot module by providing
-      advanced
+      advanced 
 
       features including longitudinal data connections, Likert scale support,
       and flexible
 
       raincloud positioning. Perfect for repeated measures data, survey
-      analysis, and
+      analysis, and 
 
       complex distribution visualization in clinical research. Uses the ggrain
       package
@@ -966,12 +966,12 @@ analyses:
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
     description: |
-      Medical Decision Calculator for diagnostic test evaluation when you have
-      the four key counts: True Positives (TP), False Positives (FP), True
-      Negatives (TN), and False Negatives (FN). Calculates comprehensive
-      diagnostic performance metrics including sensitivity, specificity,
-      positive and negative predictive values, likelihood ratios, and
-      post-test probabilities. Supports confidence interval estimation and
+      Medical Decision Calculator for diagnostic test evaluation when you have 
+      the four key counts: True Positives (TP), False Positives (FP), True 
+      Negatives (TN), and False Negatives (FN). Calculates comprehensive 
+      diagnostic performance metrics including sensitivity, specificity, 
+      positive and negative predictive values, likelihood ratios, and 
+      post-test probabilities. Supports confidence interval estimation and 
       Fagan nomogram visualization for clinical decision making.
     ribbon: analyses
     category: analyses
@@ -1067,26 +1067,26 @@ analyses:
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
     description: >
-      Combines multiple medical diagnostic tests and evaluates their collective
+      Combines multiple medical diagnostic tests and evaluates their collective 
 
-      performance using different combination rules. This function is essential
+      performance using different combination rules. This function is essential 
 
-      for optimizing diagnostic accuracy when multiple tests are available for
+      for optimizing diagnostic accuracy when multiple tests are available for 
 
-      the same condition. Supports OR logic (positive if any test is positive),
+      the same condition. Supports OR logic (positive if any test is positive), 
 
-      AND logic (positive only if all tests are positive), and majority rule
+      AND logic (positive only if all tests are positive), and majority rule 
 
       (positive if more than half of tests are positive). Calculates
-      comprehensive
+      comprehensive 
 
       diagnostic performance metrics including sensitivity, specificity,
-      positive
+      positive 
 
       and negative predictive values, likelihood ratios, and post-test
-      probabilities
+      probabilities 
 
-      for the combined test strategy. Useful for developing optimal test panels
+      for the combined test strategy. Useful for developing optimal test panels 
 
       and understanding how multiple diagnostic tests perform together.
     ribbon: analyses
@@ -1212,7 +1212,7 @@ analyses:
       research and medical decision making.
 
       Extends basic decision tree functionality with gradient boosting,
-      conditional inference trees,
+      conditional inference trees, 
 
       ensemble methods, and enhanced interpretability. Provides comprehensive
       performance evaluation,
@@ -1259,10 +1259,10 @@ analyses:
     menuTitle: Intraclass Correlation Coefficient
     description: >
       Calculate Intraclass Correlation Coefficient (ICC) for inter-rater
-      reliability
+      reliability 
 
       and agreement studies. Provides multiple ICC types with confidence
-      intervals
+      intervals 
 
       and APA-style formatting for clinical research applications.
     menuSubtitle: Agreement
@@ -1380,15 +1380,23 @@ analyses:
     menuSubtitle: Variable Type Based Graphs and Plots
     ribbon: analyses
     category: analyses
-  - title: Violin Plot
+  - title: Professional Violin Plot
     name: jviolin
     ns: ClinicoPath
     menuGroup: JJStatsPlotD
-    menuSubgroup: Drafts
-    menuTitle: Violin Plot
-    menuSubtitle: R Graph Gallery Violin
+    menuSubgroup: Distribution Plots
+    menuTitle: Professional Violin Plot
+    menuSubtitle: Advanced Violin Plots for Data Distribution
     ribbon: analyses
     category: analyses
+    description: >
+      Create professional violin plots for visualizing the distribution of
+      continuous
+
+      data across groups. Violin plots combine density estimation with boxplot
+      elements
+
+      to show both distribution shape and summary statistics.
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
@@ -1576,13 +1584,13 @@ analyses:
     menuSubtitle: Professional Bar Charts with Multiple Approaches
     description: >
       Advanced bar chart visualization module implementing 5 different
-      approaches
+      approaches 
 
       for creating professional bar charts. Choose from ggplot2 basics,
-      polished
+      polished 
 
       presentations, statistical annotations, interactive plots, and
-      publication-ready
+      publication-ready 
 
       designs. Each approach optimized for different use cases in clinical
       research.
@@ -1599,14 +1607,14 @@ analyses:
       Creates elegant Economist-style distribution plots using ggeconodist
       package
 
-      for professional publication-quality visualizations. Provides diminutive
+      for professional publication-quality visualizations. Provides diminutive 
 
-      distribution charts that effectively communicate statistical distribution
+      distribution charts that effectively communicate statistical distribution 
 
       characteristics with The Economist's distinctive visual style. Perfect
-      for
+      for 
 
-      comparing distributions across categories, showing price variations, or
+      comparing distributions across categories, showing price variations, or 
 
       visualizing any statistical distribution data in clinical research.
     ribbon: analyses
@@ -1751,7 +1759,7 @@ analyses:
     ribbon: analyses
     description: >
       Create publication-ready forest plots for meta-analyses, subgroup
-      analyses,
+      analyses, 
 
       and clinical trial results. Display point estimates with confidence
       intervals
@@ -1771,6 +1779,17 @@ analyses:
       Kendall  correlations with significance tests, confidence intervals, and
       natural language  reporting. Suitable for exploring relationships between
       continuous variables.
+  - title: Table One Draft 2
+    name: tableone2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Exploration
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Table One Draft 2
+    description: >
+      This function generates a "Table One", a descriptive summary table
+      frequently used in  clinicopathological research manuscripts. It supports
+      multiple output styles for flexible formatting.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

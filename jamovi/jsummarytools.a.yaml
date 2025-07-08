@@ -39,21 +39,25 @@ options:
     - name: group_var
       title: Grouping Variable
       type: Variable
+      default: 
       description: Optional grouping variable for stratified analysis
 
     - name: weights_var
       title: Weights Variable
       type: Variable
+      default: 
       description: Optional variable containing sample weights
 
     - name: cross_var1
       title: First Variable (for Cross-table)
       type: Variable
+      default: 
       description: First variable for cross-tabulation
 
     - name: cross_var2
       title: Second Variable (for Cross-table)
       type: Variable
+      default: 
       description: Second variable for cross-tabulation
 
     - name: show_labels
