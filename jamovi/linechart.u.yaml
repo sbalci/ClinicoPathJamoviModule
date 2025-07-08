@@ -9,16 +9,70 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: X-axis
+        label: Variables
         children:
           - type: VariablesListBox
             name: xvar
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: Y-axis
-        children:
+            label: X-axis Variable
           - type: VariablesListBox
             name: yvar
             maxItemCount: 1
             isTarget: true
+            label: Y-axis Variable
+          - type: VariablesListBox
+            name: groupby
+            maxItemCount: 1
+            isTarget: true
+            label: Group By (Optional)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Statistical Options
+            children:
+              - type: CheckBox
+                name: confidence
+              - type: CheckBox
+                name: trendline
+              - type: CheckBox
+                name: smooth
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: points
+              - type: ComboBox
+                name: colorPalette
+              - type: ComboBox
+                name: theme
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Reference Line
+            children:
+              - type: TextBox
+                name: refline
+                format: number
+              - type: TextBox
+                name: reflineLabel
+          - type: Label
+            label: Labels
+            children:
+              - type: TextBox
+                name: xlabel
+              - type: TextBox
+                name: ylabel
+              - type: TextBox
+                name: title
+          - type: Label
+            label: Size
+            children:
+              - type: TextBox
+                name: width
+                format: number
+              - type: TextBox
+                name: height
+                format: number

@@ -185,3 +185,9 @@ This replaces the previous manual approach where vignette files had to be indivi
 
 - When generating new example data and vignettes add them to appropriate place in updateModules configuration
 - Use gemini CLI for large codebase analysis. See instructions here: @use-claude-and-gemini-together.md 
+
+## Development Memories
+
+### File Update Instructions
+
+- Update NEWS.md when there is version change

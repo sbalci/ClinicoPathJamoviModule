@@ -1,4 +1,4 @@
-# Configuration file for _updateModules.R and _updateModules_enhanced.R
+# Configuration file for _updateModules.R
 # This file defines module settings, file mappings, and deployment parameters
 
 # Global settings
@@ -11,10 +11,17 @@ global:
 modes:
   quick: false
   check: false
-  extended: false
+  extended: true
   webpage: false
   commit_modules: false
   WIP: false
+
+  # File copying control modes
+  copy_vignettes: false      # Enable/disable vignette file copying
+  copy_data_files: false     # Enable/disable data file copying
+  copy_test_files: false     # Enable/disable test file copying
+  copy_r_files: true        # Enable/disable R utility file copying
+  use_legacy_copying: false # Use legacy hardcoded file lists instead of config-based copying
 
 # Required packages for validation
 required_packages:
