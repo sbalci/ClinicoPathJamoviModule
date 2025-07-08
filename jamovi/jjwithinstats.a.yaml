@@ -42,12 +42,14 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
 
     - name: dep4
       title: Fourth Measurement (Optional)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
 
     - name: pointpath
       title: Show Point Path

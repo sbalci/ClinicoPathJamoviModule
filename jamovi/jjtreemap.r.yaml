@@ -27,10 +27,13 @@ clearWith:
     - size
     - color
     - aspectRatio
+    - borderWidth
     - borderLevel1Width
     - borderLevel2Width
     - borderLevel1Color
     - borderLevel2Color
+    - showLabels
+    - labelSize
     - labelLevel1Size
     - labelLevel2Size
     - labelLevel1Color

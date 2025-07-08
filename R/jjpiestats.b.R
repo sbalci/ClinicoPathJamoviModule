@@ -8,6 +8,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjpiestatsBase,
     private = list(
 
+        # Cache for processed data and options to avoid redundant computation
+        .processedData = NULL,
+        .processedOptions = NULL,
+
         # init ----
 
         .init = function() {
@@ -69,9 +73,58 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
+        },
 
+        # Optimized data preparation with caching
+        .prepareData = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedData) && !force_refresh) {
+                return(private$.processedData)
+            }
 
+            # Prepare data with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Processing data for pie chart analysis...<br><hr>")
+            )
 
+            mydata <- self$data
+
+            # Exclude NA with checkpoint
+            private$.checkpoint()
+            mydata <- jmvcore::naOmit(mydata)
+
+            # Cache the processed data
+            private$.processedData <- mydata
+            return(mydata)
+        },
+
+        # Optimized options preparation with caching
+        .prepareOptions = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedOptions) && !force_refresh) {
+                return(private$.processedOptions)
+            }
+
+            # Prepare options with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Preparing pie chart analysis options...<br><hr>")
+            )
+
+            # Process options
+            dep <- self$options$dep
+            group <- self$options$group
+            grvar <- self$options$grvar
+            typestatistics <- self$options$typestatistics
+            
+            # Cache the processed options
+            options_list <- list(
+                dep = dep,
+                group = group,
+                grvar = grvar,
+                typestatistics = typestatistics,
+                resultssubtitle = self$options$resultssubtitle,
+                originaltheme = self$options$originaltheme
+            )
+            private$.processedOptions <- options_list
+            return(options_list)
         }
 
 
@@ -111,6 +164,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
+                # Pre-process data and options for performance
+                private$.prepareData()
+                private$.prepareOptions()
+
             }
         }
 
@@ -129,17 +186,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-            # Exclude NA ----
-
-
-            mydata <- jmvcore::naOmit(mydata)
-
-            dep <- self$options$dep
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
+            
+            dep <- options_data$dep
 
 
             # ggpiestats ----
@@ -176,13 +227,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
-                    , results.subtitle = self$options$resultssubtitle
+                    , results.subtitle = options_data$resultssubtitle
 
                     )
 
 
 
-            originaltheme <- self$options$originaltheme
+            originaltheme <- options_data$originaltheme
 
             if (!originaltheme) {
                 plot1 <- plot1 + ggtheme
@@ -212,48 +263,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-
-            # # direction, paired ----
-            #
-            # direction <- self$options$direction
-            #
-            # if (direction == "repeated") {
-            #
-            #     paired <- TRUE
-            #
-            # } else if (direction == "independent") {
-            #
-            #     paired <- FALSE
-            #
-            # }
-
-
-            # distribution <-
-            #     jmvcore::constructFormula(terms = self$options$distribution)
-
-            # pairw <- self$options$pairw
-
-
-            mydata <- self$data
-
-
-            # Exclude NA ----
-
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-
-            # mydep <- mydata[[self$options$dep]]
-            # mygroup <- mydata[[self$options$group]]
-
-
-            dep <- self$options$dep
-
-            group <- self$options$group
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
+            
+            dep <- options_data$dep
+            group <- options_data$group
 
             # originaltheme <- self$options$originaltheme
 
@@ -295,11 +310,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot.component = NULL,
                     output = "plot",
                     messages = TRUE
-                    , results.subtitle = self$options$resultssubtitle
+                    , results.subtitle = options_data$resultssubtitle
                 )
 
 
-            originaltheme <- self$options$originaltheme
+            originaltheme <- options_data$originaltheme
 
             if (!originaltheme) {
                 plot2 <- plot2 + ggtheme
@@ -436,22 +451,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-
-            # Exclude NA ----
-
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-
-            dep <- self$options$dep
-
-            group <- self$options$group
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
+            
+            dep <- options_data$dep
+            group <- options_data$group
+            grvar <- options_data$grvar
 
             # originaltheme <- self$options$originaltheme
 
@@ -464,12 +470,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # grouped_ggpiestats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggpiestats.html
 
-            if ( !is.null(self$options$grvar) ) {
+            if ( !is.null(grvar) ) {
 
-                grvar <- self$options$grvar
-
-
-                originaltheme <- self$options$originaltheme
+                originaltheme <- options_data$originaltheme
 
                 selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 

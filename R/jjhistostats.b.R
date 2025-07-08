@@ -10,6 +10,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
         inherit = jjhistostatsBase,
         private = list(
 
+            # Cache for processed data and options to avoid redundant computation
+            .processedData = NULL,
+            .processedOptions = NULL,
+
             # init ----
             .init = function() {
 
@@ -34,10 +38,72 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
 
 
-            }
+            },
+
+            # Optimized data preparation with caching
+            .prepareData = function(force_refresh = FALSE) {
+                if (!is.null(private$.processedData) && !force_refresh) {
+                    return(private$.processedData)
+                }
+
+                # Prepare data with progress feedback
+                self$results$todo$setContent(
+                    glue::glue("<br>Processing data for histogram analysis...<br><hr>")
+                )
+
+                mydata <- self$data
+                
+                # Convert variables to numeric
+                vars <- self$options$dep
+                if (!is.null(vars)) {
+                    for (var in vars) {
+                        mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+                    }
+                }
+
+                # Exclude NA
+                mydata <- jmvcore::naOmit(mydata)
+
+                # Cache the processed data
+                private$.processedData <- mydata
+                return(mydata)
+            },
+
+            # Optimized options preparation with caching
+            .prepareOptions = function(force_refresh = FALSE) {
+                if (!is.null(private$.processedOptions) && !force_refresh) {
+                    return(private$.processedOptions)
+                }
+
+                # Prepare options with progress feedback
+                self$results$todo$setContent(
+                    glue::glue("<br>Preparing histogram analysis options...<br><hr>")
+                )
+
+                # Process options
+                typestatistics <- self$options$typestatistics  # No need for constructFormula
+                dep <- self$options$dep
+                
+                # Process binwidth
+                binwidth <- NULL
+                if (self$options$changebinwidth) {
+                    binwidth <- self$options$binwidth
+                }
+                
+                # Cache the processed options
+                options_list <- list(
+                    typestatistics = typestatistics,
+                    dep = dep,
+                    binwidth = binwidth,
+                    normalcurve = self$options$normalcurve,
+                    resultssubtitle = self$options$resultssubtitle,
+                    centralityline = self$options$centralityline
+                )
+                private$.processedOptions <- options_list
+                return(options_list)
+            },
 
             # run ----
-            ,
             .run = function() {
                 ## Initial Message ----
                 if (is.null(self$options$dep)) {
@@ -68,6 +134,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     if (nrow(self$data) == 0)
                         stop('Data contains no (complete) rows')
+
+                    # Pre-process data and options for performance
+                    private$.prepareData()
+                    private$.prepareOptions()
+
                 }
             }
 
@@ -83,33 +154,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
-
-                ## read data ----
-
-                mydata <- self$data
-
-                vars <- self$options$dep
-
-
-                for (var in vars)
-                    mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-
-                ## Exclude NA ----
-                    mydata <- jmvcore::naOmit(mydata)
-
-                dep <- self$options$dep
-
-                ## arguments ----
-
-                    binwidth <- NULL
-
-                    if(self$options$changebinwidth) {
-                        binwidth <- self$options$binwidth
-                    }
-
-
-                    typestatistics <- self$options$typestatistics
+                # Use cached data and options for performance ----
+                mydata <- private$.prepareData()
+                options_data <- private$.prepareOptions()
+                
+                dep <- options_data$dep
+                typestatistics <- options_data$typestatistics
+                binwidth <- options_data$binwidth
 
 
 
@@ -131,9 +182,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             x = !!rlang::sym(dep)
 
                             , type = typestatistics
-                            , normal.curve = self$options$normalcurve
-                            , results.subtitle = self$options$resultssubtitle
-                            , centrality.plotting = self$options$centralityline
+                            , normal.curve = options_data$normalcurve
+                            , results.subtitle = options_data$resultssubtitle
+                            , centrality.plotting = options_data$centralityline
                             , binwidth = binwidth
 
                         )
@@ -177,9 +228,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                         messages = messages
 
                                         , type = typestatistics
-                                        , normal.curve = self$options$normalcurve
-                                        , results.subtitle = self$options$resultssubtitle
-                                        , centrality.plotting = self$options$centralityline
+                                        , normal.curve = options_data$normalcurve
+                                        , results.subtitle = options_data$resultssubtitle
+                                        , centrality.plotting = options_data$centralityline
                                         , binwidth = binwidth
 
                                     )
@@ -222,35 +273,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
-                ## read data ----
-
-                mydata <- self$data
-
-                vars <- self$options$dep
-
-                for (var in vars)
-                    mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-
-                ## Exclude NA ----
-
-                    mydata <- jmvcore::naOmit(mydata)
-
-                ## type of statistics ----
-
-                typestatistics <-
-                    jmvcore::constructFormula(
-                        terms = self$options$typestatistics)
-
-                dep <- self$options$dep
-
-                ## arguments ----
-
-                binwidth <- NULL
-
-                if(self$options$changebinwidth) {
-                    binwidth <- self$options$binwidth
-                }
+                # Use cached data and options for performance ----
+                mydata <- private$.prepareData()
+                options_data <- private$.prepareOptions()
+                
+                dep <- options_data$dep
+                typestatistics <- options_data$typestatistics
+                binwidth <- options_data$binwidth
 
 
 
@@ -270,9 +299,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
 
                         , type = typestatistics
-                        , normal.curve = self$options$normalcurve
-                        , results.subtitle = self$options$resultssubtitle
-                        , centrality.plotting = self$options$centralityline
+                        , normal.curve = options_data$normalcurve
+                        , results.subtitle = options_data$resultssubtitle
+                        , centrality.plotting = options_data$centralityline
                         , binwidth = binwidth
 
 
@@ -301,9 +330,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
 
                                     , type = typestatistics
-                                    , normal.curve = self$options$normalcurve
-                                    , results.subtitle = self$options$resultssubtitle
-                                    , centrality.plotting = self$options$centralityline
+                                    , normal.curve = options_data$normalcurve
+                                    , results.subtitle = options_data$resultssubtitle
+                                    , centrality.plotting = options_data$centralityline
                                     , binwidth = binwidth
 
 )

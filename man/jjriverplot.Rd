@@ -26,36 +26,77 @@ jjriverplot(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{id}{Optional identifier for individual entities in the data.}
+\item{id}{Optional identifier for individual entities (e.g., patient ID,
+customer ID). Useful for tracking individual pathways through the flow
+diagram. Not required for aggregated flow visualization.}
 
-\item{time}{Variable representing time points or sequential stages.}
+\item{time}{Variable representing time points or sequential stages in the
+flow. Required for longitudinal river plots. Use ordered factors for proper
+time sequence (e.g., 'Baseline', 'Month_3', 'Month_6'). Leave empty when
+using wide format data with multiple strata variables.}
 
-\item{strata}{Variables containing the categories that change over time.}
+\item{strata}{Variables containing the categories that flow between stages.
+For longitudinal data: single variable with categories (e.g.,
+treatment_response). For wide format: multiple variables representing
+stages (e.g., baseline, month3, month6). Each variable should be a factor
+with meaningful category names.}
 
-\item{weight}{Optional numerical variable to determine stream width.}
+\item{weight}{Optional numerical variable to determine stream width
+proportional to values. Examples: cost, patient count, revenue, frequency.
+If not provided, stream widths represent equal counts/frequencies. Use for
+emphasizing quantitative importance of different flows.}
 
-\item{plotType}{Type of river plot to generate.}
+\item{plotType}{Type of flow visualization. 'alluvial' creates flowing
+streams between stages with curved connections, ideal for tracking
+transitions. 'sankey' creates directed flow diagrams with straighter
+connections, good for process flows. 'stream' creates stacked area plots
+over time, suitable for showing composition changes.}
 
-\item{fillType}{Determines how colors are assigned to flows.}
+\item{fillType}{Determines how colors are assigned to flow streams. 'first'
+colors flows based on their initial category (useful for tracking origins).
+'last' colors by final category (useful for tracking destinations).
+'frequency' uses flow volume to determine colors (emphasizes major flows).}
 
-\item{sortStreams}{Sort alluvial streams by frequency.}
+\item{sortStreams}{Whether to sort alluvial streams by frequency/size. When
+TRUE, larger flows are positioned more prominently, making major pathways
+easier to identify. Recommended for most analyses to highlight dominant
+patterns in the data.}
 
-\item{labelNodes}{Add labels to nodes.}
+\item{labelNodes}{Whether to display category labels on the nodes (vertical
+bars). Labels help identify what each segment represents. Recommended for
+most plots unless space is limited or labels would overlap.}
 
-\item{curveType}{Type of curve to use for stream paths.}
+\item{curveType}{Shape of connecting curves between stages. 'cardinal'
+creates smooth flowing curves (most aesthetic). 'linear' creates straight
+connections (clearest flow direction). 'basis' creates very smooth curves.
+'step' creates stepped connections (good for discrete processes).}
 
-\item{showCounts}{Display counts on the diagram.}
+\item{showCounts}{Whether to display numerical counts or values on the
+nodes. Shows exact frequencies or sums for each category at each stage.
+Useful for precise quantitative interpretation but may clutter the
+visualization if many categories are present.}
 
-\item{showLegend}{Display color legend.}
+\item{showLegend}{Whether to display the color legend explaining category
+mappings. Recommended when colors represent meaningful categories. Can be
+hidden to save space if category labels are clearly visible on the diagram
+itself.}
 
-\item{mytitle}{Title for the plot.}
+\item{mytitle}{Main title for the river plot. Should describe the flow
+being visualized (e.g., 'Patient Treatment Pathways Over Time', 'Customer
+Journey Analysis'). Leave empty for no title.}
 
-\item{xtitle}{Label for the x-axis.}
+\item{xtitle}{Label for the x-axis, typically describing the time dimension
+or stages (e.g., 'Study Timepoint', 'Process Stage', 'Academic Year').
+Leave empty to use variable name.}
 
-\item{ytitle}{Label for the y-axis.}
+\item{ytitle}{Label for the y-axis, typically describing the quantity being
+measured (e.g., 'Number of Patients', 'Frequency', 'Cost ($)'). Leave empty
+to use default based on weight variable.}
 
-\item{originaltheme}{Use the ggStatsPlot theme instead of the default
-theme.}
+\item{originaltheme}{Whether to apply ggStatsPlot styling instead of
+jamovi's default theme. ggStatsPlot theme provides statistical-publication
+ready formatting. Default jamovi theme integrates better with other jamovi
+analyses.}
 }
 \value{
 A results object containing:
@@ -70,6 +111,34 @@ flows and transitions over time or between categories.'
 }
 \examples{
 \donttest{
-# example will be added
+# Load test data
+data(jjriverplot_test_data_long)
+data(jjriverplot_test_data_wide)
+
+# Basic alluvial plot (longitudinal data)
+jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  plotType = "alluvial"
+)
+
+# Weighted river plot
+jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  weight = "treatment_cost",
+  plotType = "alluvial",
+  labelNodes = TRUE
+)
+
+# Multi-stage pathway (wide format)
+jjriverplot(
+  data = jjriverplot_test_data_wide,
+  strata = c("month3_response", "month6_response", "month12_response"),
+  plotType = "sankey",
+  fillType = "first"
+)
 }
 }

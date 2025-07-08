@@ -162,17 +162,57 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' \donttest{
-#' # example will be added
+#' # Load test data
+#' data(jjhistostats_test_data)
+#'
+#' # Basic histogram
+#' jjhistostats(
+#'   data = jjhistostats_test_data,
+#'   dep = "age_years",
+#'   typestatistics = "parametric",
+#'   normalcurve = TRUE
+#' )
+#'
+#' # Multiple histograms
+#' jjhistostats(
+#'   data = jjhistostats_test_data,
+#'   dep = c("age_years", "tumor_size_mm", "bmi"),
+#'   centralityline = TRUE,
+#'   resultssubtitle = TRUE
+#' )
+#'
+#' # Grouped histogram by disease stage
+#' jjhistostats(
+#'   data = jjhistostats_test_data,
+#'   dep = "psa_level",
+#'   grvar = "disease_stage",
+#'   typestatistics = "nonparametric",
+#'   changebinwidth = TRUE,
+#'   binwidth = 2.0
+#' )
 #'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param grvar .
-#' @param typestatistics .
-#' @param centralityline .
-#' @param changebinwidth .
-#' @param binwidth .
-#' @param resultssubtitle .
-#' @param normalcurve .
+#' @param dep One or more continuous numeric variables for which histograms
+#'   will be created. Multiple variables will be displayed in separate panels.
+#' @param grvar Optional grouping variable to create separate histograms for
+#'   each level of this variable (grouped analysis).
+#' @param typestatistics Type of statistical test for normality assessment.
+#'   'parametric' uses Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling
+#'   test, 'robust' uses robust normality tests, 'bayes' provides Bayesian
+#'   analysis.
+#' @param centralityline Whether to display a vertical line indicating the
+#'   measure of central tendency (mean for parametric, median for
+#'   nonparametric).
+#' @param changebinwidth Whether to manually specify the bin width. If FALSE,
+#'   automatic bin width calculation will be used.
+#' @param binwidth Manual bin width for histogram. Only used when
+#'   changebinwidth is TRUE. Smaller values create more bins, larger values
+#'   create fewer bins.
+#' @param resultssubtitle Whether to display statistical test results as
+#'   subtitle in the plot, including normality test results and descriptive
+#'   statistics.
+#' @param normalcurve Whether to overlay a normal distribution curve on the
+#'   histogram for comparison with the theoretical normal distribution.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

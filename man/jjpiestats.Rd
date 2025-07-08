@@ -17,17 +17,31 @@ jjpiestats(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{The categorical variable to display in the pie chart. This
+variable will be used to create pie slices representing the proportion of
+each category. Must be a factor variable.}
 
-\item{group}{.}
+\item{group}{Optional grouping variable for creating contingency table
+analysis. When specified, creates a 2x2 or 2xN contingency table and
+performs association tests (Chi-square, Fisher's exact test, etc.).}
 
-\item{grvar}{.}
+\item{grvar}{Optional variable to create separate pie charts for each level
+of this grouping variable. Creates a panel of pie charts, one for each
+group level (e.g., separate charts by treatment center or study site).}
 
-\item{typestatistics}{.}
+\item{typestatistics}{Type of statistical test for categorical association
+analysis. 'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
+contingency table tests, 'robust' uses robust association measures, 'bayes'
+provides Bayesian analysis with Bayes factors.}
 
-\item{originaltheme}{.}
+\item{originaltheme}{Whether to apply the original ggstatsplot theme layer
+to the plot. If TRUE, uses ggstatsplot's default styling. If FALSE, uses
+jamovi's default ggplot2 theme for consistency with other analyses.}
 
-\item{resultssubtitle}{.}
+\item{resultssubtitle}{Whether to display statistical test results as
+subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
+and confidence intervals for categorical association tests. Provides
+detailed statistical summary.}
 }
 \value{
 A results object containing:
@@ -39,10 +53,37 @@ A results object containing:
 }
 }
 \description{
-Pie Charts
+'Wrapper Function for ggstatsplot::ggpiestats and
+ggstatsplot::grouped_ggpiestats to generate Pie Charts with
+statistical analysis.'
 }
 \examples{
 \donttest{
-# example will be added
+# Load test data
+data(jjpiestats_test_data)
+
+# Basic pie chart
+jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  typestatistics = "parametric"
+)
+
+# Pie chart with grouping
+jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  group = "treatment_arm",
+  resultssubtitle = TRUE
+)
+
+# Grouped pie charts by split variable
+jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "disease_severity",
+  group = "gender",
+  grvar = "hospital_site",
+  typestatistics = "nonparametric"
+)
 }
 }

@@ -19,21 +19,34 @@ jjhistostats(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{One or more continuous numeric variables for which histograms
+will be created. Multiple variables will be displayed in separate panels.}
 
-\item{grvar}{.}
+\item{grvar}{Optional grouping variable to create separate histograms for
+each level of this variable (grouped analysis).}
 
-\item{typestatistics}{.}
+\item{typestatistics}{Type of statistical test for normality assessment.
+'parametric' uses Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling
+test, 'robust' uses robust normality tests, 'bayes' provides Bayesian
+analysis.}
 
-\item{centralityline}{.}
+\item{centralityline}{Whether to display a vertical line indicating the
+measure of central tendency (mean for parametric, median for
+nonparametric).}
 
-\item{changebinwidth}{.}
+\item{changebinwidth}{Whether to manually specify the bin width. If FALSE,
+automatic bin width calculation will be used.}
 
-\item{binwidth}{.}
+\item{binwidth}{Manual bin width for histogram. Only used when
+changebinwidth is TRUE. Smaller values create more bins, larger values
+create fewer bins.}
 
-\item{resultssubtitle}{.}
+\item{resultssubtitle}{Whether to display statistical test results as
+subtitle in the plot, including normality test results and descriptive
+statistics.}
 
-\item{normalcurve}{.}
+\item{normalcurve}{Whether to overlay a normal distribution curve on the
+histogram for comparison with the theoretical normal distribution.}
 }
 \value{
 A results object containing:
@@ -49,6 +62,33 @@ ggstatsplot::grouped_gghistostats to generate Histogram.'
 }
 \examples{
 \donttest{
-# example will be added
+# Load test data
+data(jjhistostats_test_data)
+
+# Basic histogram
+jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "age_years",
+  typestatistics = "parametric",
+  normalcurve = TRUE
+)
+
+# Multiple histograms
+jjhistostats(
+  data = jjhistostats_test_data,
+  dep = c("age_years", "tumor_size_mm", "bmi"),
+  centralityline = TRUE,
+  resultssubtitle = TRUE
+)
+
+# Grouped histogram by disease stage
+jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "psa_level",
+  grvar = "disease_stage",
+  typestatistics = "nonparametric",
+  changebinwidth = TRUE,
+  binwidth = 2.0
+)
 }
 }
