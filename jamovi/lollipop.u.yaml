@@ -9,19 +9,67 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Variables
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: Grouping Variable
-        children:
+            label: Dependent Variable
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
+            label: Grouping Variable
           - type: LevelSelector
             name: highlight
             enable: (group)
+            label: Highlight Level
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Chart Options
+            children:
+              - type: ComboBox
+                name: sortBy
+              - type: ComboBox
+                name: orientation
+              - type: CheckBox
+                name: showValues
+              - type: CheckBox
+                name: showMean
+          - type: Label
+            label: Appearance
+            children:
+              - type: ComboBox
+                name: colorScheme
+              - type: ComboBox
+                name: theme
+              - type: TextBox
+                name: pointSize
+                format: number
+              - type: TextBox
+                name: lineWidth
+                format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Labels
+            children:
+              - type: TextBox
+                name: xlabel
+              - type: TextBox
+                name: ylabel
+              - type: TextBox
+                name: title
+          - type: Label
+            label: Size
+            children:
+              - type: TextBox
+                name: width
+                format: number
+              - type: TextBox
+                name: height
+                format: number

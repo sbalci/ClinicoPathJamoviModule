@@ -1,25 +1,34 @@
 ---
-name:  lollipop
+name: lollipop
 title: Lollipop Chart
-jrs:   '1.1'
+jrs: '1.1'
 
 items:
-    - name:  text
-      title: Lollipop Chart
-      type:  Preformatted
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
 
+    - name: summary
+      title: Data Summary
+      type: Table
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: text
 
     - name: plot
       title: 'Lollipop Chart'
       type: Image
-      width:  600
-      height: 450
+      width: '`${width}`'
+      height: '`${height}`'
       renderFun: .plot
       requiresData: true
 
 refs:
     - ClinicoPathJamoviModule
-
-
 
 ...

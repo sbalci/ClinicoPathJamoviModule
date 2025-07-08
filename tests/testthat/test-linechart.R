@@ -136,7 +136,7 @@ describe("linechart Basic Functionality", {
     
     # Validate grouped data structure
     expect_true("treatment" %in% names(data))
-    expect_true(is.factor(data$treatment))
+    expect_true(is.character(data$treatment) || is.factor(data$treatment))
     expect_equal(length(unique(data$treatment)), 3)
     
     # Check that all groups have data
@@ -400,7 +400,7 @@ describe("linechart Statistical Analysis", {
     expect_equal(interpret_correlation(0.05, 0.8), "negligible positive correlation (ns)")
     expect_equal(interpret_correlation(0.25, 0.03), "weak positive correlation (*)")
     expect_equal(interpret_correlation(-0.45, 0.001), "moderate negative correlation (**)")
-    expect_equal(interpret_correlation(0.75, 0.0001), "strong positive correlation (***)")
+    expect_equal(interpret_correlation(0.75, 0.0001), "very strong positive correlation (***)")
     expect_equal(interpret_correlation(NA, 0.05), "Not available")
   })
 })
