@@ -54,14 +54,16 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..dep4 <- jmvcore::OptionVariable$new(
                 "dep4",
                 dep4,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..pointpath <- jmvcore::OptionBool$new(
                 "pointpath",
                 pointpath,
@@ -250,8 +252,22 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep3",
                     "dep4",
                     "typestatistics",
+                    "pairwisecomparisons",
+                    "pairwisedisplay",
+                    "padjustmethod",
+                    "effsizetype",
+                    "pointpath",
+                    "centralityplotting",
+                    "centralitytype",
+                    "centralitypath",
+                    "violin",
+                    "boxplot",
+                    "point",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
                     "originaltheme",
-                    "excl"))
+                    "resultssubtitle"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -325,8 +341,8 @@ jjwithinstats <- function(
     data,
     dep1,
     dep2,
-    dep3,
-    dep4,
+    dep3 = NULL,
+    dep4 = NULL,
     pointpath = FALSE,
     centralitypath = FALSE,
     centralityplotting = FALSE,

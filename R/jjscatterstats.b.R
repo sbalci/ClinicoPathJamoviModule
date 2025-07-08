@@ -7,7 +7,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjscatterstatsClass",
     inherit = jjscatterstatsBase,
     private = list(
-
+        .prepared_data = NULL,
+        .prepared_options = NULL,
+        .data_hash = NULL,
 
         # init ----
 
@@ -30,6 +32,70 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
+            # Pre-prepare data and options for performance
+            private$.prepareData()
+            private$.prepareOptions()
+
+        },
+
+        # Performance optimization methods ----
+        
+        .prepareData = function() {
+            # Create a hash of current data to detect changes
+            current_hash <- paste(self$options$dep, self$options$group, nrow(self$data), collapse = "_")
+            
+            # Only reprocess if data has changed
+            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+                
+                if (!is.null(self$options$dep) && !is.null(self$options$group)) {
+                    mydata <- self$data
+                    
+                    # Convert variables to numeric
+                    vars <- self$options$dep
+                    for (var in vars) {
+                        mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+                    }
+                    mydata[[self$options$group]] <- jmvcore::toNumeric(mydata[[self$options$group]])
+                    
+                    # Exclude NA values once
+                    mydata <- jmvcore::naOmit(mydata)
+                    
+                    private$.prepared_data <- mydata
+                    private$.data_hash <- current_hash
+                } else {
+                    private$.prepared_data <- NULL
+                }
+            }
+            
+            return(private$.prepared_data)
+        },
+        
+        .prepareOptions = function() {
+            # Cache processed options
+            if (is.null(private$.prepared_options)) {
+                
+                # Process type statistics
+                typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+                
+                # Process titles
+                mytitle <- if (self$options$mytitle == '') NULL else self$options$mytitle
+                xtitle <- if (self$options$xtitle == '') NULL else self$options$xtitle
+                ytitle <- if (self$options$ytitle == '') NULL else self$options$ytitle
+                
+                private$.prepared_options <- list(
+                    typestatistics = typestatistics,
+                    mytitle = mytitle,
+                    xtitle = xtitle,
+                    ytitle = ytitle,
+                    dep = self$options$dep,
+                    group = self$options$group,
+                    grvar = self$options$grvar,
+                    resultssubtitle = self$options$resultssubtitle,
+                    originaltheme = self$options$originaltheme
+                )
+            }
+            
+            return(private$.prepared_options)
         }
 
         # run ----
@@ -83,84 +149,35 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-
-            mydata <- self$data
-
-
-            vars <- self$options$dep
-
-
-            for (var in vars)
-                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-
-            # Exclude NA ----
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-            dep <- self$options$dep
-
-            group <- self$options$group
-
-
-
-            mytitle <- self$options$mytitle
-
-            if (mytitle == '') {
-                mytitle <- NULL
+            # Use prepared data and options ----
+            mydata <- private$.prepareData()
+            opts <- private$.prepareOptions()
+            
+            if (is.null(mydata)) {
+                return()
             }
-
-
-            xtitle <- self$options$xtitle
-
-            if (xtitle == '') {
-                xtitle <- NULL
-            }
-
-            ytitle <- self$options$ytitle
-
-            if (ytitle == '') {
-                ytitle <- NULL
-            }
-
 
             # ggscatterstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggscatterstats.html
 
-
-
             plot <-
                 ggstatsplot::ggscatterstats(
                     data = mydata,
-                    x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group)
+                    x = !!rlang::sym(opts$dep),
+                    y = !!rlang::sym(opts$group)
 
-                    , type = typestatistics
+                    , type = opts$typestatistics
 
-                    , title = mytitle
-                    , xlab = xtitle
-                    , ylab = ytitle
+                    , title = opts$mytitle
+                    , xlab = opts$xtitle
+                    , ylab = opts$ytitle
 
-                    , results.subtitle = self$options$resultssubtitle
+                    , results.subtitle = opts$resultssubtitle
 
                 )
 
-
-
-            originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
+            # Apply theme ----
+            if (!opts$originaltheme) {
                 plot <- plot + ggtheme
             } else {
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
@@ -168,7 +185,6 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Print Plot ----
-
             print(plot)
             TRUE
 
@@ -186,68 +202,31 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-            vars <- self$options$dep
-
-
-            for (var in vars)
-                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-
-            # Exclude NA ----
-
-            mydata <- jmvcore::naOmit(mydata)
-
-
-            # type of statistics ----
-
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-            dep <- self$options$dep
-
-            group <- self$options$group
-
-
-            mytitle <- self$options$mytitle
-
-            if (mytitle == '') {
-                mytitle <- NULL
+            # Use prepared data and options ----
+            mydata <- private$.prepareData()
+            opts <- private$.prepareOptions()
+            
+            if (is.null(mydata) || is.null(opts$grvar)) {
+                return()
             }
-
 
             # grouped_ggscatterstats ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggscatterstats.html
 
+            plot2 <- ggstatsplot::grouped_ggscatterstats(
+                data = mydata,
+                x = !!rlang::sym(opts$dep),
+                y = !!rlang::sym(opts$group),
+                grouping.var = !!rlang::sym(opts$grvar),
 
+                , type = opts$typestatistics
+                # , title = opts$mytitle
+                , results.subtitle = opts$resultssubtitle
 
-            if ( !is.null(self$options$grvar) ) {
+            )
 
-                grvar <- self$options$grvar
-
-                plot2 <- ggstatsplot::grouped_ggscatterstats(
-                    data = mydata,
-                    x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group),
-                    grouping.var = !!rlang::sym(grvar),
-
-                    , type = typestatistics
-                    # , title = mytitle
-                    , results.subtitle = self$options$resultssubtitle
-
-
-                )
-            }
-
-
-            originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
+            # Apply theme ----
+            if (!opts$originaltheme) {
                 plot2 <- plot2 + ggtheme
             } else {
                 plot2 <- plot2 + ggstatsplot::theme_ggstatsplot()

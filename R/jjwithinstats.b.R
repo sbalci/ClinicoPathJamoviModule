@@ -8,6 +8,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjwithinstatsClass",
     inherit = jjwithinstatsBase,
     private = list(
+        .prepared_data = NULL,
+        .prepared_options = NULL,
+        .data_hash = NULL,
 
         # init ----
 
@@ -20,7 +23,110 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # if (!is.null(self$options$dep3) && !is.null(self$options$dep4))
             #     self$results$plot$setSize(800, 600)
+            
+            # Pre-prepare data and options for performance
+            private$.prepareData()
+            private$.prepareOptions()
 
+        },
+        
+        # Performance optimization methods ----
+        
+        .prepareData = function() {
+            # Create a simple hash of current data to detect changes
+            vars <- c(self$options$dep1, self$options$dep2, self$options$dep3, self$options$dep4)
+            vars <- vars[!sapply(vars, is.null)]
+            current_hash <- paste(vars, nrow(self$data), collapse = "_")
+            
+            # Only reprocess if data has changed
+            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+                
+                if (!is.null(self$options$dep1) && !is.null(self$options$dep2)) {
+                    mydata <- self$data
+                    mydata$rowid <- seq.int(nrow(mydata))
+                    
+                    # Convert variables to numeric once
+                    for (var in vars)
+                        mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
+                    
+                    # Remove NA values once
+                    mydata <- jmvcore::naOmit(mydata)
+                    
+                    # Perform pivot_longer transformation once
+                    long_data <- tidyr::pivot_longer(
+                        mydata,
+                        cols = vars,
+                        names_to = "measurement",
+                        values_to = "value"
+                    )
+                    
+                    long_data$measurement <- factor(long_data$measurement, levels = vars)
+                    
+                    private$.prepared_data <- long_data
+                    private$.data_hash <- current_hash
+                } else {
+                    private$.prepared_data <- NULL
+                }
+            }
+            
+            return(private$.prepared_data)
+        },
+        
+        .prepareOptions = function() {
+            # Cache processed options
+            if (is.null(private$.prepared_options)) {
+                
+                # Process formulas once
+                typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+                pairwisedisplay <- jmvcore::constructFormula(terms = self$options$pairwisedisplay)
+                padjustmethod <- jmvcore::constructFormula(terms = self$options$padjustmethod)
+                
+                # Process titles once
+                mytitle <- self$options$mytitle
+                xtitle <- if (self$options$xtitle == '') NULL else self$options$xtitle
+                ytitle <- if (self$options$ytitle == '') NULL else self$options$ytitle
+                
+                # Process plot component arguments once
+                violinargs <- if (self$options$violin) {
+                    list(width = 0.5, alpha = 0.2, na.rm = TRUE)
+                } else {
+                    list(width = 0)
+                }
+                
+                boxplotargs <- if (self$options$boxplot) {
+                    list(width = 0.2, alpha = 0.5, na.rm = TRUE)
+                } else {
+                    list(width = 0)
+                }
+                
+                pointargs <- if (self$options$point) {
+                    list(alpha = 0.5, linetype = "dashed")
+                } else {
+                    list(alpha = 0)
+                }
+                
+                private$.prepared_options <- list(
+                    typestatistics = typestatistics,
+                    pairwisecomparisons = self$options$pairwisecomparisons,
+                    pairwisedisplay = pairwisedisplay,
+                    padjustmethod = padjustmethod,
+                    pointpath = self$options$pointpath,
+                    mytitle = mytitle,
+                    xtitle = xtitle,
+                    ytitle = ytitle,
+                    effsizetype = self$options$effsizetype,
+                    centralityplotting = self$options$centralityplotting,
+                    centralitytype = self$options$centralitytype,
+                    centralitypath = self$options$centralitypath,
+                    violinargs = violinargs,
+                    boxplotargs = boxplotargs,
+                    pointargs = pointargs,
+                    originaltheme = self$options$originaltheme,
+                    resultssubtitle = self$options$resultssubtitle
+                )
+            }
+            
+            return(private$.prepared_options)
         }
 
         # run ----
@@ -78,185 +184,70 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
-
-            ## Prepare Data ----
-
-            mydata <- self$data
-
-            mydata$rowid <- seq.int(nrow(mydata))
-
-            dep1 <- self$options$dep1
-
-            dep2 <- self$options$dep2
-
-            dep3 <- self$options$dep3
-
-            dep4 <- self$options$dep4
-
-            vars <- c(dep1, dep2, dep3, dep4)
-            vars <- vars[!sapply(vars, is.null)]
-
-            for (var in vars)
-                mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-
-            mydata <- jmvcore::naOmit(mydata)
-
-            long_data <- tidyr::pivot_longer(
-                mydata,
-                cols = vars,
-                names_to = "measurement",
-                values_to = "value"
-            )
-
-            long_data$measurement <- factor(long_data$measurement,
-                                            levels = vars)
-
-
-            # mydataview ----
-            # self$results$mydataview$setContent(
-            #     list(
-            #     dep1 = dep1,
-            #     dep2 = dep2,
-            #     dep3 = dep3,
-            #     dep4 = dep4,
-            #     mydata = head(mydata),
-            #     long_data = head(long_data)
-            # )
-            # )
-
-
-            ## type of statistics ----
-
-            typestatistics <-
-                jmvcore::constructFormula(terms = self$options$typestatistics)
-
-
-            pairwisecomparisons <- self$options$pairwisecomparisons
-
-            pairwisedisplay <-
-                jmvcore::constructFormula(terms = self$options$pairwisedisplay)
-
-            padjustmethod <-
-                jmvcore::constructFormula(terms = self$options$padjustmethod)
-
-            # read arguments ----
-
-            pointpath <- self$options$pointpath
-
-            mytitle <- self$options$mytitle
-
-            xtitle <- self$options$xtitle
-
-            if (xtitle == '') {
-                xtitle <- NULL
+            # Use prepared data and options ----
+            long_data <- private$.prepareData()
+            opts <- private$.prepareOptions()
+            
+            if (is.null(long_data)) {
+                return()
             }
 
-            ytitle <- self$options$ytitle
-
-            if (ytitle == '') {
-                ytitle <- NULL
+            # Additional validation
+            if (nrow(long_data) == 0) {
+                warning_msg <- "<br>No complete data rows available after removing missing values.<br>Please check your data for missing values in the selected variables.<br><hr>"
+                self$results$todo$setContent(warning_msg)
+                return()
             }
 
-            effsizetype <- self$options$effsizetype
-
-            pointpath <- self$options$pointpath
-
-            centralityplotting <- self$options$centralityplotting
-
-            centralitytype <- self$options$centralitytype
-
-            centralitypath <- self$options$centralitypath
-
-            violin <- self$options$violin
-
-            boxplot <- self$options$boxplot
-
-            point <- self$options$point
-
-            if (violin) {
-
-                violinargs <- list(width = 0.5, alpha = 0.2, na.rm = TRUE)
-
-                } else {
-
-                violinargs <- list(width = 0)
-            }
-
-
-            if (boxplot) {
-            boxplotargs <- list(width = 0.2, alpha = 0.5, na.rm = TRUE)
-            } else {
-            boxplotargs <- list(width = 0)
-            }
-
-            if (point) {
-            pointargs <- list(alpha = 0.5, linetype = "dashed")
-            } else {
-            pointargs <- list(alpha = 0)
-            }
-
-
-            # ggwithinstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html
-
-
-            plot <-
-                ggstatsplot::ggwithinstats(
+            # Create plot using optimized data and options ----
+            tryCatch({
+                plot <- ggstatsplot::ggwithinstats(
                     data = long_data,
                     x = measurement,
                     y = value,
                     paired = TRUE,
-                    id = "rowid"
-
-
-                    , title = mytitle
-                    , xlab = xtitle
-                    , ylab = ytitle
-                    , type = typestatistics
-                    , pairwise.comparisons = pairwisecomparisons
-                    , pairwise.display = pairwisedisplay
-                    , p.adjust.method = padjustmethod
-                    , effsize.type = effsizetype
-                    , centrality.plotting = centralityplotting
-                    , centrality.type = centralitytype
-                    , point.path = pointpath
-                    , centrality.path = centralitypath
-                    , violin.args = violinargs
-                    , boxplot.args = boxplotargs
-                    , point.args = pointargs
-                    , results.subtitle = self$options$resultssubtitle
-
+                    id = "rowid",
+                    title = opts$mytitle,
+                    xlab = opts$xtitle,
+                    ylab = opts$ytitle,
+                    type = opts$typestatistics,
+                    pairwise.comparisons = opts$pairwisecomparisons,
+                    pairwise.display = opts$pairwisedisplay,
+                    p.adjust.method = opts$padjustmethod,
+                    effsize.type = opts$effsizetype,
+                    centrality.plotting = opts$centralityplotting,
+                    centrality.type = opts$centralitytype,
+                    point.path = opts$pointpath,
+                    centrality.path = opts$centralitypath,
+                    violin.args = opts$violinargs,
+                    boxplot.args = opts$boxplotargs,
+                    point.args = opts$pointargs,
+                    results.subtitle = opts$resultssubtitle
                 )
 
+                # Apply theme
+                if (!opts$originaltheme) {
+                    plot <- plot + ggtheme
+                } else {
+                    plot <- plot + ggstatsplot::theme_ggstatsplot()
+                }
 
-            # mydataview ----
-            # extracted_stats <- ggstatsplot::extract_stats(plot)
-            # extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
-            # extracted_caption <- ggstatsplot::extract_caption(plot)
-            # self$results$e_plot$setContent(
-            #     as.list(
-            #         plot
-            #     )
-            # )
-            # self$results$e_stats$setContent(as.list(extracted_stats))
-            # self$results$e_subtitle$setContent(as.list(extracted_subtitle))
-            # self$results$e_caption$setContent(as.list(extracted_caption))
-
-
-            originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
-                plot <- plot + ggtheme
-            } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
-
-
-            # Print Plot ----
-
-            print(plot)
-            TRUE
+                # Print Plot ----
+                print(plot)
+                TRUE
+                
+            }, error = function(e) {
+                error_msg <- paste0(
+                    "<br>Error creating within-subjects plot: ", e$message,
+                    "<br><br>Please check that:",
+                    "<br>• All measurement variables contain numeric values",
+                    "<br>• Data has at least 2 complete rows",
+                    "<br>• Variables have sufficient variance for statistical tests",
+                    "<br>• No extreme outliers that might affect analysis",
+                    "<br><hr>"
+                )
+                self$results$todo$setContent(error_msg)
+            })
 
         }
 

@@ -10,13 +10,39 @@ jas: '1.2'
 
 
 description:
-    # main: |
-    #     'Wrapper Function for ggstatsplot::ggpiestats and
-    #     ggstatsplot::grouped_ggpiestats to generate Pie Charts.'
+    main: |
+        'Wrapper Function for ggstatsplot::ggpiestats and
+        ggstatsplot::grouped_ggpiestats to generate Pie Charts with
+        statistical analysis.'
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load test data
+            data(jjpiestats_test_data)
+            
+            # Basic pie chart
+            jjpiestats(
+              data = jjpiestats_test_data,
+              dep = "treatment_response",
+              typestatistics = "parametric"
+            )
+            
+            # Pie chart with grouping
+            jjpiestats(
+              data = jjpiestats_test_data,
+              dep = "treatment_response",
+              group = "treatment_arm",
+              resultssubtitle = TRUE
+            )
+            
+            # Grouped pie charts by split variable
+            jjpiestats(
+              data = jjpiestats_test_data,
+              dep = "disease_severity",
+              group = "gender",
+              grvar = "hospital_site",
+              typestatistics = "nonparametric"
+            )
 
 options:
     - name: data
@@ -31,18 +57,33 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            The categorical variable to display in the pie chart. This variable
+            will be used to create pie slices representing the proportion of each
+            category. Must be a factor variable.
 
     - name: group
       title: 'Grouping Variable: (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable for creating contingency table analysis.
+            When specified, creates a 2x2 or 2xN contingency table and performs
+            association tests (Chi-square, Fisher's exact test, etc.).
 
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional variable to create separate pie charts for each level of this
+            grouping variable. Creates a panel of pie charts, one for each group
+            level (e.g., separate charts by treatment center or study site).
 
 
     - name: typestatistics
@@ -58,17 +99,33 @@ options:
         - title: Bayes
           name: bayes
       default: parametric
+      description:
+          R: >
+            Type of statistical test for categorical association analysis.
+            'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
+            contingency table tests, 'robust' uses robust association measures,
+            'bayes' provides Bayesian analysis with Bayes factors.
 
 
     - name: originaltheme
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to apply the original ggstatsplot theme layer to the plot.
+            If TRUE, uses ggstatsplot's default styling. If FALSE, uses jamovi's
+            default ggplot2 theme for consistency with other analyses.
 
     - name: resultssubtitle
       title: Statistical Results
       type: Bool
       default: true
+      description:
+          R: >
+            Whether to display statistical test results as subtitle in the pie chart.
+            Shows test statistics, p-values, effect sizes, and confidence intervals
+            for categorical association tests. Provides detailed statistical summary.
 
 
 ...

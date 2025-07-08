@@ -134,3 +134,38 @@ children:
       - type: TextBox
         name: borderWidth
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: borderLevel1Width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: borderLevel2Width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: borderLevel1Color
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: borderLevel2Color
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showLabels
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: labelSize
+        format: number

@@ -1,0 +1,745 @@
+---
+title: "jjridgestats: Comprehensive Ridgeline Plot Analysis"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    theme: cosmo
+    code-fold: false
+    df-print: kable
+execute:
+  warning: false
+  message: false
+---
+
+## Overview
+
+The `jjridgestats` function provides a comprehensive interface for creating ridgeline plots (also known as ridge plots or joy plots) to visualize and compare distributions of continuous variables across different categorical groups. This function is built on `ggplot2` and `ggridges`, offering multiple visualization styles with performance optimization through internal caching.
+
+## Key Features
+
+- **Multiple plot styles**: Density ridges, histogram ridges, and gradient ridges
+- **Flexible customization**: Height scaling, bandwidth control, color schemes
+- **Professional themes**: Minimal, classic, and dark themes optimized for ridgeline plots
+- **Performance optimized**: Uses internal caching to eliminate redundant computations
+- **Clinical research ready**: Designed for biomedical and clinical data visualization
+
+## When to Use Ridgeline Plots
+
+Ridgeline plots are particularly effective for:
+
+- **Comparing distributions** across multiple groups or categories
+- **Showing distribution shapes** (normal, skewed, bimodal, etc.)
+- **Revealing overlaps** between group distributions
+- **Temporal analysis** (distributions across time periods)
+- **Multi-site studies** (comparing distributions across centers)
+- **Biomarker analysis** (expression levels across disease stages)
+
+## Installation and Setup
+
+```{r setup}
+#| echo: true
+#| eval: false
+
+# Install ClinicoPath if not already installed
+if (!require("ClinicoPath")) {
+  devtools::install_github("sbalci/ClinicoPathJamoviModule")
+}
+
+library(ClinicoPath)
+library(ggplot2)
+```
+
+## Quick Start
+
+### Basic Ridgeline Plot
+
+```{r basic-example}
+#| echo: true
+#| eval: false
+
+# Load test data
+data(jjridgestats_test_data)
+
+# Basic ridgeline plot
+result <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "biomarker_expression",
+  group = "disease_stage",
+  plotStyle = "density"
+)
+
+# View the plot
+result$plot
+```
+
+### Customized Ridgeline Plot
+
+```{r customized-example}
+#| echo: true
+#| eval: false
+
+# Customized ridgeline with scaling and colors
+result_custom <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "response_score",
+  group = "treatment_group",
+  plotStyle = "gradient",
+  scaling = 1.5,
+  bandwidth = 0.8,
+  colorscheme = "viridis",
+  fill = TRUE
+)
+
+# View the plot
+result_custom$plot
+```
+
+### Histogram-Style Ridgeline
+
+```{r histogram-example}
+#| echo: true
+#| eval: false
+
+# Histogram-style ridgeline plot
+result_hist <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "lab_value",
+  group = "hospital_center",
+  plotStyle = "histogram",
+  binwidth = 5,
+  scaling = 1.2
+)
+
+# View the plot
+result_hist$plot
+```
+
+## Function Parameters
+
+### Core Parameters
+
+- **`data`**: Input data frame containing variables to analyze
+- **`dep`**: Continuous numeric variable for distribution visualization
+- **`group`**: Categorical grouping variable (creates separate ridges)
+
+### Plot Style Options
+
+#### Plot Styles
+
+1. **"density"** (default): Smooth density curves
+   - Best for continuous data visualization
+   - Shows distribution shape clearly
+   - Customizable bandwidth for smoothness control
+
+2. **"histogram"**: Histogram-style ridges
+   - Good for discrete or count data
+   - Shows exact frequency distributions
+   - Controllable bin width
+
+3. **"gradient"**: Density ridges with color gradients
+   - Visually striking presentation
+   - Color represents x-values
+   - Good for highlighting distribution characteristics
+
+#### Scaling and Appearance
+
+- **`scaling`**: Controls ridge height (default: 1.0)
+  - Values > 1: Taller ridges, possible overlaps
+  - Values < 1: Shorter ridges, more separation
+  - Typical range: 0.5 - 3.0
+
+- **`bandwidth`**: Density smoothness control (default: 1.0)
+  - Higher values: Smoother, wider curves
+  - Lower values: More detailed, narrower curves
+  - Only applies to density and gradient styles
+
+- **`binwidth`**: Histogram bin width (default: 1.0)
+  - Smaller values: More detailed histograms
+  - Larger values: Smoother histograms
+  - Only applies to histogram style
+
+### Color and Theme Options
+
+#### Color Schemes
+
+- **"viridis"** (default): Colorblind-friendly, perceptually uniform
+- **"plasma"**: High contrast, warm colors
+- **"magma"**: Dark background friendly
+- **"blues"**: Sequential blue palette
+- **"custom"**: User-specified color
+
+#### Theme Styles
+
+- **"minimal"** (default): Clean ridgeline-specific theme
+- **"classic"**: Traditional ggplot2 theme with borders
+- **"dark"**: Dark background for presentations
+
+## Performance Optimizations
+
+### Caching Implementation
+
+The function includes significant performance optimizations:
+
+**Previous Issues (if any existed):**
+- Potential redundant data processing
+- Repeated option parsing
+- Multiple data cleaning operations
+
+**Current Optimizations:**
+- **Data Caching**: Uses `.prepareData()` method to cache processed data
+- **Options Caching**: Uses `.prepareOptions()` method to cache option processing
+- **Single Processing**: Data cleaned once and reused
+- **Progress Feedback**: Clear user messaging during processing
+
+### Performance Benefits
+
+```{r performance-concept}
+#| echo: true
+#| eval: false
+
+# The optimized version provides:
+# - Faster processing for large datasets
+# - Reduced memory usage
+# - Better user experience with progress indicators
+# - Consistent data processing across plot variations
+```
+
+## Advanced Usage Examples
+
+### Clinical Trial Response Analysis
+
+```{r clinical-trial}
+#| echo: true
+#| eval: false
+
+# Treatment response distributions
+response_analysis <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "response_score",
+  group = "treatment_group",
+  plotStyle = "density",
+  scaling = 1.2,
+  colorscheme = "viridis",
+  mytitle = "Treatment Response Distribution by Group",
+  xtitle = "Response Score (0-100)",
+  ytitle = "Treatment Group"
+)
+
+# This reveals:
+# - Distribution shapes for each treatment
+# - Overlap between treatment groups
+# - Potential bimodal distributions (responders vs non-responders)
+```
+
+### Biomarker Progression Analysis
+
+```{r biomarker-analysis}
+#| echo: true
+#| eval: false
+
+# Biomarker expression across disease stages
+biomarker_progression <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "biomarker_expression",
+  group = "disease_stage",
+  plotStyle = "gradient",
+  scaling = 1.0,
+  bandwidth = 0.6,
+  colorscheme = "plasma",
+  mytitle = "Biomarker Expression by Disease Stage",
+  xtitle = "Biomarker Expression (ng/mL)"
+)
+
+# This shows:
+# - Progressive increase in biomarker levels
+# - Distribution spread at each stage
+# - Potential diagnostic thresholds
+```
+
+### Multi-Center Quality Control
+
+```{r quality-control}
+#| echo: true
+#| eval: false
+
+# Laboratory value distributions across centers
+lab_qc <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "lab_value",
+  group = "hospital_center",
+  plotStyle = "density",
+  scaling = 0.8,
+  bandwidth = 1.2,
+  colorscheme = "blues",
+  mytitle = "Laboratory Value Distribution by Center",
+  xtitle = "Lab Value (units)",
+  ytitle = "Hospital Center"
+)
+
+# This reveals:
+# - Center-specific calibration differences
+# - Outlier centers requiring attention
+# - Overall measurement consistency
+```
+
+### Longitudinal Treatment Response
+
+```{r longitudinal-analysis}
+#| echo: true
+#| eval: false
+
+# Symptom severity over time
+longitudinal_response <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "symptom_severity",
+  group = "time_period",
+  plotStyle = "density",
+  scaling = 1.1,
+  colorscheme = "magma",
+  mytitle = "Symptom Severity Distribution Over Time",
+  xtitle = "Symptom Severity Score (0-100)",
+  ytitle = "Time Period"
+)
+
+# This demonstrates:
+# - Treatment response progression
+# - Distribution shape changes over time
+# - Patient heterogeneity in response
+```
+
+### Regional Population Differences
+
+```{r population-analysis}
+#| echo: true
+#| eval: false
+
+# Inflammatory marker distributions by region
+population_differences <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "inflammatory_marker",
+  group = "region",
+  plotStyle = "density",
+  scaling = 1.3,
+  bandwidth = 0.8,
+  colorscheme = "viridis",
+  mytitle = "Inflammatory Marker Distribution by Region",
+  xtitle = "Inflammatory Marker (mg/L)",
+  ytitle = "Geographic Region"
+)
+
+# This reveals:
+# - Population-specific baseline differences
+# - Genetic or environmental influences
+# - Reference range considerations
+```
+
+### Comparative Plot Styles
+
+```{r plot-styles-comparison}
+#| echo: true
+#| eval: false
+
+# Same data with different plot styles
+variable_of_interest <- "response_score"
+grouping_variable <- "treatment_group"
+
+# Density style
+density_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  plotStyle = "density",
+  mytitle = "Density Style Ridgeline"
+)
+
+# Histogram style
+histogram_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  plotStyle = "histogram",
+  binwidth = 3,
+  mytitle = "Histogram Style Ridgeline"
+)
+
+# Gradient style
+gradient_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  plotStyle = "gradient",
+  mytitle = "Gradient Style Ridgeline"
+)
+```
+
+## Data Requirements
+
+### Input Data Structure
+
+The input data should be a data frame with:
+
+- **Continuous variable**: Numeric column for ridge visualization
+- **Grouping variable**: Factor or character column for separate ridges
+- **Reasonable sample size**: At least 20-30 observations per group
+- **Appropriate range**: Data should have meaningful variation
+
+### Example Data Structure
+
+```{r data-structure}
+#| echo: true
+#| eval: false
+
+# Structure of test data
+str(jjridgestats_test_data)
+
+# Key variables for ridgeline plots:
+# - biomarker_expression: Log-normal distribution (0.1-50 ng/mL)
+# - response_score: Normal/bimodal distribution (0-100 scale)
+# - lab_value: Normal distribution with center effects (20-200 units)
+# - symptom_severity: Decreasing over time (0-100 scale)
+# - inflammatory_marker: Gamma distribution (0.5-100 mg/L)
+# - disease_stage: Ordered factor (Stage I-IV)
+# - treatment_group: Unordered factor (Control, Treatment A-C)
+# - hospital_center: Unordered factor (6 centers)
+# - time_period: Ordered factor (Baseline to Month 12)
+```
+
+## Best Practices
+
+### Data Preparation
+
+1. **Check data distribution**: Ensure adequate sample sizes per group
+2. **Handle outliers**: Consider impact on visualization scale
+3. **Order groups meaningfully**: Use ordered factors for natural progressions
+4. **Handle missing data**: Understand exclusion impact
+
+### Visualization Guidelines
+
+#### Choosing Plot Style
+
+```{r style-guidelines}
+#| echo: true
+#| eval: false
+
+# Use density plots when:
+# - Data is truly continuous
+# - Sample sizes are adequate (n > 30 per group)
+# - Distribution shape is important
+
+# Use histogram plots when:
+# - Data is discrete or count-based
+# - Want to show exact frequency information
+# - Sample sizes are smaller
+
+# Use gradient plots when:
+# - Creating visually striking presentations
+# - Distribution location matters as much as shape
+# - Emphasizing distribution features
+```
+
+#### Parameter Selection
+
+```{r parameter-guidelines}
+#| echo: true
+#| eval: false
+
+# Scaling guidelines:
+# scaling = 0.5-0.8: Conservative, clear separation
+# scaling = 1.0: Balanced (default)
+# scaling = 1.5-2.0: Dramatic overlaps, artistic effect
+
+# Bandwidth guidelines:
+# bandwidth = 0.3-0.5: Detailed, follows data closely
+# bandwidth = 1.0: Balanced (default)
+# bandwidth = 1.5-2.0: Smooth, broad patterns
+
+# Color scheme selection:
+# viridis: Default, works well everywhere
+# plasma: High contrast, warm colors
+# blues: Conservative, publication-friendly
+# custom: Brand colors or specific requirements
+```
+
+### Interpretation Guidelines
+
+#### What to Look For
+
+1. **Distribution shapes**: Normal, skewed, bimodal, multimodal
+2. **Group differences**: Location, spread, shape differences
+3. **Overlaps**: How much distributions overlap between groups
+4. **Outliers**: Unusual patterns in specific groups
+5. **Sample size effects**: Smoother vs jagged ridges
+
+#### Common Patterns
+
+```{r interpretation-patterns}
+#| echo: true
+#| eval: false
+
+# Common clinical patterns in ridgeline plots:
+
+# Disease progression:
+# - Biomarker levels increase with disease stage
+# - Distributions become more variable in advanced stages
+
+# Treatment response:
+# - Control group: Single distribution
+# - Effective treatment: Shifted distribution
+# - Heterogeneous response: Bimodal distribution
+
+# Multi-center studies:
+# - Consistent centers: Similar distributions
+# - Calibration issues: Shifted means
+# - Quality problems: Different spreads
+
+# Longitudinal studies:
+# - Improvement: Progressive shifts
+# - Response heterogeneity: Changing distribution shapes
+```
+
+## Technical Details
+
+### Underlying Functions
+
+The `jjridgestats` function is built on:
+
+- **ggplot2**: Core plotting framework
+- **ggridges**: Specialized ridgeline geometries
+- **jmvcore**: Data handling and option processing
+
+### Caching Details
+
+```{r caching-technical}
+#| echo: true
+#| eval: false
+
+# Internal caching structure (conceptual)
+# private$.processedData: Cached cleaned data with numeric conversion
+# private$.processedOptions: Cached option processing including titles
+# 
+# Benefits:
+# - Eliminates redundant jmvcore::toNumeric() calls
+# - Avoids repeated jmvcore::naOmit() operations
+# - Shares processed data across plot variations
+# - Optimizes parameter processing
+```
+
+### Dependencies
+
+```{r dependencies}
+#| echo: true
+#| eval: false
+
+# Required packages:
+# - ggplot2: Core plotting
+# - ggridges: Ridgeline-specific geometries
+# - jmvcore: jamovi core functionality
+# - R6: Object-oriented programming
+# - rlang: Non-standard evaluation
+```
+
+## Clinical Applications
+
+### Research Scenarios
+
+1. **Clinical Trials**: Compare primary endpoint distributions across treatment arms
+2. **Biomarker Studies**: Show biomarker level progression across disease stages
+3. **Quality Control**: Monitor laboratory value consistency across sites
+4. **Longitudinal Studies**: Visualize outcome changes over time
+5. **Population Studies**: Compare distributions across demographic groups
+
+### Publication Guidelines
+
+```{r publication-tips}
+#| echo: true
+#| eval: false
+
+# For scientific publications:
+# - Use minimal theme with clear axis labels
+# - Choose colorblind-friendly palettes (viridis, plasma)
+# - Include sample sizes in group labels
+# - Provide clear figure captions explaining the visualization
+# - Consider grayscale-friendly colors for print
+
+# Example publication-ready plot:
+publication_plot <- jjridgestats(
+  data = clinical_data,
+  dep = "primary_endpoint",
+  group = "treatment_arm",
+  plotStyle = "density",
+  scaling = 0.8,
+  colorscheme = "viridis",
+  themeChoice = "minimal",
+  mytitle = "Primary Endpoint Distribution by Treatment Arm",
+  xtitle = "Primary Endpoint (units)",
+  ytitle = "Treatment Arm"
+)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Data contains no (complete) rows"**
+   - Check for missing values in continuous variable
+   - Ensure grouping variable has valid levels
+   - Verify data type compatibility
+
+2. **Overly smooth or jagged ridges**
+   - Adjust bandwidth parameter
+   - Check sample sizes per group
+   - Consider histogram style for small samples
+
+3. **Overlapping ridges**
+   - Reduce scaling parameter
+   - Consider fewer groups or grouping combinations
+   - Use minimal theme for cleaner appearance
+
+4. **Poor color contrast**
+   - Try different color schemes
+   - Consider dark theme for presentations
+   - Test with colorblind simulation tools
+
+### Error Handling
+
+```{r error-handling}
+#| echo: true
+#| eval: false
+
+# Example error handling
+tryCatch({
+  result <- jjridgestats(
+    data = my_data,
+    dep = "continuous_var",
+    group = "group_var",
+    plotStyle = "density"
+  )
+}, error = function(e) {
+  message("Error in ridgeline plot: ", e$message)
+  message("Check your data structure and variable types")
+  
+  # Diagnostic information
+  cat("Data structure:\n")
+  str(my_data)
+  cat("\nContinuous variable summary:\n")
+  summary(my_data$continuous_var)
+  cat("\nGrouping variable levels:\n")
+  table(my_data$group_var, useNA = "ifany")
+})
+```
+
+### Performance Considerations
+
+```{r performance-tips}
+#| echo: true
+#| eval: false
+
+# For large datasets:
+# - Consider sampling for initial exploration
+# - Use appropriate bandwidth to balance detail vs performance
+# - Be cautious with very high scaling values
+# - Monitor memory usage with many groups
+
+# Optimal performance tips:
+# - Ensure grouping variable is a factor
+# - Remove unnecessary columns from data
+# - Use reasonable numbers of groups (< 20 typically)
+```
+
+## Comparison with Other Visualizations
+
+### When to Use Ridgeline Plots vs Alternatives
+
+```{r visualization-comparison}
+#| echo: true
+#| eval: false
+
+# Use ridgeline plots when:
+# - Comparing distribution shapes across groups
+# - Showing overlaps between distributions
+# - Distribution shape is as important as central tendency
+# - Space-efficient visualization of multiple distributions
+
+# Use box plots when:
+# - Focus on quartiles and outliers
+# - Comparing medians across groups
+# - Space is limited
+# - Emphasis on summary statistics
+
+# Use violin plots when:
+# - Distribution shape is important but space is limited
+# - Combining distribution info with quartiles
+# - Symmetric layout is preferred
+
+# Use histograms when:
+# - Single group detailed distribution
+# - Exact bin counts are important
+# - Teaching distribution concepts
+```
+
+## Advanced Customization
+
+### Custom Themes and Styling
+
+```{r advanced-customization}
+#| echo: true
+#| eval: false
+
+# Advanced styling examples:
+
+# High-contrast presentation theme
+presentation_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "biomarker_expression",
+  group = "disease_stage",
+  plotStyle = "gradient",
+  scaling = 1.5,
+  themeChoice = "dark",
+  colorscheme = "plasma"
+)
+
+# Minimal publication theme
+publication_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "response_score",
+  group = "treatment_group",
+  plotStyle = "density",
+  scaling = 0.8,
+  themeChoice = "minimal",
+  colorscheme = "blues",
+  fill = FALSE  # Outline only for print
+)
+
+# Custom color example
+custom_color_plot <- jjridgestats(
+  data = jjridgestats_test_data,
+  dep = "lab_value",
+  group = "hospital_center",
+  plotStyle = "density",
+  colorscheme = "custom",
+  customColor = "#2E8B57"  # Sea green
+)
+```
+
+## Conclusion
+
+The optimized `jjridgestats` function provides:
+
+- **Comprehensive visualization**: Multiple styles for different data types and purposes
+- **High performance**: Significant speed improvements through caching
+- **Clinical relevance**: Designed for biomedical research applications
+- **Flexibility**: Extensive customization options for publication and presentation
+- **Usability**: Clear documentation and comprehensive examples
+
+Ridgeline plots excel at revealing distribution shapes, overlaps, and group differences that summary statistics alone cannot capture. They are particularly valuable in clinical research for comparing treatment effects, biomarker distributions, and population characteristics across multiple groups.
+
+The function is well-suited for exploratory data analysis, quality control monitoring, clinical trial visualization, and any scenario requiring detailed comparison of distributions across categorical groups.
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

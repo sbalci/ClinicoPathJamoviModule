@@ -11,10 +11,108 @@ jjriverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjriverplotClass",
     inherit = jjriverplotBase,
     private = list(
+
+        # Cache for processed data and options to avoid redundant computation
+        .processedData = NULL,
+        .processedOptions = NULL,
         # init ----
         .init = function() {
             # Set the size of the plot
             self$results$plot$setSize(800, 600)
+        },
+
+        # Optimized data preparation with caching
+        .prepareData = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedData) && !force_refresh) {
+                return(private$.processedData)
+            }
+
+            # Prepare data with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Processing data for river plot analysis...<br><hr>")
+            )
+
+            mydata <- self$data
+            
+            # Extract options for processing
+            time_var <- self$options$time
+            strata_vars <- self$options$strata
+            
+            # Convert to factors if needed
+            if (!is.null(time_var)) {
+                mydata[[time_var]] <- as.factor(mydata[[time_var]])
+            }
+            
+            for (var in strata_vars) {
+                if (!is.null(var)) {
+                    mydata[[var]] <- as.factor(mydata[[var]])
+                }
+            }
+
+            # Handle missing values with checkpoint
+            private$.checkpoint()
+            mydata <- jmvcore::naOmit(mydata)
+
+            # Cache the processed data
+            private$.processedData <- mydata
+            return(mydata)
+        },
+
+        # Optimized options preparation with caching
+        .prepareOptions = function(force_refresh = FALSE) {
+            if (!is.null(private$.processedOptions) && !force_refresh) {
+                return(private$.processedOptions)
+            }
+
+            # Prepare options with progress feedback
+            self$results$todo$setContent(
+                glue::glue("<br>Preparing river plot options...<br><hr>")
+            )
+
+            # Process all options
+            time_var <- self$options$time
+            strata_vars <- self$options$strata
+            id_var <- self$options$id
+            weight_var <- self$options$weight
+            plot_type <- self$options$plotType
+            fill_type <- self$options$fillType
+            sort_streams <- self$options$sortStreams
+            label_nodes <- self$options$labelNodes
+            curve_type <- self$options$curveType
+            show_counts <- self$options$showCounts
+            show_legend <- self$options$showLegend
+            originaltheme <- self$options$originaltheme
+            
+            # Process titles
+            mytitle <- self$options$mytitle
+            if (mytitle == '') mytitle <- NULL
+            
+            xtitle <- self$options$xtitle
+            if (xtitle == '') xtitle <- NULL
+            
+            ytitle <- self$options$ytitle
+            if (ytitle == '') ytitle <- NULL
+            
+            # Cache the processed options
+            options_list <- list(
+                time_var = time_var,
+                strata_vars = strata_vars,
+                id_var = id_var,
+                weight_var = weight_var,
+                plot_type = plot_type,
+                fill_type = fill_type,
+                sort_streams = sort_streams,
+                label_nodes = label_nodes,
+                curve_type = curve_type,
+                show_counts = show_counts,
+                show_legend = show_legend,
+                originaltheme = originaltheme,
+                mytitle = mytitle,
+                xtitle = xtitle,
+                ytitle = ytitle
+            )
+            private$.processedOptions <- options_list
+            return(options_list)
         },
 
         # run ----
@@ -54,6 +152,10 @@ jjriverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
+
+                # Pre-process data and options for performance
+                private$.prepareData()
+                private$.prepareOptions()
             }
         },
         
@@ -67,42 +169,26 @@ jjriverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
             
-            # Prepare data ----
-            mydata <- self$data
+            # Use cached data and options for performance ----
+            mydata <- private$.prepareData()
+            options_data <- private$.prepareOptions()
             
-            # Extract options
-            time_var <- self$options$time
-            strata_vars <- self$options$strata
-            id_var <- self$options$id
-            weight_var <- self$options$weight
-            
-            # Convert to factors if needed
-            mydata[[time_var]] <- as.factor(mydata[[time_var]])
-            for (var in strata_vars) {
-                mydata[[var]] <- as.factor(mydata[[var]])
-            }
-            
-            # Handle missing values
-            mydata <- jmvcore::naOmit(mydata)
-            
-            # Process other options
-            plot_type <- self$options$plotType
-            fill_type <- self$options$fillType
-            sort_streams <- self$options$sortStreams
-            label_nodes <- self$options$labelNodes
-            curve_type <- self$options$curveType
-            show_counts <- self$options$showCounts
-            show_legend <- self$options$showLegend
-            
-            # Title and labels
-            mytitle <- self$options$mytitle
-            if (mytitle == '') mytitle <- NULL
-            
-            xtitle <- self$options$xtitle
-            if (xtitle == '') xtitle <- NULL
-            
-            ytitle <- self$options$ytitle
-            if (ytitle == '') ytitle <- NULL
+            # Extract cached options
+            time_var <- options_data$time_var
+            strata_vars <- options_data$strata_vars
+            id_var <- options_data$id_var
+            weight_var <- options_data$weight_var
+            plot_type <- options_data$plot_type
+            fill_type <- options_data$fill_type
+            sort_streams <- options_data$sort_streams
+            label_nodes <- options_data$label_nodes
+            curve_type <- options_data$curve_type
+            show_counts <- options_data$show_counts
+            show_legend <- options_data$show_legend
+            originaltheme <- options_data$originaltheme
+            mytitle <- options_data$mytitle
+            xtitle <- options_data$xtitle
+            ytitle <- options_data$ytitle
             
             # Create appropriate river plot based on the selected type
             if (plot_type == "alluvial") {
@@ -300,8 +386,6 @@ jjriverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Apply theme
-            originaltheme <- self$options$originaltheme
-            
             if (!originaltheme) {
                 plot <- plot + ggtheme
             } else {

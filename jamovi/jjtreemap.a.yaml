@@ -38,6 +38,7 @@ options:
       type: Variable
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
+      default: NULL
 
     - name: aspectRatio
       title: Aspect Ratio
@@ -48,6 +49,38 @@ options:
       title: Border Width
       type: Number
       default: 0.7
+
+    # Border Options
+    - name: borderLevel1Width
+      title: Level 1 Border Width
+      type: Number
+      default: 1.5
+
+    - name: borderLevel2Width
+      title: Level 2 Border Width
+      type: Number
+      default: 0.5
+
+    - name: borderLevel1Color
+      title: Level 1 Border Color
+      type: String
+      default: 'black'
+
+    - name: borderLevel2Color
+      title: Level 2 Border Color
+      type: String
+      default: 'gray'
+
+    # Display Options
+    - name: showLabels
+      title: Show Labels
+      type: Bool
+      default: true
+
+    - name: labelSize
+      title: Minimum Label Size
+      type: Number
+      default: 4
 
     # Label Options
     - name: labelLevel1Size

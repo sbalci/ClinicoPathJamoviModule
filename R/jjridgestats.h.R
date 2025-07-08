@@ -224,22 +224,90 @@ jjridgestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Ridgeline Plot
 #'
+#' 'Create ridgeline plots to visualize and compare distributions of a 
+#' continuous
+#' variable across different categorical groups. Useful for showing 
+#' distribution
+#' shapes, overlaps, and differences between groups.'
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Load test data
+#' data(jjridgestats_test_data)
+#'
+#' # Basic ridgeline plot
+#' jjridgestats(
+#'   data = jjridgestats_test_data,
+#'   dep = "biomarker_expression",
+#'   group = "disease_stage",
+#'   plotStyle = "density"
+#' )
+#'
+#' # Customized ridgeline plot
+#' jjridgestats(
+#'   data = jjridgestats_test_data,
+#'   dep = "response_score",
+#'   group = "treatment_group",
+#'   plotStyle = "gradient",
+#'   scaling = 2.0,
+#'   colorscheme = "viridis",
+#'   fill = TRUE
+#' )
+#'
+#' # Histogram-style ridgeline
+#' jjridgestats(
+#'   data = jjridgestats_test_data,
+#'   dep = "lab_value",
+#'   group = "hospital_center",
+#'   plotStyle = "histogram",
+#'   binwidth = 5
+#' )
+#'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param plotStyle .
-#' @param scaling .
-#' @param bandwidth .
-#' @param binwidth .
-#' @param fill .
-#' @param colorscheme .
-#' @param customColor .
-#' @param themeChoice .
-#' @param legendPosition .
-#' @param mytitle .
-#' @param xtitle .
-#' @param ytitle .
+#' @param dep The continuous numeric variable to display as ridgeline
+#'   distributions. This variable will be plotted along the x-axis, with
+#'   separate density curves or histograms for each group level.
+#' @param group The categorical grouping variable that defines the different
+#'   ridges. Each level of this variable will create a separate ridge (density
+#'   curve or histogram) in the plot, arranged vertically.
+#' @param plotStyle Type of ridgeline plot to create. 'density' creates smooth
+#'   density curves, 'histogram' creates histogram-style ridges with discrete
+#'   bins, 'gradient' creates density ridges with color gradients based on
+#'   x-values.
+#' @param scaling Controls the height scaling of the ridges. Values > 1 make
+#'   ridges taller and may create overlapping ridges for dramatic effect. Values
+#'   < 1 make ridges shorter with more separation between groups.
+#' @param bandwidth Controls the smoothness of density ridges. Larger values
+#'   create smoother, wider curves. Smaller values create more detailed,
+#'   narrower curves that follow the data more closely. Only applies to density
+#'   and gradient styles.
+#' @param binwidth Width of histogram bins when using histogram plot style.
+#'   Smaller values create more detailed histograms with narrower bins. Larger
+#'   values create smoother histograms with wider bins.
+#' @param fill Whether to fill the ridges with color. If TRUE, ridges are
+#'   filled with colors based on the color scheme. If FALSE, only outlines are
+#'   shown. Filled ridges are better for comparing distributions.
+#' @param colorscheme Color palette for filling ridges. Viridis, plasma, and
+#'   magma are colorblind-friendly perceptually uniform scales. Blues uses a
+#'   sequential blue palette. Custom allows specification of a custom color.
+#' @param customColor Custom fill color when colorscheme is set to 'custom'.
+#'   Specify as a hex color code (e.g., '#4682B4' for steel blue) or standard
+#'   color name (e.g., 'steelblue'). Only used when colorscheme = 'custom'.
+#' @param themeChoice Overall plot theme style. 'minimal' uses clean
+#'   ridgeline-specific theme, 'classic' uses traditional ggplot2 theme with
+#'   borders, 'dark' uses dark background theme suitable for presentations.
+#' @param legendPosition Position of color legend. 'none' hides legend
+#'   (recommended for ridgeline plots since y-axis labels show groups), 'right'
+#'   places legend on right side, 'bottom' places legend below plot.
+#' @param mytitle Main plot title. Leave empty for automatic title or specify
+#'   custom title for the ridgeline plot (e.g., 'Distribution of Biomarker
+#'   Levels by Disease Stage').
+#' @param xtitle X-axis label. Leave empty to use variable name or specify
+#'   custom label for the continuous variable (e.g., 'Biomarker Expression
+#'   (ng/mL)').
+#' @param ytitle Y-axis label. Leave empty to use grouping variable name or
+#'   specify custom label for the grouping variable (e.g., 'Disease Stage').
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

@@ -11,6 +11,12 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             color = NULL,
             aspectRatio = 1.67,
             borderWidth = 0.7,
+            borderLevel1Width = 1.5,
+            borderLevel2Width = 0.5,
+            borderLevel1Color = "black",
+            borderLevel2Color = "gray",
+            showLabels = TRUE,
+            labelSize = 4,
             labelLevel1Size = 15,
             labelLevel2Size = 12,
             labelLevel1Color = "white",
@@ -52,7 +58,8 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..aspectRatio <- jmvcore::OptionNumber$new(
                 "aspectRatio",
                 aspectRatio,
@@ -61,6 +68,30 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "borderWidth",
                 borderWidth,
                 default=0.7)
+            private$..borderLevel1Width <- jmvcore::OptionNumber$new(
+                "borderLevel1Width",
+                borderLevel1Width,
+                default=1.5)
+            private$..borderLevel2Width <- jmvcore::OptionNumber$new(
+                "borderLevel2Width",
+                borderLevel2Width,
+                default=0.5)
+            private$..borderLevel1Color <- jmvcore::OptionString$new(
+                "borderLevel1Color",
+                borderLevel1Color,
+                default="black")
+            private$..borderLevel2Color <- jmvcore::OptionString$new(
+                "borderLevel2Color",
+                borderLevel2Color,
+                default="gray")
+            private$..showLabels <- jmvcore::OptionBool$new(
+                "showLabels",
+                showLabels,
+                default=TRUE)
+            private$..labelSize <- jmvcore::OptionNumber$new(
+                "labelSize",
+                labelSize,
+                default=4)
             private$..labelLevel1Size <- jmvcore::OptionNumber$new(
                 "labelLevel1Size",
                 labelLevel1Size,
@@ -128,6 +159,12 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..color)
             self$.addOption(private$..aspectRatio)
             self$.addOption(private$..borderWidth)
+            self$.addOption(private$..borderLevel1Width)
+            self$.addOption(private$..borderLevel2Width)
+            self$.addOption(private$..borderLevel1Color)
+            self$.addOption(private$..borderLevel2Color)
+            self$.addOption(private$..showLabels)
+            self$.addOption(private$..labelSize)
             self$.addOption(private$..labelLevel1Size)
             self$.addOption(private$..labelLevel2Size)
             self$.addOption(private$..labelLevel1Color)
@@ -147,6 +184,12 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         color = function() private$..color$value,
         aspectRatio = function() private$..aspectRatio$value,
         borderWidth = function() private$..borderWidth$value,
+        borderLevel1Width = function() private$..borderLevel1Width$value,
+        borderLevel2Width = function() private$..borderLevel2Width$value,
+        borderLevel1Color = function() private$..borderLevel1Color$value,
+        borderLevel2Color = function() private$..borderLevel2Color$value,
+        showLabels = function() private$..showLabels$value,
+        labelSize = function() private$..labelSize$value,
         labelLevel1Size = function() private$..labelLevel1Size$value,
         labelLevel2Size = function() private$..labelLevel2Size$value,
         labelLevel1Color = function() private$..labelLevel1Color$value,
@@ -165,6 +208,12 @@ jjtreemapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..color = NA,
         ..aspectRatio = NA,
         ..borderWidth = NA,
+        ..borderLevel1Width = NA,
+        ..borderLevel2Width = NA,
+        ..borderLevel1Color = NA,
+        ..borderLevel2Color = NA,
+        ..showLabels = NA,
+        ..labelSize = NA,
         ..labelLevel1Size = NA,
         ..labelLevel2Size = NA,
         ..labelLevel1Color = NA,
@@ -204,10 +253,13 @@ jjtreemapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "size",
                     "color",
                     "aspectRatio",
+                    "borderWidth",
                     "borderLevel1Width",
                     "borderLevel2Width",
                     "borderLevel1Color",
                     "borderLevel2Color",
+                    "showLabels",
+                    "labelSize",
                     "labelLevel1Size",
                     "labelLevel2Size",
                     "labelLevel1Color",
@@ -267,6 +319,12 @@ jjtreemapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param color .
 #' @param aspectRatio .
 #' @param borderWidth .
+#' @param borderLevel1Width .
+#' @param borderLevel2Width .
+#' @param borderLevel1Color .
+#' @param borderLevel2Color .
+#' @param showLabels .
+#' @param labelSize .
 #' @param labelLevel1Size .
 #' @param labelLevel2Size .
 #' @param labelLevel1Color .
@@ -290,9 +348,15 @@ jjtreemap <- function(
     data,
     group,
     size,
-    color,
+    color = NULL,
     aspectRatio = 1.67,
     borderWidth = 0.7,
+    borderLevel1Width = 1.5,
+    borderLevel2Width = 0.5,
+    borderLevel1Color = "black",
+    borderLevel2Color = "gray",
+    showLabels = TRUE,
+    labelSize = 4,
     labelLevel1Size = 15,
     labelLevel2Size = 12,
     labelLevel1Color = "white",
@@ -328,6 +392,12 @@ jjtreemap <- function(
         color = color,
         aspectRatio = aspectRatio,
         borderWidth = borderWidth,
+        borderLevel1Width = borderLevel1Width,
+        borderLevel2Width = borderLevel2Width,
+        borderLevel1Color = borderLevel1Color,
+        borderLevel2Color = borderLevel2Color,
+        showLabels = showLabels,
+        labelSize = labelSize,
         labelLevel1Size = labelLevel1Size,
         labelLevel2Size = labelLevel2Size,
         labelLevel1Color = labelLevel1Color,

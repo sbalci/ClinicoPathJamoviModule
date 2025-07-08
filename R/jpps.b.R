@@ -12,6 +12,10 @@ jppsClass <- R6::R6Class(
         .pps_results = NULL,
         .correlation_results = NULL,
         .prepared_data = NULL,
+        .data_hash = NULL,
+        .options_hash = NULL,
+        .cached_pps_results = NULL,
+        .cached_correlation_results = NULL,
         
         .init = function() {
             analysis_type <- self$options$analysis_type
@@ -38,16 +42,25 @@ jppsClass <- R6::R6Class(
                 return()
             }
             
-            # Prepare data
-            data <- private$.prepareData()
-            if (is.null(data)) return()
-            
-            # Perform PPS analysis
-            private$.performPPSAnalysis(data)
-            
-            # Perform correlation comparison if requested
-            if (self$options$show_correlation_comparison) {
-                private$.performCorrelationComparison(data)
+            # Check cache first
+            if (private$.canUseCache()) {
+                private$.pps_results <- private$.cached_pps_results
+                private$.correlation_results <- private$.cached_correlation_results
+            } else {
+                # Prepare data
+                data <- private$.prepareData()
+                if (is.null(data)) return()
+                
+                # Perform PPS analysis
+                private$.performPPSAnalysis(data)
+                
+                # Perform correlation comparison if requested
+                if (self$options$show_correlation_comparison) {
+                    private$.performCorrelationComparison(data)
+                }
+                
+                # Update cache
+                private$.updateCache()
             }
             
             # Populate results
@@ -240,6 +253,76 @@ jppsClass <- R6::R6Class(
             
             private$.prepared_data <- clean_data
             return(clean_data)
+        },
+        
+        .canUseCache = function() {
+            # Check if we can use cached results
+            current_data_hash <- private$.calculateDataHash()
+            current_options_hash <- private$.calculateOptionsHash()
+            
+            return(!is.null(private$.cached_pps_results) &&
+                   !is.null(private$.data_hash) &&
+                   !is.null(private$.options_hash) &&
+                   current_data_hash == private$.data_hash &&
+                   current_options_hash == private$.options_hash)
+        },
+        
+        .calculateDataHash = function() {
+            # Create a hash based on the data and selected variables
+            analysis_type <- self$options$analysis_type
+            
+            vars_to_use <- switch(analysis_type,
+                "single" = c(self$options$target_var, self$options$predictor_var),
+                "predictors" = c(self$options$target_var, self$options$predictor_vars),
+                "matrix" = self$options$matrix_vars,
+                "compare" = self$options$matrix_vars
+            )
+            
+            if (length(vars_to_use) == 0) return(NULL)
+            
+            # Create a simple hash from data dimensions, variable names, and sample of data
+            data_subset <- self$data[vars_to_use]
+            data_info <- list(
+                nrow = nrow(data_subset),
+                ncol = ncol(data_subset),
+                vars = sort(vars_to_use),
+                sample_rows = min(10, nrow(data_subset))
+            )
+            
+            # Add a sample of the first few rows for change detection
+            if (nrow(data_subset) > 0) {
+                sample_data <- head(data_subset[complete.cases(data_subset), ], 5)
+                if (nrow(sample_data) > 0) {
+                    data_info$sample_sum <- sum(sapply(sample_data, function(x) {
+                        if (is.numeric(x)) sum(x, na.rm = TRUE) else length(unique(x))
+                    }), na.rm = TRUE)
+                }
+            }
+            
+            # Simple hash
+            paste(data_info, collapse = "_")
+        },
+        
+        .calculateOptionsHash = function() {
+            # Create a hash based on analysis options that affect results
+            key_options <- list(
+                analysis_type = self$options$analysis_type,
+                algorithm = self$options$algorithm,
+                cv_folds = self$options$cv_folds,
+                sample_size = self$options$sample_size,
+                correlation_method = self$options$correlation_method,
+                show_correlation_comparison = self$options$show_correlation_comparison
+            )
+            
+            paste(key_options, collapse = "_")
+        },
+        
+        .updateCache = function() {
+            # Update cache with current results
+            private$.cached_pps_results <- private$.pps_results
+            private$.cached_correlation_results <- private$.correlation_results
+            private$.data_hash <- private$.calculateDataHash()
+            private$.options_hash <- private$.calculateOptionsHash()
         },
         
         .performPPSAnalysis = function(data) {

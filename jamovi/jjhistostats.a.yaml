@@ -15,7 +15,34 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load test data
+            data(jjhistostats_test_data)
+            
+            # Basic histogram
+            jjhistostats(
+              data = jjhistostats_test_data,
+              dep = "age_years",
+              typestatistics = "parametric",
+              normalcurve = TRUE
+            )
+            
+            # Multiple histograms
+            jjhistostats(
+              data = jjhistostats_test_data,
+              dep = c("age_years", "tumor_size_mm", "bmi"),
+              centralityline = TRUE,
+              resultssubtitle = TRUE
+            )
+            
+            # Grouped histogram by disease stage
+            jjhistostats(
+              data = jjhistostats_test_data,
+              dep = "psa_level",
+              grvar = "disease_stage",
+              typestatistics = "nonparametric",
+              changebinwidth = TRUE,
+              binwidth = 2.0
+            )
 
 options:
     - name: data
@@ -29,12 +56,20 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            One or more continuous numeric variables for which histograms will be
+            created. Multiple variables will be displayed in separate panels.
 
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable to create separate histograms for each
+            level of this variable (grouped analysis).
 
 # Data ----
 
@@ -55,6 +90,11 @@ options:
         - title: Bayes
           name: bayes
       default: parametric
+      description:
+          R: >
+            Type of statistical test for normality assessment. 'parametric' uses
+            Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling test,
+            'robust' uses robust normality tests, 'bayes' provides Bayesian analysis.
 
 
 
@@ -65,16 +105,28 @@ options:
       title: Centrality Line
       type: Bool
       default: true
+      description:
+          R: >
+            Whether to display a vertical line indicating the measure of central
+            tendency (mean for parametric, median for nonparametric).
 
     - name: changebinwidth
       title: Change Bin Width
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to manually specify the bin width. If FALSE, automatic
+            bin width calculation will be used.
 
     - name: binwidth
       title: Bin Width (Default is max(x) - min(x) / sqrt(N))
       type: Number
       default: 1.1
+      description:
+          R: >
+            Manual bin width for histogram. Only used when changebinwidth is TRUE.
+            Smaller values create more bins, larger values create fewer bins.
 
 
 
@@ -83,11 +135,19 @@ options:
       title: Statistical Results
       type: Bool
       default: true
+      description:
+          R: >
+            Whether to display statistical test results as subtitle in the plot,
+            including normality test results and descriptive statistics.
 
     - name: normalcurve
       title: Normal Curve
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to overlay a normal distribution curve on the histogram
+            for comparison with the theoretical normal distribution.
 
 
 

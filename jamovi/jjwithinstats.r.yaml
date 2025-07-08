@@ -9,8 +9,22 @@ clearWith:
     - dep3
     - dep4
     - typestatistics
+    - pairwisecomparisons
+    - pairwisedisplay
+    - padjustmethod
+    - effsizetype
+    - pointpath
+    - centralityplotting
+    - centralitytype
+    - centralitypath
+    - violin
+    - boxplot
+    - point
+    - mytitle
+    - xtitle
+    - ytitle
     - originaltheme
-    - excl
+    - resultssubtitle
 
 
 items:

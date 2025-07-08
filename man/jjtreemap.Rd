@@ -8,9 +8,15 @@ jjtreemap(
   data,
   group,
   size,
-  color,
+  color = NULL,
   aspectRatio = 1.67,
   borderWidth = 0.7,
+  borderLevel1Width = 1.5,
+  borderLevel2Width = 0.5,
+  borderLevel1Color = "black",
+  borderLevel2Color = "gray",
+  showLabels = TRUE,
+  labelSize = 4,
   labelLevel1Size = 15,
   labelLevel2Size = 12,
   labelLevel1Color = "white",
@@ -37,6 +43,18 @@ jjtreemap(
 \item{aspectRatio}{.}
 
 \item{borderWidth}{.}
+
+\item{borderLevel1Width}{.}
+
+\item{borderLevel2Width}{.}
+
+\item{borderLevel1Color}{.}
+
+\item{borderLevel2Color}{.}
+
+\item{showLabels}{.}
+
+\item{labelSize}{.}
 
 \item{labelLevel1Size}{.}
 
