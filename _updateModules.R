@@ -787,10 +787,9 @@ if (!WIP) {
     meddecide_utility_data_description_files <- c(
       "psychopdaroc_utilities.R",
       "nomogrammer.R",
-      "meddecide-utils.R",
       # "meddecide-package.R",
       # "meddecide-data.R",
-      "meddecide_stats_utils.R",
+      "stats_utils.R",  # Replaces meddecide_stats_utils.R
       # "data-histopathology.R",
       "diagnostic_metrics.R"
     )

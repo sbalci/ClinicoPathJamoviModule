@@ -17,53 +17,65 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: analysis_type
+      - type: Label
+        label: Analysis Configuration
+        children:
+          - type: ComboBox
+            name: analysis_type
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: n_imputations
-        format: number
+      - type: Label
+        label: Imputation Parameters
+        children:
+          - type: TextBox
+            name: n_imputations
+            format: number
+          - type: TextBox
+            name: max_iterations
+            format: number
+          - type: ComboBox
+            name: imputation_method
+          - type: TextBox
+            name: seed_value
+            format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: max_iterations
-        format: number
+      - type: Label
+        label: Pattern Analysis Options
+        children:
+          - type: CheckBox
+            name: show_pattern_plot
+          - type: CheckBox
+            name: show_pattern_table
+          - type: CheckBox
+            name: show_correlation_plot
+          - type: CheckBox
+            name: show_flux_plot
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: imputation_method
+      - type: Label
+        label: Imputation Diagnostics
+        children:
+          - type: CheckBox
+            name: convergence_check
+          - type: CheckBox
+            name: show_trace_plot
+          - type: CheckBox
+            name: show_density_plot
+          - type: CheckBox
+            name: show_stripplot
+          - type: CheckBox
+            name: show_scatterplot
+          - type: CheckBox
+            name: show_imputation_summary
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: seed_value
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: convergence_check
-      - type: CheckBox
-        name: show_pattern_plot
-      - type: CheckBox
-        name: show_pattern_table
-      - type: CheckBox
-        name: show_correlation_plot
-      - type: CheckBox
-        name: show_flux_plot
-      - type: CheckBox
-        name: show_trace_plot
-      - type: CheckBox
-        name: show_density_plot
-      - type: CheckBox
-        name: show_stripplot
-      - type: CheckBox
-        name: show_scatterplot
-      - type: CheckBox
-        name: show_imputation_summary
-      - type: CheckBox
-        name: show_interpretation
+      - type: Label
+        label: Help and Interpretation
+        children:
+          - type: CheckBox
+            name: show_interpretation

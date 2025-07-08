@@ -1,0 +1,998 @@
+---
+title: "Clinical Prediction Model Builder"
+subtitle: "Comprehensive Guide to the modelbuilder Function"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+format: html
+editor: visual
+---
+
+## Overview
+
+The `modelbuilder` function in ClinicoPath provides comprehensive clinical prediction model development with advanced validation and seamless integration with Decision Curve Analysis. This function is specifically designed for medical research applications where robust prediction models are essential for clinical decision-making.
+
+### Key Features
+
+-   **Multiple Model Types**: Basic clinical, enhanced clinical, biomarker, and custom models
+-   **Advanced Validation**: Cross-validation, bootstrap validation, and optimism correction
+-   **Comprehensive Metrics**: AUC, calibration, NRI, IDI, and net benefit calculations
+-   **Missing Data Handling**: Complete cases, mean imputation, and multiple imputation
+-   **DCA Integration**: Seamless workflow to Decision Curve Analysis
+-   **Clinical Risk Scores**: Automatic generation of clinical risk scoring systems
+
+### When to Use Prediction Model Builder
+
+Prediction modeling is essential when:
+
+1.  **Risk Stratification**: Identify patients at high risk for adverse outcomes
+2.  **Clinical Decision Support**: Provide evidence-based decision aids
+3.  **Biomarker Validation**: Assess the clinical utility of new biomarkers
+4.  **Regulatory Submissions**: Develop models for FDA/EMA approval
+5.  **Personalized Medicine**: Create individualized treatment recommendations
+
+## Installation and Setup
+
+```{r setup, message=FALSE, warning=FALSE}
+# Load required libraries
+library(ClinicoPath)
+library(dplyr)
+library(pROC)
+library(ggplot2)
+library(mice)
+```
+
+## Understanding Prediction Models
+
+### Types of Prediction Models
+
+The modelbuilder function supports four types of prediction models:
+
+#### 1. Basic Clinical Models
+- **Purpose**: Foundation models using core demographic and primary risk factors
+- **Variables**: Age, sex, primary risk factors (diabetes, hypertension)
+- **Use Case**: Initial risk assessment, screening tools
+- **Advantages**: Simple, widely applicable, easy to implement
+
+#### 2. Enhanced Clinical Models
+- **Purpose**: Extended models with additional clinical variables
+- **Variables**: Basic predictors plus smoking, cholesterol, BMI, blood pressure
+- **Use Case**: Comprehensive risk assessment, clinical guidelines
+- **Advantages**: Better discrimination, clinical relevance
+
+#### 3. Biomarker Models
+- **Purpose**: Advanced models incorporating laboratory values
+- **Variables**: Clinical predictors plus biomarkers (troponin, creatinine)
+- **Use Case**: Precision medicine, specialized care
+- **Advantages**: Highest accuracy, novel biomarker validation
+
+#### 4. Custom Models
+- **Purpose**: User-defined variable combinations
+- **Variables**: Any combination of available predictors
+- **Use Case**: Research applications, hypothesis testing
+- **Advantages**: Flexible, tailored to specific needs
+
+### Model Development Process
+
+The modelbuilder follows established clinical prediction modeling guidelines:
+
+1. **Data Preparation**: Validation, missing data handling, variable transformation
+2. **Model Fitting**: Logistic regression with convergence monitoring
+3. **Variable Selection**: Stepwise selection with AIC/BIC criteria
+4. **Performance Assessment**: Discrimination, calibration, clinical utility
+5. **Validation**: Cross-validation, bootstrap validation, external validation
+6. **Clinical Implementation**: Risk score generation, DCA integration
+
+## Basic Usage
+
+### Simple Clinical Model
+
+```{r basic_model, eval=FALSE}
+# Load example data
+data(modelbuilder_test_data)
+
+# Build basic clinical model
+result <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  showModelSummary = TRUE,
+  showPerformanceMetrics = TRUE
+)
+```
+
+### Enhanced Clinical Model
+
+```{r enhanced_model, eval=FALSE}
+# Build enhanced clinical model
+result <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "bmi", "systolic_bp"),
+  buildEnhancedModel = TRUE,
+  splitData = TRUE,
+  crossValidation = TRUE,
+  showROCCurves = TRUE
+)
+```
+
+### Biomarker Model with Validation
+
+```{r biomarker_model, eval=FALSE}
+# Build biomarker model with comprehensive validation
+result <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  biomarkerPredictors = c("age", "sex", "diabetes", "hypertension", 
+                         "smoking", "cholesterol", "troponin", "creatinine"),
+  buildBiomarkerModel = TRUE,
+  splitData = TRUE,
+  crossValidation = TRUE,
+  bootstrapValidation = TRUE,
+  missingDataMethod = "multiple_imputation",
+  showCalibrationPlots = TRUE,
+  compareModels = TRUE
+)
+```
+
+## Advanced Configuration
+
+### Missing Data Handling
+
+```{r missing_data, eval=FALSE}
+# Complete cases analysis
+result_complete <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "troponin"),
+  buildBasicModel = TRUE,
+  missingDataMethod = "complete_cases"
+)
+
+# Multiple imputation
+result_imputed <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "troponin"),
+  buildBasicModel = TRUE,
+  missingDataMethod = "multiple_imputation",
+  imputationSets = 10
+)
+
+# Variable exclusion for high missing rates
+result_excluded <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "troponin"),
+  buildBasicModel = TRUE,
+  missingDataMethod = "exclude_missing"
+)
+```
+
+### Variable Transformations and Interactions
+
+```{r transformations, eval=FALSE}
+# Include variable transformations
+result_transformed <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "cholesterol", "troponin"),
+  buildBasicModel = TRUE,
+  transformVariables = TRUE,
+  transformMethod = "log"
+)
+
+# Include interaction terms
+result_interactions <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "smoking"),
+  buildBasicModel = TRUE,
+  includeInteractions = TRUE,
+  interactionTerms = "age*sex, diabetes*smoking"
+)
+```
+
+### Stepwise Variable Selection
+
+```{r stepwise, eval=FALSE}
+# Stepwise selection with AIC
+result_stepwise_aic <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "bmi", "systolic_bp"),
+  buildEnhancedModel = TRUE,
+  useStepwise = TRUE,
+  stepwiseDirection = "both",
+  selectionCriterion = "aic"
+)
+
+# Stepwise selection with BIC
+result_stepwise_bic <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "bmi", "systolic_bp"),
+  buildEnhancedModel = TRUE,
+  useStepwise = TRUE,
+  stepwiseDirection = "both",
+  selectionCriterion = "bic"
+)
+```
+
+### Validation Methods
+
+```{r validation, eval=FALSE}
+# Cross-validation
+result_cv <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  crossValidation = TRUE,
+  cvFolds = 10
+)
+
+# Bootstrap validation
+result_bootstrap <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  bootstrapValidation = TRUE,
+  bootstrapReps = 1000
+)
+
+# Combined validation
+result_combined <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  crossValidation = TRUE,
+  bootstrapValidation = TRUE,
+  cvFolds = 5,
+  bootstrapReps = 500
+)
+```
+
+## Clinical Research Applications
+
+### Application 1: Cardiovascular Risk Prediction
+
+```{r cardiovascular_risk, eval=FALSE}
+# Cardiovascular risk assessment model
+cv_risk_model <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  
+  # Build multiple models for comparison
+  buildBasicModel = TRUE,
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  
+  buildEnhancedModel = TRUE,
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "bmi", "family_history"),
+  
+  buildBiomarkerModel = TRUE,
+  biomarkerPredictors = c("age", "sex", "diabetes", "hypertension", 
+                         "smoking", "cholesterol", "troponin", "creatinine"),
+  
+  # Configuration
+  splitData = TRUE,
+  crossValidation = TRUE,
+  missingDataMethod = "multiple_imputation",
+  
+  # Outputs
+  compareModels = TRUE,
+  showROCCurves = TRUE,
+  showCalibrationPlots = TRUE,
+  generateRiskScore = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+**Clinical Interpretation:**
+- Basic model provides foundation risk assessment
+- Enhanced model adds lifestyle and laboratory factors
+- Biomarker model incorporates cardiac-specific markers
+- Model comparison guides clinical implementation
+
+### Application 2: Biomarker Validation Study
+
+```{r biomarker_validation, eval=FALSE}
+# Biomarker validation for new cardiac marker
+biomarker_study <- modelbuilder(
+  data = biomarker_validation_data,
+  outcome = "major_adverse_cardiac_event",
+  outcomePositive = "Yes",
+  
+  # Reference clinical model
+  buildBasicModel = TRUE,
+  basicPredictors = c("age", "sex", "diabetes", "hypertension", "chest_pain"),
+  basicModelName = "clinical_model",
+  
+  # Biomarker-enhanced model
+  buildBiomarkerModel = TRUE,
+  biomarkerPredictors = c("age", "sex", "diabetes", "hypertension", 
+                         "chest_pain", "new_biomarker"),
+  biomarkerModelName = "biomarker_model",
+  
+  # Validation
+  splitData = TRUE,
+  crossValidation = TRUE,
+  calculateNRI = TRUE,
+  calculateIDI = TRUE,
+  
+  # Outputs
+  compareModels = TRUE,
+  showPerformanceMetrics = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+### Application 3: Personalized Treatment Selection
+
+```{r personalized_treatment, eval=FALSE}
+# Treatment selection model
+treatment_model <- modelbuilder(
+  data = treatment_response_data,
+  outcome = "treatment_response",
+  outcomePositive = "Responder",
+  
+  # Personalized model
+  buildCustomModel = TRUE,
+  customPredictors = c("age", "sex", "disease_severity", "biomarker_profile", 
+                      "genetic_score", "comorbidity_index"),
+  customModelName = "personalized_treatment",
+  
+  # Advanced options
+  includeInteractions = TRUE,
+  interactionTerms = "age*biomarker_profile, disease_severity*genetic_score",
+  transformVariables = TRUE,
+  useStepwise = TRUE,
+  
+  # Validation
+  splitData = TRUE,
+  crossValidation = TRUE,
+  bootstrapValidation = TRUE,
+  
+  # Clinical utility
+  generateRiskScore = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+### Application 4: Multi-center Model Development
+
+```{r multicenter_model, eval=FALSE}
+# Multi-center prediction model
+multicenter_model <- modelbuilder(
+  data = multicenter_study_data,
+  outcome = "clinical_outcome",
+  outcomePositive = "Yes",
+  
+  # Enhanced model with site adjustments
+  buildEnhancedModel = TRUE,
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "site"),
+  
+  # Robust validation
+  splitData = TRUE,
+  crossValidation = TRUE,
+  cvFolds = 10,
+  bootstrapValidation = TRUE,
+  
+  # Missing data handling
+  missingDataMethod = "multiple_imputation",
+  imputationSets = 20,
+  
+  # Comprehensive outputs
+  compareModels = TRUE,
+  showModelSummary = TRUE,
+  showPerformanceMetrics = TRUE,
+  showCalibrationPlots = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+## Interpreting Results
+
+### Model Performance Metrics
+
+**Discrimination Metrics:**
+- **AUC (Area Under the Curve)**: Measures model's ability to distinguish between outcomes
+  - AUC > 0.8: Excellent discrimination
+  - AUC 0.7-0.8: Good discrimination
+  - AUC 0.6-0.7: Fair discrimination
+  - AUC < 0.6: Poor discrimination
+
+**Calibration Metrics:**
+- **Calibration Slope**: Measures agreement between predicted and observed probabilities
+  - Slope = 1.0: Perfect calibration
+  - Slope < 1.0: Overfitting (predictions too extreme)
+  - Slope > 1.0: Underfitting (predictions too conservative)
+
+- **Calibration Intercept**: Measures systematic over- or under-prediction
+  - Intercept = 0: No systematic bias
+  - Intercept > 0: Systematic under-prediction
+  - Intercept < 0: Systematic over-prediction
+
+**Overall Performance:**
+- **Brier Score**: Measures overall prediction accuracy (lower is better)
+- **Hosmer-Lemeshow Test**: Tests goodness of fit (p > 0.05 indicates good fit)
+
+### Model Comparison
+
+```{r model_comparison, eval=FALSE}
+# Compare multiple models
+comparison_result <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  
+  # Build all model types
+  buildBasicModel = TRUE,
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  
+  buildEnhancedModel = TRUE,
+  enhancedPredictors = c("age", "sex", "diabetes", "hypertension", 
+                        "smoking", "cholesterol", "bmi"),
+  
+  buildBiomarkerModel = TRUE,
+  biomarkerPredictors = c("age", "sex", "diabetes", "hypertension", 
+                         "smoking", "cholesterol", "troponin"),
+  
+  # Comparison settings
+  compareModels = TRUE,
+  showPerformanceMetrics = TRUE,
+  calculateNRI = TRUE,
+  calculateIDI = TRUE
+)
+```
+
+**Interpretation Guidelines:**
+- Higher AUC indicates better discrimination
+- Calibration slope closer to 1.0 indicates better calibration
+- Lower Brier score indicates better overall performance
+- Positive NRI indicates net improvement in reclassification
+- Positive IDI indicates improvement in discrimination
+
+### Cross-Validation Results
+
+**Cross-Validation Metrics:**
+- **CV AUC**: Average AUC across folds
+- **CV AUC (SD)**: Standard deviation of AUC across folds
+- **Optimism**: Difference between training and CV performance
+- **Optimism-Corrected AUC**: Training AUC minus optimism
+
+**Interpretation:**
+- CV AUC provides unbiased estimate of future performance
+- Small SD indicates stable performance across folds
+- Large optimism indicates overfitting
+- Optimism-corrected estimates are more realistic
+
+## Best Practices
+
+### 1. Study Design and Data Quality
+
+```{r study_design, eval=FALSE}
+# Ensure adequate sample size
+n_events <- sum(clinical_data$outcome == "Yes")
+n_predictors <- length(predictor_variables)
+epv <- n_events / n_predictors
+
+# Rule of thumb: EPV should be ≥ 10
+if (epv < 10) {
+  warning("Events per variable (EPV) is low. Consider reducing predictors or increasing sample size.")
+}
+
+# Check data quality
+summary(clinical_data)
+```
+
+### 2. Variable Selection
+
+```{r variable_selection, eval=FALSE}
+# Clinical relevance first
+clinical_predictors <- c("age", "sex", "diabetes", "hypertension")
+
+# Add variables based on clinical knowledge
+enhanced_predictors <- c(clinical_predictors, "smoking", "cholesterol", "family_history")
+
+# Consider biomarkers last
+biomarker_predictors <- c(enhanced_predictors, "troponin", "creatinine", "bnp")
+
+# Use stepwise selection judiciously
+stepwise_model <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  enhancedPredictors = biomarker_predictors,
+  buildEnhancedModel = TRUE,
+  useStepwise = TRUE,
+  selectionCriterion = "bic"  # BIC is more conservative than AIC
+)
+```
+
+### 3. Validation Strategy
+
+```{r validation_strategy, eval=FALSE}
+# Comprehensive validation approach
+validation_model <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  
+  # Multiple validation methods
+  splitData = TRUE,           # Internal validation
+  crossValidation = TRUE,     # Cross-validation
+  bootstrapValidation = TRUE, # Bootstrap validation
+  
+  cvFolds = 10,
+  bootstrapReps = 1000,
+  
+  # Performance assessment
+  showPerformanceMetrics = TRUE,
+  showCalibrationPlots = TRUE,
+  compareModels = TRUE
+)
+```
+
+### 4. Missing Data Strategy
+
+```{r missing_data_strategy, eval=FALSE}
+# Assess missing data patterns
+missing_summary <- clinical_data %>%
+  summarise_all(~sum(is.na(.))) %>%
+  gather(variable, missing_count) %>%
+  mutate(missing_percent = missing_count / nrow(clinical_data) * 100) %>%
+  arrange(desc(missing_percent))
+
+# Choose appropriate method
+if (max(missing_summary$missing_percent) < 5) {
+  # Low missing data: complete cases
+  method <- "complete_cases"
+} else if (max(missing_summary$missing_percent) < 20) {
+  # Moderate missing data: multiple imputation
+  method <- "multiple_imputation"
+} else {
+  # High missing data: exclude variables
+  method <- "exclude_missing"
+}
+
+model_missing <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  missingDataMethod = method
+)
+```
+
+## Clinical Risk Scores
+
+### Generating Risk Scores
+
+```{r risk_scores, eval=FALSE}
+# Generate clinical risk score
+risk_score_model <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension", "smoking"),
+  buildBasicModel = TRUE,
+  
+  # Risk score generation
+  generateRiskScore = TRUE,
+  riskScorePoints = "framingham"  # or "simple" or "deciles"
+)
+```
+
+### Risk Score Implementation
+
+**Framingham-Style Points:**
+- Age-based scaling
+- Integer point assignments
+- Clinically interpretable ranges
+
+**Simple Integer Weights:**
+- Coefficient-based scaling
+- Easy calculation
+- Suitable for electronic systems
+
+**Risk Decile Scoring:**
+- Percentile-based categories
+- Population-specific ranges
+- Suitable for quality metrics
+
+### Clinical Risk Score Example
+
+```{r risk_score_example, eval=FALSE}
+# Example: Cardiovascular Risk Score
+# Age: 65 years = 2 points
+# Sex: Male = 3 points
+# Diabetes: Yes = 4 points
+# Hypertension: Yes = 2 points
+# Smoking: Current = 5 points
+# Total Score: 16 points
+
+# Risk interpretation:
+# 0-5 points: Low risk (<5%)
+# 6-10 points: Moderate risk (5-15%)
+# 11-15 points: High risk (15-30%)
+# >15 points: Very high risk (>30%)
+```
+
+## Integration with Decision Curve Analysis
+
+### DCA Preparation
+
+```{r dca_preparation, eval=FALSE}
+# Build models for DCA
+dca_models <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  
+  # Multiple models for comparison
+  buildBasicModel = TRUE,
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  basicModelName = "clinical_model",
+  
+  buildBiomarkerModel = TRUE,
+  biomarkerPredictors = c("age", "sex", "diabetes", "hypertension", "troponin"),
+  biomarkerModelName = "biomarker_model",
+  
+  # DCA preparation
+  createPredictions = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+### DCA Workflow
+
+```{r dca_workflow, eval=FALSE}
+# After model building, use DCA module
+# 1. Models create prediction columns automatically
+# 2. Columns named: [model_name]_prob
+# 3. Ready for direct use in DCA
+
+# Example DCA setup:
+# Outcome: cardiovascular_event
+# Positive outcome: Yes
+# Prediction models: clinical_model_prob, biomarker_model_prob
+# Threshold range: 5% to 50%
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Issue 1: Model Non-Convergence
+
+**Problem:** Model fitting fails or produces warnings
+
+**Solutions:**
+```{r convergence_fix, eval=FALSE}
+# Increase maximum iterations
+result <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes"),
+  buildBasicModel = TRUE,
+  # Convergence handled automatically in enhanced version
+)
+
+# Check for perfect separation
+separation_check <- table(clinical_data$perfect_predictor, clinical_data$cardiovascular_event)
+print(separation_check)
+```
+
+#### Issue 2: Perfect Separation
+
+**Problem:** One predictor perfectly predicts outcome
+
+**Solutions:**
+```{r separation_fix, eval=FALSE}
+# The enhanced modelbuilder automatically detects and warns about separation
+# Remove or combine categories of problematic variables
+# Use penalized regression (if available)
+```
+
+#### Issue 3: Low Event Rate
+
+**Problem:** Too few events for stable modeling
+
+**Solutions:**
+```{r low_events_fix, eval=FALSE}
+# Check events per variable
+n_events <- sum(clinical_data$outcome == "Yes")
+n_predictors <- length(predictor_variables)
+epv <- n_events / n_predictors
+
+if (epv < 10) {
+  # Reduce number of predictors
+  essential_predictors <- c("age", "sex", "primary_risk_factor")
+  
+  # Or combine outcome categories
+  # Or collect more data
+}
+```
+
+#### Issue 4: High Missing Data
+
+**Problem:** Substantial missing data in key variables
+
+**Solutions:**
+```{r missing_fix, eval=FALSE}
+# Use multiple imputation
+result <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "biomarker"),
+  buildBasicModel = TRUE,
+  missingDataMethod = "multiple_imputation",
+  imputationSets = 20
+)
+
+# Or exclude high-missing variables
+result <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "biomarker"),
+  buildBasicModel = TRUE,
+  missingDataMethod = "exclude_missing"
+)
+```
+
+## Reporting Results
+
+### Statistical Reporting Guidelines
+
+When reporting prediction model results:
+
+1. **Model Development:**
+   - Sample size and event rate
+   - Variable selection method
+   - Missing data handling
+   - Model fitting procedure
+
+2. **Performance Metrics:**
+   - Discrimination (AUC with 95% CI)
+   - Calibration (slope and intercept)
+   - Overall performance (Brier score)
+   - Classification metrics at optimal threshold
+
+3. **Validation Results:**
+   - Cross-validation performance
+   - Bootstrap validation (if performed)
+   - Optimism-corrected estimates
+   - External validation (if available)
+
+4. **Clinical Utility:**
+   - Decision curve analysis results
+   - Net benefit across thresholds
+   - Clinical impact assessment
+
+### Example Report Template
+
+```{r report_template, eval=FALSE}
+# Generate comprehensive model report
+report_model <- modelbuilder(
+  data = modelbuilder_test_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  
+  # Model development
+  buildBasicModel = TRUE,
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  
+  # Validation
+  splitData = TRUE,
+  crossValidation = TRUE,
+  bootstrapValidation = TRUE,
+  
+  # Comprehensive outputs
+  showModelSummary = TRUE,
+  showPerformanceMetrics = TRUE,
+  showCalibrationPlots = TRUE,
+  compareModels = TRUE,
+  generateRiskScore = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+**Sample Report Text:**
+"We developed a clinical prediction model for cardiovascular events using logistic regression. The model included age, sex, diabetes, and hypertension as predictors. The dataset was split into training (70%, n=420) and validation (30%, n=180) sets. The model demonstrated good discrimination (AUC 0.74, 95% CI 0.69-0.79) and adequate calibration (slope 0.96, intercept 0.03). Five-fold cross-validation yielded an optimism-corrected AUC of 0.72. Decision curve analysis showed clinical utility across the 10-30% threshold range."
+
+## Advanced Topics
+
+### Custom Prediction Models
+
+```{r custom_models, eval=FALSE}
+# Complex custom model with interactions
+custom_model <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  
+  # Custom variable combination
+  buildCustomModel = TRUE,
+  customPredictors = c("age", "sex", "diabetes", "cholesterol", 
+                      "family_history", "exercise", "diet_score"),
+  
+  # Advanced features
+  includeInteractions = TRUE,
+  interactionTerms = "age*sex, diabetes*cholesterol, family_history*exercise",
+  transformVariables = TRUE,
+  transformMethod = "polynomial",
+  
+  # Variable selection
+  useStepwise = TRUE,
+  stepwiseDirection = "both",
+  selectionCriterion = "bic"
+)
+```
+
+### Model Updating and Recalibration
+
+```{r model_updating, eval=FALSE}
+# Original model
+original_model <- modelbuilder(
+  data = original_dataset,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE
+)
+
+# Updated model with new data
+updated_model <- modelbuilder(
+  data = updated_dataset,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  
+  # Compare to original
+  compareModels = TRUE
+)
+```
+
+### Multi-outcome Models
+
+```{r multi_outcome, eval=FALSE}
+# Separate models for different outcomes
+primary_outcome <- modelbuilder(
+  data = clinical_data,
+  outcome = "primary_endpoint",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  basicModelName = "primary_model"
+)
+
+secondary_outcome <- modelbuilder(
+  data = clinical_data,
+  outcome = "secondary_endpoint",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  basicModelName = "secondary_model"
+)
+```
+
+## Quality Assurance
+
+### Model Validation Checklist
+
+- [ ] **Sample Size**: Adequate events per variable (EPV ≥ 10)
+- [ ] **Data Quality**: Missing data patterns assessed and handled
+- [ ] **Variable Selection**: Clinically relevant predictors included
+- [ ] **Model Fitting**: Convergence achieved, no separation issues
+- [ ] **Performance**: Discrimination and calibration adequate
+- [ ] **Validation**: Cross-validation or bootstrap performed
+- [ ] **Clinical Utility**: Decision curve analysis completed
+- [ ] **Reporting**: Transparent methodology and results
+
+### Validation Steps
+
+```{r validation_steps, eval=FALSE}
+# 1. Data quality assessment
+summary(clinical_data)
+
+# 2. Model development
+model_result <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  showModelSummary = TRUE
+)
+
+# 3. Performance evaluation
+performance_check <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  showPerformanceMetrics = TRUE,
+  showCalibrationPlots = TRUE
+)
+
+# 4. Validation
+validation_check <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  crossValidation = TRUE,
+  bootstrapValidation = TRUE
+)
+
+# 5. Clinical utility
+utility_check <- modelbuilder(
+  data = clinical_data,
+  outcome = "cardiovascular_event",
+  outcomePositive = "Yes",
+  basicPredictors = c("age", "sex", "diabetes", "hypertension"),
+  buildBasicModel = TRUE,
+  exportForDCA = TRUE
+)
+```
+
+## Conclusion
+
+The `modelbuilder` function provides a comprehensive toolkit for clinical prediction model development. By combining robust statistical methods, advanced validation techniques, and seamless integration with decision analysis, it enables researchers to:
+
+- Develop high-quality prediction models
+- Validate model performance rigorously
+- Assess clinical utility effectively
+- Implement models in clinical practice
+
+### Key Takeaways
+
+1. **Start with clinical knowledge** when selecting predictors
+2. **Use appropriate validation methods** for your dataset size
+3. **Handle missing data carefully** with appropriate methods
+4. **Assess both discrimination and calibration** performance
+5. **Evaluate clinical utility** with decision curve analysis
+6. **Report methods and results transparently** for reproducibility
+
+### Further Reading
+
+- Steyerberg, E.W. (2019). *Clinical Prediction Models*. Springer.
+- Harrell, F.E. (2015). *Regression Modeling Strategies*. Springer.
+- Collins, G.S., et al. (2015). Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD). *BMJ*, 350, g7594.
+
+For more information and updates, visit the [ClinicoPath documentation](https://github.com/sbalci/ClinicoPathJamoviModule).
+
+---
+
+*This vignette was generated using ClinicoPath version `r packageVersion("ClinicoPath")` on `r Sys.Date()`.*

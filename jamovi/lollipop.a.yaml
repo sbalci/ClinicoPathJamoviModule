@@ -1,31 +1,206 @@
 ---
-name:  lollipop
+name: lollipop
 title: Lollipop Chart
 menuGroup: JJStatsPlotD
 menuSubgroup: Drafts
+menuSubtitle: 'Categorical Data Visualization'
 version: '0.0.3'
 jas: '1.2'
+
+description:
+    main: Creates lollipop charts for categorical data visualization with emphasis on clinical applications like patient timelines, treatment outcomes, and biomarker comparisons.
+    R:
+        dontrun: false
+        usage: |
+            # Basic lollipop chart
+            lollipop(
+                data = clinical_data,
+                dep = "biomarker_level",
+                group = "patient_id"
+            )
+            
+            # Advanced lollipop with customization
+            lollipop(
+                data = clinical_data,
+                dep = "biomarker_level",
+                group = "patient_id",
+                highlight = "high_risk_patient",
+                sortBy = "value",
+                showValues = TRUE,
+                orientation = "horizontal"
+            )
 
 options:
     - name: data
       type: Data
+      description:
+          R: The data as a data frame.
 
     - name: dep
-      title: Dependent Variable
+      title: 'Dependent Variable'
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            The numeric variable for the values (lollipop heights/lengths).
 
     - name: group
-      title: Grouping Variable
+      title: 'Grouping Variable'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            The categorical variable for grouping (lollipop categories).
 
     - name: highlight
-      title: Highlight
+      title: 'Highlight Level'
       type: Level
       variable: (group)
+      description:
+          R: >
+            Specific level to highlight in the plot with different color/style.
 
+    - name: sortBy
+      title: 'Sort Order'
+      type: List
+      options:
+        - title: Original Order
+          name: original
+        - title: Sort by Value (Ascending)
+          name: value_asc
+        - title: Sort by Value (Descending)
+          name: value_desc
+        - title: Sort by Group (Alphabetical)
+          name: group_alpha
+      default: original
+      description:
+          R: >
+            How to sort the lollipops in the chart.
+
+    - name: orientation
+      title: 'Orientation'
+      type: List
+      options:
+        - title: Vertical
+          name: vertical
+        - title: Horizontal
+          name: horizontal
+      default: vertical
+      description:
+          R: >
+            Chart orientation (vertical or horizontal lollipops).
+
+    - name: showValues
+      title: 'Show Values'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display value labels on the lollipops.
+
+    - name: showMean
+      title: 'Show Mean Line'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display a reference line at the mean value.
+
+    - name: colorScheme
+      title: 'Color Scheme'
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Clinical
+          name: clinical
+        - title: Viridis
+          name: viridis
+        - title: Colorblind Safe
+          name: colorblind
+      default: default
+      description:
+          R: >
+            Color scheme for the lollipops.
+
+    - name: theme
+      title: 'Plot Theme'
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Publication
+          name: publication
+      default: default
+      description:
+          R: >
+            Overall theme/appearance of the plot.
+
+    - name: pointSize
+      title: 'Point Size'
+      type: Number
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: >
+            Size of the lollipop points.
+
+    - name: lineWidth
+      title: 'Line Width'
+      type: Number
+      default: 1
+      min: 0.5
+      max: 5
+      description:
+          R: >
+            Width of the lollipop stems.
+
+    - name: xlabel
+      title: 'X-axis Label'
+      type: String
+      description:
+          R: >
+            Custom label for the x-axis.
+
+    - name: ylabel
+      title: 'Y-axis Label'
+      type: String
+      description:
+          R: >
+            Custom label for the y-axis.
+
+    - name: title
+      title: 'Plot Title'
+      type: String
+      description:
+          R: >
+            Custom title for the plot.
+
+    - name: width
+      title: 'Plot Width'
+      type: Integer
+      default: 800
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of the plot in pixels.
+
+    - name: height
+      title: 'Plot Height'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1000
+      description:
+          R: >
+            Height of the plot in pixels.
 
 ...
