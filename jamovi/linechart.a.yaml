@@ -1,22 +1,187 @@
 ---
-name:  linechart
+name: linechart
 title: Line Chart
 menuGroup: JJStatsPlotD
 menuSubgroup: Drafts
-menuSubtitle: Exploration
+menuSubtitle: 'Time Series and Trend Analysis'
 version: '1.0.0'
 jas: '1.2'
+
+description:
+    main: Creates line charts for time series analysis and trend visualization, with support for multiple groups, confidence intervals, and statistical overlays.
+    R:
+        dontrun: false
+        usage: |
+            # Basic line chart
+            linechart(
+                data = clinical_data,
+                xvar = "time_point",
+                yvar = "lab_value"
+            )
+            
+            # Grouped line chart with confidence intervals
+            linechart(
+                data = clinical_data,
+                xvar = "time_point",
+                yvar = "lab_value",
+                groupby = "treatment_group",
+                confidence = TRUE,
+                trendline = TRUE
+            )
 
 options:
     - name: data
       type: Data
+      description:
+          R: The data as a data frame.
 
     - name: xvar
-      title: X-axis
+      title: 'X-axis Variable'
       type: Variable
+      suggested: [ continuous, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            The variable for the x-axis. Typically represents time, sequence, or ordered categories.
 
     - name: yvar
-      title: Y-axis
+      title: 'Y-axis Variable'
       type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            The variable for the y-axis. Must be numeric (continuous variable).
+
+    - name: groupby
+      title: 'Group By'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable to create multiple lines (e.g., treatment groups, patient categories).
+
+    - name: confidence
+      title: 'Confidence Interval'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display confidence intervals around the line(s).
+
+    - name: trendline
+      title: 'Trend Line'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to add a trend line (linear regression) to the plot.
+
+    - name: points
+      title: 'Show Points'
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to show individual data points on the line(s).
+
+    - name: smooth
+      title: 'Smooth Line'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to apply smoothing (loess) to the line(s).
+
+    - name: refline
+      title: 'Reference Line Value'
+      type: Number
+      description:
+          R: >
+            Optional reference line value (e.g., normal range, threshold).
+
+    - name: reflineLabel
+      title: 'Reference Line Label'
+      type: String
+      default: 'Reference'
+      description:
+          R: >
+            Label for the reference line.
+
+    - name: colorPalette
+      title: 'Color Palette'
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Colorblind Safe
+          name: colorblind
+        - title: Viridis
+          name: viridis
+        - title: Clinical
+          name: clinical
+      default: default
+      description:
+          R: >
+            Color palette for multiple groups.
+
+    - name: theme
+      title: 'Plot Theme'
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Publication
+          name: publication
+      default: default
+      description:
+          R: >
+            Overall theme/appearance of the plot.
+
+    - name: xlabel
+      title: 'X-axis Label'
+      type: String
+      description:
+          R: >
+            Custom label for the x-axis.
+
+    - name: ylabel
+      title: 'Y-axis Label'
+      type: String
+      description:
+          R: >
+            Custom label for the y-axis.
+
+    - name: title
+      title: 'Plot Title'
+      type: String
+      description:
+          R: >
+            Custom title for the plot.
+
+    - name: width
+      title: 'Plot Width'
+      type: Integer
+      default: 800
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of the plot in pixels.
+
+    - name: height
+      title: 'Plot Height'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1000
+      description:
+          R: >
+            Height of the plot in pixels.
 
 ...
