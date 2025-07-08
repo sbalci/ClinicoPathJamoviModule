@@ -34,21 +34,25 @@ options:
     - name: target_var
       title: Target Variable
       type: Variable
+      default: NULL
       description: Target variable to predict (for single/predictors analysis)
 
     - name: predictor_var
       title: Predictor Variable
       type: Variable
+      default: NULL
       description: Single predictor variable (for single analysis)
 
     - name: predictor_vars
       title: Predictor Variables
       type: Variables
+      default: NULL
       description: Multiple predictor variables (for predictors analysis)
 
     - name: matrix_vars
       title: Variables for Matrix
       type: Variables
+      default: NULL
       description: Variables to include in full PPS matrix
 
     - name: algorithm

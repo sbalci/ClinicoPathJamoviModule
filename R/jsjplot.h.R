@@ -54,6 +54,7 @@ jsjplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..dependent_var <- jmvcore::OptionVariable$new(
                 "dependent_var",
                 dependent_var,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -64,6 +65,7 @@ jsjplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..independent_vars <- jmvcore::OptionVariables$new(
                 "independent_vars",
                 independent_vars,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -74,6 +76,7 @@ jsjplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..grouping_var <- jmvcore::OptionVariable$new(
                 "grouping_var",
                 grouping_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -82,6 +85,7 @@ jsjplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..interaction_vars <- jmvcore::OptionVariables$new(
                 "interaction_vars",
                 interaction_vars,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -413,10 +417,10 @@ jsjplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jsjplot <- function(
     data,
     analysis_type = "coefficient_plot",
-    dependent_var,
-    independent_vars,
-    grouping_var,
-    interaction_vars,
+    dependent_var = NULL,
+    independent_vars = NULL,
+    grouping_var = NULL,
+    interaction_vars = NULL,
     model_type = "lm",
     family = "gaussian",
     plot_type = "est",

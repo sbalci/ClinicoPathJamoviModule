@@ -12,7 +12,23 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             fill = NULL,
             excl = FALSE,
             flip = FALSE,
-            themex = "ipsum",
+            add_boxplot = FALSE,
+            add_points = FALSE,
+            add_mean = FALSE,
+            draw_quantiles = FALSE,
+            quantile_lines = "0.25,0.5,0.75",
+            trim_violin = TRUE,
+            scale_violin = "area",
+            violin_width = 1,
+            violin_alpha = 0.7,
+            boxplot_width = 0.1,
+            boxplot_alpha = 0.8,
+            point_size = 1.5,
+            point_alpha = 0.6,
+            point_jitter = TRUE,
+            color_palette = "default",
+            manual_colors = "",
+            themex = "minimal",
             usexlabel = FALSE,
             xlabel = "",
             useylabel = FALSE,
@@ -26,16 +42,20 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
-                dep)
+                dep,
+                default=NULL)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group)
+                group,
+                default=NULL)
             private$..col <- jmvcore::OptionVariable$new(
                 "col",
-                col)
+                col,
+                default=NULL)
             private$..fill <- jmvcore::OptionVariable$new(
                 "fill",
-                fill)
+                fill,
+                default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -44,6 +64,91 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "flip",
                 flip,
                 default=FALSE)
+            private$..add_boxplot <- jmvcore::OptionBool$new(
+                "add_boxplot",
+                add_boxplot,
+                default=FALSE)
+            private$..add_points <- jmvcore::OptionBool$new(
+                "add_points",
+                add_points,
+                default=FALSE)
+            private$..add_mean <- jmvcore::OptionBool$new(
+                "add_mean",
+                add_mean,
+                default=FALSE)
+            private$..draw_quantiles <- jmvcore::OptionBool$new(
+                "draw_quantiles",
+                draw_quantiles,
+                default=FALSE)
+            private$..quantile_lines <- jmvcore::OptionString$new(
+                "quantile_lines",
+                quantile_lines,
+                default="0.25,0.5,0.75")
+            private$..trim_violin <- jmvcore::OptionBool$new(
+                "trim_violin",
+                trim_violin,
+                default=TRUE)
+            private$..scale_violin <- jmvcore::OptionList$new(
+                "scale_violin",
+                scale_violin,
+                options=list(
+                    "area",
+                    "count",
+                    "width"),
+                default="area")
+            private$..violin_width <- jmvcore::OptionNumber$new(
+                "violin_width",
+                violin_width,
+                min=0.1,
+                max=3,
+                default=1)
+            private$..violin_alpha <- jmvcore::OptionNumber$new(
+                "violin_alpha",
+                violin_alpha,
+                min=0,
+                max=1,
+                default=0.7)
+            private$..boxplot_width <- jmvcore::OptionNumber$new(
+                "boxplot_width",
+                boxplot_width,
+                min=0.01,
+                max=0.5,
+                default=0.1)
+            private$..boxplot_alpha <- jmvcore::OptionNumber$new(
+                "boxplot_alpha",
+                boxplot_alpha,
+                min=0,
+                max=1,
+                default=0.8)
+            private$..point_size <- jmvcore::OptionNumber$new(
+                "point_size",
+                point_size,
+                min=0.1,
+                max=5,
+                default=1.5)
+            private$..point_alpha <- jmvcore::OptionNumber$new(
+                "point_alpha",
+                point_alpha,
+                min=0,
+                max=1,
+                default=0.6)
+            private$..point_jitter <- jmvcore::OptionBool$new(
+                "point_jitter",
+                point_jitter,
+                default=TRUE)
+            private$..color_palette <- jmvcore::OptionList$new(
+                "color_palette",
+                color_palette,
+                options=list(
+                    "default",
+                    "viridis",
+                    "brewer",
+                    "manual"),
+                default="default")
+            private$..manual_colors <- jmvcore::OptionString$new(
+                "manual_colors",
+                manual_colors,
+                default="")
             private$..themex <- jmvcore::OptionList$new(
                 "themex",
                 themex,
@@ -59,7 +164,7 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "classic",
                     "void",
                     "test"),
-                default="ipsum")
+                default="minimal")
             private$..usexlabel <- jmvcore::OptionBool$new(
                 "usexlabel",
                 usexlabel,
@@ -83,6 +188,22 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..fill)
             self$.addOption(private$..excl)
             self$.addOption(private$..flip)
+            self$.addOption(private$..add_boxplot)
+            self$.addOption(private$..add_points)
+            self$.addOption(private$..add_mean)
+            self$.addOption(private$..draw_quantiles)
+            self$.addOption(private$..quantile_lines)
+            self$.addOption(private$..trim_violin)
+            self$.addOption(private$..scale_violin)
+            self$.addOption(private$..violin_width)
+            self$.addOption(private$..violin_alpha)
+            self$.addOption(private$..boxplot_width)
+            self$.addOption(private$..boxplot_alpha)
+            self$.addOption(private$..point_size)
+            self$.addOption(private$..point_alpha)
+            self$.addOption(private$..point_jitter)
+            self$.addOption(private$..color_palette)
+            self$.addOption(private$..manual_colors)
             self$.addOption(private$..themex)
             self$.addOption(private$..usexlabel)
             self$.addOption(private$..xlabel)
@@ -96,6 +217,22 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         fill = function() private$..fill$value,
         excl = function() private$..excl$value,
         flip = function() private$..flip$value,
+        add_boxplot = function() private$..add_boxplot$value,
+        add_points = function() private$..add_points$value,
+        add_mean = function() private$..add_mean$value,
+        draw_quantiles = function() private$..draw_quantiles$value,
+        quantile_lines = function() private$..quantile_lines$value,
+        trim_violin = function() private$..trim_violin$value,
+        scale_violin = function() private$..scale_violin$value,
+        violin_width = function() private$..violin_width$value,
+        violin_alpha = function() private$..violin_alpha$value,
+        boxplot_width = function() private$..boxplot_width$value,
+        boxplot_alpha = function() private$..boxplot_alpha$value,
+        point_size = function() private$..point_size$value,
+        point_alpha = function() private$..point_alpha$value,
+        point_jitter = function() private$..point_jitter$value,
+        color_palette = function() private$..color_palette$value,
+        manual_colors = function() private$..manual_colors$value,
         themex = function() private$..themex$value,
         usexlabel = function() private$..usexlabel$value,
         xlabel = function() private$..xlabel$value,
@@ -108,6 +245,22 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..fill = NA,
         ..excl = NA,
         ..flip = NA,
+        ..add_boxplot = NA,
+        ..add_points = NA,
+        ..add_mean = NA,
+        ..draw_quantiles = NA,
+        ..quantile_lines = NA,
+        ..trim_violin = NA,
+        ..scale_violin = NA,
+        ..violin_width = NA,
+        ..violin_alpha = NA,
+        ..boxplot_width = NA,
+        ..boxplot_alpha = NA,
+        ..point_size = NA,
+        ..point_alpha = NA,
+        ..point_jitter = NA,
+        ..color_palette = NA,
+        ..manual_colors = NA,
         ..themex = NA,
         ..usexlabel = NA,
         ..xlabel = NA,
@@ -169,7 +322,7 @@ jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jviolin",
-                version = c(0,0,3),
+                version = c(1,0,0),
                 options = options,
                 results = jviolinResults$new(options=options),
                 data = data,
@@ -182,21 +335,44 @@ jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Violin Plot
+#' Professional Violin Plot
 #'
+#' Create professional violin plots for visualizing the distribution of 
+#' continuous
+#' data across groups. Violin plots combine density estimation with boxplot 
+#' elements
+#' to show both distribution shape and summary statistics.
 #' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param col .
-#' @param fill .
-#' @param excl .
-#' @param flip .
-#' @param themex .
-#' @param usexlabel .
-#' @param xlabel .
-#' @param useylabel .
-#' @param ylabel .
+#' @param data The data to be analyzed
+#' @param dep Continuous variable for y-axis (violin height)
+#' @param group Categorical variable for x-axis (groups)
+#' @param col Optional variable for color mapping (uses grouping variable if
+#'   empty)
+#' @param fill Optional variable for fill mapping (uses grouping variable if
+#'   empty)
+#' @param excl Exclude observations with missing data from analysis
+#' @param flip Swap x and y axes for horizontal violin plots
+#' @param add_boxplot Add boxplot inside violin for summary statistics
+#' @param add_points Add individual data points over violin
+#' @param add_mean Add mean values as red diamond points
+#' @param draw_quantiles Draw horizontal lines at specified quantiles
+#' @param quantile_lines Comma-separated quantile values (e.g., 0.25,0.5,0.75)
+#' @param trim_violin Trim violin tails to data range
+#' @param scale_violin How to scale violin widths
+#' @param violin_width Width multiplier for violins
+#' @param violin_alpha Transparency level for violin fill
+#' @param boxplot_width Width of boxplot overlay
+#' @param boxplot_alpha Transparency level for boxplot
+#' @param point_size Size of individual data points
+#' @param point_alpha Transparency level for points
+#' @param point_jitter Add horizontal jitter to prevent point overlap
+#' @param color_palette Color palette for violin fills and outlines
+#' @param manual_colors Comma-separated color values (e.g., red,blue,green)
+#' @param themex Overall plot theme style
+#' @param usexlabel Override default x-axis label
+#' @param xlabel Custom label for x-axis
+#' @param useylabel Override default y-axis label
+#' @param ylabel Custom label for y-axis
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -206,13 +382,29 @@ jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 jviolin <- function(
     data,
-    dep,
-    group,
-    col,
-    fill,
+    dep = NULL,
+    group = NULL,
+    col = NULL,
+    fill = NULL,
     excl = FALSE,
     flip = FALSE,
-    themex = "ipsum",
+    add_boxplot = FALSE,
+    add_points = FALSE,
+    add_mean = FALSE,
+    draw_quantiles = FALSE,
+    quantile_lines = "0.25,0.5,0.75",
+    trim_violin = TRUE,
+    scale_violin = "area",
+    violin_width = 1,
+    violin_alpha = 0.7,
+    boxplot_width = 0.1,
+    boxplot_alpha = 0.8,
+    point_size = 1.5,
+    point_alpha = 0.6,
+    point_jitter = TRUE,
+    color_palette = "default",
+    manual_colors = "",
+    themex = "minimal",
     usexlabel = FALSE,
     xlabel = "",
     useylabel = FALSE,
@@ -241,6 +433,22 @@ jviolin <- function(
         fill = fill,
         excl = excl,
         flip = flip,
+        add_boxplot = add_boxplot,
+        add_points = add_points,
+        add_mean = add_mean,
+        draw_quantiles = draw_quantiles,
+        quantile_lines = quantile_lines,
+        trim_violin = trim_violin,
+        scale_violin = scale_violin,
+        violin_width = violin_width,
+        violin_alpha = violin_alpha,
+        boxplot_width = boxplot_width,
+        boxplot_alpha = boxplot_alpha,
+        point_size = point_size,
+        point_alpha = point_alpha,
+        point_jitter = point_jitter,
+        color_palette = color_palette,
+        manual_colors = manual_colors,
         themex = themex,
         usexlabel = usexlabel,
         xlabel = xlabel,

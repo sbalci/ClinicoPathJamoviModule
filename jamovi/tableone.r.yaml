@@ -45,17 +45,6 @@ items:
     visible: (sty:t4)
     refs: janitor
 
-  - name: tablestyle5
-    title: "Enhanced Table One (pivottabler)"
-    type: Html
-    clearWith:
-      - vars
-      - excl
-      - pivot_format
-      - include_statistics
-      - group_comparisons
-    visible: (sty:t5)
-
 refs:
   - ClinicoPathJamoviModule
   - whoisinthisstudy

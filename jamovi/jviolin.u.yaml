@@ -43,11 +43,25 @@ children:
         name: excl
       - type: CheckBox
         name: flip
+      - type: CheckBox
+        name: add_boxplot
+      - type: CheckBox
+        name: add_points
+      - type: CheckBox
+        name: add_mean
+      - type: CheckBox
+        name: draw_quantiles
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: themex
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: quantile_lines
+        format: string
   - type: LayoutBox
     margin: large
     children:
@@ -65,3 +79,65 @@ children:
         format: string
         width: large
         enable: (useylabel)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: trim_violin
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: scale_violin
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: violin_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: violin_alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: boxplot_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: boxplot_alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: point_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: point_alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: point_jitter
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: color_palette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: manual_colors
+        format: string

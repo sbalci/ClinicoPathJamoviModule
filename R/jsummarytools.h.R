@@ -61,16 +61,20 @@ jsummarytoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 vars)
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
-                group_var)
+                group_var,
+                default=NULL)
             private$..weights_var <- jmvcore::OptionVariable$new(
                 "weights_var",
-                weights_var)
+                weights_var,
+                default=NULL)
             private$..cross_var1 <- jmvcore::OptionVariable$new(
                 "cross_var1",
-                cross_var1)
+                cross_var1,
+                default=NULL)
             private$..cross_var2 <- jmvcore::OptionVariable$new(
                 "cross_var2",
-                cross_var2)
+                cross_var2,
+                default=NULL)
             private$..show_labels <- jmvcore::OptionBool$new(
                 "show_labels",
                 show_labels,
@@ -612,10 +616,10 @@ jsummarytools <- function(
     data,
     analysis_type = "dfsummary",
     vars,
-    group_var,
-    weights_var,
-    cross_var1,
-    cross_var2,
+    group_var = NULL,
+    weights_var = NULL,
+    cross_var1 = NULL,
+    cross_var2 = NULL,
     show_labels = TRUE,
     show_variable_numbers = FALSE,
     show_graphs = TRUE,

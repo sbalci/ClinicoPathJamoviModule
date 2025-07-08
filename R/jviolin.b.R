@@ -1,522 +1,388 @@
 #' @title Violin Plot
-#' @return Violin Plot
+#' @description Create professional violin plots for distribution visualization
+#' @return A violin plot showing distribution of continuous variables across groups
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#'
+#' @import ggplot2
+#' @importFrom dplyr %>%
 
-jviolinClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "jviolinClass",
     inherit = jviolinBase,
     private = list(
-        .run = function() {
-
-            # Error Message ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group) ) {
-
-                # ToDo Message ----
-                todo <- glue::glue("
-                <br>Welcome to ClinicoPath
-                          <br><br>
-                          This tool will help you form a Violin Plot.
-                          <br><hr>
-                          ")
-
-                html <- self$results$todo
-                html$setContent(todo)
-                return()
-
-
+        # Performance optimization: cache variables
+        .prepared_data = NULL,
+        .prepared_options = NULL,
+        .data_hash = NULL,
+        .options_hash = NULL,
+        .cached_plot = NULL,
+        .cached_plotdata = NULL,
+        
+        .init = function() {
+            # Initialize results visibility
+            if (is.null(self$options$dep) || is.null(self$options$group)) {
+                self$results$plot$setVisible(FALSE)
+                self$results$todo$setVisible(TRUE)
             } else {
-
-
-
-                # themex <- "theme_dark()"
-                # self$options$themex
-                # themex <- jmvcore::composeTerm(themex)
-                # themex <- jmvcore::decomposeTerm(themex)
-                # themex <- paste0("ggplot2::", themex)
-                #
-                # themex <- as.formula(themex)
-                #
-                # todo <- themex
-
-
-
-
-
-
-                todo <- ""
-                html <- self$results$todo
-                html$setContent(todo)
-
-
-                if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
-
-                # image <- self$results$plot
-                # image$setState(plotData)
-
-                }
+                self$results$plot$setVisible(TRUE)
+                self$results$todo$setVisible(FALSE)
+            }
         },
-
-
-        .plot = function(image, ggtheme, theme, ...) {
-
-            # plotData <- image$state
-
-
-            # Error Message ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group) )
-                return()
-
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
-
-
-            # Prepare Data ----
-
-            mydata <- self$data
-
-            # Exclude NA ----
-
-            excl <- self$options$excl
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-            # Define variables for arguments ----
-
+        
+        # Performance optimization methods
+        .calculateDataHash = function() {
+            if (is.null(self$data) || nrow(self$data) == 0) {
+                return(NULL)
+            }
+            
+            # Create hash based on relevant data
             dep <- self$options$dep
             group <- self$options$group
-
-
-            dep <- jmvcore::composeTerm(components = dep)
-
-            group <- jmvcore::composeTerm(components = group)
-
-
-            if ( is.null(self$options$fill)) {
-
-            fill <- group
-
-            } else {
-
-                fill2 <-  self$options$fill
-                fill <- jmvcore::composeTerm(components = fill2)
-
+            col <- self$options$col
+            fill <- self$options$fill
+            
+            # Determine relevant variables
+            relevant_vars <- c(dep, group)
+            if (!is.null(col)) relevant_vars <- c(relevant_vars, col)
+            if (!is.null(fill)) relevant_vars <- c(relevant_vars, fill)
+            
+            # Remove NULLs and ensure variables exist
+            relevant_vars <- relevant_vars[!sapply(relevant_vars, is.null)]
+            relevant_vars <- relevant_vars[relevant_vars %in% names(self$data)]
+            
+            if (length(relevant_vars) == 0) {
+                return(NULL)
             }
-
-
-            if ( is.null(self$options$col)) {
-
-                col <- group
-
-            } else {
-
-                col2 <-  self$options$col
-                col <- jmvcore::composeTerm(components = col2)
-
-            }
-
-
-
-            # Plot function ----
-
-            plot <- mydata %>%
-                ggplot2::ggplot(.,
-                                ggplot2::aes(x = .data[[group]]
-                                             , y = .data[[dep]]
-                                             , fill = .data[[fill]]
-                                             , col = .data[[col]]
-
-                                            )
-                                    ) +
-                ggplot2::geom_violin()
-
-
-
-            # Flip Coordinates ----
-
-            flip <-  self$options$flip
-
-            if (flip) {
-
-            plot <- plot +
-                ggplot2::coord_flip()
-
-            }
-
-
-            # Themes ----
-
-            themex <- self$options$themex
-
-
-            # , ggtheme = ggtheme
-
-
-            # plot <- plot + eval(parse(text=self$options$themex))
-
-            if (themex == "ipsum") {
-                plot <- plot + hrbrthemes::theme_ipsum()
-            } else if (themex == "grey") {
-                plot <- plot + ggplot2::theme_grey()
-            } else if (themex == "gray") {
-                plot <- plot + ggplot2::theme_gray()
-            } else if (themex == "bw") {
-                plot <- plot + ggplot2::theme_bw()
-            } else if (themex == "linedraw") {
-                plot <- plot + ggplot2::theme_linedraw()
-            } else if (themex == "light") {
-                    plot <- plot + ggplot2::theme_light()
-                } else if (themex == "dark") {
-                    plot <- plot + ggplot2::theme_dark()
-                } else if (themex == "minimal") {
-                    plot <- plot + ggplot2::theme_minimal()
-                } else if (themex == "classic") {
-                    plot <- plot + ggplot2::theme_classic()
-                } else if (themex == "void") {
-                    plot <- plot + ggplot2::theme_void()
-                } else if (themex == "test") {
-                    plot <- plot + ggplot2::theme_test()
+            
+            # Create hash string including data summary and exclude missing option
+            data_summary <- paste(
+                nrow(self$data),
+                ncol(self$data),
+                paste(relevant_vars, collapse = "_"),
+                paste(sapply(relevant_vars, function(var) {
+                    if (is.numeric(self$data[[var]])) {
+                        paste(range(self$data[[var]], na.rm = TRUE), collapse = "_")
+                    } else {
+                        paste(length(unique(self$data[[var]])), "levels")
+                    }
+                }), collapse = "_"),
+                self$options$excl,  # Include exclude missing option in hash
+                sep = "_"
+            )
+            
+            return(data_summary)
+        },
+        
+        .calculateOptionsHash = function() {
+            # Create hash of all relevant options
+            options_list <- list(
+                dep = self$options$dep,
+                group = self$options$group,
+                col = self$options$col,
+                fill = self$options$fill,
+                excl = self$options$excl,
+                flip = self$options$flip,
+                themex = self$options$themex,
+                usexlabel = self$options$usexlabel,
+                xlabel = self$options$xlabel,
+                useylabel = self$options$useylabel,
+                ylabel = self$options$ylabel,
+                add_boxplot = self$options$add_boxplot,
+                add_points = self$options$add_points,
+                add_mean = self$options$add_mean,
+                draw_quantiles = self$options$draw_quantiles,
+                quantile_lines = paste(self$options$quantile_lines, collapse = "_"),
+                trim_violin = self$options$trim_violin,
+                scale_violin = self$options$scale_violin,
+                violin_width = self$options$violin_width,
+                violin_alpha = self$options$violin_alpha,
+                boxplot_width = self$options$boxplot_width,
+                boxplot_alpha = self$options$boxplot_alpha,
+                point_size = self$options$point_size,
+                point_alpha = self$options$point_alpha,
+                point_jitter = self$options$point_jitter,
+                color_palette = self$options$color_palette,
+                manual_colors = paste(self$options$manual_colors, collapse = "_")
+            )
+            
+            return(paste(options_list, collapse = "_"))
+        },
+        
+        .canUseCache = function() {
+            current_data_hash <- private$.calculateDataHash()
+            current_options_hash <- private$.calculateOptionsHash()
+            
+            return(!is.null(private$.cached_plot) &&
+                   !is.null(private$.data_hash) &&
+                   !is.null(private$.options_hash) &&
+                   !is.null(current_data_hash) &&
+                   !is.null(current_options_hash) &&
+                   current_data_hash == private$.data_hash &&
+                   current_options_hash == private$.options_hash)
+        },
+        
+        .prepareData = function() {
+            current_hash <- private$.calculateDataHash()
+            
+            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+                # Data has changed, prepare new data
+                mydata <- self$data
+                
+                if (is.null(mydata) || nrow(mydata) == 0) {
+                    private$.prepared_data <- NULL
+                    private$.data_hash <- current_hash
+                    return(NULL)
                 }
-
-
-
-            # xlab ----
-
-            usexlabel <- self$options$usexlabel
-
-            if (usexlabel) {
-
-            xlabel <- self$options$xlabel
-
-            plot <- plot + xlab(xlabel)
-
+                
+                # Exclude NA if requested
+                if (self$options$excl) {
+                    mydata <- jmvcore::naOmit(mydata)
+                }
+                
+                private$.prepared_data <- mydata
+                private$.data_hash <- current_hash
             }
-
-
-
-
-            # ylab ----
-
-
-            useylabel <- self$options$useylabel
-
-            if (useylabel) {
-
-                ylabel <- self$options$ylabel
-
-                plot <- plot + xlab(ylabel)
-
+            
+            return(private$.prepared_data)
+        },
+        
+        .prepareOptions = function() {
+            current_hash <- private$.calculateOptionsHash()
+            
+            if (is.null(private$.options_hash) || private$.options_hash != current_hash) {
+                private$.prepared_options <- self$options
+                private$.options_hash <- current_hash
+                
+                # Clear cached plot when options change
+                private$.cached_plot <- NULL
+                private$.cached_plotdata <- NULL
             }
+            
+            return(private$.prepared_options)
+        },
+        
+        .run = function() {
+            # Check required variables
+            if (is.null(self$options$dep) || is.null(self$options$group)) {
+                todo <- paste(
+                    "<br>Welcome to ClinicoPath",
+                    "<br><br>",
+                    "This tool will help you create professional violin plots.",
+                    "<br><br>",
+                    "<b>Violin plots</b> are ideal for visualizing the distribution of continuous data across groups.",
+                    "<br><br>",
+                    "<b>Required:</b>",
+                    "<br>• Dependent Variable (continuous)",
+                    "<br>• Grouping Variable (categorical)",
+                    "<br><hr>"
+                )
+                
+                self$results$todo$setContent(todo)
+                return()
+            }
+            
+            # Prepare data and options with caching
+            mydata <- private$.prepareData()
+            options <- private$.prepareOptions()
+            
+            if (is.null(mydata) || nrow(mydata) == 0) {
+                jmvcore::reject("Data contains no (complete) rows")
+                return()
+            }
+            
+            # Check if dependent variable is numeric
+            dep_var <- mydata[[self$options$dep]]
+            if (!is.numeric(dep_var)) {
+                jmvcore::reject("Dependent variable must be numeric")
+                return()
+            }
+            
+            # Set empty todo content when analysis is running
+            self$results$todo$setContent("")
+            
+            # The actual plotting will be handled in .plot method
+            # Here we just prepare the plot state
+            plotData <- list(
+                data = mydata,
+                options = options
+            )
+            
+            image <- self$results$plot
+            image$setState(plotData)
+        },
 
-
-            # geom_violin options ----
-
-
-            #     geom_violin(width=2.1, size=0.2)
-
-
-#
-#
-#             geom_violin {ggplot2}	R Documentation
-#             Violin plot
-#             Description
-#             A violin plot is a compact display of a continuous distribution. It is a blend of geom_boxplot() and geom_density(): a violin plot is a mirrored density plot displayed in the same way as a boxplot.
-#
-#             Usage
-#             geom_violin(
-#                 mapping = NULL,
-#                 data = NULL,
-#                 stat = "ydensity",
-#                 position = "dodge",
-#                 ...,
-#                 draw_quantiles = NULL,
-#                 trim = TRUE,
-#                 scale = "area",
-#                 na.rm = FALSE,
-#                 orientation = NA,
-#                 show.legend = NA,
-#                 inherit.aes = TRUE
-#             )
-#
-#             stat_ydensity(
-#                 mapping = NULL,
-#                 data = NULL,
-#                 geom = "violin",
-#                 position = "dodge",
-#                 ...,
-#                 bw = "nrd0",
-#                 adjust = 1,
-#                 kernel = "gaussian",
-#                 trim = TRUE,
-#                 scale = "area",
-#                 na.rm = FALSE,
-#                 orientation = NA,
-#                 show.legend = NA,
-#                 inherit.aes = TRUE
-#             )
-#             Arguments
-#             mapping
-#             Set of aesthetic mappings created by aes() or aes_(). If specified and inherit.aes = TRUE (the default), it is combined with the default mapping at the top level of the plot. You must supply mapping if there is no plot mapping.
-#
-#             data
-#             The data to be displayed in this layer. There are three options:
-#
-#                 If NULL, the default, the data is inherited from the plot data as specified in the call to ggplot().
-#
-#             A data.frame, or other object, will override the plot data. All objects will be fortified to produce a data frame. See fortify() for which variables will be created.
-#
-#             A function will be called with a single argument, the plot data. The return value must be a data.frame, and will be used as the layer data. A function can be created from a formula (e.g. ~ head(.x, 10)).
-#
-#             position
-#             Position adjustment, either as a string, or the result of a call to a position adjustment function.
-#
-#             ...
-#             Other arguments passed on to layer(). These are often aesthetics, used to set an aesthetic to a fixed value, like colour = "red" or size = 3. They may also be parameters to the paired geom/stat.
-#
-#             draw_quantiles
-#             If not(NULL) (default), draw horizontal lines at the given quantiles of the density estimate.
-#
-#             trim
-#             If TRUE (default), trim the tails of the violins to the range of the data. If FALSE, don't trim the tails.
-#
-# scale
-# if "area" (default), all violins have the same area (before trimming the tails). If "count", areas are scaled proportionally to the number of observations. If "width", all violins have the same maximum width.
-#
-# na.rm
-# If FALSE, the default, missing values are removed with a warning. If TRUE, missing values are silently removed.
-#
-# orientation
-# The orientation of the layer. The default (NA) automatically determines the orientation from the aesthetic mapping. In the rare event that this fails it can be given explicitly by setting orientation to either "x" or "y". See the Orientation section for more detail.
-#
-# show.legend
-# logical. Should this layer be included in the legends? NA, the default, includes if any aesthetics are mapped. FALSE never includes, and TRUE always includes. It can also be a named logical vector to finely select the aesthetics to display.
-#
-# inherit.aes
-# If FALSE, overrides the default aesthetics, rather than combining with them. This is most useful for helper functions that define both data and aesthetics and shouldn't inherit behaviour from the default plot specification, e.g. borders().
-#
-#             geom, stat
-#             Use to override the default connection between geom_violin and stat_ydensity.
-#
-#             bw
-#             The smoothing bandwidth to be used. If numeric, the standard deviation of the smoothing kernel. If character, a rule to choose the bandwidth, as listed in stats::bw.nrd().
-#
-#             adjust
-#             A multiplicate bandwidth adjustment. This makes it possible to adjust the bandwidth while still using the a bandwidth estimator. For example, adjust = 1/2 means use half of the default bandwidth.
-#
-#             kernel
-#             Kernel. See list of available kernels in density().
-#
-#             Orientation
-#             This geom treats each axis differently and, thus, can thus have two orientations. Often the orientation is easy to deduce from a combination of the given mappings and the types of positional scales in use. Thus, ggplot2 will by default try to guess which orientation the layer should have. Under rare circumstances, the orientation is ambiguous and guessing may fail. In that case the orientation can be specified directly using the orientation parameter, which can be either "x" or "y". The value gives the axis that the geom should run along, "x" being the default orientation you would expect for the geom.
-#
-#             Aesthetics
-#             geom_violin() understands the following aesthetics (required aesthetics are in bold):
-#
-#                 x
-#
-#             y
-#
-#             alpha
-#
-#             colour
-#
-#             fill
-#
-#             group
-#
-#             linetype
-#
-#             size
-#
-#             weight
-#
-#             Learn more about setting these aesthetics in vignette("ggplot2-specs").
-#
-#             Computed variables
-#             density
-#             density estimate
-#
-#             scaled
-#             density estimate, scaled to maximum of 1
-#
-#             count
-#             density * number of points - probably useless for violin plots
-#
-#             violinwidth
-#             density scaled for the violin plot, according to area, counts or to a constant maximum width
-#
-#             n
-#             number of points
-#
-#             width
-#             width of violin bounding box
-#
-#             References
-#             Hintze, J. L., Nelson, R. D. (1998) Violin Plots: A Box Plot-Density Trace Synergism. The American Statistician 52, 181-184.
-#
-#             See Also
-#             geom_violin() for examples, and stat_density() for examples with data along the x axis.
-#
-#             Examples
-#             p <- ggplot(mtcars, aes(factor(cyl), mpg))
-#             p + geom_violin()
-#
-#             # Orientation follows the discrete axis
-#             ggplot(mtcars, aes(mpg, factor(cyl))) +
-#                 geom_violin()
-#
-#
-#             p + geom_violin() + geom_jitter(height = 0, width = 0.1)
-#
-#             # Scale maximum width proportional to sample size:
-#             p + geom_violin(scale = "count")
-#
-#             # Scale maximum width to 1 for all violins:
-#             p + geom_violin(scale = "width")
-#
-#             # Default is to trim violins to the range of the data. To disable:
-#             p + geom_violin(trim = FALSE)
-#
-#             # Use a smaller bandwidth for closer density fit (default is 1).
-#             p + geom_violin(adjust = .5)
-#
-#             # Add aesthetic mappings
-#             # Note that violins are automatically dodged when any aesthetic is
-#             # a factor
-#             p + geom_violin(aes(fill = cyl))
-#             p + geom_violin(aes(fill = factor(cyl)))
-#             p + geom_violin(aes(fill = factor(vs)))
-#             p + geom_violin(aes(fill = factor(am)))
-#
-#             # Set aesthetics to fixed value
-#             p + geom_violin(fill = "grey80", colour = "#3366FF")
-#
-#             # Show quartiles
-#             p + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75))
-#
-#             # Scales vs. coordinate transforms -------
-#             if (require("ggplot2movies")) {
-#                 # Scale transformations occur before the density statistics are computed.
-#                 # Coordinate transformations occur afterwards.  Observe the effect on the
-#                 # number of outliers.
-#                 m <- ggplot(movies, aes(y = votes, x = rating, group = cut_width(rating, 0.5)))
-#                 m + geom_violin()
-#                 m + geom_violin() + scale_y_log10()
-#                 m + geom_violin() + coord_trans(y = "log10")
-#                 m + geom_violin() + scale_y_log10() + coord_trans(y = "log10")
-#
-#                 # Violin plots with continuous x:
-#                 # Use the group aesthetic to group observations in violins
-#                 ggplot(movies, aes(year, budget)) + geom_violin()
-#                 ggplot(movies, aes(year, budget)) +
-#                     geom_violin(aes(group = cut_width(year, 10)), scale = "width")
-#             }
-#
-#             [Package ggplot2 version 3.3.0.9000 Index]
-
-
-
-
-
-
-            #     scale_fill_viridis(discrete=TRUE) +
-            #     scale_color_viridis(discrete=TRUE) +
-
-
-
-            # Grouped ----
-            # # Libraries
-            # library(ggplot2)
-            # library(dplyr)
-            # library(forcats)
-            # library(hrbrthemes)
-            # library(viridis)
-            #
-            # # Load dataset from github
-            # data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/10_OneNumSevCatSubgroupsSevObs.csv", header=T, sep=",") %>%
-            #     mutate(tip = round(tip/total_bill*100, 1))
-            #
-            # # Grouped
-            # data %>%
-            #     mutate(day = fct_reorder(day, tip)) %>%
-            #     mutate(day = factor(day, levels=c("Thur", "Fri", "Sat", "Sun"))) %>%
-            #     ggplot(aes(fill=sex, y=tip, x=day)) +
-            #     geom_violin(position="dodge", alpha=0.5, outlier.colour="transparent") +
-            #     scale_fill_viridis(discrete=T, name="") +
-            #     theme_ipsum()  +
-            #     xlab("") +
-            #     ylab("Tip (%)") +
-            #     ylim(0,40)
-
-
-
-
-            # add boxplot ----
-
-            # # Libraries
-            # library(ggplot2)
-            # library(dplyr)
-            # library(hrbrthemes)
-            # library(viridis)
-            #
-            # # create a dataset
-            # data <- data.frame(
-            #     name=c( rep("A",500), rep("B",500), rep("B",500), rep("C",20), rep('D', 100)  ),
-            #     value=c( rnorm(500, 10, 5), rnorm(500, 13, 1), rnorm(500, 18, 1), rnorm(20, 25, 4), rnorm(100, 12, 1) )
-            # )
-            #
-            # # sample size
-            # sample_size = data %>% group_by(name) %>% summarize(num=n())
-            #
-            # # Plot
-            # data %>%
-            #     left_join(sample_size) %>%
-            #     mutate(myaxis = paste0(name, "\n", "n=", num)) %>%
-            #     ggplot( aes(x=myaxis, y=value, fill=name)) +
-            #     geom_violin(width=1.4) +
-            #     geom_boxplot(width=0.1, color="grey", alpha=0.2) +
-            #     scale_fill_viridis(discrete = TRUE) +
-            #     theme_ipsum() +
-            #     theme(
-            #         legend.position="none",
-            #         plot.title = element_text(size=11)
-            #     ) +
-            #     ggtitle("A Violin wrapping a boxplot") +
-            #     xlab("")
-
-
-
-            # vioplot ----
-            # library(vioplot)
-            #
-            # # Create data
-            # treatment <- c(rep("A", 40) , rep("B", 40) , rep("C", 40) )
-            # value <- c( sample(2:5, 40 , replace=T) , sample(c(1:5,12:17), 40 , replace=T), sample(1:7, 40 , replace=T) )
-            # data <- data.frame(treatment,value)
-            #
-            # # Draw the plot
-            # with(data , vioplot(
-            #     value[treatment=="A"] , value[treatment=="B"], value[treatment=="C"],
-            #     col=rgb(0.1,0.4,0.7,0.7) , names=c("A","B","C")
-            # ))
-
-
-
-
-
-
-
-
-
-
-
-            # Print plot
-
-            print(plot)
+        .plot = function(image, ggtheme, theme, ...) {
+            # Check required variables
+            if (is.null(self$options$dep) || is.null(self$options$group)) {
+                return()
+            }
+            
+            # Performance optimization: check if we can use cached plot
+            if (private$.canUseCache()) {
+                return(private$.cached_plot)
+            }
+            
+            # Get plot data from state or prepare fresh
+            plotData <- image$state
+            if (is.null(plotData)) {
+                mydata <- private$.prepareData()
+                options <- private$.prepareOptions()
+                
+                if (is.null(mydata) || nrow(mydata) == 0) {
+                    return()
+                }
+                
+                plotData <- list(data = mydata, options = options)
+            }
+            
+            mydata <- plotData$data
+            options <- plotData$options
+            
+            # Define variables for aesthetics
+            dep <- self$options$dep
+            group <- self$options$group
+            
+            # Handle fill variable
+            if (is.null(self$options$fill)) {
+                fill_var <- group
+            } else {
+                fill_var <- self$options$fill
+            }
+            
+            # Handle color variable
+            if (is.null(self$options$col)) {
+                col_var <- group
+            } else {
+                col_var <- self$options$col
+            }
+            
+            # Create base plot
+            p <- ggplot2::ggplot(mydata, ggplot2::aes(x = .data[[group]], 
+                                                      y = .data[[dep]], 
+                                                      fill = .data[[fill_var]], 
+                                                      color = .data[[col_var]]))
+            
+            # Add violin layer with advanced options
+            violin_args <- list()
+            
+            if (self$options$trim_violin) {
+                violin_args$trim <- TRUE
+            } else {
+                violin_args$trim <- FALSE
+            }
+            
+            violin_args$scale <- self$options$scale_violin
+            violin_args$width <- self$options$violin_width
+            violin_args$alpha <- self$options$violin_alpha
+            
+            # Add quantile lines if requested
+            if (self$options$draw_quantiles && length(self$options$quantile_lines) > 0) {
+                quantiles <- as.numeric(self$options$quantile_lines)
+                quantiles <- quantiles[!is.na(quantiles) & quantiles > 0 & quantiles < 1]
+                if (length(quantiles) > 0) {
+                    violin_args$draw_quantiles <- quantiles
+                }
+            }
+            
+            p <- p + do.call(ggplot2::geom_violin, violin_args)
+            
+            # Add boxplot overlay if requested
+            if (self$options$add_boxplot) {
+                p <- p + ggplot2::geom_boxplot(
+                    width = self$options$boxplot_width,
+                    alpha = self$options$boxplot_alpha,
+                    outlier.shape = NA,  # Hide outliers if points are shown
+                    show.legend = FALSE
+                )
+            }
+            
+            # Add points if requested
+            if (self$options$add_points) {
+                jitter_width <- if (self$options$point_jitter) 0.2 else 0
+                p <- p + ggplot2::geom_jitter(
+                    width = jitter_width,
+                    size = self$options$point_size,
+                    alpha = self$options$point_alpha,
+                    show.legend = FALSE
+                )
+            }
+            
+            # Add mean points if requested
+            if (self$options$add_mean) {
+                mean_data <- mydata %>%
+                    dplyr::group_by(.data[[group]]) %>%
+                    dplyr::summarise(mean_val = mean(.data[[dep]], na.rm = TRUE), .groups = 'drop')
+                
+                p <- p + ggplot2::geom_point(
+                    data = mean_data,
+                    ggplot2::aes(x = .data[[group]], y = .data$mean_val),
+                    size = 4,
+                    shape = 23,
+                    fill = "red",
+                    color = "darkred",
+                    inherit.aes = FALSE
+                )
+            }
+            
+            # Apply color palette
+            if (self$options$color_palette == "viridis") {
+                p <- p + ggplot2::scale_fill_viridis_d() + ggplot2::scale_color_viridis_d()
+            } else if (self$options$color_palette == "brewer") {
+                p <- p + ggplot2::scale_fill_brewer(type = "qual") + ggplot2::scale_color_brewer(type = "qual")
+            } else if (self$options$color_palette == "manual" && length(self$options$manual_colors) > 0) {
+                colors <- self$options$manual_colors
+                p <- p + ggplot2::scale_fill_manual(values = colors) + ggplot2::scale_color_manual(values = colors)
+            }
+            
+            # Apply theme
+            themex <- self$options$themex
+            if (themex == "ipsum") {
+                if (requireNamespace('hrbrthemes', quietly = TRUE)) {
+                    p <- p + hrbrthemes::theme_ipsum()
+                } else {
+                    p <- p + ggplot2::theme_minimal()
+                }
+            } else if (themex == "grey") {
+                p <- p + ggplot2::theme_grey()
+            } else if (themex == "gray") {
+                p <- p + ggplot2::theme_gray()
+            } else if (themex == "bw") {
+                p <- p + ggplot2::theme_bw()
+            } else if (themex == "linedraw") {
+                p <- p + ggplot2::theme_linedraw()
+            } else if (themex == "light") {
+                p <- p + ggplot2::theme_light()
+            } else if (themex == "dark") {
+                p <- p + ggplot2::theme_dark()
+            } else if (themex == "minimal") {
+                p <- p + ggplot2::theme_minimal()
+            } else if (themex == "classic") {
+                p <- p + ggplot2::theme_classic()
+            } else if (themex == "void") {
+                p <- p + ggplot2::theme_void()
+            } else if (themex == "test") {
+                p <- p + ggplot2::theme_test()
+            }
+            
+            # Add custom axis labels
+            if (self$options$usexlabel) {
+                p <- p + ggplot2::xlab(self$options$xlabel)
+            }
+            
+            if (self$options$useylabel) {
+                p <- p + ggplot2::ylab(self$options$ylabel)  # Fixed bug: was xlab
+            }
+            
+            # Flip coordinates if requested
+            if (self$options$flip) {
+                p <- p + ggplot2::coord_flip()
+            }
+            
+            # Cache the plot
+            private$.cached_plot <- p
+            
+            print(p)
             TRUE
         }
-        )
+    )
 )

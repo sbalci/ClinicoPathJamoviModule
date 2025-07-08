@@ -1,99 +1,240 @@
 ---
-name:  jviolin
-title: Violin Plot
+name: jviolin
+title: Professional Violin Plot
 menuGroup: JJStatsPlotD
-menuSubgroup: Drafts
-menuSubtitle: R Graph Gallery Violin
-version: '0.0.3'
+menuSubgroup: Distribution Plots
+menuSubtitle: Advanced Violin Plots for Data Distribution
+version: '1.0.0'
 jas: '1.2'
+description:
+    main: |
+        Create professional violin plots for visualizing the distribution of continuous
+        data across groups. Violin plots combine density estimation with boxplot elements
+        to show both distribution shape and summary statistics.
 
 options:
     - name: data
       type: Data
+      description: The data to be analyzed
 
     - name: dep
       title: Dependent Variable
       type: Variable
+      default: 
+      description: Continuous variable for y-axis (violin height)
 
     - name: group
-      title: Grouping Variable
+      title: Grouping Variable  
       type: Variable
-
+      default: 
+      description: Categorical variable for x-axis (groups)
 
     - name: col
       title: Color Variable
       type: Variable
-
+      default: 
+      description: Optional variable for color mapping (uses grouping variable if empty)
 
     - name: fill
-      title: Color Variable
-      type: Variable
-
+      title: Fill Variable
+      type: Variable  
+      default: 
+      description: Optional variable for fill mapping (uses grouping variable if empty)
 
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude Missing Values
       type: Bool
       default: false
-
+      description: Exclude observations with missing data from analysis
 
     - name: flip
       title: Flip Coordinates
       type: Bool
       default: false
+      description: Swap x and y axes for horizontal violin plots
 
-    - name: themex
-      title: Theme
+    # Advanced Violin Options
+    - name: add_boxplot
+      title: Add Boxplot Overlay
+      type: Bool
+      default: false
+      description: Add boxplot inside violin for summary statistics
+
+    - name: add_points
+      title: Add Data Points
+      type: Bool
+      default: false
+      description: Add individual data points over violin
+
+    - name: add_mean
+      title: Add Mean Points
+      type: Bool
+      default: false
+      description: Add mean values as red diamond points
+
+    - name: draw_quantiles
+      title: Draw Quantile Lines
+      type: Bool
+      default: false
+      description: Draw horizontal lines at specified quantiles
+
+    - name: quantile_lines
+      title: Quantile Values
+      type: String
+      default: "0.25,0.5,0.75"
+      description: Comma-separated quantile values (e.g., 0.25,0.5,0.75)
+
+    - name: trim_violin
+      title: Trim Violin Tails
+      type: Bool
+      default: true
+      description: Trim violin tails to data range
+
+    - name: scale_violin
+      title: Violin Scaling
       type: List
       options:
-        - title: ipsum
+        - title: Equal Area
+          name: area
+        - title: Equal Count
+          name: count  
+        - title: Equal Width
+          name: width
+      default: area
+      description: How to scale violin widths
+
+    # Violin Appearance
+    - name: violin_width
+      title: Violin Width
+      type: Number
+      min: 0.1
+      max: 3.0
+      default: 1.0
+      description: Width multiplier for violins
+
+    - name: violin_alpha
+      title: Violin Transparency
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.7
+      description: Transparency level for violin fill
+
+    # Boxplot Options  
+    - name: boxplot_width
+      title: Boxplot Width
+      type: Number
+      min: 0.01
+      max: 0.5
+      default: 0.1
+      description: Width of boxplot overlay
+
+    - name: boxplot_alpha
+      title: Boxplot Transparency
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.8
+      description: Transparency level for boxplot
+
+    # Point Options
+    - name: point_size
+      title: Point Size
+      type: Number
+      min: 0.1
+      max: 5.0
+      default: 1.5
+      description: Size of individual data points
+
+    - name: point_alpha
+      title: Point Transparency
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.6
+      description: Transparency level for points
+
+    - name: point_jitter
+      title: Jitter Points
+      type: Bool
+      default: true
+      description: Add horizontal jitter to prevent point overlap
+
+    # Color Options
+    - name: color_palette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default ggplot2
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: ColorBrewer
+          name: brewer
+        - title: Manual Colors
+          name: manual
+      default: default
+      description: Color palette for violin fills and outlines
+
+    - name: manual_colors
+      title: Manual Colors
+      type: String
+      default: ""
+      description: Comma-separated color values (e.g., red,blue,green)
+
+    # Theme Options
+    - name: themex
+      title: Plot Theme
+      type: List
+      options:
+        - title: Ipsum (hrbrthemes)
           name: ipsum
-        - title: grey
+        - title: Grey
           name: grey
-        - title: gray
+        - title: Gray
           name: gray
-        - title: bw
+        - title: Black & White
           name: bw
-        - title: linedraw
+        - title: Line Draw
           name: linedraw
-        - title: light
+        - title: Light
           name: light
-        - title: dark
+        - title: Dark
           name: dark
-        - title: minimal
+        - title: Minimal
           name: minimal
-        - title: classic
+        - title: Classic
           name: classic
-        - title: void
+        - title: Void
           name: void
-        - title: test
+        - title: Test
           name: test
-      default: ipsum
+      default: minimal
+      description: Overall plot theme style
 
-
-
+    # Axis Labels
     - name: usexlabel
-      title: Use xlabel
+      title: Use Custom X-axis Label
       type: Bool
       default: false
+      description: Override default x-axis label
 
     - name: xlabel
-      title: >
-          x-axis label
+      title: X-axis Label
       type: String
       default: ''
+      description: Custom label for x-axis
 
     - name: useylabel
-      title: Use ylabel
+      title: Use Custom Y-axis Label
       type: Bool
       default: false
-
+      description: Override default y-axis label
 
     - name: ylabel
-      title: >
-          y-axis label
+      title: Y-axis Label
       type: String
       default: ''
-
-
+      description: Custom label for y-axis
 
 ...

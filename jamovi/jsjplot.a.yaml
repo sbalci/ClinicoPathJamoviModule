@@ -54,6 +54,7 @@ options:
     - name: dependent_var
       title: "Dependent Variable"
       type: Variable
+      default: NULL
       suggested: [continuous, nominal, ordinal]
       permitted: [numeric, factor]
       description:
@@ -63,6 +64,7 @@ options:
     - name: independent_vars
       title: "Independent Variables"
       type: Variables
+      default: NULL
       suggested: [continuous, nominal, ordinal]
       permitted: [numeric, factor]
       description:
@@ -72,6 +74,7 @@ options:
     - name: grouping_var
       title: "Grouping Variable"
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -81,6 +84,7 @@ options:
     - name: interaction_vars
       title: "Interaction Variables"
       type: Variables
+      default: NULL
       suggested: [continuous, nominal, ordinal]
       permitted: [numeric, factor]
       description:

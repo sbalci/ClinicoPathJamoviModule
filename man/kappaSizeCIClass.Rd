@@ -4,9 +4,14 @@
 \alias{kappaSizeCIClass}
 \title{Confidence Interval Approach for the Number of Subjects Required}
 \description{
-Confidence Interval Approach for the Number of Subjects Required
-
-Confidence Interval Approach for the Number of Subjects Required
+Calculate sample size for interobserver agreement studies using Cohen's kappa statistic.
+This function provides confidence interval-based sample size determination for studies
+evaluating agreement between raters across different numbers of outcome categories.
+}
+\details{
+The function uses the kappaSize package to calculate required sample sizes
+for kappa coefficient confidence intervals. It supports 2-5 outcome categories
+and 2-5 raters, with customizable precision requirements and significance levels.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::kappaSizeCIBase} -> \code{kappaSizeCIClass}

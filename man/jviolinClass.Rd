@@ -4,12 +4,10 @@
 \alias{jviolinClass}
 \title{Violin Plot}
 \value{
-Violin Plot
+A violin plot showing distribution of continuous variables across groups
 }
 \description{
-Violin Plot
-
-Violin Plot
+Create professional violin plots for distribution visualization
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::jviolinBase} -> \code{jviolinClass}
