@@ -1,0 +1,457 @@
+---
+title: "Time-Dependent Covariates in Multisurvival Analysis"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    highlight-style: github
+    code-fold: false
+---
+
+# Introduction {#introduction}
+
+Time-dependent covariates are variables that change their values over the course of follow-up time. In clinical research, many important variables can change during the study period, such as:
+
+- Treatment regimens (switching from standard to experimental therapy)
+- Disease status (remission, progression)
+- Performance status
+- Biomarker levels
+- Comorbidities
+
+The `multisurvival` function in ClinicoPath now supports time-dependent covariates in both wide and long data formats, making it easier to analyze survival data where covariates change over time.
+
+# Data Format Options {#data-formats}
+
+## Wide Format Data {#wide-format}
+
+In wide format, each subject has one row, with time-dependent variables represented as separate columns for different time points.
+
+### Example Wide Format Structure
+
+```{r wide-example}
+# Example wide format data structure
+wide_data <- data.frame(
+  id = 1:3,
+  age = c(65, 72, 58),
+  sex = factor(c("Male", "Female", "Male")),
+  time = c(24, 18, 30),
+  status = c(1, 0, 1),
+  
+  # Baseline treatment (time 0)
+  treatment_baseline = factor(c("Standard", "Standard", "Experimental")),
+  
+  # Treatment at 6 months
+  treatment_t6 = factor(c("Standard", "Experimental", "Experimental")),
+  
+  # Treatment at 12 months  
+  treatment_t12 = factor(c("Experimental", "Experimental", "Stopped")),
+  
+  # Treatment at 18 months
+  treatment_t18 = factor(c("Experimental", "Stopped", "Stopped"))
+)
+
+print(wide_data)
+```
+
+**Wide Format Advantages:**
+- One row per patient (easier to understand)
+- Common format in clinical databases
+- Easy to create from existing data
+
+**Wide Format Requirements:**
+- Baseline variables: `variable_baseline` or just `variable`
+- Time-specific variables: `variable_t6`, `variable_t12`, etc.
+- Change times specified in options
+
+## Long Format Data {#long-format}
+
+In long format, each subject can have multiple rows, with one row for each time interval where covariates remain constant.
+
+### Example Long Format Structure
+
+```{r long-example}
+# Example long format data structure  
+long_data <- data.frame(
+  id = c(1, 1, 1, 2, 2, 3, 3),
+  age = c(65, 65, 65, 72, 72, 58, 58),
+  sex = factor(c("Male", "Male", "Male", "Female", "Female", "Male", "Male")),
+  tstart = c(0, 6, 12, 0, 6, 0, 12),
+  tstop = c(6, 12, 24, 6, 18, 12, 30),
+  status = c(0, 0, 1, 0, 0, 0, 1),
+  treatment = factor(c("Standard", "Standard", "Experimental", 
+                      "Standard", "Experimental", "Experimental", "Stopped"))
+)
+
+print(long_data)
+```
+
+**Long Format Advantages:**
+- More flexible for complex time patterns
+- Standard format for survival analysis packages
+- Can handle irregular time intervals
+
+**Long Format Requirements:**
+- `tstart` and `tstop` variables for time intervals
+- Status = 1 only in final interval if event occurs
+- Time-dependent variables change between rows
+
+# Using Time-Dependent Covariates {#usage}
+
+## Basic Wide Format Analysis {#basic-wide}
+
+```{r eval=FALSE}
+library(ClinicoPath)
+
+# Load example wide format data
+load("test_wide_time_dependent.rda")
+
+result <- multisurvival(
+  data = test_wide_time_dependent,
+  elapsedtime = "time",
+  outcome = "status", 
+  outcomeLevel = "1",
+  explanatory = c("sex", "stage"),
+  contexpl = "age",
+  
+  # Time-dependent covariate options
+  use_time_dependent = TRUE,
+  td_format = "wide",
+  time_dep_vars = c("treatment_baseline"),  # Base variable name
+  change_times = "6, 12, 18",               # When changes occur
+  td_suffix_pattern = "_t{time}",           # Naming pattern
+  
+  timetypeoutput = "months"
+)
+```
+
+## Basic Long Format Analysis {#basic-long}
+
+```{r eval=FALSE}
+# Load example long format data
+load("test_long_time_dependent.rda")
+
+result <- multisurvival(
+  data = test_long_time_dependent,
+  
+  # No elapsedtime needed - using tstart/tstop
+  outcome = "status",
+  outcomeLevel = "1", 
+  explanatory = c("sex", "stage"),
+  contexpl = "age",
+  
+  # Time-dependent covariate options
+  use_time_dependent = TRUE,
+  td_format = "long", 
+  start_time_var = "tstart",
+  stop_time_var = "tstop",
+  time_dep_vars = c("treatment"),  # Time-varying variable
+  
+  timetypeoutput = "months"
+)
+```
+
+# Advanced Examples {#advanced-examples}
+
+## Multiple Time-Dependent Variables {#multiple-td}
+
+```{r eval=FALSE}
+# Wide format with multiple time-dependent variables
+result <- multisurvival(
+  data = clinical_data,
+  elapsedtime = "followup_months",
+  outcome = "event_status",
+  outcomeLevel = "Event",
+  explanatory = c("sex", "initial_stage"),
+  contexpl = "baseline_age",
+  
+  # Multiple time-dependent variables
+  use_time_dependent = TRUE,
+  td_format = "wide",
+  time_dep_vars = c("treatment_baseline", "ps_baseline"),  # Multiple variables
+  change_times = "3, 6, 12, 18",           # More frequent assessments
+  td_suffix_pattern = "_month{time}",       # Different naming pattern
+  
+  # Additional analysis options
+  calculateRiskScore = TRUE,
+  numRiskGroups = "three",
+  hr = TRUE
+)
+```
+
+## Combining Time-Dependent Covariates with Other Features {#combined}
+
+```{r eval=FALSE}
+# Complex analysis with multiple advanced features
+result <- multisurvival(
+  data = oncology_data,
+  elapsedtime = "survival_months", 
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  explanatory = c("histology", "grade"),
+  contexpl = c("age_at_diagnosis", "tumor_size"),
+  
+  # Time-dependent covariates
+  use_time_dependent = TRUE,
+  td_format = "wide",
+  time_dep_vars = c("treatment_baseline", "response_baseline"),
+  change_times = "6, 12, 24",
+  td_suffix_pattern = "_m{time}",
+  
+  # Frailty model for hospital clustering
+  use_frailty = TRUE,
+  frailty_var = "treatment_center",
+  frailty_distribution = "gamma",
+  
+  # Splines for non-proportional hazards
+  use_splines = TRUE,
+  spline_vars = "age_at_diagnosis",
+  spline_df = 3,
+  spline_type = "pspline",
+  
+  # Model selection
+  use_modelSelection = TRUE,
+  modelSelection = "backward",
+  selectionCriteria = "aic",
+  
+  # Risk stratification
+  calculateRiskScore = TRUE,
+  numRiskGroups = "four",
+  plotRiskGroups = TRUE
+)
+```
+
+# Data Preparation Guidelines {#data-prep}
+
+## Converting Long to Wide Format {#long-to-wide}
+
+```{r eval=FALSE}
+# Example conversion from long to wide format
+library(dplyr)
+library(tidyr)
+
+# Starting with long format data
+long_format <- data.frame(
+  patient_id = c(rep(1, 3), rep(2, 2), rep(3, 4)),
+  visit_month = c(0, 6, 12, 0, 6, 0, 6, 12, 18),
+  treatment = c("A", "A", "B", "A", "B", "A", "A", "A", "B"),
+  performance_status = c(0, 1, 1, 0, 0, 0, 1, 2, 2)
+)
+
+# Convert to wide format
+wide_format <- long_format %>%
+  pivot_wider(
+    id_cols = patient_id,
+    names_from = visit_month,
+    values_from = c(treatment, performance_status),
+    names_sep = "_t"
+  ) %>%
+  # Rename baseline variables
+  rename(
+    treatment_baseline = treatment_t0,
+    ps_baseline = performance_status_t0
+  )
+```
+
+## Converting Wide to Long Format {#wide-to-long}
+
+```{r eval=FALSE}
+# Example conversion from wide to long format
+wide_data <- data.frame(
+  id = 1:100,
+  age = rnorm(100, 65, 10),
+  sex = factor(sample(c("M", "F"), 100, replace = TRUE)),
+  survival_time = rexp(100, 0.01),
+  status = rbinom(100, 1, 0.3),
+  treatment_baseline = factor(sample(c("A", "B"), 100, replace = TRUE)),
+  treatment_t6 = factor(sample(c("A", "B", "C"), 100, replace = TRUE)),
+  treatment_t12 = factor(sample(c("A", "B", "C", "Stop"), 100, replace = TRUE))
+)
+
+# This conversion would typically be done by the multisurvival function
+# when td_format = "wide" is specified
+```
+
+# Clinical Applications {#clinical-applications}
+
+## Cancer Treatment Switching {#cancer-treatment}
+
+Time-dependent covariates are particularly useful in oncology:
+
+```{r eval=FALSE}
+# Analyze impact of treatment switching in cancer patients
+cancer_analysis <- multisurvival(
+  data = cancer_cohort,
+  elapsedtime = "overall_survival_months",
+  outcome = "death_status", 
+  outcomeLevel = "Dead",
+  explanatory = c("cancer_type", "stage_at_diagnosis"),
+  contexpl = c("age_at_diagnosis", "baseline_performance_status"),
+  
+  # Treatment changes over time
+  use_time_dependent = TRUE,
+  td_format = "wide",
+  time_dep_vars = c("primary_treatment_baseline"),
+  change_times = "3, 6, 12, 18, 24",  # Quarterly assessments
+  td_suffix_pattern = "_quarter{time}",
+  
+  # Account for treatment center effects
+  use_frailty = TRUE,
+  frailty_var = "treatment_center",
+  
+  # Test proportional hazards assumption
+  ph_cox = TRUE,
+  
+  # Generate comprehensive outputs
+  hr = TRUE,
+  calculateRiskScore = TRUE,
+  person_time = TRUE
+)
+```
+
+## Cardiovascular Risk Factors {#cardiovascular}
+
+```{r eval=FALSE}
+# Analyze changing cardiovascular risk factors
+cv_analysis <- multisurvival(
+  data = cardiovascular_study,
+  tint = TRUE,
+  dxdate = "enrollment_date",
+  fudate = "last_contact_date",
+  timetypedata = "ymd",
+  timetypeoutput = "years",
+  outcome = "cv_event",
+  outcomeLevel = "Yes",
+  explanatory = c("gender", "diabetes_baseline"),
+  contexpl = c("baseline_age", "baseline_bmi"),
+  
+  # Time-varying medication and lab values
+  use_time_dependent = TRUE,
+  td_format = "wide", 
+  time_dep_vars = c("statin_use_baseline", "bp_medication_baseline"),
+  change_times = "0.5, 1, 2, 3, 4, 5",  # Annual visits
+  td_suffix_pattern = "_year{time}",
+  
+  # Account for clinic clustering
+  use_frailty = TRUE,
+  frailty_var = "clinic_id",
+  frailty_distribution = "gamma"
+)
+```
+
+# Interpretation Guidelines {#interpretation}
+
+## Understanding Time-Dependent Effects {#td-effects}
+
+When interpreting results with time-dependent covariates:
+
+1. **Hazard Ratios**: Represent the instantaneous risk at any given time, accounting for the current value of time-dependent variables.
+
+2. **Model Fit**: Time-dependent models often fit better than static models but require more data and assumptions.
+
+3. **Causality**: Time-dependent covariates help address time-varying confounding but don't guarantee causal interpretation.
+
+## Common Pitfalls {#pitfalls}
+
+1. **Immortal Time Bias**: Ensure time-dependent variables are properly aligned with risk periods.
+
+2. **Missing Data**: Handle missing time-dependent measurements appropriately.
+
+3. **Measurement Timing**: Consider whether variable changes are known at the time of measurement or retrospectively.
+
+# Technical Considerations {#technical}
+
+## Wide Format Requirements {#wide-requirements}
+
+- Consistent naming pattern for time-dependent variables
+- Complete specification of change times
+- Baseline values for all time-dependent variables
+
+## Long Format Requirements {#long-requirements}
+
+- Proper `tstart`/`tstop` intervals with no gaps
+- Status = 1 only in final interval for events
+- Consistent covariate values within intervals
+
+## Performance Considerations {#performance}
+
+- Wide format is generally faster for simple patterns
+- Long format is more flexible but computationally intensive
+- Consider data size when choosing format
+
+# Advanced Features Integration {#integration}
+
+Time-dependent covariates work seamlessly with other advanced features:
+
+```{r eval=FALSE}
+# Comprehensive analysis combining all advanced features
+comprehensive_analysis <- multisurvival(
+  data = complex_dataset,
+  elapsedtime = "time_to_event",
+  outcome = "event_indicator",
+  outcomeLevel = "1",
+  explanatory = c("treatment_arm", "biomarker_status"),
+  contexpl = c("age", "baseline_score"),
+  
+  # Time-dependent covariates
+  use_time_dependent = TRUE,
+  td_format = "wide",
+  time_dep_vars = c("drug_dose_baseline", "toxicity_grade_baseline"),
+  change_times = "4, 8, 12, 16, 20, 24",
+  
+  # Frailty for center effects
+  use_frailty = TRUE,
+  frailty_var = "study_center",
+  frailty_distribution = "gamma",
+  
+  # Splines for non-linear age effects
+  use_splines = TRUE,
+  spline_vars = "age",
+  spline_df = 4,
+  spline_type = "ns",
+  
+  # Stratification for non-proportional hazards
+  use_stratify = TRUE,
+  stratvar = "biomarker_status",
+  
+  # Model selection
+  use_modelSelection = TRUE,
+  modelSelection = "both",
+  selectionCriteria = "aic",
+  
+  # Risk assessment
+  calculateRiskScore = TRUE,
+  numRiskGroups = "four",
+  plotRiskGroups = TRUE,
+  
+  # Comprehensive outputs
+  hr = TRUE,
+  km = TRUE,
+  ac = TRUE,
+  adjexplanatory = "treatment_arm",
+  person_time = TRUE,
+  ph_cox = TRUE,
+  showNomogram = TRUE
+)
+```
+
+# Conclusion {#conclusion}
+
+Time-dependent covariates in `multisurvival` provide a powerful tool for analyzing survival data where important variables change over time. The support for both wide and long data formats makes this functionality accessible to researchers working with different data structures.
+
+Key benefits include:
+
+- **Realistic modeling** of clinical scenarios where treatments and patient status change
+- **Flexible data input** supporting both wide and long formats  
+- **Integration** with other advanced survival analysis features
+- **Comprehensive output** including plots, tables, and model diagnostics
+
+For most clinical applications, wide format provides the most intuitive approach, while long format offers maximum flexibility for complex time patterns.
+
+## Further Reading {#further-reading}
+
+- Therneau, T.M. and Grambsch, P.M. (2000). *Modeling Survival Data: Extending the Cox Model*. Springer.
+- Kleinbaum, D.G. and Klein, M. (2012). *Survival Analysis: A Self-Learning Text*. Springer.
+- ClinicoPath package documentation and examples.

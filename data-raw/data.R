@@ -48,6 +48,60 @@
 #' @examples
 #' data(histopathology)
 #' str(histopathology)
+"histopathology"
+
+#' @title No Gold Standard Test Data
+#'
+#' @description A simulated dataset for testing diagnostic test analysis without a gold standard.
+#' Contains results from 5 diagnostic tests performed on 300 patients, where the true disease
+#' status is unknown (as would be the case in real-world scenarios without a gold standard).
+#' 
+#' @usage data(nogoldstandard_test_data)
+#' @format A data frame with 300 rows and 8 variables:
+#' \describe{
+#'   \item{patient_id}{Numeric. Unique patient identifier.}
+#'   \item{test1_result}{Factor. Result of diagnostic test 1 with levels "negative", "positive".
+#'   Simulated with 90% sensitivity and 85% specificity.}
+#'   \item{test2_result}{Factor. Result of diagnostic test 2 with levels "negative", "positive".
+#'   Simulated with 75% sensitivity and 95% specificity.}
+#'   \item{test3_result}{Factor. Result of diagnostic test 3 with levels "negative", "positive".
+#'   Simulated with 85% sensitivity and 85% specificity. Contains ~5% missing values.}
+#'   \item{test4_result}{Factor. Result of diagnostic test 4 with levels "negative", "positive".
+#'   Simulated with 70% sensitivity and 98% specificity. Contains ~5% missing values.}
+#'   \item{test5_result}{Factor. Result of diagnostic test 5 with levels "negative", "positive".
+#'   Simulated with 95% sensitivity and 70% specificity. Contains ~5% missing values.}
+#'   \item{age}{Numeric. Patient's age in years (mean 50, SD 15).}
+#'   \item{sex}{Factor. Patient's sex with levels "Male", "Female".}
+#' }
+#' @details
+#' This dataset was simulated with a true disease prevalence of approximately 30%, though
+#' this information would not be known in practice. The tests have varying performance
+#' characteristics to demonstrate the nogoldstandard analysis methods.
+#' 
+#' Test characteristics (used in simulation, unknown in practice):
+#' - Test 1: High sensitivity (90%), moderate specificity (85%)
+#' - Test 2: Moderate sensitivity (75%), high specificity (95%)
+#' - Test 3: Balanced (85% sensitivity, 85% specificity)
+#' - Test 4: Low sensitivity (70%), very high specificity (98%)
+#' - Test 5: High sensitivity (95%), low specificity (70%)
+#' 
+#' @examples
+#' data(nogoldstandard_test_data)
+#' str(nogoldstandard_test_data)
+#' table(nogoldstandard_test_data$test1_result, nogoldstandard_test_data$test2_result)
+"nogoldstandard_test_data"
+
+#' @title No Gold Standard Test Data (Small)
+#'
+#' @description A smaller subset of the nogoldstandard_test_data for quick testing and examples.
+#' Contains the first 50 patients from the full dataset.
+#' 
+#' @usage data(nogoldstandard_test_data_small)
+#' @format A data frame with 50 rows and 8 variables (same structure as nogoldstandard_test_data).
+#' @seealso \code{\link{nogoldstandard_test_data}} for the full dataset.
+#' @examples
+#' data(nogoldstandard_test_data_small)
+#' str(nogoldstandard_test_data_small)
 
 #' @title CONSORT Flow Chart Examples
 #'
@@ -996,3 +1050,56 @@
 #' imaging_vars <- c("CT_Scan", "MRI", "PET_Scan", "Ultrasound")
 #' colSums(diagnostic_test_data[, imaging_vars])
 "diagnostic_test_data"
+
+#' @title No Gold Standard Test Data
+#'
+#' @description A simulated dataset for testing diagnostic test analysis without a gold standard.
+#' Contains results from 5 diagnostic tests performed on 300 patients, where the true disease
+#' status is unknown (as would be the case in real-world scenarios without a gold standard).
+#' 
+#' @usage data(nogoldstandard_test_data)
+#' @format A data frame with 300 rows and 8 variables:
+#' \describe{
+#'   \item{patient_id}{Numeric. Unique patient identifier.}
+#'   \item{test1_result}{Factor. Result of diagnostic test 1 with levels "negative", "positive".
+#'   Simulated with 90% sensitivity and 85% specificity.}
+#'   \item{test2_result}{Factor. Result of diagnostic test 2 with levels "negative", "positive".
+#'   Simulated with 75% sensitivity and 95% specificity.}
+#'   \item{test3_result}{Factor. Result of diagnostic test 3 with levels "negative", "positive".
+#'   Simulated with 85% sensitivity and 85% specificity. Contains ~5% missing values.}
+#'   \item{test4_result}{Factor. Result of diagnostic test 4 with levels "negative", "positive".
+#'   Simulated with 70% sensitivity and 98% specificity. Contains ~5% missing values.}
+#'   \item{test5_result}{Factor. Result of diagnostic test 5 with levels "negative", "positive".
+#'   Simulated with 95% sensitivity and 70% specificity. Contains ~5% missing values.}
+#'   \item{age}{Numeric. Patient's age in years (mean 50, SD 15).}
+#'   \item{sex}{Factor. Patient's sex with levels "Male", "Female".}
+#' }
+#' @details
+#' This dataset was simulated with a true disease prevalence of approximately 30%, though
+#' this information would not be known in practice. The tests have varying performance
+#' characteristics to demonstrate the nogoldstandard analysis methods.
+#' 
+#' Test characteristics (used in simulation, unknown in practice):
+#' - Test 1: High sensitivity (90%), moderate specificity (85%)
+#' - Test 2: Moderate sensitivity (75%), high specificity (95%)
+#' - Test 3: Balanced (85% sensitivity, 85% specificity)
+#' - Test 4: Low sensitivity (70%), very high specificity (98%)
+#' - Test 5: High sensitivity (95%), low specificity (70%)
+#' 
+#' @examples
+#' data(nogoldstandard_test_data)
+#' str(nogoldstandard_test_data)
+#' table(nogoldstandard_test_data$test1_result, nogoldstandard_test_data$test2_result)
+"nogoldstandard_test_data"
+
+#' @title No Gold Standard Test Data (Small)
+#'
+#' @description A smaller subset of the nogoldstandard_test_data for quick testing and examples.
+#' Contains the first 50 patients from the full dataset.
+#' 
+#' @usage data(nogoldstandard_test_data_small)
+#' @format A data frame with 50 rows and 8 variables (same structure as nogoldstandard_test_data).
+#' @seealso \code{\link{nogoldstandard_test_data}} for the full dataset.
+#' @examples
+#' data(nogoldstandard_test_data_small)
+#' str(nogoldstandard_test_data_small)

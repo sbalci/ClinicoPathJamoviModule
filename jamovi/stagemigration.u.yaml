@@ -1,4 +1,4 @@
-title: Stage Migration Analysis
+title: Advanced TNM Stage Migration Analysis
 name: stagemigration
 jus: '3.0'
 stage: 0
@@ -9,19 +9,18 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Original Stage
+        label: Core Variables
         children:
           - type: VariablesListBox
             name: oldStage
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: New Stage
-        children:
+            label: Original Staging System
           - type: VariablesListBox
             name: newStage
             maxItemCount: 1
             isTarget: true
+            label: New Staging System
       - type: TargetLayoutBox
         label: Survival Variables
         children:
@@ -29,52 +28,233 @@ children:
             name: survivalTime
             maxItemCount: 1
             isTarget: true
-            label: Survival Time
+            label: Survival Time (months)
           - type: VariablesListBox
             name: event
             maxItemCount: 1
             isTarget: true
-            label: Event
+            label: Event Indicator
           - type: LevelSelector
             name: eventLevel
             label: Event Level
+
   - type: CollapseBox
-    label: Plot Options
+    label: Analysis Configuration
+    collapsed: false
+    children:
+      - type: Label
+        label: Analysis Scope and Type
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: analysisType
+                label: Analysis Scope
+              - type: ComboBox
+                name: cancerType
+                label: Cancer Type (Optional)
+              - type: TextBox
+                name: confidenceLevel
+                label: Confidence Level
+                format: number
+
+  - type: CollapseBox
+    label: Advanced Statistical Methods
     collapsed: true
     children:
       - type: Label
-        label: Visualization Options
+        label: Discrimination and Reclassification
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
-                name: plotMigration
-                label: Show Migration Plot
+                name: calculateNRI
+                label: Net Reclassification Improvement (NRI)
+              - type: TextBox
+                name: nriTimePoints
+                label: NRI Time Points (months)
+              - type: TextBox
+                name: nriClinicalThreshold
+                label: NRI Clinical Threshold
+                format: number
+              - type: CheckBox
+                name: calculateIDI
+                label: Integrated Discrimination Improvement (IDI)
       - type: Label
-        label: Survival Curve Display
+        label: ROC and Discrimination Analysis
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
-                name: showCI
-                label: Show confidence intervals
+                name: performROCAnalysis
+                label: Time-dependent ROC Analysis
+              - type: TextBox
+                name: rocTimePoints
+                label: ROC Time Points (months)
+      - type: Label
+        label: Clinical Utility Assessment
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performDCA
+                label: Decision Curve Analysis
+              - type: CheckBox
+                name: performCalibration
+                label: Calibration Analysis
+              - type: TextBox
+                name: clinicalSignificanceThreshold
+                label: Clinical Significance Threshold
+                format: number
+
   - type: CollapseBox
-    label: Analysis Options
+    label: Validation and Bootstrap
     collapsed: true
     children:
       - type: Label
-        label: Will Rogers Phenomenon
+        label: Internal Validation
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
-                name: showWillRogers
-                label: Analyze Will Rogers Phenomenon
-  - type: LayoutBox
-    margin: large
+                name: performBootstrap
+                label: Bootstrap Validation
+              - type: TextBox
+                name: bootstrapReps
+                label: Bootstrap Repetitions
+                format: number
+              - type: CheckBox
+                name: useOptimismCorrection
+                label: Apply Optimism Correction
+      - type: Label
+        label: Cross-Validation (Optional)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performCrossValidation
+                label: Cross-Validation
+              - type: TextBox
+                name: cvFolds
+                label: CV Folds
+                format: number
+
+  - type: CollapseBox
+    label: Model Comparison Tests
+    collapsed: true
     children:
-      - type: ComboBox
-        name: survivalPlotType
+      - type: Label
+        label: Statistical Testing
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performLikelihoodTests
+                label: Likelihood Ratio Tests
+              - type: CheckBox
+                name: calculatePseudoR2
+                label: Pseudo R-squared Measures
+      - type: Label
+        label: Stage Validation Tests
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performHomogeneityTests
+                label: Stage Homogeneity Tests
+              - type: CheckBox
+                name: performTrendTests
+                label: Stage Trend Analysis
+              - type: CheckBox
+                name: showWillRogersAnalysis
+                label: Will Rogers Phenomenon Analysis
+
+  - type: CollapseBox
+    label: Visualization Options
+    collapsed: true
+    children:
+      - type: Label
+        label: Primary Visualizations
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMigrationHeatmap
+                label: Migration Heatmap
+              - type: CheckBox
+                name: showROCComparison
+                label: ROC Curve Comparison
+              - type: CheckBox
+                name: showForestPlot
+                label: Hazard Ratio Forest Plot
+      - type: Label
+        label: Advanced Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showCalibrationPlots
+                label: Calibration Plots
+              - type: CheckBox
+                name: showDecisionCurves
+                label: Decision Curves
+      - type: Label
+        label: Survival Curve Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: survivalPlotType
+                label: Survival Plot Display
+              - type: CheckBox
+                name: showConfidenceIntervals
+                label: Show Confidence Intervals
+              - type: CheckBox
+                name: showRiskTables
+                label: Show Risk Tables
+              - type: TextBox
+                name: plotTimeRange
+                label: Plot Time Range (months)
+
+  - type: CollapseBox
+    label: Output and Reporting
+    collapsed: true
+    children:
+      - type: Label
+        label: Clinical Interpretation
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showClinicalInterpretation
+                label: Clinical Interpretation Guide
+              - type: CheckBox
+                name: generateExecutiveSummary
+                label: Executive Summary
+              - type: CheckBox
+                name: includeEffectSizes
+                label: Include Effect Sizes
+      - type: Label
+        label: Technical Details
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showStatisticalSummary
+                label: Statistical Summary Table
+              - type: CheckBox
+                name: showMethodologyNotes
+                label: Methodology Notes

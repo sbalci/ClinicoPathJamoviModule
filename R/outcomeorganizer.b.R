@@ -96,6 +96,116 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
+        # Enhanced input validation for outcome organization
+        # Returns validation results with errors, warnings, and informational messages
+        .validateInputs = function(mydata, outcome_var, recurrence_var = NULL, id_var = NULL, analysistype = "os") {
+            validation_results <- list(
+                errors = character(0),
+                warnings = character(0),
+                info = character(0),
+                should_stop = FALSE
+            )
+            
+            # 1. Check if required variables exist in data
+            if (!is.null(outcome_var) && !outcome_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Outcome variable '", outcome_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 2. Check recurrence variable if specified
+            if (!is.null(recurrence_var) && !recurrence_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Recurrence variable '", recurrence_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 3. Check patient ID variable if specified
+            if (!is.null(id_var) && !id_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Patient ID variable '", id_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # Stop here if variables don't exist
+            if (validation_results$should_stop) {
+                return(validation_results)
+            }
+            
+            # 4. Validate outcome variable
+            if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+                outcome_data <- mydata[[outcome_var]]
+                outcome_data_clean <- outcome_data[!is.na(outcome_data)]
+                
+                if (length(outcome_data_clean) == 0) {
+                    validation_results$errors <- c(validation_results$errors,
+                        "Outcome variable contains no non-missing values.")
+                    validation_results$should_stop <- TRUE
+                } else {
+                    # Check unique values
+                    unique_outcomes <- unique(outcome_data_clean)
+                    outcome_count <- length(unique_outcomes)
+                    
+                    if (outcome_count < 2) {
+                        validation_results$errors <- c(validation_results$errors,
+                            "Outcome variable must have at least 2 different values.")
+                        validation_results$should_stop <- TRUE
+                    } else {
+                        validation_results$info <- c(validation_results$info,
+                            paste("Outcome variable has ", outcome_count, " unique values: ", 
+                                  paste(unique_outcomes, collapse=", "), sep=""))
+                    }
+                }
+            }
+            
+            # 5. Validate analysis type compatibility
+            valid_analysis_types <- c("os", "cause", "compete", "rfs", "pfs", "dfs", "ttp", "multistate")
+            if (!analysistype %in% valid_analysis_types) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Invalid analysis type '", analysistype, "'. Must be one of: ", 
+                          paste(valid_analysis_types, collapse=", "), sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 6. Check analysis type requirements
+            if (analysistype %in% c("rfs", "pfs", "dfs", "ttp") && is.null(recurrence_var)) {
+                validation_results$warnings <- c(validation_results$warnings,
+                    paste("Analysis type '", analysistype, "' typically requires a recurrence/progression variable.", sep=""))
+            }
+            
+            # 7. Combined data quality checks
+            if (!validation_results$should_stop) {
+                total_rows <- nrow(mydata)
+                
+                # Check for minimum sample size
+                if (total_rows < 10) {
+                    validation_results$warnings <- c(validation_results$warnings,
+                        paste("Very small sample size: ", total_rows, " observations. Results may be unreliable.", sep=""))
+                } else if (total_rows < 30) {
+                    validation_results$warnings <- c(validation_results$warnings,
+                        paste("Small sample size: ", total_rows, " observations. Consider larger sample for more reliable estimates.", sep=""))
+                }
+                
+                # Check for missing data patterns
+                if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+                    missing_outcome <- sum(is.na(mydata[[outcome_var]]))
+                    missing_proportion <- missing_outcome / total_rows
+                    
+                    if (missing_proportion > 0.1) {
+                        validation_results$warnings <- c(validation_results$warnings,
+                            paste("Large amount of missing outcome data: ", round(missing_proportion * 100, 1), 
+                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                    } else if (missing_proportion > 0) {
+                        validation_results$info <- c(validation_results$info,
+                            paste("Missing outcome data: ", round(missing_proportion * 100, 1), 
+                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                    }
+                }
+            }
+            
+            return(validation_results)
+        },
+
         # Main function to organize outcomes with enhanced functionality
         .organizeOutcomes = function() {
             # Get data and variables
@@ -204,7 +314,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Initialize all as NA
                 mydata[["myoutcome"]] <- NA_integer_
 
-                if (analysistype == 'overall') {
+                if (analysistype == 'os') {
                     # Overall survival: Dead (any cause) vs Alive
                     mydata[["myoutcome"]][outcome1 == awd] <- 0
                     mydata[["myoutcome"]][outcome1 == awod] <- 0
@@ -272,20 +382,27 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Handle administrative censoring if specified
             if (self$options$adminCensoring && !is.null(self$options$adminDate)) {
-                # Mark observations censored after the administrative censoring date
-                admin_date_var <- labelled_data[["adminDate"]]
-                if (!is.null(admin_date_var)) {
-                    admin_date <- mydata[[admin_date_var]]
-                    end_date_var <- ifelse(!is.null(labelled_data$fudate), labelled_data$fudate, NULL)
-
-                    if (!is.null(end_date_var)) {
-                        end_date <- mydata[[end_date_var]]
-                        # If end date is after admin date, censor at admin date
-                        admin_censored <- end_date > admin_date
-                        mydata[["myoutcome"]][admin_censored] <- 0
-
-                        diagnostics$admin_censoring <- paste(sum(admin_censored), "observations administratively censored")
-                    }
+                # Get admin date variable from options and find it in labelled data
+                admin_date_var_name <- self$options$adminDate
+                
+                # Find the admin date variable in labelled data
+                admin_date_var <- NULL
+                if (!is.null(admin_date_var_name)) {
+                    all_labels <- labelled::var_label(mydata)
+                    admin_date_var <- names(all_labels)[all_labels == admin_date_var_name]
+                }
+                
+                if (length(admin_date_var) > 0) {
+                    admin_date <- mydata[[admin_date_var[1]]]
+                    
+                    # Note: Administrative censoring implementation depends on having follow-up time variable
+                    # This is a placeholder for more complex implementation
+                    diagnostics$admin_censoring <- "Administrative censoring requested but requires follow-up time variable"
+                    
+                    # Basic implementation: could be enhanced with actual follow-up time logic
+                    # For now, just record that admin censoring was requested
+                } else {
+                    diagnostics$admin_censoring <- "Administrative censoring requested but admin date variable not found"
                 }
             }
 
@@ -346,6 +463,34 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create table if needed
             private$.checkpoint()
 
+            # Perform input validation
+            labelled_data <- private$.getData()
+            mydata <- labelled_data$mydata_labelled
+            outcome_var <- labelled_data$outcome_var
+            recurrence_var <- labelled_data$recurrence_var
+            id_var <- labelled_data$id_var
+            
+            validation_results <- private$.validateInputs(
+                mydata, outcome_var, recurrence_var, id_var, self$options$analysistype
+            )
+            
+            # Handle validation errors - stop execution if critical errors found
+            if (validation_results$should_stop) {
+                error_msg <- paste(
+                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<b>❌ Critical Error(s) Detected:</b><br>",
+                    paste(validation_results$errors, collapse = "<br>"),
+                    "<br><br><b>💡 Suggestions:</b><br>",
+                    "• Verify that selected variables exist in your dataset<br>",
+                    "• Ensure outcome variable contains multiple different values<br>",
+                    "• Check that analysis type is appropriate for your data<br>",
+                    "• For RFS/PFS/DFS/TTP analyses, consider adding recurrence variable",
+                    "</div>",
+                    collapse = ""
+                )
+                stop(error_msg)
+            }
+
             # Organize outcomes
             results <- private$.organizeOutcomes()
             df_outcome <- results$df_outcome
@@ -359,7 +504,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_text <- ""
 
             if (self$options$multievent) {
-                if (analysistype == 'overall') {
+                if (analysistype == 'os') {
                     summary_text <- glue::glue(
                         "
                         <br><b>Overall Survival Analysis</b><br>
@@ -493,7 +638,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summary_text <- paste(summary_text, "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
             }
 
-            self$results$summary$setContent(summary_text)
+            # Add validation summary to output
+            validation_summary <- ""
+            if (length(validation_results$warnings) > 0) {
+                validation_summary <- paste0(validation_summary, 
+                    "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<b>⚠️ Warnings:</b><br>", 
+                    paste(validation_results$warnings, collapse = "<br>"),
+                    "</div>")
+            }
+            if (length(validation_results$info) > 0) {
+                validation_summary <- paste0(validation_summary,
+                    "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<b>ℹ️ Information:</b><br>", 
+                    paste(validation_results$info, collapse = "<br>"),
+                    "</div>")
+            }
+            
+            # Combine summary text with validation results
+            final_summary <- paste0(summary_text, validation_summary)
+            self$results$summary$setContent(final_summary)
 
             # Add data table if requested
             if (self$options$outputTable) {

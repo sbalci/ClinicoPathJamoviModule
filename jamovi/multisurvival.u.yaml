@@ -429,3 +429,111 @@ children:
                   - type: CheckBox
                     name: show_terminal_nodes
                     enable: (use_tree)
+
+  - type: CollapseBox
+    label: Time-Dependent Covariates
+    collapsed: true
+    children:
+      - type: Label
+        label: Time-Varying Variables
+        children:
+          - type: CheckBox
+            name: use_time_dependent
+            fitToGrid: true
+          - type: Label
+            label: Specify Variables
+            enable: (use_time_dependent)
+            children:
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Time-Dependent Variables
+                    children:
+                      - type: VariablesListBox
+                        name: time_dep_vars
+                        isTarget: true
+                        enable: (use_time_dependent)
+                  - type: TargetLayoutBox
+                    label: Start Time Variable
+                    children:
+                      - type: VariablesListBox
+                        name: start_time_var
+                        maxItemCount: 1
+                        isTarget: true
+                        enable: (use_time_dependent)
+                  - type: TargetLayoutBox
+                    label: Stop Time Variable
+                    children:
+                      - type: VariablesListBox
+                        name: stop_time_var
+                        maxItemCount: 1
+                        isTarget: true
+                        enable: (use_time_dependent)
+
+  - type: CollapseBox
+    label: Frailty Models
+    collapsed: true
+    children:
+      - type: Label
+        label: Random Effects for Clustering
+        children:
+          - type: CheckBox
+            name: use_frailty
+            fitToGrid: true
+          - type: Label
+            label: Frailty Settings
+            enable: (use_frailty)
+            children:
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Clustering Variable
+                    children:
+                      - type: VariablesListBox
+                        name: frailty_var
+                        maxItemCount: 1
+                        isTarget: true
+                        enable: (use_frailty)
+              - type: ComboBox
+                name: frailty_distribution
+                enable: (use_frailty)
+
+  - type: CollapseBox
+    label: Splines for Non-Proportional Hazards
+    collapsed: true
+    children:
+      - type: Label
+        label: Time-Varying Effects
+        children:
+          - type: CheckBox
+            name: use_splines
+            fitToGrid: true
+          - type: Label
+            label: Spline Settings
+            enable: (use_splines)
+            children:
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Variables with Time-Varying Effects
+                    children:
+                      - type: VariablesListBox
+                        name: spline_vars
+                        isTarget: true
+                        enable: (use_splines)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: TextBox
+                    name: spline_df
+                    format: number
+                    enable: (use_splines)
+                  - type: ComboBox
+                    name: spline_type
+                    enable: (use_splines)
