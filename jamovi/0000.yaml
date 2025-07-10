@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.46
+version: 0.0.3.48
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-07-08'
+date: '2025-07-10'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1266,14 +1266,6 @@ analyses:
 
       and APA-style formatting for clinical research applications.
     menuSubtitle: Agreement
-    ribbon: analyses
-    category: analyses
-  - title: Nomogram
-    name: nomogram
-    ns: ClinicoPath
-    menuGroup: meddecideD
-    menuTitle: Nomogram
-    menuSubgroup: Drafts
     ribbon: analyses
     category: analyses
   - title: Test ROC

@@ -14,6 +14,9 @@
 #
 # Author: Enhanced version with enterprise-grade features
 # Requires: R >= 4.0.0, yaml, future, digest packages
+# run  /Applications/jamovi.app/Contents/MacOS/jamovi 
+
+
 
 # Command line argument handling
 args <- commandArgs(trailingOnly = TRUE)
@@ -1483,7 +1486,7 @@ if (!extended) {
   devtools::document(main_repo_dir)
   jmvtools::prepare(main_repo_dir)
   devtools::document(main_repo_dir)
-  jmvtools::install(main_repo_dir)
+  # jmvtools::install(main_repo_dir)
 }
 
 # --- Commit changes in each repository ----
@@ -1649,19 +1652,19 @@ if (extended) {
 setwd(main_repo_dir)
 
 
-if (!WIP & !extended) {
-  # Update the main repository
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::prepare()
-  devtools::document()
-  jmvtools::install()
+# if (!WIP & !extended) {
+#   # Update the main repository
+#   jmvtools::prepare()
+#   devtools::document()
+#   jmvtools::prepare()
+#   devtools::document()
+#   jmvtools::install()
 
-  if (check) {
-    devtools::check()
-  }
+#   if (check) {
+#     devtools::check()
+#   }
 
-  if (webpage) {
-    pkgdown::build_site()
-  }
-}
+#   if (webpage) {
+#     pkgdown::build_site()
+#   }
+# }

@@ -72,6 +72,14 @@ items:
           superTitle: Specificity
           type: number
           format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
 
     - name: model_fit
       title: Model Fit Statistics

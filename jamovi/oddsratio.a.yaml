@@ -43,10 +43,17 @@ options:
           R: >
               The outcome variable to be used in the analysis.
 
-    # - name: outcomeLevel
-    #   title: Event Level
-    #   type: Level
-    #   variable: (outcome)
+    - name: outcomeLevel
+      title: Positive Outcome Level
+      type: Level
+      variable: (outcome)
+      description:
+          main: >
+              Specify which outcome level represents the positive case (e.g., "Dead", "Event", "Yes").
+              This is important for correct calculation of likelihood ratios and diagnostic metrics.
+          R: >
+            Specify which outcome level represents the positive case for likelihood ratio calculations.
+            If not specified, the function will use the second level alphabetically.
 
 
 # Nomogram ----

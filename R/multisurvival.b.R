@@ -630,6 +630,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "adjexplanatory_name" = adjexplanatory_name,
 
             "cleanData" = cleanData,
+            "mydata_labelled" = mydata_labelled,
             "mytime_labelled" = mytime_labelled,
             "myoutcome_labelled" = myoutcome_labelled,
             "mydxdate_labelled" = mydxdate_labelled,
@@ -1158,6 +1159,86 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Add checkpoint before the expensive Cox model fitting
         private$.checkpoint()
 
+        # Get all labels for variable name mapping
+        mydata_labelled <- cleaneddata$mydata_labelled
+        all_labels <- labelled::var_label(mydata_labelled)
+
+        # Handle Time-Dependent Covariates
+        if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
+          
+          # Get time-dependent variable names
+          time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
+          
+          if (self$options$td_format == "wide") {
+            # Handle wide format data - convert to long format
+            mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
+            
+            # Update formula for time-dependent covariates (long format)
+            LHT <- "survival::Surv(tstart, tstop, myoutcome)"
+            
+            # Add time-dependent variables to formula
+            formula_parts <- c(formula_parts, time_dep_vars)
+            RHT <- paste(formula_parts, collapse = " + ")
+            coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+            
+          } else if (self$options$td_format == "long") {
+            # Handle long format data
+            if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
+              start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
+              stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
+              
+              # Update formula for time-dependent covariates
+              LHT <- paste0("survival::Surv(", start_time_var, ", ", stop_time_var, ", myoutcome)")
+              
+              # Add time-dependent variables to formula
+              formula_parts <- c(formula_parts, time_dep_vars)
+              RHT <- paste(formula_parts, collapse = " + ")
+              coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+            }
+          }
+        }
+
+        # Handle Frailty Models
+        if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
+          frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
+          
+          # Add frailty term based on distribution
+          frailty_term <- switch(self$options$frailty_distribution,
+            "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
+            "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
+            "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
+          )
+          
+          formula_parts <- c(formula_parts, frailty_term)
+          RHT <- paste(formula_parts, collapse = " + ")
+          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+        }
+
+        # Handle Splines for Non-Proportional Hazards
+        if (self$options$use_splines && !is.null(self$options$spline_vars)) {
+          spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
+          
+          # Create spline terms
+          for (var in spline_vars) {
+            spline_term <- switch(self$options$spline_type,
+              "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
+              "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
+              "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
+            )
+            
+            # Replace the linear term with spline term
+            formula_parts <- formula_parts[formula_parts != var]
+            formula_parts <- c(formula_parts, spline_term)
+          }
+          
+          RHT <- paste(formula_parts, collapse = " + ")
+          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+          
+          # Load splines package if needed
+          if (self$options$spline_type %in% c("ns", "bs")) {
+            requireNamespace("splines", quietly = TRUE)
+          }
+        }
 
         cox_model <- survival::coxph(coxformula, data = mydata)
 
@@ -4357,6 +4438,99 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         
         print(plot)
         return(TRUE)
+      }
+
+      # Convert Wide Format to Long Format for Time-Dependent Covariates ----
+      ,
+      .convertWideToLong = function(mydata, time_dep_vars, all_labels) {
+        
+        # Get change time points
+        change_times <- self$options$change_times
+        if (is.null(change_times) || change_times == "") {
+          change_times <- "6, 12, 18"
+        }
+        
+        # Parse change times
+        time_points <- as.numeric(trimws(strsplit(change_times, ",")[[1]]))
+        time_points <- sort(time_points)
+        
+        # Get suffix pattern
+        suffix_pattern <- self$options$td_suffix_pattern
+        if (is.null(suffix_pattern) || suffix_pattern == "") {
+          suffix_pattern <- "_t{time}"
+        }
+        
+        # Initialize long format data
+        long_data <- data.frame()
+        
+        for (i in 1:nrow(mydata)) {
+          subject_data <- mydata[i, ]
+          
+          # Get subject's total follow-up time
+          total_time <- subject_data$mytime
+          
+          # Create time intervals: 0, change_times, total_time
+          intervals <- c(0, time_points[time_points < total_time], total_time)
+          intervals <- unique(sort(intervals))
+          
+          # If subject has very short follow-up, create just one interval
+          if (length(intervals) < 2) {
+            intervals <- c(0, total_time)
+          }
+          
+          # Create rows for each interval
+          for (j in 1:(length(intervals)-1)) {
+            tstart <- intervals[j]
+            tstop <- intervals[j+1]
+            
+            # Status is 1 only in the last interval if subject has event
+            status <- ifelse(j == (length(intervals)-1), subject_data$myoutcome, 0)
+            
+            # Create new row
+            new_row <- subject_data
+            new_row$tstart <- tstart
+            new_row$tstop <- tstop
+            new_row$myoutcome <- status
+            
+            # Update time-dependent variables for this interval
+            for (var in time_dep_vars) {
+              
+              # Determine which time-dependent version to use
+              if (tstart == 0) {
+                # Use baseline version for first interval
+                baseline_var <- paste0(var, "_baseline")
+                if (baseline_var %in% names(mydata)) {
+                  new_row[[var]] <- subject_data[[baseline_var]]
+                } else {
+                  # If no baseline version, use the base variable
+                  new_row[[var]] <- subject_data[[var]]
+                }
+              } else {
+                # Find appropriate time-dependent version
+                applicable_times <- time_points[time_points <= tstart]
+                if (length(applicable_times) > 0) {
+                  use_time <- max(applicable_times)
+                  td_var_name <- gsub("\\{time\\}", use_time, suffix_pattern)
+                  full_var_name <- paste0(var, td_var_name)
+                  
+                  if (full_var_name %in% names(mydata)) {
+                    new_row[[var]] <- subject_data[[full_var_name]]
+                  } else {
+                    # Fall back to previous value or baseline
+                    new_row[[var]] <- subject_data[[var]]
+                  }
+                } else {
+                  # Use baseline if no applicable time found
+                  new_row[[var]] <- subject_data[[var]]
+                }
+              }
+            }
+            
+            long_data <- rbind(long_data, new_row)
+          }
+        }
+        
+        return(long_data)
       }
 
 

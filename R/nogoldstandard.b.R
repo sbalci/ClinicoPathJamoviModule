@@ -32,15 +32,21 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # Enhanced input validation
             if (is.null(self$options$test1) || is.null(self$options$test2)) {
-                return()
+                stop('At least two tests must be specified')
             }
 
             if (nrow(self$data) == 0) {
                 stop('Data contains no rows')
             }
+            
+            # Check for required packages early
+            if (self$options$method == "latent_class" && !requireNamespace("poLCA", quietly = TRUE)) {
+                stop("Package 'poLCA' is required for latent class analysis. Please install it with: install.packages('poLCA')")
+            }
 
-            # Get test variables and their positive levels
+            # Get test variables and their positive levels with validation
             tests <- list()
             test_levels <- list()
 
@@ -53,10 +59,27 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     pos_level <- self$options[[level_name]]
 
                     if (!is.null(pos_level)) {
+                        # Validate that the variable is a factor
+                        if (!is.factor(self$data[[test_var]])) {
+                            stop(sprintf("Variable '%s' must be a factor", test_var))
+                        }
+                        
+                        # Validate that the positive level exists in the data
+                        if (!pos_level %in% levels(self$data[[test_var]])) {
+                            stop(sprintf("Level '%s' not found in variable '%s'. Available levels: %s",
+                                       pos_level, test_var, 
+                                       paste(levels(self$data[[test_var]]), collapse = ", ")))
+                        }
+                        
                         tests[[length(tests) + 1]] <- test_var
                         test_levels[[length(test_levels) + 1]] <- pos_level
                     }
                 }
+            }
+            
+            # Ensure at least 2 tests are provided
+            if (length(tests) < 2) {
+                stop("At least two tests with positive levels must be specified")
             }
 
             # Data preparation
@@ -101,6 +124,8 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$method == "latent_class") {
                     private$.populateModelFit(results$model)
                 }
+                # Add cross-tabulation if requested
+                private$.populateCrossTab(test_data, tests, test_levels)
             }
 
             # Prepare data for the plot
@@ -213,6 +238,10 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         upper = min(1, specificity + z * se_spec)
                     )
                 }
+                
+                # Calculate PPV and NPV
+                prevalence <- results$prevalence
+                ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
 
                 self$results$test_metrics$setRow(
                     rowKey=tests[i],
@@ -223,7 +252,9 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sens_ci_lower = sens_ci$lower,
                         sens_ci_upper = sens_ci$upper,
                         spec_ci_lower = spec_ci$lower,
-                        spec_ci_upper = spec_ci$upper
+                        spec_ci_upper = spec_ci$upper,
+                        ppv = ppv_npv$ppv,
+                        npv = ppv_npv$npv
                     )
                 )
             }
@@ -277,11 +308,14 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             var_names <- names(lca_data)
             f <- stats::as.formula(paste("cbind(", paste(var_names, collapse=","), ")~1"))
 
-            # Run LCA with multiple starts to ensure global optimum
+            # Run LCA with more starts to ensure global optimum
             best_model <- NULL
             best_llik <- -Inf
+            n_starts <- 30  # Increased from 10 for better convergence
+            
+            message(sprintf("Running Latent Class Analysis with %d random starts...", n_starts))
 
-            for (start in 1:10) {
+            for (start in 1:n_starts) {
                 set.seed(start * 100)
 
                 tryCatch({
@@ -306,7 +340,12 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (is.null(best_model)) {
-                stop("LCA model fitting failed")
+                stop("LCA model fitting failed after all attempts. Try a different method or check your data.")
+            }
+            
+            # Add convergence warning if log-likelihood is suspiciously low
+            if (best_llik < -1e10) {
+                warning("LCA model may not have converged properly. Results should be interpreted with caution.")
             }
 
             # Extract results
@@ -686,6 +725,38 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(lower = NA, upper = NA))
             }
         },
+        
+        .populateCrossTab = function(test_data, tests, test_levels) {
+            # Create cross-tabulation table if it doesn't exist
+            if (!"crosstab" %in% names(self$results)) {
+                # Would need to add this to the results YAML
+                return()
+            }
+            
+            # Create a simple cross-tabulation summary
+            n_tests <- length(tests)
+            if (n_tests < 2) return()
+            
+            # For now, just store the agreement matrix which shows cross-tab info
+            # This would need to be expanded to show actual cross-tabs
+        },
+        
+        .calculatePPVNPV = function(sensitivity, specificity, prevalence) {
+            # Calculate Positive Predictive Value (PPV) and Negative Predictive Value (NPV)
+            # Using Bayes' theorem
+            
+            # PPV = (sensitivity * prevalence) / ((sensitivity * prevalence) + ((1 - specificity) * (1 - prevalence)))
+            ppv_numerator <- sensitivity * prevalence
+            ppv_denominator <- ppv_numerator + ((1 - specificity) * (1 - prevalence))
+            ppv <- if (ppv_denominator > 0) ppv_numerator / ppv_denominator else NA
+            
+            # NPV = (specificity * (1 - prevalence)) / (((1 - sensitivity) * prevalence) + (specificity * (1 - prevalence)))
+            npv_numerator <- specificity * (1 - prevalence)
+            npv_denominator <- ((1 - sensitivity) * prevalence) + npv_numerator
+            npv <- if (npv_denominator > 0) npv_numerator / npv_denominator else NA
+            
+            return(list(ppv = ppv, npv = npv))
+        },
 
 
 
@@ -810,7 +881,8 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 # Check if ggplot2 is available
                 if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                    stop("Package 'ggplot2' is needed for this plot")
+                    # Fallback to base R plot
+                    return(private$.plot(image, ggtheme, theme, ...))
                 }
 
                 # Convert matrix to long format for ggplot

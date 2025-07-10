@@ -17,9 +17,93 @@ description:
         the model accounts for how these factors influence event rates relative to the person-time at
         risk in each subgroup.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # example will be added
+            # Example 1: Basic multivariable Cox regression
+            library(survival)
+            data(colon)
+            
+            multisurvival(
+                data = colon,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = c("sex", "obstruct", "perfor"),
+                contexpl = c("age", "nodes"),
+                timetypeoutput = "days",
+                hr = TRUE  # Show hazard ratio plot
+            )
+            
+            # Example 2: Using dates to calculate survival time
+            # Assuming you have diagnosis and follow-up dates
+            multisurvival(
+                data = mydata,
+                tint = TRUE,
+                dxdate = "diagnosis_date",
+                fudate = "last_followup_date", 
+                timetypedata = "ymd",
+                timetypeoutput = "months",
+                outcome = "vital_status",
+                outcomeLevel = "Dead",
+                explanatory = c("stage", "grade"),
+                contexpl = "age"
+            )
+            
+            # Example 3: Risk stratification analysis
+            multisurvival(
+                data = colon,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = c("sex", "obstruct"),
+                contexpl = c("age", "nodes"),
+                calculateRiskScore = TRUE,
+                numRiskGroups = "three",
+                plotRiskGroups = TRUE,
+                addRiskScore = TRUE,  # Add risk score to data
+                addRiskGroup = TRUE   # Add risk group to data
+            )
+            
+            # Example 4: Model with stratification for non-proportional hazards
+            multisurvival(
+                data = colon,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = c("obstruct", "perfor"),
+                contexpl = c("age", "nodes"),
+                use_stratify = TRUE,
+                stratvar = "sex",  # Stratify by sex if PH assumption violated
+                ph_cox = TRUE      # Test proportional hazards assumption
+            )
+            
+            # Example 5: Stepwise model selection
+            multisurvival(
+                data = colon,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = c("sex", "obstruct", "perfor", "adhere"),
+                contexpl = c("age", "nodes"),
+                use_modelSelection = TRUE,
+                modelSelection = "both",  # Stepwise selection
+                selectionCriteria = "aic",
+                pEntry = 0.05,
+                pRemoval = 0.10
+            )
+            
+            # Example 6: Person-time analysis
+            multisurvival(
+                data = colon,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = "sex",
+                contexpl = "age",
+                person_time = TRUE,
+                time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
+                rate_multiplier = 1000  # Rate per 1000 person-days
+            )
 
 
 options:
@@ -765,6 +849,157 @@ options:
       description:
         R: >
           If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
+
+# Time-Dependent Covariates ----
+    - name: use_time_dependent
+      title: Use Time-Dependent Covariates
+      type: Bool
+      default: false
+      description:
+        R: >
+          Enable time-dependent covariates for Cox regression. This allows modeling variables
+          that change values at specific time points during follow-up (e.g., treatment changes,
+          biomarker measurements, disease progression).
+
+    - name: td_format
+      title: Data Format
+      type: List
+      options:
+        - title: Wide Format (one row per subject)
+          name: wide
+        - title: Long Format (multiple rows per subject)
+          name: long
+      default: wide
+      description:
+        R: >
+          Specify whether your data is in wide format (one row per subject with time points
+          as separate variables) or long format (multiple rows per subject with time intervals).
+
+    - name: time_dep_vars
+      title: Time-Dependent Variables
+      type: Variables
+      description:
+        R: >
+          Variables that change values over time. In wide format, these are baseline variables
+          that will be updated at change points. In long format, these are the time-varying variables.
+
+    - name: change_times
+      title: Change Time Points
+      type: String
+      default: '6, 12, 18'
+      description:
+        R: >
+          Time points (in same units as survival time) when time-dependent variables change.
+          For wide format data, specify comma-separated time points (e.g., "6, 12, 18").
+          The function will create intervals and update covariate values at these times.
+
+    - name: td_suffix_pattern
+      title: Variable Suffix Pattern
+      type: String
+      default: '_t{time}'
+      description:
+        R: >
+          For wide format: Pattern for time-specific variable names. Use {time} as placeholder.
+          Example: if baseline variable is 'treatment' and pattern is '_t{time}', 
+          the function looks for 'treatment_t6', 'treatment_t12', etc.
+
+    - name: start_time_var
+      title: Start Time Variable
+      type: Variable
+      description:
+        R: >
+          For long format only: Variable indicating the start time of each interval.
+          Leave empty for wide format data.
+
+    - name: stop_time_var
+      title: Stop Time Variable  
+      type: Variable
+      description:
+        R: >
+          For long format only: Variable indicating the stop time of each interval.
+          Leave empty for wide format data.
+
+# Frailty Models ----
+    - name: use_frailty
+      title: Use Frailty Model
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add a frailty term to account for unobserved heterogeneity or clustering in the data.
+          Frailty models add random effects to the Cox model.
+
+    - name: frailty_var
+      title: Frailty Variable
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Clustering variable for the frailty term (e.g., hospital, family, or study center).
+          Each level represents a cluster with shared frailty.
+
+    - name: frailty_distribution
+      title: Frailty Distribution
+      type: List
+      options:
+        - title: Gamma
+          name: gamma
+        - title: Gaussian
+          name: gaussian
+        - title: Log-t
+          name: logt
+      default: gamma
+      description:
+        R: >
+          Distribution of the frailty term. Gamma is most commonly used and assumes multiplicative
+          effect on the hazard. Gaussian assumes additive effect on log-hazard.
+
+# Spline Options for Non-Proportional Hazards ----
+    - name: use_splines
+      title: Use Splines for Time-Varying Effects
+      type: Bool
+      default: false
+      description:
+        R: >
+          Use penalized splines to model time-varying effects (non-proportional hazards).
+          This is an alternative to stratification for handling PH violations.
+
+    - name: spline_vars
+      title: Variables with Time-Varying Effects
+      type: Variables
+      description:
+        R: >
+          Variables to model with time-varying coefficients using splines. These are variables
+          that violate the proportional hazards assumption.
+
+    - name: spline_df
+      title: Spline Degrees of Freedom
+      type: Integer
+      min: 1
+      max: 10
+      default: 3
+      description:
+        R: >
+          Degrees of freedom for the spline functions. Higher values allow more flexible
+          time-varying effects but may lead to overfitting.
+
+    - name: spline_type
+      title: Spline Type
+      type: List
+      options:
+        - title: Penalized Smoothing Splines
+          name: pspline
+        - title: Natural Splines
+          name: ns
+        - title: B-Splines
+          name: bs
+      default: pspline
+      description:
+        R: >
+          Type of spline basis to use. Penalized splines provide smooth functions with
+          automatic smoothness selection. Natural splines are constrained to be linear
+          at the boundaries.
 
 
 
