@@ -457,6 +457,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     image1 <- self$results$plot1
                     image1$setState(plotData)
                 }
+                
+                # Set radar plot data for visualization
+                if (self$options$radarplot) {
+                    imageRadar <- self$results$plotRadar
+                    imageRadar$setState(plotData)
+                }
             },
 
             .plot1 = function(image1, ggtheme, ...) {
@@ -523,6 +529,98 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     ) +
                     ggtheme +
                     ggplot2::theme(legend.position = "bottom")
+
+                print(plot)
+                TRUE
+            },
+
+            .plotRadar = function(imageRadar, ggtheme, ...) {
+                plotData <- imageRadar$state
+
+                # Prepare data frame for radar plotting
+                df <- data.frame(
+                    test = character(),
+                    metric = character(),
+                    value = numeric(),
+                    scaled_value = numeric(),
+                    stringsAsFactors = FALSE
+                )
+
+                for (test_name in names(plotData)) {
+                    test_data <- plotData[[test_name]]
+
+                    # For radar plot, we'll use all 7 metrics but need to scale them appropriately
+                    # Metrics that are percentages (0-1): Sens, Spec, AccurT, PPV, NPV
+                    # Metrics that are ratios (>0): LRP, LRN - need special scaling
+                    
+                    # Add percentage metrics (already 0-1, just convert to 0-100 scale)
+                    metrics_pct <- list(
+                        "Sensitivity" = test_data$Sens,
+                        "Specificity" = test_data$Spec,
+                        "Accuracy" = test_data$AccurT,
+                        "PPV" = test_data$PPV,
+                        "NPV" = test_data$NPV
+                    )
+                    
+                    for (metric_name in names(metrics_pct)) {
+                        df <- rbind(df, data.frame(
+                            test = test_name,
+                            metric = metric_name,
+                            value = metrics_pct[[metric_name]],
+                            scaled_value = metrics_pct[[metric_name]] * 100
+                        ))
+                    }
+                    
+                    # Add likelihood ratios with special scaling
+                    # LRP: good values are >1, excellent >10. Scale as: min(value/10, 1) * 100
+                    # LRN: good values are <1, excellent <0.1. Scale as: max(1-value, 0) * 100
+                    lrp_scaled <- min(test_data$LRP / 10, 1) * 100
+                    lrn_scaled <- max(1 - test_data$LRN, 0) * 100
+                    
+                    df <- rbind(df, data.frame(
+                        test = test_name,
+                        metric = "LR+",
+                        value = test_data$LRP,
+                        scaled_value = lrp_scaled
+                    ))
+                    
+                    df <- rbind(df, data.frame(
+                        test = test_name,
+                        metric = "LR-",
+                        value = test_data$LRN,
+                        scaled_value = lrn_scaled
+                    ))
+                }
+
+                # Ensure factor ordering for consistent radar plot
+                df$metric <- factor(df$metric, 
+                                  levels = c("Sensitivity", "Specificity", "Accuracy", 
+                                           "PPV", "NPV", "LR+", "LR-"))
+
+                # Create radar plot using ggplot2
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = metric, y = scaled_value, 
+                                                        group = test, color = test)) +
+                    ggplot2::geom_line(size = 1.2) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::coord_polar() +
+                    ggplot2::scale_y_continuous(limits = c(0, 100), 
+                                               breaks = c(0, 25, 50, 75, 100),
+                                               labels = c("0%", "25%", "50%", "75%", "100%")) +
+                    ggplot2::labs(
+                        title = "Radar Plot: Decision Test Statistics Comparison",
+                        subtitle = "All metrics scaled 0-100% (LR+ scaled by /10, LR- as 1-value)",
+                        x = "",
+                        y = "",
+                        color = "Test"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_text(size = 10),
+                        axis.text.y = ggplot2::element_text(size = 8),
+                        legend.position = "bottom",
+                        plot.title = ggplot2::element_text(hjust = 0.5),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9)
+                    )
 
                 print(plot)
                 TRUE
