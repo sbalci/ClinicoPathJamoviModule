@@ -113,6 +113,11 @@ options:
       type: Bool
       default: false
 
+    - name: radarplot
+      title: 'Radar Plot'
+      type: Bool
+      default: false
+
     - name: statComp
       title: 'Statistical Comparison'
       type: Bool
