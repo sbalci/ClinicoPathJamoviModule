@@ -20,6 +20,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             fnote = FALSE,
             ci = FALSE,
             plot = FALSE,
+            radarplot = FALSE,
             statComp = FALSE, ...) {
 
             super$initialize(
@@ -98,6 +99,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "plot",
                 plot,
                 default=FALSE)
+            private$..radarplot <- jmvcore::OptionBool$new(
+                "radarplot",
+                radarplot,
+                default=FALSE)
             private$..statComp <- jmvcore::OptionBool$new(
                 "statComp",
                 statComp,
@@ -117,6 +122,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..plot)
+            self$.addOption(private$..radarplot)
             self$.addOption(private$..statComp)
         }),
     active = list(
@@ -134,6 +140,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
         plot = function() private$..plot$value,
+        radarplot = function() private$..radarplot$value,
         statComp = function() private$..statComp$value),
     private = list(
         ..gold = NA,
@@ -150,6 +157,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..fnote = NA,
         ..ci = NA,
         ..plot = NA,
+        ..radarplot = NA,
         ..statComp = NA)
 )
 
@@ -168,7 +176,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         comparisonTable = function() private$.items[["comparisonTable"]],
         mcnemarTable = function() private$.items[["mcnemarTable"]],
         diffTable = function() private$.items[["diffTable"]],
-        plot1 = function() private$.items[["plot1"]]),
+        plot1 = function() private$.items[["plot1"]],
+        plotRadar = function() private$.items[["plotRadar"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -450,6 +459,19 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(plot)",
                 clearWith=list(
                     "plot"),
+                refs=list(
+                    "ggplot2")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotRadar",
+                title="Radar Plot Comparison",
+                width=600,
+                height=600,
+                renderFun=".plotRadar",
+                requiresData=TRUE,
+                visible="(radarplot)",
+                clearWith=list(
+                    "radarplot"),
                 refs=list(
                     "ggplot2")))}))
 
