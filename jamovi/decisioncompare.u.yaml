@@ -63,6 +63,8 @@ children:
             enable: (!pp)
           - type: CheckBox
             name: plot
+          - type: CheckBox
+            name: radarplot
 
   - type: Label
     label: Prior Probability

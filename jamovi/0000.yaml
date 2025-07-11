@@ -126,6 +126,18 @@ analyses:
       clinical events.
     ribbon: analyses
     category: analyses
+  - title: Genomic Landscape Visualization
+    name: ggoncoplot
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: Molecular Pathology Plots
+    menuTitle: Genomic Landscape Visualization
+    description: >-
+      Creates oncoplots (mutation landscapes) to visualize genomic alterations
+      across genes and samples with optional clinical annotations.
+    menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
+    ribbon: analyses
+    category: analyses
   - title: Eurostat Map
     name: eurostatmap
     ns: ClinicoPath
@@ -1587,6 +1599,20 @@ analyses:
 
       designs. Each approach optimized for different use cases in clinical
       research.
+    ribbon: analyses
+    category: analyses
+  - title: Segmented Total Bar Charts
+    name: ggsegmentedtotalbar
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuTitle: Segmented Total Bar Charts
+    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubtitle: 100% Stacked Bar Charts for Proportional Data
+    description: >
+      Create segmented total bar charts (100% stacked bars) that show proportional 
+      breakdowns within categories. Perfect for displaying composition data where 
+      each bar represents 100% and segments show relative proportions. Ideal for 
+      survey responses, patient demographics, market composition analysis.
     ribbon: analyses
     category: analyses
   - title: Economist-Style Distribution Plots
