@@ -1608,6 +1608,20 @@ analyses:
       research.
     ribbon: analyses
     category: analyses
+  - title: Segmented Total Bar Charts
+    name: ggsegmentedtotalbar
+    ns: ClinicoPath
+    menuGroup: JJStatsPlotD
+    menuTitle: Segmented Total Bar Charts
+    menuSubgroup: ClinicoPath Advanced Plots
+    menuSubtitle: 100% Stacked Bar Charts for Proportional Data
+    description: >
+      Create segmented total bar charts (100% stacked bars) that show proportional 
+      breakdowns within categories. Perfect for displaying composition data where 
+      each bar represents 100% and segments show relative proportions. Ideal for 
+      survey responses, patient demographics, market composition analysis.
+    ribbon: analyses
+    category: analyses
   - title: Economist-Style Distribution Plots
     name: economistplots
     ns: ClinicoPath
