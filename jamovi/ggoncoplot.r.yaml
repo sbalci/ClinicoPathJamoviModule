@@ -1,0 +1,138 @@
+---
+name: ggoncoplot
+title: Genomic Landscape Visualization
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: main
+      title: Genomic Landscape Plot
+      type: Image
+      width: 800
+      height: 600
+      requiresData: true
+      refs: ggoncoplot
+
+    - name: mutationSummary
+      title: Mutation Summary
+      type: Table
+      rows: (geneVars)
+      clearWith:
+        - geneVars
+        - sampleVar
+      columns:
+        - name: gene
+          title: Gene
+          type: text
+        - name: mutated_samples
+          title: Mutated Samples
+          type: integer
+        - name: total_samples
+          title: Total Samples
+          type: integer
+        - name: mutation_frequency
+          title: Mutation Frequency
+          type: number
+          format: pc
+        - name: mutation_type
+          title: Most Common Type
+          type: text
+
+    - name: sampleSummary
+      title: Sample Summary
+      type: Table
+      visible: (showMutationLoad)
+      clearWith:
+        - geneVars
+        - sampleVar
+      columns:
+        - name: sample
+          title: Sample ID
+          type: text
+        - name: total_mutations
+          title: Total Mutations
+          type: integer
+        - name: genes_mutated
+          title: Genes Mutated
+          type: integer
+        - name: mutation_burden
+          title: Mutation Burden
+          type: number
+          format: pc
+
+    - name: clinicalSummary
+      title: Clinical Annotation Summary
+      type: Table
+      visible: (clinicalVars)
+      clearWith:
+        - clinicalVars
+        - sampleVar
+      columns:
+        - name: variable
+          title: Clinical Variable
+          type: text
+        - name: categories
+          title: Categories/Range
+          type: text
+        - name: missing
+          title: Missing Values
+          type: integer
+        - name: complete
+          title: Complete Values
+          type: integer
+
+    - name: cooccurrence
+      title: Gene Co-occurrence Analysis
+      type: Table
+      visible: (plotType:cooccurrence)
+      clearWith:
+        - geneVars
+        - sampleVar
+        - plotType
+      columns:
+        - name: gene1
+          title: Gene 1
+          type: text
+        - name: gene2
+          title: Gene 2
+          type: text
+        - name: cooccurrence_count
+          title: Co-occurring Samples
+          type: integer
+        - name: exclusivity_count
+          title: Mutually Exclusive Samples
+          type: integer
+        - name: association_type
+          title: Association
+          type: text
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: plotInfo
+      title: Plot Information
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+refs:
+    ggoncoplot:
+        authors:
+            - name: Sam El-Kamand
+              url: https://github.com/selkamand/ggoncoplot
+        title: 'ggoncoplot: Create Oncoplots with ggplot2'
+        publisher: GitHub
+        url: https://github.com/selkamand/ggoncoplot
+        version: ''
+
+...
