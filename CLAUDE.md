@@ -191,3 +191,7 @@ This replaces the previous manual approach where vignette files had to be indivi
 ### File Update Instructions
 
 - Update NEWS.md when there is version change
+
+### Module Update Command
+
+- Use this to check and update modules: `Rscript _updateModules.R`

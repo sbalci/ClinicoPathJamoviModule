@@ -1,4 +1,4 @@
-title: Parallel Plot
+title: Parallel Coordinates Plot
 name: parallelplot
 jus: '3.0'
 stage: 0
@@ -9,11 +9,10 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent Variable
+        label: Variables
         children:
           - type: VariablesListBox
-            name: dep
-            maxItemCount: 1
+            name: vars
             isTarget: true
       - type: TargetLayoutBox
         label: Grouping Variable
@@ -26,9 +25,22 @@ children:
     margin: large
     children:
       - type: ComboBox
-        name: alt
+        name: scaling
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha
+        format: number
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: varEq
+        name: showMissing
+      - type: CheckBox
+        name: interactive
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: colorPalette

@@ -562,6 +562,7 @@ if (!WIP) {
   cat("\n📁 Copying assets with configuration-based logic...\n")
 
   for (module_name in names(modules_config)) {
+    # Skip disabled modules - respects enabled: false in config
     if (!modules_config[[module_name]]$enabled) next
 
     module_cfg <- modules_config[[module_name]]
@@ -1541,11 +1542,29 @@ if (WIP) {
 active_modules <- sum(c(jjstatsplot_module, meddecide_module, jsurvival_module, ClinicoPathDescriptives_module))
 cat("📊 Active modules:", active_modules, "/4\n")
 
-if (active_modules > 0) {
-  if (jjstatsplot_module) cat("  ✅ jjstatsplot\n")
-  if (meddecide_module) cat("  ✅ meddecide\n")
-  if (jsurvival_module) cat("  ✅ jsurvival\n")
-  if (ClinicoPathDescriptives_module) cat("  ✅ ClinicoPathDescriptives\n")
+# Show active and disabled modules
+if (jjstatsplot_module) {
+  cat("  ✅ jjstatsplot\n")
+} else {
+  cat("  ⏭️ jjstatsplot (disabled)\n")
+}
+
+if (meddecide_module) {
+  cat("  ✅ meddecide\n")
+} else {
+  cat("  ⏭️ meddecide (disabled)\n")
+}
+
+if (jsurvival_module) {
+  cat("  ✅ jsurvival\n")
+} else {
+  cat("  ⏭️ jsurvival (disabled)\n")
+}
+
+if (ClinicoPathDescriptives_module) {
+  cat("  ✅ ClinicoPathDescriptives\n")
+} else {
+  cat("  ⏭️ ClinicoPathDescriptives (disabled)\n")
 }
 
 cat("\n🎉 Module update process completed successfully!\n")
@@ -1566,6 +1585,7 @@ cat("\n🎉 Module update process completed successfully!\n")
 
 
 # Extended processing with enhanced error handling ----
+# Only processes enabled modules (respects enabled: false in config)
 if (extended) {
   cat("\n🔧 Extended processing mode enabled...\n")
 
@@ -1597,54 +1617,104 @@ if (extended) {
     }, finally = {
       setwd(old_wd)
     })
+  } else {
+    cat("\n⏭️ Skipping jjstatsplot package (disabled)\n")
   }
 
   if (meddecide_module) {
-    setwd(meddecide_dir)
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::install()
+    cat("\n🎩 Processing meddecide package...\n")
+    old_wd <- getwd()
+    tryCatch({
+      setwd(meddecide_dir)
+      cat("  📄 Preparing package...\n")
+      jmvtools::prepare()
+      cat("  📝 Documenting...\n")
+      devtools::document()
+      jmvtools::prepare()
+      devtools::document()
+      cat("  📦 Installing...\n")
+      jmvtools::install()
 
-    if (check) {
-      devtools::check()
-    }
-    if (webpage) {
-      pkgdown::build_site()
-    }
+      if (check) {
+        cat("  🔍 Running R CMD check...\n")
+        devtools::check()
+      }
+      if (webpage) {
+        cat("  🌐 Building website...\n")
+        pkgdown::build_site()
+      }
+      cat("  ✅ meddecide processing completed\n")
+    }, error = function(e) {
+      warning("⚠️ Error processing meddecide: ", e$message)
+    }, finally = {
+      setwd(old_wd)
+    })
+  } else {
+    cat("\n⏭️ Skipping meddecide package (disabled)\n")
   }
 
   if (jsurvival_module) {
-    setwd(jsurvival_dir)
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::install()
+    cat("\n⚰️ Processing jsurvival package...\n")
+    old_wd <- getwd()
+    tryCatch({
+      setwd(jsurvival_dir)
+      cat("  📄 Preparing package...\n")
+      jmvtools::prepare()
+      cat("  📝 Documenting...\n")
+      devtools::document()
+      jmvtools::prepare()
+      devtools::document()
+      cat("  📦 Installing...\n")
+      jmvtools::install()
 
-    if (check) {
-      devtools::check()
-    }
-    if (webpage) {
-      pkgdown::build_site()
-    }
+      if (check) {
+        cat("  🔍 Running R CMD check...\n")
+        devtools::check()
+      }
+      if (webpage) {
+        cat("  🌐 Building website...\n")
+        pkgdown::build_site()
+      }
+      cat("  ✅ jsurvival processing completed\n")
+    }, error = function(e) {
+      warning("⚠️ Error processing jsurvival: ", e$message)
+    }, finally = {
+      setwd(old_wd)
+    })
+  } else {
+    cat("\n⏭️ Skipping jsurvival package (disabled)\n")
   }
 
   if (ClinicoPathDescriptives_module) {
-    setwd(ClinicoPathDescriptives_dir)
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::prepare()
-    devtools::document()
-    jmvtools::install()
+    cat("\n🔬 Processing ClinicoPathDescriptives package...\n")
+    old_wd <- getwd()
+    tryCatch({
+      setwd(ClinicoPathDescriptives_dir)
+      cat("  📄 Preparing package...\n")
+      jmvtools::prepare()
+      cat("  📝 Documenting...\n")
+      devtools::document()
+      jmvtools::prepare()
+      devtools::document()
+      cat("  📦 Installing...\n")
+      jmvtools::install()
 
-    if (check) {
-      devtools::check()
-    }
-    if (webpage) {
-      pkgdown::build_site()
-    }
+      if (check) {
+        cat("  🔍 Running R CMD check...\n")
+        devtools::check()
+      }
+      if (webpage) {
+        cat("  🌐 Building website...\n")
+        pkgdown::build_site()
+      }
+      cat("  ✅ ClinicoPathDescriptives processing completed\n")
+    }, error = function(e) {
+      warning("⚠️ Error processing ClinicoPathDescriptives: ", e$message)
+    }, finally = {
+      setwd(old_wd)
+    })
+  } else {
+    cat("\n⏭️ Skipping ClinicoPathDescriptives package (disabled)\n")
   }
 
 }

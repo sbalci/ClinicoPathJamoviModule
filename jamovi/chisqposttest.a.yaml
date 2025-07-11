@@ -81,4 +81,48 @@ options:
       default: false
       description: >
                   display plot of standardized residuals
+
+    - name: showResiduals
+      title: Show Residuals Analysis
+      type: Bool
+      default: true
+      description: >
+                  display standardized residuals analysis with interpretation
+
+    - name: showEducational
+      title: Show Educational Panels
+      type: Bool
+      default: true
+      description: >
+                  display educational guidance and explanations
+
+    - name: showDetailedTables
+      title: Show Detailed Comparison Tables
+      type: Bool
+      default: true
+      description: >
+                  display individual 2x2 tables for each pairwise comparison
+
+    - name: residualsCutoff
+      title: Residuals Significance Cutoff
+      type: Number
+      min: 1.5
+      max: 4.0
+      default: 2.0
+      description: >
+                  critical value for identifying significant residuals (typically 2.0 or 3.0)
+
+    - name: testSelection
+      title: Statistical Test Selection
+      type: List
+      options:
+        - title: Automatic (Recommended)
+          name: auto
+        - title: Always Chi-Square
+          name: chisquare
+        - title: Always Fisher's Exact
+          name: fisher
+      default: auto
+      description: >
+                  method for selecting statistical test for pairwise comparisons
 ...

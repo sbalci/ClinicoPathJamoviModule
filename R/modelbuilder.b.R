@@ -1473,12 +1473,6 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
         },
 
-        .performAllCrossValidation = function(models_built, data) {
-            if (!self$options$crossValidation) return()
-
-            # Implementation placeholder for cross-validation
-            # This would iterate through all models and perform CV
-        },
 
         .addPredictionsToDataset = function() {
             if (!self$options$createPredictions) return()

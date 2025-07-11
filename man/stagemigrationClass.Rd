@@ -2,16 +2,163 @@
 % Please edit documentation in R/stagemigration.b.R
 \name{stagemigrationClass}
 \alias{stagemigrationClass}
-\title{Stage Migration Analysis}
+\title{Advanced TNM Stage Migration Analysis}
 \value{
-A results object containing migration tables, survival comparisons,
-and visualization of migration patterns.
+A comprehensive staging validation analysis with statistical comparisons,
+clinical interpretation, and advanced visualizations
 }
 \description{
-This function analyzes stage migration between different staging systems and assesses
-its impact on prognostic value and survival outcomes. It provides tools for quantifying
-the Will Rogers phenomenon and evaluating staging system performance.
+State-of-the-art analysis for validating TNM staging system improvements using
+comprehensive statistical methods. This analysis provides pathologists with robust
+tools to evaluate whether a new staging system provides superior prognostic
+discrimination compared to existing systems.
 }
+\details{
+This comprehensive staging validation analysis includes:
+
+\strong{Core Migration Analysis:}
+\itemize{
+\item Migration matrices with detailed statistics
+\item Stage distribution comparisons
+\item Will Rogers phenomenon detection
+\item Upstaging and downstaging quantification
+}
+
+\strong{Advanced Discrimination Metrics:}
+\itemize{
+\item Harrell's C-index with confidence intervals
+\item Net Reclassification Improvement (NRI)
+\item Integrated Discrimination Improvement (IDI)
+\item Time-dependent ROC analysis
+\item Likelihood ratio tests for nested models
+}
+
+\strong{Clinical Utility Assessment:}
+\itemize{
+\item Decision Curve Analysis (DCA)
+\item Net benefit calculations
+\item Clinical significance thresholds
+\item Cancer-type specific interpretations
+}
+
+\strong{Validation Framework:}
+\itemize{
+\item Bootstrap validation with optimism correction
+\item Cross-validation options
+\item Stability assessment
+\item Internal validation metrics
+}
+
+\strong{Advanced Visualizations:}
+\itemize{
+\item Migration heatmaps
+\item Time-dependent ROC curves
+\item Calibration plots
+\item Decision curves
+\item Forest plots with confidence intervals
+}
+}
+\section{Clinical Applications}{
+
+\itemize{
+\item TNM staging system validation (7th to 8th edition transitions)
+\item AJCC staging improvements
+\item Institution-specific staging modifications
+\item Multi-institutional staging harmonization
+\item Biomarker-enhanced staging systems
+}
+}
+
+\section{Statistical Methods}{
+
+The analysis implements state-of-the-art methods for staging validation:
+\itemize{
+\item \strong{NRI:} Quantifies net improvement in risk classification
+\item \strong{IDI:} Measures integrated discrimination improvement
+\item \strong{C-index:} Harrell's concordance with bootstrap confidence intervals
+\item \strong{DCA:} Clinical utility across decision thresholds
+\item \strong{Bootstrap:} Internal validation with bias correction
+}
+}
+
+\section{Clinical Decision Framework}{
+
+Results include comprehensive guidance for staging system adoption:
+\itemize{
+\item Statistical significance vs. clinical importance
+\item Effect size interpretation (small, medium, large improvements)
+\item Sample size adequacy assessment
+\item Recommendation confidence levels
+\item Implementation considerations
+}
+}
+
+\section{Data Requirements}{
+
+\itemize{
+\item \strong{Sample Size:} Minimum 30 patients (100+ recommended)
+\item \strong{Follow-up:} Adequate survival time for meaningful analysis
+\item \strong{Staging:} Both old and new staging variables with 2+ levels
+\item \strong{Events:} Binary event indicator (0/1) or factor with specified level
+\item \strong{Data Quality:} Complete case analysis (missing values removed)
+}
+}
+
+\section{Troubleshooting}{
+
+\itemize{
+\item \strong{"TRUE/FALSE error":} Check for missing values in staging or survival variables
+\item \strong{"Not atomic error":} Disable individual tables to isolate problematic components
+\item \strong{Model fitting errors:} Ensure adequate sample size and event rate (5-95\%)
+\item \strong{Stage level errors:} Verify staging variables have multiple distinct levels
+}
+}
+
+\examples{
+\dontrun{
+# Basic staging comparison
+stagemigration(
+  data = cancer_data,
+  oldStage = "old_stage",
+  newStage = "new_stage", 
+  survivalTime = "survival_months",
+  event = "outcome",
+  eventLevel = "DEAD",
+  analysisType = "basic"
+)
+
+# Comprehensive analysis with all options
+stagemigration(
+  data = lung_cancer_cohort,
+  oldStage = "tnm7_stage",
+  newStage = "tnm8_stage", 
+  survivalTime = "os_months",
+  event = "death",
+  eventLevel = "dead",
+  analysisType = "comprehensive",
+  calculateNRI = TRUE,
+  performBootstrap = TRUE,
+  bootstrapReps = 1000
+)
+}
+
+}
+\seealso{
+\code{\link[survival]{concordance}} for C-index calculations,
+\code{\link[survminer]{ggsurvplot}} for survival visualizations
+}
+\concept{cancer staging}
+\concept{pathology}
+\concept{prognostic models}
+\concept{staging systems}
+\keyword{TNM}
+\keyword{analysis}
+\keyword{migration,}
+\keyword{stage}
+\keyword{staging}
+\keyword{staging,}
+\keyword{survival}
+\keyword{validation,}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::stagemigrationBase} -> \code{stagemigrationClass}
 }

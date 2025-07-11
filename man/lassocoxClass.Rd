@@ -2,11 +2,58 @@
 % Please edit documentation in R/lassocox.b.R
 \name{lassocoxClass}
 \alias{lassocoxClass}
-\title{Lasso-Cox Regression}
+\title{Lasso-Cox Regression for Variable Selection in Survival Analysis}
 \description{
-Lasso-Cox Regression
+Performs Lasso-penalized Cox proportional hazards regression for variable selection
+in survival analysis. This function uses penalized likelihood to identify the most
+important predictors while preventing overfitting, making it ideal for high-dimensional
+survival data where the number of potential predictors may approach or exceed the sample size.
+}
+\details{
+The Lasso-Cox regression combines the Cox proportional hazards model with L1 regularization
+(Lasso penalty) to perform automatic variable selection. The method minimizes the partial
+likelihood penalized by the L1 norm of the coefficient vector, effectively shrinking
+less important coefficients toward zero and setting some exactly to zero.
 
-Lasso-Cox Regression
+Key features:
+\itemize{
+\item Automatic variable selection through L1 regularization
+\item Cross-validation for optimal tuning parameter selection
+\item Risk score calculation and stratification
+\item Comprehensive model performance evaluation
+\item Survival curve visualization by risk groups
+}
+
+The function uses the glmnet package for efficient computation and supports both
+lambda.min (minimum cross-validation error) and lambda.1se (1 standard error rule)
+for tuning parameter selection.
+}
+\examples{
+\dontrun{
+# Basic Lasso-Cox regression
+result <- lassocox(
+  data = survival_data,
+  elapsedtime = "time",
+  outcome = "status", 
+  outcomeLevel = "1",
+  explanatory = c("age", "gender", "stage", "grade"),
+  lambda = "lambda.1se",
+  nfolds = 10
+)
+
+# High-dimensional scenario
+result <- lassocox(
+  data = genomic_data,
+  elapsedtime = "survival_time",
+  outcome = "event",
+  outcomeLevel = "death",
+  explanatory = gene_variables,
+  lambda = "lambda.min",
+  nfolds = 5,
+  standardize = TRUE
+)
+}
+
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::lassocoxBase} -> \code{lassocoxClass}

@@ -57,13 +57,7 @@ children:
         children:
           - type: Label
             label: Labels
-            children:
-              - type: TextBox
-                name: xlabel
-              - type: TextBox
-                name: ylabel
-              - type: TextBox
-                name: title
+            children: []
           - type: Label
             label: Size
             children:
@@ -73,3 +67,21 @@ children:
               - type: TextBox
                 name: height
                 format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: xlabel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ylabel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: title
+        format: string

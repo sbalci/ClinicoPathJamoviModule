@@ -1,10 +1,11 @@
 ---
 name:  stagemigration
-title: Stage Migration Analysis
+title: Advanced TNM Stage Migration Analysis
 jrs:   '1.1'
 
 items:
-    - name: todo
+    # Welcome Message
+    - name: welcomeMessage
       title: Welcome
       type: Html
       clearWith:
@@ -14,10 +15,60 @@ items:
           - event
           - eventLevel
 
-    # Migration Summary Table
+    # Debugging Information
+    - name: mydataview
+      title: mydataview
+      type: Preformatted
+      visible: false
+
+    - name: mydataview2
+      title: mydataview2
+      type: Preformatted
+      visible: false
+
+    # Migration Overview Explanation
+    - name: migrationOverviewExplanation
+      title: Understanding the Migration Overview
+      type: Html
+      visible: (showMigrationOverview && showExplanations)
+      clearWith:
+          - showMigrationOverview
+
+    # Migration Overview
+    - name: migrationOverview
+      title: Migration Overview
+      type: Table
+      visible: (showMigrationOverview)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+          - name: percentage
+            title: "Percentage"
+            type: text
+
+    # Migration Summary Explanation
+    - name: migrationSummaryExplanation
+      title: Understanding Statistical Tests for Migration
+      type: Html
+      visible: (showMigrationSummary && showExplanations)
+      clearWith:
+          - showMigrationSummary
+
+    # Migration Summary
     - name: migrationSummary
       title: Migration Summary
       type: Table
+      visible: (showMigrationSummary)
       clearWith:
           - oldStage
           - newStage
@@ -32,16 +83,55 @@ items:
             title: "Value"
             type: text
 
-    # Stage Distribution Table
-    - name: stageDistribution
-      title: Stage Distribution Comparison
+    # Statistical Comparison Explanation
+    - name: statisticalComparisonExplanation
+      title: Understanding Statistical Comparison Metrics
+      type: Html
+      visible: (showStatisticalComparison && showExplanations)
+      clearWith:
+          - showStatisticalComparison
+
+    # Statistical Comparison
+    - name: statisticalComparison
+      title: Statistical Comparison
       type: Table
+      visible: (showStatisticalComparison)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+          - name: ci
+            title: "95% CI"
+            type: text
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    # Stage Distribution Explanation
+    - name: stageDistributionExplanation
+      title: Understanding Stage Distribution Changes
+      type: Html
+      visible: (showStageDistribution && showExplanations)
+      clearWith:
+          - showStageDistribution
+
+    # Stage Distribution Comparison
+    - name: stageDistribution
+      title: Stage Distribution Comparison
+      type: Table
+      visible: (showStageDistribution)
+      clearWith:
+          - oldStage
+          - newStage
       columns:
           - name: stage
             title: "Stage"
@@ -62,22 +152,40 @@ items:
             title: "Change"
             type: text
 
-    # Migration Table
-    - name: migrationTable
+    # Migration Matrix Explanation
+    - name: migrationMatrixExplanation
+      title: Understanding the Migration Matrix
+      type: Html
+      visible: (showMigrationMatrix && showExplanations)
+      clearWith:
+          - showMigrationMatrix
+
+    # Migration Matrix
+    - name: migrationMatrix
       title: Stage Migration Matrix
       type: Table
+      visible: (showMigrationMatrix)
       clearWith:
           - oldStage
           - newStage
-          - survivalTime
-          - event
-          - eventLevel
-      columns: []  # Columns will be added dynamically based on stage levels
+      columns:
+        - name: .name
+          title: "Original Stage"
+          type: text
 
-    # Survival Comparison Table
-    - name: survivalComparison
-      title: Prognostic Performance Comparison
+    # Concordance Comparison Explanation
+    - name: concordanceComparisonExplanation
+      title: Understanding Concordance (C-Index) Analysis
+      type: Html
+      visible: (showConcordanceComparison && showExplanations)
+      clearWith:
+          - showConcordanceComparison
+
+    # Discrimination Comparison
+    - name: concordanceComparison
+      title: Discrimination Comparison (C-Index)
       type: Table
+      visible: (showConcordanceComparison)
       clearWith:
           - oldStage
           - newStage
@@ -85,109 +193,659 @@ items:
           - event
           - eventLevel
       columns:
-          - name: metric
+          - name: Model
+            title: "Model"
+            type: text
+          - name: C_Index
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: Difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Net Reclassification Improvement Explanation
+    - name: nriResultsExplanation
+      title: Understanding Net Reclassification Improvement (NRI)
+      type: Html
+      visible: (calculateNRI && showExplanations)
+      clearWith:
+          - calculateNRI
+
+    # Net Reclassification Improvement
+    - name: nriResults
+      title: Net Reclassification Improvement (NRI)
+      type: Table
+      visible: (calculateNRI)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateNRI
+          - nriTimePoints
+      columns:
+          - name: TimePoint
+            title: "Time Point (months)"
+            type: text
+          - name: NRI
+            title: "NRI"
+            type: number
+            format: zto
+          - name: NRI_CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: NRI_CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: NRI_Plus
+            title: "NRI+ (Events)"
+            type: number
+            format: zto
+          - name: NRI_Minus
+            title: "NRI- (Non-events)"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Integrated Discrimination Improvement Explanation
+    - name: idiResultsExplanation
+      title: Understanding Integrated Discrimination Improvement (IDI)
+      type: Html
+      visible: (calculateIDI && showExplanations)
+      clearWith:
+          - calculateIDI
+
+    # Integrated Discrimination Improvement
+    - name: idiResults
+      title: Integrated Discrimination Improvement (IDI)
+      type: Table
+      visible: (calculateIDI)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateIDI
+      columns:
+          - name: IDI
+            title: "IDI"
+            type: number
+            format: zto
+          - name: IDI_CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: IDI_CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Time-dependent ROC Analysis
+    - name: rocAnalysis
+      title: Time-dependent ROC Analysis
+      type: Table
+      visible: (performROCAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performROCAnalysis
+          - rocTimePoints
+      columns:
+          - name: TimePoint
+            title: "Time Point (months)"
+            type: text
+          - name: AUC_Old
+            title: "AUC (Original)"
+            type: number
+            format: zto
+          - name: AUC_New
+            title: "AUC (New)"
+            type: number
+            format: zto
+          - name: AUC_Difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Decision Curve Analysis
+    - name: dcaResults
+      title: Decision Curve Analysis
+      type: Table
+      visible: (performDCA)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performDCA
+      columns:
+          - name: Threshold
+            title: "Threshold"
+            type: number
+            format: zto
+          - name: NetBenefit_Old
+            title: "Net Benefit (Original)"
+            type: number
+            format: zto
+          - name: NetBenefit_New
+            title: "Net Benefit (New)"
+            type: number
+            format: zto
+          - name: Improvement
+            title: "Improvement"
+            type: number
+            format: zto
+
+    # Bootstrap Validation Results
+    - name: bootstrapResults
+      title: Bootstrap Validation Results
+      type: Table
+      visible: (performBootstrap)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performBootstrap
+          - bootstrapReps
+      columns:
+          - name: Metric
             title: "Metric"
             type: text
-          - name: oldValue
-            title: "Original System"
-            type: text
-          - name: newValue
-            title: "New System"
-            type: text
-          - name: change
-            title: "Change"
-            type: text
+          - name: Original
+            title: "Original"
+            type: number
+            format: zto
+          - name: Bootstrap_Mean
+            title: "Bootstrap Mean"
+            type: number
+            format: zto
+          - name: Bootstrap_CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: Bootstrap_CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: Optimism
+            title: "Optimism"
+            type: number
+            format: zto
+          - name: Corrected
+            title: "Corrected"
+            type: number
+            format: zto
 
-    # Will Rogers Phenomenon Table
-    - name: stagingPerformance
+    # Will Rogers Phenomenon Analysis Explanation
+    - name: willRogersAnalysisExplanation
+      title: Understanding Will Rogers Phenomenon Analysis
+      type: Html
+      visible: (showWillRogersAnalysis && showExplanations)
+      clearWith:
+          - showWillRogersAnalysis
+
+    # Will Rogers Phenomenon Analysis
+    - name: willRogersAnalysis
       title: Will Rogers Phenomenon Analysis
       type: Table
-      visible: (showWillRogers)
+      visible: (showWillRogersAnalysis)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
-          - showWillRogers
+          - showWillRogersAnalysis
       columns:
-          - name: stage
+          - name: Stage
             title: "Stage"
             type: text
-          - name: stayedN
+          - name: Unchanged_N
             title: "Unchanged N"
             type: integer
-          - name: stayedMedian
+          - name: Unchanged_Median
             title: "Unchanged Median"
-            type: text
-          - name: migratedN
+            type: number
+            format: zto
+          - name: Migrated_N
             title: "Migrated N"
             type: integer
-          - name: migratedMedian
+          - name: Migrated_Median
             title: "Migrated Median"
-            type: text
-          - name: pValue
+            type: number
+            format: zto
+          - name: p_value
             title: "p-value"
-            type: text
-            format: pvalue
+            type: number
+            format: zto,pvalue
 
-    # Migration Plot
-    - name: migrationPlot
-      title: Stage Migration Flow
+    # Likelihood Ratio Tests
+    - name: likelihoodTests
+      title: Likelihood Ratio Tests
+      type: Table
+      visible: (performLikelihoodTests)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performLikelihoodTests
+      columns:
+          - name: Test
+            title: "Test"
+            type: text
+          - name: Chi_Square
+            title: "Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Stage Homogeneity Tests
+    - name: homogeneityTests
+      title: Stage Homogeneity Tests
+      type: Table
+      visible: (performHomogeneityTests)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performHomogeneityTests
+      columns:
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: Test
+            title: "Test"
+            type: text
+          - name: Statistic
+            title: "Statistic"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Clinical Interpretation Explanation
+    - name: clinicalInterpretationExplanation
+      title: Understanding Clinical Interpretation Guide
+      type: Html
+      visible: (showClinicalInterpretation && showExplanations)
+      clearWith:
+          - showClinicalInterpretation
+
+    # Clinical Interpretation
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Table
+      visible: (showClinicalInterpretation)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showClinicalInterpretation
+          - cancerType
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Value
+            title: "Value"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+          - name: Recommendation
+            title: "Recommendation"
+            type: text
+
+    # Executive Summary Explanation
+    - name: executiveSummaryExplanation
+      title: Understanding the Executive Summary
+      type: Html
+      visible: (generateExecutiveSummary && showExplanations)
+      clearWith:
+          - generateExecutiveSummary
+
+    # Executive Summary
+    - name: executiveSummary
+      title: Executive Summary
+      type: Table
+      visible: (generateExecutiveSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - generateExecutiveSummary
+      columns:
+          - name: Category
+            title: "Category"
+            type: text
+          - name: Finding
+            title: "Finding"
+            type: text
+          - name: Evidence
+            title: "Evidence"
+            type: text
+          - name: Strength
+            title: "Strength"
+            type: text
+
+    # Statistical Summary Explanation
+    - name: statisticalSummaryExplanation
+      title: Understanding the Statistical Summary
+      type: Html
+      visible: (showStatisticalSummary && showExplanations)
+      clearWith:
+          - showStatisticalSummary
+
+    # Statistical Summary
+    - name: statisticalSummary
+      title: Statistical Summary
+      type: Table
+      visible: (showStatisticalSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showStatisticalSummary
+      columns:
+          - name: Method
+            title: "Method"
+            type: text
+          - name: Result
+            title: "Result"
+            type: text
+          - name: CI
+            title: "95% CI"
+            type: text
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Significance
+            title: "Significance"
+            type: text
+
+    # Methodology Notes
+    - name: methodologyNotes
+      title: Methodology Notes
+      type: Html
+      visible: (showMethodologyNotes)
+      clearWith:
+          - showMethodologyNotes
+
+    # Plots Section
+
+    # Migration Heatmap Explanation
+    - name: migrationHeatmapExplanation
+      title: Interpreting the Migration Heatmap
+      type: Html
+      visible: (showMigrationHeatmap && showExplanations)
+      clearWith:
+          - showMigrationHeatmap
+
+    # Migration Heatmap
+    - name: migrationHeatmap
+      title: Migration Heatmap
       type: Image
       width: 700
       height: 500
-      renderFun: .migrationPlot
-      visible: (plotMigration)
+      renderFun: .plotMigrationHeatmap
+      visible: (showMigrationHeatmap)
       clearWith:
           - oldStage
           - newStage
-          - survivalTime
-          - event
-          - eventLevel
-          - plotMigration
+          - showMigrationHeatmap
 
-    # Survival Comparison Plot
-    - name: survivalPlot
-      title: Survival Comparison
+    # ROC Comparison Explanation
+    - name: rocComparisonExplanation
+      title: Understanding Time-dependent ROC Curves
+      type: Html
+      visible: (showROCComparison && showExplanations)
+      clearWith:
+          - showROCComparison
+
+    # ROC Comparison Plot
+    - name: rocComparisonPlot
+      title: Time-dependent ROC Curves
       type: Image
       width: 800
       height: 600
-      renderFun: .survivalPlot
-      visible: (plotMigration)
+      renderFun: .plotROCComparison
+      visible: (showROCComparison)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
-          - plotMigration
-          - survivalPlotType
-          - showCI
+          - showROCComparison
+          - rocTimePoints
 
-    # Concordance Index Plot
-    - name: concordancePlot
-      title: Concordance Index Comparison
+    # Forest Plot Explanation
+    - name: forestPlotExplanation
+      title: Understanding Hazard Ratio Forest Plots
+      type: Html
+      visible: (showForestPlot && showExplanations)
+      clearWith:
+          - showForestPlot
+
+    # Forest Plot
+    - name: forestPlot
+      title: Hazard Ratio Forest Plot
       type: Image
-      width: 600
-      height: 400
-      renderFun: .concordancePlot
-      visible: (plotMigration)
+      width: 700
+      height: 600
+      renderFun: .plotForest
+      visible: (showForestPlot)
       clearWith:
           - oldStage
           - newStage
           - survivalTime
           - event
           - eventLevel
-          - plotMigration
+          - showForestPlot
+
+    # Calibration Analysis Explanation
+    - name: calibrationAnalysisExplanation
+      title: Understanding Calibration Analysis
+      type: Html
+      visible: (performCalibration && showExplanations)
+      clearWith:
+          - performCalibration
+
+    # Calibration Analysis
+    - name: calibrationAnalysis
+      title: Calibration Analysis
+      type: Table
+      visible: (performCalibration)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCalibration
+      columns:
+          - name: Model
+            title: "Model"
+            type: text
+          - name: Hosmer_Lemeshow_Chi2
+            title: "H-L Chi²"
+            type: number
+            format: zto
+          - name: Hosmer_Lemeshow_df
+            title: "H-L df"
+            type: integer
+          - name: Hosmer_Lemeshow_p
+            title: "H-L p-value"
+            type: number
+            format: zto,pvalue
+          - name: Calibration_Slope
+            title: "Calibration Slope"
+            type: number
+            format: zto
+          - name: Calibration_Intercept
+            title: "Calibration Intercept"
+            type: number
+            format: zto
+          - name: C_Slope_CI_Lower
+            title: "Slope 95% CI Lower"
+            type: number
+            format: zto
+          - name: C_Slope_CI_Upper
+            title: "Slope 95% CI Upper"
+            type: number
+            format: zto
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Calibration Plots Explanation
+    - name: calibrationPlotsExplanation
+      title: Understanding Calibration Plots
+      type: Html
+      visible: (showCalibrationPlots && showExplanations)
+      clearWith:
+          - showCalibrationPlots
+
+    # Calibration Plots
+    - name: calibrationPlots
+      title: Calibration Plots
+      type: Image
+      width: 800
+      height: 400
+      renderFun: .plotCalibration
+      visible: (showCalibrationPlots)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showCalibrationPlots
+          - performCalibration
+
+    # Decision Curves Explanation
+    - name: decisionCurvesExplanation
+      title: Understanding Decision Curve Analysis
+      type: Html
+      visible: (showDecisionCurves && showExplanations)
+      clearWith:
+          - showDecisionCurves
+
+    # Decision Curves
+    - name: decisionCurves
+      title: Decision Curves
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotDecisionCurves
+      visible: (showDecisionCurves)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showDecisionCurves
+          - performDCA
+
+    # Survival Curves Explanation
+    - name: survivalCurvesExplanation
+      title: Understanding Survival Curves Comparison
+      type: Html
+      visible: (showSurvivalCurves && showExplanations)
+      clearWith:
+          - showSurvivalCurves
+
+    # Survival Curves
+    - name: survivalCurves
+      title: Survival Curves by Stage
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .plotSurvivalCurves
+      visible: (showSurvivalCurves)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showSurvivalCurves
+          - survivalPlotType
+          - showConfidenceIntervals
+          - showRiskTables
+          - plotTimeRange
 
 refs:
-    - willrogers1985
-    - stagemigration2009
-    - tnmstaging2017
-    - stagingbias2004
+    - harrell2015
+    - pencina2008
+    - vickers2006
+    - steyerberg2010
     - survival
     - survminer
-    - ggalluvial
+    - ggplot2
+    - timeROC
+    - dcurves
 
 ...

@@ -7,7 +7,21 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             xvar = NULL,
-            yvar = NULL, ...) {
+            yvar = NULL,
+            groupby = NULL,
+            confidence = FALSE,
+            trendline = FALSE,
+            points = TRUE,
+            smooth = FALSE,
+            refline = NULL,
+            reflineLabel = "Reference",
+            colorPalette = "default",
+            theme = "default",
+            xlabel = NULL,
+            ylabel = NULL,
+            title = NULL,
+            width = 800,
+            height = 600, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,27 +31,151 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..xvar <- jmvcore::OptionVariable$new(
                 "xvar",
-                xvar)
+                xvar,
+                suggested=list(
+                    "continuous",
+                    "ordinal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
             private$..yvar <- jmvcore::OptionVariable$new(
                 "yvar",
-                yvar)
+                yvar,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..groupby <- jmvcore::OptionVariable$new(
+                "groupby",
+                groupby,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..confidence <- jmvcore::OptionBool$new(
+                "confidence",
+                confidence,
+                default=FALSE)
+            private$..trendline <- jmvcore::OptionBool$new(
+                "trendline",
+                trendline,
+                default=FALSE)
+            private$..points <- jmvcore::OptionBool$new(
+                "points",
+                points,
+                default=TRUE)
+            private$..smooth <- jmvcore::OptionBool$new(
+                "smooth",
+                smooth,
+                default=FALSE)
+            private$..refline <- jmvcore::OptionNumber$new(
+                "refline",
+                refline)
+            private$..reflineLabel <- jmvcore::OptionString$new(
+                "reflineLabel",
+                reflineLabel,
+                default="Reference")
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "colorblind",
+                    "viridis",
+                    "clinical"),
+                default="default")
+            private$..theme <- jmvcore::OptionList$new(
+                "theme",
+                theme,
+                options=list(
+                    "default",
+                    "minimal",
+                    "classic",
+                    "publication"),
+                default="default")
+            private$..xlabel <- jmvcore::OptionString$new(
+                "xlabel",
+                xlabel)
+            private$..ylabel <- jmvcore::OptionString$new(
+                "ylabel",
+                ylabel)
+            private$..title <- jmvcore::OptionString$new(
+                "title",
+                title)
+            private$..width <- jmvcore::OptionInteger$new(
+                "width",
+                width,
+                default=800,
+                min=300,
+                max=1200)
+            private$..height <- jmvcore::OptionInteger$new(
+                "height",
+                height,
+                default=600,
+                min=300,
+                max=1000)
 
             self$.addOption(private$..xvar)
             self$.addOption(private$..yvar)
+            self$.addOption(private$..groupby)
+            self$.addOption(private$..confidence)
+            self$.addOption(private$..trendline)
+            self$.addOption(private$..points)
+            self$.addOption(private$..smooth)
+            self$.addOption(private$..refline)
+            self$.addOption(private$..reflineLabel)
+            self$.addOption(private$..colorPalette)
+            self$.addOption(private$..theme)
+            self$.addOption(private$..xlabel)
+            self$.addOption(private$..ylabel)
+            self$.addOption(private$..title)
+            self$.addOption(private$..width)
+            self$.addOption(private$..height)
         }),
     active = list(
         xvar = function() private$..xvar$value,
-        yvar = function() private$..yvar$value),
+        yvar = function() private$..yvar$value,
+        groupby = function() private$..groupby$value,
+        confidence = function() private$..confidence$value,
+        trendline = function() private$..trendline$value,
+        points = function() private$..points$value,
+        smooth = function() private$..smooth$value,
+        refline = function() private$..refline$value,
+        reflineLabel = function() private$..reflineLabel$value,
+        colorPalette = function() private$..colorPalette$value,
+        theme = function() private$..theme$value,
+        xlabel = function() private$..xlabel$value,
+        ylabel = function() private$..ylabel$value,
+        title = function() private$..title$value,
+        width = function() private$..width$value,
+        height = function() private$..height$value),
     private = list(
         ..xvar = NA,
-        ..yvar = NA)
+        ..yvar = NA,
+        ..groupby = NA,
+        ..confidence = NA,
+        ..trendline = NA,
+        ..points = NA,
+        ..smooth = NA,
+        ..refline = NA,
+        ..reflineLabel = NA,
+        ..colorPalette = NA,
+        ..theme = NA,
+        ..xlabel = NA,
+        ..ylabel = NA,
+        ..title = NA,
+        ..width = NA,
+        ..height = NA)
 )
 
 linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "linechartResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
+        todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
+        correlation = function() private$.items[["correlation"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -48,16 +186,48 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Line Chart",
                 refs=list(
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Line Chart"))
+                name="todo",
+                title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Data Summary",
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlation",
+                title="Correlation Analysis",
+                visible="(trendline)",
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${xvar} - {yvar}`",
-                width=600,
-                height=450,
+                title="Line Chart: `${yvar}` by `${xvar}`",
+                width=700,
+                height=500,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -84,37 +254,117 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Line Chart
 #'
-#' 
-#' @param data .
-#' @param xvar .
-#' @param yvar .
+#' Creates line charts for time series analysis and trend visualization, with 
+#' support for multiple groups, confidence intervals, and statistical 
+#' overlays.
+#'
+#' @examples
+#' # Basic line chart
+#' linechart(
+#'     data = clinical_data,
+#'     xvar = "time_point",
+#'     yvar = "lab_value"
+#' )
+#'
+#' # Grouped line chart with confidence intervals
+#' linechart(
+#'     data = clinical_data,
+#'     xvar = "time_point",
+#'     yvar = "lab_value",
+#'     groupby = "treatment_group",
+#'     confidence = TRUE,
+#'     trendline = TRUE
+#' )
+#'
+#' @param data The data as a data frame.
+#' @param xvar The variable for the x-axis. Typically represents time,
+#'   sequence, or ordered categories.
+#' @param yvar The variable for the y-axis. Must be numeric (continuous
+#'   variable).
+#' @param groupby Optional grouping variable to create multiple lines (e.g.,
+#'   treatment groups, patient categories).
+#' @param confidence Whether to display confidence intervals around the
+#'   line(s).
+#' @param trendline Whether to add a trend line (linear regression) to the
+#'   plot.
+#' @param points Whether to show individual data points on the line(s).
+#' @param smooth Whether to apply smoothing (loess) to the line(s).
+#' @param refline Optional reference line value (e.g., normal range,
+#'   threshold).
+#' @param reflineLabel Label for the reference line.
+#' @param colorPalette Color palette for multiple groups.
+#' @param theme Overall theme/appearance of the plot.
+#' @param xlabel Custom label for the x-axis.
+#' @param ylabel Custom label for the y-axis.
+#' @param title Custom title for the plot.
+#' @param width Width of the plot in pixels.
+#' @param height Height of the plot in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 linechart <- function(
     data,
     xvar,
-    yvar) {
+    yvar,
+    groupby,
+    confidence = FALSE,
+    trendline = FALSE,
+    points = TRUE,
+    smooth = FALSE,
+    refline,
+    reflineLabel = "Reference",
+    colorPalette = "default",
+    theme = "default",
+    xlabel,
+    ylabel,
+    title,
+    width = 800,
+    height = 600) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("linechart requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(xvar)) xvar <- jmvcore::resolveQuo(jmvcore::enquo(xvar))
     if ( ! missing(yvar)) yvar <- jmvcore::resolveQuo(jmvcore::enquo(yvar))
+    if ( ! missing(groupby)) groupby <- jmvcore::resolveQuo(jmvcore::enquo(groupby))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(xvar), xvar, NULL),
-            `if`( ! missing(yvar), yvar, NULL))
+            `if`( ! missing(yvar), yvar, NULL),
+            `if`( ! missing(groupby), groupby, NULL))
 
+    for (v in groupby) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- linechartOptions$new(
         xvar = xvar,
-        yvar = yvar)
+        yvar = yvar,
+        groupby = groupby,
+        confidence = confidence,
+        trendline = trendline,
+        points = points,
+        smooth = smooth,
+        refline = refline,
+        reflineLabel = reflineLabel,
+        colorPalette = colorPalette,
+        theme = theme,
+        xlabel = xlabel,
+        ylabel = ylabel,
+        title = title,
+        width = width,
+        height = height)
 
     analysis <- linechartClass$new(
         options = options,

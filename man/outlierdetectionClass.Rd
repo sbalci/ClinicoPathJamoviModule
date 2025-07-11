@@ -4,13 +4,174 @@
 \alias{outlierdetectionClass}
 \title{Advanced Outlier Detection with easystats}
 \value{
-Advanced outlier detection using performance package
+A jamovi analysis object containing outlier detection results with tables,
+plots, and interpretation based on selected options
 }
 \description{
-Advanced Outlier Detection with easystats
-
-Advanced Outlier Detection with easystats
+Advanced outlier detection using multiple statistical methods from the easystats performance package.
+This function provides comprehensive outlier detection through univariate methods (Z-scores, IQR, confidence intervals),
+multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and composite scoring across multiple algorithms.
+Complements existing data quality assessment modules with state-of-the-art outlier detection capabilities.
+Perfect for clinical research data quality control and preprocessing.
 }
+\details{
+The outlier detection module supports four main categories of methods:
+
+\strong{Univariate Methods:}
+\itemize{
+\item \strong{Robust Z-Score (MAD-based):} Uses median absolute deviation for robust standardization
+\item \strong{Standard Z-Score:} Classical z-score based on mean and standard deviation
+\item \strong{Interquartile Range (IQR):} Tukey's method using quartiles and IQR multiplier
+\item \strong{Equal-Tailed Interval (ETI):} Symmetric confidence interval approach
+\item \strong{Highest Density Interval (HDI):} Bayesian credible interval method
+}
+
+\strong{Multivariate Methods:}
+\itemize{
+\item \strong{Mahalanobis Distance:} Classical multivariate distance accounting for covariance
+\item \strong{Robust Mahalanobis Distance:} Robust version using minimum covariance determinant
+\item \strong{Minimum Covariance Determinant (MCD):} Robust covariance estimation
+\item \strong{OPTICS Clustering:} Density-based clustering approach
+\item \strong{Local Outlier Factor (LOF):} Local density deviation method
+}
+
+\strong{Composite Methods:} Combine multiple algorithms for robust detection with adjustable thresholds
+
+\strong{All Methods:} Comprehensive analysis using all available techniques
+}
+\section{Method Selection Guidelines}{
+
+\itemize{
+\item \strong{Univariate:} When analyzing variables independently, simple interpretation needed
+\item \strong{Multivariate:} When variable relationships matter, detecting complex outlier patterns
+\item \strong{Composite:} When robust detection across different data patterns is needed
+\item \strong{All:} For comprehensive analysis and method comparison
+}
+}
+
+\section{Threshold Recommendations}{
+
+\itemize{
+\item \strong{Z-Score:} 3.29 (99.9\% confidence, ~0.1\% outliers)
+\item \strong{IQR Multiplier:} 1.7 (more conservative than Tukey's 1.5)
+\item \strong{Confidence Level:} 0.999 (99.9\% for interval methods)
+\item \strong{Composite Threshold:} 0.5 (outliers detected by ≥50\% of methods)
+}
+}
+
+\section{Clinical Applications}{
+
+\itemize{
+\item \strong{Laboratory Data:} CBC, chemistry panels, liver function tests
+\item \strong{Anthropometric Data:} Height, weight, BMI measurements
+\item \strong{Physiological Data:} Blood pressure, heart rate, temperature
+\item \strong{Biomarker Data:} Protein levels, genetic markers, metabolites
+\item \strong{Quality Control:} Data entry errors, instrument malfunctions
+}
+}
+
+\section{Output Components}{
+
+\itemize{
+\item \strong{Outlier Table:} Detailed results with outlier scores and classifications
+\item \strong{Method Comparison:} Performance across different detection algorithms
+\item \strong{Exclusion Summary:} Recommendations for data cleaning procedures
+\item \strong{Visualization:} Plots showing outlier patterns and distributions
+\item \strong{Interpretation:} Detailed guidance on results and methodology
+}
+}
+
+\section{Statistical Considerations}{
+
+\itemize{
+\item \strong{Sample Size:} Minimum 30 observations recommended for robust results
+\item \strong{Distribution:} Robust methods handle non-normal distributions better
+\item \strong{Missing Data:} Complete cases analysis performed automatically
+\item \strong{Correlations:} Multivariate methods account for variable relationships
+\item \strong{False Positives:} Conservative thresholds reduce over-detection
+}
+}
+
+\section{References}{
+
+\itemize{
+\item Lüdecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021).
+performance: An R Package for Assessment, Comparison and Testing of Statistical Models.
+Journal of Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139
+\item Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection by robust statistics.
+Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 8(2), e1236.
+\item Breunig, M. M., Kriegel, H. P., Ng, R. T., & Sander, J. (2000). LOF: identifying
+density-based local outliers. ACM sigmod record, 29(2), 93-104.
+}
+}
+
+\examples{
+\dontrun{
+# Example 1: Basic univariate outlier detection
+# Load clinical data
+data(clinical_data)
+
+# Detect outliers using robust z-score
+outlierdetection(
+  data = clinical_data,
+  vars = c("hemoglobin", "glucose", "creatinine"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 3.29,
+  show_outlier_table = TRUE,
+  show_visualization = TRUE
+)
+
+# Example 2: Multivariate outlier detection
+# Detect multivariate outliers in biomarker data
+outlierdetection(
+  data = biomarker_data,
+  vars = c("protein_1", "protein_2", "protein_3"),
+  method_category = "multivariate",
+  multivariate_methods = "mahalanobis",
+  show_method_comparison = TRUE,
+  show_exclusion_summary = TRUE
+)
+
+# Example 3: Composite outlier detection
+# Robust detection using multiple methods
+outlierdetection(
+  data = patient_data,
+  vars = c("age", "weight", "height", "bmi"),
+  method_category = "composite",
+  composite_threshold = 0.6,
+  show_outlier_table = TRUE,
+  show_interpretation = TRUE
+)
+
+# Example 4: Comprehensive analysis
+# Compare all available methods
+outlierdetection(
+  data = lab_data,
+  vars = c("alt", "ast", "bilirubin", "albumin"),
+  method_category = "all",
+  show_method_comparison = TRUE,
+  show_exclusion_summary = TRUE,
+  show_visualization = TRUE
+)
+}
+
+}
+\seealso{
+\code{\link[performance]{check_outliers}} for the underlying outlier detection functions
+}
+\concept{data preprocessing}
+\concept{multivariate analysis}
+\concept{quality control}
+\concept{robust statistics}
+\keyword{analysis}
+\keyword{clinical}
+\keyword{data}
+\keyword{detection,}
+\keyword{outlier}
+\keyword{quality,}
+\keyword{research,}
+\keyword{statistical}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::outlierdetectionBase} -> \code{outlierdetectionClass}
 }

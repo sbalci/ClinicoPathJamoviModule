@@ -2,18 +2,43 @@ testthat::context("outlierdetection")
 
 testthat::describe("outlierdetection", {
     
-    # Load test data
-    if (file.exists("../../data/outlierdetection_test_data.rda")) {
-        load("../../data/outlierdetection_test_data.rda")
-    } else if (file.exists("data/outlierdetection_test_data.rda")) {
-        load("data/outlierdetection_test_data.rda")
-    } else {
-        testthat::skip("Test data not found")
-    }
-    
     testthat::describe("Data Generation and Quality", {
         
+        # Set up test data once for this describe block
+        testthat::it("can load test data", {
+            possible_paths <- c(
+                "../../data/outlierdetection_test_data.rda",
+                "../../../data/outlierdetection_test_data.rda", 
+                "data/outlierdetection_test_data.rda",
+                file.path(getwd(), "data", "outlierdetection_test_data.rda"),
+                file.path(dirname(getwd()), "data", "outlierdetection_test_data.rda"),
+                file.path(dirname(dirname(getwd())), "data", "outlierdetection_test_data.rda")
+            )
+            
+            data_loaded <- FALSE
+            for (path in possible_paths) {
+                if (file.exists(path)) {
+                    tryCatch({
+                        load(path, envir = .GlobalEnv)
+                        data_loaded <- TRUE
+                        break
+                    }, error = function(e) {
+                        # Continue to next path
+                    })
+                }
+            }
+            
+            if (!data_loaded) {
+                testthat::skip("Test data not found")
+            }
+            
+            testthat::expect_true(data_loaded)
+        })
+        
         testthat::it("generates basic outlier detection test data correctly", {
+            if (!exists("outlierdetection_basic", envir = .GlobalEnv)) {
+                testthat::skip("Test data not loaded")
+            }
             testthat::expect_true(exists("outlierdetection_basic"))
             testthat::expect_equal(nrow(outlierdetection_basic), 200)
             testthat::expect_true(all(c("patient_id", "age", "weight", "height", "bmi") %in% names(outlierdetection_basic)))

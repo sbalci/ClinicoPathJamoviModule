@@ -2,7 +2,7 @@
 % Please edit documentation in R/outcomeorganizer.h.R
 \name{outcomeorganizer}
 \alias{outcomeorganizer}
-\title{Enhanced Outcome Organizer for Survival Analysis}
+\title{Outcome Organizer for Survival Analysis}
 \usage{
 outcomeorganizer(
   data,

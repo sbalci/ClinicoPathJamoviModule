@@ -17,7 +17,6 @@ auc_ci(auc, n_pos, n_neg, conf_level = 0.95)
 }
 \value{
 Vector containing lower and upper CI bounds
-#' @export
 }
 \description{
 Functions for calculating confidence intervals and test statistics

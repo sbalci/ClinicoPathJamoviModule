@@ -2,11 +2,19 @@
 % Please edit documentation in R/chisqposttest.b.R
 \name{chisqposttestClass}
 \alias{chisqposttestClass}
-\title{Chi-Square Post-Hoc Tests}
+\title{Chi-Square Post-Hoc Tests - Enhanced Implementation}
 \description{
-Chi-Square Post-Hoc Tests
-
-Chi-Square Post-Hoc Tests
+Comprehensive post-hoc analysis for chi-square tests including residuals analysis,
+pairwise comparisons, and multiple testing corrections. Integrates methods from
+jamovi forum recommendations and best practices from statistical literature.
+}
+\details{
+This enhanced implementation provides three complementary approaches:
+\enumerate{
+\item Residuals Analysis - Identifies which cells contribute to significance (recommended first step)
+\item Pairwise Comparisons - Formal hypothesis testing between group pairs
+\item Comprehensive Analysis - Combines both approaches with educational guidance
+}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::chisqposttestBase} -> \code{chisqposttestClass}

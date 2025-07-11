@@ -57,7 +57,21 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             min_node = 20,
             complexity = 0.01,
             max_depth = 5,
-            show_terminal_nodes = TRUE, ...) {
+            show_terminal_nodes = TRUE,
+            use_time_dependent = FALSE,
+            td_format = "wide",
+            time_dep_vars = NULL,
+            change_times = "6, 12, 18",
+            td_suffix_pattern = "_t{time}",
+            start_time_var = NULL,
+            stop_time_var = NULL,
+            use_frailty = FALSE,
+            frailty_var = NULL,
+            frailty_distribution = "gamma",
+            use_splines = FALSE,
+            spline_vars = NULL,
+            spline_df = 3,
+            spline_type = "pspline", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -359,6 +373,75 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "show_terminal_nodes",
                 show_terminal_nodes,
                 default=TRUE)
+            private$..use_time_dependent <- jmvcore::OptionBool$new(
+                "use_time_dependent",
+                use_time_dependent,
+                default=FALSE)
+            private$..td_format <- jmvcore::OptionList$new(
+                "td_format",
+                td_format,
+                options=list(
+                    "wide",
+                    "long"),
+                default="wide")
+            private$..time_dep_vars <- jmvcore::OptionVariables$new(
+                "time_dep_vars",
+                time_dep_vars)
+            private$..change_times <- jmvcore::OptionString$new(
+                "change_times",
+                change_times,
+                default="6, 12, 18")
+            private$..td_suffix_pattern <- jmvcore::OptionString$new(
+                "td_suffix_pattern",
+                td_suffix_pattern,
+                default="_t{time}")
+            private$..start_time_var <- jmvcore::OptionVariable$new(
+                "start_time_var",
+                start_time_var)
+            private$..stop_time_var <- jmvcore::OptionVariable$new(
+                "stop_time_var",
+                stop_time_var)
+            private$..use_frailty <- jmvcore::OptionBool$new(
+                "use_frailty",
+                use_frailty,
+                default=FALSE)
+            private$..frailty_var <- jmvcore::OptionVariable$new(
+                "frailty_var",
+                frailty_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..frailty_distribution <- jmvcore::OptionList$new(
+                "frailty_distribution",
+                frailty_distribution,
+                options=list(
+                    "gamma",
+                    "gaussian",
+                    "logt"),
+                default="gamma")
+            private$..use_splines <- jmvcore::OptionBool$new(
+                "use_splines",
+                use_splines,
+                default=FALSE)
+            private$..spline_vars <- jmvcore::OptionVariables$new(
+                "spline_vars",
+                spline_vars)
+            private$..spline_df <- jmvcore::OptionInteger$new(
+                "spline_df",
+                spline_df,
+                min=1,
+                max=10,
+                default=3)
+            private$..spline_type <- jmvcore::OptionList$new(
+                "spline_type",
+                spline_type,
+                options=list(
+                    "pspline",
+                    "ns",
+                    "bs"),
+                default="pspline")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -416,6 +499,20 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..complexity)
             self$.addOption(private$..max_depth)
             self$.addOption(private$..show_terminal_nodes)
+            self$.addOption(private$..use_time_dependent)
+            self$.addOption(private$..td_format)
+            self$.addOption(private$..time_dep_vars)
+            self$.addOption(private$..change_times)
+            self$.addOption(private$..td_suffix_pattern)
+            self$.addOption(private$..start_time_var)
+            self$.addOption(private$..stop_time_var)
+            self$.addOption(private$..use_frailty)
+            self$.addOption(private$..frailty_var)
+            self$.addOption(private$..frailty_distribution)
+            self$.addOption(private$..use_splines)
+            self$.addOption(private$..spline_vars)
+            self$.addOption(private$..spline_df)
+            self$.addOption(private$..spline_type)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -473,7 +570,21 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         min_node = function() private$..min_node$value,
         complexity = function() private$..complexity$value,
         max_depth = function() private$..max_depth$value,
-        show_terminal_nodes = function() private$..show_terminal_nodes$value),
+        show_terminal_nodes = function() private$..show_terminal_nodes$value,
+        use_time_dependent = function() private$..use_time_dependent$value,
+        td_format = function() private$..td_format$value,
+        time_dep_vars = function() private$..time_dep_vars$value,
+        change_times = function() private$..change_times$value,
+        td_suffix_pattern = function() private$..td_suffix_pattern$value,
+        start_time_var = function() private$..start_time_var$value,
+        stop_time_var = function() private$..stop_time_var$value,
+        use_frailty = function() private$..use_frailty$value,
+        frailty_var = function() private$..frailty_var$value,
+        frailty_distribution = function() private$..frailty_distribution$value,
+        use_splines = function() private$..use_splines$value,
+        spline_vars = function() private$..spline_vars$value,
+        spline_df = function() private$..spline_df$value,
+        spline_type = function() private$..spline_type$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -530,7 +641,21 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..min_node = NA,
         ..complexity = NA,
         ..max_depth = NA,
-        ..show_terminal_nodes = NA)
+        ..show_terminal_nodes = NA,
+        ..use_time_dependent = NA,
+        ..td_format = NA,
+        ..time_dep_vars = NA,
+        ..change_times = NA,
+        ..td_suffix_pattern = NA,
+        ..start_time_var = NA,
+        ..stop_time_var = NA,
+        ..use_frailty = NA,
+        ..frailty_var = NA,
+        ..frailty_distribution = NA,
+        ..use_splines = NA,
+        ..spline_vars = NA,
+        ..spline_df = NA,
+        ..spline_type = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1177,9 +1302,92 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' influence event rates relative to the person-time at risk in each subgroup.
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Example 1: Basic multivariable Cox regression
+#' library(survival)
+#' data(colon)
+#'
+#' multisurvival(
+#'     data = colon,
+#'     elapsedtime = "time",
+#'     outcome = "status",
+#'     outcomeLevel = "1",
+#'     explanatory = c("sex", "obstruct", "perfor"),
+#'     contexpl = c("age", "nodes"),
+#'     timetypeoutput = "days",
+#'     hr = TRUE  # Show hazard ratio plot
+#' )
+#'
+#' # Example 2: Using dates to calculate survival time
+#' # Assuming you have diagnosis and follow-up dates
+#' multisurvival(
+#'     data = mydata,
+#'     tint = TRUE,
+#'     dxdate = "diagnosis_date",
+#'     fudate = "last_followup_date",
+#'     timetypedata = "ymd",
+#'     timetypeoutput = "months",
+#'     outcome = "vital_status",
+#'     outcomeLevel = "Dead",
+#'     explanatory = c("stage", "grade"),
+#'     contexpl = "age"
+#' )
+#'
+#' # Example 3: Risk stratification analysis
+#' multisurvival(
+#'     data = colon,
+#'     elapsedtime = "time",
+#'     outcome = "status",
+#'     outcomeLevel = "1",
+#'     explanatory = c("sex", "obstruct"),
+#'     contexpl = c("age", "nodes"),
+#'     calculateRiskScore = TRUE,
+#'     numRiskGroups = "three",
+#'     plotRiskGroups = TRUE,
+#'     addRiskScore = TRUE,  # Add risk score to data
+#'     addRiskGroup = TRUE   # Add risk group to data
+#' )
+#'
+#' # Example 4: Model with stratification for non-proportional hazards
+#' multisurvival(
+#'     data = colon,
+#'     elapsedtime = "time",
+#'     outcome = "status",
+#'     outcomeLevel = "1",
+#'     explanatory = c("obstruct", "perfor"),
+#'     contexpl = c("age", "nodes"),
+#'     use_stratify = TRUE,
+#'     stratvar = "sex",  # Stratify by sex if PH assumption violated
+#'     ph_cox = TRUE      # Test proportional hazards assumption
+#' )
+#'
+#' # Example 5: Stepwise model selection
+#' multisurvival(
+#'     data = colon,
+#'     elapsedtime = "time",
+#'     outcome = "status",
+#'     outcomeLevel = "1",
+#'     explanatory = c("sex", "obstruct", "perfor", "adhere"),
+#'     contexpl = c("age", "nodes"),
+#'     use_modelSelection = TRUE,
+#'     modelSelection = "both",  # Stepwise selection
+#'     selectionCriteria = "aic",
+#'     pEntry = 0.05,
+#'     pRemoval = 0.10
+#' )
+#'
+#' # Example 6: Person-time analysis
+#' multisurvival(
+#'     data = colon,
+#'     elapsedtime = "time",
+#'     outcome = "status",
+#'     outcomeLevel = "1",
+#'     explanatory = "sex",
+#'     contexpl = "age",
+#'     person_time = TRUE,
+#'     time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
+#'     rate_multiplier = 1000  # Rate per 1000 person-days
+#' )
+#'
 #' @param data The dataset to be analyzed, provided as a data frame. Must
 #'   contain the variables specified in the options below.
 #' @param elapsedtime The numeric variable representing follow-up time until
@@ -1304,6 +1512,48 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   complexity of the tree to avoid overfitting.
 #' @param show_terminal_nodes If true, displays Kaplan-Meier survival curves
 #'   for each terminal node of the decision tree.
+#' @param use_time_dependent Enable time-dependent covariates for Cox
+#'   regression. This allows modeling variables that change values at specific
+#'   time points during follow-up (e.g., treatment changes, biomarker
+#'   measurements, disease progression).
+#' @param td_format Specify whether your data is in wide format (one row per
+#'   subject with time points as separate variables) or long format (multiple
+#'   rows per subject with time intervals).
+#' @param time_dep_vars Variables that change values over time. In wide
+#'   format, these are baseline variables that will be updated at change points.
+#'   In long format, these are the time-varying variables.
+#' @param change_times Time points (in same units as survival time) when
+#'   time-dependent variables change. For wide format data, specify
+#'   comma-separated time points (e.g., "6, 12, 18"). The function will create
+#'   intervals and update covariate values at these times.
+#' @param td_suffix_pattern For wide format: Pattern for time-specific
+#'   variable names. Use {time} as placeholder. Example: if baseline variable is
+#'   'treatment' and pattern is '_t{time}',  the function looks for
+#'   'treatment_t6', 'treatment_t12', etc.
+#' @param start_time_var For long format only: Variable indicating the start
+#'   time of each interval. Leave empty for wide format data.
+#' @param stop_time_var For long format only: Variable indicating the stop
+#'   time of each interval. Leave empty for wide format data.
+#' @param use_frailty Add a frailty term to account for unobserved
+#'   heterogeneity or clustering in the data. Frailty models add random effects
+#'   to the Cox model.
+#' @param frailty_var Clustering variable for the frailty term (e.g.,
+#'   hospital, family, or study center). Each level represents a cluster with
+#'   shared frailty.
+#' @param frailty_distribution Distribution of the frailty term. Gamma is most
+#'   commonly used and assumes multiplicative effect on the hazard. Gaussian
+#'   assumes additive effect on log-hazard.
+#' @param use_splines Use penalized splines to model time-varying effects
+#'   (non-proportional hazards). This is an alternative to stratification for
+#'   handling PH violations.
+#' @param spline_vars Variables to model with time-varying coefficients using
+#'   splines. These are variables that violate the proportional hazards
+#'   assumption.
+#' @param spline_df Degrees of freedom for the spline functions. Higher values
+#'   allow more flexible time-varying effects but may lead to overfitting.
+#' @param spline_type Type of spline basis to use. Penalized splines provide
+#'   smooth functions with automatic smoothness selection. Natural splines are
+#'   constrained to be linear at the boundaries.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1398,7 +1648,21 @@ multisurvival <- function(
     min_node = 20,
     complexity = 0.01,
     max_depth = 5,
-    show_terminal_nodes = TRUE) {
+    show_terminal_nodes = TRUE,
+    use_time_dependent = FALSE,
+    td_format = "wide",
+    time_dep_vars,
+    change_times = "6, 12, 18",
+    td_suffix_pattern = "_t{time}",
+    start_time_var,
+    stop_time_var,
+    use_frailty = FALSE,
+    frailty_var,
+    frailty_distribution = "gamma",
+    use_splines = FALSE,
+    spline_vars,
+    spline_df = 3,
+    spline_type = "pspline") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1411,6 +1675,11 @@ multisurvival <- function(
     if ( ! missing(contexpl)) contexpl <- jmvcore::resolveQuo(jmvcore::enquo(contexpl))
     if ( ! missing(adjexplanatory)) adjexplanatory <- jmvcore::resolveQuo(jmvcore::enquo(adjexplanatory))
     if ( ! missing(stratvar)) stratvar <- jmvcore::resolveQuo(jmvcore::enquo(stratvar))
+    if ( ! missing(time_dep_vars)) time_dep_vars <- jmvcore::resolveQuo(jmvcore::enquo(time_dep_vars))
+    if ( ! missing(start_time_var)) start_time_var <- jmvcore::resolveQuo(jmvcore::enquo(start_time_var))
+    if ( ! missing(stop_time_var)) stop_time_var <- jmvcore::resolveQuo(jmvcore::enquo(stop_time_var))
+    if ( ! missing(frailty_var)) frailty_var <- jmvcore::resolveQuo(jmvcore::enquo(frailty_var))
+    if ( ! missing(spline_vars)) spline_vars <- jmvcore::resolveQuo(jmvcore::enquo(spline_vars))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -1421,11 +1690,17 @@ multisurvival <- function(
             `if`( ! missing(explanatory), explanatory, NULL),
             `if`( ! missing(contexpl), contexpl, NULL),
             `if`( ! missing(adjexplanatory), adjexplanatory, NULL),
-            `if`( ! missing(stratvar), stratvar, NULL))
+            `if`( ! missing(stratvar), stratvar, NULL),
+            `if`( ! missing(time_dep_vars), time_dep_vars, NULL),
+            `if`( ! missing(start_time_var), start_time_var, NULL),
+            `if`( ! missing(stop_time_var), stop_time_var, NULL),
+            `if`( ! missing(frailty_var), frailty_var, NULL),
+            `if`( ! missing(spline_vars), spline_vars, NULL))
 
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in adjexplanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in stratvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in frailty_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- multisurvivalOptions$new(
         elapsedtime = elapsedtime,
@@ -1479,7 +1754,21 @@ multisurvival <- function(
         min_node = min_node,
         complexity = complexity,
         max_depth = max_depth,
-        show_terminal_nodes = show_terminal_nodes)
+        show_terminal_nodes = show_terminal_nodes,
+        use_time_dependent = use_time_dependent,
+        td_format = td_format,
+        time_dep_vars = time_dep_vars,
+        change_times = change_times,
+        td_suffix_pattern = td_suffix_pattern,
+        start_time_var = start_time_var,
+        stop_time_var = stop_time_var,
+        use_frailty = use_frailty,
+        frailty_var = frailty_var,
+        frailty_distribution = frailty_distribution,
+        use_splines = use_splines,
+        spline_vars = spline_vars,
+        spline_df = spline_df,
+        spline_type = spline_type)
 
     analysis <- multisurvivalClass$new(
         options = options,

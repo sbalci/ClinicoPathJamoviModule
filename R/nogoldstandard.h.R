@@ -238,6 +238,16 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="Upper CI", 
                         `superTitle`="Specificity", 
                         `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
                         `format`="pc"))))
             self$add(jmvcore::Table$new(
                 options=options,

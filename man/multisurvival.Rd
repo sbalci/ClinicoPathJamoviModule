@@ -57,7 +57,21 @@ multisurvival(
   min_node = 20,
   complexity = 0.01,
   max_depth = 5,
-  show_terminal_nodes = TRUE
+  show_terminal_nodes = TRUE,
+  use_time_dependent = FALSE,
+  td_format = "wide",
+  time_dep_vars,
+  change_times = "6, 12, 18",
+  td_suffix_pattern = "_t{time}",
+  start_time_var,
+  stop_time_var,
+  use_frailty = FALSE,
+  frailty_var,
+  frailty_distribution = "gamma",
+  use_splines = FALSE,
+  spline_vars,
+  spline_df = 3,
+  spline_type = "pspline"
 )
 }
 \arguments{
@@ -237,6 +251,62 @@ complexity of the tree to avoid overfitting.}
 
 \item{show_terminal_nodes}{If true, displays Kaplan-Meier survival curves
 for each terminal node of the decision tree.}
+
+\item{use_time_dependent}{Enable time-dependent covariates for Cox
+regression. This allows modeling variables that change values at specific
+time points during follow-up (e.g., treatment changes, biomarker
+measurements, disease progression).}
+
+\item{td_format}{Specify whether your data is in wide format (one row per
+subject with time points as separate variables) or long format (multiple
+rows per subject with time intervals).}
+
+\item{time_dep_vars}{Variables that change values over time. In wide
+format, these are baseline variables that will be updated at change points.
+In long format, these are the time-varying variables.}
+
+\item{change_times}{Time points (in same units as survival time) when
+time-dependent variables change. For wide format data, specify
+comma-separated time points (e.g., "6, 12, 18"). The function will create
+intervals and update covariate values at these times.}
+
+\item{td_suffix_pattern}{For wide format: Pattern for time-specific
+variable names. Use {time} as placeholder. Example: if baseline variable is
+'treatment' and pattern is '_t{time}',  the function looks for
+'treatment_t6', 'treatment_t12', etc.}
+
+\item{start_time_var}{For long format only: Variable indicating the start
+time of each interval. Leave empty for wide format data.}
+
+\item{stop_time_var}{For long format only: Variable indicating the stop
+time of each interval. Leave empty for wide format data.}
+
+\item{use_frailty}{Add a frailty term to account for unobserved
+heterogeneity or clustering in the data. Frailty models add random effects
+to the Cox model.}
+
+\item{frailty_var}{Clustering variable for the frailty term (e.g.,
+hospital, family, or study center). Each level represents a cluster with
+shared frailty.}
+
+\item{frailty_distribution}{Distribution of the frailty term. Gamma is most
+commonly used and assumes multiplicative effect on the hazard. Gaussian
+assumes additive effect on log-hazard.}
+
+\item{use_splines}{Use penalized splines to model time-varying effects
+(non-proportional hazards). This is an alternative to stratification for
+handling PH violations.}
+
+\item{spline_vars}{Variables to model with time-varying coefficients using
+splines. These are variables that violate the proportional hazards
+assumption.}
+
+\item{spline_df}{Degrees of freedom for the spline functions. Higher values
+allow more flexible time-varying effects but may lead to overfitting.}
+
+\item{spline_type}{Type of spline basis to use. Penalized splines provide
+smooth functions with automatic smoothness selection. Natural splines are
+constrained to be linear at the boundaries.}
 }
 \value{
 A results object containing:
@@ -290,7 +360,90 @@ or examining multiple predictors, the model accounts for how these factors
 influence event rates relative to the person-time at risk in each subgroup.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Example 1: Basic multivariable Cox regression
+library(survival)
+data(colon)
+
+multisurvival(
+    data = colon,
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    explanatory = c("sex", "obstruct", "perfor"),
+    contexpl = c("age", "nodes"),
+    timetypeoutput = "days",
+    hr = TRUE  # Show hazard ratio plot
+)
+
+# Example 2: Using dates to calculate survival time
+# Assuming you have diagnosis and follow-up dates
+multisurvival(
+    data = mydata,
+    tint = TRUE,
+    dxdate = "diagnosis_date",
+    fudate = "last_followup_date",
+    timetypedata = "ymd",
+    timetypeoutput = "months",
+    outcome = "vital_status",
+    outcomeLevel = "Dead",
+    explanatory = c("stage", "grade"),
+    contexpl = "age"
+)
+
+# Example 3: Risk stratification analysis
+multisurvival(
+    data = colon,
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    explanatory = c("sex", "obstruct"),
+    contexpl = c("age", "nodes"),
+    calculateRiskScore = TRUE,
+    numRiskGroups = "three",
+    plotRiskGroups = TRUE,
+    addRiskScore = TRUE,  # Add risk score to data
+    addRiskGroup = TRUE   # Add risk group to data
+)
+
+# Example 4: Model with stratification for non-proportional hazards
+multisurvival(
+    data = colon,
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    explanatory = c("obstruct", "perfor"),
+    contexpl = c("age", "nodes"),
+    use_stratify = TRUE,
+    stratvar = "sex",  # Stratify by sex if PH assumption violated
+    ph_cox = TRUE      # Test proportional hazards assumption
+)
+
+# Example 5: Stepwise model selection
+multisurvival(
+    data = colon,
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    explanatory = c("sex", "obstruct", "perfor", "adhere"),
+    contexpl = c("age", "nodes"),
+    use_modelSelection = TRUE,
+    modelSelection = "both",  # Stepwise selection
+    selectionCriteria = "aic",
+    pEntry = 0.05,
+    pRemoval = 0.10
+)
+
+# Example 6: Person-time analysis
+multisurvival(
+    data = colon,
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    explanatory = "sex",
+    contexpl = "age",
+    person_time = TRUE,
+    time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
+    rate_multiplier = 1000  # Rate per 1000 person-days
+)
+
 }

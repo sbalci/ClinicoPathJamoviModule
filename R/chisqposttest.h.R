@@ -12,7 +12,12 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             sig = 0.05,
             excl = FALSE,
             exp = FALSE,
-            plot = FALSE, ...) {
+            plot = FALSE,
+            showResiduals = TRUE,
+            showEducational = TRUE,
+            showDetailedTables = TRUE,
+            residualsCutoff = 2,
+            testSelection = "auto", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -63,6 +68,32 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "plot",
                 plot,
                 default=FALSE)
+            private$..showResiduals <- jmvcore::OptionBool$new(
+                "showResiduals",
+                showResiduals,
+                default=TRUE)
+            private$..showEducational <- jmvcore::OptionBool$new(
+                "showEducational",
+                showEducational,
+                default=TRUE)
+            private$..showDetailedTables <- jmvcore::OptionBool$new(
+                "showDetailedTables",
+                showDetailedTables,
+                default=TRUE)
+            private$..residualsCutoff <- jmvcore::OptionNumber$new(
+                "residualsCutoff",
+                residualsCutoff,
+                min=1.5,
+                max=4,
+                default=2)
+            private$..testSelection <- jmvcore::OptionList$new(
+                "testSelection",
+                testSelection,
+                options=list(
+                    "auto",
+                    "chisquare",
+                    "fisher"),
+                default="auto")
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -71,6 +102,11 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..excl)
             self$.addOption(private$..exp)
             self$.addOption(private$..plot)
+            self$.addOption(private$..showResiduals)
+            self$.addOption(private$..showEducational)
+            self$.addOption(private$..showDetailedTables)
+            self$.addOption(private$..residualsCutoff)
+            self$.addOption(private$..testSelection)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -79,7 +115,12 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         sig = function() private$..sig$value,
         excl = function() private$..excl$value,
         exp = function() private$..exp$value,
-        plot = function() private$..plot$value),
+        plot = function() private$..plot$value,
+        showResiduals = function() private$..showResiduals$value,
+        showEducational = function() private$..showEducational$value,
+        showDetailedTables = function() private$..showDetailedTables$value,
+        residualsCutoff = function() private$..residualsCutoff$value,
+        testSelection = function() private$..testSelection$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -87,7 +128,12 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..sig = NA,
         ..excl = NA,
         ..exp = NA,
-        ..plot = NA)
+        ..plot = NA,
+        ..showResiduals = NA,
+        ..showEducational = NA,
+        ..showDetailedTables = NA,
+        ..residualsCutoff = NA,
+        ..testSelection = NA)
 )
 
 chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -96,8 +142,12 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         todo = function() private$.items[["todo"]],
         chisqTable = function() private$.items[["chisqTable"]],
+        educationalOverview = function() private$.items[["educationalOverview"]],
         contingencyTable = function() private$.items[["contingencyTable"]],
+        residualsAnalysis = function() private$.items[["residualsAnalysis"]],
+        multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
         posthocTable = function() private$.items[["posthocTable"]],
+        detailedComparisons = function() private$.items[["detailedComparisons"]],
         plotOutput = function() private$.items[["plotOutput"]]),
     private = list(),
     public=list(
@@ -146,6 +196,13 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="educationalOverview",
+                title="Analysis Guide",
+                clearWith=list(
+                    "rows",
+                    "cols")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="contingencyTable",
                 title="Contingency Table",
                 clearWith=list(
@@ -153,14 +210,34 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cols",
                     "excl",
                     "exp")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="residualsAnalysis",
+                title="Standardized Residuals Analysis",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multipleTestingInfo",
+                title="Multiple Testing Information",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "posthoc")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="posthocTable",
-                title="Post-Hoc Test Results",
+                title="Pairwise Comparison Results",
                 columns=list(
                     list(
                         `name`="comparison", 
                         `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="test_method", 
+                        `title`="Test Method", 
                         `type`="text"),
                     list(
                         `name`="chi", 
@@ -177,9 +254,23 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
+                        `name`="effect_size", 
+                        `title`="Effect Size (Phi)", 
+                        `type`="number"),
+                    list(
                         `name`="sig", 
                         `title`="Significant", 
                         `type`="text")),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "posthoc",
+                    "sig",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="detailedComparisons",
+                title="Detailed Pairwise Comparison Tables",
                 clearWith=list(
                     "rows",
                     "cols",
@@ -236,12 +327,25 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl exclude missing values from analysis
 #' @param exp show expected values in the table
 #' @param plot display plot of standardized residuals
+#' @param showResiduals display standardized residuals analysis with
+#'   interpretation
+#' @param showEducational display educational guidance and explanations
+#' @param showDetailedTables display individual 2x2 tables for each pairwise
+#'   comparison
+#' @param residualsCutoff critical value for identifying significant residuals
+#'   (typically 2.0 or 3.0)
+#' @param testSelection method for selecting statistical test for pairwise
+#'   comparisons
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plotOutput} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -260,7 +364,12 @@ chisqposttest <- function(
     sig = 0.05,
     excl = FALSE,
     exp = FALSE,
-    plot = FALSE) {
+    plot = FALSE,
+    showResiduals = TRUE,
+    showEducational = TRUE,
+    showDetailedTables = TRUE,
+    residualsCutoff = 2,
+    testSelection = "auto") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("chisqposttest requires jmvcore to be installed (restart may be required)")
@@ -283,7 +392,12 @@ chisqposttest <- function(
         sig = sig,
         excl = excl,
         exp = exp,
-        plot = plot)
+        plot = plot,
+        showResiduals = showResiduals,
+        showEducational = showEducational,
+        showDetailedTables = showDetailedTables,
+        residualsCutoff = residualsCutoff,
+        testSelection = testSelection)
 
     analysis <- chisqposttestClass$new(
         options = options,

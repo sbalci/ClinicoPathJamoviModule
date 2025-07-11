@@ -8,7 +8,20 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            highlight = NULL, ...) {
+            highlight = NULL,
+            sortBy = "original",
+            orientation = "vertical",
+            showValues = FALSE,
+            showMean = FALSE,
+            colorScheme = "default",
+            theme = "default",
+            pointSize = 3,
+            lineWidth = 1,
+            xlabel = NULL,
+            ylabel = NULL,
+            title = NULL,
+            width = 800,
+            height = 600, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,26 +48,141 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "highlight",
                 highlight,
                 variable="(group)")
+            private$..sortBy <- jmvcore::OptionList$new(
+                "sortBy",
+                sortBy,
+                options=list(
+                    "original",
+                    "value_asc",
+                    "value_desc",
+                    "group_alpha"),
+                default="original")
+            private$..orientation <- jmvcore::OptionList$new(
+                "orientation",
+                orientation,
+                options=list(
+                    "vertical",
+                    "horizontal"),
+                default="vertical")
+            private$..showValues <- jmvcore::OptionBool$new(
+                "showValues",
+                showValues,
+                default=FALSE)
+            private$..showMean <- jmvcore::OptionBool$new(
+                "showMean",
+                showMean,
+                default=FALSE)
+            private$..colorScheme <- jmvcore::OptionList$new(
+                "colorScheme",
+                colorScheme,
+                options=list(
+                    "default",
+                    "clinical",
+                    "viridis",
+                    "colorblind"),
+                default="default")
+            private$..theme <- jmvcore::OptionList$new(
+                "theme",
+                theme,
+                options=list(
+                    "default",
+                    "minimal",
+                    "classic",
+                    "publication"),
+                default="default")
+            private$..pointSize <- jmvcore::OptionNumber$new(
+                "pointSize",
+                pointSize,
+                default=3,
+                min=1,
+                max=10)
+            private$..lineWidth <- jmvcore::OptionNumber$new(
+                "lineWidth",
+                lineWidth,
+                default=1,
+                min=0.5,
+                max=5)
+            private$..xlabel <- jmvcore::OptionString$new(
+                "xlabel",
+                xlabel)
+            private$..ylabel <- jmvcore::OptionString$new(
+                "ylabel",
+                ylabel)
+            private$..title <- jmvcore::OptionString$new(
+                "title",
+                title)
+            private$..width <- jmvcore::OptionInteger$new(
+                "width",
+                width,
+                default=800,
+                min=300,
+                max=1200)
+            private$..height <- jmvcore::OptionInteger$new(
+                "height",
+                height,
+                default=600,
+                min=300,
+                max=1000)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..highlight)
+            self$.addOption(private$..sortBy)
+            self$.addOption(private$..orientation)
+            self$.addOption(private$..showValues)
+            self$.addOption(private$..showMean)
+            self$.addOption(private$..colorScheme)
+            self$.addOption(private$..theme)
+            self$.addOption(private$..pointSize)
+            self$.addOption(private$..lineWidth)
+            self$.addOption(private$..xlabel)
+            self$.addOption(private$..ylabel)
+            self$.addOption(private$..title)
+            self$.addOption(private$..width)
+            self$.addOption(private$..height)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        highlight = function() private$..highlight$value),
+        highlight = function() private$..highlight$value,
+        sortBy = function() private$..sortBy$value,
+        orientation = function() private$..orientation$value,
+        showValues = function() private$..showValues$value,
+        showMean = function() private$..showMean$value,
+        colorScheme = function() private$..colorScheme$value,
+        theme = function() private$..theme$value,
+        pointSize = function() private$..pointSize$value,
+        lineWidth = function() private$..lineWidth$value,
+        xlabel = function() private$..xlabel$value,
+        ylabel = function() private$..ylabel$value,
+        title = function() private$..title$value,
+        width = function() private$..width$value,
+        height = function() private$..height$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..highlight = NA)
+        ..highlight = NA,
+        ..sortBy = NA,
+        ..orientation = NA,
+        ..showValues = NA,
+        ..showMean = NA,
+        ..colorScheme = NA,
+        ..theme = NA,
+        ..pointSize = NA,
+        ..lineWidth = NA,
+        ..xlabel = NA,
+        ..ylabel = NA,
+        ..title = NA,
+        ..width = NA,
+        ..height = NA)
 )
 
 lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lollipopResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
+        todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -65,16 +193,30 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Lollipop Chart",
                 refs=list(
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Lollipop Chart"))
+                name="todo",
+                title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Data Summary",
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Lollipop Chart",
-                width=600,
-                height=450,
+                width=700,
+                height=500,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -101,23 +243,79 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Lollipop Chart
 #'
-#' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param highlight .
+#' Creates lollipop charts for categorical data visualization with emphasis on 
+#' clinical applications like patient timelines, treatment outcomes, and 
+#' biomarker comparisons.
+#'
+#' @examples
+#' # Basic lollipop chart
+#' lollipop(
+#'     data = clinical_data,
+#'     dep = "biomarker_level",
+#'     group = "patient_id"
+#' )
+#'
+#' # Advanced lollipop with customization
+#' lollipop(
+#'     data = clinical_data,
+#'     dep = "biomarker_level",
+#'     group = "patient_id",
+#'     highlight = "high_risk_patient",
+#'     sortBy = "value",
+#'     showValues = TRUE,
+#'     orientation = "horizontal"
+#' )
+#'
+#' @param data The data as a data frame.
+#' @param dep The numeric variable for the values (lollipop heights/lengths).
+#' @param group The categorical variable for grouping (lollipop categories).
+#' @param highlight Specific level to highlight in the plot with different
+#'   color/style.
+#' @param sortBy How to sort the lollipops in the chart.
+#' @param orientation Chart orientation (vertical or horizontal lollipops).
+#' @param showValues Whether to display value labels on the lollipops.
+#' @param showMean Whether to display a reference line at the mean value.
+#' @param colorScheme Color scheme for the lollipops.
+#' @param theme Overall theme/appearance of the plot.
+#' @param pointSize Size of the lollipop points.
+#' @param lineWidth Width of the lollipop stems.
+#' @param xlabel Custom label for the x-axis.
+#' @param ylabel Custom label for the y-axis.
+#' @param title Custom title for the plot.
+#' @param width Width of the plot in pixels.
+#' @param height Height of the plot in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 lollipop <- function(
     data,
     dep,
     group,
-    highlight) {
+    highlight,
+    sortBy = "original",
+    orientation = "vertical",
+    showValues = FALSE,
+    showMean = FALSE,
+    colorScheme = "default",
+    theme = "default",
+    pointSize = 3,
+    lineWidth = 1,
+    xlabel,
+    ylabel,
+    title,
+    width = 800,
+    height = 600) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("lollipop requires jmvcore to be installed (restart may be required)")
@@ -135,7 +333,20 @@ lollipop <- function(
     options <- lollipopOptions$new(
         dep = dep,
         group = group,
-        highlight = highlight)
+        highlight = highlight,
+        sortBy = sortBy,
+        orientation = orientation,
+        showValues = showValues,
+        showMean = showMean,
+        colorScheme = colorScheme,
+        theme = theme,
+        pointSize = pointSize,
+        lineWidth = lineWidth,
+        xlabel = xlabel,
+        ylabel = ylabel,
+        title = title,
+        width = width,
+        height = height)
 
     analysis <- lollipopClass$new(
         options = options,

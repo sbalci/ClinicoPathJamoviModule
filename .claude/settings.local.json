@@ -38,7 +38,10 @@
       "Bash(R:*)",
       "WebFetch(domain:r-graph-gallery.com)",
       "Bash(quarto render:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(cp:*)",
+      "Bash(awk:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

@@ -30,7 +30,7 @@ required_packages:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
@@ -78,7 +78,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"
@@ -159,7 +159,7 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"
@@ -197,6 +197,7 @@ modules:
       - "jamovi"
 
 # File extensions to copy for jamovi modules
+
 jamovi_extensions:
   - ".b.R"
   - ".a.yaml"
