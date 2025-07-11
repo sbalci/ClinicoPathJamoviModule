@@ -1,0 +1,95 @@
+---
+name: ggsegmentedtotalbar
+title: Segmented Total Bar Charts
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Instructions'
+      type: Html
+      visible: true
+
+    - name: plot
+      title: Segmented Total Bar Chart
+      type: Image
+      width: 650
+      height: 450
+      requiresData: true
+      refs: ggplot2
+
+    - name: summary
+      title: 'Chart Summary'
+      type: Table
+      rows: 1
+      visible: (x_var && y_var && fill_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+      columns:
+        - name: categories
+          title: 'Categories'
+          type: integer
+        - name: segments
+          title: 'Segments'
+          type: integer
+        - name: total_observations
+          title: 'Total Observations'
+          type: integer
+        - name: chart_type
+          title: 'Chart Type'
+          type: text
+
+    - name: composition_table
+      title: 'Composition Analysis'
+      type: Table
+      visible: (x_var && y_var && fill_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+      columns:
+        - name: category
+          title: 'Category'
+          type: text
+        - name: segment
+          title: 'Segment'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: pc
+        - name: total_in_category
+          title: 'Category Total'
+          type: integer
+
+    - name: detailed_stats
+      title: 'Detailed Statistics'
+      type: Table
+      visible: false
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+      columns:
+        - name: measure
+          title: 'Measure'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: interpretation
+      title: 'Chart Interpretation'
+      type: Html
+      visible: (x_var && y_var && fill_var)
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+
+refs:
+  - ggplot2
