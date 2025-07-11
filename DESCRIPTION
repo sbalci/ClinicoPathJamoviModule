@@ -185,7 +185,8 @@ Imports:
     grDevices,
     grid,
     mlr3measures,
-    vcdExtra
+    vcdExtra,
+    ggoncoplot
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -199,7 +200,9 @@ Remotes:
     hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
     alstockdale/sumvar,
-    mlr-org/mlr3extralearners@v1.0.0
+    mlr-org/mlr3extralearners@v1.0.0,
+    selkamand/ggoncoplot,
+    CCICB/ggEDA
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

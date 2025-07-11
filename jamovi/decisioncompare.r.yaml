@@ -241,6 +241,20 @@ items:
       refs:
           - ggplot2
 
+    # Radar Plot
+    - name: plotRadar
+      title: 'Radar Plot Comparison'
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotRadar
+      requiresData: true
+      visible: (radarplot)
+      clearWith:
+          - radarplot
+      refs:
+          - ggplot2
+
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule
