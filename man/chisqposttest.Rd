@@ -12,7 +12,12 @@ chisqposttest(
   sig = 0.05,
   excl = FALSE,
   exp = FALSE,
-  plot = FALSE
+  plot = FALSE,
+  showResiduals = TRUE,
+  showEducational = TRUE,
+  showDetailedTables = TRUE,
+  residualsCutoff = 2,
+  testSelection = "auto"
 )
 }
 \arguments{
@@ -31,14 +36,32 @@ chisqposttest(
 \item{exp}{show expected values in the table}
 
 \item{plot}{display plot of standardized residuals}
+
+\item{showResiduals}{display standardized residuals analysis with
+interpretation}
+
+\item{showEducational}{display educational guidance and explanations}
+
+\item{showDetailedTables}{display individual 2x2 tables for each pairwise
+comparison}
+
+\item{residualsCutoff}{critical value for identifying significant residuals
+(typically 2.0 or 3.0)}
+
+\item{testSelection}{method for selecting statistical test for pairwise
+comparisons}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+\code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
 \code{results$plotOutput} \tab \tab \tab \tab \tab an image \cr
 }
 

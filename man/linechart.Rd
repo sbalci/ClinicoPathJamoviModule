@@ -4,22 +4,103 @@
 \alias{linechart}
 \title{Line Chart}
 \usage{
-linechart(data, xvar, yvar)
+linechart(
+  data,
+  xvar,
+  yvar,
+  groupby,
+  confidence = FALSE,
+  trendline = FALSE,
+  points = TRUE,
+  smooth = FALSE,
+  refline,
+  reflineLabel = "Reference",
+  colorPalette = "default",
+  theme = "default",
+  xlabel,
+  ylabel,
+  title,
+  width = 800,
+  height = 600
+)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{xvar}{.}
+\item{xvar}{The variable for the x-axis. Typically represents time,
+sequence, or ordered categories.}
 
-\item{yvar}{.}
+\item{yvar}{The variable for the y-axis. Must be numeric (continuous
+variable).}
+
+\item{groupby}{Optional grouping variable to create multiple lines (e.g.,
+treatment groups, patient categories).}
+
+\item{confidence}{Whether to display confidence intervals around the
+line(s).}
+
+\item{trendline}{Whether to add a trend line (linear regression) to the
+plot.}
+
+\item{points}{Whether to show individual data points on the line(s).}
+
+\item{smooth}{Whether to apply smoothing (loess) to the line(s).}
+
+\item{refline}{Optional reference line value (e.g., normal range,
+threshold).}
+
+\item{reflineLabel}{Label for the reference line.}
+
+\item{colorPalette}{Color palette for multiple groups.}
+
+\item{theme}{Overall theme/appearance of the plot.}
+
+\item{xlabel}{Custom label for the x-axis.}
+
+\item{ylabel}{Custom label for the y-axis.}
+
+\item{title}{Custom title for the plot.}
+
+\item{width}{Width of the plot in pixels.}
+
+\item{height}{Height of the plot in pixels.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
-Line Chart
+Creates line charts for time series analysis and trend visualization, with
+support for multiple groups, confidence intervals, and statistical
+overlays.
+}
+\examples{
+# Basic line chart
+linechart(
+    data = clinical_data,
+    xvar = "time_point",
+    yvar = "lab_value"
+)
+
+# Grouped line chart with confidence intervals
+linechart(
+    data = clinical_data,
+    xvar = "time_point",
+    yvar = "lab_value",
+    groupby = "treatment_group",
+    confidence = TRUE,
+    trendline = TRUE
+)
+
 }

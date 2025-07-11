@@ -8,6 +8,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             explanatory = NULL,
             outcome = NULL,
+            outcomeLevel = NULL,
             showNomogram = FALSE, ...) {
 
             super$initialize(
@@ -33,6 +34,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(outcome)")
             private$..showNomogram <- jmvcore::OptionBool$new(
                 "showNomogram",
                 showNomogram,
@@ -40,15 +45,18 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..showNomogram)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
         showNomogram = function() private$..showNomogram$value),
     private = list(
         ..explanatory = NA,
         ..outcome = NA,
+        ..outcomeLevel = NA,
         ..showNomogram = NA)
 )
 
@@ -152,6 +160,9 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.
+#' @param outcomeLevel Specify which outcome level represents the positive
+#'   case for likelihood ratio calculations. If not specified, the function will
+#'   use the second level alphabetically.
 #' @param showNomogram Display an interactive nomogram for converting pre-test
 #'   to post-test  probabilities using likelihood ratios calculated from the
 #'   data.
@@ -170,6 +181,7 @@ oddsratio <- function(
     data,
     explanatory,
     outcome,
+    outcomeLevel,
     showNomogram = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -188,6 +200,7 @@ oddsratio <- function(
     options <- oddsratioOptions$new(
         explanatory = explanatory,
         outcome = outcome,
+        outcomeLevel = outcomeLevel,
         showNomogram = showNomogram)
 
     analysis <- oddsratioClass$new(

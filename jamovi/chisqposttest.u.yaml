@@ -23,7 +23,7 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Options
+    label: Statistical Options
     collapsed: true
     children:
       - type: LayoutBox
@@ -35,9 +35,28 @@ children:
             name: sig
             format: number
             suffix: α
+          - type: ComboBox
+            name: testSelection
+          - type: TextBox
+            name: residualsCutoff
+            format: number
+            suffix: σ
           - type: CheckBox
             name: excl
           - type: CheckBox
             name: exp
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showEducational
+          - type: CheckBox
+            name: showResiduals
+          - type: CheckBox
+            name: showDetailedTables
           - type: CheckBox
             name: plot

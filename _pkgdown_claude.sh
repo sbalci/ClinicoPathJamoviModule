@@ -13,3 +13,8 @@ Rscript -e "
     ),
     error = function(e) cat('ERROR:', conditionMessage(e), '\n')
   )" | claude
+
+
+Rscript -e 'tryCatch(jmvtools::prepare(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude
+
+Rscript -e 'tryCatch(devtools::document(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude

@@ -34,6 +34,13 @@ items:
           - cols
           - excl
 
+    - name:  educationalOverview
+      title: 'Analysis Guide'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+
     - name:  contingencyTable
       title: 'Contingency Table'
       type:  Html
@@ -43,12 +50,31 @@ items:
           - excl
           - exp
 
+    - name:  residualsAnalysis
+      title: 'Standardized Residuals Analysis'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+          - excl
+
+    - name:  multipleTestingInfo
+      title: 'Multiple Testing Information'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+
     - name:  posthocTable
-      title: 'Post-Hoc Test Results'
+      title: 'Pairwise Comparison Results'
       type:  Table
       columns:
         - name: comparison
           title: "Comparison"
+          type: text
+        - name: test_method
+          title: "Test Method"
           type: text
         - name: chi
           title: "Chi-Square"
@@ -61,9 +87,22 @@ items:
           title: "Adj. p-value"
           type: number
           format: zto,pvalue
+        - name: effect_size
+          title: "Effect Size (Phi)"
+          type: number
         - name: sig
           title: "Significant"
           type: text
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+          - sig
+          - excl
+
+    - name:  detailedComparisons
+      title: 'Detailed Pairwise Comparison Tables'
+      type:  Html
       clearWith:
           - rows
           - cols

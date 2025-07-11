@@ -2,27 +2,51 @@
 % Please edit documentation in R/parallelplot.h.R
 \name{parallelplot}
 \alias{parallelplot}
-\title{Parallel Plot}
+\title{Parallel Coordinates Plot}
 \usage{
-parallelplot(data, dep, group, alt = "notequal", varEq = TRUE)
+parallelplot(
+  data,
+  vars,
+  group,
+  scaling = "std",
+  alpha = 0.7,
+  showMissing = FALSE,
+  interactive = TRUE,
+  colorPalette = "default"
+)
 }
 \arguments{
 \item{data}{.}
 
-\item{dep}{.}
+\item{vars}{Select multiple continuous variables for parallel coordinates}
 
-\item{group}{.}
+\item{group}{Variable for coloring and grouping lines}
 
-\item{alt}{.}
+\item{scaling}{Method for scaling variables to comparable ranges}
 
-\item{varEq}{.}
+\item{alpha}{Transparency level for parallel coordinate lines}
+
+\item{showMissing}{Include cases with missing values}
+
+\item{interactive}{Create interactive plotly visualization}
+
+\item{colorPalette}{Color scheme for grouping variable}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotly} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
-Parallel Plot
+Parallel Coordinates Plot
 }

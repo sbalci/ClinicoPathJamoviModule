@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.48
+version: 0.0.3.52
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -447,19 +447,6 @@ analyses:
     menuSubtitle: Summary Tables
     ribbon: analyses
     category: analyses
-  - title: Pairwise Chi-Square Test
-    name: pairchi2
-    ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuTitle: Pairwise Chi-Square Test
-    menuSubgroup: ClinicoPath Comparisons
-    menuSubtitle: Association
-    ribbon: analyses
-    description: |
-      Performs post-hoc pairwise chi-square tests following a significant
-      overall chi-square test of independence. Includes multiple testing
-      correction and standardized residuals analysis.
-    category: analyses
   - title: Tools for data summary
     name: toolssummary
     ns: ClinicoPath
@@ -795,11 +782,11 @@ analyses:
       for enhanced customization and connectivity features.
     ribbon: analyses
     category: analyses
-  - title: Enhanced Outcome Organizer for Survival Analysis
+  - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalD
-    menuTitle: Enhanced Outcome Organizer for Survival Analysis
+    menuGroup: Survival
+    menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
     description: >-
@@ -923,18 +910,23 @@ analyses:
     menuTitle: Treatment Pathway Alluvial Plot
     ribbon: analyses
     category: analyses
-  - title: Stage Migration Analysis
+  - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Survival
-    menuTitle: Stage Migration Analysis
-    menuSubtitle: Will Rogers Phenomenon Analysis
+    menuGroup: Survival
+    menuSubgroup: Stage Migration Analysis
+    menuTitle: Advanced TNM Stage Migration Analysis
+    menuSubtitle: State-of-the-Art Staging System Validation
     description: >-
-      Analyzes staging system changes and the "Will Rogers Phenomenon" in
-      disease staging.  This analysis compares staging distributions before and
-      after a staging system change, quantifies stage migration, and evaluates
-      changes in prognostic performance.
+      Comprehensive analysis for validating TNM staging system improvements
+      using state-of-the-art  statistical methods. This analysis provides
+      pathologists with robust tools to evaluate whether  a new staging system
+      provides superior prognostic discrimination compared to existing systems.
+
+      Includes advanced metrics: Net Reclassification Improvement (NRI),
+      Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
+      decision curve analysis, bootstrap validation,  and comprehensive clinical
+      interpretation guidance.
     ribbon: analyses
     category: analyses
   - title: Interrater Reliability
@@ -1395,9 +1387,13 @@ analyses:
     menuGroup: JJStatsPlotD
     menuSubgroup: Drafts
     menuTitle: Line Chart
-    menuSubtitle: Exploration
+    menuSubtitle: Time Series and Trend Analysis
     ribbon: analyses
     category: analyses
+    description: >-
+      Creates line charts for time series analysis and trend visualization, with
+      support for multiple groups, confidence intervals, and statistical
+      overlays.
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
@@ -1406,13 +1402,18 @@ analyses:
     menuTitle: Lollipop Chart
     ribbon: analyses
     category: analyses
-  - title: Parallel Plot
+    menuSubtitle: Categorical Data Visualization
+    description: >-
+      Creates lollipop charts for categorical data visualization with emphasis
+      on clinical applications like patient timelines, treatment outcomes, and
+      biomarker comparisons.
+  - title: Parallel Coordinates Plot
     name: parallelplot
     ns: ClinicoPath
     menuGroup: JJStatsPlotD
-    menuTitle: Parallel Plot
-    menuSubgroup: Drafts
-    menuSubtitle: Exploration
+    menuTitle: Parallel Coordinates Plot
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuSubtitle: Multivariate Exploration
     ribbon: analyses
     category: analyses
   - title: Positive Predictive Value

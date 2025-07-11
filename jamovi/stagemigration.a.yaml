@@ -2,7 +2,7 @@
 name: stagemigration
 title: Advanced TNM Stage Migration Analysis
 menuGroup: Survival
-menuSubgroup: ClinicoPath Survival
+menuSubgroup: Stage Migration Analysis
 menuSubtitle: 'State-of-the-Art Staging System Validation'
 version: '0.0.3'
 jas: '1.2'
@@ -116,7 +116,7 @@ options:
     - name: calculateNRI
       title: 'Net Reclassification Improvement (NRI)'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate Net Reclassification Improvement to quantify improvement in 
         risk classification between staging systems. Essential for staging validation.
@@ -132,7 +132,7 @@ options:
     - name: calculateIDI
       title: 'Integrated Discrimination Improvement (IDI)'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate Integrated Discrimination Improvement to measure improvement 
         in risk prediction accuracy between staging systems.
@@ -140,7 +140,7 @@ options:
     - name: performROCAnalysis
       title: 'Time-dependent ROC Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform time-dependent ROC analysis to compare discriminative ability
         of staging systems over time.
@@ -156,7 +156,7 @@ options:
     - name: performDCA
       title: 'Decision Curve Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform Decision Curve Analysis to assess clinical utility and net benefit
         of the new staging system for clinical decision making.
@@ -164,7 +164,7 @@ options:
     - name: performCalibration
       title: 'Calibration Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Assess calibration of risk predictions from both staging systems.
         Important for validating accuracy of survival predictions.
@@ -173,7 +173,7 @@ options:
     - name: performBootstrap
       title: 'Bootstrap Validation'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform bootstrap validation with optimism correction to assess
         internal validity of results. Recommended for all staging validation studies.
@@ -230,7 +230,7 @@ options:
     - name: performHomogeneityTests
       title: 'Stage Homogeneity Tests'
       type: Bool
-      default: true
+      default: false
       description: >-
         Test homogeneity within stages and monotonic trend across stages.
         Essential for validating stage ordering and grouping.
@@ -238,7 +238,7 @@ options:
     - name: performTrendTests
       title: 'Stage Trend Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Test for monotonic trend in survival across stage levels.
         Validates that higher stages consistently have worse prognosis.
@@ -247,7 +247,7 @@ options:
     - name: performLikelihoodTests
       title: 'Likelihood Ratio Tests'
       type: Bool
-      default: true
+      default: false
       description: >-
         Perform formal likelihood ratio tests comparing nested staging models.
         Provides statistical significance testing for staging improvement.
@@ -255,56 +255,127 @@ options:
     - name: calculatePseudoR2
       title: 'Pseudo R-squared Measures'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate multiple pseudo R-squared measures for model comparison
         (Nagelkerke, McFadden, Cox-Snell).
+
+    # Table Display Options
+    - name: showMigrationOverview
+      title: 'Migration Overview Table'
+      type: Bool
+      default: true
+      description: >-
+        Display overview table showing the fundamental migration statistics including:
+        total number of patients, number and percentage of patients who migrated stages,
+        direction of migration (upstaged vs downstaged), and net migration effect.
+        This is the essential first table for understanding the overall impact of the
+        new staging system.
+
+    - name: showMigrationSummary
+      title: 'Migration Summary Table'
+      type: Bool
+      default: true
+      description: >-
+        Display statistical summary of migration patterns including overall migration
+        rate and formal statistical tests. Shows Chi-square test results for
+        independence and Fisher's exact test p-values to determine if the migration
+        patterns are statistically significant. Essential for validating whether
+        observed changes are due to genuine staging improvements or random variation.
+
+    - name: showStageDistribution
+      title: 'Stage Distribution Comparison Table'
+      type: Bool
+      default: true
+      description: >-
+        Display side-by-side comparison of how patients are distributed across stages
+        in both the original and new staging systems. Shows the count and percentage
+        of patients in each stage, along with the net change. This helps identify
+        which stages are gaining or losing patients and whether the new system
+        creates better separation between prognostic groups.
+
+    - name: showMigrationMatrix
+      title: 'Migration Matrix Table'
+      type: Bool
+      default: true
+      description: >-
+        Display detailed cross-tabulation matrix showing exactly how patients moved
+        between stages. Rows represent the original staging system and columns represent
+        the new staging system. Diagonal values indicate patients who remained in the
+        same stage, while off-diagonal values show stage migrations. This is essential
+        for understanding the specific migration patterns and identifying which stages
+        are most affected by the new criteria.
+
+    - name: showStatisticalComparison
+      title: 'Statistical Comparison Table'
+      type: Bool
+      default: true
+      description: >-
+        Display table with C-index comparisons and other statistical metrics.
+
+    - name: showConcordanceComparison
+      title: 'Concordance Comparison Table'
+      type: Bool
+      default: true
+      description: >-
+        Display detailed concordance comparison between staging systems.
 
     # Visualization Options
     - name: showMigrationHeatmap
       title: 'Migration Heatmap'
       type: Bool
-      default: true
+      default: false
       description: >-
-        Display detailed heatmap showing migration patterns between staging systems.
+        Display a color-coded heatmap visualization of the migration matrix. 
+        Darker colors indicate more patients, with the diagonal showing patients 
+        who remained in the same stage. This visual representation makes it easy 
+        to identify migration patterns at a glance - upstaging appears above the 
+        diagonal, downstaging below. Essential for presentations and publications.
 
     - name: showROCComparison
       title: 'ROC Curve Comparison'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display time-dependent ROC curves comparing staging systems.
 
     - name: showCalibrationPlots
       title: 'Calibration Plots'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display calibration plots for both staging systems.
 
     - name: showDecisionCurves
       title: 'Decision Curves'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display decision curves showing net benefit of staging systems.
 
     - name: showForestPlot
       title: 'Hazard Ratio Forest Plot'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display forest plot with stage-specific hazard ratios and confidence intervals.
 
     - name: showWillRogersAnalysis
       title: 'Will Rogers Phenomenon Analysis'
       type: Bool
-      default: true
+      default: false
       description: >-
         Detailed analysis of Will Rogers phenomenon with survival comparisons
         between migrated and non-migrated patients within stages.
 
     # Survival Plot Options
+    - name: showSurvivalCurves
+      title: 'Show Survival Curves'
+      type: Bool
+      default: false
+      description: >-
+        Display survival curves comparing the staging systems.
+    
     - name: survivalPlotType
       title: 'Survival Plot Display'
       type: List
@@ -324,14 +395,14 @@ options:
     - name: showConfidenceIntervals
       title: 'Show Confidence Intervals'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display confidence intervals around survival curves and other estimates.
 
     - name: showRiskTables
       title: 'Show Risk Tables'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display at-risk tables below survival curves.
 
@@ -347,7 +418,7 @@ options:
     - name: showClinicalInterpretation
       title: 'Clinical Interpretation Guide'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display comprehensive clinical interpretation of all statistical results
         with guidance for staging system adoption decisions.
@@ -355,21 +426,21 @@ options:
     - name: showStatisticalSummary
       title: 'Statistical Summary Table'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display comprehensive table summarizing all statistical comparisons.
 
     - name: showMethodologyNotes
       title: 'Methodology Notes'
       type: Bool
-      default: true
+      default: false
       description: >-
         Display detailed notes on statistical methods used and their interpretation.
 
     - name: includeEffectSizes
       title: 'Include Effect Sizes'
       type: Bool
-      default: true
+      default: false
       description: >-
         Calculate and display effect sizes for all comparisons to assess
         practical significance beyond statistical significance.
@@ -377,7 +448,7 @@ options:
     - name: generateExecutiveSummary
       title: 'Executive Summary'
       type: Bool
-      default: true
+      default: false
       description: >-
         Generate executive summary with key findings and recommendations
         for clinical and research stakeholders.
@@ -411,9 +482,18 @@ options:
     - name: useOptimismCorrection
       title: 'Apply Optimism Correction'
       type: Bool
-      default: true
+      default: false
       description: >-
         Apply optimism correction to performance metrics using bootstrap
         validation to avoid overly optimistic estimates.
+
+
+    - name: showExplanations
+      title: 'Explanations for Results'
+      type: Bool
+      default: true
+      description: >-
+        Include detailed explanations for results.
+
 
 ...

@@ -38,8 +38,8 @@ items:
     - name: plot
       title: 'Line Chart: `${yvar}` by `${xvar}`'
       type: Image
-      width: '`${width}`'
-      height: '`${height}`'
+      width: 700
+      height: 500
       renderFun: .plot
       requiresData: true
 

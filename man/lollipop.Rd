@@ -4,24 +4,98 @@
 \alias{lollipop}
 \title{Lollipop Chart}
 \usage{
-lollipop(data, dep, group, highlight)
+lollipop(
+  data,
+  dep,
+  group,
+  highlight,
+  sortBy = "original",
+  orientation = "vertical",
+  showValues = FALSE,
+  showMean = FALSE,
+  colorScheme = "default",
+  theme = "default",
+  pointSize = 3,
+  lineWidth = 1,
+  xlabel,
+  ylabel,
+  title,
+  width = 800,
+  height = 600
+)
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{The numeric variable for the values (lollipop heights/lengths).}
 
-\item{group}{.}
+\item{group}{The categorical variable for grouping (lollipop categories).}
 
-\item{highlight}{.}
+\item{highlight}{Specific level to highlight in the plot with different
+color/style.}
+
+\item{sortBy}{How to sort the lollipops in the chart.}
+
+\item{orientation}{Chart orientation (vertical or horizontal lollipops).}
+
+\item{showValues}{Whether to display value labels on the lollipops.}
+
+\item{showMean}{Whether to display a reference line at the mean value.}
+
+\item{colorScheme}{Color scheme for the lollipops.}
+
+\item{theme}{Overall theme/appearance of the plot.}
+
+\item{pointSize}{Size of the lollipop points.}
+
+\item{lineWidth}{Width of the lollipop stems.}
+
+\item{xlabel}{Custom label for the x-axis.}
+
+\item{ylabel}{Custom label for the y-axis.}
+
+\item{title}{Custom title for the plot.}
+
+\item{width}{Width of the plot in pixels.}
+
+\item{height}{Height of the plot in pixels.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
-Lollipop Chart
+Creates lollipop charts for categorical data visualization with emphasis on
+clinical applications like patient timelines, treatment outcomes, and
+biomarker comparisons.
+}
+\examples{
+# Basic lollipop chart
+lollipop(
+    data = clinical_data,
+    dep = "biomarker_level",
+    group = "patient_id"
+)
+
+# Advanced lollipop with customization
+lollipop(
+    data = clinical_data,
+    dep = "biomarker_level",
+    group = "patient_id",
+    highlight = "high_risk_patient",
+    sortBy = "value",
+    showValues = TRUE,
+    orientation = "horizontal"
+)
+
 }

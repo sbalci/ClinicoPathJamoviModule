@@ -1,16 +1,56 @@
 ---
 name:  parallelplot
-title: Parallel Plot
+title: Parallel Coordinates Plot
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: Parallel Plot
-      type:  Preformatted
+    - name:  instructions
+      title: Instructions
+      type:  Html
+      visible: (vars:length == 0)
 
+    - name:  plot
+      title: Parallel Coordinates Plot
+      type:  Image
+      width:  800
+      height: 600
+      renderFun: .plot
+      visible: (vars:length > 1)
+
+    - name:  plotly
+      title: Interactive Plot
+      type:  Html
+      visible: (interactive && vars:length > 1)
+
+    - name:  summary
+      title: Variable Summary
+      type:  Table
+      rows:  (vars)
+      visible: (vars:length > 1)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: missing
+          title: Missing
+          type: integer
+        - name: mean
+          title: Mean
+          type: number
+        - name: sd
+          title: SD
+          type: number
+        - name: min
+          title: Min
+          type: number
+        - name: max
+          title: Max
+          type: number
 
 refs:
     - ClinicoPathJamoviModule
-
 
 ...

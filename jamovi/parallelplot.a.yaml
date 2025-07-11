@@ -1,9 +1,9 @@
 ---
 name:  parallelplot
-title: Parallel Plot
+title: Parallel Coordinates Plot
 menuGroup: JJStatsPlotD
-menuSubgroup: Drafts
-menuSubtitle: Exploration
+menuSubgroup: ClinicoPath Descriptive Plots
+menuSubtitle: Multivariate Exploration
 version: '0.0.3'
 jas: '1.2'
 
@@ -11,28 +11,65 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
-      type: Variable
+    - name: vars
+      title: Variables
+      type: Variables
+      description: Select multiple continuous variables for parallel coordinates
 
     - name: group
       title: Grouping Variable
       type: Variable
+      default: null
+      description: Variable for coloring and grouping lines
 
-    - name: alt
-      title: Alternative hypothesis
+    - name: scaling
+      title: Variable Scaling
       type: List
       options:
-        - title: Not equal
-          name:  notequal
-        - title: One greater
-          name:  onegreater
-        - title: Two greater
-          name:  twogreater
-      default: notequal
+        - title: Standardize (z-score)
+          name:  std
+        - title: Scale to [0,1]
+          name:  uniminmax
+        - title: Scale to range
+          name:  minmax
+        - title: No scaling
+          name:  none
+      default: std
+      description: Method for scaling variables to comparable ranges
 
-    - name: varEq
-      title: Assume equal variances
+    - name: alpha
+      title: Line Transparency
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.7
+      description: Transparency level for parallel coordinate lines
+
+    - name: showMissing
+      title: Show Missing Values
+      type: Bool
+      default: false
+      description: Include cases with missing values
+
+    - name: interactive
+      title: Interactive Plot
       type: Bool
       default: true
+      description: Create interactive plotly visualization
+
+    - name: colorPalette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name:  default
+        - title: Viridis
+          name:  viridis
+        - title: Set1
+          name:  set1
+        - title: Clinical
+          name:  clinical
+      default: default
+      description: Color scheme for grouping variable
+
 ...

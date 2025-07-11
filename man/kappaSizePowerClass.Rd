@@ -2,11 +2,62 @@
 % Please edit documentation in R/kappasizepower.b.R
 \name{kappaSizePowerClass}
 \alias{kappaSizePowerClass}
-\title{Power Approach for the Number of Subjects Required}
+\title{Power Analysis for Inter-rater Agreement Studies}
 \description{
-Power Approach for the Number of Subjects Required
+Performs power analysis to determine the required sample size for detecting
+a specified improvement in inter-rater agreement (kappa coefficient). This function
+helps researchers design adequately powered studies to validate training programs,
+standardized protocols, or other interventions aimed at improving agreement between raters.
+}
+\details{
+The function calculates the sample size needed to detect a difference between
+two kappa values (kappa0 vs kappa1) with specified power and significance level.
+It supports 2-5 outcome categories and 2-5 raters, using the kappaSize package
+implementation of power calculations for different scenarios.
 
-Power Approach for the Number of Subjects Required
+Key requirements:
+\itemize{
+\item kappa1 must be greater than kappa0 (alternative hypothesis should represent improvement)
+\item Proportions must sum to 1.0 and match the number of outcome categories
+\item Power should be at least 0.50, typically 0.80 or higher
+}
+}
+\examples{
+\dontrun{
+# Basic binary outcome power analysis
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.40,           # Current agreement level
+  kappa1 = 0.60,           # Target agreement level
+  props = "0.30, 0.70",    # Expected proportions
+  raters = "2",            # Number of raters
+  alpha = 0.05,            # Significance level
+  power = 0.80             # Desired power
+)
+
+# Medical diagnosis validation study
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.50,           # Baseline fair agreement
+  kappa1 = 0.75,           # Target good agreement
+  props = "0.25, 0.75",    # 25\% disease prevalence
+  raters = "2",
+  alpha = 0.05,
+  power = 0.80
+)
+
+# Multi-category severity assessment
+result <- kappaSizePower(
+  outcome = "3",
+  kappa0 = 0.55,           # Current moderate agreement
+  kappa1 = 0.75,           # Target good agreement
+  props = "0.20, 0.50, 0.30", # Mild, moderate, severe
+  raters = "3",
+  alpha = 0.05,
+  power = 0.85
+)
+}
+
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::kappaSizePowerBase} -> \code{kappaSizePowerClass}

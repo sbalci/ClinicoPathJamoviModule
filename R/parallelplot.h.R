@@ -6,10 +6,13 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
+            vars = NULL,
             group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            scaling = "std",
+            alpha = 0.7,
+            showMissing = FALSE,
+            interactive = TRUE,
+            colorPalette = "default", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -17,60 +20,142 @@ parallelplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+                group,
+                default=NULL)
+            private$..scaling <- jmvcore::OptionList$new(
+                "scaling",
+                scaling,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
+                    "std",
+                    "uniminmax",
+                    "minmax",
+                    "none"),
+                default="std")
+            private$..alpha <- jmvcore::OptionNumber$new(
+                "alpha",
+                alpha,
+                min=0.1,
+                max=1,
+                default=0.7)
+            private$..showMissing <- jmvcore::OptionBool$new(
+                "showMissing",
+                showMissing,
+                default=FALSE)
+            private$..interactive <- jmvcore::OptionBool$new(
+                "interactive",
+                interactive,
                 default=TRUE)
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "viridis",
+                    "set1",
+                    "clinical"),
+                default="default")
 
-            self$.addOption(private$..dep)
+            self$.addOption(private$..vars)
             self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..scaling)
+            self$.addOption(private$..alpha)
+            self$.addOption(private$..showMissing)
+            self$.addOption(private$..interactive)
+            self$.addOption(private$..colorPalette)
         }),
     active = list(
-        dep = function() private$..dep$value,
+        vars = function() private$..vars$value,
         group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        scaling = function() private$..scaling$value,
+        alpha = function() private$..alpha$value,
+        showMissing = function() private$..showMissing$value,
+        interactive = function() private$..interactive$value,
+        colorPalette = function() private$..colorPalette$value),
     private = list(
-        ..dep = NA,
+        ..vars = NA,
         ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..scaling = NA,
+        ..alpha = NA,
+        ..showMissing = NA,
+        ..interactive = NA,
+        ..colorPalette = NA)
 )
 
 parallelplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "parallelplotResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        instructions = function() private$.items[["instructions"]],
+        plot = function() private$.items[["plot"]],
+        plotly = function() private$.items[["plotly"]],
+        summary = function() private$.items[["summary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Parallel Plot",
+                title="Parallel Coordinates Plot",
                 refs=list(
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="text",
-                title="Parallel Plot"))}))
+                name="instructions",
+                title="Instructions",
+                visible="(vars:length == 0)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Parallel Coordinates Plot",
+                width=800,
+                height=600,
+                renderFun=".plot",
+                visible="(vars:length > 1)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plotly",
+                title="Interactive Plot",
+                visible="(interactive && vars:length > 1)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Variable Summary",
+                rows="(vars)",
+                visible="(vars:length > 1)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number"),
+                    list(
+                        `name`="min", 
+                        `title`="Min", 
+                        `type`="number"),
+                    list(
+                        `name`="max", 
+                        `title`="Max", 
+                        `type`="number"))))}))
 
 parallelplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "parallelplotBase",
@@ -93,44 +178,62 @@ parallelplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Parallel Plot
+#' Parallel Coordinates Plot
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param vars Select multiple continuous variables for parallel coordinates
+#' @param group Variable for coloring and grouping lines
+#' @param scaling Method for scaling variables to comparable ranges
+#' @param alpha Transparency level for parallel coordinate lines
+#' @param showMissing Include cases with missing values
+#' @param interactive Create interactive plotly visualization
+#' @param colorPalette Color scheme for grouping variable
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotly} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 parallelplot <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    vars,
+    group = NULL,
+    scaling = "std",
+    alpha = 0.7,
+    showMissing = FALSE,
+    interactive = TRUE,
+    colorPalette = "default") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("parallelplot requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
+            `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(group), group, NULL))
 
 
     options <- parallelplotOptions$new(
-        dep = dep,
+        vars = vars,
         group = group,
-        alt = alt,
-        varEq = varEq)
+        scaling = scaling,
+        alpha = alpha,
+        showMissing = showMissing,
+        interactive = interactive,
+        colorPalette = colorPalette)
 
     analysis <- parallelplotClass$new(
         options = options,

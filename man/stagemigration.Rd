@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagemigration.h.R
 \name{stagemigration}
 \alias{stagemigration}
-\title{Stage Migration Analysis}
+\title{Advanced TNM Stage Migration Analysis}
 \usage{
 stagemigration(
   data,
@@ -11,81 +11,319 @@ stagemigration(
   survivalTime,
   event,
   eventLevel,
-  plotMigration = TRUE,
+  analysisType = "comprehensive",
+  confidenceLevel = 0.95,
+  calculateNRI = FALSE,
+  nriTimePoints = "12, 24, 60",
+  calculateIDI = FALSE,
+  performROCAnalysis = FALSE,
+  rocTimePoints = "12, 24, 36, 60",
+  performDCA = FALSE,
+  performCalibration = FALSE,
+  performBootstrap = FALSE,
+  bootstrapReps = 1000,
+  performCrossValidation = FALSE,
+  cvFolds = 5,
+  clinicalSignificanceThreshold = 0.02,
+  nriClinicalThreshold = 0.2,
+  performHomogeneityTests = FALSE,
+  performTrendTests = FALSE,
+  performLikelihoodTests = FALSE,
+  calculatePseudoR2 = FALSE,
+  showMigrationOverview = TRUE,
+  showMigrationSummary = TRUE,
+  showStageDistribution = TRUE,
+  showMigrationMatrix = TRUE,
+  showStatisticalComparison = TRUE,
+  showConcordanceComparison = TRUE,
+  showMigrationHeatmap = FALSE,
+  showROCComparison = FALSE,
+  showCalibrationPlots = FALSE,
+  showDecisionCurves = FALSE,
+  showForestPlot = FALSE,
+  showWillRogersAnalysis = FALSE,
+  showSurvivalCurves = FALSE,
   survivalPlotType = "separate",
-  showCI = FALSE,
-  showWillRogers = TRUE
+  showConfidenceIntervals = FALSE,
+  showRiskTables = FALSE,
+  plotTimeRange = "auto",
+  showClinicalInterpretation = FALSE,
+  showStatisticalSummary = FALSE,
+  showMethodologyNotes = FALSE,
+  includeEffectSizes = FALSE,
+  generateExecutiveSummary = FALSE,
+  cancerType = "general",
+  useOptimismCorrection = FALSE,
+  showExplanations = TRUE
 )
 }
 \arguments{
-\item{data}{The dataset containing staging and survival information.}
+\item{data}{The dataset containing staging and survival information for TNM
+validation analysis.}
 
-\item{oldStage}{The original staging variable. This represents the staging
-system used before the revision or change (e.g., TNM 7th edition).}
+\item{oldStage}{The original staging variable (e.g., TNM 7th edition, AJCC
+7th edition). Should be coded as ordered factor with appropriate stage
+levels.}
 
-\item{newStage}{The new staging variable. This represents the revised or
-changed staging system (e.g., TNM 8th edition).}
+\item{newStage}{The proposed new staging variable (e.g., TNM 8th edition,
+revised staging). Should use the same coding structure as the original
+staging system.}
 
-\item{survivalTime}{The survival or follow-up time variable. This should be
-a numeric variable representing time in consistent units (e.g., months).}
+\item{survivalTime}{Time to event or censoring in consistent units (months
+recommended). For overall survival analysis, use time from diagnosis to
+death or last follow-up.}
 
-\item{event}{The event indicator variable. This can be a factor or numeric
-variable indicating whether the event of interest (e.g., death) occurred.}
+\item{event}{Event indicator (1 = event occurred, 0 = censored) or factor
+with event levels. For overall survival, event = death from any cause.}
 
-\item{eventLevel}{The level of the event variable that indicates the event
-occurred. This is required if the event variable is a factor.}
+\item{eventLevel}{The level indicating event occurrence when using factor
+variables.}
 
-\item{plotMigration}{Enable to display an alluvial/Sankey plot visualizing
-stage migration patterns. This plot shows how patients move between stages
-in the old and new systems.}
+\item{analysisType}{Determines the scope of statistical analysis performed.
+Comprehensive analysis includes all available methods for thorough staging
+system validation.}
 
-\item{survivalPlotType}{Controls how survival curves are displayed for
-comparing staging systems. "Separate" shows full KM plots for each system,
-while "Side by side"  focuses on direct stage comparisons.}
+\item{confidenceLevel}{Confidence level for all confidence intervals and
+hypothesis tests.}
 
-\item{showCI}{Enable to display 95\\% confidence intervals around survival
-curves.}
+\item{calculateNRI}{Calculate Net Reclassification Improvement to quantify
+improvement in  risk classification between staging systems. Essential for
+staging validation.}
 
-\item{showWillRogers}{Enable to perform detailed analysis of the Will
-Rogers phenomenon. This will compare survival within stages between
-patients who migrated and those who didn't.}
+\item{nriTimePoints}{Comma-separated time points for NRI calculation (e.g.,
+"12, 24, 60" for  1, 2, and 5-year survival). Use clinically relevant time
+points.}
+
+\item{calculateIDI}{Calculate Integrated Discrimination Improvement to
+measure improvement  in risk prediction accuracy between staging systems.}
+
+\item{performROCAnalysis}{Perform time-dependent ROC analysis to compare
+discriminative ability of staging systems over time.}
+
+\item{rocTimePoints}{Time points for ROC analysis. Should include
+clinically important survival milestones for the specific cancer type.}
+
+\item{performDCA}{Perform Decision Curve Analysis to assess clinical
+utility and net benefit of the new staging system for clinical decision
+making.}
+
+\item{performCalibration}{Assess calibration of risk predictions from both
+staging systems. Important for validating accuracy of survival predictions.}
+
+\item{performBootstrap}{Perform bootstrap validation with optimism
+correction to assess internal validity of results. Recommended for all
+staging validation studies.}
+
+\item{bootstrapReps}{Number of bootstrap repetitions for internal
+validation.  1000 repetitions recommended for stable results.}
+
+\item{performCrossValidation}{Perform k-fold cross-validation for
+additional validation. Computationally intensive but provides robust
+validation.}
+
+\item{cvFolds}{Number of folds for cross-validation when enabled.}
+
+\item{clinicalSignificanceThreshold}{Minimum improvement in C-index
+considered clinically significant. Default 0.02 based on oncology
+literature recommendations.}
+
+\item{nriClinicalThreshold}{Minimum NRI improvement considered clinically
+meaningful. Default 0.20 (20\\% net reclassification improvement).}
+
+\item{performHomogeneityTests}{Test homogeneity within stages and monotonic
+trend across stages. Essential for validating stage ordering and grouping.}
+
+\item{performTrendTests}{Test for monotonic trend in survival across stage
+levels. Validates that higher stages consistently have worse prognosis.}
+
+\item{performLikelihoodTests}{Perform formal likelihood ratio tests
+comparing nested staging models. Provides statistical significance testing
+for staging improvement.}
+
+\item{calculatePseudoR2}{Calculate multiple pseudo R-squared measures for
+model comparison (Nagelkerke, McFadden, Cox-Snell).}
+
+\item{showMigrationOverview}{Display overview table showing the fundamental
+migration statistics including: total number of patients, number and
+percentage of patients who migrated stages, direction of migration
+(upstaged vs downstaged), and net migration effect. This is the essential
+first table for understanding the overall impact of the new staging system.}
+
+\item{showMigrationSummary}{Display statistical summary of migration
+patterns including overall migration rate and formal statistical tests.
+Shows Chi-square test results for independence and Fisher's exact test
+p-values to determine if the migration patterns are statistically
+significant. Essential for validating whether observed changes are due to
+genuine staging improvements or random variation.}
+
+\item{showStageDistribution}{Display side-by-side comparison of how
+patients are distributed across stages in both the original and new staging
+systems. Shows the count and percentage of patients in each stage, along
+with the net change. This helps identify which stages are gaining or losing
+patients and whether the new system creates better separation between
+prognostic groups.}
+
+\item{showMigrationMatrix}{Display detailed cross-tabulation matrix showing
+exactly how patients moved between stages. Rows represent the original
+staging system and columns represent the new staging system. Diagonal
+values indicate patients who remained in the same stage, while off-diagonal
+values show stage migrations. This is essential for understanding the
+specific migration patterns and identifying which stages are most affected
+by the new criteria.}
+
+\item{showStatisticalComparison}{Display table with C-index comparisons and
+other statistical metrics.}
+
+\item{showConcordanceComparison}{Display detailed concordance comparison
+between staging systems.}
+
+\item{showMigrationHeatmap}{Display a color-coded heatmap visualization of
+the migration matrix.  Darker colors indicate more patients, with the
+diagonal showing patients  who remained in the same stage. This visual
+representation makes it easy  to identify migration patterns at a glance -
+upstaging appears above the  diagonal, downstaging below. Essential for
+presentations and publications.}
+
+\item{showROCComparison}{Display time-dependent ROC curves comparing
+staging systems.}
+
+\item{showCalibrationPlots}{Display calibration plots for both staging
+systems.}
+
+\item{showDecisionCurves}{Display decision curves showing net benefit of
+staging systems.}
+
+\item{showForestPlot}{Display forest plot with stage-specific hazard ratios
+and confidence intervals.}
+
+\item{showWillRogersAnalysis}{Detailed analysis of Will Rogers phenomenon
+with survival comparisons between migrated and non-migrated patients within
+stages.}
+
+\item{showSurvivalCurves}{Display survival curves comparing the staging
+systems.}
+
+\item{survivalPlotType}{Controls display of survival curves for staging
+system comparison.}
+
+\item{showConfidenceIntervals}{Display confidence intervals around survival
+curves and other estimates.}
+
+\item{showRiskTables}{Display at-risk tables below survival curves.}
+
+\item{plotTimeRange}{Maximum time for survival plots. Use "auto" for
+automatic range or specify maximum months (e.g., "60" for 5-year
+follow-up).}
+
+\item{showClinicalInterpretation}{Display comprehensive clinical
+interpretation of all statistical results with guidance for staging system
+adoption decisions.}
+
+\item{showStatisticalSummary}{Display comprehensive table summarizing all
+statistical comparisons.}
+
+\item{showMethodologyNotes}{Display detailed notes on statistical methods
+used and their interpretation.}
+
+\item{includeEffectSizes}{Calculate and display effect sizes for all
+comparisons to assess practical significance beyond statistical
+significance.}
+
+\item{generateExecutiveSummary}{Generate executive summary with key
+findings and recommendations for clinical and research stakeholders.}
+
+\item{cancerType}{Optional cancer type specification for customized
+thresholds and  interpretation guidelines based on cancer-specific
+literature.}
+
+\item{useOptimismCorrection}{Apply optimism correction to performance
+metrics using bootstrap validation to avoid overly optimistic estimates.}
+
+\item{showExplanations}{Include detailed explanations for results.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$mydataview2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$migrationOverviewExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$migrationOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$migrationSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$statisticalComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$statisticalComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageDistributionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stageDistribution} \tab \tab \tab \tab \tab a table \cr
-\code{results$migrationTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survivalComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$stagingPerformance} \tab \tab \tab \tab \tab a table \cr
-\code{results$migrationPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$concordancePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$migrationMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$migrationMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$concordanceComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$nriResultsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$nriResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$idiResultsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalInterpretationExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a table \cr
+\code{results$executiveSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$executiveSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$statisticalSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$statisticalSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$migrationHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$migrationHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$rocComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rocComparisonPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$forestPlotExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$forestPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibrationAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$calibrationAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$calibrationPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$calibrationPlots} \tab \tab \tab \tab \tab an image \cr
+\code{results$decisionCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$migrationSummary$asDF}
+\code{results$migrationOverview$asDF}
 
-\code{as.data.frame(results$migrationSummary)}
+\code{as.data.frame(results$migrationOverview)}
 }
 \description{
-Analyzes staging system changes and the "Will Rogers Phenomenon" in disease
-staging.  This analysis compares staging distributions before and after a
-staging system change, quantifies stage migration, and evaluates changes in
-prognostic performance.
+Comprehensive analysis for validating TNM staging system improvements using
+state-of-the-art  statistical methods. This analysis provides pathologists
+with robust tools to evaluate whether  a new staging system provides
+superior prognostic discrimination compared to existing systems.
+Includes advanced metrics: Net Reclassification Improvement (NRI),
+Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
+decision curve analysis, bootstrap validation,  and comprehensive clinical
+interpretation guidance.
 }
 \examples{
 \donttest{
-# Example analyzing migration between TNM staging editions:
+# Example analyzing TNM staging system migration:
 # stagemigration(
-#   data = patient_data,
+#   data = cancer_cohort,
 #   oldStage = "tnm7_stage",
 #   newStage = "tnm8_stage",
-#   survivalTime = "follow_up_months",
+#   survivalTime = "os_months",
 #   event = "death_status",
-#   eventLevel = "Dead"
+#   eventLevel = "Dead",
+#   analysisType = "comprehensive",
+#   calculateNRI = TRUE,
+#   calculateIDI = TRUE,
+#   performBootstrap = TRUE,
+#   bootstrapReps = 1000
 # )
 }
 }

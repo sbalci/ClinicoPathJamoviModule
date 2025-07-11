@@ -4,7 +4,7 @@
 \alias{oddsratio}
 \title{Odds Ratio Table and Plot}
 \usage{
-oddsratio(data, explanatory, outcome, showNomogram = FALSE)
+oddsratio(data, explanatory, outcome, outcomeLevel, showNomogram = FALSE)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,6 +12,10 @@ oddsratio(data, explanatory, outcome, showNomogram = FALSE)
 \item{explanatory}{The explanatory variables to be used in the analysis.}
 
 \item{outcome}{The outcome variable to be used in the analysis.}
+
+\item{outcomeLevel}{Specify which outcome level represents the positive
+case for likelihood ratio calculations. If not specified, the function will
+use the second level alphabetically.}
 
 \item{showNomogram}{Display an interactive nomogram for converting pre-test
 to post-test  probabilities using likelihood ratios calculated from the

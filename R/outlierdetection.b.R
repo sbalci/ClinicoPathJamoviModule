@@ -157,6 +157,7 @@
 #' @importFrom performance check_outliers
 #' @importFrom dplyr mutate select row_number
 #' @importFrom htmltools HTML
+#' @importFrom stringr str_to_title
 
 outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierdetectionClass",
     inherit = outlierdetectionBase,
@@ -260,6 +261,47 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 </div>"
                 self$results$interpretation$setContent(error_msg)
                 return()
+            }
+            
+            # Check for additional dependencies based on method selection
+            method_category <- self$options$method_category
+            if (method_category %in% c("multivariate", "composite", "all")) {
+                multivariate_method <- self$options$multivariate_methods
+                
+                # Check for dbscan package for clustering methods
+                if (multivariate_method %in% c("optics", "lof") && 
+                    !requireNamespace("dbscan", quietly = TRUE)) {
+                    dependency_msg <- paste0("
+                    <div style='color: #856404; background-color: #fff3cd; padding: 20px; border-radius: 8px;'>
+                    <h4>📦 Optional Dependency Missing</h4>
+                    <p><strong>Method Limitation:</strong> The selected method requires the 'dbscan' package.</p>
+                    <p><strong>Selected Method:</strong> ", stringr::str_to_title(multivariate_method), "</p>
+                    <h5>Quick Fix:</h5>
+                    <ol>
+                    <li><strong>Install dbscan:</strong> <code style='background-color: #f1f1f1; padding: 2px;'>install.packages('dbscan')</code></li>
+                    <li><strong>Alternative:</strong> Select a different multivariate method (Mahalanobis Distance or MCD)</li>
+                    </ol>
+                    <p><em>💡 The analysis will continue with available methods only.</em></p>
+                    </div>")
+                    self$results$interpretation$setContent(dependency_msg)
+                }
+                
+                # Check for robustbase package for robust methods  
+                if (multivariate_method == "mcd" && 
+                    !requireNamespace("robustbase", quietly = TRUE)) {
+                    dependency_msg <- "
+                    <div style='color: #856404; background-color: #fff3cd; padding: 20px; border-radius: 8px;'>
+                    <h4>📦 Optional Dependency Missing</h4>
+                    <p><strong>Method Limitation:</strong> The MCD method requires the 'robustbase' package.</p>
+                    <h5>Quick Fix:</h5>
+                    <ol>
+                    <li><strong>Install robustbase:</strong> <code style='background-color: #f1f1f1; padding: 2px;'>install.packages('robustbase')</code></li>
+                    <li><strong>Alternative:</strong> Select a different multivariate method (Mahalanobis Distance)</li>
+                    </ol>
+                    <p><em>💡 The analysis will continue with available methods only.</em></p>
+                    </div>"
+                    self$results$interpretation$setContent(dependency_msg)
+                }
             }
 
             # Get data and variables

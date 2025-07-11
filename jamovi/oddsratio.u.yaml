@@ -28,4 +28,8 @@ children:
       - type: CheckBox
         name: showNomogram
         label: Show diagnostic nomogram
-        # enable: ()
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: outcomeLevel

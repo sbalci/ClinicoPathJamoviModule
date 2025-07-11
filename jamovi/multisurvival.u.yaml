@@ -234,9 +234,6 @@ children:
               - type: TextBox
                 name: cutp
                 format: string
-
-
-
   - type: CollapseBox
     label: Risk Score Grouping
     collapsed: true
@@ -268,7 +265,6 @@ children:
                       - type: Output
                         name: addRiskGroup
                         enable: (calculateRiskScore)
-
   - type: CollapseBox
     label: Adjusted Survival Analysis
     collapsed: true
@@ -338,7 +334,6 @@ children:
                         isTarget: true
                         fitToGrid: true
                         stretchFactor: 1
-
   - type: CollapseBox
     label: Nomogram
     collapsed: true
@@ -348,9 +343,6 @@ children:
         children:
           - type: CheckBox
             name: showNomogram
-            # enable: ()
-
-
   - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true
@@ -368,7 +360,6 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
-
   - type: CollapseBox
     label: Model Selection
     collapsed: true
@@ -397,7 +388,6 @@ children:
                 format: number
                 label: Removal Significance (p-value)
                 enable: (use_modelSelection)
-
   - type: CollapseBox
     label: Survival Decision Tree
     collapsed: true
@@ -429,7 +419,6 @@ children:
                   - type: CheckBox
                     name: show_terminal_nodes
                     enable: (use_tree)
-
   - type: CollapseBox
     label: Time-Dependent Covariates
     collapsed: true
@@ -471,7 +460,6 @@ children:
                         maxItemCount: 1
                         isTarget: true
                         enable: (use_time_dependent)
-
   - type: CollapseBox
     label: Frailty Models
     collapsed: true
@@ -501,7 +489,23 @@ children:
               - type: ComboBox
                 name: frailty_distribution
                 enable: (use_frailty)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: change_times
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: td_format
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: td_suffix_pattern
+        format: string
   - type: CollapseBox
     label: Splines for Non-Proportional Hazards
     collapsed: true

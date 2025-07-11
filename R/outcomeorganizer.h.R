@@ -397,7 +397,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 weightsSupport = 'none')
         }))
 
-#' Enhanced Outcome Organizer for Survival Analysis
+#' Outcome Organizer for Survival Analysis
 #'
 #' Advanced tool for preparing outcome variables for various types of survival 
 #' analysis including overall survival, cause-specific, competing risks, 
