@@ -201,7 +201,8 @@ Remotes:
     CHOP-CGTInformatics/ggswim,
     alstockdale/sumvar,
     mlr-org/mlr3extralearners@v1.0.0,
-    selkamand/ggoncoplot
+    selkamand/ggoncoplot,
+    CCICB/ggEDA
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
