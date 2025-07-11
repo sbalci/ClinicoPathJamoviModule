@@ -58,6 +58,14 @@ options:
           name: target
         - title: "Comprehensive Report"
           name: comprehensive
+        - title: "ggEDA: Enhanced Overview"
+          name: ggeda_overview
+        - title: "ggEDA: Clinical Distributions"
+          name: ggeda_distributions
+        - title: "ggEDA: Advanced Correlations"
+          name: ggeda_correlation
+        - title: "ggEDA: Biomarker Analysis"
+          name: ggeda_biomarker
       default: overview
       description:
         R: >
@@ -162,13 +170,32 @@ options:
         jamovi: >
           Choose output presentation format.
 
+    - name: eda_engine
+      title: "EDA Engine"
+      type: List
+      options:
+        - title: "DataExplorer (Comprehensive)"
+          name: dataexplorer
+        - title: "ggEDA (Enhanced Visualizations)"
+          name: ggeda
+        - title: "Hybrid (Both)"
+          name: hybrid
+      default: dataexplorer
+      description:
+        R: >
+          Choose the exploratory data analysis engine.
+          DataExplorer provides comprehensive automated reporting.
+          ggEDA provides enhanced visualizations for clinical research.
+        jamovi: >
+          Select the EDA analysis engine.
+
     - name: advanced_options
       title: "Advanced Analysis Options"
       type: Bool
       default: false
       description:
         R: >
-          Enable advanced DataExplorer features and detailed analysis.
+          Enable advanced features and detailed analysis.
         jamovi: >
           Enable advanced automated analysis features.
 
