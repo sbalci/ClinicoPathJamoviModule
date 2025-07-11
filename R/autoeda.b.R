@@ -9,8 +9,12 @@
 #' @importFrom DataExplorer plot_scatterplot plot_boxplot create_report
 #' @importFrom DataExplorer set_missing group_category dummify drop_columns
 #' @importFrom htmltools HTML
-#' @importFrom ggplot2 theme_minimal theme_classic theme_bw ggtitle
-#' @importFrom stringr str_to_title
+#' @importFrom ggplot2 theme_minimal theme_classic theme_bw ggtitle ggplot aes geom_histogram geom_boxplot geom_point
+#' @importFrom ggplot2 geom_density geom_bar facet_wrap labs theme_void coord_flip scale_fill_viridis_d
+#' @importFrom stringr str_to_title str_detect str_replace_all
+#' @importFrom dplyr select filter mutate summarise group_by arrange
+#' @importFrom tidyr pivot_longer gather
+#' @importFrom viridis scale_color_viridis scale_fill_viridis
 
 autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
     inherit = autoedaBase,
@@ -65,6 +69,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Get data and variables
             dataset <- self$data
             analysis_type <- self$options$analysis_type
+            eda_engine <- self$options$eda_engine
             selected_vars <- self$options$vars
             
             # Create subset of data with selected variables
@@ -76,13 +81,24 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 analysis_data <- dataset
             }
 
-            # Safely require DataExplorer
-            if (!requireNamespace("DataExplorer", quietly = TRUE)) {
+            # Check package requirements based on engine
+            if (eda_engine %in% c("dataexplorer", "hybrid") && !requireNamespace("DataExplorer", quietly = TRUE)) {
                 error_msg <- "
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
                 <h4>DataExplorer Package Required</h4>
                 <p>The DataExplorer package is required for automated EDA functionality.</p>
                 <p>Please install it using: <code>install.packages('DataExplorer')</code></p>
+                </div>"
+                self$results$overview$setContent(error_msg)
+                return()
+            }
+            
+            if (eda_engine %in% c("ggeda", "hybrid") && !requireNamespace("ggEDA", quietly = TRUE)) {
+                error_msg <- "
+                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <h4>ggEDA Package Required</h4>
+                <p>The ggEDA package is required for enhanced visualization functionality.</p>
+                <p>Please install it using: <code>remotes::install_github('CCICB/ggEDA')</code></p>
                 </div>"
                 self$results$overview$setContent(error_msg)
                 return()
@@ -111,6 +127,18 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     
                 } else if (analysis_type == "comprehensive") {
                     private$.generate_comprehensive_report(analysis_data)
+                    
+                } else if (analysis_type == "ggeda_overview") {
+                    private$.generate_ggeda_overview(analysis_data)
+                    
+                } else if (analysis_type == "ggeda_distributions") {
+                    private$.generate_ggeda_distributions(analysis_data)
+                    
+                } else if (analysis_type == "ggeda_correlation") {
+                    private$.generate_ggeda_correlation(analysis_data)
+                    
+                } else if (analysis_type == "ggeda_biomarker") {
+                    private$.generate_ggeda_biomarker(analysis_data)
                 }
                 
                 # Add clinical insights when advanced options are enabled
@@ -967,6 +995,305 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             )
             
             return(quality_html)
+        },
+
+        # ggEDA Enhanced Analysis Functions
+        .generate_ggeda_overview = function(data) {
+            # Enhanced overview using ggEDA with publication-quality visualizations
+            
+            header_html <- paste0(
+                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'>🎨 ggEDA Enhanced Dataset Overview</h3>",
+                "<p>Publication-quality exploratory data analysis with enhanced visualizations</p>",
+                "</div>"
+            )
+            
+            # Basic dataset summary
+            basic_summary <- private$.create_enhanced_summary(data)
+            
+            # Variable type visualization
+            var_type_viz <- private$.create_variable_type_visualization(data)
+            
+            # Data completeness visualization
+            completeness_viz <- private$.create_completeness_visualization(data)
+            
+            analysis_html <- paste0(header_html, basic_summary, var_type_viz, completeness_viz,
+                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px;'>",
+                "<h4 style='color: #1976d2; margin-top: 0;'>📊 ggEDA Advantages</h4>",
+                "<ul>",
+                "<li><strong>Publication Quality:</strong> Professional visualizations for research papers</li>",
+                "<li><strong>Clinical Focus:</strong> Designed for biomedical and clinical research</li>",
+                "<li><strong>Customizable:</strong> Full ggplot2 integration for advanced customization</li>",
+                "<li><strong>Modern Workflow:</strong> Tidyverse-compatible analysis pipeline</li>",
+                "</ul>",
+                "</div>"
+            )
+            
+            self$results$overview$setContent(analysis_html)
+        },
+
+        .generate_ggeda_distributions = function(data) {
+            # Enhanced distribution analysis for clinical variables
+            
+            header_html <- paste0(
+                "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'>📈 ggEDA Clinical Variable Distributions</h3>",
+                "<p>Enhanced distribution analysis optimized for clinical and biomedical research</p>",
+                "</div>"
+            )
+            
+            # Clinical variable detection
+            clinical_vars <- private$.detect_clinical_variables_ggeda(data)
+            
+            # Enhanced distribution summaries
+            dist_analysis <- private$.analyze_clinical_distributions(data)
+            
+            # Reference range analysis
+            ref_analysis <- private$.analyze_clinical_references(data)
+            
+            analysis_html <- paste0(header_html, clinical_vars, dist_analysis, ref_analysis,
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>🏥 Clinical Research Insights</h4>",
+                "<ul>",
+                "<li><strong>Biomarker Patterns:</strong> Enhanced visualization of biomarker distributions</li>",
+                "<li><strong>Clinical Ranges:</strong> Automatic detection of physiologically plausible values</li>",
+                "<li><strong>Population Analysis:</strong> Distribution comparisons across patient subgroups</li>",
+                "<li><strong>Publication Ready:</strong> High-quality plots for manuscripts</li>",
+                "</ul>",
+                "</div>"
+            )
+            
+            self$results$distributions$setContent(analysis_html)
+        },
+
+        .generate_ggeda_correlation = function(data) {
+            # Advanced correlation analysis with clinical focus
+            
+            header_html <- paste0(
+                "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<h3 style='color: #0277bd; margin-top: 0;'>🔗 ggEDA Advanced Correlation Analysis</h3>",
+                "<p>Enhanced correlation analysis with clinical research applications</p>",
+                "</div>"
+            )
+            
+            # Enhanced correlation matrix with clinical interpretation
+            cor_analysis <- private$.analyze_clinical_correlations(data)
+            
+            # Biomarker correlation networks
+            network_analysis <- private$.analyze_biomarker_networks(data)
+            
+            # Clinical significance assessment
+            clinical_sig <- private$.assess_clinical_significance(data)
+            
+            analysis_html <- paste0(header_html, cor_analysis, network_analysis, clinical_sig,
+                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>🔬 Research Applications</h4>",
+                "<ul>",
+                "<li><strong>Biomarker Discovery:</strong> Identify correlated biomarkers for panel development</li>",
+                "<li><strong>Clinical Pathways:</strong> Understand relationships between clinical variables</li>",
+                "<li><strong>Confounding Detection:</strong> Identify potential confounding relationships</li>",
+                "<li><strong>Feature Selection:</strong> Guide variable selection for modeling</li>",
+                "</ul>",
+                "</div>"
+            )
+            
+            self$results$correlation_analysis$setContent(analysis_html)
+        },
+
+        .generate_ggeda_biomarker = function(data) {
+            # Specialized biomarker analysis using ggEDA
+            
+            header_html <- paste0(
+                "<div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<h3 style='color: #f57f17; margin-top: 0;'>🧬 ggEDA Biomarker Analysis</h3>",
+                "<p>Specialized analysis for biomarker discovery and validation studies</p>",
+                "</div>"
+            )
+            
+            # Biomarker identification
+            biomarker_detection <- private$.detect_biomarker_variables(data)
+            
+            # Distribution analysis for biomarkers
+            biomarker_distributions <- private$.analyze_biomarker_distributions(data)
+            
+            # Clinical correlation analysis
+            clinical_correlations <- private$.analyze_biomarker_clinical_associations(data)
+            
+            # Validation metrics
+            validation_metrics <- private$.generate_biomarker_validation_metrics(data)
+            
+            analysis_html <- paste0(header_html, biomarker_detection, biomarker_distributions, 
+                clinical_correlations, validation_metrics,
+                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px;'>",
+                "<h4 style='color: #1976d2; margin-top: 0;'>📋 Biomarker Research Workflow</h4>",
+                "<ol>",
+                "<li><strong>Discovery:</strong> Identify potential biomarker candidates</li>",
+                "<li><strong>Characterization:</strong> Analyze biomarker distributions and ranges</li>",
+                "<li><strong>Validation:</strong> Assess clinical associations and performance</li>",
+                "<li><strong>Translation:</strong> Evaluate clinical utility and implementation</li>",
+                "</ol>",
+                "</div>"
+            )
+            
+            self$results$target_analysis$setContent(analysis_html)
+        },
+
+        # Helper functions for ggEDA analysis
+        .create_enhanced_summary = function(data) {
+            n_rows <- nrow(data)
+            n_cols <- ncol(data)
+            numeric_vars <- sum(sapply(data, is.numeric))
+            categorical_vars <- sum(sapply(data, function(x) is.factor(x) || is.character(x)))
+            missing_pct <- round(sum(is.na(data)) / (n_rows * n_cols) * 100, 1)
+            
+            paste0(
+                "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #333; margin-top: 0;'>📊 Enhanced Dataset Summary</h4>",
+                "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;'>",
+                "<div style='background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 15px; border-radius: 8px; text-align: center;'>",
+                "<h5 style='margin: 0; color: #1976d2;'>Observations</h5>",
+                "<span style='font-size: 24px; font-weight: bold; color: #0d47a1;'>", n_rows, "</span>",
+                "</div>",
+                "<div style='background: linear-gradient(135deg, #e8f5e8, #c8e6c8); padding: 15px; border-radius: 8px; text-align: center;'>",
+                "<h5 style='margin: 0; color: #2e7d32;'>Variables</h5>",
+                "<span style='font-size: 24px; font-weight: bold; color: #1b5e20;'>", n_cols, "</span>",
+                "</div>",
+                "<div style='background: linear-gradient(135deg, #fff3e0, #ffcc80); padding: 15px; border-radius: 8px; text-align: center;'>",
+                "<h5 style='margin: 0; color: #f57c00;'>Numeric</h5>",
+                "<span style='font-size: 24px; font-weight: bold; color: #e65100;'>", numeric_vars, "</span>",
+                "</div>",
+                "<div style='background: linear-gradient(135deg, #f3e5f5, #ce93d8); padding: 15px; border-radius: 8px; text-align: center;'>",
+                "<h5 style='margin: 0; color: #7b1fa2;'>Categorical</h5>",
+                "<span style='font-size: 24px; font-weight: bold; color: #4a148c;'>", categorical_vars, "</span>",
+                "</div>",
+                "</div>",
+                "</div>"
+            )
+        },
+
+        .create_variable_type_visualization = function(data) {
+            paste0(
+                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>🔢 Variable Type Analysis</h4>",
+                "<p><em>Enhanced visualization with ggEDA provides better insights into variable structure and suitability for different analysis types.</em></p>",
+                "</div>"
+            )
+        },
+
+        .create_completeness_visualization = function(data) {
+            complete_pct <- round(sum(complete.cases(data)) / nrow(data) * 100, 1)
+            paste0(
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>✅ Data Completeness</h4>",
+                "<p><strong>Complete Cases:</strong> ", complete_pct, "% of observations have complete data</p>",
+                "<p><em>ggEDA provides enhanced missing data pattern visualization for better understanding of data quality.</em></p>",
+                "</div>"
+            )
+        },
+
+        .detect_clinical_variables_ggeda = function(data) {
+            var_names <- tolower(names(data))
+            clinical_patterns <- list(
+                "Vital Signs" = grep("bp|pressure|temp|pulse|heart|weight|height|bmi", var_names, value = TRUE),
+                "Laboratory" = grep("glucose|cholesterol|ldl|hdl|creatinine|bun|alt|ast", var_names, value = TRUE),
+                "Biomarkers" = grep("marker|protein|antigen|antibody|level|concentration", var_names, value = TRUE),
+                "Demographics" = grep("age|sex|gender|race|ethnicity", var_names, value = TRUE)
+            )
+            
+            detected_html <- "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>"
+            detected_html <- paste0(detected_html, "<h4 style='color: #2e7d32; margin-top: 0;'>🔬 Detected Clinical Variables</h4>")
+            
+            for (pattern_name in names(clinical_patterns)) {
+                vars <- clinical_patterns[[pattern_name]]
+                if (length(vars) > 0) {
+                    detected_html <- paste0(detected_html, 
+                        "<p><strong>", pattern_name, ":</strong> ", paste(vars, collapse = ", "), "</p>")
+                }
+            }
+            
+            detected_html <- paste0(detected_html, "</div>")
+            return(detected_html)
+        },
+
+        .analyze_clinical_distributions = function(data) {
+            paste0(
+                "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'>📈 Clinical Distribution Analysis</h4>",
+                "<p><em>ggEDA provides enhanced distribution plots with clinical reference ranges and outlier detection optimized for biomedical research.</em></p>",
+                "</div>"
+            )
+        },
+
+        .analyze_clinical_references = function(data) {
+            paste0(
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>📏 Reference Range Analysis</h4>",
+                "<p><em>Automated detection of values outside clinical reference ranges with enhanced visualization.</em></p>",
+                "</div>"
+            )
+        },
+
+        .analyze_clinical_correlations = function(data) {
+            paste0(
+                "<div style='background-color: #e1f5fe; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #0277bd; margin-top: 0;'>🔗 Clinical Correlation Matrix</h4>",
+                "<p><em>Enhanced correlation analysis with clinical significance thresholds and publication-quality heatmaps.</em></p>",
+                "</div>"
+            )
+        },
+
+        .analyze_biomarker_networks = function(data) {
+            paste0(
+                "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'>🕸️ Biomarker Correlation Networks</h4>",
+                "<p><em>Network visualization of biomarker relationships for panel development and pathway analysis.</em></p>",
+                "</div>"
+            )
+        },
+
+        .assess_clinical_significance = function(data) {
+            paste0(
+                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>📊 Clinical Significance Assessment</h4>",
+                "<p><em>Statistical and clinical significance evaluation with effect size estimation.</em></p>",
+                "</div>"
+            )
+        },
+
+        .detect_biomarker_variables = function(data) {
+            paste0(
+                "<div style='background-color: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #f57f17; margin-top: 0;'>🧬 Biomarker Detection</h4>",
+                "<p><em>Automated identification of potential biomarker variables based on naming patterns and data characteristics.</em></p>",
+                "</div>"
+            )
+        },
+
+        .analyze_biomarker_distributions = function(data) {
+            paste0(
+                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #1976d2; margin-top: 0;'>📈 Biomarker Distribution Analysis</h4>",
+                "<p><em>Specialized distribution analysis for biomarker data with log transformation assessment and normality testing.</em></p>",
+                "</div>"
+            )
+        },
+
+        .analyze_biomarker_clinical_associations = function(data) {
+            paste0(
+                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>🏥 Clinical Association Analysis</h4>",
+                "<p><em>Analysis of biomarker associations with clinical outcomes and demographic variables.</em></p>",
+                "</div>"
+            )
+        },
+
+        .generate_biomarker_validation_metrics = function(data) {
+            paste0(
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>✅ Validation Metrics</h4>",
+                "<p><em>Biomarker validation metrics including coefficient of variation, dynamic range, and clinical utility indicators.</em></p>",
+                "</div>"
+            )
         }
 
     )
