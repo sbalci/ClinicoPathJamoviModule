@@ -1,0 +1,710 @@
+---
+title: "Complete Guide to kappasizepower: Power Analysis for Inter-rater Agreement Studies"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Introduction
+
+The `kappasizepower` function provides **power analysis for sample size determination** in inter-rater agreement studies. Unlike fixed sample size analysis, this function answers the question: *"How many subjects do I need to detect a meaningful improvement in agreement between raters?"*
+
+## When to Use kappasizepower
+
+This function is essential for research scenarios where:
+
+- **Designing new agreement studies** with specific power requirements
+- **Validating training programs** that aim to improve inter-rater agreement
+- **Standardizing clinical protocols** requiring demonstrated agreement improvements
+- **Grant applications** requiring rigorous power analysis justification
+- **Multi-center studies** establishing minimum recruitment targets
+
+## Key Concepts
+
+### Power Analysis Framework
+Traditional power analysis determines sample size based on:
+**Effect Size + Power + Alpha → Sample Size**
+
+For kappa agreement: **κ₁ - κ₀ + Power + Alpha → Required N**
+
+### Hypothesis Testing for Agreement
+- **H₀**: κ = κ₀ (null hypothesis agreement level)
+- **H₁**: κ = κ₁ (alternative hypothesis agreement level)
+- **Effect Size**: κ₁ - κ₀ (improvement in agreement)
+
+### Critical Validation
+**κ₁ must be greater than κ₀** - The alternative hypothesis should represent better agreement than the null hypothesis.
+
+# Theoretical Background
+
+## Inter-rater Agreement Fundamentals
+
+Cohen's kappa (κ) measures agreement beyond chance:
+
+$$\kappa = \frac{p_o - p_e}{1 - p_e}$$
+
+Where:
+- $p_o$ = observed agreement
+- $p_e$ = expected agreement by chance
+
+### Agreement Interpretation Guidelines
+
+| Kappa Range | Agreement Level | Research Interpretation |
+|------------|----------------|------------------------|
+| < 0.00 | Poor | Unacceptable for clinical use |
+| 0.00-0.20 | Slight | Needs substantial improvement |
+| 0.21-0.40 | Fair | May be acceptable for some applications |
+| 0.41-0.60 | Moderate | Acceptable for many clinical uses |
+| 0.61-0.80 | Good | Strong agreement for clinical practice |
+| 0.81-1.00 | Excellent | Ideal agreement level |
+
+## Power Analysis Theory
+
+### Sample Size Determinants
+
+Sample size requirements depend on:
+
+1. **Effect Size (κ₁ - κ₀)**: Larger differences require smaller samples
+2. **Desired Power**: Higher power requires larger samples  
+3. **Significance Level (α)**: Stricter levels require larger samples
+4. **Number of Categories**: More categories generally require larger samples
+5. **Number of Raters**: More raters can affect sample size requirements
+6. **Category Proportions**: Unbalanced distributions may require larger samples
+
+### Statistical Framework
+
+The `kappasizepower` function uses the `kappaSize` package implementation of power calculations for different numbers of outcome categories:
+
+### Binary Outcomes (2 categories)
+Uses asymptotic variance estimates for binary kappa with finite sample corrections.
+
+### Multi-category Outcomes (3-5 categories)
+Employs generalized kappa variance formulas accounting for:
+- Number of categories and raters
+- Marginal probability distributions
+- Complex covariance structures
+
+# Function Parameters and Usage
+
+## Basic Syntax
+
+```r
+kappaSizePower(
+  outcome = "2",           # Number of categories (2, 3, 4, or 5)
+  kappa0 = 0.40,          # Null hypothesis kappa value
+  kappa1 = 0.60,          # Alternative hypothesis kappa value
+  props = "0.30, 0.70",   # Category proportions
+  raters = "2",           # Number of raters (2-5)
+  alpha = 0.05,           # Significance level
+  power = 0.80            # Desired power
+)
+```
+
+## Parameter Details
+
+### `outcome`: Number of Outcome Categories
+- **Options**: "2", "3", "4", "5"
+- **Purpose**: Determines which statistical model to use
+- **Clinical Examples**:
+  - **2**: Disease present/absent, positive/negative test
+  - **3**: Mild/moderate/severe disease
+  - **4**: WHO grade 1-4, ECOG performance status
+  - **5**: Likert scales, comprehensive rating systems
+
+### `kappa0`: Null Hypothesis Kappa
+- **Range**: 0.01 to 0.99 (exclusive)
+- **Purpose**: Current or baseline agreement level
+- **Sources**: Literature review, pilot data, current practice assessment
+
+### `kappa1`: Alternative Hypothesis Kappa
+- **Range**: 0.01 to 0.99 (exclusive)
+- **Critical Requirement**: **Must be greater than kappa0**
+- **Purpose**: Target agreement level after intervention/training
+- **Effect Size**: κ₁ - κ₀ represents the improvement you want to detect
+
+### `props`: Category Proportions
+- **Format**: Comma-separated proportions that sum to 1.0
+- **Examples**: 
+  - Binary: "0.25, 0.75" (25% disease prevalence)
+  - Three-category: "0.20, 0.50, 0.30"
+- **Sources**: Registry data, literature, preliminary studies
+
+### `raters`: Number of Raters
+- **Options**: "2", "3", "4", "5"
+- **Impact**: More raters can improve precision but increase complexity
+- **Practical considerations**: Availability, cost, training requirements
+
+### `alpha`: Significance Level
+- **Common values**: 0.05 (5%), 0.01 (1%)
+- **Impact**: Lower alpha requires larger sample sizes
+- **Selection**: Based on field standards and consequence of errors
+
+### `power`: Desired Power
+- **Range**: 0.01 to 0.99, typically ≥ 0.80
+- **Common values**: 0.80 (80%), 0.90 (90%)
+- **Impact**: Higher power requires larger sample sizes
+- **Minimum**: Should be at least 0.50 for meaningful analysis
+
+# Clinical Applications and Examples
+
+## Medical Diagnosis Studies
+
+### Example 1: Emergency Department Pneumonia Detection
+
+**Scenario**: Emergency physicians want to validate that training improves chest X-ray agreement for pneumonia detection.
+
+```r
+# Emergency department pneumonia training validation
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.50,          # Current fair agreement
+  kappa1 = 0.75,          # Target good agreement post-training
+  props = "0.25, 0.75",   # 25% pneumonia prevalence
+  raters = "2",           # Two emergency physicians
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Clinical Context**: 
+- Training programs require validation of effectiveness
+- Patient safety depends on reliable pneumonia detection
+- Effect size of 0.25 (0.75 - 0.50) represents meaningful improvement
+
+### Example 2: Mammography Screening Enhancement
+
+**Scenario**: Radiologists implementing new BI-RADS standardization want to demonstrate improved agreement.
+
+```r
+# Mammography screening standardization study
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.60,          # Current good agreement
+  kappa1 = 0.80,          # Target excellent agreement
+  props = "0.12, 0.88",   # 12% positive findings (BI-RADS 4-5)
+  raters = "2",           # Two radiologists
+  alpha = 0.05,
+  power = 0.85            # Higher power for screening validation
+)
+```
+
+**Clinical Context**:
+- Screening programs require high agreement levels
+- Effect size of 0.20 represents substantial improvement
+- Higher power (85%) provides stronger evidence
+
+## Multi-Category Medical Assessments
+
+### Example 3: Heart Failure Severity Staging
+
+**Scenario**: Cardiologists validating new echocardiographic staging criteria.
+
+```r
+# Heart failure staging validation study
+result <- kappaSizePower(
+  outcome = "3",
+  kappa0 = 0.55,          # Current moderate agreement
+  kappa1 = 0.75,          # Target good agreement
+  props = "0.20, 0.50, 0.30",  # Mild, Moderate, Severe
+  raters = "2",           # Two cardiologists
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Clinical Context**:
+- Staging affects treatment decisions
+- Standardization improves patient outcomes
+- Multi-category assessment adds complexity
+
+### Example 4: Burn Severity Grading Protocol
+
+**Scenario**: Emergency physicians implementing standardized burn severity assessment.
+
+```r
+# Burn severity grading standardization
+result <- kappaSizePower(
+  outcome = "3",
+  kappa0 = 0.60,          # Current good agreement
+  kappa1 = 0.85,          # Target excellent agreement
+  props = "0.40, 0.35, 0.25",  # First, Second, Third degree
+  raters = "3",           # Three emergency physicians
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Clinical Context**:
+- Burn severity affects triage decisions
+- Large effect size (0.25) represents major improvement
+- Multiple raters increase reliability
+
+## Complex Multi-Category Studies
+
+### Example 5: Tumor Grading Standardization
+
+**Scenario**: Pathologists implementing standardized tumor grading criteria.
+
+```r
+# Tumor grading standardization study
+result <- kappaSizePower(
+  outcome = "4",
+  kappa0 = 0.60,          # Current good agreement
+  kappa1 = 0.80,          # Target very good agreement
+  props = "0.15, 0.25, 0.35, 0.25",  # Grade 1, 2, 3, 4
+  raters = "3",           # Three pathologists
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Clinical Context**:
+- Tumor grading affects treatment decisions
+- Standardization reduces inter-institutional variability
+- Four categories require careful power analysis
+
+### Example 6: Cognitive Assessment Tool Validation
+
+**Scenario**: Neuropsychologists validating structured cognitive assessment protocol.
+
+```r
+# Cognitive assessment tool validation
+result <- kappaSizePower(
+  outcome = "4",
+  kappa0 = 0.55,          # Current moderate agreement
+  kappa1 = 0.75,          # Target good agreement
+  props = "0.20, 0.30, 0.30, 0.20",  # Normal, MCI, Mild, Moderate+ dementia
+  raters = "2",           # Two neuropsychologists
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Clinical Context**:
+- Cognitive assessment affects care planning
+- Structured protocols improve consistency
+- Effect size of 0.20 represents meaningful improvement
+
+## High-Precision Research Applications
+
+### Example 7: Surgical Complication Grading
+
+**Scenario**: Surgeons implementing standardized Clavien-Dindo classification.
+
+```r
+# Surgical complication grading validation
+result <- kappaSizePower(
+  outcome = "4",
+  kappa0 = 0.65,          # Current good agreement
+  kappa1 = 0.85,          # Target excellent agreement
+  props = "0.40, 0.30, 0.20, 0.10",  # None, Grade I, II, III+
+  raters = "3",           # Three surgeons
+  alpha = 0.01,           # Strict significance level
+  power = 0.90            # High power requirement
+)
+```
+
+**Clinical Context**:
+- Surgical outcomes require high precision
+- Strict alpha (0.01) and high power (90%) for rigorous validation
+- Large effect size (0.20) represents substantial improvement
+
+### Example 8: Biomarker Expression Assessment
+
+**Scenario**: Pathologists standardizing immunohistochemical scoring.
+
+```r
+# Biomarker expression standardization
+result <- kappaSizePower(
+  outcome = "3",
+  kappa0 = 0.70,          # Current good agreement
+  kappa1 = 0.90,          # Target excellent agreement
+  props = "0.30, 0.45, 0.25",  # Low, Moderate, High expression
+  raters = "2",           # Two pathologists
+  alpha = 0.01,           # Strict significance level
+  power = 0.90            # High power requirement
+)
+```
+
+**Clinical Context**:
+- Biomarker scoring affects treatment decisions
+- Research applications require high precision
+- Large effect size (0.20) with strict criteria
+
+# Advanced Applications
+
+## Effect Size Considerations
+
+### Small Effect Sizes (κ₁ - κ₀ < 0.20)
+
+Require large sample sizes but may be clinically meaningful:
+
+```r
+# Small but clinically significant improvement
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.70,          # Already good agreement
+  kappa1 = 0.80,          # Modest improvement
+  props = "0.50, 0.50",   # Balanced categories
+  raters = "2",
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+### Large Effect Sizes (κ₁ - κ₀ > 0.30)
+
+Require smaller sample sizes, easier to detect:
+
+```r
+# Large improvement from training
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.30,          # Poor baseline agreement
+  kappa1 = 0.70,          # Good post-training agreement
+  props = "0.25, 0.75",
+  raters = "2",
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+## Dealing with Unbalanced Proportions
+
+### Rare Event Studies
+
+```r
+# Rare disease diagnosis agreement
+result <- kappaSizePower(
+  outcome = "2",
+  kappa0 = 0.60,
+  kappa1 = 0.80,
+  props = "0.05, 0.95",   # 5% rare disease prevalence
+  raters = "3",
+  alpha = 0.05,
+  power = 0.80
+)
+```
+
+**Considerations for Unbalanced Data**:
+- May require larger sample sizes
+- Consider stratified analysis approaches
+- Validate results with simulation studies
+
+## High-Power Study Designs
+
+### Research Validation Studies
+
+```r
+# High-power research validation
+result <- kappaSizePower(
+  outcome = "5",
+  kappa0 = 0.50,
+  kappa1 = 0.70,
+  props = "0.10, 0.20, 0.35, 0.25, 0.10",
+  raters = "4",
+  alpha = 0.01,           # Strict significance
+  power = 0.95            # Very high power
+)
+```
+
+**High-Power Considerations**:
+- Necessary for definitive validation studies
+- Required for regulatory submissions
+- Increases sample size requirements substantially
+
+## Multi-Center Study Planning
+
+### Coordinated Research Networks
+
+```r
+# Multi-center standardization study
+result <- kappaSizePower(
+  outcome = "4",
+  kappa0 = 0.55,          # Current multi-center variability
+  kappa1 = 0.75,          # Target standardized agreement
+  props = "0.25, 0.30, 0.25, 0.20",
+  raters = "3",           # Representative raters per site
+  alpha = 0.05,
+  power = 0.85            # Higher power for multi-center
+)
+```
+
+**Multi-Center Considerations**:
+- Account for between-site variability
+- Consider hierarchical study designs
+- Plan for adequate power at each site
+
+# Best Practices and Guidelines
+
+## Study Design Considerations
+
+### 1. **Realistic Effect Size Setting**
+
+- Base κ₀ on literature review or pilot data
+- Set κ₁ to represent clinically meaningful improvement
+- Consider that improvement often decreases in real-world settings
+
+### 2. **Proportion Estimation**
+
+- Use registry data or large databases when available
+- Consider temporal and geographical variations
+- Account for selection bias in study populations
+
+### 3. **Power and Alpha Selection**
+
+**Standard Approaches**:
+- **α = 0.05, Power = 0.80**: Most clinical studies
+- **α = 0.01, Power = 0.90**: High-stakes validation studies
+- **α = 0.05, Power = 0.85**: Regulatory submissions
+
+### 4. **Rater Selection and Training**
+
+- **Training**: Ensure consistent training across raters
+- **Experience**: Balance expertise with availability
+- **Independence**: Maintain rater independence during assessment
+- **Calibration**: Consider calibration exercises
+
+## Common Pitfalls and Solutions
+
+### 1. **Unrealistic Effect Size Expectations**
+
+**Problem**: Setting κ₁ too high based on ideal conditions
+
+**Solution**: 
+- Review literature for realistic agreement levels
+- Conduct pilot studies under actual conditions
+- Account for implementation challenges
+
+### 2. **Ignoring Practical Constraints**
+
+**Problem**: Sample size calculations that exceed feasible recruitment
+
+**Solution**:
+- Consider feasibility during planning
+- Explore alternative study designs
+- Plan for adaptive or sequential designs
+
+### 3. **Inadequate Baseline Assessment**
+
+**Problem**: Poor κ₀ estimation leading to underpowered studies
+
+**Solution**:
+- Conduct thorough baseline assessment
+- Use multiple data sources for κ₀ estimation
+- Consider sensitivity analyses
+
+### 4. **Overlooking Implementation Complexity**
+
+**Problem**: Not accounting for real-world implementation challenges
+
+**Solution**:
+- Plan for training and calibration time
+- Account for rater availability and scheduling
+- Consider quality control procedures
+
+## Quality Assurance Framework
+
+### Pre-study Planning Checklist
+
+- [ ] Literature review completed for realistic κ₀ and κ₁ values
+- [ ] Proportion estimates obtained from reliable sources
+- [ ] Power analysis conducted with multiple scenarios
+- [ ] Feasibility assessment completed
+- [ ] Rater training protocol established
+- [ ] Quality control procedures defined
+
+### During-study Monitoring
+
+- [ ] Interim agreement assessments conducted
+- [ ] Rater consistency monitored
+- [ ] Protocol adherence documented
+- [ ] Sample size adequacy reassessed
+
+### Post-study Validation
+
+- [ ] Achieved agreement levels compared to predictions
+- [ ] Power analysis assumptions validated
+- [ ] Lessons learned documented for future studies
+
+# Interpretation of Results
+
+## Understanding Power Analysis Output
+
+The `kappasizepower` function provides:
+
+1. **Required Sample Size**: Number of subjects needed
+2. **Study Design Summary**: Comprehensive explanation of parameters and context
+
+### Sample Size Interpretation
+
+**Key Considerations**:
+- Sample size refers to number of subjects rated by all raters
+- Consider dropout rates and missing data
+- Plan for quality control assessments
+
+### Clinical Decision Making
+
+Use results to:
+- **Justify study feasibility** in grant applications
+- **Set recruitment targets** for multi-center studies
+- **Inform resource planning** for training and implementation
+- **Support protocol development**
+
+## Reporting Guidelines
+
+### In Grant Applications
+
+"Power analysis using kappasizepower indicated that N subjects are required to detect an improvement in inter-rater agreement from κ₀=X to κ₁=Y with 80% power at the 5% significance level."
+
+### In Study Protocols
+
+Detail the power analysis assumptions including:
+- Baseline agreement estimates and sources
+- Target agreement levels and justification
+- Effect size rationale
+- Power and alpha selection rationale
+
+### In Manuscripts
+
+Report both the power analysis and achieved results:
+- Compare observed agreement to predicted levels
+- Discuss any discrepancies between planned and achieved parameters
+- Address implications for study conclusions
+
+# Troubleshooting Common Issues
+
+## Error Messages and Solutions
+
+### "kappa1 must be greater than kappa0"
+
+**Cause**: Alternative hypothesis agreement is not better than null hypothesis
+
+**Solution**: 
+```r
+# Incorrect
+kappa0 = 0.70, kappa1 = 0.60  # kappa1 < kappa0
+
+# Correct
+kappa0 = 0.60, kappa1 = 0.70  # kappa1 > kappa0
+```
+
+### "Proportions must sum to 1"
+
+**Cause**: Category proportions don't sum to exactly 1.0
+
+**Solution**: Adjust proportions or use normalized values
+```r
+# Incorrect
+props = "0.25, 0.80"  # Sums to 1.05
+
+# Correct
+props = "0.24, 0.76"  # Sums to 1.00
+```
+
+### "Power should be at least 0.5 for meaningful analysis"
+
+**Cause**: Power set too low for reasonable detection
+
+**Solution**: Increase power to at least 50%, typically 80%
+```r
+# Problematic
+power = 0.30  # Too low
+
+# Recommended
+power = 0.80  # Standard minimum
+```
+
+### "kappaSize package not installed"
+
+**Cause**: Required dependency not available
+
+**Solution**: Install the kappaSize package
+```r
+install.packages("kappaSize")
+```
+
+## Computational Issues
+
+### Very Large Sample Size Requirements
+
+When sample sizes exceed feasible limits:
+
+**Solutions**:
+- Reduce effect size expectations (smaller κ₁ - κ₀)
+- Accept lower power (minimum 80%)
+- Consider multi-stage or adaptive designs
+- Explore alternative study approaches
+
+### Small Effect Sizes
+
+For very small effect sizes (κ₁ - κ₀ < 0.10):
+
+**Considerations**:
+- Ensure clinical meaningfulness of small improvements
+- Consider cost-benefit of large sample requirements
+- Explore whether the improvement justifies the study
+
+### Complex Multi-rater Scenarios
+
+With 4-5 raters and 4-5 categories:
+
+**Solutions**:
+- Ensure computational stability with adequate samples
+- Consider phased implementation approaches
+- Validate with simulation studies
+
+# Future Directions and Related Tools
+
+## Complementary Functions
+
+The `kappasizepower` function works alongside:
+
+- **`kappasizefixedn`**: For fixed sample size power analysis
+- **Other agreement functions**: For post-hoc agreement assessment
+- **Sample size calculators**: For comprehensive study planning
+
+## Advanced Methods
+
+For specialized scenarios, consider:
+
+- **Weighted kappa**: For ordinal categories with meaningful ordering
+- **Multilevel models**: For hierarchical data structures
+- **Bayesian approaches**: For incorporating prior information
+- **Sequential designs**: For adaptive sample size modification
+
+## Software Integration
+
+The function integrates well with:
+
+- **jamovi**: User-friendly interface for clinical researchers
+- **R workflows**: Programmable analysis pipelines
+- **Reproducible research**: RMarkdown and Quarto integration
+
+# Summary
+
+The `kappasizepower` function provides essential power analysis capabilities for inter-rater agreement studies. Key takeaways:
+
+1. **Use for prospective study planning** requiring specific power levels
+2. **Ensures adequate sample sizes** for detecting meaningful agreement improvements
+3. **Supports 2-5 categories** and 2-5 raters with comprehensive validation
+4. **Requires κ₁ > κ₀** for valid power analysis
+5. **Integrates with comprehensive research planning** workflows
+
+By understanding and properly applying this tool, researchers can design adequately powered studies to validate inter-rater agreement improvements, supporting evidence-based advances in clinical practice and research methodology.
+
+# References
+
+1. Cohen, J. (1960). A coefficient of agreement for nominal scales. Educational and Psychological Measurement, 20(1), 37-46.
+
+2. Fleiss, J. L., Levin, B., & Paik, M. C. (2003). Statistical methods for rates and proportions. John Wiley & Sons.
+
+3. Gwet, K. L. (2014). Handbook of inter-rater reliability: The definitive guide to measuring the extent of agreement among raters. Advanced Analytics, LLC.
+
+4. Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159-174.
+
+5. Shoukri, M. M. (2011). Measures of interobserver agreement and reliability. Chapman and Hall/CRC.
+
+---
+
+*This vignette was generated using the ClinicoPath R package. For more information, visit the [ClinicoPath GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule).*

@@ -10,11 +10,61 @@ jas: '1.2'
 description:
     main: |
         'Function for generating river plots (alluvial diagrams) to visualize
-        flows and transitions over time or between categories.'
+        flows and transitions over time or between categories. Supports alluvial 
+        diagrams, Sankey diagrams, and stream graphs with customizable aesthetics.'
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load example data
+            data(riverplot_example_data)
+            data(riverplot_wide_example_data)
+            
+            # Basic alluvial plot (longitudinal data)
+            riverplot(
+              data = riverplot_example_data,
+              time = "timepoint",
+              strata = "treatment_response",
+              plotType = "alluvial"
+            )
+            
+            # Weighted river plot with patient tracking
+            riverplot(
+              data = riverplot_example_data,
+              id = "patient_id",
+              time = "timepoint",
+              strata = "treatment_response", 
+              weight = "treatment_cost",
+              plotType = "alluvial",
+              labelNodes = TRUE,
+              fillType = "first"
+            )
+            
+            # Multi-stage flow (wide format data)
+            riverplot(
+              data = riverplot_wide_example_data,
+              strata = c("screening", "enrollment", "treatment", "outcome"),
+              plotType = "alluvial",
+              fillType = "last",
+              showCounts = TRUE
+            )
+            
+            # Sankey diagram
+            riverplot(
+              data = riverplot_wide_example_data,
+              strata = c("screening", "enrollment", "treatment"),
+              weight = "total_cost",
+              plotType = "sankey",
+              curveType = "cardinal"
+            )
+            
+            # Stream plot
+            riverplot(
+              data = riverplot_example_data,
+              time = "timepoint",
+              strata = "treatment_response",
+              weight = "treatment_cost",
+              plotType = "stream"
+            )
 
 options:
     - name: data

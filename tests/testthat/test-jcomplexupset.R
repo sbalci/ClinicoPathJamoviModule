@@ -26,7 +26,7 @@ test_that("jcomplexupset works", {
     set_vars = binary_vars,
     min_size = 1,
     max_degree = 3,
-    sort_by = "size",
+    sort_by = "cardinality",
     sort_order = "descending"
   )
   
@@ -106,7 +106,7 @@ test_that("jcomplexupset with molecular data works", {
     data = molecular_subtype_data,
     set_vars = mutation_vars,
     min_size = 1,
-    sort_by = "size",
+    sort_by = "cardinality",
     show_statistics = TRUE,
     show_interpretation = TRUE
   )

@@ -2,15 +2,7 @@
 title: "Decision Tree vs Markov Chain Analysis: Complete Guide"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-vignette: >
-  %\VignetteIndexEntry{Decision Tree vs Markov Chain Analysis: Complete Guide}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include = FALSE}

@@ -2,41 +2,20 @@
 % Please edit documentation in R/benford.b.R
 \name{benfordClass}
 \alias{benfordClass}
-\title{Benford's Law Analysis for Fraud Detection and Data Validation}
+\title{Benford's Law Analysis}
 \value{
-A comprehensive results object containing:
-\itemize{
-\item{Statistical analysis with chi-square test and p-values}
-\item{Suspect identification with detailed risk assessment}
-\item{Data quality validation and compliance metrics}
-\item{Publication-ready visualization with theoretical vs. observed distributions}
-}
+A list with the Benford's Law distribution and a list of potential suspects.
+
+A list with the Benford's Law distribution and a list of potential suspects.
 }
 \description{
-Performs comprehensive Benford's Law analysis on numeric data to detect potential
-fraud, manipulation, or data quality issues. This implementation provides robust error handling,
-data validation, statistical testing, and detailed reporting for forensic data analysis.
+This function performs a Benford's Law analysis on a numeric variable.
+It returns the Benford's Law distribution and a list of potential suspects.
 }
 \details{
-Benford's Law states that in many naturally occurring datasets, the leading digit d
-occurs with probability P(d) = log₁₀(1 + 1/d). This analysis:
-\itemize{
-\item{Validates data appropriateness for Benford analysis}
-\item{Performs chi-square goodness of fit testing}
-\item{Calculates Mean Absolute Deviation (MAD) for compliance assessment}
-\item{Identifies suspicious patterns and outliers}
-\item{Provides comprehensive statistical reporting}
-\item{Generates publication-ready visualizations}
-}
-}
-\note{
-This function requires data with sufficient size (n ≥ 100 recommended) and
-appropriate distribution (positive numbers spanning multiple orders of magnitude).
-Small or constrained datasets may not follow Benford's Law naturally.
-}
-\references{
-Benford, F. (1938). The law of anomalous numbers. Proceedings of the American Philosophical Society, 78(4), 551-572.
-Nigrini, M. J. (2012). Benford's Law: Applications for Forensic Accounting, Auditing, and Fraud Detection.
+The Benford's Law analysis is a test to determine if the distribution of the first digits of a numeric variable follows Benford's Law.
+The Benford's Law distribution is compared to the observed distribution of the first digits of the variable.
+The analysis returns a list of potential suspects that deviate significantly from Benford's Law.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::benfordBase} -> \code{benfordClass}

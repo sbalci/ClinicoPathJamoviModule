@@ -13,6 +13,8 @@
 #' @importFrom scales alpha
 #' @importFrom stringr str_to_title
 #' @importFrom htmltools HTML
+#' @importFrom moments skewness kurtosis
+#' @importFrom viridis viridis
 
 raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
     inherit = raincloudBase,
@@ -237,7 +239,12 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             palette_name <- self$options$color_palette
             
             if (palette_name == "viridis") {
-                return(viridis::viridis(n_colors, discrete = TRUE))
+                if (requireNamespace("viridis", quietly = TRUE)) {
+                    return(viridis::viridis(n_colors, discrete = TRUE))
+                } else {
+                    # Fallback to similar color scheme
+                    return(grDevices::heat.colors(n_colors))
+                }
             } else if (palette_name == "clinical") {
                 clinical_colors <- c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")
                 return(rep(clinical_colors, length.out = n_colors))
@@ -285,11 +292,19 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     ggprism::prism_colour_pal(palette = prism_name)(n_colors)
                 }, error = function(e) {
                     # Fallback to viridis if ggprism palette fails
-                    viridis::viridis(n_colors, discrete = TRUE)
+                    if (requireNamespace("viridis", quietly = TRUE)) {
+                        viridis::viridis(n_colors, discrete = TRUE)
+                    } else {
+                        grDevices::heat.colors(n_colors)
+                    }
                 })
             } else {
                 # Fallback to viridis if ggprism not available
-                viridis::viridis(n_colors, discrete = TRUE)
+                if (requireNamespace("viridis", quietly = TRUE)) {
+                    viridis::viridis(n_colors, discrete = TRUE)
+                } else {
+                    grDevices::heat.colors(n_colors)
+                }
             }
         },
 
@@ -365,6 +380,37 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         .generate_statistics = function(data, dep_var, group_var) {
             # Generate comprehensive statistics table
             
+            # Calculate skewness and kurtosis with fallback
+            calc_skewness <- function(x) {
+                if (requireNamespace("moments", quietly = TRUE)) {
+                    tryCatch(moments::skewness(x, na.rm = TRUE), error = function(e) NA)
+                } else {
+                    # Simple skewness approximation
+                    n <- length(x[!is.na(x)])
+                    if (n < 3) return(NA)
+                    x_clean <- x[!is.na(x)]
+                    m <- mean(x_clean)
+                    s <- sd(x_clean)
+                    if (s == 0) return(0)
+                    sum((x_clean - m)^3) / (n * s^3)
+                }
+            }
+            
+            calc_kurtosis <- function(x) {
+                if (requireNamespace("moments", quietly = TRUE)) {
+                    tryCatch(moments::kurtosis(x, na.rm = TRUE), error = function(e) NA)
+                } else {
+                    # Simple kurtosis approximation
+                    n <- length(x[!is.na(x)])
+                    if (n < 4) return(NA)
+                    x_clean <- x[!is.na(x)]
+                    m <- mean(x_clean)
+                    s <- sd(x_clean)
+                    if (s == 0) return(3)
+                    sum((x_clean - m)^4) / (n * s^4)
+                }
+            }
+            
             stats_summary <- data %>%
                 dplyr::group_by(.data[[group_var]]) %>%
                 dplyr::summarise(
@@ -378,8 +424,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     iqr = round(q3 - q1, 3),
                     min_val = round(min(.data[[dep_var]], na.rm = TRUE), 3),
                     max_val = round(max(.data[[dep_var]], na.rm = TRUE), 3),
-                    skewness = round(moments::skewness(.data[[dep_var]], na.rm = TRUE), 3),
-                    kurtosis = round(moments::kurtosis(.data[[dep_var]], na.rm = TRUE), 3),
+                    skewness = round(calc_skewness(.data[[dep_var]]), 3),
+                    kurtosis = round(calc_kurtosis(.data[[dep_var]]), 3),
                     .groups = 'drop'
                 )
             

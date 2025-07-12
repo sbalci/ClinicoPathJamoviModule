@@ -63,6 +63,7 @@ options:
     - name: dateVar
       title: Date Variable (if grouping by date)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric, factor, id]
       description:

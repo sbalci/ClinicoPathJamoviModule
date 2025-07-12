@@ -1,0 +1,630 @@
+---
+title: "jjpiestats: Pie Charts with Performance Optimization and Visualization Best Practices"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Overview
+
+The `jjpiestats` function provides a comprehensive interface for creating pie charts with statistical analysis of categorical data. This function is a wrapper around `ggstatsplot::ggpiestats` and `ggstatsplot::grouped_ggpiestats`, offering single and grouped pie chart visualizations with advanced statistical testing.
+
+**⚠️ Important Note on Pie Chart Usage**: While this function provides optimized pie chart functionality, the visualization community strongly recommends considering alternatives like bar charts for most applications. This vignette explains both the optimized functionality and the limitations of pie charts.
+
+## Key Features
+
+- **Statistical analysis**: Chi-square tests, Fisher's exact tests, Bayesian analysis
+- **Multiple visualization modes**: Single pie charts, grouped analysis, split panels
+- **Flexible grouping**: Support for contingency table analysis
+- **Performance optimized**: Uses internal caching to eliminate redundant computations
+- **Comprehensive testing**: Parametric, nonparametric, robust, and Bayesian approaches
+
+## Installation and Setup
+
+```{r setup}
+echo: true
+eval: false
+
+# Install ClinicoPath if not already installed
+if (!require("ClinicoPath")) {
+  devtools::install_github("sbalci/ClinicoPathJamoviModule")
+}
+
+library(ClinicoPath)
+library(ggplot2)
+```
+
+## ⚠️ Pie Chart Limitations and Visualization Best Practices
+
+### Why the Visualization Community Discourages Pie Charts
+
+Before demonstrating the functionality, it's crucial to understand the well-documented limitations of pie charts:
+
+#### 1. **Human Perception Issues**
+
+- **Angle estimation**: Humans are poor at accurately judging angles and arc lengths
+- **Area comparison**: Difficult to compare slice sizes, especially similar-sized slices
+- **Ranking problems**: Hard to order categories by value from pie charts
+
+#### 2. **Comparison Difficulties**
+
+```{r pie-problems}
+echo: true
+eval: false
+
+# Example demonstrating comparison difficulties
+# These values are hard to distinguish in pie charts:
+similar_values <- c(23, 25, 22, 30)  # Very close values
+# But easy to compare in bar charts
+
+# Multiple pie charts are nearly impossible to compare
+# Bar charts allow direct comparison across groups
+```
+
+#### 3. **Accessibility Issues**
+
+- **Color blindness**: Reliance on color distinction creates accessibility barriers
+- **Small slices**: Tiny categories become invisible or unlabeled
+- **Label overlap**: Text labels often overlap or become unreadable
+
+#### 4. **Scientific Publication Standards**
+
+Most high-impact journals and style guides recommend:
+- **Bar charts** for categorical data comparison
+- **Stacked bar charts** for part-to-whole relationships
+- **Dot plots** for precise value communication
+- **Cleveland dot plots** for ranking categories
+
+### When Pie Charts Might Be Acceptable
+
+Pie charts may be considered only when:
+1. **Few categories** (3-5 maximum)
+2. **Clear differences** between values (each slice >10% of total)
+3. **Part-to-whole emphasis** is specifically needed
+4. **Single time point** (not comparing across groups)
+
+### Recommended Alternatives
+
+```{r alternatives-concept}
+echo: true
+eval: false
+
+# Instead of pie charts, consider:
+
+# 1. Bar charts (jjbarstats function)
+jjbarstats(
+  data = your_data,
+  dep = "outcome_variable",
+  grvar = "grouping_variable"
+)
+
+# 2. Stacked bar charts
+# 3. Cleveland dot plots
+# 4. Horizontal bar charts for long category names
+```
+
+## Function Parameters
+
+### Core Parameters
+
+- **`data`**: Input data frame containing categorical variables
+- **`dep`**: Categorical variable for pie chart creation (factor required)
+- **`group`**: Optional grouping variable for contingency table analysis
+- **`grvar`**: Optional split variable for creating separate pie charts
+
+### Statistical Methods
+
+The `typestatistics` parameter supports four approaches:
+
+1. **"parametric"** (default): Pearson's Chi-square test
+   - Tests independence in contingency tables
+   - Assumes expected cell counts ≥ 5
+   - Most commonly used for categorical association
+
+2. **"nonparametric"**: Contingency table tests
+   - Fisher's exact test for small samples
+   - More appropriate when expected cell counts are low
+   - Exact p-values for categorical associations
+
+3. **"robust"**: Robust association measures
+   - Less sensitive to outliers and violations
+   - Uses robust statistical measures
+   - Good when data quality is uncertain
+
+4. **"bayes"**: Bayesian categorical analysis
+   - Provides Bayes factors for association evidence
+   - Quantifies strength of evidence for/against independence
+   - Incorporates prior beliefs about associations
+
+## Performance Optimizations
+
+### Version History
+
+The function has been significantly optimized:
+
+**Previous Issues:**
+- Redundant data processing across 4 plot methods (.plot1, .plot2, .plot4)
+- No caching infrastructure
+- Multiple jmvcore::naOmit() calls for same data
+- Complex conditional logic duplicated across methods
+
+**Current Optimizations:**
+- **Data Caching**: Uses `.prepareData()` method to cache processed data
+- **Options Caching**: Uses `.prepareOptions()` method to cache option processing
+- **Eliminated Redundancy**: All plot methods now use cached results
+- **Shared Processing**: Single data preparation for all visualization modes
+- **Better Progress Feedback**: Clear user messaging during processing
+
+### Performance Benefits
+
+The optimized version provides:
+- **Significant speedup** for grouped and split analyses
+- **Reduced memory usage** through single data processing
+- **Faster rendering** of multiple pie charts
+- **Improved user experience** with progress indicators
+
+## Quick Start Examples
+
+### Basic Pie Chart
+
+```{r basic-example}
+echo: true
+eval: false
+
+# Load test data
+data(jjpiestats_test_data)
+
+# Basic pie chart with statistical testing
+result <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# View the plot
+result$plot1
+```
+
+### Contingency Table Analysis
+
+```{r contingency-example}
+echo: true
+eval: false
+
+# Pie chart with grouping for association testing
+result_grouped <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  group = "treatment_arm",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# View the grouped analysis
+result_grouped$plot2
+```
+
+### Split Panel Analysis
+
+```{r split-example}
+echo: true
+eval: false
+
+# Separate pie charts by hospital site
+result_split <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "disease_severity",
+  group = "gender",
+  grvar = "hospital_site",
+  typestatistics = "nonparametric"
+)
+
+# View the split panel plot
+result_split$plot4
+```
+
+## Advanced Usage Examples
+
+### Clinical Trial Response Analysis
+
+```{r clinical-trial}
+echo: true
+eval: false
+
+# Primary endpoint analysis
+primary_response <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Response by treatment arm (association testing)
+response_by_treatment <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  group = "treatment_arm",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Multi-site analysis
+response_by_site <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  group = "treatment_arm",
+  grvar = "hospital_site",
+  typestatistics = "nonparametric"
+)
+```
+
+### Safety Analysis
+
+```{r safety-analysis}
+echo: true
+eval: false
+
+# Adverse event distribution
+adverse_events <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "adverse_event_grade",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Safety by treatment group
+safety_by_treatment <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "adverse_event_grade",
+  group = "treatment_arm",
+  typestatistics = "parametric"
+)
+
+# Regional safety differences
+safety_by_region <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "adverse_event_grade",
+  grvar = "region",
+  typestatistics = "nonparametric"
+)
+```
+
+### Biomarker Analysis
+
+```{r biomarker-analysis}
+echo: true
+eval: false
+
+# Biomarker prevalence
+biomarker_prevalence <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "biomarker_status",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Biomarker by demographic
+biomarker_by_gender <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "biomarker_status",
+  group = "gender",
+  typestatistics = "parametric"
+)
+
+# Response by biomarker status
+response_by_biomarker <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = "treatment_response",
+  group = "biomarker_status",
+  typestatistics = "parametric"
+)
+```
+
+### Statistical Method Comparison
+
+```{r method-comparison}
+echo: true
+eval: false
+
+# Compare different statistical approaches
+variable_of_interest <- "tumor_grade"
+grouping_variable <- "treatment_arm"
+
+# Parametric approach (Chi-square)
+param_result <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  typestatistics = "parametric"
+)
+
+# Nonparametric approach (Fisher's exact)
+nonparam_result <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  typestatistics = "nonparametric"
+)
+
+# Bayesian approach
+bayes_result <- jjpiestats(
+  data = jjpiestats_test_data,
+  dep = variable_of_interest,
+  group = grouping_variable,
+  typestatistics = "bayes"
+)
+```
+
+## Data Requirements
+
+### Input Data Structure
+
+The input data should be a data frame with:
+
+- **Categorical variables**: Factor columns for pie chart analysis
+- **Proper factor levels**: Well-defined categories with meaningful names
+- **Reasonable sample size**: At least 20-30 observations per category
+- **Balanced groups**: Avoid extremely rare categories (<5% of total)
+
+### Example Data Structure
+
+```{r data-structure}
+echo: true
+eval: false
+
+# Structure of test data
+str(jjpiestats_test_data)
+
+# Key variables for pie chart analysis:
+# - treatment_response: 4-level outcome (25%, 35%, 25%, 15%)
+# - disease_severity: 3-level ordered factor (40%, 45%, 15%)
+# - tumor_grade: 4-level pathological classification
+# - treatment_arm: 3-level balanced groups
+# - hospital_site: 5 different sites
+# - biomarker_status: Binary positive/negative (35%/65%)
+```
+
+## Best Practices (Given Pie Chart Limitations)
+
+### Data Preparation
+
+1. **Limit categories**: Maximum 5 categories for readability
+2. **Combine rare categories**: Merge categories with <5% frequency
+3. **Order meaningfully**: For ordinal data, maintain natural order
+4. **Handle missing data**: Decide whether to exclude or show as category
+
+### Statistical Considerations
+
+- **Sample size**: Ensure adequate power for detecting associations
+- **Expected cell counts**: Check assumptions for Chi-square tests
+- **Multiple testing**: Consider correction for multiple comparisons
+- **Effect size**: Report practical significance, not just p-values
+
+### Visualization Guidelines
+
+```{r viz-guidelines}
+echo: true
+eval: false
+
+# Recommended practices when using pie charts:
+
+# 1. Limit to 3-5 categories maximum
+jjpiestats(
+  data = subset(jjpiestats_test_data, 
+                disease_severity %in% c("Mild", "Moderate", "Severe")),
+  dep = "disease_severity"
+)
+
+# 2. Use when part-to-whole relationship is key
+# (Total adds to 100%)
+
+# 3. Ensure clear category differences
+# (Each slice should be >10% ideally)
+
+# 4. Consider accessibility
+# (Color patterns, not just colors)
+```
+
+### When to Use Alternatives
+
+Consider `jjbarstats` instead when:
+- Comparing values across categories is important
+- You have >5 categories
+- Precise value reading is needed
+- Comparing multiple groups
+- Publishing in scientific journals
+
+```{r when-alternatives}
+echo: true
+eval: false
+
+# Use bar charts for these scenarios:
+# - Multiple time points
+# - Precise comparisons needed
+# - >5 categories
+# - Scientific publications
+# - Accessibility requirements
+
+# The ClinicoPath module provides jjbarstats as the recommended alternative
+```
+
+## Technical Details
+
+### Underlying Functions
+
+The `jjpiestats` function is built on:
+
+- **ggstatsplot::ggpiestats**: For single pie charts with statistical testing
+- **ggstatsplot::grouped_ggpiestats**: For grouped/split analyses
+- **jmvcore**: For data handling and option processing
+
+### Caching Implementation
+
+```{r caching-details}
+echo: true
+eval: false
+
+# Internal caching structure (conceptual)
+# private$.processedData: Cached cleaned data with factor levels
+# private$.processedOptions: Cached option processing
+# 
+# Benefits:
+# - Eliminates redundant jmvcore::naOmit() calls
+# - Avoids repeated data processing across plot methods
+# - Shares processed data between single/grouped/split analyses
+# - Optimizes multi-group processing
+```
+
+### Statistical Tests Performed
+
+```{r statistical-tests}
+echo: true
+eval: false
+
+# Tests performed based on typestatistics:
+
+# Parametric:
+# - Pearson's Chi-square test
+# - Goodness of fit test (single variable)
+# - Test of independence (two variables)
+
+# Nonparametric:
+# - Fisher's exact test (small samples)
+# - McNemar's test (paired data, if applicable)
+# - Exact contingency table tests
+
+# Robust:
+# - Robust association measures
+# - Bootstrap confidence intervals
+# - Less sensitive to outliers
+
+# Bayesian:
+# - Bayes factors for independence
+# - Posterior probabilities
+# - Credible intervals
+```
+
+## Clinical Applications
+
+### Research Scenarios Where Pie Charts Might Be Used
+
+Despite their limitations, pie charts are sometimes requested in:
+
+1. **Executive summaries**: High-level overview for non-technical audiences
+2. **Patient education**: Simple prevalence communication
+3. **Grant applications**: General population distribution overviews
+4. **Regulatory submissions**: When specifically required by guidelines
+
+### Recommended Workflow
+
+```{r clinical-workflow}
+echo: true
+eval: false
+
+# Step 1: Create pie chart if required
+pie_result <- jjpiestats(
+  data = clinical_data,
+  dep = "primary_outcome",
+  typestatistics = "parametric"
+)
+
+# Step 2: ALSO create bar chart alternative
+bar_result <- jjbarstats(  # Recommended alternative
+  data = clinical_data,
+  dep = "primary_outcome",
+  typestatistics = "parametric"
+)
+
+# Step 3: Present both, emphasizing bar chart advantages
+# Step 4: Use statistical results from either (they're the same)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Data contains no (complete) rows"**
+   - Check for missing values in categorical variables
+   - Ensure factor variables have valid levels
+   - Consider excluding incomplete cases
+
+2. **Empty pie slices**
+   - Combine rare categories (frequency <5%)
+   - Check factor level definitions
+   - Verify data coding consistency
+
+3. **Overlapping labels**
+   - Reduce number of categories
+   - Consider horizontal bar chart alternative
+   - Check for extremely small slices
+
+4. **Statistical test warnings**
+   - Check expected cell counts for Chi-square tests
+   - Use Fisher's exact test for small samples
+   - Consider category combination
+
+### Error Handling
+
+```{r error-handling}
+echo: true
+eval: false
+
+# Example error handling
+tryCatch({
+  result <- jjpiestats(
+    data = my_data,
+    dep = "categorical_var",
+    typestatistics = "parametric"
+  )
+}, error = function(e) {
+  message("Error in pie chart analysis: ", e$message)
+  message("Consider these alternatives:")
+  message("1. Check factor levels in your data")
+  message("2. Combine rare categories")
+  message("3. Use bar charts instead (jjbarstats)")
+  
+  # Diagnostic information
+  cat("Data structure:\n")
+  str(my_data)
+  cat("\nVariable summary:\n")
+  summary(my_data$categorical_var)
+})
+```
+
+## Recommendations and Conclusion
+
+### Key Takeaways
+
+1. **Performance**: The optimized `jjpiestats` provides significant speed improvements through caching
+2. **Functionality**: Comprehensive statistical testing with multiple approaches
+3. **Limitations**: Pie charts have well-documented visualization problems
+4. **Alternatives**: Consider `jjbarstats` for most categorical data visualization needs
+
+### Decision Framework
+
+Use pie charts only when:
+- ✅ Specifically requested by stakeholders
+- ✅ Part-to-whole relationship is crucial
+- ✅ ≤5 categories with clear differences
+- ✅ Single time point analysis
+- ⚠️ **Always provide bar chart alternative**
+
+Use bar charts when:
+- ✅ Comparing values across categories
+- ✅ >5 categories present
+- ✅ Scientific publication intended
+- ✅ Accessibility is important
+- ✅ Precise value reading needed
+
+### Final Recommendation
+
+**While the `jjpiestats` function provides optimized, feature-rich pie chart functionality, we strongly recommend considering the `jjbarstats` function for most categorical data visualization needs.** The statistical analysis capabilities are identical, but bar charts provide superior readability, comparison ability, and accessibility.
+
+The optimized `jjpiestats` function is best used when pie charts are specifically required by external stakeholders, while always providing bar chart alternatives when possible.
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

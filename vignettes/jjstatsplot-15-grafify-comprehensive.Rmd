@@ -1,0 +1,267 @@
+---
+title: "Scientific Visualization with Grafify: Comprehensive Guide"
+subtitle: "Color-blind friendly plots for clinical research and experimental data"
+date: "`r Sys.Date()`"
+author: "ClinicoPath"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+vignette: >
+  %\VignetteIndexEntry{Scientific Visualization with Grafify: Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8,
+  dpi = 300,
+  out.width = "100%"
+)
+
+# Load required libraries
+suppressMessages({
+  library(ClinicoPath)
+  library(dplyr)
+  library(ggplot2)
+})
+```
+
+# Introduction to Grafify Scientific Plots
+
+The `grafify` function in ClinicoPath provides access to the powerful grafify R package for creating beautiful, color-blind friendly scientific visualizations. This module is specifically designed for clinical research, experimental data analysis, and scientific publications.
+
+## Key Features
+
+- **12+ Color-blind friendly palettes** optimized for scientific visualization
+- **Multiple plot types** including scatter plots, box plots, violin plots, and specialized designs
+- **Integrated statistical analysis** with ANOVA, t-tests, correlations, and post-hoc comparisons
+- **Experimental design support** for randomized blocks, repeated measures, and factorial designs
+- **Before-after analysis** for paired data and longitudinal studies
+- **Publication-ready styling** with professional themes and customization options
+
+## Accessing Grafify in jamovi
+
+The grafify functionality is available through the jamovi interface:
+
+1. **Load your data** into jamovi
+2. **Navigate** to Analyses → ClinicoPath → JJ Plots → Grafify
+3. **Select variables** for your analysis
+4. **Choose plot type** from the available options
+5. **Customize** colors, themes, and statistical options
+6. **Export** high-resolution plots for publication
+
+## Available Plot Types
+
+### Basic Plot Types
+
+The grafify module supports these core visualization types:
+
+- **scatterbar**: Scatter plots with summary statistics and error bars
+- **scatterbox**: Box plots with individual data points overlaid
+- **scatterviolin**: Violin plots showing data distribution and points
+- **histogram**: Distribution histograms with grouping options
+- **density**: Density plots for continuous data visualization
+
+### Specialized Plot Types
+
+- **befafter_box**: Before-after comparisons for paired data
+- **befafter_colors**: Color-coded before-after visualizations
+- **scatter_3d**: Three-dimensional scatter plots
+- **scatter_4d**: Four-dimensional scatter plots with size/color mapping
+
+## Color Palettes
+
+Grafify includes scientifically optimized, color-blind friendly palettes:
+
+- **default**: Standard palette for general use
+- **vibrant**: High-contrast colors for presentations
+- **contrast**: Maximum contrast for accessibility
+- **bright**: Bright colors for highlighting
+- **muted**: Subtle colors for professional publications
+- **dark**: Dark theme compatible colors
+
+## Example Data Setup
+
+```{r data-setup}
+# Create example clinical trial data
+set.seed(123)
+clinical_data <- data.frame(
+  patient_id = 1:120,
+  treatment = rep(c("Control", "Drug A", "Drug B"), each = 40),
+  age_group = rep(c("Young", "Middle", "Senior"), times = 40),
+  gender = rep(c("Male", "Female"), times = 60),
+  biomarker_baseline = rnorm(120, mean = 10, sd = 3),
+  biomarker_followup = rnorm(120, mean = 12, sd = 4),
+  response_score = rnorm(120, mean = 75, sd = 15),
+  timepoint = rep(c("Baseline", "Follow-up"), each = 60)
+)
+
+# Display data structure
+str(clinical_data)
+head(clinical_data)
+```
+
+## Example Visualizations
+
+Here are examples of the types of plots you can create with grafify in jamovi:
+
+### Scatter Plot with Error Bars
+
+```{r example-scatterbar, fig.cap="Example of scatterbar plot showing biomarker levels by treatment group"}
+# This demonstrates the type of plot grafify creates with scatterbar
+summary_data <- clinical_data %>%
+  group_by(treatment) %>%
+  summarise(
+    mean_biomarker = mean(biomarker_baseline, na.rm = TRUE),
+    sd_biomarker = sd(biomarker_baseline, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+ggplot(clinical_data, aes(x = treatment, y = biomarker_baseline, color = treatment)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.7, size = 2) +
+  geom_point(data = summary_data, aes(y = mean_biomarker), size = 4) +
+  geom_errorbar(data = summary_data, 
+                aes(y = mean_biomarker, 
+                    ymin = mean_biomarker - sd_biomarker, 
+                    ymax = mean_biomarker + sd_biomarker),
+                width = 0.2, size = 1) +
+  scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73")) +
+  theme_minimal() +
+  labs(title = "Biomarker Levels by Treatment Group",
+       subtitle = "Points show individual values, error bars show standard deviation",
+       y = "Biomarker Level (Baseline)", x = "Treatment Group") +
+  theme(legend.position = "none")
+```
+
+### Box Plot with Individual Points
+
+```{r example-scatterbox, fig.cap="Example of scatterbox plot showing response scores by treatment and gender"}
+ggplot(clinical_data, aes(x = treatment, y = response_score, color = gender)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA, position = position_dodge(width = 0.8)) +
+  geom_point(position = position_jitterdodge(dodge.width = 0.8, jitter.width = 0.2), 
+             alpha = 0.6, size = 1.5) +
+  scale_color_manual(values = c("#E69F00", "#56B4E9")) +
+  theme_minimal() +
+  labs(title = "Response Scores by Treatment and Gender",
+       subtitle = "Box plots with individual data points overlaid",
+       y = "Response Score", x = "Treatment Group", color = "Gender") +
+  theme(legend.position = "top")
+```
+
+### Before-After Comparison
+
+```{r example-befafter, fig.cap="Example of before-after analysis for biomarker changes"}
+# Reshape data for before-after comparison
+before_after_data <- data.frame(
+  patient_id = rep(1:60, 2),
+  treatment = rep(rep(c("Control", "Drug A", "Drug B"), each = 20), 2),
+  timepoint = rep(c("Baseline", "Follow-up"), each = 60),
+  biomarker = c(clinical_data$biomarker_baseline[1:60], 
+                clinical_data$biomarker_followup[1:60])
+)
+
+ggplot(before_after_data, aes(x = timepoint, y = biomarker, color = treatment)) +
+  geom_line(aes(group = patient_id), alpha = 0.3) +
+  geom_point(alpha = 0.7, size = 2) +
+  stat_summary(fun = mean, geom = "point", size = 4, shape = 15) +
+  stat_summary(fun = mean, geom = "line", aes(group = treatment), size = 1.5) +
+  scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73")) +
+  theme_minimal() +
+  labs(title = "Biomarker Changes: Baseline to Follow-up",
+       subtitle = "Individual patient trajectories with group means",
+       y = "Biomarker Level", x = "Time Point", color = "Treatment") +
+  theme(legend.position = "top")
+```
+
+## Statistical Analysis Integration
+
+Grafify integrates with statistical analysis options:
+
+### Available Statistical Methods
+
+- **One-way ANOVA**: Comparing multiple groups
+- **Two-way ANOVA**: Factorial designs with two factors
+- **Mixed models**: Repeated measures and nested designs
+- **T-tests**: Pairwise comparisons
+- **Correlations**: Relationship analysis
+
+### Post-hoc Comparisons
+
+- **Pairwise**: All possible group comparisons
+- **vs Reference**: Comparisons to control group
+- **Trends**: Testing for linear/polynomial trends
+
+## Clinical Research Applications
+
+### Biomarker Analysis
+
+Grafify is particularly useful for:
+
+- **Dose-response relationships**: Visualizing drug concentration effects
+- **Treatment comparisons**: Comparing multiple therapeutic interventions
+- **Longitudinal studies**: Tracking changes over time
+- **Diagnostic performance**: ROC-style visualizations
+
+### Publication-Ready Output
+
+Features for scientific publication:
+
+- **High-resolution export**: 300+ DPI for journals
+- **Customizable themes**: Professional styling options
+- **Color-blind accessibility**: All palettes tested for accessibility
+- **Statistical annotations**: Automatic p-value reporting
+
+## Best Practices
+
+### Data Preparation
+
+1. **Clean your data** before analysis
+2. **Check for outliers** and missing values
+3. **Ensure proper factor levels** for grouping variables
+4. **Consider transformations** for skewed data
+
+### Plot Selection
+
+1. **Choose appropriate plot types** for your data structure
+2. **Consider your audience** when selecting colors
+3. **Balance detail with clarity** in complex visualizations
+4. **Test accessibility** with color-blind simulation tools
+
+### Statistical Considerations
+
+1. **Check assumptions** before applying statistical tests
+2. **Consider multiple comparisons** when doing post-hoc tests
+3. **Report effect sizes** along with p-values
+4. **Validate findings** with appropriate sample sizes
+
+## Troubleshooting
+
+### Common Issues
+
+- **Missing data**: Handle appropriately before analysis
+- **Factor ordering**: Ensure logical ordering of categorical variables
+- **Color conflicts**: Test palettes with your specific data
+- **Export problems**: Check resolution and file format settings
+
+### Getting Help
+
+- **jamovi Community**: Active user forums and support
+- **Documentation**: Comprehensive help files within jamovi
+- **Examples**: Built-in datasets and tutorials
+- **Updates**: Regular feature additions and improvements
+
+## Conclusion
+
+The grafify module in ClinicoPath provides powerful, accessible tools for scientific visualization. Its integration with jamovi makes advanced plotting techniques available to researchers without programming experience, while maintaining the flexibility and quality needed for professional scientific publication.
+
+By combining color-blind friendly design, statistical integration, and publication-ready output, grafify serves as a comprehensive solution for clinical and experimental data visualization needs.

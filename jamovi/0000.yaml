@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.52
+version: 0.0.3.54
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-07-10'
+date: '2025-07-13'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -47,16 +47,17 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
-      Generates a detailed summary of categorical variables including counts,
-      percentages, and missing value information. The output is presented in
-      both textual and visual formats, making it easy to interpret the
-      distribution of your data.
+      Generates a comprehensive summary of categorical variables including
+      frequency counts,  percentages, missing value information, and optional
+      visual summaries. Supports multiple  output formats and sorting options
+      for enhanced data exploration. Automatically handles  edge cases like
+      missing values, single categories, and variable conversion.
     ribbon: analyses
     category: analyses
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -410,6 +411,11 @@ analyses:
     menuSubtitle: Bibliometrics
     ribbon: analyses
     category: analyses
+    description: >
+      Checks DOIs against retraction databases to identify retracted
+      publications. Uses OpenRetractions API to validate publication status and
+      can optionally retrieve PubMed IDs. Includes DOI format validation, rate
+      limiting, and  robust error handling for reliable results.
   - title: Data Quality Assessment
     name: checkdata
     ns: ClinicoPath
@@ -1040,7 +1046,7 @@ analyses:
   - title: ROC Analysis
     name: psychopdaroc
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecide
     menuTitle: ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: ROC Analysis, AUC, Cutpoints
@@ -1102,7 +1108,14 @@ analyses:
     menuTitle: Screening Test Calculator
     menuSubgroup: Decision
     menuSubtitle: Calculate disease probability based on test characteristics
-    description: Function for Screening Test Probability Calculator.
+    description: >-
+      Calculates positive and negative predictive values for screening and
+      diagnostic tests
+
+      using Bayes' theorem. Demonstrates how disease probability changes with
+      sequential 
+
+      testing and provides Fagan nomograms for clinical decision-making.
     ribbon: analyses
     category: analyses
   - title: Co-Testing Analysis
@@ -1125,10 +1138,17 @@ analyses:
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis
-    description: >
-      Function for Sequential Testing Analysis. Analyzes how diagnostic accuracy
-      changes when applying two tests in sequence (screening followed by
-      confirmation).
+    description: >-
+      Analyzes how diagnostic accuracy changes when applying two tests in
+      sequence,
+
+      comparing three different testing strategies: serial positive
+      (confirmation),
+
+      serial negative (exclusion), and parallel testing. Provides comprehensive
+
+      analysis including population flow, cost implications, and Fagan
+      nomograms.
     ribbon: analyses
     category: analyses
   - title: ROC
@@ -1548,9 +1568,13 @@ analyses:
     menuSubgroup: Categorical Over Time
     menuTitle: River Plots
     menuSubtitle: Flow and Transition Visualization
-    description: |
+    description: >
       'Function for generating river plots (alluvial diagrams) to visualize
-      flows and transitions over time or between categories.'
+
+      flows and transitions over time or between categories. Supports alluvial 
+
+      diagrams, Sankey diagrams, and stream graphs with customizable
+      aesthetics.'
     category: analyses
   - title: Scientific Visualization with Grafify
     name: grafify
@@ -1819,6 +1843,13 @@ analyses:
       This function generates a "Table One", a descriptive summary table
       frequently used in  clinicopathological research manuscripts. It supports
       multiple output styles for flexible formatting.
+  - title: Benford Analysis 2
+    name: benford2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Benford Analysis 2
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

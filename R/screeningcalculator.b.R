@@ -12,41 +12,185 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 sens <- self$options$sens
                 spec <- self$options$spec
                 prev <- self$options$prev
+                
+                # Input validation and error handling
+                errors <- c()
+                warnings <- c()
+                
+                # Validate probability ranges
+                if (is.na(sens) || sens < 0 || sens > 1) {
+                    errors <- c(errors, "Sensitivity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(spec) || spec < 0 || spec > 1) {
+                    errors <- c(errors, "Specificity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(prev) || prev < 0 || prev > 1) {
+                    errors <- c(errors, "Prevalence must be between 0 and 1 (0% to 100%)")
+                }
+                
+                # Clinical plausibility warnings
+                if (sens < 0.50) {
+                    warnings <- c(warnings, "Sensitivity <50% is unusual for most clinical tests")
+                }
+                if (spec < 0.50) {
+                    warnings <- c(warnings, "Specificity <50% is unusual for most clinical tests")
+                }
+                if (sens > 0.99) {
+                    warnings <- c(warnings, "Sensitivity >99% is rarely achieved in practice")
+                }
+                if (spec > 0.99) {
+                    warnings <- c(warnings, "Specificity >99% is rarely achieved in practice")
+                }
+                if (prev > 0.90) {
+                    warnings <- c(warnings, "Prevalence >90% is unusual except for confirmatory testing")
+                }
+                if (prev < 0.001) {
+                    warnings <- c(warnings, "Very low prevalence (<0.1%) may lead to extremely low PPV")
+                }
+                
+                # Test characteristic combinations that may be problematic
+                if ((sens + spec) < 1.0) {
+                    warnings <- c(warnings, "Combined sensitivity + specificity <100% suggests poor test performance")
+                }
+                
+                # Show errors if any exist
+                if (length(errors) > 0) {
+                    errorHtml <- paste0(
+                        '<div class="alert alert-danger"><h4>Input Errors:</h4><ul>',
+                        paste0('<li>', errors, '</li>', collapse = ''),
+                        '</ul><p>Please correct these values to proceed with calculations.</p></div>'
+                    )
+                    self$results$explanatoryText$setContent(errorHtml)
+                    return()
+                }
+                
+                # Show warnings if any exist (but continue with calculation)
+                if (length(warnings) > 0) {
+                    warningHtml <- paste0(
+                        '<div class="alert alert-warning"><h4>Clinical Notes:</h4><ul>',
+                        paste0('<li>', warnings, '</li>', collapse = ''),
+                        '</ul><p>Calculations will proceed, but please verify these parameters are appropriate for your clinical scenario.</p></div>'
+                    )
+                    # We'll add this to the explanatory text later
+                }
 
-                # Add explanatory text about sequential testing
+                # Add explanatory text about sequential testing with clinical examples
                 explanatoryHtml <- '
             <div class="jmv-results-item">
                 <h3>How Sequential Testing Works</h3>
                 <p>This calculator demonstrates how disease probability changes with sequential tests. <strong>Each subsequent test uses the post-test probability from the previous test as the new pre-test probability (prevalence).</strong> This is known as Bayesian updating.</p>
-                <p>For example, if a patient has a positive test result, their probability of disease becomes the Positive Predictive Value (PPV). If they then have a second test, this PPV is used as the new "prevalence" when calculating the next post-test probability.</p>
+                
+                <h4>Clinical Examples:</h4>
+                <p><strong>COVID-19 Testing:</strong> A rapid antigen test positive in community screening (2% prevalence) might have 26% PPV. If confirmed with RT-PCR, the probability increases to >95%.</p>
+                
+                <p><strong>Cancer Screening:</strong> Mammography positive in 50-year-old women (0.8% prevalence) has ~7% PPV. Tissue biopsy after positive mammogram increases probability to >90%.</p>
+                
+                <p><strong>Cardiac Testing:</strong> Abnormal stress test in chest pain patients (25% prevalence) has ~70% PPV. Cardiac catheterization after positive stress test approaches 95% certainty.</p>
+                
+                <p><strong>HIV Screening:</strong> Positive ELISA in general population (0.1% prevalence) has ~9% PPV. Western blot confirmation increases probability to >99%.</p>
+                
+                <p><strong>Key Principle:</strong> Sequential testing dramatically improves diagnostic accuracy by updating disease probability with each test result, following Bayes theorem.</p>
             </div>
             '
+                
+                # Add warnings to explanatory text if they exist
+                if (length(warnings) > 0) {
+                    explanatoryHtml <- paste0(warningHtml, explanatoryHtml)
+                }
+                
                 self$results$explanatoryText$setContent(explanatoryHtml)
 
-                # Add math explanations
+                # Add math explanations with clinical interpretation guidance
                 mathHtml <- '
             <div class="jmv-results-item">
                 <h3>Math Behind the Calculations</h3>
                 <p>These calculations use Bayes\' theorem to update probabilities based on test results:</p>
+                
                 <p><strong>Positive Predictive Value (PPV)</strong>: Probability of disease after a positive test<br>
-                PPV = (Sensitivity × Prevalence) / [(Sensitivity × Prevalence) + (1-Specificity) × (1-Prevalence)]</p>
+                PPV = (Sensitivity × Prevalence) / [(Sensitivity × Prevalence) + (1-Specificity) × (1-Prevalence)]<br>
+                <em>Clinical use: Determines confidence in positive results. PPV <10% suggests confirmatory testing needed.</em></p>
+                
                 <p><strong>Negative Predictive Value (NPV)</strong>: Probability of being disease-free after a negative test<br>
-                NPV = (Specificity × (1-Prevalence)) / [(Specificity × (1-Prevalence)) + (1-Sensitivity) × Prevalence]</p>
-                <p><strong>Probability of disease after a negative test</strong> = 1 - NPV</p>
-                <p><strong>Sequential Testing</strong>: For each subsequent test, the post-test probability from the previous test becomes the new pre-test probability.</p>
-                <p><strong>Likelihood Ratios</strong>:<br>
-                Positive LR = Sensitivity / (1-Specificity)<br>
-                Negative LR = (1-Sensitivity) / Specificity</p>
+                NPV = (Specificity × (1-Prevalence)) / [(Specificity × (1-Prevalence)) + (1-Sensitivity) × Prevalence]<br>
+                <em>Clinical use: Determines confidence in negative results. NPV >95% suggests disease can be ruled out.</em></p>
+                
+                <p><strong>Likelihood Ratios (LR)</strong>:<br>
+                Positive LR = Sensitivity / (1-Specificity) &nbsp;&nbsp;&nbsp; Negative LR = (1-Sensitivity) / Specificity<br>
+                <em>Clinical interpretation: LR+ >10 = strong evidence for disease; LR- <0.1 = strong evidence against disease</em></p>
+                
+                <p><strong>Sequential Testing Formula</strong>: For each subsequent test, the post-test probability from the previous test becomes the new pre-test probability.<br>
+                <em>Clinical principle: Each test result updates disease probability, creating a chain of evidence.</em></p>
+                
+                <h4>Prevalence Effects:</h4>
+                <p><em>Low prevalence (screening): Even excellent tests have low PPV due to many false positives</em><br>
+                <em>High prevalence (symptomatic): Same tests have high PPV due to enriched disease population</em></p>
+                
+                <h4>Example Datasets Available:</h4>
+                <p><em>Use data(screening_examples) for 15 realistic clinical scenarios across medical specialties</em><br>
+                <em>Use data(prevalence_demo) to see how prevalence affects test performance</em><br>
+                <em>Use data(common_tests) for reference characteristics of standard medical tests</em></p>
             </div>
             '
                 self$results$mathText$setContent(mathHtml)
 
-                # Calculate single test metrics
-                PPV <- (sens * prev) / ((sens * prev) + ((1 - spec) * (1 - prev)))
-                NPV <- (spec * (1 - prev)) / ((spec * (1 - prev)) + ((1 - sens) * prev))
-                LRP <- sens / (1 - spec)
-                LRN <- (1 - sens) / spec
+                # Calculate single test metrics with error handling
+                tryCatch({
+                    # Check for division by zero conditions
+                    if (spec == 1) {
+                        # Perfect specificity: positive LR is infinite
+                        LRP <- Inf
+                    } else {
+                        LRP <- sens / (1 - spec)
+                    }
+                    
+                    if (spec == 0) {
+                        # Zero specificity: negative LR is infinite
+                        LRN <- Inf
+                    } else {
+                        LRN <- (1 - sens) / spec
+                    }
+                    
+                    # Calculate predictive values with protection against edge cases
+                    denom_ppv <- (sens * prev) + ((1 - spec) * (1 - prev))
+                    if (denom_ppv == 0) {
+                        PPV <- NaN  # Undefined case
+                    } else {
+                        PPV <- (sens * prev) / denom_ppv
+                    }
+                    
+                    denom_npv <- (spec * (1 - prev)) + ((1 - sens) * prev)
+                    if (denom_npv == 0) {
+                        NPV <- NaN  # Undefined case
+                    } else {
+                        NPV <- (spec * (1 - prev)) / denom_npv
+                    }
+                    
+                    # Ensure results are in valid probability ranges
+                    PPV <- pmax(0, pmin(1, PPV))
+                    NPV <- pmax(0, pmin(1, NPV))
+                    
+                }, error = function(e) {
+                    # If any calculation fails, set to NA and show error
+                    PPV <<- NA
+                    NPV <<- NA
+                    LRP <<- NA
+                    LRN <<- NA
+                    
+                    errorMsg <- paste0(
+                        '<div class="alert alert-danger"><h4>Calculation Error:</h4>',
+                        '<p>Unable to calculate test metrics with the provided values. Error: ', e$message, '</p>',
+                        '<p>Please check your input parameters and try again.</p></div>'
+                    )
+                    self$results$explanatoryText$setContent(errorMsg)
+                    return()
+                })
 
+                # Prepare values for table with handling of special cases
+                display_PPV <- if (is.infinite(PPV) || is.nan(PPV)) NA else PPV
+                display_NPV <- if (is.infinite(NPV) || is.nan(NPV)) NA else NPV
+                display_LRP <- if (is.infinite(LRP)) "∞" else if (is.nan(LRP)) NA else LRP
+                display_LRN <- if (is.infinite(LRN)) "∞" else if (is.nan(LRN)) NA else LRN
+                
                 # Fill single test table
                 singleTestTable <- self$results$singleTestTable
                 singleTestTable$setRow(
@@ -56,12 +200,35 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                         Sensitivity = sens,
                         Specificity = spec,
                         Prevalence = prev,
-                        PPV = PPV,
-                        NPV = NPV,
-                        LRP = LRP,
-                        LRN = LRN
+                        PPV = display_PPV,
+                        NPV = display_NPV,
+                        LRP = if (is.character(display_LRP)) NA else display_LRP,  # Handle ∞ symbol
+                        LRN = if (is.character(display_LRN)) NA else display_LRN   # Handle ∞ symbol
                     )
                 )
+                
+                # Add special footnotes for infinite or undefined values
+                if (is.infinite(LRP)) {
+                    singleTestTable$addFootnote(
+                        rowNo = 1,
+                        col = "LRP", 
+                        "Infinite (perfect specificity)"
+                    )
+                }
+                if (is.infinite(LRN)) {
+                    singleTestTable$addFootnote(
+                        rowNo = 1,
+                        col = "LRN",
+                        "Infinite (zero specificity)"
+                    )
+                }
+                if (is.nan(PPV) || is.nan(NPV)) {
+                    singleTestTable$addFootnote(
+                        rowNo = 1,
+                        col = "PPV",
+                        "Undefined due to extreme parameter values"
+                    )
+                }
 
                 # Add footnotes if requested
                 if (self$options$fnote) {

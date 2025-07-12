@@ -1,0 +1,728 @@
+---
+title: "Enhanced Tables with gt Package - Professional Clinical Research"
+subtitle: "Publication-ready tables with advanced formatting and clinical research optimization"
+date: "`r Sys.Date()`"
+author: "ClinicoPath"
+output: html_document
+---
+
+# Introduction to Enhanced Tables with gt
+
+The `enhancedtables` function in ClinicoPath leverages the powerful gt package to create professional, publication-ready tables with advanced formatting capabilities. This module transforms standard data summaries into sophisticated tables suitable for medical journals, regulatory submissions, and clinical presentations. The integration provides comprehensive styling options, automated statistical summaries, and clinical research-specific optimizations.
+
+## What Makes Enhanced Tables Special?
+
+### **Advanced Table Creation**
+- **gt Package Integration**: Full integration with the grammar of tables for professional formatting
+- **Multiple Table Types**: Summary, grouped, clinical characteristics, Table One, and custom formats
+- **Six Professional Themes**: Clinical, publication, modern, traditional, minimal, and journal styles
+- **Statistical Integration**: Automated statistical summaries and group comparisons
+- **Export Flexibility**: HTML, Word, LaTeX, and RTF export options
+
+### **Clinical Research Focus**
+- **Publication Standards**: Tables formatted for medical journal requirements
+- **Regulatory Compliance**: Output suitable for FDA, EMA, and other regulatory submissions
+- **Statistical Rigor**: Appropriate statistical summaries and test selection
+- **Professional Appearance**: High-quality formatting for presentations and reports
+
+## When to Use Enhanced Tables
+
+**Perfect for:**
+- Clinical trial baseline characteristic tables (Table 1)
+- Summary statistics for manuscript preparation
+- Regulatory submission documentation
+- Conference presentation materials
+- Multi-center study reports
+- Biostatistical analysis summaries
+
+**Key Advantages:**
+- Superior formatting compared to basic data frames
+- Automated statistical summary generation
+- Professional themes designed for medical research
+- Comprehensive export options for various publication formats
+- Clinical interpretation and usage guidelines
+
+# Getting Started
+
+## Installation Requirements
+
+The enhanced tables functionality requires the `gt` package and supporting packages:
+
+```r
+# Install core gt package
+install.packages("gt")
+
+# For enhanced export functionality
+install.packages(c("officer", "webshot2"))
+
+# Supporting packages (automatically handled)
+install.packages(c("dplyr", "tidyr", "janitor", "stringr"))
+```
+
+## Basic Syntax and Options
+
+### **Enhanced Tables vs Standard Tables**
+
+```r
+# Standard R table
+summary(histopathology[c("Age", "Sex", "Grade_Level")])
+
+# Enhanced tables with gt integration
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  table_type = "summary",
+  table_theme = "clinical",
+  export_format = "html"
+)
+```
+
+### **Key Differences**
+- **Professional Formatting**: Publication-ready appearance with customizable themes
+- **Statistical Summaries**: Comprehensive statistics for both continuous and categorical variables
+- **Clinical Optimization**: Designed specifically for medical research applications
+- **Export Flexibility**: Multiple output formats for different publication needs
+
+# Clinical Research Applications
+
+## Example 1: Baseline Characteristics Table (Table 1)
+
+This example demonstrates creating a comprehensive Table 1 for clinical trial baseline characteristics:
+
+```r
+library(ClinicoPath)
+
+# Load the histopathology dataset
+data("histopathology")
+
+# Create Table 1 with enhanced formatting
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Race", "Grade_Level", "LVI", "PNI", "OverallTime"),
+  table_type = "tableone",
+  table_theme = "clinical",
+  stats_continuous = "mean_sd",
+  stats_categorical = "n_percent",
+  include_total = TRUE,
+  table_title = "Table 1. Baseline Characteristics",
+  table_subtitle = "Clinical and pathological features of study participants",
+  show_interpretation = TRUE
+)
+```
+
+**Clinical Features:**
+- Automatic Table 1 formatting with "Overall (N = X)" column
+- Professional clinical theme with appropriate fonts and spacing
+- Mean ± SD for continuous variables, N (%) for categorical variables
+- Comprehensive sample size reporting
+- Clinical interpretation guidelines included
+
+## Example 2: Grouped Analysis by Treatment
+
+Analyzing characteristics across treatment groups with statistical comparisons:
+
+```r
+# Grouped analysis with statistical testing
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level", "LVI", "PNI", "OverallTime"),
+  group_var = "Group",
+  table_type = "grouped",
+  table_theme = "publication",
+  include_pvalues = TRUE,
+  test_type = "auto",
+  highlight_significant = TRUE,
+  confidence_level = 0.95,
+  table_title = "Baseline Characteristics by Treatment Group",
+  export_format = "word"
+)
+```
+
+**Advanced Features:**
+- Automatic statistical test selection (t-test, chi-square, etc.)
+- P-value calculation and highlighting of significant results
+- Publication theme optimized for journal submission
+- Word-compatible export for manuscript preparation
+- Confidence interval reporting
+
+## Example 3: Clinical Characteristics Summary
+
+Creating a comprehensive clinical summary table:
+
+```r
+# Clinical characteristics with comprehensive statistics
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level", "TStage", "LVI", "PNI", "Mortality5yr"),
+  table_type = "clinical",
+  table_theme = "journal",
+  stats_continuous = "both",
+  stats_categorical = "n_percent_missing",
+  missing_handling = "show",
+  show_footnotes = TRUE,
+  decimal_places = 1,
+  source_note = "Data from institutional pathology database"
+)
+```
+
+**Clinical Optimization:**
+- Both mean ± SD and median [IQR] for continuous variables
+- Missing value transparency with counts
+- Journal-style formatting for publication
+- Comprehensive footnotes explaining statistical methods
+- Source documentation for data provenance
+
+# Advanced Features and Customization
+
+## Table Types and Formatting
+
+The enhanced tables module offers six distinct table types optimized for different clinical applications:
+
+### **Table Type Options**
+- **`summary`**: General summary statistics for selected variables
+- **`grouped`**: Grouped analysis with statistical comparisons
+- **`descriptive`**: Comprehensive descriptive overview
+- **`clinical`**: Clinical characteristics format
+- **`tableone`**: Standard Table 1 format for baseline characteristics
+- **`custom`**: User-defined formatting options
+
+### **Professional Applications**
+```r
+# Summary table for exploratory analysis
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "Grade_Level"),
+  table_type = "summary",
+  table_theme = "minimal"
+)
+
+# Clinical characteristics for case series
+enhancedtables(
+  data = histopathology,
+  vars = c("Sex", "Age", "TStage", "Grade_Level", "Outcome"),
+  table_type = "clinical",
+  table_theme = "clinical",
+  stats_continuous = "median_iqr"
+)
+```
+
+## Theme System and Visual Customization
+
+The enhanced tables module provides six professional themes designed for different publication contexts:
+
+### **Available Themes**
+- **`clinical`**: Healthcare-focused with clean, readable formatting
+- **`publication`**: Optimized for academic journal submission
+- **`modern`**: Contemporary design with accent colors
+- **`traditional`**: Conservative formatting for formal reports
+- **`minimal`**: Clean, uncluttered appearance
+- **`journal`**: Specific formatting for medical journals
+
+### **Theme Applications**
+```r
+# Clinical research presentation
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  table_theme = "clinical",
+  font_size = "large",
+  stripe_rows = TRUE,
+  group_colors = TRUE
+)
+
+# Journal manuscript submission
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  table_theme = "publication",
+  font_size = "normal",
+  stripe_rows = FALSE,
+  table_width = "full"
+)
+```
+
+## Statistical Summary Options
+
+Comprehensive statistical summary options for different variable types:
+
+### **Continuous Variables**
+- **`mean_sd`**: Mean ± Standard Deviation
+- **`median_iqr`**: Median [Interquartile Range]
+- **`both`**: Mean ± SD, Median [IQR]
+- **`mean_sd_range`**: Mean ± SD with Min-Max range
+- **`all`**: Comprehensive statistics including all measures
+
+### **Categorical Variables**
+- **`n_percent`**: Count (Percentage)
+- **`n_only`**: Count only
+- **`percent_only`**: Percentage only
+- **`n_percent_missing`**: Count (Percentage) with missing value reporting
+
+### **Clinical Applications**
+```r
+# Comprehensive continuous variable summaries
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "OverallTime"),
+  stats_continuous = "all",
+  decimal_places = 2
+)
+
+# Categorical variables with missing value transparency
+enhancedtables(
+  data = histopathology,
+  vars = c("Sex", "Race", "Grade_Level"),
+  stats_categorical = "n_percent_missing",
+  missing_handling = "show"
+)
+```
+
+## Statistical Testing and P-values
+
+Automated statistical testing with appropriate test selection:
+
+### **Test Types**
+- **`auto`**: Automatic test selection based on data characteristics
+- **`parametric`**: Parametric tests (t-test, ANOVA)
+- **`nonparametric`**: Non-parametric tests (Wilcoxon, Kruskal-Wallis)
+- **`categorical`**: Chi-square and Fisher's exact tests
+
+### **Statistical Features**
+```r
+# Automatic test selection with p-values
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level", "LVI"),
+  group_var = "Mortality5yr",
+  include_pvalues = TRUE,
+  test_type = "auto",
+  confidence_level = 0.95,
+  highlight_significant = TRUE
+)
+
+# Non-parametric analysis for skewed data
+enhancedtables(
+  data = histopathology,
+  vars = c("OverallTime", "Age"),
+  group_var = "Group",
+  include_pvalues = TRUE,
+  test_type = "nonparametric",
+  stats_continuous = "median_iqr"
+)
+```
+
+# Export and Reporting Options
+
+## Publication-Ready Outputs
+
+### **HTML Tables for Web Reports**
+```r
+# Interactive HTML table for web reports
+enhancedtables(
+  data = histopathology,
+  vars = c("Sex", "Age", "Grade_Level", "LVI", "PNI"),
+  group_var = "Group",
+  export_format = "html",
+  table_theme = "modern",
+  stripe_rows = TRUE,
+  highlight_significant = TRUE
+)
+```
+
+### **Word Document Integration**
+```r
+# Word-compatible formatting for manuscripts
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "TStage", "Grade_Level", "Outcome"),
+  group_var = "Group",
+  export_format = "word",
+  table_theme = "publication",
+  font_size = "small",
+  table_width = "full"
+)
+```
+
+### **LaTeX for Academic Publishing**
+```r
+# LaTeX output for academic journals
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level", "LVI"),
+  table_type = "tableone",
+  export_format = "latex",
+  table_theme = "journal",
+  decimal_places = 1
+)
+```
+
+## Missing Value Handling
+
+Comprehensive missing value handling strategies:
+
+### **Missing Value Options**
+- **`show`**: Display missing values transparently
+- **`hide`**: Hide missing values from display
+- **`exclude`**: Exclude cases with missing values
+- **`category`**: Treat missing as a separate category
+
+### **Clinical Applications**
+```r
+# Transparent missing value reporting
+enhancedtables(
+  data = histopathology,
+  vars = c("Race", "Smoker", "BMI"),
+  missing_handling = "show",
+  stats_categorical = "n_percent_missing",
+  show_footnotes = TRUE
+)
+
+# Complete case analysis
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  group_var = "Group",
+  missing_handling = "exclude",
+  include_pvalues = TRUE
+)
+```
+
+# Best Practices for Clinical Research
+
+## Design Recommendations
+
+### **Variable Selection**
+- **Primary Variables**: Focus on clinically meaningful characteristics
+- **Grouping Variables**: Select appropriate stratification variables
+- **Sample Size**: Ensure adequate representation in each group
+
+### **Statistical Considerations**
+- **Appropriate Statistics**: Use median [IQR] for skewed distributions
+- **Multiple Testing**: Consider Bonferroni correction for multiple comparisons
+- **Effect Sizes**: Report alongside p-values for clinical significance
+- **Confidence Intervals**: Provide precision estimates for key measures
+
+### **Formatting Standards**
+- **Journal Requirements**: Follow specific journal table formatting guidelines
+- **Regulatory Standards**: Adhere to FDA/EMA table formatting requirements
+- **Accessibility**: Ensure tables are accessible to screen readers
+
+## Quality Assurance
+
+### **Data Validation**
+```r
+# Pre-analysis data quality check
+summary(histopathology[c("Group", "Age", "Sex", "Grade_Level")])
+
+# Enhanced table with validation
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level", "LVI"),
+  group_var = "Group",
+  missing_handling = "show",
+  show_interpretation = TRUE,
+  source_note = "Data validated: [Date] by [Analyst]"
+)
+```
+
+### **Reproducibility Standards**
+```r
+# Document analysis parameters
+analysis_parameters <- list(
+  dataset = "histopathology v1.0",
+  variables = c("Age", "Sex", "Grade_Level", "LVI", "PNI"),
+  grouping = "Group",
+  statistics = "mean_sd for continuous, n_percent for categorical",
+  missing_handling = "show",
+  significance_level = 0.05,
+  analysis_date = Sys.Date()
+)
+
+# Include parameters in table
+enhancedtables(
+  data = histopathology,
+  vars = analysis_parameters$variables,
+  group_var = analysis_parameters$grouping,
+  stats_continuous = "mean_sd",
+  stats_categorical = "n_percent",
+  missing_handling = "show",
+  confidence_level = 0.95,
+  source_note = paste("Analysis parameters documented:", 
+                     analysis_parameters$analysis_date)
+)
+```
+
+# Advanced Features and Customization
+
+## Conditional Formatting and Highlighting
+
+### **Significance Highlighting**
+```r
+# Highlight statistically significant results
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "Grade_Level", "LVI"),
+  group_var = "Mortality5yr",
+  include_pvalues = TRUE,
+  highlight_significant = TRUE,
+  confidence_level = 0.95,
+  table_theme = "clinical"
+)
+```
+
+### **Custom Color Schemes**
+```r
+# Custom color scheme for group headers
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  group_var = "Group",
+  table_theme = "modern",
+  group_colors = TRUE,
+  stripe_rows = TRUE,
+  font_size = "normal"
+)
+```
+
+## Multi-level Grouping and Stratification
+
+### **Stratified Analysis**
+```r
+# Stratified analysis by multiple variables
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Grade_Level", "LVI", "PNI"),
+  group_var = "Group",
+  strata_var = "Sex",
+  table_type = "grouped",
+  include_pvalues = TRUE,
+  table_theme = "publication"
+)
+```
+
+### **Complex Table Structures**
+```r
+# Complex multi-level table
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "TStage", "Grade_Level", "LVI", "PNI"),
+  group_var = "Group",
+  table_type = "clinical",
+  stats_continuous = "both",
+  stats_categorical = "n_percent",
+  table_theme = "journal",
+  decimal_places = 2,
+  show_footnotes = TRUE
+)
+```
+
+# Integration with Clinical Workflows
+
+## Electronic Medical Record (EMR) Data
+
+### **EMR Data Processing**
+```r
+# Example with electronic medical record data structure
+emr_data <- data.frame(
+  patient_id = 1:150,
+  age = rnorm(150, 62, 15),
+  sex = factor(sample(c("Male", "Female"), 150, replace = TRUE)),
+  diagnosis = factor(sample(c("Type 1", "Type 2", "Type 3"), 150, replace = TRUE)),
+  stage = factor(sample(c("Early", "Advanced"), 150, replace = TRUE)),
+  treatment = factor(sample(c("Surgery", "Chemotherapy", "Radiation", "Combined"), 150, replace = TRUE)),
+  response = factor(sample(c("Complete", "Partial", "No Response"), 150, replace = TRUE))
+)
+
+# Clinical research table
+enhancedtables(
+  data = emr_data,
+  vars = c("age", "sex", "diagnosis", "stage"),
+  group_var = "treatment",
+  table_type = "clinical",
+  include_pvalues = TRUE,
+  table_theme = "clinical",
+  export_format = "word"
+)
+```
+
+## Multi-Center Studies
+
+### **Standardized Reporting**
+```r
+# Multi-center study analysis function
+multi_center_table <- function(data, center_var) {
+  centers <- unique(data[[center_var]])
+  
+  for (center in centers) {
+    cat("\n=== Analysis for", center, "===\n")
+    center_data <- data[data[[center_var]] == center, ]
+    
+    result <- enhancedtables(
+      data = center_data,
+      vars = c("age", "sex", "diagnosis", "stage"),
+      table_type = "summary",
+      table_theme = "clinical",
+      table_title = paste("Center:", center),
+      show_interpretation = FALSE
+    )
+    
+    print(result)
+  }
+}
+```
+
+# Troubleshooting and Support
+
+## Common Issues and Solutions
+
+### **Package Dependencies**
+```r
+# Check required packages
+required_packages <- c("gt", "dplyr", "tidyr", "officer")
+
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    message(paste("Installing missing package:", pkg))
+    install.packages(pkg)
+  }
+}
+```
+
+### **Data Format Issues**
+```r
+# Ensure proper factor levels
+histopathology$Group <- factor(histopathology$Group)
+histopathology$Sex <- factor(histopathology$Sex)
+
+# Check for adequate sample sizes
+table(histopathology$Group, histopathology$Sex)
+```
+
+### **Export Problems**
+```r
+# Fallback to HTML if specialized export fails
+tryCatch({
+  enhancedtables(
+    data = histopathology,
+    vars = c("Age", "Sex"),
+    export_format = "word"
+  )
+}, error = function(e) {
+  enhancedtables(
+    data = histopathology,
+    vars = c("Age", "Sex"),
+    export_format = "html"  # Reliable fallback
+  )
+})
+```
+
+## Performance Optimization
+
+### **Large Dataset Handling**
+```r
+# Optimize for large datasets
+large_data_table <- function(data, max_vars = 10) {
+  # Limit variables for performance
+  selected_vars <- names(data)[1:min(max_vars, ncol(data))]
+  
+  enhancedtables(
+    data = data,
+    vars = selected_vars,
+    table_type = "summary",
+    table_theme = "minimal",
+    show_interpretation = FALSE
+  )
+}
+```
+
+### **Memory Management**
+```r
+# Memory-efficient processing
+enhancedtables(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade_Level"),
+  table_theme = "minimal",
+  stripe_rows = FALSE,
+  show_footnotes = FALSE,
+  show_interpretation = FALSE
+)
+```
+
+## Getting Help
+
+### **Documentation Resources**
+- **Function Help**: `?enhancedtables` for parameter details
+- **gt Package Documentation**: `help(package = "gt")` for advanced formatting
+- **Clinical Examples**: Additional vignettes for specific research contexts
+
+### **Community Support**
+- **GitHub Issues**: Report bugs and request features
+- **Clinical Research Forums**: Discuss table design with peers
+- **Statistical Consulting**: Professional guidance for complex studies
+
+# Future Enhancements
+
+## Planned Features
+
+### **Advanced Analytics Integration**
+- **Survival Tables**: Integration with survival analysis results
+- **Regression Tables**: Automated model summary tables
+- **ROC Analysis**: Diagnostic test performance tables
+- **Meta-analysis**: Forest plot data integration
+
+### **Enhanced Export Options**
+- **PowerPoint**: Direct export to presentation slides
+- **Excel**: Advanced Excel formatting with formulas
+- **PDF**: Direct PDF generation with custom styling
+- **Interactive Tables**: Web-based interactive table widgets
+
+## Research Applications
+
+### **Specialized Clinical Areas**
+- **Oncology**: Tumor response evaluation tables
+- **Cardiology**: Hemodynamic parameter summaries
+- **Neurology**: Neurological assessment tables
+- **Pathology**: Histopathological feature summaries
+
+### **Regulatory Submissions**
+- **FDA Templates**: Pre-configured FDA submission formats
+- **EMA Standards**: European regulatory compliance
+- **ICH Guidelines**: International harmonization standards
+- **GCP Compliance**: Good clinical practice documentation
+
+# Conclusion
+
+The enhanced tables functionality represents a significant advancement in clinical research reporting capabilities. By integrating the sophisticated gt package with ClinicoPath's clinical focus, researchers gain access to:
+
+- **Professional Quality**: Publication-ready tables that meet journal and regulatory standards
+- **Statistical Integration**: Automated statistical summaries and hypothesis testing
+- **Clinical Optimization**: Features designed specifically for medical research applications
+- **Export Flexibility**: Multiple output formats for various publication needs
+- **Reproducible Research**: Comprehensive documentation and parameter tracking
+
+## Key Benefits
+
+1. **Enhanced Productivity**: Automated table generation reduces manual formatting work
+2. **Improved Quality**: Professional appearance and statistical rigor
+3. **Clinical Focus**: Designed for medical research applications and standards
+4. **Flexibility**: Comprehensive customization options for different contexts
+5. **Integration**: Seamless workflow with ClinicoPath analysis ecosystem
+
+## Recommendations
+
+- **Start Simple**: Begin with basic summary tables before exploring advanced features
+- **Validate Output**: Compare with manual calculations during initial implementation
+- **Document Methods**: Maintain detailed table generation logs for reproducibility
+- **Follow Standards**: Adhere to journal and regulatory formatting requirements
+- **Stay Current**: Monitor package updates for new features and improvements
+
+## Clinical Research Impact
+
+Enhanced tables transform the way clinical researchers present their findings, providing:
+- **Consistency**: Standardized formatting across studies and publications
+- **Efficiency**: Reduced time from analysis to publication
+- **Quality**: Professional appearance that enhances credibility
+- **Compliance**: Adherence to regulatory and journal standards
+- **Accessibility**: Tables designed for broad accessibility and understanding
+
+For optimal results in clinical research, combine the enhanced tables functionality with appropriate study design, comprehensive data validation, and careful interpretation of results within the clinical context. This approach ensures that tables not only look professional but also accurately communicate important clinical findings to the medical community.

@@ -1,5 +1,33 @@
 #' @title Summary of Categorical Variables
-#' @return Text
+#' @description Generates a comprehensive summary of categorical variables including 
+#' frequency counts, percentages, missing value information, and optional visual 
+#' summaries. Supports multiple output formats and sorting options for enhanced 
+#' data exploration.
+#' @return A results object containing HTML-formatted text summaries and visual tables
+#' @examples 
+#' \donttest{
+#' # Example 1: Basic categorical summary
+#' data <- data.frame(
+#'   treatment = factor(c("A", "B", "A", "C", "B", "A")),
+#'   grade = factor(c("High", "Low", "Medium", "High", "Low", "Medium"))
+#' )
+#' result <- reportcat(data = data, vars = c("treatment", "grade"))
+#' 
+#' # Example 2: Enhanced summary with cumulative percentages  
+#' result_enhanced <- reportcat(
+#'   data = data, 
+#'   vars = "treatment",
+#'   sumvar_style = TRUE,
+#'   show_proportions = TRUE
+#' )
+#' 
+#' # Example 3: Sort categories by frequency
+#' result_sorted <- reportcat(
+#'   data = data,
+#'   vars = "grade", 
+#'   sort_by_frequency = TRUE
+#' )
+#' }
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -44,17 +72,40 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Function to generate a summary for a single categorical variable.
             catsummary <- function(myvar) {
+                # Validate variable exists
+                if (!myvar %in% names(mydata)) {
+                    return(paste0("<strong>Error:</strong> Variable '", myvar, "' not found in dataset."))
+                }
+                
                 # Calculate total observations, missing values, and valid (non-missing) count.
                 total_obs <- length(mydata[[myvar]])
                 missing_obs <- sum(is.na(mydata[[myvar]]))
                 valid_obs <- total_obs - missing_obs
+                
+                # Handle edge case: all values are missing
+                if (valid_obs == 0) {
+                    return(paste0("<strong>", myvar, "</strong>: All ", total_obs, " observations are missing."))
+                }
+                
                 num_levels <- nlevels(as.factor(mydata[[myvar]]))
+                
+                # Handle edge case: only one level
+                if (num_levels <= 1) {
+                    unique_val <- unique(mydata[[myvar]][!is.na(mydata[[myvar]])])
+                    return(paste0("<strong>", myvar, "</strong>: Only one category ('", unique_val, "') with ", valid_obs, " observations. Missing: ", missing_obs, "."))
+                }
 
-                # Create a summary table for the variable.
-                summar <- summary(as.factor(mydata[[myvar]])) %>%
-                    as.table() %>%
-                    tibble::as_tibble(.name_repair = "unique") %>%
-                    dplyr::filter(.[[1]] != "NA's")
+                # Create a summary table for the variable with safer filtering.
+                summar <- tryCatch({
+                    summary(as.factor(mydata[[myvar]])) %>%
+                        as.table() %>%
+                        tibble::as_tibble(.name_repair = "unique") %>%
+                        dplyr::filter(!is.na(.[[1]]) & .[[1]] != "NA's")
+                }, error = function(e) {
+                    # Fallback for edge cases
+                    table(mydata[[myvar]], useNA = "no") %>%
+                        tibble::as_tibble(.name_repair = "unique")
+                })
                 
                 # Apply sorting if requested
                 if (self$options$sort_by_frequency) {
@@ -120,62 +171,29 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_text <- paste(summaries, collapse = "<br><br>")
             self$results$text$setContent(summary_text)
 
-            # Generate a visually appealing summary plot using gtExtras.
-            plot_obj <- mydata %>%
-                gtExtras::gt_plt_summary() %>%
-                gt::cols_hide(columns = c("Mean", "Median", "SD"))
-
-
-            # Convert the gt object to HTML for display.
-            plot_html <- htmltools::HTML(print(plot_obj)[["children"]][[2]])
-            self$results$text1$setContent(plot_html)
+            # Generate a visually appealing summary plot using gtExtras with error handling.
+            tryCatch({
+                if (requireNamespace("gtExtras", quietly = TRUE) && requireNamespace("gt", quietly = TRUE)) {
+                    plot_obj <- mydata %>%
+                        gtExtras::gt_plt_summary() %>%
+                        gt::cols_hide(columns = c("Mean", "Median", "SD"))
+                    
+                    # Safely convert the gt object to HTML for display.
+                    plot_html_raw <- as.character(gt::as_raw_html(plot_obj))
+                    plot_html <- htmltools::HTML(plot_html_raw)
+                    self$results$text1$setContent(plot_html)
+                } else {
+                    self$results$text1$setContent(htmltools::HTML(
+                        "<p><em>Visual summary table requires 'gtExtras' and 'gt' packages to be installed.</em></p>"
+                    ))
+                }
+            }, error = function(e) {
+                self$results$text1$setContent(htmltools::HTML(
+                    paste0("<p><em>Could not generate visual summary: ", e$message, "</em></p>")
+                ))
+            })
         }
     )
 )
 
-
-
-# med <- self$options$med
-# cent <- self$options$cent
-# disp <- self$options$disp
-# ran <- self$options$ran
-# distr <- self$options$distr
-# lev <- self$options$lev
-# n_ch <- self$options$n_ch
-# mis <- self$options$mis
-#
-#
-
-# myreport <- mydata %>%
-#     select(myvars) %>%
-#     report::report(.,
-#                    median = FALSE,
-#                    centrality = TRUE,
-#                    dispersion = TRUE,
-#                    range = TRUE,
-#                    distribution = FALSE,
-#                    levels_percentage = FALSE,
-#                    n_entries = 3,
-#                    missing_percentage = FALSE
-# #                    median = med,
-# #                    centrality = cent,
-# #                    dispersion = disp,
-# #                    range = ran,
-# #                    distribution = distr,
-# #                    levels_percentage = lev,
-# #                    n_characters = n_ch,
-# #                    missing_percentage = mis
-#                    )
-#
-# results1 <- myreport
-
-
-
-# results1 <- mydata %>%
-#     explore::describe(.) %>%
-#     dplyr::filter(na > 0)
-
-
-# for (fac in facs)
-#     data[[fac]] <- as.factor(data[[fac]])
 

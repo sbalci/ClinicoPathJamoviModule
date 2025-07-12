@@ -2,17 +2,7 @@
 title: "Visualization Gallery for Clinical Research"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    fig_width: 8
-    fig_height: 6
-vignette: >
-  %\VignetteIndexEntry{Visualization Gallery for Clinical Research}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r, include = FALSE}
@@ -364,20 +354,20 @@ swimmerplot(
 
 ```{r}
 # Benford's law for measurement data
-benford(
-  data = viz_data,
-  var = "MeasurementA"
-)
+# benford(
+#   data = viz_data,
+#   var = "MeasurementA"
+# )
 ```
 
 ### Multi-variable Benford Analysis
 
 ```{r}
 # Benford's law for follow-up time
-benford(
-  data = viz_data,
-  var = "OverallTime"
-)
+# benford(
+#   data = viz_data,
+#   var = "OverallTime"
+# )
 ```
 
 ## Section 8: Advanced Composite Visualizations

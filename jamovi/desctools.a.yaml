@@ -98,6 +98,7 @@ options:
     - name: group_var
       title: 'Grouping Variable'
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description: >-
@@ -107,6 +108,7 @@ options:
     - name: continuous_var
       title: 'Continuous Variable'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description: >-
@@ -149,6 +151,7 @@ options:
     - name: fitted_probs
       title: 'Fitted Probabilities'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description: >-
@@ -158,6 +161,7 @@ options:
     - name: observed_outcomes
       title: 'Observed Outcomes'
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor, numeric ]
       description: >-
@@ -176,6 +180,7 @@ options:
     - name: normality_var
       title: 'Variable for Normality Testing'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description: >-
@@ -195,6 +200,7 @@ options:
     - name: cat_var1
       title: 'First Categorical Variable'
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description: >-
@@ -203,6 +209,7 @@ options:
     - name: cat_var2
       title: 'Second Categorical Variable'
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description: >-
@@ -211,6 +218,7 @@ options:
     - name: stratum_var
       title: 'Stratification Variable'
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description: >-
@@ -220,6 +228,7 @@ options:
     - name: ordered_exposure
       title: 'Ordered Exposure Variable'
       type: Variable
+      default: NULL
       suggested: [ ordinal, continuous ]
       permitted: [ factor, numeric ]
       description: >-
@@ -229,6 +238,7 @@ options:
     - name: binary_outcome
       title: 'Binary Outcome Variable'
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description: >-

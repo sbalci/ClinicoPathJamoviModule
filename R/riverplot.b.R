@@ -148,26 +148,35 @@ riverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     var_names <- strata_vars
 
                     if (is.null(weight_var)) {
-                        # Set up the aesthetics
+                        # Set up the aesthetics using aes() instead of deprecated aes_string()
                         plot <- ggplot(mydata,
-                                       aes_string(axis1 = var_names[1],
-                                                  axis2 = var_names[2]))
+                                       aes(axis1 = !!rlang::sym(var_names[1]),
+                                           axis2 = !!rlang::sym(var_names[2])))
 
                         # Add more axes if needed
                         if (length(var_names) > 2) {
                             for (i in 3:length(var_names)) {
-                                plot <- plot + ggalluvial::geom_alluvium(aes_string(axis = var_names[i]))
+                                plot <- plot + ggalluvial::geom_alluvium(aes(axis = !!rlang::sym(var_names[i])))
                             }
                         }
 
-                        # Complete the plot
-                        plot <- plot +
-                            ggalluvial::geom_alluvium(aes_string(fill = if(fill_type == "first") var_names[1]
-                                                                 else if(fill_type == "last") var_names[length(var_names)]
-                                                                 else "after_stat(frequency)"),
-                                                      alpha = 0.8,
-                                                      curve_type = curve_type) +
-                            ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        # Complete the plot with proper fill aesthetic
+                        fill_var <- if(fill_type == "first") var_names[1]
+                                    else if(fill_type == "last") var_names[length(var_names)]
+                                    else NULL
+                        
+                        if (!is.null(fill_var)) {
+                            plot <- plot +
+                                ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                                          alpha = 0.8,
+                                                          curve_type = curve_type) +
+                                ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        } else {
+                            plot <- plot +
+                                ggalluvial::geom_alluvium(alpha = 0.8,
+                                                          curve_type = curve_type) +
+                                ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        }
 
                         # Add labels if requested
                         if (label_nodes) {
@@ -175,27 +184,36 @@ riverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                  position = "center")
                         }
                     } else {
-                        # With weight variable
+                        # With weight variable using aes() instead of deprecated aes_string()
                         plot <- ggplot(mydata,
-                                       aes_string(axis1 = var_names[1],
-                                                  axis2 = var_names[2],
-                                                  weight = weight_var))
+                                       aes(axis1 = !!rlang::sym(var_names[1]),
+                                           axis2 = !!rlang::sym(var_names[2]),
+                                           weight = !!rlang::sym(weight_var)))
 
                         # Add more axes if needed
                         if (length(var_names) > 2) {
                             for (i in 3:length(var_names)) {
-                                plot <- plot + ggalluvial::geom_alluvium(aes_string(axis = var_names[i]))
+                                plot <- plot + ggalluvial::geom_alluvium(aes(axis = !!rlang::sym(var_names[i])))
                             }
                         }
 
-                        # Complete the plot
-                        plot <- plot +
-                            ggalluvial::geom_alluvium(aes_string(fill = if(fill_type == "first") var_names[1]
-                                                                 else if(fill_type == "last") var_names[length(var_names)]
-                                                                 else "after_stat(frequency)"),
-                                                      alpha = 0.8,
-                                                      curve_type = curve_type) +
-                            ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        # Complete the plot with proper fill aesthetic and weight
+                        fill_var <- if(fill_type == "first") var_names[1]
+                                    else if(fill_type == "last") var_names[length(var_names)]
+                                    else NULL
+                        
+                        if (!is.null(fill_var)) {
+                            plot <- plot +
+                                ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                                          alpha = 0.8,
+                                                          curve_type = curve_type) +
+                                ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        } else {
+                            plot <- plot +
+                                ggalluvial::geom_alluvium(alpha = 0.8,
+                                                          curve_type = curve_type) +
+                                ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                        }
 
                         # Add labels if requested
                         if (label_nodes) {
@@ -212,27 +230,37 @@ riverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_names <- strata_vars
 
                 if (is.null(weight_var)) {
-                    # Set up the aesthetics for Sankey-style
+                    # Set up the aesthetics for Sankey-style using aes() instead of aes_string()
                     plot <- ggplot(mydata,
-                                   aes_string(axis1 = var_names[1],
-                                              axis2 = var_names[2]))
+                                   aes(axis1 = !!rlang::sym(var_names[1]),
+                                       axis2 = !!rlang::sym(var_names[2])))
 
                     # Add more axes if needed
                     if (length(var_names) > 2) {
                         for (i in 3:length(var_names)) {
-                            plot <- plot + ggalluvial::geom_alluvium(aes_string(axis = var_names[i]))
+                            plot <- plot + ggalluvial::geom_alluvium(aes(axis = !!rlang::sym(var_names[i])))
                         }
                     }
 
                     # Complete the plot with Sankey-style settings
-                    plot <- plot +
-                        ggalluvial::geom_alluvium(aes_string(fill = if(fill_type == "first") var_names[1]
-                                                             else if(fill_type == "last") var_names[length(var_names)]
-                                                             else "after_stat(frequency)"),
-                                                  alpha = 0.8,
-                                                  curve_type = "sigmoid",
-                                                  width = 1/2) +
-                        ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    fill_var <- if(fill_type == "first") var_names[1]
+                                else if(fill_type == "last") var_names[length(var_names)]
+                                else NULL
+                    
+                    if (!is.null(fill_var)) {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                                      alpha = 0.8,
+                                                      curve_type = "sigmoid",
+                                                      width = 1/2) +
+                            ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    } else {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(alpha = 0.8,
+                                                      curve_type = "sigmoid",
+                                                      width = 1/2) +
+                            ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    }
 
                     # Add labels if requested
                     if (label_nodes) {
@@ -240,28 +268,38 @@ riverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                              position = "center")
                     }
                 } else {
-                    # With weight variable
+                    # With weight variable using aes() instead of aes_string()
                     plot <- ggplot(mydata,
-                                   aes_string(axis1 = var_names[1],
-                                              axis2 = var_names[2],
-                                              weight = weight_var))
+                                   aes(axis1 = !!rlang::sym(var_names[1]),
+                                       axis2 = !!rlang::sym(var_names[2]),
+                                       weight = !!rlang::sym(weight_var)))
 
                     # Add more axes if needed
                     if (length(var_names) > 2) {
                         for (i in 3:length(var_names)) {
-                            plot <- plot + ggalluvial::geom_alluvium(aes_string(axis = var_names[i]))
+                            plot <- plot + ggalluvial::geom_alluvium(aes(axis = !!rlang::sym(var_names[i])))
                         }
                     }
 
-                    # Complete the plot with Sankey-style settings
-                    plot <- plot +
-                        ggalluvial::geom_alluvium(aes_string(fill = if(fill_type == "first") var_names[1]
-                                                             else if(fill_type == "last") var_names[length(var_names)]
-                                                             else "after_stat(frequency)"),
-                                                  alpha = 0.8,
-                                                  curve_type = "sigmoid",
-                                                  width = 1/2) +
-                        ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    # Complete the plot with Sankey-style settings and weight
+                    fill_var <- if(fill_type == "first") var_names[1]
+                                else if(fill_type == "last") var_names[length(var_names)]
+                                else NULL
+                    
+                    if (!is.null(fill_var)) {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                                      alpha = 0.8,
+                                                      curve_type = "sigmoid",
+                                                      width = 1/2) +
+                            ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    } else {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(alpha = 0.8,
+                                                      curve_type = "sigmoid",
+                                                      width = 1/2) +
+                            ggalluvial::geom_stratum(width = 1/8, alpha = 0.8)
+                    }
 
                     # Add labels if requested
                     if (label_nodes) {
@@ -301,9 +339,47 @@ riverplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
                 } else {
-                    # Multiple strata variables, need to reshape to long format first
-                    message <- "Stream plot with multiple strata variables requires data reshaping. Please use the Restructure option in Jamovi to convert your data to long format first."
-                    stop(message)
+                    # Multiple strata variables - provide helpful fallback
+                    warning("Stream plot with multiple strata variables requires data reshaping. Falling back to alluvial plot.")
+                    
+                    # Fall back to alluvial plot for multiple strata
+                    var_names <- strata_vars
+                    
+                    if (is.null(weight_var)) {
+                        plot <- ggplot(mydata,
+                                       aes(axis1 = !!rlang::sym(var_names[1]),
+                                           axis2 = !!rlang::sym(var_names[2])))
+                    } else {
+                        plot <- ggplot(mydata,
+                                       aes(axis1 = !!rlang::sym(var_names[1]),
+                                           axis2 = !!rlang::sym(var_names[2]),
+                                           weight = !!rlang::sym(weight_var)))
+                    }
+                    
+                    # Add more axes if needed
+                    if (length(var_names) > 2) {
+                        for (i in 3:length(var_names)) {
+                            plot <- plot + ggalluvial::geom_alluvium(aes(axis = !!rlang::sym(var_names[i])))
+                        }
+                    }
+                    
+                    # Complete the plot
+                    fill_var <- if(fill_type == "first") var_names[1]
+                                else if(fill_type == "last") var_names[length(var_names)]
+                                else NULL
+                    
+                    if (!is.null(fill_var)) {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(aes(fill = !!rlang::sym(fill_var)),
+                                                      alpha = 0.8,
+                                                      curve_type = curve_type) +
+                            ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                    } else {
+                        plot <- plot +
+                            ggalluvial::geom_alluvium(alpha = 0.8,
+                                                      curve_type = curve_type) +
+                            ggalluvial::geom_stratum(width = 1/3, alpha = 0.8)
+                    }
                 }
             }
 

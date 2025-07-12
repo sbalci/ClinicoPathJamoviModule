@@ -3,8 +3,8 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.53"
-  new_date: "2025-07-12"
+  new_version: "0.0.3.55"
+  new_date: "2025-07-13"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
@@ -19,7 +19,7 @@ modes:
   # File copying control modes
   copy_vignettes: true       # Enable/disable vignette file copying
   copy_data_files: true      # Enable/disable data file copying
-  copy_test_files: false     # Enable/disable test file copying
+  copy_test_files: true     # Enable/disable test file copying
   copy_r_files: true         # Enable/disable R utility file copying
   use_legacy_copying: false  # Use legacy hardcoded file lists instead of config-based copying
 
@@ -121,7 +121,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: false
+    enabled: true
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"

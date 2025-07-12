@@ -200,11 +200,11 @@ venn(
 Assess data quality using Benford's law - useful for detecting fabricated data:
 
 ```{r}
-# Analyze first digits of continuous measurements
-benford(
-  data = histopathology,
-  var = "MeasurementA"
-)
+# Analyze first digits of age data (suitable for Benford's Law)
+# benford(
+#   data = histopathology,
+#   var = "Age"
+# )
 ```
 
 ### Variable Tree Summary

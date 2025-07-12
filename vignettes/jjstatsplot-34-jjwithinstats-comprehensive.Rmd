@@ -1,0 +1,883 @@
+---
+title: "jjwithinstats: Comprehensive Within-Subjects Analysis"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\\VignetteIndexEntry{jjwithinstats: Comprehensive Within-Subjects Analysis}
+  %\\VignetteEngine{quarto::html}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Introduction to jjwithinstats
+
+The `jjwithinstats` function is a powerful wrapper around the `ggstatsplot::ggwithinstats` function that creates publication-ready violin-box plots for within-subjects (repeated measures) designs. Within-subjects designs are fundamental in research where the same participants are measured at multiple time points or under different conditions, making this tool essential for longitudinal studies, clinical trials, and experimental research.
+
+## Key Features
+
+- **Repeated Measures Analysis**: Compare 2-4 measurements from the same subjects
+- **Statistical Flexibility**: Parametric, nonparametric, robust, and Bayesian tests
+- **Visual Customization**: Violin plots, box plots, individual data points, and connection lines
+- **Pairwise Comparisons**: Multiple comparison corrections and effect size calculations
+- **Performance Optimized**: Enhanced caching and data preparation for faster rendering
+- **Publication-Ready**: High-quality outputs suitable for manuscripts and presentations
+
+## Loading Required Libraries
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(tidyr)
+
+# For this vignette, we'll create sample data
+set.seed(123)
+```
+
+# Basic Within-Subjects Analysis
+
+## Simple Pre-Post Design
+
+The most common within-subjects design compares measurements before and after an intervention:
+
+```{r basic-prepost}
+# Create pre-post treatment data
+prepost_data <- data.frame(
+  subject_id = 1:20,
+  pre_treatment = rnorm(20, mean = 85, sd = 12),
+  post_treatment = rnorm(20, mean = 75, sd = 10)
+)
+
+# Add realistic correlation
+prepost_data$post_treatment <- prepost_data$pre_treatment - rnorm(20, mean = 8, sd = 5)
+
+# Create basic within-subjects plot
+result_basic <- jjwithinstats(
+  data = prepost_data,
+  dep1 = "pre_treatment",
+  dep2 = "post_treatment",
+  mytitle = "Treatment Effect Analysis",
+  xtitle = "Time Point",
+  ytitle = "Outcome Score"
+)
+
+print(result_basic)
+```
+
+## Understanding Within-Subjects Design
+
+### Key Concepts
+
+**Within-Subjects Design Advantages:**
+- Reduces individual differences as confounding variables
+- More statistical power with smaller sample sizes
+- Each participant serves as their own control
+- Ideal for studying change over time
+
+**Data Requirements:**
+- Wide format: Each row represents one subject
+- Multiple columns for different time points/conditions
+- Complete cases (missing data is removed)
+- Numeric measurements only
+
+# Three Time Points Analysis
+
+## Therapy Effectiveness Study
+
+```{r three-timepoints}
+# Create therapy effectiveness data
+therapy_data <- data.frame(
+  patient_id = 1:25,
+  baseline_anxiety = rnorm(25, mean = 65, sd = 15),
+  week_6_anxiety = rnorm(25, mean = 50, sd = 12),
+  week_12_anxiety = rnorm(25, mean = 35, sd = 10)
+)
+
+# Add realistic decreasing trend
+for(i in 1:25) {
+  therapy_data$week_6_anxiety[i] <- therapy_data$baseline_anxiety[i] - runif(1, 8, 18)
+  therapy_data$week_12_anxiety[i] <- therapy_data$week_6_anxiety[i] - runif(1, 10, 20)
+}
+
+# Create three-timepoint analysis
+result_therapy <- jjwithinstats(
+  data = therapy_data,
+  dep1 = "baseline_anxiety",
+  dep2 = "week_6_anxiety",
+  dep3 = "week_12_anxiety",
+  typestatistics = "nonparametric",
+  pairwisecomparisons = TRUE,
+  mytitle = "Anxiety Reduction Over Therapy",
+  xtitle = "Assessment Time",
+  ytitle = "Anxiety Score"
+)
+
+print(result_therapy)
+```
+
+# Four Time Points Analysis
+
+## Clinical Trial Longitudinal Study
+
+```{r four-timepoints}
+# Create clinical trial data
+clinical_data <- data.frame(
+  participant_id = 1:30,
+  baseline_score = rnorm(30, mean = 100, sd = 20),
+  month_3_score = rnorm(30, mean = 85, sd = 18),
+  month_6_score = rnorm(30, mean = 70, sd = 16),
+  month_12_score = rnorm(30, mean = 55, sd = 15)
+)
+
+# Add realistic progressive improvement
+for(i in 1:30) {
+  decline_factor <- runif(1, 0.8, 0.95)
+  clinical_data$month_3_score[i] <- clinical_data$baseline_score[i] * decline_factor
+  clinical_data$month_6_score[i] <- clinical_data$month_3_score[i] * decline_factor
+  clinical_data$month_12_score[i] <- clinical_data$month_6_score[i] * decline_factor
+}
+
+# Create four-timepoint analysis
+result_clinical <- jjwithinstats(
+  data = clinical_data,
+  dep1 = "baseline_score",
+  dep2 = "month_3_score",
+  dep3 = "month_6_score",
+  dep4 = "month_12_score",
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  centralityplotting = TRUE,
+  mytitle = "Clinical Trial Longitudinal Results",
+  xtitle = "Study Month",
+  ytitle = "Clinical Score"
+)
+
+print(result_clinical)
+```
+
+# Statistical Test Types
+
+## Parametric vs Nonparametric Analysis
+
+```{r stat-types}
+# Create example data for statistical comparisons
+stat_data <- data.frame(
+  measurement_1 = c(80, 85, 78, 82, 88, 75, 83, 79, 86, 81),
+  measurement_2 = c(70, 75, 68, 72, 78, 65, 73, 69, 76, 71),
+  measurement_3 = c(60, 65, 58, 62, 68, 55, 63, 59, 66, 61)
+)
+
+# Parametric analysis (assumes normality)
+result_parametric <- jjwithinstats(
+  data = stat_data,
+  dep1 = "measurement_1",
+  dep2 = "measurement_2",
+  dep3 = "measurement_3",
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  mytitle = "Parametric Analysis (ANOVA)",
+  resultssubtitle = TRUE
+)
+
+print(result_parametric)
+
+# Nonparametric analysis (distribution-free)
+result_nonparam <- jjwithinstats(
+  data = stat_data,
+  dep1 = "measurement_1",
+  dep2 = "measurement_2",
+  dep3 = "measurement_3",
+  typestatistics = "nonparametric",
+  pairwisecomparisons = TRUE,
+  mytitle = "Nonparametric Analysis (Friedman Test)",
+  resultssubtitle = TRUE
+)
+
+print(result_nonparam)
+```
+
+## Robust and Bayesian Analysis
+
+```{r robust-bayes}
+# Robust analysis (trimmed means, resistant to outliers)
+result_robust <- jjwithinstats(
+  data = stat_data,
+  dep1 = "measurement_1",
+  dep2 = "measurement_2",
+  dep3 = "measurement_3",
+  typestatistics = "robust",
+  pairwisecomparisons = TRUE,
+  mytitle = "Robust Analysis (Trimmed Means)",
+  centralityplotting = TRUE,
+  centralitytype = "robust"
+)
+
+print(result_robust)
+
+# Bayesian analysis
+result_bayes <- jjwithinstats(
+  data = stat_data,
+  dep1 = "measurement_1",
+  dep2 = "measurement_2",
+  dep3 = "measurement_3",
+  typestatistics = "bayes",
+  pairwisecomparisons = TRUE,
+  mytitle = "Bayesian Analysis",
+  centralityplotting = TRUE,
+  centralitytype = "bayes"
+)
+
+print(result_bayes)
+```
+
+# Pairwise Comparisons and Corrections
+
+## Multiple Comparison Adjustments
+
+```{r pairwise-comparisons}
+# Create data for pairwise comparison demonstration
+pairwise_data <- data.frame(
+  time_1 = rnorm(20, mean = 100, sd = 15),
+  time_2 = rnorm(20, mean = 90, sd = 12),
+  time_3 = rnorm(20, mean = 80, sd = 10),
+  time_4 = rnorm(20, mean = 70, sd = 8)
+)
+
+# Bonferroni correction (conservative)
+result_bonferroni <- jjwithinstats(
+  data = pairwise_data,
+  dep1 = "time_1",
+  dep2 = "time_2",
+  dep3 = "time_3",
+  dep4 = "time_4",
+  pairwisecomparisons = TRUE,
+  padjustmethod = "bonferroni",
+  pairwisedisplay = "everything",
+  mytitle = "Bonferroni Correction"
+)
+
+print(result_bonferroni)
+
+# Holm correction (step-down method)
+result_holm <- jjwithinstats(
+  data = pairwise_data,
+  dep1 = "time_1",
+  dep2 = "time_2",
+  dep3 = "time_3",
+  dep4 = "time_4",
+  pairwisecomparisons = TRUE,
+  padjustmethod = "holm",
+  pairwisedisplay = "significant",
+  mytitle = "Holm Correction"
+)
+
+print(result_holm)
+```
+
+## Effect Size Calculations
+
+```{r effect-sizes}
+# Unbiased effect sizes (Hedge's g)
+result_unbiased <- jjwithinstats(
+  data = pairwise_data,
+  dep1 = "time_1",
+  dep2 = "time_2",
+  dep3 = "time_3",
+  dep4 = "time_4",
+  typestatistics = "parametric",
+  effsizetype = "unbiased",
+  pairwisecomparisons = TRUE,
+  mytitle = "Unbiased Effect Sizes (Hedge's g)"
+)
+
+print(result_unbiased)
+
+# Partial omega-squared for ANOVA
+result_omega <- jjwithinstats(
+  data = pairwise_data,
+  dep1 = "time_1",
+  dep2 = "time_2",
+  dep3 = "time_3",
+  dep4 = "time_4",
+  typestatistics = "parametric",
+  effsizetype = "omega",
+  pairwisecomparisons = TRUE,
+  mytitle = "Partial Omega-Squared Effect Size"
+)
+
+print(result_omega)
+```
+
+# Plot Customization
+
+## Visual Components Control
+
+```{r plot-components}
+# Create sample data for customization
+custom_data <- data.frame(
+  pre_score = c(85, 88, 82, 90, 87, 84, 91, 86, 89, 83),
+  post_score = c(75, 78, 72, 80, 77, 74, 81, 76, 79, 73)
+)
+
+# Violin plots only
+result_violin <- jjwithinstats(
+  data = custom_data,
+  dep1 = "pre_score",
+  dep2 = "post_score",
+  violin = TRUE,
+  boxplot = FALSE,
+  point = FALSE,
+  mytitle = "Violin Plots Only"
+)
+
+print(result_violin)
+
+# Box plots with individual points
+result_box_points <- jjwithinstats(
+  data = custom_data,
+  dep1 = "pre_score",
+  dep2 = "post_score",
+  violin = FALSE,
+  boxplot = TRUE,
+  point = TRUE,
+  pointpath = TRUE,
+  mytitle = "Box Plots with Connected Points"
+)
+
+print(result_box_points)
+```
+
+## Centrality and Path Options
+
+```{r centrality-paths}
+# Centrality plotting with paths
+result_centrality <- jjwithinstats(
+  data = custom_data,
+  dep1 = "pre_score",
+  dep2 = "post_score",
+  centralityplotting = TRUE,
+  centralitytype = "parametric",
+  centralitypath = TRUE,
+  pointpath = TRUE,
+  mytitle = "Mean Values with Connection Paths"
+)
+
+print(result_centrality)
+```
+
+## Theme Customization
+
+```{r themes}
+# Original ggstatsplot theme
+result_original <- jjwithinstats(
+  data = custom_data,
+  dep1 = "pre_score",
+  dep2 = "post_score",
+  originaltheme = TRUE,
+  mytitle = "Original ggstatsplot Theme"
+)
+
+print(result_original)
+
+# Custom jamovi theme
+result_custom <- jjwithinstats(
+  data = custom_data,
+  dep1 = "pre_score",
+  dep2 = "post_score",
+  originaltheme = FALSE,
+  mytitle = "Custom Jamovi Theme"
+)
+
+print(result_custom)
+```
+
+# Real-World Applications
+
+## Clinical Research: Pain Management
+
+```{r pain-management}
+# Pain management study
+pain_data <- data.frame(
+  patient_id = 1:25,
+  pain_baseline = sample(6:10, 25, replace = TRUE, prob = c(0.1, 0.2, 0.3, 0.3, 0.1)),
+  pain_week_2 = sample(4:8, 25, replace = TRUE, prob = c(0.15, 0.25, 0.3, 0.25, 0.05)),
+  pain_week_4 = sample(2:6, 25, replace = TRUE, prob = c(0.2, 0.3, 0.3, 0.15, 0.05)),
+  pain_week_8 = sample(1:5, 25, replace = TRUE, prob = c(0.3, 0.3, 0.25, 0.1, 0.05))
+)
+
+result_pain <- jjwithinstats(
+  data = pain_data,
+  dep1 = "pain_baseline",
+  dep2 = "pain_week_2",
+  dep3 = "pain_week_4",
+  dep4 = "pain_week_8",
+  typestatistics = "nonparametric",
+  pairwisecomparisons = TRUE,
+  mytitle = "Pain Reduction Over Treatment Period",
+  xtitle = "Assessment Time",
+  ytitle = "Pain Score (1-10 scale)",
+  pointpath = TRUE
+)
+
+print(result_pain)
+```
+
+## Educational Research: Learning Assessment
+
+```{r education-assessment}
+# Educational assessment data
+education_data <- data.frame(
+  student_id = 1:30,
+  pretest_score = rnorm(30, mean = 60, sd = 15),
+  midterm_score = rnorm(30, mean = 70, sd = 12),
+  final_score = rnorm(30, mean = 80, sd = 10)
+)
+
+# Add learning progression
+for(i in 1:30) {
+  improvement <- runif(1, 5, 15)
+  education_data$midterm_score[i] <- education_data$pretest_score[i] + improvement
+  education_data$final_score[i] <- education_data$midterm_score[i] + improvement
+}
+education_data$midterm_score <- pmin(education_data$midterm_score, 100)
+education_data$final_score <- pmin(education_data$final_score, 100)
+
+result_education <- jjwithinstats(
+  data = education_data,
+  dep1 = "pretest_score",
+  dep2 = "midterm_score",
+  dep3 = "final_score",
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  centralityplotting = TRUE,
+  centralitypath = TRUE,
+  mytitle = "Student Learning Progression",
+  xtitle = "Assessment Period",
+  ytitle = "Test Score (%)"
+)
+
+print(result_education)
+```
+
+## Exercise Science: Performance Training
+
+```{r exercise-performance}
+# Exercise performance data
+exercise_data <- data.frame(
+  athlete_id = 1:20,
+  week_0_performance = rnorm(20, mean = 120, sd = 25),
+  week_4_performance = rnorm(20, mean = 135, sd = 22),
+  week_8_performance = rnorm(20, mean = 150, sd = 20),
+  week_12_performance = rnorm(20, mean = 165, sd = 18)
+)
+
+# Add realistic training progression
+for(i in 1:20) {
+  base_performance <- exercise_data$week_0_performance[i]
+  improvement_rate <- runif(1, 1.08, 1.15)
+  exercise_data$week_4_performance[i] <- base_performance * improvement_rate
+  exercise_data$week_8_performance[i] <- exercise_data$week_4_performance[i] * improvement_rate
+  exercise_data$week_12_performance[i] <- exercise_data$week_8_performance[i] * improvement_rate
+}
+
+result_exercise <- jjwithinstats(
+  data = exercise_data,
+  dep1 = "week_0_performance",
+  dep2 = "week_4_performance",
+  dep3 = "week_8_performance",
+  dep4 = "week_12_performance",
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  effsizetype = "unbiased",
+  mytitle = "Athletic Performance Improvement",
+  xtitle = "Training Week",
+  ytitle = "Performance Score",
+  pointpath = TRUE
+)
+
+print(result_exercise)
+```
+
+## Psychology: Cognitive Training
+
+```{r cognitive-training}
+# Cognitive training study
+cognitive_data <- data.frame(
+  participant_id = 1:25,
+  memory_pre = rnorm(25, mean = 75, sd = 18),
+  memory_post_1month = rnorm(25, mean = 85, sd = 16),
+  memory_post_3month = rnorm(25, mean = 90, sd = 14),
+  memory_post_6month = rnorm(25, mean = 88, sd = 15)  # Some decline over time
+)
+
+# Add realistic cognitive improvement pattern
+for(i in 1:25) {
+  initial_improvement <- runif(1, 8, 18)
+  continued_improvement <- runif(1, 3, 10)
+  maintenance_decline <- runif(1, 0, 5)
+  
+  cognitive_data$memory_post_1month[i] <- cognitive_data$memory_pre[i] + initial_improvement
+  cognitive_data$memory_post_3month[i] <- cognitive_data$memory_post_1month[i] + continued_improvement
+  cognitive_data$memory_post_6month[i] <- cognitive_data$memory_post_3month[i] - maintenance_decline
+}
+
+result_cognitive <- jjwithinstats(
+  data = cognitive_data,
+  dep1 = "memory_pre",
+  dep2 = "memory_post_1month",
+  dep3 = "memory_post_3month",
+  dep4 = "memory_post_6month",
+  typestatistics = "robust",
+  pairwisecomparisons = TRUE,
+  centralityplotting = TRUE,
+  mytitle = "Cognitive Training Effects with Maintenance",
+  xtitle = "Assessment Time",
+  ytitle = "Memory Score"
+)
+
+print(result_cognitive)
+```
+
+# Performance Optimization Features
+
+## Large Dataset Handling
+
+```{r performance-demo, eval=FALSE}
+# Performance test with larger dataset
+large_data <- data.frame(
+  time_1 = runif(500, 80, 120),
+  time_2 = runif(500, 75, 115),
+  time_3 = runif(500, 70, 110)
+)
+
+# This renders efficiently due to optimization
+start_time <- Sys.time()
+performance_result <- jjwithinstats(
+  data = large_data,
+  dep1 = "time_1",
+  dep2 = "time_2",
+  dep3 = "time_3",
+  typestatistics = "parametric"
+)
+end_time <- Sys.time()
+
+cat("Rendering time:", difftime(end_time, start_time, units = "secs"), "seconds\\n")
+print(performance_result)
+```
+
+## Optimization Features
+
+The function implements several performance enhancements:
+
+1. **Data Preparation Caching**: Long data transformation is cached and reused
+2. **Option Preprocessing**: Statistical options and plot arguments are processed once
+3. **Hash-based Change Detection**: Only reprocesses when inputs actually change
+4. **Efficient Memory Usage**: Minimizes data copying and transformation overhead
+5. **Smart Invalidation**: Cache is cleared only when relevant options change
+
+# Data Preparation Best Practices
+
+## Data Format Requirements
+
+```{r data-format}
+# Correct format: Wide data with subjects as rows
+correct_format <- data.frame(
+  subject_id = 1:5,
+  time_1 = c(85, 90, 78, 88, 92),
+  time_2 = c(75, 85, 68, 82, 87),
+  time_3 = c(65, 80, 58, 76, 82)
+)
+
+cat("✓ Correct Format (Wide):\\n")
+print(correct_format)
+
+# Function automatically converts to long format internally
+cat("\\n→ Internal conversion to long format for analysis\\n")
+```
+
+## Handling Missing Data
+
+```{r missing-data}
+# Data with missing values
+missing_data <- data.frame(
+  pre_measure = c(80, 85, NA, 88, 92),
+  post_measure = c(75, NA, 68, 82, 87)
+)
+
+cat("Data with missing values:\\n")
+print(missing_data)
+
+# Function removes incomplete cases
+result_missing <- jjwithinstats(
+  data = missing_data,
+  dep1 = "pre_measure",
+  dep2 = "post_measure",
+  mytitle = "Handling Missing Data"
+)
+
+cat("\\n→ Analysis proceeds with complete cases only\\n")
+```
+
+# Troubleshooting Common Issues
+
+## Data Validation
+
+```{r data-validation}
+# Function to validate within-subjects data
+validate_within_subjects_data <- function(data, variables) {
+  errors <- c()
+  
+  # Check if variables exist
+  missing_vars <- variables[!variables %in% names(data)]
+  if (length(missing_vars) > 0) {
+    errors <- c(errors, paste("Missing variables:", paste(missing_vars, collapse = ", ")))
+  }
+  
+  if (length(errors) > 0) return(errors)
+  
+  # Check data types
+  non_numeric <- variables[!sapply(variables, function(v) is.numeric(data[[v]]))]
+  if (length(non_numeric) > 0) {
+    errors <- c(errors, paste("Non-numeric variables:", paste(non_numeric, collapse = ", ")))
+  }
+  
+  # Check for sufficient data
+  complete_rows <- sum(complete.cases(data[variables]))
+  if (complete_rows < 3) {
+    errors <- c(errors, "Insufficient complete cases (need at least 3)")
+  }
+  
+  # Check for variance
+  zero_variance <- variables[sapply(variables, function(v) var(data[[v]], na.rm = TRUE) == 0)]
+  if (length(zero_variance) > 0) {
+    errors <- c(errors, paste("Zero variance variables:", paste(zero_variance, collapse = ", ")))
+  }
+  
+  if (length(errors) == 0) {
+    return("Data validation passed!")
+  } else {
+    return(errors)
+  }
+}
+
+# Test validation
+test_data <- data.frame(
+  measurement_1 = c(80, 85, 90),
+  measurement_2 = c(75, 80, 85)
+)
+
+validate_within_subjects_data(test_data, c("measurement_1", "measurement_2"))
+```
+
+## Common Error Solutions
+
+```{r error-solutions}
+# Error prevention examples
+
+# 1. Ensure sufficient data points
+minimal_data <- data.frame(
+  pre = c(10, 15, 20),
+  post = c(8, 12, 18)
+)
+
+cat("✓ Minimal viable dataset (n=3):\\n")
+result_minimal <- jjwithinstats(
+  data = minimal_data,
+  dep1 = "pre",
+  dep2 = "post",
+  typestatistics = "nonparametric",
+  pairwisecomparisons = FALSE,
+  mytitle = "Minimal Dataset Analysis"
+)
+
+# 2. Handle extreme values
+extreme_data <- data.frame(
+  measure_a = c(1, 2, 3, 1000),  # Outlier
+  measure_b = c(0.5, 1.5, 2.5, 500)  # Outlier
+)
+
+cat("\\n✓ Dataset with extreme values:\\n")
+result_extreme <- jjwithinstats(
+  data = extreme_data,
+  dep1 = "measure_a",
+  dep2 = "measure_b",
+  typestatistics = "robust",  # Robust to outliers
+  mytitle = "Robust Analysis for Extreme Values"
+)
+```
+
+# Advanced Applications
+
+## Dose-Response Studies
+
+```{r dose-response}
+# Drug dosage optimization
+dosage_data <- data.frame(
+  patient_id = 1:15,
+  efficacy_5mg = rnorm(15, mean = 40, sd = 12),
+  efficacy_10mg = rnorm(15, mean = 65, sd = 15),
+  efficacy_15mg = rnorm(15, mean = 80, sd = 18),
+  efficacy_20mg = rnorm(15, mean = 85, sd = 20)
+)
+
+# Add dose-response relationship
+for(i in 1:15) {
+  base_response <- dosage_data$efficacy_5mg[i]
+  dosage_data$efficacy_10mg[i] <- base_response + runif(1, 15, 30)
+  dosage_data$efficacy_15mg[i] <- dosage_data$efficacy_10mg[i] + runif(1, 10, 20)
+  dosage_data$efficacy_20mg[i] <- dosage_data$efficacy_15mg[i] + runif(1, 2, 8)
+}
+
+result_dosage <- jjwithinstats(
+  data = dosage_data,
+  dep1 = "efficacy_5mg",
+  dep2 = "efficacy_10mg", 
+  dep3 = "efficacy_15mg",
+  dep4 = "efficacy_20mg",
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  centralityplotting = TRUE,
+  mytitle = "Dose-Response Relationship",
+  xtitle = "Drug Dosage (mg)",
+  ytitle = "Treatment Efficacy (%)"
+)
+
+print(result_dosage)
+```
+
+## Recovery Time Analysis
+
+```{r recovery-analysis}
+# Recovery study with realistic progression
+recovery_data <- data.frame(
+  patient_id = 1:20,
+  recovery_day_1 = rnorm(20, mean = 80, sd = 15),
+  recovery_day_7 = rnorm(20, mean = 60, sd = 12),
+  recovery_day_14 = rnorm(20, mean = 40, sd = 10),
+  recovery_day_21 = rnorm(20, mean = 20, sd = 8)
+)
+
+# Add realistic recovery progression
+for(i in 1:20) {
+  daily_improvement <- runif(1, 2, 4)
+  recovery_data$recovery_day_7[i] <- recovery_data$recovery_day_1[i] - (daily_improvement * 6)
+  recovery_data$recovery_day_14[i] <- recovery_data$recovery_day_7[i] - (daily_improvement * 7)
+  recovery_data$recovery_day_21[i] <- recovery_data$recovery_day_14[i] - (daily_improvement * 7)
+}
+recovery_data[, 2:5] <- lapply(recovery_data[, 2:5], function(x) pmax(x, 0))
+
+result_recovery <- jjwithinstats(
+  data = recovery_data,
+  dep1 = "recovery_day_1",
+  dep2 = "recovery_day_7",
+  dep3 = "recovery_day_14",
+  dep4 = "recovery_day_21",
+  typestatistics = "nonparametric",
+  pairwisecomparisons = TRUE,
+  pointpath = TRUE,
+  mytitle = "Patient Recovery Trajectory",
+  xtitle = "Days Post-Treatment",
+  ytitle = "Recovery Score"
+)
+
+print(result_recovery)
+```
+
+# Best Practices and Recommendations
+
+## Design Guidelines
+
+1. **Sample Size**: Minimum 8-10 subjects for reliable results
+2. **Time Points**: 2-4 measurements work best (function limitation)
+3. **Measurement Spacing**: Ensure sufficient time for meaningful change
+4. **Data Quality**: Remove extreme outliers that may bias results
+5. **Statistical Choice**: Use nonparametric tests for ordinal data or small samples
+
+## Statistical Considerations
+
+1. **Sphericity**: For parametric tests with >2 time points, consider sphericity assumptions
+2. **Effect Sizes**: Report effect sizes alongside p-values for practical significance
+3. **Multiple Comparisons**: Use appropriate corrections for pairwise comparisons
+4. **Missing Data**: Understand that complete case analysis is used
+
+## Visualization Best Practices
+
+```{r viz-best-practices}
+# Optimal visualization settings
+best_practice_data <- data.frame(
+  pre_intervention = rnorm(20, 70, 15),
+  post_intervention = rnorm(20, 55, 12)
+)
+
+result_best_practice <- jjwithinstats(
+  data = best_practice_data,
+  dep1 = "pre_intervention",
+  dep2 = "post_intervention",
+  # Statistical settings
+  typestatistics = "parametric",
+  pairwisecomparisons = TRUE,
+  padjustmethod = "holm",
+  effsizetype = "unbiased",
+  # Visual settings
+  violin = TRUE,
+  boxplot = TRUE,
+  point = TRUE,
+  pointpath = TRUE,
+  centralityplotting = TRUE,
+  # Labels
+  mytitle = "Intervention Effectiveness Study",
+  xtitle = "Assessment Time",
+  ytitle = "Outcome Measure",
+  resultssubtitle = TRUE
+)
+
+print(result_best_practice)
+```
+
+# Summary
+
+The `jjwithinstats` function provides a comprehensive solution for within-subjects analysis with:
+
+- **Flexible Design Support**: 2-4 repeated measurements
+- **Statistical Rigor**: Multiple test types and correction methods  
+- **Visual Excellence**: Customizable publication-ready plots
+- **Performance Optimization**: Efficient rendering for large datasets
+- **Clinical Applicability**: Ideal for longitudinal and intervention studies
+
+## When to Use jjwithinstats
+
+**Ideal Applications:**
+- Pre-post intervention studies
+- Longitudinal clinical trials
+- Educational assessment progressions
+- Therapy effectiveness research
+- Dose-response studies
+- Recovery time analysis
+
+**Key Advantages:**
+- Reduces individual differences as confounding variables
+- Higher statistical power with smaller samples
+- Comprehensive statistical output with effect sizes
+- Publication-ready visualizations
+- Robust error handling and optimization
+
+## Function Reference
+
+For complete parameter documentation, see the ggstatsplot package documentation:
+- [CRAN ggstatsplot documentation](https://cran.r-project.org/web/packages/ggstatsplot/ggstatsplot.pdf)
+- [ggwithinstats function](https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html)
+
+```{r session-info}
+# Session information
+sessionInfo()
+```

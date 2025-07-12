@@ -54,6 +54,7 @@ options:
       description: >
                   Categorical variable for grouping data in plots.
                   Creates different colors, shapes, or panels for each group.
+      default: NULL
 
     - name: blocks
       title: Blocking/Pairing Variable
@@ -63,6 +64,7 @@ options:
       description: >
                   Variable for blocking or pairing observations.
                   Used in randomized block designs or before-after comparisons.
+      default: NULL
 
     - name: facet_var
       title: Faceting Variable
@@ -72,6 +74,7 @@ options:
       description: >
                   Variable for creating multiple panels (facets).
                   Useful for complex experimental designs with multiple factors.
+      default: NULL
 
     # Plot configuration
     - name: plot_type
@@ -336,6 +339,7 @@ options:
       description: >
                   Variable defining before/after or timepoint for paired data.
                   Used in before-after plot types.
+      default: NULL
 
     - name: befafter_id_var
       title: Subject ID Variable
@@ -345,6 +349,7 @@ options:
       description: >
                   Variable identifying individual subjects or experimental units.
                   Used to connect paired observations in before-after plots.
+      default: NULL
 
     # Output options
     - name: show_individual_points
@@ -465,6 +470,7 @@ options:
       description: >
                   Variables to include as random effects in mixed models.
                   Typically subjects, blocks, or experimental units.
+      default: NULL
 
     - name: alpha_level
       title: Significance Level (α)

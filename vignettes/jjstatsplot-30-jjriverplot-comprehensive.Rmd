@@ -1,0 +1,848 @@
+---
+title: "jjriverplot: Comprehensive River Plot and Flow Visualization"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Overview
+
+The `jjriverplot` function provides a comprehensive interface for creating river plots (alluvial diagrams), Sankey diagrams, and stream graphs to visualize flows, transitions, and pathways over time or between categories. This function is built on `ggplot2` and `ggalluvial`, offering multiple visualization styles with performance optimization through internal caching.
+
+## Key Features
+
+- **Multiple plot types**: Alluvial diagrams, Sankey diagrams, and stream graphs
+- **Flexible data formats**: Supports both longitudinal (long) and cross-sectional (wide) data
+- **Weight integration**: Stream widths can represent quantities like costs, counts, or frequencies
+- **Rich customization**: Fill patterns, curve types, labeling options, and themes
+- **Performance optimized**: Uses internal caching to eliminate redundant computations
+- **Clinical research ready**: Designed for patient pathway and treatment flow analysis
+
+## When to Use River Plots
+
+River plots excel at visualizing:
+
+- **Patient treatment pathways**: Response changes over time
+- **Customer journey analysis**: Funnel progression and conversion flows
+- **Educational progressions**: Student performance tracking through stages
+- **Process flows**: Manufacturing, approval, or workflow stages
+- **Market transitions**: Brand switching, category migration
+- **Longitudinal studies**: Any categorical changes over time
+
+## Installation and Setup
+
+```{r setup}
+echo: true
+eval: false
+
+# Install ClinicoPath if not already installed
+if (!require("ClinicoPath")) {
+  devtools::install_github("sbalci/ClinicoPathJamoviModule")
+}
+
+library(ClinicoPath)
+library(ggplot2)
+```
+
+## Quick Start
+
+### Basic Alluvial Plot (Longitudinal Data)
+
+```{r basic-longitudinal}
+echo: true
+eval: false
+
+# Load test data
+data(jjriverplot_test_data_long)
+
+# Basic treatment response flow over time
+result <- jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  plotType = "alluvial"
+)
+
+# View the plot
+result$plot
+```
+
+### Weighted River Plot
+
+```{r weighted-example}
+echo: true
+eval: false
+
+# River plot with treatment costs as weights
+result_weighted <- jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  weight = "treatment_cost",
+  plotType = "alluvial",
+  labelNodes = TRUE,
+  showCounts = TRUE
+)
+
+# View the plot
+result_weighted$plot
+```
+
+### Multi-Stage Pathway (Wide Format)
+
+```{r wide-format-example}
+echo: true
+eval: false
+
+# Load wide format data
+data(jjriverplot_test_data_wide)
+
+# Multi-stage treatment pathway
+result_pathway <- jjriverplot(
+  data = jjriverplot_test_data_wide,
+  strata = c("month3_response", "month6_response", "month12_response"),
+  plotType = "sankey",
+  fillType = "first",
+  mytitle = "Treatment Response Pathway"
+)
+
+# View the plot
+result_pathway$plot
+```
+
+## Function Parameters
+
+### Core Parameters
+
+- **`data`**: Input data frame containing variables to analyze
+- **`time`**: Time or sequence variable (for longitudinal data)
+- **`strata`**: Categorical variables representing flow categories
+- **`weight`**: Optional numeric variable for stream width weighting
+- **`id`**: Optional identifier for tracking individual entities
+
+### Plot Types
+
+#### Alluvial Diagrams
+
+```{r alluvial-concept}
+echo: true
+eval: false
+
+# Alluvial plots show flowing streams between time points
+# - Curved connections emphasize continuity
+# - Stream width represents frequency or quantity
+# - Good for tracking changes in categorical variables over time
+```
+
+Best for:
+- **Longitudinal studies**: Patient outcomes over treatment periods
+- **Cohort tracking**: Changes in group membership over time
+- **Transition analysis**: Movement between categories
+
+#### Sankey Diagrams
+
+```{r sankey-concept}
+echo: true
+eval: false
+
+# Sankey diagrams show directed flows between stages
+# - Straighter connections emphasize flow direction
+# - Node width represents total flow through that stage
+# - Good for process flows and sequential decision points
+```
+
+Best for:
+- **Process analysis**: Manufacturing or approval workflows
+- **Resource allocation**: Budget flows, staff assignments
+- **Multi-stage conversions**: Sales funnels, patient triage
+
+#### Stream Graphs
+
+```{r stream-concept}
+echo: true
+eval: false
+
+# Stream graphs show stacked area plots over time
+# - Shows composition changes continuously
+# - Total height represents overall volume
+# - Good for showing relative proportions over time
+```
+
+Best for:
+- **Composition analysis**: Market share changes over time
+- **Population studies**: Demographic changes
+- **Portfolio analysis**: Investment allocations over time
+
+### Customization Options
+
+#### Fill Patterns
+
+- **"first"**: Colors based on initial category (track origins)
+- **"last"**: Colors based on final category (track destinations)  
+- **"frequency"**: Colors based on flow volume (emphasize major flows)
+
+#### Curve Types
+
+- **"cardinal"**: Smooth flowing curves (most aesthetic)
+- **"linear"**: Straight connections (clearest direction)
+- **"basis"**: Very smooth curves (artistic)
+- **"step"**: Stepped connections (discrete processes)
+
+## Performance Optimizations
+
+### Caching Implementation
+
+The function includes significant performance optimizations:
+
+**Previous Issues:**
+- Redundant data processing in plot method
+- Repeated factor conversion operations
+- Multiple jmvcore::naOmit() calls
+- Complex option processing repeated
+
+**Current Optimizations:**
+- **Data Caching**: Uses `.prepareData()` method to cache processed data
+- **Options Caching**: Uses `.prepareOptions()` method to cache option processing
+- **Factor Conversion**: Variables converted once and cached
+- **Progress Feedback**: Clear user messaging during processing
+
+### Performance Benefits
+
+```{r performance-concept}
+echo: true
+eval: false
+
+# The optimized version provides:
+# - Faster processing for large datasets
+# - Reduced memory usage through single data processing
+# - Better user experience with progress indicators
+# - Consistent data handling across plot variations
+```
+
+## Advanced Usage Examples
+
+### Clinical Trial Analysis
+
+```{r clinical-trial}
+echo: true
+eval: false
+
+# Treatment response progression over time
+clinical_pathway <- jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  weight = "treatment_cost",
+  plotType = "alluvial",
+  fillType = "first",
+  labelNodes = TRUE,
+  mytitle = "Patient Treatment Response Pathways",
+  xtitle = "Study Timepoint",
+  ytitle = "Treatment Cost ($)"
+)
+
+# This reveals:
+# - How patient responses change over time
+# - Cost implications of different response patterns
+# - Treatment effectiveness across timepoints
+```
+
+### Quality of Life Progression
+
+```{r qol-analysis}
+echo: true
+eval: false
+
+# Quality of life changes alongside treatment response
+qol_flow <- jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint", 
+  strata = "quality_of_life",
+  plotType = "alluvial",
+  fillType = "last",
+  curveType = "cardinal",
+  mytitle = "Quality of Life Progression",
+  xtitle = "Study Period",
+  ytitle = "Patient Count"
+)
+
+# This shows:
+# - Patient quality of life trajectories
+# - Correlation with treatment responses
+# - Long-term outcome patterns
+```
+
+### Treatment Arm Comparison
+
+```{r treatment-comparison}
+echo: true
+eval: false
+
+# Compare pathways by treatment arm using wide format
+treatment_comparison <- jjriverplot(
+  data = jjriverplot_test_data_wide,
+  strata = c("month3_response", "month6_response", "month12_response"),
+  plotType = "sankey",
+  fillType = "first",
+  showCounts = TRUE,
+  mytitle = "Treatment Response Progression by Stage"
+)
+
+# Filter by treatment arm for separate analysis
+control_data <- jjriverplot_test_data_wide[
+  jjriverplot_test_data_wide$treatment_arm == "Control", ]
+
+control_pathway <- jjriverplot(
+  data = control_data,
+  strata = c("month3_response", "month6_response", "month12_response"),
+  plotType = "sankey",
+  mytitle = "Control Group Response Pathway"
+)
+```
+
+### Educational Journey Analysis
+
+```{r education-analysis}
+echo: true
+eval: false
+
+# Load education data
+data(jjriverplot_education_data)
+
+# Student performance progression
+education_flow <- jjriverplot(
+  data = jjriverplot_education_data,
+  strata = c("year1_performance", "year2_performance", 
+             "year3_performance", "final_outcome"),
+  plotType = "alluvial",
+  fillType = "last",
+  labelNodes = TRUE,
+  mytitle = "Student Academic Progression",
+  xtitle = "Academic Year",
+  ytitle = "Student Count"
+)
+
+# This reveals:
+# - Academic performance trajectories
+# - Points of student attrition
+# - Success pathway identification
+```
+
+### Marketing Funnel Analysis
+
+```{r marketing-analysis}
+echo: true
+eval: false
+
+# Load marketing data  
+data(jjriverplot_marketing_data)
+
+# Customer journey through marketing funnel
+marketing_funnel <- jjriverplot(
+  data = jjriverplot_marketing_data,
+  strata = c("awareness", "interest", "consideration", 
+             "purchase", "loyalty"),
+  weight = "purchase_value",
+  plotType = "sankey",
+  fillType = "last",
+  showCounts = TRUE,
+  mytitle = "Customer Journey Analysis",
+  xtitle = "Funnel Stage",
+  ytitle = "Customer Value ($)"
+)
+
+# This shows:
+# - Conversion rates between stages
+# - Value-weighted customer flows
+# - Drop-off points in the funnel
+```
+
+### Multi-Site Quality Control
+
+```{r multisite-analysis}
+echo: true
+eval: false
+
+# Analyze treatment consistency across hospital centers
+site_analysis <- jjriverplot(
+  data = jjriverplot_test_data_long,
+  time = "timepoint",
+  strata = "treatment_response",
+  plotType = "alluvial",
+  fillType = "first",
+  mytitle = "Treatment Response Patterns Across All Sites"
+)
+
+# Compare specific high-performing vs low-performing sites
+high_performing_sites <- c("Center_A", "Center_B")
+site_subset <- jjriverplot_test_data_long[
+  jjriverplot_test_data_long$hospital_center %in% high_performing_sites, ]
+
+site_comparison <- jjriverplot(
+  data = site_subset,
+  time = "timepoint",
+  strata = "treatment_response",
+  weight = "treatment_cost",
+  plotType = "alluvial",
+  mytitle = "High-Performing Sites: Treatment Pathways"
+)
+```
+
+## Data Requirements
+
+### Data Formats
+
+#### Long Format (Longitudinal Data)
+
+```{r long-format-structure}
+echo: true
+eval: false
+
+# Structure for longitudinal river plots
+# Required columns:
+# - time: factor with ordered levels (e.g., "Baseline", "Month_3", "Month_6")
+# - strata: factor with category levels (e.g., "Complete_Response", "Partial_Response")
+# - Optional: weight (numeric), id (factor)
+
+example_long <- data.frame(
+  patient_id = rep(c("P001", "P002"), each = 3),
+  timepoint = factor(rep(c("T1", "T2", "T3"), times = 2)),
+  response = factor(c("Good", "Good", "Excellent", 
+                     "Poor", "Fair", "Good")),
+  cost = c(1000, 1200, 800, 1500, 1300, 1100)
+)
+```
+
+#### Wide Format (Cross-Sectional Stages)
+
+```{r wide-format-structure}
+echo: true
+eval: false
+
+# Structure for multi-stage river plots
+# Required: multiple strata variables representing sequential stages
+# Optional: weight variable, demographic variables
+
+example_wide <- data.frame(
+  id = paste0("ID", 1:100),
+  stage1 = factor(sample(c("A", "B", "C"), 100, replace = TRUE)),
+  stage2 = factor(sample(c("X", "Y", "Z"), 100, replace = TRUE)),
+  stage3 = factor(sample(c("Success", "Failure"), 100, replace = TRUE)),
+  total_value = runif(100, 100, 1000)
+)
+```
+
+### Data Quality Requirements
+
+```{r data-quality}
+echo: true
+eval: false
+
+# For optimal river plots:
+# 1. Adequate sample sizes (n > 50 recommended)
+# 2. Reasonable number of categories (2-8 per variable)
+# 3. Meaningful category names (not just codes)
+# 4. Proper factor ordering for time variables
+# 5. Complete cases (missing values are excluded)
+```
+
+## Best Practices
+
+### Plot Type Selection
+
+```{r plot-type-selection}
+echo: true
+eval: false
+
+# Use Alluvial plots when:
+# - Tracking changes over time
+# - Emphasizing flow continuity
+# - Showing patient/customer journeys
+# - Time points are clearly defined
+
+# Use Sankey diagrams when:  
+# - Analyzing process flows
+# - Emphasizing directed flows
+# - Decision tree visualization
+# - Resource allocation analysis
+
+# Use Stream graphs when:
+# - Showing composition over time
+# - Continuous time variable
+# - Relative proportions important
+# - Market share analysis
+```
+
+### Color and Fill Strategy
+
+```{r color-strategy}
+echo: true
+eval: false
+
+# fillType selection:
+# - "first": Track where flows originated (good for source analysis)
+# - "last": Track where flows end up (good for outcome analysis)  
+# - "frequency": Emphasize major flows (good for identifying patterns)
+
+# Examples:
+# Treatment analysis: use "first" to track initial response groups
+# Outcome analysis: use "last" to track final outcomes
+# Process optimization: use "frequency" to identify bottlenecks
+```
+
+### Labeling and Clarity
+
+```{r labeling-guidelines}
+echo: true
+eval: false
+
+# For clear river plots:
+# 1. Use meaningful variable names and category labels
+# 2. Enable node labels for interpretation (labelNodes = TRUE)
+# 3. Show counts for quantitative analysis (showCounts = TRUE)
+# 4. Provide clear axis labels and titles
+# 5. Consider legend positioning based on plot complexity
+
+# Avoid overwhelming plots:
+# - Limit to 6-8 categories per variable
+# - Combine rare categories when appropriate
+# - Use clear, contrasting colors
+# - Consider split plots for complex data
+```
+
+## Advanced Techniques
+
+### Subset Analysis
+
+```{r subset-analysis}
+echo: true
+eval: false
+
+# Analyze specific subgroups for detailed insights
+# Example: High-cost patients only
+high_cost_patients <- jjriverplot_test_data_long[
+  jjriverplot_test_data_long$treatment_cost > 5000, ]
+
+high_cost_analysis <- jjriverplot(
+  data = high_cost_patients,
+  time = "timepoint",
+  strata = "treatment_response",
+  weight = "treatment_cost",
+  plotType = "alluvial",
+  mytitle = "High-Cost Patient Pathways"
+)
+
+# Example: By demographic groups
+elderly_patients <- jjriverplot_test_data_long[
+  jjriverplot_test_data_long$age_group == "75+", ]
+
+elderly_analysis <- jjriverplot(
+  data = elderly_patients,
+  time = "timepoint", 
+  strata = "treatment_response",
+  plotType = "alluvial",
+  mytitle = "Elderly Patient Treatment Pathways"
+)
+```
+
+### Comparative Analysis
+
+```{r comparative-analysis}
+echo: true
+eval: false
+
+# Compare different treatments side by side
+treatment_groups <- c("Treatment_A", "Treatment_B")
+
+for (treatment in treatment_groups) {
+  subset_data <- jjriverplot_test_data_long[
+    jjriverplot_test_data_long$treatment_arm == treatment, ]
+  
+  plot_result <- jjriverplot(
+    data = subset_data,
+    time = "timepoint",
+    strata = "treatment_response", 
+    plotType = "alluvial",
+    mytitle = paste("Pathways for", treatment)
+  )
+  
+  # Save or display each plot
+  print(plot_result$plot)
+}
+```
+
+### Quality Control Applications
+
+```{r quality-control}
+echo: true
+eval: false
+
+# Multi-center consistency analysis
+center_comparison <- function(center_id) {
+  center_data <- jjriverplot_test_data_long[
+    jjriverplot_test_data_long$hospital_center == center_id, ]
+  
+  jjriverplot(
+    data = center_data,
+    time = "timepoint",
+    strata = "treatment_response",
+    plotType = "alluvial",
+    mytitle = paste("Treatment Patterns -", center_id),
+    labelNodes = TRUE,
+    showCounts = TRUE
+  )
+}
+
+# Analyze each center
+centers <- unique(jjriverplot_test_data_long$hospital_center)
+center_plots <- lapply(centers[1:3], center_comparison)  # First 3 centers
+```
+
+## Technical Details
+
+### Underlying Functions
+
+The `jjriverplot` function is built on:
+
+- **ggplot2**: Core plotting framework
+- **ggalluvial**: Specialized alluvial diagram geometries
+- **dplyr**: Data manipulation for aggregation
+- **jmvcore**: Data handling and option processing
+
+### Caching Details
+
+```{r caching-technical}
+echo: true
+eval: false
+
+# Internal caching structure (conceptual)
+# private$.processedData: Cached cleaned data with factor conversion
+# private$.processedOptions: Cached option processing including titles
+# 
+# Benefits:
+# - Eliminates redundant factor conversion calls
+# - Avoids repeated jmvcore::naOmit() operations
+# - Shares processed data across plot variations
+# - Optimizes complex conditional logic processing
+```
+
+### Dependencies
+
+```{r dependencies}
+echo: true
+eval: false
+
+# Required packages:
+# - ggplot2: Core plotting
+# - ggalluvial: Alluvial-specific geometries
+# - dplyr: Data manipulation (group_by, summarize)
+# - jmvcore: jamovi core functionality
+# - R6: Object-oriented programming
+# - rlang: Non-standard evaluation
+```
+
+## Clinical Applications
+
+### Research Scenarios
+
+1. **Clinical Trials**: Track patient responses across treatment periods
+2. **Quality Improvement**: Monitor care pathway adherence
+3. **Cost Analysis**: Visualize resource utilization flows
+4. **Epidemiology**: Study disease progression patterns
+5. **Health Services**: Analyze patient flow through care systems
+
+### Publication Guidelines
+
+```{r publication-tips}
+echo: true
+eval: false
+
+# For scientific publications:
+# - Use clear, descriptive titles and axis labels
+# - Include sample sizes in figure captions
+# - Choose colorblind-friendly fill patterns
+# - Provide detailed methodology in methods section
+# - Consider grayscale compatibility for print journals
+
+# Example publication-ready plot:
+publication_plot <- jjriverplot(
+  data = clinical_data,
+  time = "study_timepoint",
+  strata = "response_category",
+  weight = "patient_count",
+  plotType = "alluvial",
+  fillType = "first",
+  labelNodes = TRUE,
+  showLegend = TRUE,
+  mytitle = "Patient Response Trajectories (N = 600)",
+  xtitle = "Study Timepoint",
+  ytitle = "Number of Patients"
+)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Data contains no (complete) rows"**
+   - Check for missing values in required variables
+   - Ensure factor variables have valid levels
+   - Verify data filtering hasn't excluded all observations
+
+2. **Empty or unexpected flows**
+   - Check factor level definitions and ordering
+   - Verify time variable is properly formatted
+   - Ensure categories exist at multiple time points
+
+3. **Overlapping labels**
+   - Reduce number of categories through grouping
+   - Disable labels (labelNodes = FALSE) for complex plots
+   - Consider using counts instead of labels
+
+4. **Poor flow visibility**
+   - Adjust plot size settings
+   - Use weight variable to emphasize important flows
+   - Consider filtering to show only major pathways
+
+### Error Handling
+
+```{r error-handling}
+echo: true
+eval: false
+
+# Example error handling
+tryCatch({
+  result <- jjriverplot(
+    data = my_data,
+    time = "time_var",
+    strata = "category_var",
+    plotType = "alluvial"
+  )
+}, error = function(e) {
+  message("Error in river plot: ", e$message)
+  message("Check your data structure and variable types")
+  
+  # Diagnostic information
+  cat("Data structure:\n")
+  str(my_data)
+  cat("\nTime variable levels:\n")
+  print(levels(my_data$time_var))
+  cat("\nCategory variable levels:\n")
+  print(levels(my_data$category_var))
+})
+```
+
+### Performance Considerations
+
+```{r performance-tips}
+echo: true
+eval: false
+
+# For large datasets:
+# - Consider sampling for initial exploration
+# - Group rare categories to reduce complexity
+# - Use weight variables to highlight important flows
+# - Monitor memory usage with very wide datasets
+
+# Optimal performance tips:
+# - Ensure categorical variables are factors
+# - Use meaningful factor level ordering
+# - Remove unnecessary columns from data
+# - Balance detail with readability
+```
+
+## Interpretation Guidelines
+
+### What River Plots Reveal
+
+```{r interpretation-guide}
+echo: true
+eval: false
+
+# River plots effectively show:
+# 1. Transition patterns: How categories change over time
+# 2. Flow volumes: Relative sizes of different pathways
+# 3. Stability: Which categories remain constant
+# 4. Convergence: Multiple paths leading to same outcome
+# 5. Divergence: Single starting points leading to multiple outcomes
+
+# Key interpretation elements:
+# - Stream width = quantity/frequency
+# - Stream color = category grouping (based on fillType)
+# - Node height = total volume at that stage
+# - Flow crossings = category transitions
+```
+
+### Common Patterns
+
+```{r common-patterns}
+echo: true
+eval: false
+
+# Clinical research patterns:
+
+# Treatment response progression:
+# - Stable flows: Consistent responders
+# - Improving flows: Treatment success
+# - Declining flows: Treatment failure
+# - Complex flows: Mixed responses
+
+# Patient journey analysis:
+# - Funnel patterns: Progressive selection
+# - Retention patterns: Stable participation
+# - Dropout patterns: Loss to follow-up
+# - Recovery patterns: Improvement over time
+```
+
+## Comparison with Other Visualizations
+
+### When to Use River Plots vs Alternatives
+
+```{r visualization-comparison}
+echo: true
+eval: false
+
+# Use river plots when:
+# - Tracking categorical changes over time
+# - Showing flow volumes and transitions
+# - Multiple pathways need visualization
+# - Process or journey analysis required
+
+# Use line plots when:
+# - Continuous variables over time
+# - Trends and patterns are focus
+# - Statistical relationships important
+# - Precise values needed
+
+# Use bar charts when:
+# - Single time point comparisons
+# - Exact values are important
+# - Categories don't flow/transition
+# - Simple frequency distributions
+
+# Use heatmaps when:
+# - Showing correlation patterns
+# - Matrix-style data relationships
+# - Intensity rather than flow important
+# - Compact representation needed
+```
+
+## Conclusion
+
+The optimized `jjriverplot` function provides:
+
+- **Comprehensive flow visualization**: Multiple plot types for different analytical needs
+- **High performance**: Significant speed improvements through caching
+- **Clinical relevance**: Designed for healthcare pathway and outcome analysis  
+- **Flexibility**: Extensive customization options for publication and presentation
+- **Usability**: Clear documentation and comprehensive examples
+
+River plots excel at revealing transition patterns, pathway volumes, and flow dynamics that traditional static visualizations cannot capture. They are particularly valuable in clinical research for tracking patient journeys, treatment responses, and outcome progressions over time.
+
+The function is well-suited for longitudinal studies, quality improvement initiatives, clinical trial analysis, and any scenario requiring visualization of categorical transitions and flows between defined stages or time points.
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

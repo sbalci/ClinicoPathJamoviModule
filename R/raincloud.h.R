@@ -57,6 +57,7 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
                 facet_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -66,6 +67,7 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..color_var <- jmvcore::OptionVariable$new(
                 "color_var",
                 color_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -382,14 +384,53 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load your data frame with continuous and categorical variables.
-#' # 2. Select a continuous variable for distribution analysis.
-#' # 3. Choose a grouping variable for comparison across categories.
-#' # 4. Customize raincloud appearance and statistical options.
-#' # 5. Run the raincloud plot to visualize distribution patterns.
-#'}
+#' # Load example dataset
+#' data(histopathology)
+#'
+#' # Basic raincloud plot
+#' raincloud(
+#'   data = histopathology,
+#'   dep_var = "Age",
+#'   group_var = "Group"
+#' )
+#'
+#' # Advanced raincloud plot with faceting and custom colors
+#' raincloud(
+#'   data = histopathology,
+#'   dep_var = "OverallTime",
+#'   group_var = "Group",
+#'   facet_var = "Sex",
+#'   color_var = "Race",
+#'   color_palette = "clinical",
+#'   plot_theme = "publication"
+#' )
+#'
+#' # Statistical analysis with outlier detection
+#' raincloud(
+#'   data = histopathology,
+#'   dep_var = "Age",
+#'   group_var = "Group",
+#'   show_statistics = TRUE,
+#'   show_outliers = TRUE,
+#'   outlier_method = "iqr",
+#'   normality_test = TRUE,
+#'   comparison_test = TRUE
+#' )
+#'
+#' # Customized visualization components
+#' raincloud(
+#'   data = histopathology,
+#'   dep_var = "Age",
+#'   group_var = "Group",
+#'   show_violin = TRUE,
+#'   show_boxplot = TRUE,
+#'   show_dots = TRUE,
+#'   dots_side = "left",
+#'   orientation = "horizontal",
+#'   violin_width = 0.8,
+#'   alpha_violin = 0.6
+#' )
+#'
 #' @param data The data as a data frame.
 #' @param dep_var Continuous variable whose distribution will be visualized in
 #'   the raincloud plot.
@@ -446,8 +487,8 @@ raincloud <- function(
     data,
     dep_var,
     group_var,
-    facet_var,
-    color_var,
+    facet_var = NULL,
+    color_var = NULL,
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE,

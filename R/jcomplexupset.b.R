@@ -99,8 +99,8 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 min_size = self$options$min_size,
                 max_degree = self$options$max_degree,
                 keep_empty_groups = self$options$keep_empty_groups,
-                sort_by = self$options$sort_by,
-                sort_order = self$options$sort_order,
+                sort_intersections = self$options$sort_order,
+                sort_intersections_by = self$options$sort_by,
                 width_ratio = self$options$width_ratio,
                 height_ratio = self$options$height_ratio
             )
@@ -128,17 +128,24 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 plot <- plot + ComplexUpset::upset_set_size(show = FALSE)
             }
             
-            if (!self$options$intersection_size_show) {
-                plot <- plot + ComplexUpset::upset_intersection_size(show = FALSE)
+            # Note: Don't apply intersection_size(show = FALSE) if we're showing percentages
+            # as it conflicts with the percentage display
+            if (!self$options$intersection_size_show && !self$options$show_percentages) {
+                plot <- plot + ComplexUpset::intersection_size(show = FALSE)
             }
             
             # Apply percentages if requested
             if (self$options$show_percentages) {
-                plot <- plot + ComplexUpset::upset_intersection_size(
-                    mapping = ggplot2::aes(label = !!ComplexUpset::aes_percentage(
-                        relative_to = 'intersection'
-                    ))
-                )
+                # Check if ComplexUpset supports upset_text_percentage
+                if (exists("upset_text_percentage", where = asNamespace("ComplexUpset"))) {
+                    plot <- plot + ComplexUpset::intersection_size(
+                        text_mapping = ggplot2::aes(label = !!ComplexUpset::upset_text_percentage())
+                    )
+                } else {
+                    # Fallback: just show intersection sizes without percentages
+                    warning("ComplexUpset package does not support upset_text_percentage. Showing intersection sizes instead.")
+                    plot <- plot + ComplexUpset::intersection_size()
+                }
             }
             
             return(plot)
@@ -149,17 +156,12 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             height <- self$options$base_annotations_height
             
             if (annotation_type == "intersection_size") {
-                plot <- plot + ComplexUpset::upset_intersection_size(
+                plot <- plot + ComplexUpset::intersection_size(
                     height = height,
                     text = list(size = self$options$text_size * 0.8)
                 )
             } else if (annotation_type == "intersection_ratio") {
-                plot <- plot + ComplexUpset::upset_intersection_ratio(
-                    height = height,
-                    text = list(size = self$options$text_size * 0.8)
-                )
-            } else if (annotation_type == "union_size") {
-                plot <- plot + ComplexUpset::upset_union_size(
+                plot <- plot + ComplexUpset::intersection_ratio(
                     height = height,
                     text = list(size = self$options$text_size * 0.8)
                 )

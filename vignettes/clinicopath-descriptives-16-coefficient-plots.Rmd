@@ -1,0 +1,808 @@
+---
+title: "Coefficient Plots for Regression Models"
+subtitle: "Professional Forest Plots for Clinical Research"
+author: "ClinicoPath Module"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Introduction
+
+The `coefplot` function in ClinicoPath creates professional coefficient plots (forest plots) for regression models. These visualizations are essential for presenting regression results in clinical research, epidemiological studies, and statistical reports.
+
+## Clinical Motivation
+
+Coefficient plots are crucial in clinical research for:
+
+- **Effect Visualization**: Clear presentation of treatment effects and confidence intervals
+- **Comparative Analysis**: Comparing effect sizes across multiple predictors
+- **Publication Quality**: Professional plots suitable for journals and presentations  
+- **Model Interpretation**: Understanding the relative importance of predictors
+- **Risk Communication**: Presenting odds ratios, hazard ratios, and effect sizes to clinicians
+- **Meta-Analysis**: Displaying pooled estimates and individual study effects
+
+This function supports multiple regression types and provides extensive customization options for clinical publications.
+
+## Features Overview
+
+### Regression Model Support
+- **Linear Regression**: Continuous outcomes with coefficient estimates
+- **Logistic Regression**: Binary outcomes with odds ratios
+- **Cox Regression**: Survival analysis with hazard ratios  
+- **Poisson Regression**: Count outcomes with rate ratios
+
+### Visualization Options
+- **Confidence Intervals**: Customizable levels with inner/outer intervals
+- **Coefficient Selection**: Include/exclude specific predictors
+- **Sorting Options**: By magnitude, alphabetical, or natural order
+- **Professional Styling**: Publication-ready aesthetics
+
+## Package Setup
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)
+library(knitr)
+
+# Note: This function requires coefplot and jtools packages
+# Install if needed: install.packages(c("coefplot", "jtools"))
+
+# For demonstration, we'll use the histopathology dataset
+set.seed(42)
+```
+
+# Creating Test Data
+
+Let's create comprehensive datasets for different regression scenarios:
+
+```{r create-test-data}
+# Load the histopathology dataset
+data("histopathology")
+
+# Create additional variables for different model types
+clinical_data <- histopathology %>%
+  mutate(
+    # Binary outcomes
+    high_grade = factor(ifelse(Grade %in% c("3", "4"), "High", "Low")),
+    lymph_node_positive = factor(ifelse(LymphNodeMetastasis == "Present", "Positive", "Negative")),
+    
+    # Count outcome (simulate node counts)
+    positive_nodes = ifelse(LymphNodeMetastasis == "Present", 
+                           sample(1:5, nrow(histopathology), replace = TRUE), 0),
+    total_nodes = positive_nodes + sample(5:15, nrow(histopathology), replace = TRUE),
+    
+    # Continuous biomarker
+    ki67_score = rnorm(nrow(histopathology), 25, 15),
+    
+    # Treatment variable
+    chemotherapy = factor(sample(c("Yes", "No"), nrow(histopathology), 
+                                replace = TRUE, prob = c(0.4, 0.6))),
+    
+    # Continuous outcome (simulated survival time)
+    death_numeric = ifelse(Death == "DOĞRU", 1, 0),
+    survival_months = ifelse(death_numeric == 1, 
+                           rnorm(nrow(histopathology), 18, 8), 
+                           rnorm(nrow(histopathology), 48, 12))
+  ) %>%
+  # Ensure realistic ranges
+  mutate(
+    ki67_score = pmax(0, pmin(100, ki67_score)),
+    survival_months = pmax(1, pmin(120, survival_months)),
+    total_nodes = pmax(0, total_nodes)
+  )
+
+# Display data structure
+cat("Clinical data structure:\n")
+str(clinical_data)
+cat("\nFirst few rows:\n")
+head(clinical_data) %>% kable()
+```
+
+# Linear Regression Coefficient Plots
+
+## Example 1: Basic Linear Regression
+
+Analyze predictors of a continuous biomarker (Ki-67 score):
+
+```{r linear-basic, eval=FALSE}
+# Basic linear regression coefficient plot
+coefplot(
+  data = clinical_data,
+  dep = "ki67_score",
+  covs = c("Age", "TStage", "Grade"),
+  model_type = "linear",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = FALSE
+)
+```
+
+### Clinical Interpretation
+
+**Coefficient Interpretation**:
+- **Positive coefficients**: Higher predictor values associated with higher Ki-67 scores
+- **Negative coefficients**: Higher predictor values associated with lower Ki-67 scores  
+- **Confidence intervals**: 95% CI crossing zero indicate non-significant effects
+- **Effect magnitude**: Larger absolute coefficients indicate stronger effects
+
+## Example 2: Comprehensive Linear Model
+
+Analyze multiple predictors with customization:
+
+```{r linear-comprehensive, eval=FALSE}
+# Comprehensive linear regression analysis
+coefplot(
+  data = clinical_data,
+  dep = "survival_months",
+  covs = c("Age", "TStage", "Grade", "LVI", "PNI", "ki67_score"),
+  model_type = "linear",
+  ci_level = 0.95,
+  inner_ci_level = 0.8,
+  include_intercept = FALSE,
+  custom_title = "Predictors of Survival Time",
+  custom_x_label = "Effect on Survival (months)",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Advanced Features
+
+**Inner Confidence Intervals**: The inner CI (80%) provides additional precision information
+**Custom Labels**: Professional titles and axis labels for publications
+**Intercept Exclusion**: Focus on predictor effects rather than baseline values
+
+# Logistic Regression (Odds Ratios)
+
+## Example 3: Binary Outcome Analysis
+
+Analyze predictors of high-grade tumors:
+
+```{r logistic-basic, eval=FALSE}
+# Logistic regression for binary outcome
+coefplot(
+  data = clinical_data,
+  dep = "high_grade",
+  covs = c("Age", "TStage", "LVI", "PNI"),
+  model_type = "logistic",
+  ci_level = 0.95,
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE
+)
+```
+
+### Clinical Significance
+
+**Odds Ratio Interpretation**:
+- **OR = 1**: No association
+- **OR > 1**: Increased odds of high-grade tumor
+- **OR < 1**: Decreased odds of high-grade tumor
+- **CI excluding 1**: Statistically significant association
+
+## Example 4: Lymph Node Involvement
+
+Predict lymph node positivity:
+
+```{r logistic-lymphnode, eval=FALSE}
+# Predictors of lymph node involvement
+coefplot(
+  data = clinical_data,
+  dep = "lymph_node_positive",
+  covs = c("Age", "TStage", "Grade", "LVI", "ki67_score", "chemotherapy"),
+  model_type = "logistic",
+  custom_title = "Predictors of Lymph Node Involvement",
+  custom_x_label = "Odds Ratio",
+  point_size = 4,
+  line_thickness = 1.5,
+  show_coefficient_plot = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Clinical Applications
+
+This analysis helps identify:
+- **High-risk patients**: Those likely to have node-positive disease
+- **Treatment planning**: Inform decisions about lymph node dissection
+- **Prognostic factors**: Understand disease biology and progression
+- **Risk stratification**: Personalize treatment approaches
+
+# Cox Regression (Hazard Ratios)
+
+## Example 5: Survival Analysis
+
+Analyze predictors of mortality risk:
+
+```{r cox-survival, eval=FALSE}
+# Cox proportional hazards model
+coefplot(
+  data = clinical_data,
+  dep = "Death",
+  time_var = "OverallTime",
+  covs = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  model_type = "cox",
+  ci_level = 0.95,
+  custom_title = "Mortality Risk Factors",
+  custom_x_label = "Hazard Ratio",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Hazard Ratio Interpretation
+
+**Clinical Meaning**:
+- **HR = 1**: No effect on hazard
+- **HR > 1**: Increased risk of death
+- **HR < 1**: Decreased risk of death (protective factor)
+- **HR = 2**: Doubling of hazard rate
+
+## Example 6: Treatment Effect Analysis
+
+Evaluate treatment efficacy:
+
+```{r cox-treatment, eval=FALSE}
+# Treatment effect on survival
+coefplot(
+  data = clinical_data,
+  dep = "Death",
+  time_var = "OverallTime",
+  covs = c("chemotherapy", "TStage", "Grade", "Age"),
+  model_type = "cox",
+  coef_selection = "specific",
+  specific_coefs = "chemotherapy, TStage, Grade",
+  custom_title = "Treatment Effect on Survival",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE
+)
+```
+
+# Poisson Regression (Rate Ratios)
+
+## Example 7: Count Outcome Analysis
+
+Analyze predictors of total lymph node count:
+
+```{r poisson-basic, eval=FALSE}
+# Poisson regression for count data
+coefplot(
+  data = clinical_data,
+  dep = "total_nodes",
+  covs = c("Age", "TStage", "Grade", "LVI"),
+  model_type = "poisson",
+  custom_title = "Predictors of Total Node Count",
+  custom_x_label = "Rate Ratio",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Rate Ratio Interpretation
+
+**Clinical Understanding**:
+- **RR = 1**: No effect on rate
+- **RR > 1**: Increased rate/count
+- **RR < 1**: Decreased rate/count
+- **RR = 1.5**: 50% increase in expected count
+
+# Advanced Customization
+
+## Example 8: Publication-Ready Plot
+
+Create a professional plot for publication:
+
+```{r publication-plot, eval=FALSE}
+# High-quality publication plot
+coefplot(
+  data = clinical_data,
+  dep = "high_grade",
+  covs = c("Age", "TStage", "Grade", "LVI", "PNI", "ki67_score"),
+  model_type = "logistic",
+  ci_level = 0.95,
+  inner_ci_level = 0.8,
+  include_intercept = FALSE,
+  point_size = 3,
+  line_thickness = 1.2,
+  custom_title = "Risk Factors for High-Grade Tumors",
+  custom_x_label = "Odds Ratio (95% CI)",
+  show_coefficient_plot = TRUE,
+  show_model_summary = FALSE,
+  show_coefficient_table = FALSE
+)
+```
+
+## Example 9: Coefficient Selection
+
+Focus on specific predictors of interest:
+
+```{r coefficient-selection, eval=FALSE}
+# Select specific coefficients to display
+coefplot(
+  data = clinical_data,
+  dep = "lymph_node_positive",
+  covs = c("Age", "TStage", "Grade", "LVI", "PNI", "ki67_score", "chemotherapy"),
+  model_type = "logistic",
+  coef_selection = "specific",
+  specific_coefs = "TStage, Grade, LVI, PNI",
+  custom_title = "Key Pathological Predictors",
+  show_coefficient_plot = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+## Example 10: Excluding Coefficients
+
+Remove confounding or adjustment variables from display:
+
+```{r exclude-coefficients, eval=FALSE}
+# Exclude specific coefficients from plot
+coefplot(
+  data = clinical_data,
+  dep = "high_grade",
+  covs = c("Age", "TStage", "Grade", "LVI", "PNI", "ki67_score"),
+  model_type = "logistic",
+  coef_selection = "exclude",
+  specific_coefs = "Age",  # Remove age (adjustment variable)
+  custom_title = "Disease-Specific Risk Factors",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE
+)
+```
+
+# Model Comparison and Selection
+
+## Example 11: Confidence Interval Comparison
+
+Compare different confidence levels:
+
+```{r confidence-comparison, eval=FALSE}
+# Compare 90% vs 95% confidence intervals
+coefplot(
+  data = clinical_data,
+  dep = "Death",
+  time_var = "OverallTime",
+  covs = c("TStage", "Grade", "LVI", "PNI"),
+  model_type = "cox",
+  ci_level = 0.90,
+  inner_ci_level = 0.80,
+  custom_title = "Survival Predictors (90% CI)",
+  show_coefficient_plot = TRUE
+)
+```
+
+## Example 12: Effect Size Visualization
+
+Emphasize effect magnitudes:
+
+```{r effect-size, eval=FALSE}
+# Focus on effect sizes with larger points
+coefplot(
+  data = clinical_data,
+  dep = "survival_months",
+  covs = c("TStage", "Grade", "LVI", "PNI", "ki67_score"),
+  model_type = "linear",
+  point_size = 5,
+  line_thickness = 2,
+  custom_title = "Effect Sizes on Survival Time",
+  custom_x_label = "Effect Size (months)",
+  show_coefficient_plot = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+# Clinical Interpretation Guidelines
+
+## Understanding Coefficient Plots
+
+```{r interpretation-guide}
+cat("Coefficient Plot Interpretation Guide:\n\n")
+
+interpretation_guide <- data.frame(
+  Model_Type = c("Linear", "Logistic", "Cox", "Poisson"),
+  Effect_Measure = c("Coefficient", "Odds Ratio", "Hazard Ratio", "Rate Ratio"),
+  Null_Value = c("0", "1", "1", "1"),
+  Interpretation = c(
+    "Units change in outcome per unit predictor",
+    "Odds multiplication per unit predictor", 
+    "Hazard multiplication per unit predictor",
+    "Rate multiplication per unit predictor"
+  ),
+  Clinical_Significance = c(
+    "Direct effect size",
+    "Risk factor strength",
+    "Survival impact",
+    "Count/rate impact"
+  )
+)
+
+kable(interpretation_guide, caption = "Clinical Interpretation of Coefficient Plots")
+```
+
+## Statistical Significance Assessment
+
+```{r significance-guidelines}
+cat("Statistical Significance Guidelines:\n\n")
+cat("🔴 SIGNIFICANT EFFECTS:\n")
+cat("   • Confidence intervals do not cross null value\n")
+cat("   • Strong evidence for association\n")
+cat("   • Consider clinical significance alongside statistical significance\n\n")
+
+cat("🟡 BORDERLINE EFFECTS:\n")
+cat("   • Confidence intervals barely cross null value\n")
+cat("   • May warrant further investigation\n")
+cat("   • Consider sample size and power\n\n")
+
+cat("🟢 NON-SIGNIFICANT EFFECTS:\n")
+cat("   • Confidence intervals clearly include null value\n")
+cat("   • Insufficient evidence for association\n")
+cat("   • May still have clinical relevance if effect size is meaningful\n\n")
+
+cat("📊 EFFECT SIZE CONSIDERATIONS:\n")
+cat("   • Large effect with wide CI: Potentially important but uncertain\n")
+cat("   • Small effect with narrow CI: Precise but may not be clinically meaningful\n")
+cat("   • Consider clinical context and domain expertise\n")
+```
+
+# Best Practices and Guidelines
+
+## Model Selection Guidelines
+
+```{r model-selection}
+cat("Model Type Selection Guidelines:\n\n")
+
+model_selection_guide <- data.frame(
+  Outcome_Type = c("Continuous", "Binary", "Time-to-Event", "Count/Rate"),
+  Model_Choice = c("Linear", "Logistic", "Cox", "Poisson"),
+  Example_Outcomes = c(
+    "Biomarker levels, scores, measurements",
+    "Disease presence, treatment response",
+    "Survival time, time to recurrence", 
+    "Number of events, lesion counts"
+  ),
+  Key_Assumptions = c(
+    "Linearity, normality, homoscedasticity",
+    "Logit linearity, independence",
+    "Proportional hazards, independent censoring",
+    "Mean equals variance, independence"
+  )
+)
+
+kable(model_selection_guide, caption = "Choosing the Right Regression Model")
+```
+
+## Publication Standards
+
+```{r publication-standards}
+cat("Publication-Ready Coefficient Plots:\n\n")
+cat("✓ ESSENTIAL ELEMENTS:\n")
+cat("   • Clear, informative title\n")
+cat("   • Appropriate axis labels with units\n")
+cat("   • Confidence intervals displayed\n")
+cat("   • Reference line at null value\n")
+cat("   • Legend explaining symbols and intervals\n\n")
+
+cat("✓ REPORTING REQUIREMENTS:\n")
+cat("   • Sample size and missing data handling\n")
+cat("   • Model assumptions and diagnostics\n")
+cat("   • Confidence interval levels\n")
+cat("   • Adjustment variables included\n")
+cat("   • Software and package versions\n\n")
+
+cat("✓ VISUAL QUALITY:\n")
+cat("   • High resolution for print (≥300 DPI)\n")
+cat("   • Readable font sizes\n")
+cat("   • Clear contrast and colors\n")
+cat("   • Consistent formatting across figures\n")
+```
+
+# Clinical Case Studies
+
+## Case Study 1: Biomarker Validation
+
+Validate a new prognostic biomarker:
+
+```{r case-biomarker, eval=FALSE}
+# Biomarker validation study
+coefplot(
+  data = clinical_data,
+  dep = "Death",
+  time_var = "OverallTime",
+  covs = c("ki67_score", "TStage", "Grade", "Age"),
+  model_type = "cox",
+  custom_title = "Ki-67 as Prognostic Biomarker",
+  custom_x_label = "Hazard Ratio (95% CI)",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Clinical Implications
+
+This analysis addresses:
+- **Prognostic value**: Is Ki-67 independently predictive?
+- **Clinical utility**: Should Ki-67 guide treatment decisions?
+- **Risk stratification**: Can we identify high-risk patients?
+- **Standard of care**: How does Ki-67 compare to established factors?
+
+## Case Study 2: Treatment Decision Making
+
+Inform treatment selection:
+
+```{r case-treatment, eval=FALSE}
+# Treatment decision support
+coefplot(
+  data = clinical_data,
+  dep = "lymph_node_positive",
+  covs = c("TStage", "Grade", "LVI", "PNI", "ki67_score"),
+  model_type = "logistic",
+  custom_title = "Pre-operative Prediction of Node Involvement",
+  custom_x_label = "Odds Ratio",
+  show_coefficient_plot = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Clinical Decision Support
+
+Results inform:
+- **Surgical planning**: Extent of lymph node dissection
+- **Imaging decisions**: Need for additional staging studies
+- **Patient counseling**: Risk communication and shared decision-making
+- **Follow-up intensity**: Surveillance strategy planning
+
+## Case Study 3: Risk Prediction Model
+
+Develop clinical prediction tool:
+
+```{r case-prediction, eval=FALSE}
+# Comprehensive risk prediction model
+coefplot(
+  data = clinical_data,
+  dep = "high_grade",
+  covs = c("Age", "TStage", "LVI", "PNI", "ki67_score"),
+  model_type = "logistic",
+  include_intercept = TRUE,  # Needed for prediction
+  custom_title = "High-Grade Tumor Prediction Model",
+  show_coefficient_plot = TRUE,
+  show_model_summary = TRUE,
+  show_coefficient_table = TRUE
+)
+```
+
+### Model Development
+
+This analysis supports:
+- **Risk calculator development**: Convert coefficients to prediction tool
+- **Validation planning**: Design external validation studies
+- **Clinical implementation**: Integration into electronic health records
+- **Performance assessment**: Discrimination and calibration evaluation
+
+# Advanced Statistical Considerations
+
+## Model Diagnostics and Assumptions
+
+```{r diagnostics-guide}
+cat("Model Diagnostic Considerations:\n\n")
+cat("🔍 LINEAR REGRESSION:\n")
+cat("   • Linearity: Scatter plots of predictors vs. outcome\n")
+cat("   • Residual plots: Check for patterns and outliers\n")
+cat("   • Normality: Q-Q plots of residuals\n")
+cat("   • Multicollinearity: Variance inflation factors\n\n")
+
+cat("🔍 LOGISTIC REGRESSION:\n")
+cat("   • Linearity in logit: Smooth terms or polynomial checks\n")
+cat("   • Outliers: Leverage and influence diagnostics\n")
+cat("   • Goodness of fit: Hosmer-Lemeshow test\n")
+cat("   • Calibration: Calibration plots\n\n")
+
+cat("🔍 COX REGRESSION:\n")
+cat("   • Proportional hazards: Schoenfeld residuals\n")
+cat("   • Linearity: Martingale residuals\n")
+cat("   • Outliers: Deviance residuals\n")
+cat("   • Time-varying effects: Test for interactions with time\n\n")
+
+cat("🔍 POISSON REGRESSION:\n")
+cat("   • Overdispersion: Compare variance to mean\n")
+cat("   • Zero inflation: Assess excess zeros\n")
+cat("   • Linearity: Residual plots\n")
+cat("   • Independence: Autocorrelation checks\n")
+```
+
+## Effect Size and Clinical Significance
+
+```{r effect-size-guide}
+cat("Effect Size Interpretation:\n\n")
+
+effect_size_guide <- data.frame(
+  Effect_Measure = c("Cohen's d", "Odds Ratio", "Hazard Ratio", "Rate Ratio"),
+  Small_Effect = c("0.2", "1.2-1.5", "1.2-1.5", "1.2-1.5"),
+  Medium_Effect = c("0.5", "2.0-3.0", "2.0-3.0", "2.0-3.0"),
+  Large_Effect = c("0.8", ">4.0", ">4.0", ">4.0"),
+  Clinical_Relevance = c(
+    "Standardized mean difference",
+    "Multiplicative risk increase",
+    "Proportional hazard increase", 
+    "Rate multiplication factor"
+  )
+)
+
+kable(effect_size_guide, caption = "Effect Size Interpretation Guidelines")
+```
+
+## Sample Size and Power Considerations
+
+```{r sample-size-guide}
+cat("Sample Size Considerations for Coefficient Plots:\n\n")
+cat("📊 GENERAL GUIDELINES:\n")
+cat("   • Minimum 10-15 events per predictor (EPV rule)\n")
+cat("   • Larger samples for stable coefficient estimates\n")
+cat("   • Consider effect size and desired precision\n")
+cat("   • Account for missing data and exclusions\n\n")
+
+cat("📊 MODEL-SPECIFIC REQUIREMENTS:\n")
+cat("   • Linear: n ≥ 100 + 10×predictors for stable estimates\n")
+cat("   • Logistic: ≥10 events per predictor minimum\n")
+cat("   • Cox: ≥10 events per predictor minimum\n")
+cat("   • Poisson: Consider event rate and zero inflation\n\n")
+
+cat("📊 PRECISION CONSIDERATIONS:\n")
+cat("   • Narrow CIs require larger samples\n")
+cat("   • Rare outcomes need larger samples\n")
+cat("   • Multiple comparisons reduce effective power\n")
+cat("   • Subgroup analyses require additional power\n")
+```
+
+# Output Integration and Reporting
+
+## Comprehensive Analysis Workflow
+
+```{r workflow-example, eval=FALSE}
+# Complete analysis workflow example
+clinical_analysis <- function(data, outcome_var, predictors, model_type) {
+  
+  # Step 1: Descriptive analysis
+  cat("=== DESCRIPTIVE ANALYSIS ===\n")
+  # (Add descriptive statistics here)
+  
+  # Step 2: Coefficient plot
+  cat("\n=== COEFFICIENT PLOT ===\n")
+  coefplot(
+    data = data,
+    dep = outcome_var,
+    covs = predictors,
+    model_type = model_type,
+    show_coefficient_plot = TRUE,
+    show_model_summary = TRUE,
+    show_coefficient_table = TRUE
+  )
+  
+  # Step 3: Model diagnostics
+  cat("\n=== MODEL DIAGNOSTICS ===\n")
+  # (Add diagnostic plots and tests here)
+  
+  # Step 4: Clinical interpretation
+  cat("\n=== CLINICAL INTERPRETATION ===\n")
+  # (Add interpretation guidelines here)
+}
+
+# Example usage
+# clinical_analysis(clinical_data, "high_grade", 
+#                  c("Age", "TStage", "Grade", "LVI"), "logistic")
+```
+
+## Integration with Other ClinicoPath Functions
+
+```{r integration-example}
+cat("Integration with ClinicoPath Workflow:\n\n")
+cat("🔄 TYPICAL ANALYSIS SEQUENCE:\n")
+cat("   1. tableone() - Descriptive statistics by groups\n")
+cat("   2. summarydata() - Overall data summary\n")
+cat("   3. coefplot() - Regression coefficient visualization\n")
+cat("   4. survival() - Survival analysis (if applicable)\n")
+cat("   5. roc() - Diagnostic performance (if applicable)\n\n")
+
+cat("🔄 COMPLEMENTARY FUNCTIONS:\n")
+cat("   • crosstable() - Univariate associations\n")
+cat("   • correlation() - Predictor relationships\n")
+cat("   • nomogram() - Prediction model visualization\n")
+cat("   • forest plots from meta-analysis functions\n\n")
+
+cat("🔄 QUALITY ASSURANCE:\n")
+cat("   • checkdata() - Data quality assessment\n")
+cat("   • outlierdetection() - Identify unusual observations\n")
+cat("   • missingdata() - Handle missing data patterns\n")
+```
+
+# Troubleshooting and Common Issues
+
+## Error Prevention and Solutions
+
+```{r troubleshooting}
+cat("Common Issues and Solutions:\n\n")
+cat("❌ ERROR: 'Package not found'\n")
+cat("   SOLUTION: Install required packages\n")
+cat("   install.packages(c('coefplot', 'jtools', 'survival'))\n\n")
+
+cat("❌ ERROR: 'Binary variable must have exactly 2 levels'\n")
+cat("   SOLUTION: Check outcome variable formatting\n")
+cat("   • Remove missing values: data$outcome[!is.na(data$outcome)]\n")
+cat("   • Convert to factor: factor(data$outcome)\n")
+cat("   • Check unique values: unique(data$outcome)\n\n")
+
+cat("❌ ERROR: 'Cox regression requires time variable'\n")
+cat("   SOLUTION: Specify time_var parameter\n")
+cat("   • Ensure time variable is numeric and positive\n")
+cat("   • Check for missing values in time variable\n\n")
+
+cat("❌ WARNING: 'Convergence issues'\n")
+cat("   SOLUTION: Check data quality and model specification\n")
+cat("   • Remove highly correlated predictors\n")
+cat("   • Check for complete separation in logistic models\n")
+cat("   • Consider variable transformations\n")
+cat("   • Ensure adequate sample size\n\n")
+
+cat("❌ ERROR: 'Plot not displaying'\n")
+cat("   SOLUTION: Check output options\n")
+cat("   • Ensure show_coefficient_plot = TRUE\n")
+cat("   • Check that variables are properly selected\n")
+cat("   • Verify data contains the specified variables\n")
+```
+
+## Data Preparation Guidelines
+
+```{r data-preparation}
+cat("Data Preparation Checklist:\n\n")
+cat("✓ VARIABLE FORMATTING:\n")
+cat("   • Outcomes: Proper type (numeric, factor, Surv object)\n")
+cat("   • Predictors: Appropriate scale and distribution\n")
+cat("   • Factors: Meaningful reference levels\n")
+cat("   • Missing data: Handle systematically\n\n")
+
+cat("✓ MODEL ASSUMPTIONS:\n")
+cat("   • Check linearity assumptions\n")
+cat("   • Assess multicollinearity\n")
+cat("   • Verify independence\n")
+cat("   • Test proportional hazards (Cox models)\n\n")
+
+cat("✓ SAMPLE SIZE:\n")
+cat("   • Adequate events per variable\n")
+cat("   • Consider power for detecting effects\n")
+cat("   • Account for missing data\n")
+cat("   • Plan for model validation\n")
+```
+
+# Conclusion
+
+The `coefplot` function provides comprehensive coefficient visualization capabilities essential for clinical research and statistical reporting. Key benefits include:
+
+1. **Professional Visualization**: Publication-ready forest plots for all major regression types
+2. **Clinical Interpretation**: Clear presentation of effect sizes and confidence intervals
+3. **Flexible Customization**: Extensive options for specific research needs
+4. **Statistical Rigor**: Proper handling of different model types and assumptions
+5. **Integration**: Seamless workflow with other ClinicoPath functions
+
+This tool enables researchers to effectively communicate regression results, support clinical decision-making, and advance evidence-based medicine through clear statistical visualization.
+
+## Best Practice Summary
+
+- **Choose appropriate model type** based on outcome variable characteristics
+- **Include relevant covariates** but avoid overfitting with too many predictors
+- **Check model assumptions** and perform diagnostic analyses
+- **Use confidence intervals** to assess statistical and clinical significance
+- **Customize plots** for target audience and publication requirements
+- **Provide clinical interpretation** alongside statistical results
+
+## References
+
+- Harrell, F. E. (2015). *Regression Modeling Strategies*. Springer.
+- Hosmer, D. W., Lemeshow, S., & Sturdivant, R. X. (2013). *Applied Logistic Regression*. Wiley.
+- Therneau, T. M., & Grambsch, P. M. (2000). *Modeling Survival Data*. Springer.
+- Agresti, A. (2013). *Categorical Data Analysis*. Wiley.
+
+---
+
+*This vignette was created for the ClinicoPath jamovi module. For more information and updates, visit [https://github.com/sbalci/ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule).*

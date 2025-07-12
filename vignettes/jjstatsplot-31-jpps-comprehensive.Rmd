@@ -1,0 +1,740 @@
+---
+title: "Predictive Power Score (PPS) Analysis with jpps"
+subtitle: "Comprehensive Guide to Modern Relationship Detection"
+date: "2025-07-07"
+author: "ClinicoPath"
+output: html_document
+---
+
+# Introduction
+
+## What is Predictive Power Score (PPS)?
+
+Predictive Power Score (PPS) is a modern metric that detects **linear and non-linear relationships** between variables using machine learning. Unlike traditional correlation analysis, PPS:
+
+- **Detects non-linear relationships** that correlation misses
+- **Works with mixed data types** (numeric, categorical)
+- Provides **asymmetric scores** (X→Y may differ from Y→X)
+- **Uses machine learning** for robust relationship detection
+- Ranges from **0 (no predictive power) to 1 (perfect prediction)**
+
+## Why Use PPS Instead of Correlation?
+
+| Feature | Correlation | PPS |
+|---------|-------------|-----|
+| **Relationship Types** | Linear only | Linear + Non-linear |
+| **Data Types** | Numeric only | Numeric + Categorical |
+| **Symmetry** | Symmetric (X↔Y) | Asymmetric (X→Y ≠ Y→X) |
+| **Method** | Mathematical formula | Machine learning |
+| **Range** | -1 to +1 | 0 to 1 |
+| **Outlier Sensitivity** | High | Moderate |
+
+## The jpps Function
+
+The `jpps()` function in ClinicoPath provides a comprehensive interface for PPS analysis with four analysis types:
+
+1. **Single**: One predictor → one target
+2. **Predictors**: Multiple predictors → one target  
+3. **Matrix**: All variables → all variables
+4. **Compare**: PPS vs correlation comparison
+
+# Getting Started
+
+```{r setup}
+# Load required packages
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+
+# Set random seed for reproducibility
+set.seed(20250707)
+```
+
+## Quick Example
+
+Let's start with a simple example showing PPS detecting a non-linear relationship:
+
+```{r quick_example}
+# Create data with non-linear relationship
+data <- data.frame(
+  x = seq(-3, 3, length.out = 50),
+  y_linear = 2 * seq(-3, 3, length.out = 50) + rnorm(50, 0, 0.5),
+  y_quadratic = seq(-3, 3, length.out = 50)^2 + rnorm(50, 0, 0.5)
+)
+
+# Analyze with PPS
+result <- jpps(
+  data = data,
+  analysis_type = "predictors",
+  target_var = "y_quadratic",
+  predictor_vars = c("x"),
+  algorithm = "tree"
+)
+
+# View results
+result
+```
+
+This demonstrates how PPS can detect the quadratic relationship between `x` and `y_quadratic`.
+
+# Analysis Types
+
+## Single Predictor Analysis
+
+Use when you want to analyze **one specific predictor-target relationship**:
+
+```{r single_analysis}
+# Create test data
+single_data <- data.frame(
+  sales = c(100, 150, 120, 180, 140, 200, 160, 220, 180, 250),
+  advertising = c(5, 8, 6, 10, 7, 12, 9, 13, 10, 15)
+)
+
+# Single predictor analysis
+single_result <- jpps(
+  data = single_data,
+  analysis_type = "single",
+  target_var = "sales",
+  predictor_var = "advertising",
+  algorithm = "auto"
+)
+
+single_result
+```
+
+## Multiple Predictors Analysis
+
+Use to **identify the best predictors** for a target variable:
+
+```{r predictors_analysis}
+# Create business data
+business_data <- data.frame(
+  revenue = rnorm(40, 1000, 200),
+  marketing_spend = rnorm(40, 50, 15),
+  employee_count = round(rnorm(40, 25, 8)),
+  customer_satisfaction = rnorm(40, 4.2, 0.8),
+  market_share = rnorm(40, 15, 5)
+)
+
+# Multiple predictors analysis
+predictors_result <- jpps(
+  data = business_data,
+  analysis_type = "predictors",
+  target_var = "revenue",
+  predictor_vars = c("marketing_spend", "employee_count", "customer_satisfaction", "market_share"),
+  sort_results = "pps_desc",
+  show_summary = TRUE
+)
+
+predictors_result
+```
+
+## Matrix Analysis
+
+Use for **comprehensive relationship exploration** between all variables:
+
+```{r matrix_analysis}
+# Create correlation matrix data
+matrix_data <- data.frame(
+  var1 = rnorm(30, 50, 10),
+  var2 = rnorm(30, 100, 20),
+  var3 = rnorm(30, 25, 5),
+  var4 = rnorm(30, 75, 15)
+) %>%
+  mutate(
+    # Create some relationships
+    var2 = var2 + 0.5 * var1,  # Linear relationship
+    var3 = var1^0.5 + rnorm(30, 0, 2),  # Non-linear relationship
+    var4 = ifelse(var1 > 50, var4 + 20, var4)  # Threshold relationship
+  )
+
+# Matrix analysis with heatmap
+matrix_result <- jpps(
+  data = matrix_data,
+  analysis_type = "matrix",
+  matrix_vars = c("var1", "var2", "var3", "var4"),
+  show_heatmap = TRUE,
+  color_scheme = "viridis",
+  show_values_on_plot = TRUE
+)
+
+matrix_result
+```
+
+## Comparison Analysis
+
+Use to **compare PPS with correlation** and identify where PPS provides additional insights:
+
+```{r comparison_analysis}
+# Create data where PPS outperforms correlation
+comparison_data <- data.frame(
+  x = runif(50, -3, 3)
+) %>%
+  mutate(
+    linear_rel = 0.8 * x + rnorm(50, 0, 0.5),      # High correlation, high PPS
+    quadratic_rel = x^2 + rnorm(50, 0, 0.5),       # Low correlation, high PPS
+    no_rel = rnorm(50, 0, 1)                       # Low correlation, low PPS
+  )
+
+# Comparison analysis
+comparison_result <- jpps(
+  data = comparison_data,
+  analysis_type = "compare",
+  matrix_vars = c("x", "linear_rel", "quadratic_rel", "no_rel"),
+  show_correlation_comparison = TRUE,
+  correlation_method = "pearson"
+)
+
+comparison_result
+```
+
+# Algorithm Options
+
+PPS supports three algorithms, each with different strengths:
+
+## Decision Tree Algorithm
+
+**Best for**: Interpretable results, categorical variables, threshold relationships
+
+```{r tree_algorithm}
+# Data with clear thresholds
+threshold_data <- data.frame(
+  income = runif(40, 20000, 100000),
+  age = round(runif(40, 25, 65))
+) %>%
+  mutate(
+    loan_approved = factor(ifelse(income > 50000 & age > 30, "Yes", "No"))
+  )
+
+tree_result <- jpps(
+  data = threshold_data,
+  analysis_type = "single",
+  target_var = "loan_approved",
+  predictor_var = "income",
+  algorithm = "tree"
+)
+
+tree_result
+```
+
+## Random Forest Algorithm
+
+**Best for**: Complex relationships, mixed data types, high accuracy
+
+```{r forest_algorithm}
+forest_result <- jpps(
+  data = threshold_data,
+  analysis_type = "single", 
+  target_var = "loan_approved",
+  predictor_var = "income",
+  algorithm = "forest"
+)
+
+forest_result
+```
+
+## Auto Algorithm
+
+**Best for**: General use, automatic algorithm selection
+
+```{r auto_algorithm}
+auto_result <- jpps(
+  data = threshold_data,
+  analysis_type = "single",
+  target_var = "loan_approved", 
+  predictor_var = "income",
+  algorithm = "auto"
+)
+
+auto_result
+```
+
+# Working with Different Data Types
+
+## Mixed Data Types
+
+PPS excels with mixed categorical and numerical data:
+
+```{r mixed_data}
+# Create mixed data
+mixed_data <- data.frame(
+  # Categorical variables
+  education = factor(sample(c("High School", "Bachelor", "Master", "PhD"), 60, replace = TRUE)),
+  department = factor(sample(c("Sales", "Marketing", "Engineering", "HR"), 60, replace = TRUE)),
+  
+  # Numerical variables
+  experience_years = round(runif(60, 0, 20)),
+  performance_score = rnorm(60, 75, 15)
+) %>%
+  mutate(
+    # Salary influenced by education and experience
+    salary = case_when(
+      education == "PhD" ~ 80000 + experience_years * 3000 + rnorm(sum(education == "PhD"), 0, 5000),
+      education == "Master" ~ 60000 + experience_years * 2500 + rnorm(sum(education == "Master"), 0, 4000),
+      education == "Bachelor" ~ 45000 + experience_years * 2000 + rnorm(sum(education == "Bachelor"), 0, 3000),
+      TRUE ~ 30000 + experience_years * 1500 + rnorm(sum(education == "High School"), 0, 2000)
+    )
+  )
+
+# Analyze mixed data
+mixed_result <- jpps(
+  data = mixed_data,
+  analysis_type = "predictors",
+  target_var = "salary",
+  predictor_vars = c("education", "department", "experience_years", "performance_score"),
+  sort_results = "pps_desc"
+)
+
+mixed_result
+```
+
+## Time Series Data
+
+PPS can detect temporal patterns:
+
+```{r timeseries_data}
+# Create time series data
+ts_data <- data.frame(
+  month = 1:24,
+  seasonal_factor = sin(2 * pi * (1:24) / 12)
+) %>%
+  mutate(
+    sales = 1000 + 50 * month + 200 * seasonal_factor + rnorm(24, 0, 50),
+    lagged_sales = lag(sales, 1)
+  ) %>%
+  filter(!is.na(lagged_sales))
+
+# Analyze temporal relationships
+ts_result <- jpps(
+  data = ts_data,
+  analysis_type = "matrix",
+  matrix_vars = c("month", "seasonal_factor", "sales", "lagged_sales"),
+  show_heatmap = TRUE
+)
+
+ts_result
+```
+
+# Advanced Features
+
+## Sample Size Management
+
+For large datasets, use sample size limits for faster analysis:
+
+```{r sample_size}
+# Create large dataset
+large_data <- data.frame(
+  x = rnorm(1000),
+  y = rnorm(1000)
+) %>%
+  mutate(z = 0.6 * x + 0.4 * y + rnorm(1000, 0, 0.3))
+
+# Use sampling for efficiency
+sampled_result <- jpps(
+  data = large_data,
+  analysis_type = "matrix",
+  matrix_vars = c("x", "y", "z"),
+  sample_size = 200,  # Use only 200 samples
+  algorithm = "tree"
+)
+
+sampled_result
+```
+
+## Cross-Validation Options
+
+Adjust cross-validation for different dataset sizes:
+
+```{r cross_validation}
+# Small dataset - use fewer folds
+small_result <- jpps(
+  data = mixed_data[1:20, ],
+  analysis_type = "single",
+  target_var = "salary",
+  predictor_var = "experience_years",
+  cv_folds = 3  # Fewer folds for small data
+)
+
+# Larger dataset - use more folds
+large_result <- jpps(
+  data = mixed_data,
+  analysis_type = "single",
+  target_var = "salary",
+  predictor_var = "experience_years", 
+  cv_folds = 10  # More folds for better validation
+)
+```
+
+## Threshold Filtering
+
+Filter results by minimum PPS score:
+
+```{r threshold_filtering}
+# Show only relationships with PPS > 0.1
+threshold_result <- jpps(
+  data = matrix_data,
+  analysis_type = "matrix",
+  matrix_vars = c("var1", "var2", "var3", "var4"),
+  min_pps_threshold = 0.1,
+  sort_results = "pps_desc"
+)
+
+threshold_result
+```
+
+# Visualization Options
+
+## Heatmap Customization
+
+Customize heatmaps for matrix analysis:
+
+```{r heatmap_custom}
+# Custom color scheme
+custom_heatmap <- jpps(
+  data = matrix_data,
+  analysis_type = "matrix",
+  matrix_vars = c("var1", "var2", "var3", "var4"),
+  show_heatmap = TRUE,
+  color_scheme = "custom",
+  custom_color_low = "#FFFFFF",
+  custom_color_high = "#FF6B35",
+  show_values_on_plot = TRUE,
+  plot_title = "Custom PPS Heatmap"
+)
+
+custom_heatmap
+```
+
+## Barplot Options
+
+Customize barplots for predictor analysis:
+
+```{r barplot_custom}
+# Custom barplot
+barplot_result <- jpps(
+  data = business_data,
+  analysis_type = "predictors",
+  target_var = "revenue",
+  predictor_vars = c("marketing_spend", "employee_count", "customer_satisfaction"),
+  show_barplot = TRUE,
+  show_values_on_plot = TRUE,
+  plot_title = "Revenue Predictors",
+  sort_results = "pps_desc"
+)
+
+barplot_result
+```
+
+# Practical Applications
+
+## Marketing Analytics
+
+Identify which marketing channels drive sales:
+
+```{r marketing_example}
+# Marketing data
+marketing_data <- data.frame(
+  # Marketing channels
+  tv_spend = runif(50, 1000, 10000),
+  digital_spend = runif(50, 500, 5000),
+  radio_spend = runif(50, 200, 2000),
+  print_spend = runif(50, 100, 1000),
+  
+  # Customer metrics
+  brand_awareness = runif(50, 20, 80),
+  website_visits = round(runif(50, 1000, 10000))
+) %>%
+  mutate(
+    # Sales influenced by digital and TV (non-linear)
+    sales = 5000 + 
+      sqrt(digital_spend) * 2 +  # Non-linear digital effect
+      tv_spend * 0.3 +           # Linear TV effect
+      ifelse(brand_awareness > 60, 2000, 0) +  # Threshold effect
+      rnorm(50, 0, 1000)
+  )
+
+# Analyze marketing effectiveness
+marketing_result <- jpps(
+  data = marketing_data,
+  analysis_type = "predictors",
+  target_var = "sales",
+  predictor_vars = c("tv_spend", "digital_spend", "radio_spend", "print_spend", "brand_awareness"),
+  algorithm = "forest",
+  show_summary = TRUE
+)
+
+marketing_result
+```
+
+## Medical Research
+
+Identify predictors of health outcomes:
+
+```{r medical_example}
+# Clinical data
+clinical_data <- data.frame(
+  age = round(runif(80, 25, 75)),
+  gender = factor(sample(c("Male", "Female"), 80, replace = TRUE)),
+  bmi = rnorm(80, 26, 4),
+  smoking = factor(sample(c("Never", "Former", "Current"), 80, replace = TRUE, prob = c(0.5, 0.3, 0.2))),
+  exercise_hours = pmax(0, rnorm(80, 3, 2))
+) %>%
+  mutate(
+    # Risk score with complex relationships
+    risk_score = case_when(
+      smoking == "Current" & age > 50 ~ 70 + rnorm(sum(smoking == "Current" & age > 50), 0, 10),
+      smoking == "Current" ~ 50 + rnorm(sum(smoking == "Current" & age <= 50), 0, 8),
+      age > 60 ~ 40 + rnorm(sum(smoking != "Current" & age > 60), 0, 12),
+      TRUE ~ 20 + rnorm(sum(smoking != "Current" & age <= 60), 0, 8)
+    ),
+    risk_score = pmax(0, pmin(100, risk_score))
+  )
+
+# Analyze health risk factors
+health_result <- jpps(
+  data = clinical_data,
+  analysis_type = "predictors",
+  target_var = "risk_score",
+  predictor_vars = c("age", "gender", "bmi", "smoking", "exercise_hours"),
+  algorithm = "forest",
+  show_summary = TRUE
+)
+
+health_result
+```
+
+## Financial Analysis
+
+Detect relationships in financial data:
+
+```{r financial_example}
+# Financial indicators
+financial_data <- data.frame(
+  # Market indicators
+  sp500_return = rnorm(60, 0.08, 0.15),
+  volatility_index = abs(rnorm(60, 20, 8)),
+  bond_yield = rnorm(60, 3.5, 1.2),
+  
+  # Economic indicators  
+  gdp_growth = rnorm(60, 2.5, 1.0),
+  inflation = rnorm(60, 2.8, 0.8),
+  unemployment = rnorm(60, 5.2, 1.5)
+) %>%
+  mutate(
+    # Stock performance with complex relationships
+    stock_performance = 
+      sp500_return * 1.2 +                           # Market beta
+      -0.5 * log(volatility_index + 1) +            # Non-linear volatility effect
+      ifelse(gdp_growth > 3, 0.05, 0) +             # Threshold GDP effect
+      rnorm(60, 0, 0.1)
+  )
+
+# Analyze financial relationships
+financial_result <- jpps(
+  data = financial_data,
+  analysis_type = "compare",
+  matrix_vars = c("sp500_return", "volatility_index", "bond_yield", "gdp_growth", "stock_performance"),
+  show_correlation_comparison = TRUE,
+  correlation_method = "pearson"
+)
+
+financial_result
+```
+
+# Performance and Optimization
+
+## Caching System
+
+The jpps function includes intelligent caching to speed up repeated analyses:
+
+```{r caching_demo, eval=FALSE}
+# First run - computes PPS
+system.time({
+  result1 <- jpps(
+    data = large_data,
+    analysis_type = "matrix",
+    matrix_vars = c("x", "y", "z")
+  )
+})
+
+# Second run with same parameters - uses cache (much faster)
+system.time({
+  result2 <- jpps(
+    data = large_data,
+    analysis_type = "matrix", 
+    matrix_vars = c("x", "y", "z")
+  )
+})
+```
+
+## Memory Management
+
+For very large datasets, use strategic sampling:
+
+```{r memory_management, eval=FALSE}
+# For datasets > 10,000 rows
+huge_data <- data.frame(
+  x = rnorm(50000),
+  y = rnorm(50000),
+  z = rnorm(50000)
+)
+
+# Use sample_size to manage memory
+efficient_result <- jpps(
+  data = huge_data,
+  analysis_type = "matrix",
+  matrix_vars = c("x", "y", "z"),
+  sample_size = 1000,    # Sample for efficiency
+  algorithm = "tree"     # Faster algorithm
+)
+```
+
+# Interpretation Guidelines
+
+## PPS Score Interpretation
+
+| PPS Score | Interpretation | Action |
+|-----------|----------------|--------|
+| **0.0** | No predictive power | No relationship |
+| **0.0 - 0.2** | Weak relationship | Investigate further |
+| **0.2 - 0.5** | Moderate relationship | Potentially useful |
+| **0.5 - 0.8** | Strong relationship | Very useful predictor |
+| **0.8 - 1.0** | Very strong to perfect | Excellent predictor |
+
+## When to Use PPS vs Correlation
+
+### Use PPS when:
+- Exploring **unknown relationships**
+- Working with **mixed data types**
+- Suspecting **non-linear patterns**
+- Need **asymmetric relationship detection**
+- Want **robust outlier handling**
+
+### Use Correlation when:
+- Specifically testing **linear relationships**
+- Need **fast computation**
+- Working with **continuous variables only**
+- Require **exact mathematical interpretation**
+
+## Clinical/Research Interpretation
+
+```{r interpretation_example}
+# Example interpretation workflow
+interpretation_data <- data.frame(
+  treatment_dose = c(0, 5, 10, 15, 20, 25, 30),
+  response_rate = c(10, 25, 45, 65, 75, 80, 82)
+)
+
+# Analyze dose-response relationship
+dose_response <- jpps(
+  data = interpretation_data,
+  analysis_type = "single",
+  target_var = "response_rate",
+  predictor_var = "treatment_dose",
+  algorithm = "tree"
+)
+
+dose_response
+```
+
+**Interpretation**: A high PPS score (>0.8) suggests treatment dose is a strong predictor of response rate, likely following a non-linear dose-response curve typical in pharmacology.
+
+# Best Practices
+
+## Data Preparation
+
+1. **Clean missing values** appropriately
+2. **Scale/normalize** when comparing vastly different ranges
+3. **Consider transformations** for heavily skewed data
+4. **Encode categorical variables** consistently
+
+## Analysis Strategy
+
+1. **Start with matrix analysis** for exploration
+2. **Use comparison analysis** to validate against correlation
+3. **Focus on predictors analysis** for modeling
+4. **Apply domain knowledge** to interpretation
+
+## Performance Tips
+
+1. **Use sampling** for datasets >5,000 rows
+2. **Choose appropriate algorithms** for data type
+3. **Adjust CV folds** based on sample size
+4. **Leverage caching** for repeated analyses
+
+# Common Pitfalls and Solutions
+
+## Pitfall 1: Overfitting with Small Samples
+
+**Problem**: High PPS scores with very small datasets
+
+**Solution**: Use more conservative CV folds and interpret cautiously
+
+```{r small_sample_solution}
+# Small sample - use conservative settings
+small_data <- data.frame(
+  x = 1:8,
+  y = rnorm(8)
+)
+
+conservative_result <- jpps(
+  data = small_data,
+  analysis_type = "single",
+  target_var = "y",
+  predictor_var = "x",
+  cv_folds = 3,  # Fewer folds for small data
+  algorithm = "tree"  # Simpler algorithm
+)
+```
+
+## Pitfall 2: Ignoring Data Types
+
+**Problem**: Treating categorical variables as numeric
+
+**Solution**: Ensure proper factor encoding
+
+```{r data_types_solution}
+# Correct categorical encoding
+corrected_data <- data.frame(
+  category = factor(c("A", "B", "C", "A", "B", "C")),  # Proper factor
+  outcome = c(10, 20, 30, 12, 22, 28)
+)
+
+correct_result <- jpps(
+  data = corrected_data,
+  analysis_type = "single",
+  target_var = "outcome",
+  predictor_var = "category"
+)
+```
+
+## Pitfall 3: Misinterpreting Causation
+
+**Problem**: Assuming high PPS implies causation
+
+**Solution**: Remember PPS shows **predictive power**, not **causation**
+
+# Conclusion
+
+The `jpps()` function provides a powerful, modern approach to relationship detection that goes beyond traditional correlation analysis. Key advantages include:
+
+✅ **Detects non-linear relationships**  
+✅ **Works with mixed data types**  
+✅ **Provides asymmetric insights**  
+✅ **Uses robust machine learning**  
+✅ **Includes performance optimizations**  
+✅ **Offers comprehensive visualization**  
+
+## Next Steps
+
+1. **Explore your data** with matrix analysis
+2. **Compare with correlation** to identify missed relationships  
+3. **Focus on high-PPS predictors** for modeling
+4. **Validate findings** with domain knowledge
+5. **Use for feature selection** in machine learning pipelines
+
+Remember: PPS is a **"quick and dirty"** exploration tool. Use it to guide more detailed analysis rather than as a final answer.
+
+---
+
+*For more information about ClinicoPath functions, visit our documentation or explore other vignettes in this series.*

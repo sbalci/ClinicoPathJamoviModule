@@ -51,10 +51,42 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$singleTestTable)}
 }
 \description{
-Function for Screening Test Probability Calculator.
+Calculates positive and negative predictive values for screening and
+diagnostic tests
+using Bayes' theorem. Demonstrates how disease probability changes with
+sequential
+testing and provides Fagan nomograms for clinical decision-making.
+}
+\details{
+This calculator is particularly useful for:
+• Understanding screening test performance in different prevalence settings
+• Sequential testing scenarios (confirmatory testing)
+• Teaching Bayesian probability concepts in medical decision-making
+• Evaluating diagnostic test chains in clinical workflows
 }
 \examples{
-\donttest{
-# example will be added
-}
+# COVID-19 rapid test in community screening (low prevalence)
+# Sensitivity: 85\\%, Specificity: 95\\%, Prevalence: 2\\%
+data(screening_examples)
+covid_community <- screening_examples[1, ]
+
+# Mammography screening in women aged 50-69
+# Demonstrates low PPV due to low cancer prevalence
+mammo_data <- screening_examples[screening_examples$scenario == "Mammography Screening", ]
+
+# Sequential testing example: HIV screening followed by confirmatory test
+# Shows how probability increases dramatically with confirmatory testing
+hiv_screening <- screening_examples[screening_examples$scenario == "HIV Testing", ]
+
+# Prevalence effect demonstration
+# Shows how identical test performs differently at various prevalence levels
+data(prevalence_demo)
+
+# Load example datasets for realistic clinical scenarios
+data(screening_examples)  # 15 clinical scenarios across specialties
+data(prevalence_demo)     # Prevalence effect demonstration
+data(performance_demo)    # Test performance comparisons
+data(sequential_demo)     # Sequential testing examples
+data(common_tests)        # Reference test characteristics
+
 }
