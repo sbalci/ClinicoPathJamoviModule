@@ -672,4 +672,13 @@
         `issue`=2, 
         `pages`="461-469", 
         `doi`="10.1007/s12253-017-0335-y", 
-        `url`="https://pubmed.ncbi.nlm.nih.gov/29264761/"))
+        `url`="https://pubmed.ncbi.nlm.nih.gov/29264761/"), 
+    `ggoncoplot`=list(
+        `authors`=list(
+            list(
+                `name`="Sam El-Kamand", 
+                `url`="https://github.com/selkamand/ggoncoplot")), 
+        `title`="ggoncoplot: Create Oncoplots with ggplot2", 
+        `publisher`="GitHub", 
+        `url`="https://github.com/selkamand/ggoncoplot", 
+        `version`=""))

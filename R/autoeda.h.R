@@ -15,6 +15,7 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pca_components = 5,
             plot_theme = "clinical",
             output_format = "combined",
+            eda_engine = "dataexplorer",
             advanced_options = FALSE,
             categorical_limit = 15,
             generate_report = FALSE, ...) {
@@ -45,7 +46,11 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "correlation",
                     "pca",
                     "target",
-                    "comprehensive"),
+                    "comprehensive",
+                    "ggeda_overview",
+                    "ggeda_distributions",
+                    "ggeda_correlation",
+                    "ggeda_biomarker"),
                 default="overview")
             private$..target_var <- jmvcore::OptionVariable$new(
                 "target_var",
@@ -98,6 +103,14 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tables",
                     "combined"),
                 default="combined")
+            private$..eda_engine <- jmvcore::OptionList$new(
+                "eda_engine",
+                eda_engine,
+                options=list(
+                    "dataexplorer",
+                    "ggeda",
+                    "hybrid"),
+                default="dataexplorer")
             private$..advanced_options <- jmvcore::OptionBool$new(
                 "advanced_options",
                 advanced_options,
@@ -122,6 +135,7 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pca_components)
             self$.addOption(private$..plot_theme)
             self$.addOption(private$..output_format)
+            self$.addOption(private$..eda_engine)
             self$.addOption(private$..advanced_options)
             self$.addOption(private$..categorical_limit)
             self$.addOption(private$..generate_report)
@@ -136,6 +150,7 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pca_components = function() private$..pca_components$value,
         plot_theme = function() private$..plot_theme$value,
         output_format = function() private$..output_format$value,
+        eda_engine = function() private$..eda_engine$value,
         advanced_options = function() private$..advanced_options$value,
         categorical_limit = function() private$..categorical_limit$value,
         generate_report = function() private$..generate_report$value),
@@ -149,6 +164,7 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pca_components = NA,
         ..plot_theme = NA,
         ..output_format = NA,
+        ..eda_engine = NA,
         ..advanced_options = NA,
         ..categorical_limit = NA,
         ..generate_report = NA)
@@ -272,8 +288,10 @@ autoedaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis.
 #' @param plot_theme Visual theme for automated plots.
 #' @param output_format Format for the automated EDA output.
-#' @param advanced_options Enable advanced DataExplorer features and detailed
-#'   analysis.
+#' @param eda_engine Choose the exploratory data analysis engine. DataExplorer
+#'   provides comprehensive automated reporting. ggEDA provides enhanced
+#'   visualizations for clinical research.
+#' @param advanced_options Enable advanced features and detailed analysis.
 #' @param categorical_limit Maximum number of levels for categorical variables
 #'   to include in analysis.
 #' @param generate_report Generate a comprehensive automated EDA report with
@@ -304,6 +322,7 @@ autoeda <- function(
     pca_components = 5,
     plot_theme = "clinical",
     output_format = "combined",
+    eda_engine = "dataexplorer",
     advanced_options = FALSE,
     categorical_limit = 15,
     generate_report = FALSE) {
@@ -330,6 +349,7 @@ autoeda <- function(
         pca_components = pca_components,
         plot_theme = plot_theme,
         output_format = output_format,
+        eda_engine = eda_engine,
         advanced_options = advanced_options,
         categorical_limit = categorical_limit,
         generate_report = generate_report)

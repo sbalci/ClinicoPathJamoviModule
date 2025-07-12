@@ -70,6 +70,11 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: eda_engine
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: categorical_limit
         format: number

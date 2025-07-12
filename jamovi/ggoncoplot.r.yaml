@@ -126,13 +126,6 @@ items:
           type: text
 
 refs:
-    ggoncoplot:
-        authors:
-            - name: Sam El-Kamand
-              url: https://github.com/selkamand/ggoncoplot
-        title: 'ggoncoplot: Create Oncoplots with ggplot2'
-        publisher: GitHub
-        url: https://github.com/selkamand/ggoncoplot
-        version: ''
+  - ggoncoplot
 
 ...

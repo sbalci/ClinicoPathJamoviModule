@@ -4,7 +4,7 @@ jus: '3.0'
 compilerMode: tame
 children:
   - type: VariableSupplier
-    suggested: 
+    suggested:
       - continuous
       - nominal
       - ordinal
@@ -39,7 +39,6 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
   - type: LayoutBox
     margin: large
     stretchFactor: 0
@@ -48,10 +47,11 @@ children:
         label: Segmented Total Bar Charts
         children:
           - type: Label
-            label: "Create 100% stacked bar charts showing proportional composition within categories"
+            label: >-
+              Create 100% stacked bar charts showing proportional composition
+              within categories
             margin: small
             style: list-inline
-
   - type: CollapseBox
     label: Chart Options
     collapsed: false
@@ -68,7 +68,6 @@ children:
             name: orientation
           - type: ComboBox
             name: sort_categories
-
   - type: CollapseBox
     label: Labels and Percentages
     collapsed: false
@@ -87,25 +86,13 @@ children:
           - type: TextBox
             name: label_threshold
             format: number
-            suffix: "%"
-
-  - type: CollapseBox
-    label: Titles and Labels
-    collapsed: true
-    stretchFactor: 0
+            suffix: '%'
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: plot_title
-          - type: TextBox
-            name: x_title
-          - type: TextBox
-            name: y_title
-          - type: TextBox
-            name: legend_title
-
+      - type: TextBox
+        name: plot_title
+        format: string
   - type: CollapseBox
     label: Layout and Styling
     collapsed: true
@@ -119,13 +106,18 @@ children:
           - type: TextBox
             name: bar_width
             format: number
-            suffix: ""
+            suffix: ''
           - type: CheckBox
             name: add_outline
           - type: ComboBox
             name: outline_color
             enable: (add_outline)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: x_title
+        format: string
   - type: CollapseBox
     label: Plot Dimensions
     collapsed: true
@@ -137,10 +129,22 @@ children:
           - type: TextBox
             name: plot_width
             format: number
-            suffix: " inches"
+            suffix: ' inches'
           - type: TextBox
             name: plot_height
             format: number
-            suffix: " inches"
+            suffix: ' inches'
           - type: CheckBox
             name: export_ready
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: y_title
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: legend_title
+        format: string

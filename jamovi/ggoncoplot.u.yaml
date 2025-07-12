@@ -1,5 +1,5 @@
-name: ggoncoplot
 title: Genomic Landscape Visualization
+name: ggoncoplot
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -11,75 +11,78 @@ children:
       - type: TargetLayoutBox
         label: Sample ID Variable
         children:
-          - type: VariablesTargetList
+          - type: VariablesListBox
             name: sampleVar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
         label: Gene Variables
         children:
-          - type: VariablesTargetList
+          - type: VariablesListBox
             name: geneVars
             isTarget: true
-            height: large
       - type: TargetLayoutBox
-        label: Clinical Variables (Optional)
+        label: Clinical Variables
         children:
-          - type: VariablesTargetList
+          - type: VariablesListBox
             name: clinicalVars
             isTarget: true
-            height: medium
-
   - type: LayoutBox
     margin: large
-    stretchFactor: 1
     children:
-      - type: Label
-        label: Plot Configuration
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: plotType
-              - type: TextBox
-                name: maxGenes
-                format: number
-              - type: TextBox
-                name: maxSamples
-                format: number
-              - type: ComboBox
-                name: sortBy
-              - type: ComboBox
-                name: colorScheme
-
-      - type: Label
-        label: Display Options
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showMutationLoad
-              - type: CheckBox
-                name: showGeneFreq
-              - type: CheckBox
-                name: showClinicalAnnotation
-              - type: CheckBox
-                name: showLegend
-
-      - type: Label
-        label: Plot Appearance
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: plotWidth
-                format: number
-              - type: TextBox
-                name: plotHeight
-                format: number
-              - type: TextBox
-                name: fontSize
-                format: number
+      - type: ComboBox
+        name: plotType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: maxGenes
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: maxSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sortBy
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: colorScheme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showMutationLoad
+      - type: CheckBox
+        name: showGeneFreq
+      - type: CheckBox
+        name: showClinicalAnnotation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plotWidth
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plotHeight
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fontSize
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showLegend

@@ -1433,9 +1433,16 @@ analyses:
     ns: ClinicoPath
     menuGroup: meddecideD
     menuTitle: Positive Predictive Value
-    menuSubgroup: Drafts
+    menuSubgroup: Research Design
     ribbon: analyses
     category: analyses
+    menuSubtitle: PPV and FDR for research findings
+    description: >-
+      Calculates the Positive Predictive Value (PPV) and False Discovery Rate
+      (FDR) for research findings based on study characteristics. This tool
+      helps researchers understand the probability that their significant
+      findings are actually true, considering factors like prior probability,
+      statistical power, and research biases.
   - title: ROC Curve Analysis
     name: roc
     ns: ClinicoPath
@@ -1609,10 +1616,13 @@ analyses:
     menuSubgroup: ClinicoPath Advanced Plots
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
     description: >
-      Create segmented total bar charts (100% stacked bars) that show proportional 
-      breakdowns within categories. Perfect for displaying composition data where 
-      each bar represents 100% and segments show relative proportions. Ideal for 
-      survey responses, patient demographics, market composition analysis.
+      Create segmented total bar charts (100% stacked bars) that show
+      proportional 
+
+      breakdowns within categories. Perfect for displaying composition data
+      where 
+
+      each bar represents 100% and segments show relative proportions.
     ribbon: analyses
     category: analyses
   - title: Economist-Style Distribution Plots

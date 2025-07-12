@@ -7,7 +7,7 @@
 parallelplot(
   data,
   vars,
-  group,
+  group = NULL,
   scaling = "std",
   alpha = 0.7,
   showMissing = FALSE,

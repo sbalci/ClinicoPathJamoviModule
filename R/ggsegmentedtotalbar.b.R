@@ -20,7 +20,6 @@
 #' @importFrom dplyr group_by summarise mutate arrange count ungroup
 #' @importFrom scales percent
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom viridis viridis scale_fill_viridis_d
 #' @importFrom stringr str_to_title
 #' @importFrom rlang sym
 #' @export

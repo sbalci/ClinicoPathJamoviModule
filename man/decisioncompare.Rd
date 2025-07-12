@@ -20,6 +20,7 @@ decisioncompare(
   fnote = FALSE,
   ci = FALSE,
   plot = FALSE,
+  radarplot = FALSE,
   statComp = FALSE
 )
 }
@@ -56,6 +57,8 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 
 \item{plot}{.}
 
+\item{radarplot}{.}
+
 \item{statComp}{Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).}
 }
@@ -74,6 +77,7 @@ A results object containing:
 \code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

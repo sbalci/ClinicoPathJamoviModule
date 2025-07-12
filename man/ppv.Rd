@@ -7,13 +7,21 @@
 ppv(percTrue = 50, alpha = 0.05, power = 0.8, percHack = 0)
 }
 \arguments{
-\item{percTrue}{.}
+\item{percTrue}{The pre-study probability that the tested relationships are
+true. In exploratory research fields, this may be 10\\% or lower. In
+confirmatory research with strong theoretical basis, it may be higher.}
 
-\item{alpha}{.}
+\item{alpha}{The significance level (Type I error rate) used in the
+studies. Standard value is 0.05, but may be lower for multiple testing
+situations.}
 
-\item{power}{.}
+\item{power}{Statistical power of the studies to detect true effects.
+Well-designed studies typically have 80\\% power or higher. Many published
+studies have much lower actual power.}
 
-\item{percHack}{.}
+\item{percHack}{Percentage of studies with questionable research practices
+(p-hacking, selective reporting, data dredging). This represents bias in
+the research process that increases false positive rates.}
 }
 \value{
 A results object containing:
@@ -30,5 +38,19 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$confusion)}
 }
 \description{
-Positive Predictive Value
+Calculates the Positive Predictive Value (PPV) and False Discovery Rate
+(FDR) for research findings based on study characteristics. This tool helps
+researchers understand the probability that their significant findings are
+actually true, considering factors like prior probability, statistical
+power, and research biases.
+}
+\examples{
+# Calculate PPV for a typical medical research scenario
+ppv(
+    percTrue = 10,    # 10\\% of tested hypotheses are true
+    alpha = 0.05,     # 5\\% significance level
+    power = 0.80,     # 80\\% power
+    percHack = 30     # 30\\% of studies have some bias
+)
+
 }
