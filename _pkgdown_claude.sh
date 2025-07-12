@@ -20,6 +20,6 @@ Rscript -e 'tryCatch(jmvtools::prepare(), error = function(e) cat("ERROR:", cond
 Rscript -e 'tryCatch(devtools::document(), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude
 
 RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64" \
-Rscript -e 'tryCatch({jmvtools::prepare(); devtools::document(); jmvtools::prepare(); devtools::document(); devtools::install(quick = TRUE, upgrade = FALSE); pkgdown::build_articles()}, error = function(e) cat("ERROR:", conditionMessage(e), "\n"))'
+Rscript -e 'tryCatch({jmvtools::prepare(); devtools::document(); jmvtools::prepare(); devtools::document(); devtools::install(quick = TRUE, upgrade = FALSE); pkgdown::build_articles()}, error = function(e) cat("ERROR:", conditionMessage(e), "\n"))'  | claude
 
 
