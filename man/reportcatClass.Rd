@@ -4,12 +4,39 @@
 \alias{reportcatClass}
 \title{Summary of Categorical Variables}
 \value{
-Text
+A results object containing HTML-formatted text summaries and visual tables
 }
 \description{
-Summary of Categorical Variables
+Generates a comprehensive summary of categorical variables including
+frequency counts, percentages, missing value information, and optional visual
+summaries. Supports multiple output formats and sorting options for enhanced
+data exploration.
+}
+\examples{
+\donttest{
+# Example 1: Basic categorical summary
+data <- data.frame(
+  treatment = factor(c("A", "B", "A", "C", "B", "A")),
+  grade = factor(c("High", "Low", "Medium", "High", "Low", "Medium"))
+)
+result <- reportcat(data = data, vars = c("treatment", "grade"))
 
-Summary of Categorical Variables
+# Example 2: Enhanced summary with cumulative percentages  
+result_enhanced <- reportcat(
+  data = data, 
+  vars = "treatment",
+  sumvar_style = TRUE,
+  show_proportions = TRUE
+)
+
+# Example 3: Sort categories by frequency
+result_sorted <- reportcat(
+  data = data,
+  vars = "grade", 
+  sort_by_frequency = TRUE
+)
+}
+
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::reportcatBase} -> \code{reportcatClass}

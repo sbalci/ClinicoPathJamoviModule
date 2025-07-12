@@ -1,0 +1,564 @@
+---
+title: "Comprehensive Guide to Sankey & Alluvial Diagrams with jggsankeyfier"
+author: "ClinicoPath Package"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup}
+include: false
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  dpi = 300,
+  fig.retina = 2
+)
+
+# Load required libraries
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+```
+
+# Sankey & Alluvial Diagrams with jggsankeyfier
+
+## Overview
+
+The `jggsankeyfier` function creates flow diagrams that visualize how quantities flow between different categories over time or through different stages. This guide covers three main diagram types:
+
+- **Sankey Diagrams**: Visualize flows between source and target nodes with thickness proportional to flow magnitude
+- **Alluvial Diagrams**: Show how categorical variables change across multiple dimensions or time points  
+- **Parallel Sets**: Alternative representation using straight lines instead of curves
+
+## Understanding Flow Diagrams
+
+### When to Use Each Type
+
+**Sankey Diagrams** are ideal for:
+- Budget allocation and expenditure flows
+- Energy consumption patterns
+- Material flows in manufacturing
+- Website traffic patterns
+- Patient referral pathways
+
+**Alluvial Diagrams** excel at showing:
+- Treatment progression through multiple stages
+- Educational pathways and outcomes
+- Customer journey mapping
+- Survey response changes over time
+- Multi-step process optimization
+
+**Parallel Sets** are useful for:
+- Categorical data relationships
+- Survey response patterns
+- Classification hierarchies
+- Decision tree visualizations
+
+## Basic Usage Examples
+
+### Simple Source-Target Flow
+
+```{r simple-sankey}
+# Load test data
+data("simple_flow_data")
+
+# Basic sankey diagram
+jggsankeyfier(
+  data = simple_flow_data,
+  value_var = "flow_amount",
+  source_var = "from_node", 
+  target_var = "to_node",
+  diagram_type = "sankey",
+  plot_title = "Simple Flow Diagram"
+)
+```
+
+### Multi-Level Alluvial Diagram
+
+```{r multi-level-alluvial}
+# Load complex data
+data("complex_alluvial_data")
+
+# Multi-level alluvial diagram
+jggsankeyfier(
+  data = complex_alluvial_data,
+  value_var = "revenue",
+  node_vars = c("level_1", "level_2", "level_3", "level_4"),
+  diagram_type = "alluvial",
+  plot_title = "Multi-Level Revenue Flow"
+)
+```
+
+## Clinical Research Applications
+
+### Treatment Pathway Analysis
+
+```{r treatment-pathways}
+# Load treatment pathway data
+data("treatment_pathways_data")
+
+# Visualize treatment progression
+jggsankeyfier(
+  data = treatment_pathways_data,
+  value_var = "patient_count",
+  node_vars = c("initial_diagnosis", "first_treatment", "response", "final_outcome"),
+  grouping_var = "age_group",
+  diagram_type = "alluvial",
+  color_palette = "viridis",
+  plot_title = "Cancer Treatment Pathways",
+  plot_subtitle = "Patient flow through treatment stages",
+  show_statistics = TRUE,
+  show_interpretation = TRUE
+)
+```
+
+### Patient Outcome Flows
+
+```{r patient-outcomes}
+# Create outcome-focused view
+jggsankeyfier(
+  data = treatment_pathways_data,
+  value_var = "patient_count", 
+  source_var = "response",
+  target_var = "final_outcome",
+  grouping_var = "age_group",
+  diagram_type = "sankey",
+  color_palette = "set3",
+  plot_title = "Treatment Response to Final Outcome",
+  flow_direction = "left_right",
+  show_labels = TRUE,
+  show_values = TRUE
+)
+```
+
+## Business Process Analysis
+
+### Business Process Optimization
+
+```{r business-process}
+# Load business process data
+data("business_process_data")
+
+# Analyze process flows
+jggsankeyfier(
+  data = business_process_data,
+  value_var = "process_value",
+  node_vars = c("department_start", "process_step_1", "process_step_2", "final_outcome"),
+  grouping_var = "region",
+  time_var = "quarter", 
+  diagram_type = "alluvial",
+  color_palette = "plasma",
+  plot_title = "Business Process Value Flow",
+  plot_subtitle = "Quarterly process analysis by region",
+  sort_nodes = "by_value",
+  value_format = "rounded"
+)
+```
+
+### Sales Pipeline Analysis
+
+```{r sales-pipeline}
+# Focus on successful outcomes
+successful_processes <- business_process_data %>%
+  filter(final_outcome %in% c("Closed Won", "On Hold"))
+
+jggsankeyfier(
+  data = successful_processes,
+  value_var = "process_value",
+  source_var = "department_start",
+  target_var = "final_outcome", 
+  grouping_var = "quarter",
+  diagram_type = "sankey",
+  color_palette = "dark2",
+  plot_title = "Successful Sales Pipeline",
+  edge_alpha = 0.8,
+  node_width = 0.7,
+  show_values = TRUE,
+  value_format = "rounded"
+)
+```
+
+## Educational Data Analysis
+
+### Educational Pathways
+
+```{r education-pathways}
+# Load education data
+data("education_pathways_data")
+
+# Analyze educational progression
+jggsankeyfier(
+  data = education_pathways_data,
+  value_var = "student_count",
+  node_vars = c("high_school_type", "college_admission", "major_category", "graduation_status"),
+  grouping_var = "socioeconomic_status",
+  diagram_type = "alluvial",
+  color_palette = "pastel1",
+  plot_title = "Educational Pathway Analysis",
+  plot_subtitle = "Student progression through education system",
+  show_interpretation = TRUE,
+  output_format = "both"
+)
+```
+
+### College Admission Outcomes
+
+```{r college-outcomes}
+# Focus on college admission patterns
+jggsankeyfier(
+  data = education_pathways_data,
+  value_var = "student_count",
+  source_var = "high_school_type",
+  target_var = "college_admission",
+  grouping_var = "socioeconomic_status",
+  diagram_type = "parallel_sets",
+  color_palette = "viridis",
+  plot_title = "High School to College Transitions",
+  flow_direction = "left_right",
+  show_labels = TRUE,
+  label_size = 10
+)
+```
+
+## Technology Migration Analysis
+
+### System Migration Flows
+
+```{r tech-migration}
+# Load technology migration data
+data("tech_migration_data")
+
+# Analyze migration patterns
+jggsankeyfier(
+  data = tech_migration_data,
+  value_var = "migration_cost",
+  node_vars = c("legacy_system", "migration_phase_1", "migration_phase_2", "implementation"),
+  grouping_var = "business_unit",
+  diagram_type = "sankey",
+  color_palette = "set3",
+  plot_title = "Technology Migration Analysis",
+  plot_subtitle = "Cost flow through migration phases",
+  sort_nodes = "by_value",
+  value_format = "rounded",
+  show_statistics = TRUE
+)
+```
+
+## Advanced Customization
+
+### Custom Color Schemes and Styling
+
+```{r custom-styling}
+# Advanced styling example
+jggsankeyfier(
+  data = sankey_simple_data,
+  value_var = "flow_value",
+  source_var = "source",
+  target_var = "target",
+  grouping_var = "group",
+  diagram_type = "alluvial",
+  color_palette = "viridis",
+  node_width = 0.8,
+  edge_alpha = 0.7,
+  show_labels = TRUE,
+  label_size = 12,
+  show_values = TRUE,
+  value_format = "percent",
+  plot_title = "Custom Styled Flow Diagram",
+  plot_subtitle = "Demonstrating advanced styling options",
+  theme_style = "minimal",
+  flow_direction = "left_right"
+)
+```
+
+### Different Flow Directions
+
+```{r flow-directions}
+# Demonstrate different flow directions
+directions <- c("left_right", "top_bottom", "right_left", "bottom_top")
+
+for (direction in directions[1:2]) {  # Show first two for brevity
+  print(
+    jggsankeyfier(
+      data = simple_flow_data,
+      value_var = "flow_amount",
+      source_var = "from_node",
+      target_var = "to_node",
+      diagram_type = "sankey",
+      flow_direction = direction,
+      plot_title = paste("Flow Direction:", gsub("_", " to ", direction))
+    )
+  )
+}
+```
+
+## Data Preparation Guidelines
+
+### Source-Target Format
+
+For simple flow diagrams, your data should contain:
+
+```{r data-format-example}
+# Example source-target format
+example_data <- data.frame(
+  source = c("A", "A", "B", "B", "C"),
+  target = c("X", "Y", "X", "Z", "Y"),
+  flow_value = c(50, 30, 25, 40, 35),
+  category = c("Type1", "Type2", "Type1", "Type2", "Type1")
+)
+
+print(example_data)
+```
+
+### Multi-Node Format
+
+For alluvial diagrams with multiple stages:
+
+```{r multi-node-format}
+# Example multi-node format  
+example_alluvial <- data.frame(
+  stage_1 = c("Start_A", "Start_B", "Start_A", "Start_C"),
+  stage_2 = c("Mid_X", "Mid_Y", "Mid_Z", "Mid_X"), 
+  stage_3 = c("End_1", "End_2", "End_1", "End_3"),
+  value = c(100, 75, 50, 25),
+  group = c("Group1", "Group2", "Group1", "Group3")
+)
+
+print(example_alluvial)
+```
+
+## Interpreting Flow Diagrams
+
+### Key Elements to Analyze
+
+1. **Flow Thickness**: Proportional to the magnitude of flow between nodes
+2. **Node Size**: Represents total flow through that node
+3. **Color Coding**: Groups flows by categories or highlights patterns
+4. **Flow Convergence**: Multiple sources feeding into single targets
+5. **Flow Divergence**: Single sources splitting into multiple targets
+
+### Statistical Insights
+
+The function provides automatic statistics including:
+
+- Total flow volume
+- Mean and median flow sizes
+- Number of distinct flows
+- Maximum and minimum flows
+- Flow distribution patterns
+
+```{r flow-statistics}
+# Example with statistics enabled
+jggsankeyfier(
+  data = simple_flow_data,
+  value_var = "flow_amount",
+  source_var = "from_node",
+  target_var = "to_node",
+  diagram_type = "sankey",
+  show_statistics = TRUE,
+  show_interpretation = TRUE,
+  output_format = "both"
+)
+```
+
+## Common Use Cases in Healthcare
+
+### Clinical Decision Pathways
+
+```{r clinical-decisions}
+# Create synthetic clinical decision data
+clinical_decisions <- data.frame(
+  presentation = rep(c("Chest Pain", "Shortness of Breath", "Fatigue"), each = 50),
+  initial_test = sample(c("ECG", "Chest X-ray", "Blood Work", "Echo"), 150, replace = TRUE),
+  diagnosis = sample(c("Cardiac", "Pulmonary", "Other", "Normal"), 150, replace = TRUE),
+  treatment = sample(c("Medication", "Surgery", "Monitoring", "Discharge"), 150, replace = TRUE),
+  patient_count = 1
+)
+
+# Aggregate data
+clinical_summary <- clinical_decisions %>%
+  group_by(presentation, initial_test, diagnosis, treatment) %>%
+  summarise(patient_count = sum(patient_count), .groups = "drop")
+
+jggsankeyfier(
+  data = clinical_summary,
+  value_var = "patient_count",
+  node_vars = c("presentation", "initial_test", "diagnosis", "treatment"),
+  diagram_type = "alluvial",
+  color_palette = "viridis",
+  plot_title = "Clinical Decision Pathway Analysis",
+  plot_subtitle = "Patient flow through diagnostic and treatment stages"
+)
+```
+
+### Hospital Department Transfers
+
+```{r department-transfers}
+# Create hospital transfer data
+hospital_transfers <- data.frame(
+  admission_dept = sample(c("Emergency", "Cardiology", "Surgery", "Medicine"), 200, replace = TRUE),
+  transfer_dept = sample(c("ICU", "Step-down", "General Ward", "Discharge"), 200, replace = TRUE),
+  los_days = sample(1:14, 200, replace = TRUE),
+  severity = sample(c("Low", "Medium", "High"), 200, replace = TRUE, prob = c(0.5, 0.3, 0.2))
+)
+
+# Aggregate by severity
+transfer_summary <- hospital_transfers %>%
+  group_by(admission_dept, transfer_dept, severity) %>%
+  summarise(patient_count = n(), avg_los = mean(los_days), .groups = "drop")
+
+jggsankeyfier(
+  data = transfer_summary,
+  value_var = "patient_count",
+  source_var = "admission_dept",
+  target_var = "transfer_dept",
+  grouping_var = "severity",
+  diagram_type = "sankey",
+  color_palette = "plasma",
+  plot_title = "Hospital Department Transfers",
+  plot_subtitle = "Patient flow between departments by severity",
+  show_values = TRUE,
+  show_interpretation = TRUE
+)
+```
+
+## Performance Optimization
+
+### Large Dataset Handling
+
+For large datasets (>10,000 flows), consider:
+
+1. **Data Aggregation**: Pre-aggregate similar flows
+2. **Filtering**: Focus on significant flows only
+3. **Sampling**: Use representative subsets for exploration
+
+```{r large-data-optimization}
+# Example of data aggregation for performance
+large_dataset_simulation <- data.frame(
+  source = sample(paste0("Source_", 1:20), 5000, replace = TRUE),
+  target = sample(paste0("Target_", 1:20), 5000, replace = TRUE),
+  value = sample(1:100, 5000, replace = TRUE)
+)
+
+# Aggregate to reduce complexity
+aggregated_data <- large_dataset_simulation %>%
+  group_by(source, target) %>%
+  summarise(total_value = sum(value), flow_count = n(), .groups = "drop") %>%
+  filter(total_value >= quantile(total_value, 0.75))  # Focus on top 25% of flows
+
+jggsankeyfier(
+  data = aggregated_data,
+  value_var = "total_value", 
+  source_var = "source",
+  target_var = "target",
+  diagram_type = "sankey",
+  plot_title = "Optimized Large Dataset Visualization",
+  plot_subtitle = "Showing top 25% of flows by value"
+)
+```
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+**Issue**: "No flows to display"
+- **Solution**: Check that value variable contains positive numbers
+- **Solution**: Verify source/target or node variables are properly specified
+
+**Issue**: "Overlapping labels"
+- **Solution**: Adjust `label_size` parameter
+- **Solution**: Use `show_labels = FALSE` for complex diagrams
+- **Solution**: Try different `flow_direction` settings
+
+**Issue**: "Too many categories"
+- **Solution**: Aggregate low-frequency categories into "Other"
+- **Solution**: Filter to show only significant flows
+- **Solution**: Use multi-level grouping
+
+**Issue**: "Memory issues with large data"
+- **Solution**: Pre-aggregate data before visualization
+- **Solution**: Sample representative subset
+- **Solution**: Filter to top N flows by value
+
+### Data Quality Checks
+
+```{r data-quality}
+# Function to check data quality for flow diagrams
+check_flow_data <- function(data, value_var, source_var = NULL, target_var = NULL, node_vars = NULL) {
+  
+  cat("Data Quality Assessment for Flow Diagram\n")
+  cat("==========================================\n\n")
+  
+  # Basic data info
+  cat("Dataset dimensions:", nrow(data), "rows,", ncol(data), "columns\n\n")
+  
+  # Check value variable
+  if (!is.null(value_var)) {
+    values <- data[[value_var]]
+    cat("Value Variable (", value_var, "):\n")
+    cat("  - Non-missing values:", sum(!is.na(values)), "/", length(values), "\n")
+    cat("  - Range:", min(values, na.rm = TRUE), "to", max(values, na.rm = TRUE), "\n")
+    cat("  - Zero values:", sum(values == 0, na.rm = TRUE), "\n")
+    cat("  - Negative values:", sum(values < 0, na.rm = TRUE), "\n\n")
+  }
+  
+  # Check source-target format
+  if (!is.null(source_var) && !is.null(target_var)) {
+    cat("Source-Target Format:\n")
+    cat("  - Unique sources:", length(unique(data[[source_var]])), "\n")
+    cat("  - Unique targets:", length(unique(data[[target_var]])), "\n")
+    cat("  - Total unique flows:", nrow(unique(data[c(source_var, target_var)])), "\n\n")
+  }
+  
+  # Check multi-node format
+  if (!is.null(node_vars)) {
+    cat("Multi-Node Format:\n")
+    for (var in node_vars) {
+      cat("  -", var, "unique values:", length(unique(data[[var]])), "\n")
+    }
+  }
+}
+
+# Example usage
+check_flow_data(
+  data = simple_flow_data,
+  value_var = "flow_amount",
+  source_var = "from_node", 
+  target_var = "to_node"
+)
+```
+
+## Best Practices
+
+### Design Principles
+
+1. **Clarity**: Keep diagrams simple and focused
+2. **Color Harmony**: Use consistent color schemes
+3. **Proportionality**: Ensure flow thickness accurately represents magnitude
+4. **Labeling**: Provide clear, concise labels
+5. **Context**: Include titles and subtitles for interpretation
+
+### Analytical Workflow
+
+1. **Data Exploration**: Start with summary statistics
+2. **Simple Visualization**: Begin with basic diagrams
+3. **Iterative Refinement**: Add complexity gradually
+4. **Validation**: Cross-check with source data
+5. **Interpretation**: Focus on key insights and patterns
+
+## Conclusion
+
+The `jggsankeyfier` function provides powerful capabilities for visualizing flow data across multiple domains. Whether analyzing clinical pathways, business processes, or educational outcomes, these diagrams offer intuitive ways to understand complex relationships and identify optimization opportunities.
+
+Key takeaways:
+
+- Choose diagram type based on data structure and analysis goals
+- Use appropriate aggregation for complex datasets  
+- Customize visual elements to enhance clarity
+- Validate visualizations against source data
+- Focus on actionable insights from flow patterns
+
+For additional examples and advanced techniques, explore the comprehensive test datasets included with the package.

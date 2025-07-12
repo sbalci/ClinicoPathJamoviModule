@@ -7,9 +7,9 @@
 grafify(
   data,
   vars,
-  groups,
-  blocks,
-  facet_var,
+  groups = NULL,
+  blocks = NULL,
+  facet_var = NULL,
   plot_type = "scatterbar",
   x_var,
   y_var,
@@ -27,8 +27,8 @@ grafify(
   stat_method = "anova_1way",
   posthoc_comparisons = FALSE,
   comparison_method = "pairwise",
-  befafter_shape_var,
-  befafter_id_var,
+  befafter_shape_var = NULL,
+  befafter_id_var = NULL,
   show_individual_points = TRUE,
   show_summary_stats = TRUE,
   show_model_diagnostics = FALSE,
@@ -40,7 +40,7 @@ grafify(
   y_label = "",
   legend_position = "right",
   experimental_design = "crd",
-  random_effects,
+  random_effects = NULL,
   alpha_level = 0.05
 )
 }

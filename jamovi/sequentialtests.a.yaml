@@ -8,13 +8,51 @@ version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: >
-        Function for Sequential Testing Analysis. Analyzes how diagnostic accuracy changes
-        when applying two tests in sequence (screening followed by confirmation).
+    main: |
+        Analyzes how diagnostic accuracy changes when applying two tests in sequence,
+        comparing three different testing strategies: serial positive (confirmation),
+        serial negative (exclusion), and parallel testing. Provides comprehensive
+        analysis including population flow, cost implications, and Fagan nomograms.
+        
+        This analysis is particularly useful for:
+        • Designing diagnostic protocols and clinical pathways
+        • Optimizing test sequencing for specific clinical contexts
+        • Understanding trade-offs between sensitivity and specificity
+        • Evaluating cost-effectiveness of different testing strategies
+        • Teaching sequential testing concepts and Bayesian probability
+        
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # example will be added
+            # COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
+            # Shows how serial positive strategy improves specificity
+            data(sequential_testing_examples)
+            covid_example <- sequential_testing_examples[
+              sequential_testing_examples$scenario == "COVID-19 Testing" & 
+              sequential_testing_examples$clinical_setting == "Community screening", ]
+            
+            # Cancer screening: Mammography followed by tissue biopsy
+            # Demonstrates cost-effective screening with definitive diagnosis
+            breast_cancer <- sequential_testing_examples[
+              sequential_testing_examples$scenario == "Breast Cancer Screening", ]
+            
+            # Emergency medicine: Parallel testing for rapid diagnosis
+            # Shows how parallel strategy maximizes sensitivity
+            emergency_example <- sequential_testing_examples[
+              sequential_testing_examples$scenario == "Myocardial Infarction Rule-out", ]
+            
+            # Strategy comparison across different prevalence settings
+            data(strategy_comparison)
+            
+            # Cost-effectiveness analysis for resource planning
+            data(cost_effectiveness_examples)
+            
+            # Load example datasets for realistic clinical scenarios
+            data(sequential_testing_examples)  # 15+ clinical scenarios across specialties
+            data(strategy_comparison)          # Strategy performance comparisons
+            data(cost_effectiveness_examples)  # Economic analysis examples
+            data(teaching_examples)            # Educational scenarios
+            data(common_test_combinations)     # Reference test characteristics
 
 options:
     # First Test (Screening Test) Parameters

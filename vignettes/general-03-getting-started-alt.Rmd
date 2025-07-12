@@ -2,17 +2,7 @@
 title: "General 02: Getting Started with Statistical Analysis for Pathologists"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    fig_width: 8
-    fig_height: 6
-vignette: >
-  %\VignetteIndexEntry{General 02: Getting Started with Statistical Analysis for Pathologists}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r, include = FALSE}
@@ -59,6 +49,7 @@ Download the `.jmo` file from [Releases](https://github.com/sbalci/ClinicoPathDe
 library(ClinicoPath)
 library(dplyr)    # For data manipulation
 library(ggplot2)  # For additional plotting
+library(tidyr)   # For data reshaping 
 ```
 
 ## Example Dataset
@@ -194,16 +185,20 @@ venn(
 
 ## Data Quality Assessment
 
-### Benford's Law Analysis
+### Missing Value Analysis
 
-Assess data quality using Benford's law - useful for detecting fabricated data:
+Check for missing values and data completeness:
 
 ```{r}
-# Analyze first digits of continuous measurements
-benford(
-  data = histopathology,
-  var = "MeasurementA"
-)
+# Check data completeness
+missing_summary <- histopathology %>%
+  summarise_all(~sum(is.na(.))) %>%
+  gather(variable, missing_count) %>%
+  mutate(missing_percent = round(missing_count / nrow(histopathology) * 100, 1)) %>%
+  filter(missing_count > 0) %>%
+  arrange(desc(missing_count))
+
+print(missing_summary)
 ```
 
 ### Variable Tree Summary

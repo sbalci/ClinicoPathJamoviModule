@@ -7,10 +7,10 @@
 jcomplexupset(
   data,
   set_vars,
-  value_var,
+  value_var = NULL,
   min_size = 0,
   max_degree = 4,
-  sort_by = "size",
+  sort_by = "cardinality",
   sort_order = "descending",
   keep_empty_groups = FALSE,
   set_size_show = TRUE,

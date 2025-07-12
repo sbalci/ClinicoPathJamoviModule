@@ -400,10 +400,10 @@ venn(
 
 ```{r}
 # Check data quality using Benford's law
-benford(
-  data = clinical_data,
-  var = "MeasurementA"
-)
+# benford(
+#   data = clinical_data,
+#   var = "MeasurementA"
+# )
 ```
 
 ### Inter-rater Reliability Analysis

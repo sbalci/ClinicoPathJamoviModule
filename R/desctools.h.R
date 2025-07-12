@@ -42,6 +42,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -50,6 +51,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..continuous_var <- jmvcore::OptionVariable$new(
                 "continuous_var",
                 continuous_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -75,6 +77,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..fitted_probs <- jmvcore::OptionVariable$new(
                 "fitted_probs",
                 fitted_probs,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -82,6 +85,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..observed_outcomes <- jmvcore::OptionVariable$new(
                 "observed_outcomes",
                 observed_outcomes,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -97,6 +101,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..normality_var <- jmvcore::OptionVariable$new(
                 "normality_var",
                 normality_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -108,6 +113,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cat_var1 <- jmvcore::OptionVariable$new(
                 "cat_var1",
                 cat_var1,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -116,6 +122,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cat_var2 <- jmvcore::OptionVariable$new(
                 "cat_var2",
                 cat_var2,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -124,6 +131,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..stratum_var <- jmvcore::OptionVariable$new(
                 "stratum_var",
                 stratum_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -132,6 +140,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..ordered_exposure <- jmvcore::OptionVariable$new(
                 "ordered_exposure",
                 ordered_exposure,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "continuous"),
@@ -141,6 +150,7 @@ desctoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..binary_outcome <- jmvcore::OptionVariable$new(
                 "binary_outcome",
                 binary_outcome,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -454,22 +464,22 @@ desctoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 desctools <- function(
     data,
     effect_size_analysis = FALSE,
-    group_var,
-    continuous_var,
+    group_var = NULL,
+    continuous_var = NULL,
     pooled_sd = TRUE,
     hedges_correction = FALSE,
     effect_ci_level = 0.95,
     goodness_of_fit = FALSE,
-    fitted_probs,
-    observed_outcomes,
+    fitted_probs = NULL,
+    observed_outcomes = NULL,
     hl_groups = 10,
-    normality_var,
+    normality_var = NULL,
     categorical_tests = FALSE,
-    cat_var1,
-    cat_var2,
-    stratum_var,
-    ordered_exposure,
-    binary_outcome,
+    cat_var1 = NULL,
+    cat_var2 = NULL,
+    stratum_var = NULL,
+    ordered_exposure = NULL,
+    binary_outcome = NULL,
     multiple_testing = "none",
     show_effect_sizes = TRUE,
     show_goodness_tests = TRUE,

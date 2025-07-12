@@ -13,21 +13,27 @@ reportcat(
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame containing the categorical variables
+to be analyzed.  The data frame should have at least one row and the
+specified variables should  exist in the dataset.}
 
-\item{vars}{Select the variables from your data frame that you wish to
-summarize. Only categorical variables (nominal, ordinal, or factors) are
-allowed.}
+\item{vars}{A character vector specifying the variable names to summarize.
+These variables  will be automatically converted to factors if they aren't
+already. Character,  numeric, and logical variables are all acceptable and
+will be treated as categorical.}
 
-\item{sumvar_style}{If TRUE, provides comprehensive categorical analysis
-similar to  sumvar package's tab1() function with enhanced frequency tables
-and percentage breakdowns.}
+\item{sumvar_style}{Logical (default: FALSE). If TRUE, provides
+comprehensive categorical analysis  similar to the sumvar package's tab1()
+function, including enhanced frequency  tables, percentage breakdowns, and
+cumulative statistics for each category.}
 
-\item{show_proportions}{If TRUE, shows proportions alongside counts in the
-summary.}
+\item{show_proportions}{Logical (default: TRUE). If TRUE, displays
+cumulative counts and percentages  alongside individual category statistics
+when using sumvar_style format.  Ignored when sumvar_style is FALSE.}
 
-\item{sort_by_frequency}{If TRUE, categories are sorted by frequency (most
-common first).}
+\item{sort_by_frequency}{Logical (default: FALSE). If TRUE, categories
+within each variable are sorted  by frequency (most common first) rather
+than alphabetically. This applies to  both output formats.}
 }
 \value{
 A results object containing:
@@ -38,18 +44,34 @@ A results object containing:
 }
 }
 \description{
-Generates a detailed summary of categorical variables including counts,
-percentages, and missing value information. The output is presented in both
-textual and visual formats, making it easy to interpret the distribution of
-your data.
+Generates a comprehensive summary of categorical variables including
+frequency counts,  percentages, missing value information, and optional
+visual summaries. Supports multiple  output formats and sorting options for
+enhanced data exploration. Automatically handles  edge cases like missing
+values, single categories, and variable conversion.
 }
 \examples{
 \donttest{
-# Example usage:
-# 1. Load your data into a data frame.
-# 2. Select the categorical variables to summarize.
-# 3. Run the reportcat module to view the summary.
-#
-# The module will produce a styled textual report along with a visual summary table.
+# Example 1: Basic categorical summary
+data <- data.frame(
+  treatment = factor(c("A", "B", "A", "C", "B", "A")),
+  grade = factor(c("High", "Low", "Medium", "High", "Low", "Medium"))
+)
+result <- reportcat(data = data, vars = c("treatment", "grade"))
+
+# Example 2: Enhanced summary with cumulative percentages
+result_enhanced <- reportcat(
+  data = data,
+  vars = "treatment",
+  sumvar_style = TRUE,
+  show_proportions = TRUE
+)
+
+# Example 3: Sort categories by frequency
+result_sorted <- reportcat(
+  data = data,
+  vars = "grade",
+  sort_by_frequency = TRUE
+)
 }
 }

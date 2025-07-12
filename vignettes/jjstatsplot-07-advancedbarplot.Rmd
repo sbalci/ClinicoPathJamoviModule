@@ -1,0 +1,658 @@
+---
+title: "Advanced Bar Charts - 7 Professional Approaches"
+description: "Comprehensive guide to creating professional bar charts with multiple visualization approaches, BBC styling, and GraphPad Prism integration."
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{Advanced Bar Charts - 7 Professional Approaches}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "vignettes/",
+  fig.width = 10,
+  fig.height = 6,
+  out.width = "100%",
+  dpi = 300
+)
+
+library(ClinicoPath)
+library(ggplot2)
+library(dplyr)
+```
+
+## Overview
+
+The `advancedbarplot` module provides **7 distinct professional approaches** to bar chart visualization, each optimized for different use cases in clinical research, data presentation, and publication. This comprehensive guide demonstrates all approaches with the histopathology dataset.
+
+### Key Features
+
+- **7 Chart Approaches**: From basic exploration to publication-ready designs
+- **Professional Styling**: BBC News and GraphPad Prism authentic themes
+- **Statistical Integration**: Built-in statistical tests and annotations
+- **26+ Color Palettes**: Including BBC colors and Prism palettes
+- **Interactive Options**: Plotly integration for web-based exploration
+- **Export Optimization**: Publication and presentation-ready outputs
+
+## Dataset Overview
+
+We'll use the comprehensive `histopathology` dataset throughout this guide:
+
+```{r data-overview}
+# Load the histopathology dataset
+data("histopathology")
+
+# Dataset structure
+str(histopathology)
+
+# Key variables for bar charts
+cat("Categorical variables suitable for X-axis:\n")
+cat("- Sex:", unique(histopathology$Sex), "\n")
+cat("- Race:", unique(histopathology$Race), "\n") 
+cat("- Group:", unique(histopathology$Group), "\n")
+cat("- Grade_Level:", unique(histopathology$Grade_Level), "\n")
+
+cat("\nNumeric variables suitable for Y-axis:\n")
+cat("- Age: range", range(histopathology$Age, na.rm = TRUE), "\n")
+cat("- Grade: range", range(histopathology$Grade, na.rm = TRUE), "\n")
+cat("- OverallTime: range", range(histopathology$OverallTime, na.rm = TRUE), "\n")
+```
+
+## Approach 1: Basic ggplot2
+
+**Use Case**: Data exploration, quick analysis, educational purposes
+
+**Strengths**: Fast rendering, straightforward implementation, highly customizable
+
+```{r approach-basic, eval=FALSE}
+# Basic ggplot2 approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Group",
+  y_var = "Age", 
+  chart_approach = "basic",
+  stat_type = "mean",
+  show_values = TRUE,
+  plot_title = "Mean Age by Treatment Group",
+  x_title = "Treatment Group",
+  y_title = "Mean Age (years)"
+)
+```
+
+### R Code Example for Basic Approach
+
+```{r basic-code, eval=TRUE}
+# Reproducible R code for basic approach
+library(ggplot2)
+library(dplyr)
+
+# Summarize data
+summary_data <- histopathology %>%
+  group_by(Group) %>%
+  summarise(
+    mean_age = mean(Age, na.rm = TRUE),
+    se = sd(Age, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+# Create basic plot
+basic_plot <- ggplot(summary_data, aes(x = Group, y = mean_age)) +
+  geom_col(width = 0.8, alpha = 0.9) +
+  geom_text(aes(label = round(mean_age, 1)), vjust = -0.5) +
+  theme_minimal() +
+  labs(
+    title = "Mean Age by Treatment Group - Basic Approach",
+    x = "Treatment Group",
+    y = "Mean Age (years)"
+  )
+
+print(basic_plot)
+```
+
+## Approach 2: Polished Presentation
+
+**Use Case**: Business presentations, stakeholder reports, dashboard displays
+
+**Strengths**: Professional appearance, enhanced readability, presentation-ready
+
+```{r approach-polished, eval=FALSE}
+# Polished presentation approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Grade_Level", 
+  y_var = "OverallTime",
+  fill_var = "Sex",
+  chart_approach = "polished",
+  stat_type = "mean",
+  color_palette = "clinical",
+  bar_position = "dodge",
+  show_values = TRUE,
+  value_format = "decimal1",
+  plot_title = "Overall Survival Time by Grade and Sex",
+  legend_position = "top"
+)
+```
+
+### R Code Example for Polished Approach
+
+```{r polished-code, eval=TRUE}
+# Polished presentation approach
+summary_data_grouped <- histopathology %>%
+  group_by(Grade_Level, Sex) %>%
+  summarise(
+    mean_time = mean(OverallTime, na.rm = TRUE),
+    se = sd(OverallTime, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+# Clinical color palette
+clinical_colors <- c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728")
+
+polished_plot <- ggplot(summary_data_grouped, aes(x = Grade_Level, y = mean_time, fill = Sex)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.8, alpha = 0.9) +
+  geom_text(
+    aes(label = sprintf("%.1f", mean_time)),
+    position = position_dodge(width = 0.8),
+    vjust = -0.5,
+    size = 3.5
+  ) +
+  scale_fill_manual(values = clinical_colors) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 10),
+    legend.position = "top"
+  ) +
+  labs(
+    title = "Overall Survival Time by Grade and Sex - Polished Approach",
+    x = "Grade Level",
+    y = "Mean Overall Time (months)",
+    fill = "Sex"
+  )
+
+print(polished_plot)
+```
+
+## Approach 3: Statistical Annotations
+
+**Use Case**: Research publications, clinical studies, comparative analysis
+
+**Strengths**: Built-in statistics, automated annotations, hypothesis testing
+
+```{r approach-statistical, eval=FALSE}
+# Statistical annotations approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Group",
+  y_var = "Grade",
+  chart_approach = "statistical", 
+  stat_type = "mean",
+  add_statistics = TRUE,
+  stat_method = "ttest",
+  error_bars = "se",
+  show_values = TRUE,
+  plot_title = "Mean Grade by Treatment Group with Statistical Test",
+  color_palette = "nature"
+)
+```
+
+### R Code Example for Statistical Approach
+
+```{r statistical-code, eval=TRUE}
+# Statistical approach with error bars
+summary_stats <- histopathology %>%
+  group_by(Group) %>%
+  summarise(
+    mean_grade = mean(Grade, na.rm = TRUE),
+    se = sd(Grade, na.rm = TRUE) / sqrt(n()),
+    sd = sd(Grade, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Perform t-test
+control_data <- histopathology$Grade[histopathology$Group == "Control"]
+treatment_data <- histopathology$Grade[histopathology$Group == "Treatment"]
+t_result <- t.test(control_data, treatment_data)
+
+statistical_plot <- ggplot(summary_stats, aes(x = Group, y = mean_grade)) +
+  geom_col(width = 0.8, alpha = 0.9, fill = "steelblue") +
+  geom_errorbar(
+    aes(ymin = mean_grade - se, ymax = mean_grade + se),
+    width = 0.2,
+    position = position_dodge(width = 0.8)
+  ) +
+  geom_text(aes(label = sprintf("%.2f", mean_grade)), vjust = -1.5) +
+  theme_minimal() +
+  labs(
+    title = paste0("Mean Grade by Treatment Group - Statistical Approach\n",
+                   "t(", round(t_result$parameter, 1), ") = ", round(t_result$statistic, 3),
+                   ", p = ", format.pval(t_result$p.value, digits = 3)),
+    x = "Treatment Group", 
+    y = "Mean Grade",
+    caption = paste0("Error bars represent standard error\n",
+                     "Mean difference: ", round(diff(t_result$estimate), 3))
+  )
+
+print(statistical_plot)
+```
+
+## Approach 4: Interactive Plotly
+
+**Use Case**: Web applications, interactive reports, data exploration tools
+
+**Strengths**: Interactive exploration, hover information, zoom and pan capabilities
+
+```{r approach-interactive, eval=FALSE}
+# Interactive plotly approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Race",
+  y_var = "MeasurementA", 
+  chart_approach = "interactive",
+  stat_type = "median",
+  color_palette = "viridis",
+  plot_title = "Median Measurement A by Race - Interactive",
+  show_values = TRUE
+)
+```
+
+### R Code Example for Interactive Approach
+
+```{r interactive-code, eval=TRUE}
+library(plotly)
+
+# Prepare data for interactive plot
+race_summary <- histopathology %>%
+  group_by(Race) %>%
+  summarise(
+    median_measurement = median(MeasurementA, na.rm = TRUE),
+    mad = mad(MeasurementA, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Create ggplot
+interactive_base <- ggplot(race_summary, aes(x = Race, y = median_measurement, fill = Race)) +
+  geom_col(width = 0.8, alpha = 0.9) +
+  geom_text(aes(label = sprintf("%.3f", median_measurement)), vjust = -0.5) +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Median Measurement A by Race - Interactive Approach",
+    x = "Race",
+    y = "Median Measurement A"
+  )
+
+# Convert to interactive plot
+interactive_plot <- ggplotly(interactive_base, tooltip = c("x", "y"))
+
+print(interactive_plot)
+```
+
+## Approach 5: Publication Ready
+
+**Use Case**: Academic papers, journal submissions, conference presentations
+
+**Strengths**: Journal formatting standards, high-resolution export, citation ready
+
+```{r approach-publication, eval=FALSE}
+# Publication ready approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Sex",
+  y_var = "MeasurementB",
+  chart_approach = "publication",
+  stat_type = "mean",
+  error_bars = "ci95", 
+  show_values = TRUE,
+  value_format = "decimal2",
+  plot_title = "Mean Measurement B by Sex",
+  theme_style = "publication",
+  export_options = TRUE
+)
+```
+
+### R Code Example for Publication Approach
+
+```{r publication-code, eval=TRUE}
+# Publication-ready approach
+sex_summary <- histopathology %>%
+  group_by(Sex) %>%
+  summarise(
+    mean_measurement = mean(MeasurementB, na.rm = TRUE),
+    se = sd(MeasurementB, na.rm = TRUE) / sqrt(n()),
+    ci95 = 1.96 * se,
+    n = n(),
+    .groups = "drop"
+  )
+
+publication_plot <- ggplot(sex_summary, aes(x = Sex, y = mean_measurement)) +
+  geom_col(
+    width = 0.8,
+    alpha = 0.7,
+    color = "black",
+    size = 0.3,
+    fill = "steelblue"
+  ) +
+  geom_errorbar(
+    aes(ymin = mean_measurement - ci95, ymax = mean_measurement + ci95),
+    width = 0.2
+  ) +
+  geom_text(
+    aes(label = sprintf("%.2f", mean_measurement)),
+    vjust = -1.5,
+    size = 3
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(size = 11, family = "serif"),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+    axis.text = element_text(size = 10, color = "black"),
+    axis.title = element_text(size = 11, face = "bold"),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5)
+  ) +
+  labs(
+    title = "Mean Measurement B by Sex",
+    x = "Sex",
+    y = "Mean Measurement B",
+    caption = "Error bars represent 95% confidence intervals"
+  )
+
+print(publication_plot)
+```
+
+## Approach 6: BBC News Style
+
+**Use Case**: News reports, journalism, public communications, professional presentations
+
+**Strengths**: BBC design standards, professional typography, brand consistency
+
+```{r approach-bbc, eval=FALSE}
+# BBC News style approach
+advancedbarplot(
+  data = histopathology,
+  x_var = "Grade_Level",
+  y_var = "Age",
+  chart_approach = "bbc_style",
+  stat_type = "mean",
+  color_palette = "bbc_multi",
+  show_values = TRUE,
+  plot_title = "Age Distribution by Grade Level",
+  subtitle_text = "BBC Visual and Data Journalism Style",
+  source_text = "ClinicoPath Histopathology Dataset"
+)
+```
+
+### R Code Example for BBC Style
+
+```{r bbc-code, eval=TRUE}
+# BBC News style approach
+grade_age_summary <- histopathology %>%
+  group_by(Grade_Level) %>%
+  summarise(
+    mean_age = mean(Age, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# BBC color palette
+bbc_colors <- c("#1380A1", "#FAAB18", "#007f7f", "#333333")
+
+bbc_plot <- ggplot(grade_age_summary, aes(x = Grade_Level, y = mean_age, fill = Grade_Level)) +
+  geom_col(width = 0.8, alpha = 1.0) +
+  scale_fill_manual(values = bbc_colors) +
+  theme(
+    # Text elements
+    text = element_text(family = "Arial", size = 18, color = "#222222"),
+    plot.title = element_text(family = "Arial", size = 28, face = "bold", color = "#222222"),
+    plot.subtitle = element_text(family = "Arial", size = 22, margin = margin(9, 0, 9, 0)),
+    plot.caption = element_text(size = 14, color = "#666666"),
+    
+    # Legend
+    legend.position = "none",
+    
+    # Axis
+    axis.title = element_blank(),
+    axis.text = element_text(family = "Arial", size = 18, color = "#222222"),
+    axis.text.x = element_text(margin = margin(5, b = 10)),
+    axis.ticks = element_blank(),
+    axis.line = element_blank(),
+    
+    # Grid lines (BBC style: horizontal only)
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "#cbcbcb"),
+    panel.grid.major.x = element_blank(),
+    
+    # Background
+    panel.background = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  ) +
+  labs(
+    title = "Age Distribution by Grade Level",
+    subtitle = "BBC Visual and Data Journalism Style",
+    caption = "Source: ClinicoPath Histopathology Dataset"
+  )
+
+print(bbc_plot)
+```
+
+## Approach 7: GraphPad Prism Style
+
+**Use Case**: Scientific software integration, GraphPad users, statistical software consistency
+
+**Strengths**: Authentic Prism styling, scientific software aesthetics, statistical focus
+
+```{r approach-prism, eval=FALSE}
+# GraphPad Prism style approach  
+advancedbarplot(
+  data = histopathology,
+  x_var = "Group",
+  y_var = "OverallTime",
+  fill_var = "Grade_Level",
+  chart_approach = "prism_style",
+  stat_type = "mean",
+  color_palette = "prism_floral",
+  bar_position = "dodge",
+  theme_style = "prism_default",
+  show_values = TRUE,
+  plot_title = "Overall Survival Time by Treatment and Grade",
+  subtitle_text = "GraphPad Prism Style Visualization"
+)
+```
+
+### R Code Example for Prism Style
+
+```{r prism-code, eval=TRUE}
+# GraphPad Prism style approach
+prism_summary <- histopathology %>%
+  group_by(Group, Grade_Level) %>%
+  summarise(
+    mean_time = mean(OverallTime, na.rm = TRUE),
+    se = sd(OverallTime, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+# Prism-style colors (approximation)
+prism_colors <- c("#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4")
+
+prism_plot <- ggplot(prism_summary, aes(x = Group, y = mean_time, fill = Grade_Level)) +
+  geom_col(
+    position = position_dodge(width = 0.8),
+    width = 0.8,
+    alpha = 0.9
+  ) +
+  scale_fill_manual(values = prism_colors) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(colour = "black", fill = NA),
+    axis.line = element_line(colour = "black"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    legend.position = "top"
+  ) +
+  labs(
+    title = "Overall Survival Time by Treatment and Grade",
+    subtitle = "GraphPad Prism Style Visualization", 
+    x = "Treatment Group",
+    y = "Mean Overall Time (months)",
+    fill = "Grade Level"
+  )
+
+print(prism_plot)
+```
+
+## Statistical Testing Integration
+
+All approaches support integrated statistical testing:
+
+```{r statistical-tests}
+# Example statistical comparisons
+cat("Available statistical tests in advancedbarplot:\n")
+cat("- ANOVA: For comparing multiple groups\n")
+cat("- t-test: For comparing two groups\n") 
+cat("- Wilcoxon: Non-parametric alternative to t-test\n")
+cat("- Chi-square: For categorical data associations\n")
+cat("- Kruskal-Wallis: Non-parametric alternative to ANOVA\n")
+
+# Example ANOVA test
+anova_result <- aov(Age ~ Group, data = histopathology)
+cat("\nExample ANOVA result (Age by Group):\n")
+summary(anova_result)
+```
+
+## Color Palette Showcase
+
+The module includes 26+ professional color palettes:
+
+```{r color-palettes, eval=FALSE}
+# BBC Color Palettes
+- bbc_blue: "#1380A1" 
+- bbc_orange: "#FAAB18"
+- bbc_multi: Multiple BBC brand colors
+
+# GraphPad Prism Palettes  
+- prism_floral: 12 colors
+- prism_candy_bright: 9 colors
+- prism_office: 9 colors
+- prism_colorblind_safe: 6 colors
+
+# Scientific Journal Palettes
+- nature: Nature journal colors
+- science: Science journal colors
+- clinical: Clinical research optimized
+
+# Standard Palettes
+- viridis: Colorblind-friendly
+- set1, dark2: RColorBrewer palettes
+```
+
+## Export and Reproducibility
+
+### High-Quality Export Options
+
+```{r export-tips, eval=FALSE}
+# For publication export
+advancedbarplot(
+  # ... your parameters ...
+  plot_width = 10,      # Width in inches
+  plot_height = 6,      # Height in inches
+  export_options = TRUE # Optimize for export
+)
+```
+
+### Reproducible R Code
+
+Each approach generates reproducible R code that you can copy and modify:
+
+```{r reproducible-example, eval=FALSE}
+# Example generated code
+ggplot(data, aes(x = Group, y = Age)) +
+  geom_col(alpha = 0.8) +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Best Practices
+
+### 1. Choosing the Right Approach
+
+- **Basic**: Quick exploration, learning ggplot2
+- **Polished**: Business presentations, dashboards  
+- **Statistical**: Research papers, hypothesis testing
+- **Interactive**: Web apps, exploration tools
+- **Publication**: Journal submissions, formal reports
+- **BBC Style**: News graphics, public communication
+- **Prism Style**: Scientific software integration
+
+### 2. Data Preparation
+
+```{r data-prep-tips}
+# Always check your data first
+summary(histopathology[c("Group", "Age", "Grade_Level")])
+
+# Handle missing values
+cat("Missing values check:\n")
+sapply(histopathology[c("Group", "Age", "Grade_Level")], function(x) sum(is.na(x)))
+
+# Ensure proper factor levels
+histopathology$Group <- factor(histopathology$Group)
+histopathology$Grade_Level <- factor(histopathology$Grade_Level, levels = c("low", "high"))
+```
+
+### 3. Statistical Considerations
+
+```{r statistical-considerations}
+# Check assumptions before statistical tests
+cat("Sample sizes by group:\n")
+table(histopathology$Group)
+
+cat("\nNormality check (Shapiro-Wilk test p-values):\n")
+by(histopathology$Age, histopathology$Group, function(x) shapiro.test(x)$p.value)
+
+cat("\nEqual variances test (F-test p-value):\n")
+var.test(Age ~ Group, data = histopathology)$p.value
+```
+
+## Conclusion
+
+The `advancedbarplot` module provides a comprehensive toolkit for professional bar chart visualization. Whether you need quick exploration plots or publication-ready graphics, the 7 approaches cover all major use cases in clinical research and data presentation.
+
+### Key Takeaways
+
+1. **7 distinct approaches** for different use cases
+2. **Professional styling** with BBC and Prism authenticity
+3. **Statistical integration** with automated testing
+4. **Extensive customization** with 26+ color palettes
+5. **Export optimization** for publication and presentation
+
+### Next Steps
+
+- Explore the interactive features in jamovi
+- Try different color palettes for your specific use case
+- Experiment with statistical testing options
+- Use the generated R code for further customization
+
+For more advanced statistical plotting, see the related modules:
+- `jjhistogram` for distribution analysis
+- `jjscatter` for correlation visualization  
+- `survival` for time-to-event analysis

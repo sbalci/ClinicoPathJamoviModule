@@ -1,0 +1,721 @@
+---
+title: "Advanced Heatmap Visualization with jggheatmap"
+subtitle: "Professional Heatmap Creation for Clinical Research and Data Analysis"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig_height = 8,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r}
+library(ClinicoPath)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+# Introduction
+
+The `jggheatmap` function provides comprehensive heatmap visualization capabilities for clinical research and data analysis. It creates publication-ready heatmaps with advanced clustering, scaling, and customization options, making it ideal for gene expression analysis, correlation matrices, clinical parameter visualization, and other matrix-based data.
+
+Heatmaps are essential tools in clinical research for:
+
+- **Gene Expression Analysis**: Visualizing expression patterns across samples and genes
+- **Correlation Matrices**: Displaying relationships between multiple variables
+- **Clinical Parameter Clustering**: Identifying patterns in patient characteristics
+- **Biomarker Discovery**: Exploring associations in high-dimensional data
+- **Quality Control**: Identifying outliers and batch effects in datasets
+
+# Key Features
+
+The `jggheatmap` function supports:
+
+- **Flexible Data Input**: Matrix variables or pivot format (row/column/value)
+- **Advanced Clustering**: Hierarchical clustering with multiple distance and linkage methods
+- **Data Scaling**: Row, column, or global normalization options
+- **Rich Visualization**: Multiple color schemes, cell shapes, and annotation options
+- **Interactive Elements**: Dendrograms, value displays, and custom labeling
+- **Export Options**: Multiple output formats and customizable dimensions
+
+# Basic Heatmap Creation
+
+## Matrix Variables Approach
+
+The simplest way to create a heatmap is using the matrix variables approach with numeric data:
+
+```{r}
+# Load histopathology data
+data(histopathology, package = "ClinicoPath")
+
+# Display the first few rows of relevant numeric variables
+head(histopathology[c("Age", "TStage", "Grade", "LVI", "PNI")])
+```
+
+```{r}
+# Create a basic heatmap using matrix variables
+basic_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  plot_title = "Basic Clinical Parameters Heatmap",
+  show_colorbar = TRUE,
+  colorbar_title = "Value"
+)
+
+# The plot will be displayed in jamovi interface
+```
+
+## Understanding Matrix Variables
+
+When using matrix variables:
+
+- Each selected variable becomes a column in the heatmap
+- Each row in your dataset becomes a row in the heatmap
+- Values are displayed as colors according to the selected color scheme
+- Only numeric variables should be included
+
+# Pivot Format Approach
+
+## Row/Column/Value Structure
+
+For data that needs to be reshaped into matrix format, use the pivot approach:
+
+```{r}
+# Create example data in pivot format
+pivot_data <- histopathology[1:20, ] %>%
+  select(PatientID, Grade, TStage, Age) %>%
+  mutate(
+    PatientID = paste0("Patient_", row_number()),
+    Grade = paste0("Grade_", Grade)
+  ) %>%
+  # Create long format for demonstration
+  pivot_longer(cols = c(TStage, Age), names_to = "Measure", values_to = "Value")
+
+head(pivot_data)
+```
+
+```{r}
+# Create heatmap using pivot format
+pivot_heatmap <- jggheatmap(
+  data = pivot_data,
+  row_var = "PatientID",
+  col_var = "Measure",
+  value_var = "Value",
+  plot_title = "Patient Measures Heatmap",
+  cluster_rows = TRUE,
+  cluster_cols = FALSE
+)
+```
+
+# Data Scaling Options
+
+## Row Scaling (Z-score by rows)
+
+Row scaling normalizes each row to have mean=0 and sd=1, useful for comparing patterns across variables:
+
+```{r}
+# Row scaling for cross-variable comparison
+row_scaled_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  scaling = "row",
+  plot_title = "Row-Scaled Clinical Parameters",
+  colorbar_title = "Z-Score",
+  color_scheme = "blue_red"
+)
+```
+
+## Column Scaling
+
+Column scaling normalizes each variable independently:
+
+```{r}
+# Column scaling for variable standardization
+column_scaled_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  scaling = "column",
+  plot_title = "Column-Scaled Clinical Parameters",
+  colorbar_title = "Standardized Value",
+  color_scheme = "viridis"
+)
+```
+
+## Global Scaling
+
+Global scaling applies standardization across the entire matrix:
+
+```{r}
+# Global scaling for overall comparison
+global_scaled_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  scaling = "global",
+  plot_title = "Globally-Scaled Parameters",
+  colorbar_title = "Global Z-Score",
+  color_scheme = "plasma"
+)
+```
+
+# Clustering Analysis
+
+## Hierarchical Clustering
+
+Enable clustering to reveal patterns and group similar rows/columns:
+
+```{r}
+# Basic clustering with default settings
+clustered_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scaling = "row",
+  plot_title = "Clustered Clinical Parameters",
+  show_dendrograms = TRUE
+)
+```
+
+## Clustering Methods
+
+Different clustering methods reveal different patterns:
+
+```{r}
+# Ward's method clustering
+ward_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  clustering_method = "ward.D2",
+  scaling = "row",
+  plot_title = "Ward's Method Clustering"
+)
+
+# Average linkage clustering
+average_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  clustering_method = "average",
+  scaling = "row",
+  plot_title = "Average Linkage Clustering"
+)
+```
+
+## Distance Methods
+
+Choose appropriate distance metrics for your data type:
+
+```{r}
+# Pearson correlation distance
+correlation_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  distance_method = "pearson",
+  clustering_method = "complete",
+  scaling = "row",
+  plot_title = "Pearson Correlation Distance"
+)
+
+# Manhattan distance
+manhattan_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  distance_method = "manhattan",
+  scaling = "column",
+  plot_title = "Manhattan Distance Clustering"
+)
+```
+
+# Color Schemes and Visualization
+
+## Built-in Color Schemes
+
+The function provides several professional color schemes:
+
+```{r}
+# Viridis color scheme (perceptually uniform)
+viridis_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  color_scheme = "viridis",
+  plot_title = "Viridis Color Scheme",
+  scaling = "row"
+)
+
+# Spectral color scheme (diverging)
+spectral_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  color_scheme = "spectral",
+  plot_title = "Spectral Color Scheme",
+  scaling = "row"
+)
+
+# RdYlBu scheme (red-yellow-blue)
+rdylbu_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  color_scheme = "rdylbu",
+  plot_title = "RdYlBu Color Scheme",
+  scaling = "row"
+)
+```
+
+## Cell Value Display
+
+Show actual values within cells for detailed analysis:
+
+```{r}
+# Display cell values with custom formatting
+values_heatmap <- jggheatmap(
+  data = histopathology[1:15, ],  # Smaller subset for readability
+  matrix_vars = c("Age", "TStage", "Grade"),
+  show_values = TRUE,
+  value_format = "decimal1",
+  text_size = 10,
+  plot_title = "Heatmap with Cell Values",
+  scaling = "none"
+)
+```
+
+# Advanced Customization
+
+## Label and Text Customization
+
+Control the appearance of row and column labels:
+
+```{r}
+# Custom label styling
+custom_labels_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI"),
+  show_row_labels = TRUE,
+  show_col_labels = TRUE,
+  row_label_size = 8,
+  col_label_size = 12,
+  plot_title = "Custom Label Styling",
+  scaling = "row"
+)
+
+# Hide specific labels
+minimal_labels_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  show_row_labels = FALSE,
+  show_col_labels = TRUE,
+  col_label_size = 14,
+  plot_title = "Minimal Labeling",
+  scaling = "row"
+)
+```
+
+## Plot Dimensions and Layout
+
+Customize plot size and appearance:
+
+```{r}
+# Large format for publication
+publication_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  plot_width = 1000,
+  plot_height = 800,
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scaling = "row",
+  plot_title = "Publication-Ready Heatmap",
+  colorbar_title = "Standardized Expression"
+)
+```
+
+## Cell Appearance Options
+
+Customize cell shapes and colors:
+
+```{r}
+# Custom cell appearance
+custom_cells_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  cell_shape = "circle",
+  border_color = "black",
+  na_color = "gray50",
+  plot_title = "Custom Cell Appearance",
+  scaling = "row"
+)
+```
+
+# Correlation Matrix Visualization
+
+## Creating Correlation Heatmaps
+
+Heatmaps are excellent for visualizing correlation matrices:
+
+```{r}
+# Calculate correlation matrix
+numeric_vars <- c("Age", "TStage", "Grade", "LVI", "PNI")
+correlation_matrix <- cor(histopathology[numeric_vars], use = "complete.obs")
+
+# Convert to long format for jggheatmap
+correlation_long <- correlation_matrix %>%
+  as.data.frame() %>%
+  rownames_to_column("Variable1") %>%
+  pivot_longer(cols = -Variable1, names_to = "Variable2", values_to = "Correlation")
+
+head(correlation_long)
+```
+
+```{r}
+# Create correlation heatmap
+correlation_heatmap <- jggheatmap(
+  data = correlation_long,
+  row_var = "Variable1",
+  col_var = "Variable2", 
+  value_var = "Correlation",
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  color_scheme = "blue_red",
+  plot_title = "Clinical Parameter Correlations",
+  colorbar_title = "Pearson r",
+  show_values = TRUE,
+  value_format = "decimal2"
+)
+```
+
+# Output Options and Data Export
+
+## Multiple Output Formats
+
+The function supports different output formats:
+
+```{r}
+# Plot only (default)
+plot_only_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  output_format = "plot_only",
+  plot_title = "Plot Only Output"
+)
+
+# Data matrix output
+data_matrix_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  output_format = "data_matrix",
+  scaling = "row",
+  plot_title = "Data Matrix Output"
+)
+
+# Both plot and data
+both_output_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  output_format = "both",
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scaling = "row",
+  plot_title = "Combined Output"
+)
+```
+
+# Clinical Research Applications
+
+## Gene Expression Analysis
+
+For genomic data analysis (simulated example):
+
+```{r}
+# Simulate gene expression data
+set.seed(123)
+gene_expression <- data.frame(
+  Patient = paste0("P", 1:20),
+  Gene1 = rnorm(20, 5, 2),
+  Gene2 = rnorm(20, 3, 1.5),
+  Gene3 = rnorm(20, 7, 2.5),
+  Gene4 = rnorm(20, 4, 1),
+  Gene5 = rnorm(20, 6, 2)
+)
+
+# Create gene expression heatmap
+gene_heatmap <- jggheatmap(
+  data = gene_expression,
+  matrix_vars = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scaling = "row",
+  color_scheme = "viridis",
+  plot_title = "Gene Expression Heatmap",
+  colorbar_title = "Log2 Expression",
+  show_dendrograms = TRUE
+)
+```
+
+## Biomarker Analysis
+
+Analyzing biomarker patterns:
+
+```{r}
+# Create biomarker data subset
+biomarker_data <- histopathology %>%
+  select(Age, TStage, Grade, LVI, PNI) %>%
+  slice_head(n = 30)  # Focus on first 30 patients
+
+# Comprehensive biomarker heatmap
+biomarker_heatmap <- jggheatmap(
+  data = biomarker_data,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  clustering_method = "ward.D2",
+  distance_method = "euclidean",
+  scaling = "column",
+  color_scheme = "spectral",
+  show_values = FALSE,
+  show_dendrograms = TRUE,
+  plot_title = "Clinical Biomarker Patterns",
+  colorbar_title = "Normalized Value"
+)
+```
+
+# Quality Control and Batch Effects
+
+## Identifying Outliers
+
+Use heatmaps to identify unusual patterns:
+
+```{r}
+# Create QC heatmap with highlighting
+qc_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = FALSE,
+  scaling = "row",
+  color_scheme = "blue_red",
+  plot_title = "Quality Control Heatmap",
+  show_values = FALSE,
+  border_color = "white"
+)
+```
+
+# Interactive Features and Annotations
+
+## Dendrogram Display
+
+Show clustering relationships:
+
+```{r}
+# Detailed dendrogram display
+dendrogram_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade", "LVI", "PNI"),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  show_dendrograms = TRUE,
+  dendrogram_height = 0.3,
+  clustering_method = "complete",
+  distance_method = "pearson",
+  scaling = "row",
+  plot_title = "Heatmap with Dendrograms"
+)
+```
+
+## Annotation Variables
+
+Add contextual information (when available):
+
+```{r}
+# Heatmap with annotations
+annotated_heatmap <- jggheatmap(
+  data = histopathology,
+  matrix_vars = c("Age", "TStage", "Grade"),
+  annotation_var = "Grade",
+  annotation_colors = "set1",
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scaling = "row",
+  plot_title = "Annotated Heatmap"
+)
+```
+
+# Interpretation Guidelines
+
+## Reading Heatmaps Effectively
+
+### Color Interpretation
+- **Hot colors (red/yellow)**: High values or positive associations
+- **Cool colors (blue/green)**: Low values or negative associations
+- **White/neutral**: Baseline or no association
+
+### Clustering Patterns
+- **Row clusters**: Groups of samples with similar profiles
+- **Column clusters**: Groups of variables with similar patterns
+- **Dendrogram height**: Indicates dissimilarity; longer branches = more different
+
+### Data Scaling Impact
+- **No scaling**: Preserves original value relationships
+- **Row scaling**: Emphasizes patterns within each sample
+- **Column scaling**: Emphasizes patterns within each variable
+- **Global scaling**: Provides overall standardization
+
+## Statistical Considerations
+
+### Distance Metrics
+- **Euclidean**: Standard geometric distance, sensitive to scale
+- **Manhattan**: Sum of absolute differences, robust to outliers
+- **Pearson**: Based on linear correlation, good for expression data
+- **Spearman**: Based on rank correlation, robust to non-linear relationships
+
+### Clustering Methods
+- **Complete**: Conservative, creates compact clusters
+- **Average**: Balanced approach, widely used
+- **Single**: Liberal, can create elongated clusters
+- **Ward**: Minimizes within-cluster variance, good for even-sized groups
+
+# Best Practices
+
+## Data Preparation
+1. **Quality Control**: Remove samples/variables with excessive missing data
+2. **Outlier Assessment**: Identify and evaluate extreme values
+3. **Normalization**: Choose appropriate scaling method for your data type
+4. **Variable Selection**: Include relevant variables with sufficient variability
+
+## Visualization Design
+1. **Color Choice**: Use perceptually uniform color schemes when possible
+2. **Label Clarity**: Ensure labels are readable and informative
+3. **Plot Size**: Match dimensions to intended use (screen vs. publication)
+4. **Legend**: Include clear color bar with appropriate title
+
+## Interpretation
+1. **Pattern Recognition**: Look for blocks of similar colors
+2. **Cluster Validation**: Verify that clusters make biological sense
+3. **Statistical Significance**: Remember that patterns may not be statistically significant
+4. **Replication**: Validate patterns in independent datasets when possible
+
+# Troubleshooting Common Issues
+
+## Data Format Problems
+```r
+# Ensure numeric variables
+data$variable <- as.numeric(data$variable)
+
+# Handle missing values
+data <- data[complete.cases(data[variables]), ]
+
+# Check for constant variables
+apply(data[variables], 2, var, na.rm = TRUE)  # Should be > 0
+```
+
+## Visualization Issues
+```r
+# For too many variables, consider subsetting
+important_vars <- c("Gene1", "Gene2", "Gene3")  # Select key variables
+
+# For overcrowded labels, adjust sizes or hide them
+row_label_size = 6
+show_row_labels = FALSE
+```
+
+## Performance Optimization
+```r
+# For large datasets, consider sampling
+sample_data <- data[sample(nrow(data), 100), ]
+
+# Or focus on most variable features
+var_scores <- apply(data[variables], 2, var, na.rm = TRUE)
+top_vars <- names(sort(var_scores, decreasing = TRUE)[1:20])
+```
+
+# Advanced Applications
+
+## Time Series Heatmaps
+For longitudinal data analysis:
+
+```{r}
+# Simulate time series data
+time_series_data <- expand.grid(
+  Patient = paste0("P", 1:10),
+  Timepoint = paste0("T", 1:5)
+) %>%
+  mutate(
+    Biomarker1 = rnorm(50, 5, 2),
+    Biomarker2 = rnorm(50, 3, 1),
+    Biomarker3 = rnorm(50, 7, 2)
+  )
+
+# Create time series heatmap
+timeseries_heatmap <- jggheatmap(
+  data = time_series_data,
+  row_var = "Patient",
+  col_var = "Timepoint",
+  value_var = "Biomarker1",
+  cluster_rows = TRUE,
+  cluster_cols = FALSE,  # Keep temporal order
+  color_scheme = "plasma",
+  plot_title = "Longitudinal Biomarker Changes"
+)
+```
+
+## Multi-Level Comparisons
+For comparing different conditions:
+
+```{r}
+# Create condition-specific data
+condition_data <- histopathology %>%
+  mutate(Condition = ifelse(Grade > 2, "High_Grade", "Low_Grade")) %>%
+  select(Condition, Age, TStage, LVI, PNI) %>%
+  group_by(Condition) %>%
+  summarise(
+    across(c(Age, TStage, LVI, PNI), mean, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Create comparison heatmap
+comparison_heatmap <- jggheatmap(
+  data = condition_data,
+  matrix_vars = c("Age", "TStage", "LVI", "PNI"),
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  scaling = "column",
+  color_scheme = "blue_red",
+  plot_title = "Condition Comparison Heatmap"
+)
+```
+
+# Conclusion
+
+The `jggheatmap` function provides a comprehensive solution for advanced heatmap visualization in clinical research. Key benefits include:
+
+- **Flexible Data Input**: Support for both matrix and pivot data formats
+- **Advanced Analytics**: Hierarchical clustering with multiple distance and linkage methods
+- **Professional Quality**: Publication-ready outputs with extensive customization
+- **Clinical Integration**: Designed for medical research applications
+- **Scalability**: Handles datasets from small studies to large genomic analyses
+
+Heatmaps are powerful tools for exploring complex datasets, identifying patterns, and communicating findings effectively. The `jggheatmap` function makes it easy to create professional-quality visualizations that meet publication standards and enhance your research presentations.
+
+For specific applications in your research domain, consider consulting with a biostatistician or bioinformatician to ensure appropriate analysis methods and interpretation of results.
+
+# References
+
+1. Wilkinson L, Friendly M. The History of the Cluster Heat Map. The American Statistician. 2009;63(2):179-184.
+2. Weinstein JN, et al. The Cancer Genome Atlas Pan-Cancer analysis project. Nature Genetics. 2013;45(10):1113-20.
+3. Eisen MB, et al. Cluster analysis and display of genome-wide expression patterns. PNAS. 1998;95(25):14863-8.
+4. Ward JH. Hierarchical Grouping to Optimize an Objective Function. Journal of the American Statistical Association. 1963;58(301):236-244.
+5. Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery. 2012;2(1):86-97.

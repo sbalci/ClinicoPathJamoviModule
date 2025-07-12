@@ -122,11 +122,46 @@ retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Find Retracted Papers from DOI
 #'
+#' Checks DOIs against retraction databases to identify retracted 
+#' publications. Uses OpenRetractions API to validate publication status and 
+#' can optionally retrieve PubMed IDs. Includes DOI format validation, rate 
+#' limiting, and  robust error handling for reliable results.
 #' 
-#' @param data The data as a data frame.
-#' @param doi Column containing DOI strings.
-#' @param database Database to check for retractions.
-#' @param pmid Add corresponding PubMed IDs to dataset.
+#'
+#' @examples
+#' \donttest{
+#' # Example 1: Basic retraction check
+#' data <- data.frame(
+#'   doi = c("10.1126/science.aac4716", "10.1038/nature12373", "10.1016/j.cell.2014.09.045")
+#' )
+#' result <- retracted(data = data, doi = "doi")
+#'
+#' # Example 2: Include PubMed IDs
+#' result_with_pmid <- retracted(
+#'   data = data,
+#'   doi = "doi",
+#'   pmid = TRUE
+#' )
+#'
+#' # Example 3: Using different database
+#' result_rw <- retracted(
+#'   data = data,
+#'   doi = "doi",
+#'   database = "rw"
+#' )
+#'}
+#' @param data The data as a data frame containing the DOI variable to check.
+#'   Must have at least one column with DOI strings.
+#' @param doi Column containing DOI strings to check for retractions. Supports
+#'   multiple DOI formats including bare DOIs (10.1000/example),  DOI URIs
+#'   (doi:10.1000/example), and DOI URLs (https://doi.org/10.1000/example).
+#' @param database Database to check for retractions. OpenRetractions is
+#'   recommended  as it provides comprehensive and up-to-date retraction
+#'   information.  RetractionWatch option currently uses OpenRetractions as
+#'   fallback.
+#' @param pmid If TRUE, attempts to retrieve corresponding PubMed IDs for
+#'   valid DOIs using the rcrossref package. Requires internet connection and
+#'   may  increase processing time for large datasets.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

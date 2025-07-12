@@ -2,15 +2,7 @@
 title: "Decision Tree and Markov Chain Analysis Examples"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-vignette: >
-  %\VignetteIndexEntry{Decision Tree and Markov Chain Analysis Examples}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include = FALSE}

@@ -9,7 +9,7 @@ groupsummary(
   groupVars,
   sumVars,
   statistics = list("sum", "mean", "n"),
-  dateVar,
+  dateVar = NULL,
   dateFormat = "ymd",
   timeAggregation = "day",
   showMissing = FALSE,

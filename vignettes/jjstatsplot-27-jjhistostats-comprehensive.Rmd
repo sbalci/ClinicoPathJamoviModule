@@ -1,0 +1,580 @@
+---
+title: "jjhistostats: Comprehensive Histogram Analysis"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Overview
+
+The `jjhistostats` function provides a comprehensive interface for creating statistical histograms that visualize the distribution of continuous variables with normality testing and statistical summaries. This function is a wrapper around `ggstatsplot::gghistostats` and `ggstatsplot::grouped_gghistostats`, offering both single and grouped histogram visualizations with advanced statistical analysis.
+
+## Key Features
+
+- **Multiple distribution assessment methods**: Parametric (Shapiro-Wilk), nonparametric (Anderson-Darling), robust, and Bayesian approaches
+- **Flexible bin width control**: Automatic or manual bin width specification
+- **Normal curve overlay**: Compare data distribution with theoretical normal distribution
+- **Centrality indicators**: Display mean, median, or robust centrality measures
+- **Multi-variable support**: Create multiple histograms in a single analysis
+- **Grouped analysis**: Separate histograms for different subgroups
+- **Performance optimized**: Uses internal caching to eliminate redundant computations
+
+## Installation and Setup
+
+```{r setup}
+echo: true
+eval: false
+
+# Install ClinicoPath if not already installed
+if (!require("ClinicoPath")) {
+  devtools::install_github("sbalci/ClinicoPathJamoviModule")
+}
+
+library(ClinicoPath)
+library(ggplot2)
+```
+
+## Quick Start
+
+### Basic Histogram
+
+```{r basic-example}
+echo: true
+eval: false
+
+# Load test data
+data(jjhistostats_test_data)
+
+# Basic histogram with normality testing
+result <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "age_years",
+  typestatistics = "parametric",
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+
+# View the plot
+result$plot
+```
+
+### Multiple Variables Histogram
+
+```{r multiple-example}
+echo: true
+eval: false
+
+# Multiple histograms in one analysis
+result_multiple <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = c("age_years", "tumor_size_mm", "bmi"),
+  typestatistics = "parametric",
+  resultssubtitle = TRUE,
+  centralityline = TRUE
+)
+
+# View the combined plot
+result_multiple$plot
+```
+
+### Grouped Histogram
+
+```{r grouped-example}
+echo: true
+eval: false
+
+# Grouped histogram by disease stage
+result_grouped <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "psa_level",
+  grvar = "disease_stage",
+  typestatistics = "nonparametric",
+  normalcurve = TRUE,
+  changebinwidth = TRUE,
+  binwidth = 2.0
+)
+
+# View the grouped plot
+result_grouped$plot2
+```
+
+## Function Parameters
+
+### Core Parameters
+
+- **`data`**: Input data frame containing the variables to analyze
+- **`dep`**: One or more continuous numeric variables for histogram creation
+- **`grvar`**: Optional grouping variable for stratified analysis
+- **`typestatistics`**: Type of normality test to perform
+
+### Statistical Methods
+
+The `typestatistics` parameter supports four different approaches:
+
+1. **"parametric"** (default): Shapiro-Wilk normality test
+   - Best for sample sizes 3 < n < 5000
+   - Tests null hypothesis of normality
+   - Most commonly used in clinical research
+
+2. **"nonparametric"**: Anderson-Darling test
+   - More powerful than Shapiro-Wilk for detecting departures from normality
+   - Better for detecting deviations in the tails
+   - Good for larger sample sizes
+
+3. **"robust"**: Robust normality tests
+   - Less sensitive to outliers
+   - Uses robust statistical measures
+   - Good when data may have contamination
+
+4. **"bayes"**: Bayesian normality assessment
+   - Provides Bayes factors for normality
+   - Quantifies evidence for/against normality
+   - Incorporates prior beliefs
+
+### Display Options
+
+#### Binning Control
+
+- **`changebinwidth`**: Enable manual bin width control
+- **`binwidth`**: Specify exact bin width (when changebinwidth = TRUE)
+
+Automatic binning uses the formula: `(max(x) - min(x)) / sqrt(n)`
+
+#### Visual Elements
+
+- **`centralityline`**: Display vertical line for central tendency
+  - Mean for parametric analysis
+  - Median for nonparametric analysis
+  - Trimmed mean for robust analysis
+
+- **`normalcurve`**: Overlay theoretical normal distribution
+  - Uses sample mean and standard deviation
+  - Helps visualize departure from normality
+
+- **`resultssubtitle`**: Show statistical test results as subtitle
+
+## Performance Optimizations
+
+### Version History
+
+The function has been significantly optimized for performance:
+
+**Previous Issues:**
+- Redundant data processing in `.plot()` and `.plot2()` methods
+- No caching infrastructure
+- Repeated variable conversion and formula construction
+- Inefficient multi-variable handling
+
+**Current Optimizations:**
+- **Data Caching**: Uses `.prepareData()` method to cache processed data
+- **Options Caching**: Uses `.prepareOptions()` method to cache option processing
+- **Eliminated Redundancy**: Both plot methods now use cached results
+- **Efficient Multi-Variable Processing**: Shared data preparation for multiple histograms
+- **Better Progress Feedback**: Clear user messaging during processing
+
+### Performance Benefits
+
+```{r performance-comparison}
+echo: true
+eval: false
+
+# Performance comparison (conceptual)
+# Before optimization: 
+# - Data processed separately for each plot method
+# - Variable conversion repeated for each histogram
+# - Options processing duplicated
+
+# After optimization:
+# - Data processed once and cached
+# - Variable conversion done once for all variables
+# - Significant speedup for multiple variables and grouped analysis
+```
+
+## Advanced Usage Examples
+
+### Distribution Shape Analysis
+
+```{r distribution-shapes}
+echo: true
+eval: false
+
+# Analyze different distribution shapes in the test data
+
+# Normal distribution (age)
+age_hist <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "age_years",
+  typestatistics = "parametric",
+  normalcurve = TRUE,
+  centralityline = TRUE,
+  resultssubtitle = TRUE
+)
+
+# Right-skewed distribution (tumor size)
+tumor_hist <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "tumor_size_mm",
+  typestatistics = "nonparametric",
+  normalcurve = TRUE,
+  changebinwidth = TRUE,
+  binwidth = 5
+)
+
+# Bimodal distribution (PSA levels)
+psa_hist <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "psa_level",
+  typestatistics = "robust",
+  normalcurve = TRUE,
+  changebinwidth = TRUE,
+  binwidth = 3
+)
+```
+
+### Clinical Biomarker Analysis
+
+```{r clinical-example}
+echo: true
+eval: false
+
+# Comprehensive biomarker distribution analysis
+biomarkers <- c("hemoglobin_level", "creatinine_level", "crp_level")
+
+# Analyze all biomarkers simultaneously
+biomarker_analysis <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = biomarkers,
+  typestatistics = "parametric",
+  centralityline = TRUE,
+  resultssubtitle = TRUE,
+  normalcurve = TRUE
+)
+
+# Stratified analysis by treatment group
+biomarker_by_treatment <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = "crp_level",
+  grvar = "treatment_group",
+  typestatistics = "nonparametric",
+  normalcurve = TRUE,
+  changebinwidth = TRUE,
+  binwidth = 5
+)
+```
+
+### Normality Assessment Workflow
+
+```{r normality-assessment}
+echo: true
+eval: false
+
+# Systematic normality testing across multiple methods
+variable_of_interest <- "ejection_fraction"
+
+# Parametric approach (Shapiro-Wilk)
+norm_parametric <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable_of_interest,
+  typestatistics = "parametric",
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+
+# Nonparametric approach (Anderson-Darling)
+norm_nonparametric <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable_of_interest,
+  typestatistics = "nonparametric",
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+
+# Robust approach
+norm_robust <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable_of_interest,
+  typestatistics = "robust",
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+
+# Bayesian approach
+norm_bayes <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable_of_interest,
+  typestatistics = "bayes",
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+```
+
+### Custom Binning Strategies
+
+```{r binning-strategies}
+echo: true
+eval: false
+
+# Different binning approaches for the same variable
+variable <- "lab_score"
+
+# Automatic binning
+auto_bins <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable,
+  changebinwidth = FALSE
+)
+
+# Fine binning (many narrow bins)
+fine_bins <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable,
+  changebinwidth = TRUE,
+  binwidth = 2
+)
+
+# Coarse binning (few wide bins)
+coarse_bins <- jjhistostats(
+  data = jjhistostats_test_data,
+  dep = variable,
+  changebinwidth = TRUE,
+  binwidth = 10
+)
+```
+
+## Data Requirements
+
+### Input Data Structure
+
+The input data should be a data frame with:
+
+- **Continuous variables**: Numeric columns for histogram analysis
+- **Grouping variables**: Factor or character columns for stratified analysis
+- **Complete cases**: Missing values are automatically excluded
+- **Reasonable sample size**: At least 10-15 observations per group for meaningful analysis
+
+### Example Data Structure
+
+```{r data-structure}
+echo: true
+eval: false
+
+# Structure of test data
+str(jjhistostats_test_data)
+
+# Key variables:
+# - age_years: Normal distribution (20-95 years)
+# - tumor_size_mm: Right-skewed distribution (3-150 mm)
+# - ejection_fraction: Left-skewed distribution (15-80%)
+# - psa_level: Bimodal distribution (0.1-100 ng/mL)
+# - bmi: Nearly normal distribution (15-45 kg/m²)
+# - disease_stage: Ordered factor (Stage I-IV)
+# - treatment_group: Factor (Control, Treatment A, Treatment B)
+```
+
+## Best Practices
+
+### Variable Selection and Preparation
+
+1. **Choose appropriate variables**: 
+   - Ensure variables are truly continuous
+   - Check for reasonable ranges and outliers
+   
+2. **Sample size considerations**:
+   - Minimum 10-15 observations for basic histogram
+   - At least 30 observations for reliable normality testing
+   - Consider power for detecting departures from normality
+
+3. **Handle missing data**: 
+   - Understand missing data patterns
+   - Document exclusions due to missing values
+   
+4. **Outlier assessment**:
+   - Identify potential outliers before analysis
+   - Consider robust methods if outliers are present
+
+### Statistical Method Selection
+
+- **Use parametric** for well-behaved, moderately-sized samples (n=30-5000)
+- **Use nonparametric** for larger samples or when concerned about tail behavior
+- **Use robust** when outliers are present or data quality is uncertain
+- **Use Bayesian** when you want to quantify evidence for normality
+
+### Binning Strategy Guidelines
+
+```{r binning-guidelines}
+echo: true
+eval: false
+
+# General binning guidelines:
+
+# Automatic binning (recommended starting point)
+# - Good for initial exploration
+# - Uses sqrt(n) rule or Sturges' formula
+
+# Manual binning considerations:
+# Small datasets (n < 50): 5-10 bins
+# Medium datasets (n = 50-200): 10-20 bins  
+# Large datasets (n > 200): 20+ bins
+
+# Rule of thumb for bin width:
+# binwidth ≈ (max - min) / desired_number_of_bins
+```
+
+### Interpretation Guidelines
+
+#### Histogram Shape Assessment
+
+- **Normal**: Bell-shaped, symmetric around mean
+- **Right-skewed**: Long tail extending to the right
+- **Left-skewed**: Long tail extending to the left
+- **Bimodal**: Two distinct peaks
+- **Uniform**: Relatively flat across the range
+
+#### Normality Test Interpretation
+
+- **p > 0.05**: Fail to reject normality (data may be normal)
+- **p ≤ 0.05**: Reject normality (data significantly non-normal)
+- **Visual inspection**: Always combine with histogram visual assessment
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Data contains no (complete) rows"**
+   - Check for missing values in selected variables
+   - Ensure at least some complete cases exist
+   - Consider imputation strategies
+
+2. **Binning issues**
+   - If automatic binning creates too few/many bins, use manual binwidth
+   - For integer data, consider binwidth = 1
+   - For continuous data, experiment with different bin widths
+
+3. **Performance issues**
+   - The optimized version should be much faster
+   - For very large datasets (n > 10,000), consider sampling
+   - Multiple variables create multiple plots - expect longer processing
+
+### Error Handling
+
+```{r error-handling}
+echo: true
+eval: false
+
+# Example error handling
+tryCatch({
+  result <- jjhistostats(
+    data = my_data,
+    dep = "continuous_var",
+    typestatistics = "parametric"
+  )
+}, error = function(e) {
+  message("Error in histogram analysis: ", e$message)
+  message("Check your data structure and variable types")
+  
+  # Diagnostic information
+  cat("Data structure:\n")
+  str(my_data)
+  cat("\nVariable summary:\n")
+  summary(my_data$continuous_var)
+})
+```
+
+## Technical Details
+
+### Underlying Functions
+
+The `jjhistostats` function is built on:
+
+- **ggstatsplot::gghistostats**: For single histograms
+- **ggstatsplot::grouped_gghistostats**: For grouped analyses
+- **jmvcore**: For data handling and option processing
+
+### Caching Implementation
+
+```{r caching-details}
+echo: true
+eval: false
+
+# Internal caching structure (conceptual)
+# private$.processedData: Cached cleaned data with converted variables
+# private$.processedOptions: Cached option processing including binwidth
+# 
+# Benefits:
+# - Eliminates redundant jmvcore::naOmit() calls
+# - Avoids repeated variable conversion
+# - Shares processed data between plot methods
+# - Optimizes multi-variable processing
+```
+
+## Clinical Applications
+
+### Distribution Analysis in Research
+
+Histograms are essential for:
+
+- **Data exploration**: Understanding variable distributions before analysis
+- **Assumption checking**: Verifying normality for parametric tests
+- **Outlier detection**: Identifying unusual values
+- **Data quality assessment**: Detecting measurement errors or data entry issues
+
+### Research Scenarios
+
+1. **Clinical Trials**: Assess baseline characteristics and endpoint distributions
+2. **Epidemiology**: Examine exposure and outcome variable distributions
+3. **Laboratory Medicine**: Establish reference ranges and quality control
+4. **Biomarker Studies**: Understand biomarker distributions across populations
+
+### Normality Assessment Workflow
+
+```{r clinical-workflow}
+echo: true
+eval: false
+
+# Typical clinical research workflow
+
+# Step 1: Initial exploration
+initial_assessment <- jjhistostats(
+  data = clinical_data,
+  dep = c("primary_endpoint", "key_biomarker"),
+  normalcurve = TRUE,
+  centralityline = TRUE
+)
+
+# Step 2: Formal normality testing  
+normality_test <- jjhistostats(
+  data = clinical_data,
+  dep = "primary_endpoint",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Step 3: Stratified analysis
+stratified_analysis <- jjhistostats(
+  data = clinical_data,
+  dep = "primary_endpoint",
+  grvar = "treatment_group",
+  typestatistics = "parametric"
+)
+
+# Step 4: Decision for downstream analysis
+# Based on normality results, choose appropriate statistical tests
+```
+
+## Conclusion
+
+The optimized `jjhistostats` function provides:
+
+- **High performance**: Significant speed improvements through caching
+- **Statistical rigor**: Multiple normality testing approaches
+- **Flexibility**: Comprehensive customization options for binning and display
+- **Clinical relevance**: Designed for biomedical research applications
+- **Usability**: Clear documentation and comprehensive examples
+
+The function is well-suited for clinical research, biomarker analysis, data exploration, and any scenario requiring robust distribution visualization and normality assessment.
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```

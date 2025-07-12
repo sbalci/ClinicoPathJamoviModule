@@ -57,6 +57,7 @@ groupsummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..dateVar <- jmvcore::OptionVariable$new(
                 "dateVar",
                 dateVar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -267,7 +268,7 @@ groupsummary <- function(
                 "sum",
                 "mean",
                 "n"),
-    dateVar,
+    dateVar = NULL,
     dateFormat = "ymd",
     timeAggregation = "day",
     showMissing = FALSE,

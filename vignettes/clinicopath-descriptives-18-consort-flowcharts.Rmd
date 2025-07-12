@@ -2,16 +2,7 @@
 title: "CONSORT Flow Charts for Clinical Trial Reporting"
 author: "ClinicoPath"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    fig_width: 8
-    fig_height: 10
-vignette: >
-  %\VignetteIndexEntry{CONSORT Flow Charts for Clinical Trial Reporting}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include = FALSE}

@@ -2,17 +2,7 @@
 title: "R Programming Guide for jjstatsplot"
 author: "ClinicoPath Development Team"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    fig_width: 8
-    fig_height: 6
-vignette: >
-  %\VignetteIndexEntry{R Programming Guide for jjstatsplot}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

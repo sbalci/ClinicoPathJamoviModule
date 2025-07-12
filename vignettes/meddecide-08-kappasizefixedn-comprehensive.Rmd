@@ -1,0 +1,516 @@
+---
+title: "Complete Guide to kappasizefixedn: Fixed Sample Size Kappa Power Analysis"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Introduction
+
+The `kappasizefixedn` function is a specialized power analysis tool that helps researchers determine the **expected lower bound** for kappa (κ) agreement coefficients when working with a **fixed, predetermined sample size**. Unlike traditional sample size calculations that determine how many subjects you need for a target effect size, this function answers the question: *"Given that I have access to N subjects, what level of agreement can I reliably detect?"*
+
+## When to Use kappasizefixedn
+
+This function is particularly valuable in research scenarios where:
+
+- **Sample size is constrained** by practical limitations (e.g., rare diseases, expensive procedures)
+- **Retrospective studies** using existing databases or specimen collections  
+- **Pilot studies** with limited resources
+- **Multi-site studies** where contributing sites have varying patient volumes
+- **Grant planning** where you need to justify feasibility with available resources
+
+## Key Concepts
+
+### Fixed Sample Size Analysis
+Traditional power analysis follows the pattern: *Effect Size + Power + Alpha → Sample Size*
+
+Fixed sample size analysis follows: *Sample Size + Effect Size + Alpha → Power/Precision*
+
+### Lower Bound Interpretation
+The function calculates the **lower confidence bound** for kappa, representing the minimum level of agreement you can reliably detect with your available sample size. This helps assess whether your study has adequate power to detect meaningful agreement levels.
+
+# Theoretical Background
+
+## Kappa Coefficient Overview
+
+Cohen's kappa (κ) measures inter-rater agreement for categorical data, accounting for agreement that might occur by chance:
+
+$$\kappa = \frac{p_o - p_e}{1 - p_e}$$
+
+Where:
+- $p_o$ = observed agreement
+- $p_e$ = expected agreement by chance
+
+### Interpretation Guidelines
+
+| Kappa Value | Agreement Level | Clinical Interpretation |
+|------------|----------------|------------------------|
+| < 0.00 | Poor | Less than chance agreement |
+| 0.00-0.20 | Slight | Minimal agreement |
+| 0.21-0.40 | Fair | Weak agreement |
+| 0.41-0.60 | Moderate | Acceptable agreement |
+| 0.61-0.80 | Good | Strong agreement |
+| 0.81-1.00 | Excellent | Near perfect agreement |
+
+## Statistical Framework
+
+The `kappasizefixedn` function uses the `kappaSize` package implementation of variance formulas for different numbers of outcome categories:
+
+### Binary Outcomes (2 categories)
+Uses asymptotic variance estimates for binary kappa with corrections for finite samples.
+
+### Multi-category Outcomes (3-5 categories)  
+Employs generalized kappa variance formulas that account for:
+- Number of categories
+- Marginal probability distributions
+- Number of raters
+- Sample size effects
+
+# Function Parameters and Usage
+
+## Basic Syntax
+
+```r
+kappaSizeFixedN(
+  outcome = "2",           # Number of categories (2, 3, 4, or 5)
+  kappa0 = 0.60,          # Expected kappa value
+  props = "0.30, 0.70",   # Category proportions
+  raters = "2",           # Number of raters (2-5)
+  alpha = 0.05,           # Significance level
+  n = 100                 # Available sample size
+)
+```
+
+## Parameter Details
+
+### `outcome`: Number of Outcome Categories
+- **Options**: "2", "3", "4", "5"
+- **Purpose**: Determines which statistical model to use
+- **Clinical Examples**:
+  - **2**: Disease present/absent, malignant/benign, positive/negative test
+  - **3**: Mild/moderate/severe, low/medium/high risk
+  - **4**: WHO grade 1-4, ECOG performance status 0-3
+  - **5**: Likert scales, pain intensity scales
+
+### `kappa0`: Expected Kappa Value
+- **Range**: 0.01 to 0.99 (exclusive)
+- **Purpose**: The level of agreement you expect to observe
+- **Guidance**: Base on literature review, pilot data, or clinical expertise
+
+### `props`: Category Proportions
+- **Format**: Comma-separated proportions that sum to 1.0
+- **Examples**: 
+  - Binary: "0.25, 0.75" (25% disease prevalence)
+  - Three-category: "0.20, 0.50, 0.30" (mild, moderate, severe)
+- **Sources**: Literature, registry data, clinical experience
+
+### `raters`: Number of Raters
+- **Options**: "2", "3", "4", "5"
+- **Impact**: More raters can improve precision but increase complexity
+- **Practical considerations**: Availability, cost, logistics
+
+### `alpha`: Significance Level
+- **Common values**: 0.05 (5%), 0.01 (1%)
+- **Impact**: Lower alpha provides more conservative bounds
+- **Selection**: Based on field standards and study importance
+
+### `n`: Available Sample Size
+- **Requirements**: Positive integer ≥ 10
+- **Reality check**: Must reflect actual constraints (budget, time, access)
+
+# Clinical Applications and Examples
+
+## Medical Diagnosis Studies
+
+### Example 1: Emergency Department Chest X-ray Agreement
+
+**Scenario**: Two emergency physicians reviewing chest X-rays for pneumonia detection with 80 available cases.
+
+```r
+# Emergency department pneumonia detection
+result <- kappaSizeFixedN(
+  outcome = "2",
+  kappa0 = 0.65,          # Expected good agreement
+  props = "0.25, 0.75",   # 25% pneumonia prevalence
+  raters = "2",           # Two emergency physicians
+  alpha = 0.05,
+  n = 80                  # Available ED cases
+)
+```
+
+**Clinical Context**: 
+- Emergency departments have natural patient flow limitations
+- Quick decision-making requires reliable agreement between physicians
+- Cost-effective validation of diagnostic protocols
+
+### Example 2: Pathology Tumor Grading
+
+**Scenario**: Three pathologists grading tumor differentiation with 160 available specimens.
+
+```r
+# Tumor grading agreement study
+result <- kappaSizeFixedN(
+  outcome = "4",
+  kappa0 = 0.75,                           # Expected strong agreement
+  props = "0.15, 0.25, 0.35, 0.25",       # Grade 1, 2, 3, 4 distribution
+  raters = "3",                            # Three pathologists
+  alpha = 0.05,
+  n = 160                                  # Available tumor specimens
+)
+```
+
+**Clinical Context**:
+- Tumor banks have finite specimen availability
+- Grading consistency affects treatment decisions
+- Multi-institutional studies require agreement validation
+
+## Multi-Category Assessments
+
+### Example 3: Cognitive Impairment Assessment
+
+**Scenario**: Two neuropsychologists assessing cognitive status with 90 available patients.
+
+```r
+# Cognitive impairment assessment
+result <- kappaSizeFixedN(
+  outcome = "4",
+  kappa0 = 0.70,
+  props = "0.20, 0.30, 0.30, 0.20",      # Normal, MCI, Mild, Moderate+ dementia
+  raters = "2",                            # Two neuropsychologists  
+  alpha = 0.05,
+  n = 90                                   # Available cognitive assessments
+)
+```
+
+**Clinical Context**:
+- Specialized cognitive testing requires trained personnel
+- Limited patient availability in memory clinics
+- Diagnostic consistency crucial for treatment planning
+
+### Example 4: Burn Severity Grading
+
+**Scenario**: Three emergency physicians grading burn severity with 75 available cases.
+
+```r
+# Burn severity grading study
+result <- kappaSizeFixedN(
+  outcome = "3",
+  kappa0 = 0.75,
+  props = "0.40, 0.35, 0.25",            # First, second, third degree
+  raters = "3",                           # Three emergency physicians
+  alpha = 0.05,
+  n = 75                                  # Available burn cases
+)
+```
+
+## Research Methodology Applications
+
+### Example 5: Systematic Review Quality Assessment
+
+**Scenario**: Two researchers assessing study quality with 60 available papers.
+
+```r
+# Study quality assessment for systematic review
+result <- kappaSizeFixedN(
+  outcome = "3",
+  kappa0 = 0.70,
+  props = "0.25, 0.45, 0.30",            # Low, moderate, high quality
+  raters = "2",                           # Two researchers
+  alpha = 0.05,
+  n = 60                                  # Available studies
+)
+```
+
+**Research Context**:
+- Systematic reviews limited by available literature
+- Quality assessment affects meta-analysis inclusion
+- Agreement validation required for methodology papers
+
+# Advanced Applications
+
+## Dealing with Unbalanced Proportions
+
+### Rare Disease Studies
+
+When studying rare conditions, category proportions can be highly unbalanced:
+
+```r
+# Rare disease diagnosis agreement
+result <- kappaSizeFixedN(
+  outcome = "2",
+  kappa0 = 0.80,
+  props = "0.05, 0.95",                   # 5% rare disease prevalence
+  raters = "3",
+  alpha = 0.05,
+  n = 200                                 # Large sample needed for rare events
+)
+```
+
+**Considerations for Unbalanced Data**:
+- Requires larger sample sizes for reliable estimates
+- May need stratified analysis approaches
+- Consider specialized statistical methods for rare events
+
+## Multi-Rater Scenarios
+
+### Large Consensus Panels
+
+```r
+# Multi-expert consensus study
+result <- kappaSizeFixedN(
+  outcome = "5",
+  kappa0 = 0.60,                          # Lower expected agreement with more raters
+  props = "0.10, 0.20, 0.35, 0.25, 0.10", # Symmetric distribution
+  raters = "5",                           # Five expert raters
+  alpha = 0.01,                           # Strict significance level
+  n = 150
+)
+```
+
+**Multi-rater Considerations**:
+- Agreement typically decreases with more raters
+- Computational complexity increases
+- May require hierarchical or staged agreement protocols
+
+## Sample Size Optimization
+
+### Finding the Optimal Trade-off
+
+When you have some flexibility in sample size, you can explore different scenarios:
+
+```r
+# Compare different sample sizes
+sample_sizes <- c(50, 100, 150, 200, 250)
+
+results <- list()
+for (n in sample_sizes) {
+  results[[paste0("n_", n)]] <- kappaSizeFixedN(
+    outcome = "3",
+    kappa0 = 0.65,
+    props = "0.30, 0.40, 0.30",
+    raters = "2",
+    alpha = 0.05,
+    n = n
+  )
+}
+
+# Analysis of results would show diminishing returns pattern
+```
+
+# Best Practices and Guidelines
+
+## Study Design Considerations
+
+### 1. **Realistic Expectation Setting**
+
+- Base `kappa0` on literature review or pilot data
+- Consider that inter-rater agreement often decreases in real-world settings
+- Account for rater training and experience levels
+
+### 2. **Proportion Estimation**
+
+- Use registry data, literature reviews, or pilot studies
+- Consider seasonal or temporal variations
+- Account for selection bias in available samples
+
+### 3. **Rater Selection**
+
+- **Training**: Ensure consistent training across raters
+- **Experience**: Balance expertise with availability
+- **Independence**: Maintain rater independence during scoring
+
+### 4. **Sample Size Constraints**
+
+- **Be realistic** about practical limitations
+- **Document constraints** in study protocols
+- **Consider power implications** in interpretation
+
+## Common Pitfalls and Solutions
+
+### 1. **Overly Optimistic Kappa Expectations**
+
+**Problem**: Setting `kappa0` too high based on idealized conditions
+
+**Solution**: 
+- Review literature for realistic agreement levels
+- Conduct small pilot studies
+- Account for real-world variability
+
+### 2. **Ignoring Practical Constraints**
+
+**Problem**: Not considering rater availability, cost, time constraints
+
+**Solution**:
+- Factor in all practical limitations early in planning
+- Have contingency plans for lower sample sizes
+- Consider staged or adaptive designs
+
+### 3. **Inadequate Proportion Estimation**
+
+**Problem**: Using unrealistic or outdated prevalence estimates
+
+**Solution**:
+- Use multiple data sources for proportion estimates
+- Conduct sensitivity analyses with different proportions
+- Update estimates as preliminary data becomes available
+
+## Quality Assurance
+
+### Pre-study Checklist
+
+- [ ] Literature review completed for expected kappa values
+- [ ] Realistic proportion estimates obtained
+- [ ] Rater training protocol established
+- [ ] Sample size constraints documented
+- [ ] Power analysis results acceptable for study goals
+
+### During-study Monitoring
+
+- [ ] Track actual vs. expected proportions
+- [ ] Monitor rater consistency/drift
+- [ ] Document any protocol deviations
+- [ ] Consider interim power analyses
+
+# Interpretation of Results
+
+## Understanding the Output
+
+The `kappasizefixedn` function provides two main outputs:
+
+1. **Statistical Result**: The lower confidence bound for kappa
+2. **Study Explanation**: Detailed interpretation of parameters and context
+
+### Statistical Interpretation
+
+The lower bound represents the **minimum level of agreement** you can reliably detect with your sample size. If this value meets your clinical or research threshold for meaningful agreement, your study has adequate power.
+
+### Clinical Decision Making
+
+Use the results to:
+- **Justify feasibility** in grant applications
+- **Set realistic expectations** for stakeholders  
+- **Inform protocol modifications** if power is inadequate
+- **Support statistical analysis plans**
+
+## Reporting Guidelines
+
+### In Methods Sections
+
+"Power analysis using the kappasizefixedn function indicated that with our available sample size of N subjects and expected kappa of X, we could reliably detect a lower bound of Y with 95% confidence (α = 0.05)."
+
+### In Results Sections
+
+Report both the observed kappa and compare it to the expected lower bound from your power analysis.
+
+### In Discussion Sections
+
+Address any discrepancies between expected and observed agreement levels, and discuss implications for study conclusions.
+
+# Troubleshooting Common Issues
+
+## Error Messages and Solutions
+
+### "Proportions must sum to 1"
+
+**Cause**: Category proportions don't sum to exactly 1.0
+
+**Solution**: Adjust proportions or use normalized values
+```r
+# Incorrect
+props = "0.25, 0.80"  # Sums to 1.05
+
+# Correct  
+props = "0.24, 0.76"  # Sums to 1.00
+```
+
+### "Sample size too small"
+
+**Cause**: Sample size less than minimum recommended (typically 10)
+
+**Solution**: 
+- Increase sample size if possible
+- Consider alternative study designs
+- Use specialized small-sample methods
+
+### "kappaSize package not installed"
+
+**Cause**: Required dependency not available
+
+**Solution**: Install the kappaSize package
+```r
+install.packages("kappaSize")
+```
+
+## Computational Issues
+
+### Very Small or Large Kappa Values
+
+Extreme kappa values (< 0.1 or > 0.95) may cause computational issues:
+
+**Solutions**:
+- Verify that such extreme values are realistic
+- Consider alternative agreement measures for extreme cases
+- Increase sample size for more stable estimates
+
+### Complex Multi-rater Scenarios
+
+With 4-5 raters and 4-5 categories, computations become complex:
+
+**Solutions**:
+- Ensure adequate sample size (n > 100 recommended)
+- Consider staged agreement protocols
+- Validate results with simulation studies
+
+# Future Directions and Related Tools
+
+## Complementary Functions
+
+The `kappasizefixedn` function works well alongside:
+
+- **`kappasizeci`**: For traditional sample size calculations
+- **Other power analysis tools**: For comprehensive study planning
+- **Agreement analysis functions**: For post-hoc agreement assessment
+
+## Advanced Methods
+
+For specialized scenarios, consider:
+
+- **Weighted kappa**: For ordinal categories with meaningful ordering
+- **Multilevel models**: For hierarchical data structures
+- **Bayesian approaches**: For incorporating prior information
+
+## Software Integration
+
+The function integrates well with:
+
+- **jamovi**: User-friendly interface for clinical researchers
+- **R workflows**: Programmable analysis pipelines
+- **Reproducible research**: RMarkdown and Quarto integration
+
+# Summary
+
+The `kappasizefixedn` function provides essential power analysis capabilities for inter-rater agreement studies with fixed sample sizes. Key takeaways:
+
+1. **Use when sample size is constrained** by practical limitations
+2. **Provides lower confidence bounds** for detectable agreement levels  
+3. **Supports 2-5 categories** and 2-5 raters
+4. **Requires realistic parameter estimates** for meaningful results
+5. **Integrates with comprehensive study planning** workflows
+
+By understanding and properly applying this tool, researchers can make informed decisions about study feasibility and set appropriate expectations for inter-rater agreement analyses.
+
+# References
+
+1. Cohen, J. (1960). A coefficient of agreement for nominal scales. Educational and Psychological Measurement, 20(1), 37-46.
+
+2. Fleiss, J. L., Levin, B., & Paik, M. C. (2003). Statistical methods for rates and proportions. John Wiley & Sons.
+
+3. Gwet, K. L. (2014). Handbook of inter-rater reliability: The definitive guide to measuring the extent of agreement among raters. Advanced Analytics, LLC.
+
+4. Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159-174.
+
+5. Shoukri, M. M. (2011). Measures of interobserver agreement and reliability. Chapman and Hall/CRC.
+
+---
+
+*This vignette was generated using the ClinicoPath R package. For more information, visit the [ClinicoPath GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule).*

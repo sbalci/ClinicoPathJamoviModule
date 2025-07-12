@@ -268,11 +268,17 @@ ppvClass <- R6::R6Class(
         }),
 
     public=list(
+        #' @description
+        #' Read dataset for PPV analysis
+        #' @return NULL as this analysis doesn't require data
         readDataset=function() {
             # This analysis doesn't require data
             return(NULL)
         },
         
+        #' @description
+        #' Generate R source code for PPV analysis
+        #' @return Character string indicating syntax mode is not supported
         asSource=function() {
 
             paste0("This module does not support syntax mode yet.")

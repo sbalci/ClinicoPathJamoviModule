@@ -1,0 +1,731 @@
+---
+title: "High-Performance Scatter Plots with jscattermore"
+subtitle: "Comprehensive Guide to Fast Visualization of Large Datasets"
+date: last-modified
+author: "ClinicoPath"
+output: html_document
+---
+
+# Introduction
+
+The `jscattermore` function provides high-performance scatter plot visualization using the `scattermore` package, designed specifically for plotting millions of data points efficiently. This function is ideal for large datasets where traditional plotting methods become slow or memory-intensive.
+
+## Key Features
+
+- **High Performance**: Efficiently plot millions of points using raster graphics
+- **Multiple Backends**: Support for base R, ggplot2, and optimized ggplot2 rendering
+- **Advanced Aesthetics**: Color and size mapping with multiple palette options
+- **Statistical Overlays**: Correlation coefficients, smooth lines, and density contours
+- **Customization**: Extensive theming and styling options
+- **Performance Monitoring**: Built-in performance measurement and comparison
+- **Memory Efficient**: Optimized memory usage through intelligent caching
+
+## Installation and Setup
+
+```{r setup}
+# Load required libraries
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%"
+)
+
+# Check if scattermore is available
+if (!requireNamespace("scattermore", quietly = TRUE)) {
+  message("Note: scattermore package not available. Install with: install.packages('scattermore')")
+}
+```
+
+# Basic Usage
+
+## Simple Scatter Plot
+
+The most basic usage requires only x and y variables:
+
+```{r basic-scatter}
+# Create sample data
+set.seed(123)
+basic_data <- data.frame(
+  x = rnorm(5000),
+  y = rnorm(5000) + 0.5 * rnorm(5000),
+  group = factor(sample(c("A", "B", "C"), 5000, replace = TRUE))
+)
+
+# Basic scatter plot
+result_basic <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y"
+)
+
+# The result contains the plot and summary information
+print(names(result_basic))
+```
+
+## Plot Types
+
+### Base R Implementation
+
+```{r base-r-plot}
+result_base <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "base_r",
+  show_correlation = TRUE,
+  plot_title = "Base R Scatter Plot"
+)
+```
+
+### ggplot2 Implementation
+
+```{r ggplot2-plot}
+result_ggplot <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "ggplot2",
+  show_correlation = TRUE,
+  plot_title = "ggplot2 Scatter Plot"
+)
+```
+
+### Optimized ggplot2 Implementation
+
+```{r ggplot2-opt-plot}
+result_opt <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "ggplot2_opt",
+  show_correlation = TRUE,
+  plot_title = "Optimized ggplot2 Scatter Plot"
+)
+```
+
+# Advanced Aesthetics
+
+## Color Mapping
+
+### Continuous Color Variables
+
+```{r continuous-color}
+# Add continuous color variable
+continuous_data <- basic_data %>%
+  mutate(intensity = x^2 + y^2 + rnorm(nrow(basic_data), sd = 0.1))
+
+result_cont_color <- jscattermore(
+  data = continuous_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "intensity",
+  color_palette = "viridis",
+  plot_title = "Continuous Color Mapping"
+)
+```
+
+### Categorical Color Variables
+
+```{r categorical-color}
+result_cat_color <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  color_palette = "plasma",
+  plot_title = "Categorical Color Mapping"
+)
+```
+
+## Size Mapping
+
+```{r size-mapping}
+# Add size variable
+size_data <- basic_data %>%
+  mutate(magnitude = abs(x + y) + runif(nrow(basic_data), 0.5, 2))
+
+result_size <- jscattermore(
+  data = size_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  size_var = "magnitude",
+  plot_title = "Color and Size Mapping"
+)
+```
+
+## Color Palettes
+
+### Comparing Different Palettes
+
+```{r color-palettes}
+palettes <- c("viridis", "plasma", "inferno", "magma", "cividis")
+
+# Create a comparison (showing code for one palette)
+result_palette <- jscattermore(
+  data = continuous_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "intensity",
+  color_palette = "inferno",
+  plot_title = "Inferno Color Palette"
+)
+```
+
+# Statistical Overlays
+
+## Correlation Display
+
+```{r correlation}
+# Data with strong correlation
+corr_data <- data.frame(
+  x = rnorm(2000),
+  y = NA
+)
+corr_data$y <- 0.8 * corr_data$x + rnorm(2000, sd = 0.5)
+
+result_corr <- jscattermore(
+  data = corr_data,
+  x_var = "x",
+  y_var = "y",
+  show_correlation = TRUE,
+  plot_title = "Scatter Plot with Correlation"
+)
+```
+
+## Smooth Lines
+
+```{r smooth-lines}
+# Linear smooth
+result_smooth_lm <- jscattermore(
+  data = corr_data,
+  x_var = "x",
+  y_var = "y",
+  show_smooth = TRUE,
+  smooth_method = "lm",
+  show_correlation = TRUE,
+  plot_title = "Linear Smooth Line"
+)
+
+# LOESS smooth
+result_smooth_loess <- jscattermore(
+  data = corr_data,
+  x_var = "x",
+  y_var = "y",
+  show_smooth = TRUE,
+  smooth_method = "loess",
+  show_correlation = TRUE,
+  plot_title = "LOESS Smooth Line"
+)
+```
+
+## Density Contours
+
+```{r density-contours}
+result_density <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  show_density = TRUE,
+  alpha = 0.6,
+  plot_title = "Scatter Plot with Density Contours"
+)
+```
+
+# Data Transformations
+
+## Log Transformations
+
+```{r log-transformations}
+# Create positive data for log transformation
+log_data <- data.frame(
+  x = exp(rnorm(3000, mean = 2, sd = 1)),
+  y = exp(rnorm(3000, mean = 1.5, sd = 0.8))
+)
+
+# Log transform X-axis
+result_log_x <- jscattermore(
+  data = log_data,
+  x_var = "x",
+  y_var = "y",
+  log_transform_x = TRUE,
+  plot_title = "Log-transformed X-axis"
+)
+
+# Log transform both axes
+result_log_both <- jscattermore(
+  data = log_data,
+  x_var = "x",
+  y_var = "y",
+  log_transform_x = TRUE,
+  log_transform_y = TRUE,
+  plot_title = "Log-log Transformation"
+)
+```
+
+# Faceting and Grouping
+
+## Faceted Plots
+
+```{r faceting}
+# Multi-group data for faceting
+facet_data <- data.frame(
+  x = rnorm(1500),
+  y = rnorm(1500),
+  condition = factor(rep(c("Control", "Treatment_A", "Treatment_B"), each = 500)),
+  time_point = factor(rep(c("Baseline", "Week_4", "Week_8"), times = 500))
+)
+
+result_facet <- jscattermore(
+  data = facet_data,
+  x_var = "x",
+  y_var = "y",
+  facet_var = "condition",
+  color_var = "time_point",
+  plot_title = "Faceted Scatter Plot by Condition"
+)
+```
+
+# Performance Optimization
+
+## Performance Monitoring
+
+```{r performance-monitoring}
+# Large dataset for performance testing
+large_data <- data.frame(
+  x = rnorm(20000),
+  y = rnorm(20000) + 0.3 * rnorm(20000),
+  group = factor(sample(c("Group1", "Group2", "Group3"), 20000, replace = TRUE))
+)
+
+result_performance <- jscattermore(
+  data = large_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  show_performance = TRUE,
+  plot_title = "Performance Monitoring Example"
+)
+```
+
+## Raster Settings
+
+### Resolution Control
+
+```{r resolution-control}
+# High resolution for publication quality
+result_high_res <- jscattermore(
+  data = large_data,
+  x_var = "x",
+  y_var = "y",
+  pixels = 1024,  # High resolution
+  interpolate = TRUE,
+  plot_title = "High Resolution (1024x1024)"
+)
+
+# Lower resolution for faster rendering
+result_low_res <- jscattermore(
+  data = large_data,
+  x_var = "x",
+  y_var = "y",
+  pixels = 256,   # Lower resolution
+  interpolate = FALSE,
+  plot_title = "Lower Resolution (256x256)"
+)
+```
+
+### Point Size Optimization
+
+```{r point-size}
+# Automatic point sizing
+result_auto_size <- jscattermore(
+  data = large_data,
+  x_var = "x",
+  y_var = "y",
+  pointsize = 0,  # Automatic
+  plot_title = "Automatic Point Sizing"
+)
+
+# Manual point sizing
+result_manual_size <- jscattermore(
+  data = large_data,
+  x_var = "x",
+  y_var = "y",
+  pointsize = 2,  # Manual
+  plot_title = "Manual Point Sizing"
+)
+```
+
+# Customization and Theming
+
+## Visual Themes
+
+```{r themes}
+# Different themes
+theme_data <- basic_data[1:1000, ]
+
+# Minimal theme
+result_minimal <- jscattermore(
+  data = theme_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  theme_style = "minimal",
+  plot_title = "Minimal Theme"
+)
+
+# Dark theme
+result_dark <- jscattermore(
+  data = theme_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  theme_style = "dark",
+  plot_title = "Dark Theme"
+)
+```
+
+## Custom Labels and Titles
+
+```{r custom-labels}
+result_labels <- jscattermore(
+  data = basic_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  x_label = "Predictor Variable (X)",
+  y_label = "Response Variable (Y)",
+  plot_title = "Custom Scatter Plot with Detailed Labels"
+)
+```
+
+## Alpha and Transparency
+
+```{r transparency}
+# Different alpha levels for overplotting
+alpha_data <- data.frame(
+  x = rnorm(8000),
+  y = rnorm(8000)
+)
+
+# High alpha (less transparent)
+result_alpha_high <- jscattermore(
+  data = alpha_data,
+  x_var = "x",
+  y_var = "y",
+  alpha = 0.9,
+  plot_title = "High Alpha (α = 0.9)"
+)
+
+# Low alpha (more transparent)
+result_alpha_low <- jscattermore(
+  data = alpha_data,
+  x_var = "x",
+  y_var = "y",
+  alpha = 0.3,
+  plot_title = "Low Alpha (α = 0.3)"
+)
+```
+
+# Real-World Applications
+
+## Medical Research Example
+
+```{r medical-research}
+# Simulate medical research data
+set.seed(456)
+medical_data <- data.frame(
+  patient_id = 1:2000,
+  age = round(rnorm(2000, mean = 55, sd = 15)),
+  bmi = rnorm(2000, mean = 26, sd = 4),
+  systolic_bp = round(rnorm(2000, mean = 130, sd = 20)),
+  cholesterol = rnorm(2000, mean = 200, sd = 30),
+  treatment = factor(sample(c("Control", "Drug_A", "Drug_B"), 2000, replace = TRUE)),
+  outcome_score = rnorm(2000, mean = 50, sd = 15)
+) %>%
+  # Create realistic relationships
+  mutate(
+    systolic_bp = systolic_bp + 0.5 * age + 1.5 * bmi,
+    cholesterol = cholesterol + 0.3 * age + 2 * bmi,
+    outcome_score = outcome_score - 0.2 * age + 0.1 * cholesterol
+  )
+
+# BMI vs Blood Pressure colored by treatment
+result_medical <- jscattermore(
+  data = medical_data,
+  x_var = "bmi",
+  y_var = "systolic_bp",
+  color_var = "treatment",
+  size_var = "age",
+  show_smooth = TRUE,
+  smooth_method = "lm",
+  show_correlation = TRUE,
+  x_label = "Body Mass Index (BMI)",
+  y_label = "Systolic Blood Pressure (mmHg)",
+  plot_title = "BMI vs Blood Pressure by Treatment Group"
+)
+```
+
+## Time Series Analysis
+
+```{r time-series}
+# Time series scatter plot
+time_data <- data.frame(
+  time = 1:1000,
+  signal = sin(seq(0, 4*pi, length.out = 1000)) + rnorm(1000, sd = 0.2),
+  noise = rnorm(1000),
+  phase = factor(rep(c("Phase1", "Phase2", "Phase3", "Phase4"), each = 250))
+)
+
+result_timeseries <- jscattermore(
+  data = time_data,
+  x_var = "time",
+  y_var = "signal",
+  color_var = "phase",
+  show_smooth = TRUE,
+  smooth_method = "loess",
+  x_label = "Time Points",
+  y_label = "Signal Amplitude",
+  plot_title = "Time Series Signal Analysis"
+)
+```
+
+## High-Dimensional Data Visualization
+
+```{r high-dimensional}
+# Simulate high-dimensional data with clustering
+set.seed(789)
+n_points <- 3000
+cluster_centers <- rbind(
+  c(0, 0), c(3, 3), c(-2, 4), c(4, -1)
+)
+
+high_dim_data <- do.call(rbind, lapply(1:4, function(i) {
+  n_cluster <- n_points / 4
+  data.frame(
+    x = rnorm(n_cluster, cluster_centers[i, 1], 1),
+    y = rnorm(n_cluster, cluster_centers[i, 2], 1),
+    cluster = factor(paste("Cluster", i)),
+    density = runif(n_cluster, 0.1, 1.0),
+    dimension_3 = rnorm(n_cluster, cluster_centers[i, 1] + cluster_centers[i, 2], 0.5)
+  )
+}))
+
+result_clusters <- jscattermore(
+  data = high_dim_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "dimension_3",
+  size_var = "density",
+  facet_var = "cluster",
+  color_palette = "viridis",
+  plot_title = "High-Dimensional Clustering Visualization"
+)
+```
+
+# Performance Comparison
+
+## Benchmarking Different Methods
+
+```{r benchmarking}
+# Large dataset for benchmarking
+benchmark_data <- data.frame(
+  x = rnorm(50000),
+  y = rnorm(50000),
+  group = factor(sample(c("A", "B", "C", "D"), 50000, replace = TRUE))
+)
+
+# Benchmark different plot types with performance monitoring
+benchmark_results <- list()
+
+# Base R method
+benchmark_results$base_r <- jscattermore(
+  data = benchmark_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "base_r",
+  show_performance = TRUE,
+  plot_title = "Base R Performance Test"
+)
+
+# ggplot2 method
+benchmark_results$ggplot2 <- jscattermore(
+  data = benchmark_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "ggplot2",
+  show_performance = TRUE,
+  plot_title = "ggplot2 Performance Test"
+)
+
+# Optimized ggplot2 method
+benchmark_results$ggplot2_opt <- jscattermore(
+  data = benchmark_data,
+  x_var = "x",
+  y_var = "y",
+  plot_type = "ggplot2_opt",
+  show_performance = TRUE,
+  plot_title = "Optimized ggplot2 Performance Test"
+)
+```
+
+# Error Handling and Edge Cases
+
+## Missing Data
+
+```{r missing-data}
+# Data with missing values
+missing_data <- basic_data
+missing_data$x[sample(1:nrow(missing_data), 200)] <- NA
+missing_data$y[sample(1:nrow(missing_data), 150)] <- NA
+
+result_missing <- jscattermore(
+  data = missing_data,
+  x_var = "x",
+  y_var = "y",
+  color_var = "group",
+  plot_title = "Handling Missing Data"
+)
+```
+
+## Single Data Points
+
+```{r single-point}
+# Edge case: single data point
+single_data <- data.frame(x = 1, y = 1)
+
+result_single <- jscattermore(
+  data = single_data,
+  x_var = "x",
+  y_var = "y",
+  plot_title = "Single Data Point"
+)
+```
+
+## Identical Values
+
+```{r identical-values}
+# Edge case: all identical values
+identical_data <- data.frame(
+  x = rep(5, 100),
+  y = rep(5, 100)
+)
+
+result_identical <- jscattermore(
+  data = identical_data,
+  x_var = "x",
+  y_var = "y",
+  plot_title = "Identical Values"
+)
+```
+
+# Best Practices
+
+## 1. Choosing Plot Types
+
+- **base_r**: Best for simple, fast plots without ggplot2 dependencies
+- **ggplot2**: Standard ggplot2 integration with full theming support
+- **ggplot2_opt**: Most optimized for very large datasets
+
+## 2. Performance Optimization
+
+```{r performance-tips}
+# For very large datasets
+performance_tips <- data.frame(
+  tip = c(
+    "Use lower pixel resolution for interactive exploration",
+    "Use higher resolution for final publication plots",
+    "Enable interpolation for smoother appearance",
+    "Disable correlation calculation for huge datasets",
+    "Use appropriate alpha values to handle overplotting",
+    "Consider sampling large datasets for initial exploration"
+  ),
+  code_example = c(
+    "pixels = 256",
+    "pixels = 1024",
+    "interpolate = TRUE",
+    "show_correlation = FALSE",
+    "alpha = 0.3",
+    "sample_n(data, 10000)"
+  )
+)
+
+print(performance_tips)
+```
+
+## 3. Color and Aesthetics
+
+```{r aesthetic-tips}
+# Best practices for color mapping
+aesthetic_guidelines <- data.frame(
+  aspect = c(
+    "Continuous variables",
+    "Categorical variables",
+    "Large datasets",
+    "Publication plots",
+    "Accessibility"
+  ),
+  recommendation = c(
+    "Use perceptually uniform palettes (viridis, plasma)",
+    "Use qualitatively different colors",
+    "Use transparency (alpha < 1) to show density",
+    "Use high resolution and interpolation",
+    "Avoid red-green combinations, use colorblind-friendly palettes"
+  ),
+  palette_suggestion = c(
+    "viridis, plasma, inferno",
+    "Set1, Dark2, Accent",
+    "Any with alpha = 0.3-0.7",
+    "viridis with interpolate = TRUE",
+    "viridis, cividis"
+  )
+)
+
+print(aesthetic_guidelines)
+```
+
+# Summary
+
+The `jscattermore` function provides a powerful and efficient solution for visualizing large datasets through high-performance scatter plots. Key advantages include:
+
+## Performance Benefits
+
+- **Speed**: 10-100x faster than traditional plotting for large datasets
+- **Memory Efficiency**: Raster-based rendering reduces memory usage
+- **Scalability**: Can handle millions of data points
+- **Caching**: Intelligent caching system reduces redundant computations
+
+## Visualization Features
+
+- **Multiple Backends**: Choose optimal rendering method for your needs
+- **Rich Aesthetics**: Color and size mapping with multiple palette options
+- **Statistical Overlays**: Correlation, smooth lines, density contours
+- **Customization**: Extensive theming and styling options
+
+## Use Cases
+
+- **Exploratory Data Analysis**: Quick visualization of large datasets
+- **Time Series Analysis**: Efficient plotting of temporal data
+- **Clustering Visualization**: Color-coded cluster analysis
+- **Medical Research**: Patient data visualization with multiple variables
+- **Performance Monitoring**: Built-in benchmarking capabilities
+
+The function is designed to handle real-world scenarios including missing data, edge cases, and performance requirements while maintaining high visual quality and statistical accuracy.
+
+## Next Steps
+
+- Explore the [ClinicoPath package documentation](https://github.com/sbalci/ClinicoPathJamoviModule) for more statistical analysis functions
+- Try the function with your own large datasets
+- Experiment with different plot types and aesthetic options
+- Use performance monitoring to optimize your workflows
+
+```{r session-info}
+sessionInfo()
+```

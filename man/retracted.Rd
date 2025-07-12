@@ -7,13 +7,21 @@
 retracted(data, doi, database = "or", pmid = FALSE)
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame containing the DOI variable to check.
+Must have at least one column with DOI strings.}
 
-\item{doi}{Column containing DOI strings.}
+\item{doi}{Column containing DOI strings to check for retractions. Supports
+multiple DOI formats including bare DOIs (10.1000/example),  DOI URIs
+(doi:10.1000/example), and DOI URLs (https://doi.org/10.1000/example).}
 
-\item{database}{Database to check for retractions.}
+\item{database}{Database to check for retractions. OpenRetractions is
+recommended  as it provides comprehensive and up-to-date retraction
+information.  RetractionWatch option currently uses OpenRetractions as
+fallback.}
 
-\item{pmid}{Add corresponding PubMed IDs to dataset.}
+\item{pmid}{If TRUE, attempts to retrieve corresponding PubMed IDs for
+valid DOIs using the rcrossref package. Requires internet connection and
+may  increase processing time for large datasets.}
 }
 \value{
 A results object containing:
@@ -31,5 +39,31 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Find Retracted Papers from DOI
+Checks DOIs against retraction databases to identify retracted
+publications. Uses OpenRetractions API to validate publication status and
+can optionally retrieve PubMed IDs. Includes DOI format validation, rate
+limiting, and  robust error handling for reliable results.
+}
+\examples{
+\donttest{
+# Example 1: Basic retraction check
+data <- data.frame(
+  doi = c("10.1126/science.aac4716", "10.1038/nature12373", "10.1016/j.cell.2014.09.045")
+)
+result <- retracted(data = data, doi = "doi")
+
+# Example 2: Include PubMed IDs
+result_with_pmid <- retracted(
+  data = data,
+  doi = "doi",
+  pmid = TRUE
+)
+
+# Example 3: Using different database
+result_rw <- retracted(
+  data = data,
+  doi = "doi",
+  database = "rw"
+)
+}
 }

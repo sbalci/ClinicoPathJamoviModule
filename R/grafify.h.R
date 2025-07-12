@@ -63,7 +63,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..blocks <- jmvcore::OptionVariable$new(
                 "blocks",
                 blocks,
@@ -71,7 +72,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
                 facet_var,
@@ -79,7 +81,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..plot_type <- jmvcore::OptionList$new(
                 "plot_type",
                 plot_type,
@@ -227,7 +230,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..befafter_id_var <- jmvcore::OptionVariable$new(
                 "befafter_id_var",
                 befafter_id_var,
@@ -236,7 +240,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor",
-                    "id"))
+                    "id"),
+                default=NULL)
             private$..show_individual_points <- jmvcore::OptionBool$new(
                 "show_individual_points",
                 show_individual_points,
@@ -305,7 +310,8 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "id"))
+                    "id"),
+                default=NULL)
             private$..alpha_level <- jmvcore::OptionNumber$new(
                 "alpha_level",
                 alpha_level,
@@ -695,9 +701,9 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 grafify <- function(
     data,
     vars,
-    groups,
-    blocks,
-    facet_var,
+    groups = NULL,
+    blocks = NULL,
+    facet_var = NULL,
     plot_type = "scatterbar",
     x_var,
     y_var,
@@ -715,8 +721,8 @@ grafify <- function(
     stat_method = "anova_1way",
     posthoc_comparisons = FALSE,
     comparison_method = "pairwise",
-    befafter_shape_var,
-    befafter_id_var,
+    befafter_shape_var = NULL,
+    befafter_id_var = NULL,
     show_individual_points = TRUE,
     show_summary_stats = TRUE,
     show_model_diagnostics = FALSE,
@@ -728,7 +734,7 @@ grafify <- function(
     y_label = "",
     legend_position = "right",
     experimental_design = "crd",
-    random_effects,
+    random_effects = NULL,
     alpha_level = 0.05) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

@@ -23,6 +23,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: NULL
       description: Optional variable for weighting intersections
     
     - name: min_size
@@ -44,13 +45,13 @@ options:
       title: Sort Intersections By
       type: List
       options:
-        - name: size
+        - name: cardinality
           title: Intersection Size
         - name: degree
           title: Set Degree
         - name: ratio
           title: Size/Union Ratio
-      default: size
+      default: cardinality
       description: Method for sorting intersections
     
     - name: sort_order
@@ -98,8 +99,6 @@ options:
           title: Intersection Size
         - name: intersection_ratio
           title: Size/Union Ratio
-        - name: union_size
-          title: Union Size
       default: intersection_size
       description: Type of annotation to add
     

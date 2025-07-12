@@ -240,7 +240,7 @@ ppv <- function(
 
     analysis <- ppvClass$new(
         options = options,
-        data = NULL)
+        data = data)
 
     analysis$run()
 

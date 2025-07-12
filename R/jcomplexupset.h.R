@@ -10,7 +10,7 @@ jcomplexupsetOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             value_var = NULL,
             min_size = 0,
             max_degree = 4,
-            sort_by = "size",
+            sort_by = "cardinality",
             sort_order = "descending",
             keep_empty_groups = FALSE,
             set_size_show = TRUE,
@@ -52,7 +52,8 @@ jcomplexupsetOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..min_size <- jmvcore::OptionNumber$new(
                 "min_size",
                 min_size,
@@ -68,10 +69,10 @@ jcomplexupsetOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "sort_by",
                 sort_by,
                 options=list(
-                    "size",
+                    "cardinality",
                     "degree",
                     "ratio"),
-                default="size")
+                default="cardinality")
             private$..sort_order <- jmvcore::OptionList$new(
                 "sort_order",
                 sort_order,
@@ -101,8 +102,7 @@ jcomplexupsetOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=list(
                     "none",
                     "intersection_size",
-                    "intersection_ratio",
-                    "union_size"),
+                    "intersection_ratio"),
                 default="intersection_size")
             private$..base_annotations_height <- jmvcore::OptionNumber$new(
                 "base_annotations_height",
@@ -372,10 +372,10 @@ jcomplexupsetBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jcomplexupset <- function(
     data,
     set_vars,
-    value_var,
+    value_var = NULL,
     min_size = 0,
     max_degree = 4,
-    sort_by = "size",
+    sort_by = "cardinality",
     sort_order = "descending",
     keep_empty_groups = FALSE,
     set_size_show = TRUE,

@@ -6,19 +6,51 @@ menuSubgroup: ClinicoPath Bibliometrics
 version: '1.0.0'
 jas: '1.2'
 
+description:
+  main: >
+    Checks DOIs against retraction databases to identify retracted publications.
+    Uses OpenRetractions API to validate publication status and can optionally
+    retrieve PubMed IDs. Includes DOI format validation, rate limiting, and 
+    robust error handling for reliable results.
+  R:
+    dontrun: true
+    usage: |
+      # Example 1: Basic retraction check
+      data <- data.frame(
+        doi = c("10.1126/science.aac4716", "10.1038/nature12373", "10.1016/j.cell.2014.09.045")
+      )
+      result <- retracted(data = data, doi = "doi")
+      
+      # Example 2: Include PubMed IDs
+      result_with_pmid <- retracted(
+        data = data, 
+        doi = "doi",
+        pmid = TRUE
+      )
+      
+      # Example 3: Using different database
+      result_rw <- retracted(
+        data = data,
+        doi = "doi", 
+        database = "rw"
+      )
+
 options:
     - name: data
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The data as a data frame containing the DOI variable to check. 
+            Must have at least one column with DOI strings.
 
     - name: doi 
       title: DOI Variable
       type: Variable
       description:
           R: >
-            Column containing DOI strings.
+            Column containing DOI strings to check for retractions. Supports
+            multiple DOI formats including bare DOIs (10.1000/example), 
+            DOI URIs (doi:10.1000/example), and DOI URLs (https://doi.org/10.1000/example).
 
     - name: database
       title: Retraction Database
@@ -31,7 +63,9 @@ options:
       default: or
       description:
           R: >
-            Database to check for retractions.
+            Database to check for retractions. OpenRetractions is recommended 
+            as it provides comprehensive and up-to-date retraction information. 
+            RetractionWatch option currently uses OpenRetractions as fallback.
 
     - name: pmid
       title: Add PMID to Data
@@ -39,7 +73,9 @@ options:
       default: false
       description:
           R: >
-            Add corresponding PubMed IDs to dataset.
+            If TRUE, attempts to retrieve corresponding PubMed IDs for valid DOIs
+            using the rcrossref package. Requires internet connection and may 
+            increase processing time for large datasets.
 
     - name: resids
       title: PMIDs

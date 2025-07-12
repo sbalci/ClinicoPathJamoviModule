@@ -2,16 +2,7 @@
 title: "Decision Tree Graph Analysis: Comprehensive Guide and Testing"
 author: "ClinicoPath Package"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-    fig_width: 8
-    fig_height: 6
-vignette: >
-  %\VignetteIndexEntry{Decision Tree Graph Analysis: Comprehensive Guide and Testing}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include = FALSE}

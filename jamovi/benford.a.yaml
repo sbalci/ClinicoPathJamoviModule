@@ -1,7 +1,7 @@
 ---
 name:  benford
 title: Benford Analysis
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptives
 version: '0.0.3'
 jas: '1.2'

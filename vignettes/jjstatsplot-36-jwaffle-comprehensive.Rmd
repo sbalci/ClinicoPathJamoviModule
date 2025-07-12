@@ -1,0 +1,1054 @@
+---
+title: "Professional Waffle Charts with jwaffle"
+subtitle: "Proportional Data Visualization Using Grid-Based Charts"
+date: last-modified
+author: "ClinicoPath"
+output: html_document
+---
+
+# Introduction
+
+The `jwaffle` function provides professional waffle chart visualizations for proportional data display. Waffle charts (also known as square pie charts) use a grid of squares to represent data proportions, making them particularly effective for displaying percentages, survey responses, and categorical distributions.
+
+## What are Waffle Charts?
+
+Waffle charts are a powerful alternative to traditional pie charts that offer several advantages:
+
+- **Easy to read**: Grid-based layout is more intuitive than pie slices
+- **Precise comparison**: Individual squares make exact proportions clear
+- **Flexible scaling**: Can represent different scales (each square = 1%, 10 cases, etc.)
+- **Professional appearance**: Clean, modern aesthetic suitable for presentations
+- **Accessible design**: Color patterns are easier to distinguish than pie segments
+
+## Key Features of jwaffle
+
+- **Flexible Data Input**: Works with counts, frequencies, or case-level data
+- **Advanced Customization**: Multiple color palettes, themes, and styling options
+- **Faceting Support**: Create multi-panel charts for complex data comparison
+- **Performance Optimized**: Intelligent caching for large datasets and repeated analyses
+- **Professional Styling**: Publication-ready output with customizable themes
+
+## Installation and Setup
+
+```{r setup}
+# Load required libraries
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 12,
+  fig.height = 8,
+  dpi = 300,
+  out.width = "100%"
+)
+
+# Check if required packages are available
+if (!requireNamespace("waffle", quietly = TRUE)) {
+  message("Note: waffle package required for waffle chart creation")
+}
+
+if (!requireNamespace("scales", quietly = TRUE)) {
+  message("Note: scales package recommended for enhanced formatting")
+}
+```
+
+# Data Preparation
+
+Let's create diverse datasets to demonstrate different waffle chart applications:
+
+## Market Research Data
+
+```{r market-data}
+# Create market research dataset
+set.seed(123)
+market_data <- data.frame(
+  # Core product preferences
+  preferred_brand = factor(sample(c("Brand_A", "Brand_B", "Brand_C", "Brand_D", "Brand_E"), 
+                                 500, replace = TRUE, prob = c(0.35, 0.25, 0.20, 0.15, 0.05))),
+  
+  purchase_frequency = sample(1:12, 500, replace = TRUE, 
+                             prob = c(0.3, 0.2, 0.15, 0.1, 0.08, 0.07, rep(0.02, 6))),
+  
+  # Demographic segmentation
+  age_group = factor(sample(c("18-25", "26-35", "36-45", "46-55", "55+"), 
+                           500, replace = TRUE, prob = c(0.15, 0.25, 0.25, 0.20, 0.15))),
+  
+  region = factor(sample(c("North", "South", "East", "West"), 
+                        500, replace = TRUE)),
+  
+  income_level = factor(sample(c("Low", "Middle", "High"), 
+                              500, replace = TRUE, prob = c(0.25, 0.50, 0.25))),
+  
+  # Customer behavior
+  loyalty_program = factor(sample(c("Member", "Non_Member"), 
+                                 500, replace = TRUE, prob = c(0.4, 0.6))),
+  
+  purchase_channel = factor(sample(c("Online", "In_Store", "Mobile", "Phone"), 
+                                  500, replace = TRUE, prob = c(0.45, 0.35, 0.15, 0.05)))
+)
+
+# Display structure
+str(market_data)
+head(market_data)
+```
+
+## Survey Response Data
+
+```{r survey-data}
+# Create employee satisfaction survey data
+survey_data <- data.frame(
+  # Satisfaction ratings (Likert scale)
+  job_satisfaction = factor(sample(c("Very_Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very_Dissatisfied"), 
+                                  400, replace = TRUE, prob = c(0.20, 0.35, 0.25, 0.15, 0.05)),
+                           levels = c("Very_Dissatisfied", "Dissatisfied", "Neutral", "Satisfied", "Very_Satisfied")),
+  
+  work_life_balance = factor(sample(c("Excellent", "Good", "Fair", "Poor"), 
+                                   400, replace = TRUE, prob = c(0.15, 0.45, 0.30, 0.10)),
+                            levels = c("Poor", "Fair", "Good", "Excellent")),
+  
+  # Employee demographics
+  department = factor(sample(c("Engineering", "Sales", "Marketing", "HR", "Finance", "Operations"), 
+                            400, replace = TRUE, prob = c(0.25, 0.20, 0.15, 0.10, 0.15, 0.15))),
+  
+  tenure_years = factor(sample(c("Less_than_1", "1-2", "3-5", "5-10", "More_than_10"), 
+                              400, replace = TRUE, prob = c(0.15, 0.25, 0.30, 0.20, 0.10))),
+  
+  employment_type = factor(sample(c("Full_Time", "Part_Time", "Contract"), 
+                                 400, replace = TRUE, prob = c(0.80, 0.15, 0.05))),
+  
+  remote_work = factor(sample(c("Fully_Remote", "Hybrid", "On_Site"), 
+                             400, replace = TRUE, prob = c(0.30, 0.45, 0.25)))
+)
+
+str(survey_data)
+```
+
+## Healthcare Data
+
+```{r healthcare-data}
+# Create healthcare outcome data
+healthcare_data <- data.frame(
+  # Treatment outcomes
+  treatment_response = factor(sample(c("Complete_Response", "Partial_Response", "Stable_Disease", "Progressive_Disease"), 
+                                    300, replace = TRUE, prob = c(0.25, 0.35, 0.25, 0.15))),
+  
+  # Patient characteristics
+  age_category = factor(sample(c("Under_40", "40-60", "60-75", "Over_75"), 
+                              300, replace = TRUE, prob = c(0.15, 0.35, 0.35, 0.15))),
+  
+  disease_stage = factor(sample(c("Early", "Intermediate", "Advanced"), 
+                               300, replace = TRUE, prob = c(0.30, 0.45, 0.25))),
+  
+  treatment_type = factor(sample(c("Surgery", "Chemotherapy", "Radiation", "Immunotherapy", "Combination"), 
+                                300, replace = TRUE, prob = c(0.20, 0.25, 0.20, 0.15, 0.20))),
+  
+  hospital_type = factor(sample(c("Academic", "Community", "Cancer_Center"), 
+                               300, replace = TRUE, prob = c(0.35, 0.40, 0.25))),
+  
+  insurance_type = factor(sample(c("Private", "Medicare", "Medicaid"), 
+                                300, replace = TRUE, prob = c(0.60, 0.30, 0.10)))
+)
+
+str(healthcare_data)
+```
+
+# Basic Usage
+
+## Simple Waffle Chart
+
+The most basic waffle chart shows the distribution of a categorical variable:
+
+```{r basic-waffle}
+# Basic waffle chart
+basic_chart <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand"
+)
+
+# Display the result
+print("Basic waffle chart created successfully")
+```
+
+This creates a 10x10 grid (100 squares) where each square represents approximately 1% of the data.
+
+## Understanding Waffle Chart Components
+
+A waffle chart consists of:
+
+- **Squares**: Individual units that make up the grid
+- **Colors**: Different colors represent different categories
+- **Legend**: Explains what each color represents
+- **Caption**: Shows what each square represents (e.g., "Each square represents 5 cases")
+
+## Customizing Rows and Layout
+
+```{r custom-layout}
+# Different grid sizes
+waffle_5x20 <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  rows = 5  # Creates 5x20 grid (still 100 squares)
+)
+
+waffle_8x12 <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand", 
+  rows = 8  # Creates 8x12 grid (approximately 100 squares)
+)
+
+# Flipped orientation
+waffle_flipped <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  rows = 10,
+  flip = TRUE
+)
+
+print("Custom layout waffle charts created")
+```
+
+## Using Count Variables
+
+When you have aggregated data with counts:
+
+```{r count-variables}
+# Aggregate data first
+brand_summary <- market_data %>%
+  group_by(preferred_brand) %>%
+  summarise(customer_count = n(), .groups = "drop")
+
+print(brand_summary)
+
+# Create waffle chart with counts
+count_waffle <- jwaffle(
+  data = brand_summary,
+  groups = "preferred_brand",
+  counts = "customer_count"
+)
+
+print("Count-based waffle chart created")
+```
+
+# Advanced Features
+
+## Faceting for Multi-Panel Charts
+
+Create separate waffle charts for different subgroups:
+
+```{r faceting}
+# Faceted waffle chart
+faceted_chart <- jwaffle(
+  data = survey_data,
+  groups = "job_satisfaction",
+  facet = "department"
+)
+
+print("Faceted waffle chart created")
+
+# Faceting with geographic data
+regional_chart <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  facet = "region"
+)
+
+print("Regional comparison waffle chart created")
+```
+
+Faceting is particularly useful for:
+- Comparing patterns across different groups
+- Showing changes over time periods
+- Analyzing subpopulations separately
+
+## Color Palettes for Professional Presentation
+
+```{r color-palettes}
+# Default palette
+default_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "default"
+)
+
+# Colorblind-friendly palette
+colorblind_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "colorblind"
+)
+
+# Professional business palette
+professional_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "professional"
+)
+
+# Presentation palette (high contrast)
+presentation_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "presentation"
+)
+
+# Journal publication palette
+journal_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "journal"
+)
+
+# Pastel colors
+pastel_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "pastel"
+)
+
+# Dark theme colors
+dark_palette <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  color_palette = "dark"
+)
+
+print("Multiple color palette waffle charts created")
+```
+
+### Color Palette Guidelines
+
+- **Default**: General purpose, good balance of visibility and aesthetics
+- **Colorblind**: Optimized for accessibility, distinguishable by all users
+- **Professional**: Business-appropriate colors for corporate presentations
+- **Presentation**: High contrast colors for projector displays
+- **Journal**: Grayscale-friendly for academic publications
+- **Pastel**: Soft colors for informal or creative presentations
+- **Dark**: Bold colors that work well on dark backgrounds
+
+## Titles and Labels
+
+```{r titles-labels}
+# Comprehensive labeling
+labeled_chart <- jwaffle(
+  data = survey_data,
+  groups = "work_life_balance",
+  facet = "employment_type",
+  mytitle = "Work-Life Balance by Employment Type",
+  legendtitle = "Balance Rating",
+  color_palette = "professional",
+  show_legend = TRUE
+)
+
+print("Labeled waffle chart created")
+
+# Minimal labeling (no legend)
+minimal_chart <- jwaffle(
+  data = market_data,
+  groups = "purchase_channel",
+  mytitle = "Customer Purchase Channel Preferences", 
+  show_legend = FALSE,
+  color_palette = "presentation"
+)
+
+print("Minimal waffle chart created")
+```
+
+# Real-World Applications
+
+## Market Research Analysis
+
+### Brand Preference Study
+
+```{r market-research}
+# Overall brand preference
+brand_preference <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  mytitle = "Overall Brand Preference Distribution",
+  legendtitle = "Brand",
+  color_palette = "professional",
+  show_legend = TRUE
+)
+
+# Brand preference by age group
+age_brand_analysis <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  facet = "age_group",
+  mytitle = "Brand Preference by Age Group",
+  legendtitle = "Brand",
+  color_palette = "presentation",
+  rows = 8
+)
+
+# Purchase channel analysis
+channel_analysis <- jwaffle(
+  data = market_data,
+  groups = "purchase_channel",
+  facet = "income_level",
+  mytitle = "Purchase Channel Preference by Income Level",
+  legendtitle = "Channel",
+  color_palette = "colorblind"
+)
+
+print("Market research waffle charts created")
+```
+
+### Customer Segmentation
+
+```{r customer-segmentation}
+# Loyalty program membership
+loyalty_chart <- jwaffle(
+  data = market_data,
+  groups = "loyalty_program",
+  facet = "region",
+  mytitle = "Loyalty Program Membership by Region",
+  legendtitle = "Membership",
+  color_palette = "professional",
+  rows = 6
+)
+
+print("Customer segmentation chart created")
+```
+
+## Employee Satisfaction Survey
+
+### Job Satisfaction Analysis
+
+```{r job-satisfaction}
+# Overall job satisfaction
+overall_satisfaction <- jwaffle(
+  data = survey_data,
+  groups = "job_satisfaction",
+  mytitle = "Employee Job Satisfaction Distribution",
+  legendtitle = "Satisfaction Level",
+  color_palette = "journal",
+  rows = 10
+)
+
+# Satisfaction by department
+dept_satisfaction <- jwaffle(
+  data = survey_data,
+  groups = "job_satisfaction",
+  facet = "department",
+  mytitle = "Job Satisfaction by Department",
+  legendtitle = "Satisfaction",
+  color_palette = "professional"
+)
+
+# Work-life balance analysis
+balance_analysis <- jwaffle(
+  data = survey_data,
+  groups = "work_life_balance",
+  facet = "remote_work",
+  mytitle = "Work-Life Balance by Work Arrangement",
+  legendtitle = "Balance Rating",
+  color_palette = "colorblind",
+  rows = 8
+)
+
+print("Employee satisfaction charts created")
+```
+
+### Tenure and Employment Analysis
+
+```{r tenure-analysis}
+# Employment type distribution
+employment_dist <- jwaffle(
+  data = survey_data,
+  groups = "employment_type",
+  mytitle = "Employment Type Distribution",
+  legendtitle = "Employment Type",
+  color_palette = "presentation",
+  rows = 6
+)
+
+# Tenure analysis
+tenure_analysis <- jwaffle(
+  data = survey_data,
+  groups = "tenure_years",
+  facet = "department",
+  mytitle = "Employee Tenure by Department",
+  legendtitle = "Tenure",
+  color_palette = "pastel"
+)
+
+print("Tenure analysis charts created")
+```
+
+## Healthcare Outcomes Research
+
+### Treatment Response Analysis
+
+```{r treatment-response}
+# Overall treatment response
+treatment_overall <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  mytitle = "Treatment Response Distribution",
+  legendtitle = "Response Type",
+  color_palette = "professional",
+  rows = 10
+)
+
+# Response by treatment type
+response_by_treatment <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  facet = "treatment_type",
+  mytitle = "Treatment Response by Treatment Type", 
+  legendtitle = "Response",
+  color_palette = "journal"
+)
+
+# Response by disease stage
+response_by_stage <- jwaffle(
+  data = healthcare_data,
+  groups = "treatment_response",
+  facet = "disease_stage",
+  mytitle = "Treatment Response by Disease Stage",
+  legendtitle = "Response",
+  color_palette = "colorblind",
+  rows = 8
+)
+
+print("Healthcare outcome charts created")
+```
+
+### Healthcare System Analysis
+
+```{r healthcare-system}
+# Hospital type distribution
+hospital_dist <- jwaffle(
+  data = healthcare_data,
+  groups = "hospital_type",
+  mytitle = "Patient Distribution by Hospital Type",
+  legendtitle = "Hospital Type",
+  color_palette = "presentation"
+)
+
+# Insurance analysis
+insurance_analysis <- jwaffle(
+  data = healthcare_data,
+  groups = "insurance_type",
+  facet = "age_category",
+  mytitle = "Insurance Type by Age Category",
+  legendtitle = "Insurance",
+  color_palette = "professional",
+  rows = 6
+)
+
+print("Healthcare system charts created")
+```
+
+# Advanced Customization
+
+## Complex Multi-Variable Analysis
+
+```{r complex-analysis}
+# Create complex segmented data
+complex_data <- market_data %>%
+  mutate(
+    customer_segment = case_when(
+      loyalty_program == "Member" & income_level == "High" ~ "Premium_Customer",
+      loyalty_program == "Member" & income_level == "Middle" ~ "Standard_Member", 
+      loyalty_program == "Member" & income_level == "Low" ~ "Budget_Member",
+      loyalty_program == "Non_Member" & income_level == "High" ~ "High_Value_Prospect",
+      TRUE ~ "Standard_Prospect"
+    )
+  )
+
+# Complex segmentation analysis
+segment_analysis <- jwaffle(
+  data = complex_data,
+  groups = "customer_segment",
+  facet = "purchase_channel",
+  mytitle = "Customer Segmentation by Purchase Channel",
+  legendtitle = "Customer Segment",
+  color_palette = "professional",
+  rows = 8
+)
+
+print("Complex segmentation analysis created")
+```
+
+## Weighted Analysis with Purchase Frequency
+
+```{r weighted-analysis}
+# Use purchase frequency as weights
+weighted_analysis <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  counts = "purchase_frequency",
+  facet = "region",
+  mytitle = "Brand Preference Weighted by Purchase Frequency",
+  legendtitle = "Brand",
+  color_palette = "presentation"
+)
+
+print("Weighted analysis chart created")
+```
+
+## Time-Based Analysis
+
+```{r time-analysis}
+# Create quarterly data
+quarterly_data <- data.frame(
+  quarter = rep(c("Q1", "Q2", "Q3", "Q4"), each = 100),
+  satisfaction = factor(sample(c("Satisfied", "Neutral", "Dissatisfied"), 
+                              400, replace = TRUE, prob = c(0.6, 0.25, 0.15))),
+  product_line = factor(sample(c("Product_A", "Product_B", "Product_C"), 
+                              400, replace = TRUE))
+)
+
+# Quarterly satisfaction trends
+quarterly_satisfaction <- jwaffle(
+  data = quarterly_data,
+  groups = "satisfaction",
+  facet = "quarter",
+  mytitle = "Customer Satisfaction Trends by Quarter",
+  legendtitle = "Satisfaction",
+  color_palette = "journal",
+  rows = 10
+)
+
+print("Quarterly trend analysis created")
+```
+
+# Performance and Optimization
+
+## Large Dataset Handling
+
+```{r large-dataset}
+# Create large dataset for performance testing
+large_data <- do.call(rbind, replicate(5, market_data, simplify = FALSE))
+large_data$customer_id <- 1:nrow(large_data)
+
+# Performance timing
+system.time({
+  large_chart1 <- jwaffle(
+    data = large_data,
+    groups = "preferred_brand",
+    color_palette = "professional"
+  )
+})
+
+# Second run should be faster due to caching
+system.time({
+  large_chart2 <- jwaffle(
+    data = large_data,
+    groups = "preferred_brand", 
+    color_palette = "professional"
+  )
+})
+
+print("Large dataset analysis completed")
+```
+
+## Caching Performance Benefits
+
+The jwaffle function includes intelligent caching that provides several performance benefits:
+
+- **Data Caching**: Prepared data is cached to avoid reprocessing
+- **Plot Caching**: Generated plots are cached for identical parameters
+- **Palette Caching**: Color palettes are cached based on options and group count
+- **Hash-Based Invalidation**: Cache is automatically invalidated when data or options change
+
+```{r cache-demo}
+# Demonstrate caching with repeated calls
+for (i in 1:3) {
+  start_time <- Sys.time()
+  
+  result <- jwaffle(
+    data = survey_data,
+    groups = "job_satisfaction",
+    color_palette = "professional"
+  )
+  
+  end_time <- Sys.time()
+  cat("Run", i, "completed in", round(as.numeric(end_time - start_time), 3), "seconds\n")
+}
+```
+
+# Best Practices
+
+## When to Use Waffle Charts
+
+Waffle charts are ideal for:
+
+- **Proportional data**: When showing percentages or parts of a whole
+- **Survey responses**: Likert scales and categorical responses
+- **Market share**: Brand preference and competitive analysis
+- **Demographics**: Population breakdowns and characteristics
+- **Binary outcomes**: Yes/no, success/failure, member/non-member
+
+```{r best-practices-table}
+# Create best practices guide
+best_practices <- data.frame(
+  Scenario = c(
+    "Survey Results",
+    "Market Share",
+    "Demographics", 
+    "Binary Outcomes",
+    "Progress Tracking",
+    "Budget Allocation"
+  ),
+  Waffle_Advantage = c(
+    "Easy to see exact proportions",
+    "Clear competitive positioning",
+    "Intuitive population representation",
+    "Simple visual comparison",
+    "Progress visualization", 
+    "Resource distribution clarity"
+  ),
+  Key_Settings = c(
+    "Use colorblind palette, show legend",
+    "Professional palette, custom title",
+    "Facet by subgroups, clean layout",
+    "High contrast colors, minimal legend",
+    "Sequential colors, progress labels",
+    "Professional theme, clear categories"
+  )
+)
+
+knitr::kable(best_practices, caption = "Waffle Chart Best Practices by Use Case")
+```
+
+## Design Guidelines
+
+### Color Selection
+
+```{r color-guidelines}
+# Create color guideline examples
+color_guide <- data.frame(
+  Palette = c("Default", "Colorblind", "Professional", "Presentation", "Journal", "Pastel", "Dark"),
+  Best_For = c(
+    "General purpose presentations",
+    "Accessible design, inclusive audiences", 
+    "Business meetings, corporate reports",
+    "Projector displays, conference presentations",
+    "Academic papers, grayscale printing",
+    "Creative projects, informal presentations",
+    "Dark themes, modern designs"
+  ),
+  Avoid_When = c(
+    "Accessibility is critical",
+    "Creative expression is primary goal",
+    "Informal or creative contexts",
+    "Fine detail distinction needed",
+    "Color emphasis is important",
+    "Professional formality required",
+    "Light backgrounds are used"
+  )
+)
+
+knitr::kable(color_guide, caption = "Color Palette Selection Guide")
+```
+
+### Layout Recommendations
+
+```{r layout-recommendations}
+# Layout guidelines
+layout_guide <- data.frame(
+  Grid_Size = c("5 rows", "8 rows", "10 rows", "12+ rows"),
+  Best_For = c(
+    "Simple data (2-4 categories)",
+    "Moderate complexity (4-6 categories)",
+    "Standard presentations (any categories)",
+    "Detailed analysis (many categories)"
+  ),
+  Considerations = c(
+    "Large squares, easy to count",
+    "Good balance of detail and clarity",
+    "Standard 10x10 grid, familiar format",
+    "Smaller squares, harder to count individually"
+  )
+)
+
+knitr::kable(layout_guide, caption = "Grid Size Selection Guide")
+```
+
+## Accessibility Considerations
+
+```{r accessibility}
+# Accessible waffle chart example
+accessible_chart <- jwaffle(
+  data = survey_data,
+  groups = "job_satisfaction",
+  color_palette = "colorblind",  # Colorblind-friendly
+  mytitle = "Employee Job Satisfaction Survey Results (N=400)",  # Descriptive title
+  legendtitle = "Satisfaction Level",  # Clear legend
+  show_legend = TRUE,  # Always show legend for accessibility
+  rows = 10  # Standard grid for easy counting
+)
+
+print("Accessible waffle chart created")
+```
+
+Accessibility best practices:
+- Use colorblind-friendly palettes
+- Include descriptive titles and legends
+- Provide sample size information
+- Use standard grid sizes when possible
+- Consider alternative text descriptions for digital formats
+
+# Integration with Research Workflows
+
+## Statistical Analysis Integration
+
+```{r statistical-integration}
+# Combine waffle charts with statistical tests
+library(dplyr)
+
+# Chi-square test for independence
+if (requireNamespace("stats", quietly = TRUE)) {
+  # Test brand preference vs age group
+  contingency_table <- table(market_data$preferred_brand, market_data$age_group)
+  chi_test <- chisq.test(contingency_table)
+  
+  cat("Chi-square test results:\n")
+  cat("Chi-square =", round(chi_test$statistic, 3), "\n")
+  cat("p-value =", round(chi_test$p.value, 4), "\n")
+  cat("Significant association:", ifelse(chi_test$p.value < 0.05, "Yes", "No"), "\n")
+}
+
+# Combine with waffle visualization
+statistical_chart <- jwaffle(
+  data = market_data,
+  groups = "preferred_brand",
+  facet = "age_group",
+  mytitle = paste("Brand Preference by Age Group",
+                  ifelse(chi_test$p.value < 0.05, "(p < 0.05)", "(n.s.)")),
+  legendtitle = "Brand",
+  color_palette = "journal"
+)
+
+print("Statistical analysis with waffle chart created")
+```
+
+## Report Generation
+
+```{r report-generation}
+# Function to generate waffle chart reports
+generate_waffle_report <- function(data, group_var, facet_var = NULL, title_prefix = "") {
+  
+  # Basic summary statistics
+  summary_stats <- data %>%
+    group_by(.data[[group_var]]) %>%
+    summarise(
+      count = n(),
+      percentage = round(n() / nrow(data) * 100, 1),
+      .groups = "drop"
+    )
+  
+  # Create waffle chart
+  chart <- jwaffle(
+    data = data,
+    groups = group_var,
+    facet = facet_var,
+    mytitle = paste(title_prefix, "Distribution of", gsub("_", " ", group_var)),
+    legendtitle = gsub("_", " ", group_var),
+    color_palette = "professional"
+  )
+  
+  # Return summary and chart
+  return(list(
+    summary = summary_stats,
+    chart = chart,
+    total_n = nrow(data)
+  ))
+}
+
+# Generate reports
+brand_report <- generate_waffle_report(
+  data = market_data,
+  group_var = "preferred_brand",
+  title_prefix = "Market Research:"
+)
+
+satisfaction_report <- generate_waffle_report(
+  data = survey_data,
+  group_var = "job_satisfaction",
+  facet_var = "department",
+  title_prefix = "Employee Survey:"
+)
+
+# Display summaries
+cat("Brand Preference Summary:\n")
+print(brand_report$summary)
+cat("\nTotal respondents:", brand_report$total_n, "\n")
+
+cat("\nJob Satisfaction Summary:\n")
+print(satisfaction_report$summary)
+cat("\nTotal employees:", satisfaction_report$total_n, "\n")
+```
+
+# Troubleshooting
+
+## Common Issues and Solutions
+
+### Data Validation
+
+```{r data-validation}
+# Function to validate waffle chart data
+validate_waffle_data <- function(data, groups, counts = NULL, facet = NULL) {
+  issues <- c()
+  
+  # Check if data is not empty
+  if (nrow(data) == 0) {
+    issues <- c(issues, "Data frame is empty")
+  }
+  
+  # Check if group variable exists
+  if (!groups %in% names(data)) {
+    issues <- c(issues, paste("Group variable", groups, "not found in data"))
+  }
+  
+  # Check if count variable exists (if specified)
+  if (!is.null(counts) && !counts %in% names(data)) {
+    issues <- c(issues, paste("Count variable", counts, "not found in data"))
+  }
+  
+  # Check if facet variable exists (if specified)
+  if (!is.null(facet) && !facet %in% names(data)) {
+    issues <- c(issues, paste("Facet variable", facet, "not found in data"))
+  }
+  
+  # Check for sufficient data in groups
+  if (groups %in% names(data)) {
+    group_counts <- table(data[[groups]])
+    if (any(group_counts == 0)) {
+      issues <- c(issues, "Some groups have zero observations")
+    }
+  }
+  
+  # Check for missing values
+  if (groups %in% names(data)) {
+    missing_groups <- sum(is.na(data[[groups]]))
+    if (missing_groups > 0) {
+      issues <- c(issues, paste(missing_groups, "missing values in group variable"))
+    }
+  }
+  
+  return(issues)
+}
+
+# Test validation
+validation_result <- validate_waffle_data(
+  data = market_data,
+  groups = "preferred_brand",
+  facet = "region"
+)
+
+if (length(validation_result) == 0) {
+  cat("✓ Data validation passed\n")
+} else {
+  cat("⚠ Data validation issues:\n")
+  for (issue in validation_result) {
+    cat("-", issue, "\n")
+  }
+}
+```
+
+### Handling Missing Data
+
+```{r missing-data}
+# Create data with missing values
+missing_data <- market_data
+missing_data$preferred_brand[sample(1:500, 25)] <- NA
+missing_data$region[sample(1:500, 15)] <- NA
+
+# Check missing data impact
+cat("Original data:", nrow(market_data), "rows\n")
+cat("Data with missing values:", nrow(missing_data), "rows\n")
+cat("Complete cases:", sum(complete.cases(missing_data)), "rows\n")
+
+# Create waffle chart (automatically handles missing data)
+missing_chart <- jwaffle(
+  data = missing_data,
+  groups = "preferred_brand",
+  facet = "region",
+  mytitle = "Brand Preference with Missing Data Handling",
+  legendtitle = "Brand",
+  color_palette = "colorblind"
+)
+
+print("Missing data chart created (missing values automatically excluded)")
+```
+
+### Performance Optimization Tips
+
+```{r performance-tips}
+# Performance optimization guidelines
+perf_tips <- data.frame(
+  Scenario = c(
+    "Large datasets (>1000 rows)",
+    "Many categories (>8 groups)",
+    "Frequent updates",
+    "Multiple facets",
+    "Presentation mode"
+  ),
+  Recommendation = c(
+    "Use caching, avoid unnecessary recalculation",
+    "Consider grouping rare categories",
+    "Minimize data changes between calls",
+    "Limit number of facet levels",
+    "Use high-contrast palettes"
+  ),
+  Implementation = c(
+    "Keep same data object, change options only",
+    "Create 'Other' category for small groups",
+    "Batch process multiple charts",
+    "Filter data to key comparisons",
+    "Use 'presentation' color palette"
+  )
+)
+
+knitr::kable(perf_tips, caption = "Performance Optimization Guide")
+```
+
+# Summary
+
+The `jwaffle` function provides a comprehensive solution for creating professional waffle charts. Key advantages include:
+
+## Core Visualization Capabilities
+
+- **Intuitive Design**: Grid-based layout that's easier to interpret than pie charts
+- **Flexible Input**: Works with raw data, counts, or aggregated summaries
+- **Professional Output**: Publication and presentation-ready visualizations
+- **Accessibility**: Colorblind-friendly palettes and clear visual hierarchy
+
+## Advanced Features
+
+- **Faceting Support**: Multi-panel comparisons across subgroups
+- **Custom Styling**: Multiple color palettes and theme options
+- **Performance Optimization**: Intelligent caching for large datasets
+- **Error Handling**: Graceful handling of edge cases and missing data
+
+## Real-World Applications
+
+- **Market Research**: Brand preference, customer segmentation, purchase behavior
+- **Survey Analysis**: Employee satisfaction, customer feedback, opinion polls
+- **Healthcare Research**: Treatment outcomes, patient demographics, quality metrics
+- **Business Intelligence**: Resource allocation, performance metrics, KPI tracking
+
+## Integration Benefits
+
+- **Statistical Workflow**: Seamless integration with statistical testing
+- **Report Generation**: Automated chart creation for regular reporting
+- **Data Validation**: Built-in checks for data quality and completeness
+- **Accessibility**: Support for inclusive design and universal access
+
+## Next Steps
+
+- Explore different applications for your specific data visualization needs
+- Experiment with color palettes and styling for your organization's brand
+- Try the performance optimization features with your datasets
+- Consider jwaffle for standardizing proportional data visualization
+
+```{r session-info}
+sessionInfo()
+```

@@ -75,19 +75,27 @@ Adapted from https://github.com/raviselker/ppv
 \if{html}{\out{<a id="method-ppvClass-readDataset"></a>}}
 \if{latex}{\out{\hypertarget{method-ppvClass-readDataset}{}}}
 \subsection{Method \code{readDataset()}}{
+Read dataset for PPV analysis
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ppvClass$readDataset()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+NULL as this analysis doesn't require data
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ppvClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-ppvClass-asSource}{}}}
 \subsection{Method \code{asSource()}}{
+Generate R source code for PPV analysis
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ppvClass$asSource()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+Character string indicating syntax mode is not supported
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ppvClass-clone"></a>}}

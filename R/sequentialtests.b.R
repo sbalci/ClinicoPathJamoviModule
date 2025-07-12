@@ -39,18 +39,204 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 strategy <- self$options$strategy
                 prevalence <- self$options$prevalence
+                
+                # Input validation and error handling
+                errors <- c()
+                warnings <- c()
+                
+                # Validate probability ranges for all test parameters
+                if (is.na(test1_sens) || test1_sens < 0 || test1_sens > 1) {
+                    errors <- c(errors, "Test 1 sensitivity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(test1_spec) || test1_spec < 0 || test1_spec > 1) {
+                    errors <- c(errors, "Test 1 specificity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(test2_sens) || test2_sens < 0 || test2_sens > 1) {
+                    errors <- c(errors, "Test 2 sensitivity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(test2_spec) || test2_spec < 0 || test2_spec > 1) {
+                    errors <- c(errors, "Test 2 specificity must be between 0 and 1 (0% to 100%)")
+                }
+                if (is.na(prevalence) || prevalence < 0 || prevalence > 1) {
+                    errors <- c(errors, "Prevalence must be between 0 and 1 (0% to 100%)")
+                }
+                
+                # Validate test names
+                if (is.null(test1_name) || nchar(trimws(test1_name)) == 0) {
+                    errors <- c(errors, "Test 1 name cannot be empty")
+                }
+                if (is.null(test2_name) || nchar(trimws(test2_name)) == 0) {
+                    errors <- c(errors, "Test 2 name cannot be empty")
+                }
+                
+                # Clinical plausibility warnings
+                if (test1_sens < 0.50) {
+                    warnings <- c(warnings, "Test 1 sensitivity <50% is unusual for most clinical tests")
+                }
+                if (test1_spec < 0.50) {
+                    warnings <- c(warnings, "Test 1 specificity <50% is unusual for most clinical tests")
+                }
+                if (test2_sens < 0.50) {
+                    warnings <- c(warnings, "Test 2 sensitivity <50% is unusual for most clinical tests")
+                }
+                if (test2_spec < 0.50) {
+                    warnings <- c(warnings, "Test 2 specificity <50% is unusual for most clinical tests")
+                }
+                if (test1_sens > 0.99) {
+                    warnings <- c(warnings, "Test 1 sensitivity >99% is rarely achieved in practice")
+                }
+                if (test1_spec > 0.99) {
+                    warnings <- c(warnings, "Test 1 specificity >99% is rarely achieved in practice")
+                }
+                if (test2_sens > 0.99) {
+                    warnings <- c(warnings, "Test 2 sensitivity >99% is rarely achieved in practice")
+                }
+                if (test2_spec > 0.99) {
+                    warnings <- c(warnings, "Test 2 specificity >99% is rarely achieved in practice")
+                }
+                if (prevalence > 0.90) {
+                    warnings <- c(warnings, "Prevalence >90% is unusual except for confirmatory testing scenarios")
+                }
+                if (prevalence < 0.001) {
+                    warnings <- c(warnings, "Very low prevalence (<0.1%) may lead to extremely low PPV even with good tests")
+                }
+                
+                # Strategy-specific warnings
+                if (strategy == "serial_positive") {
+                    if (test1_spec > test2_spec) {
+                        warnings <- c(warnings, "For serial positive strategy, Test 2 should typically have higher specificity than Test 1")
+                    }
+                    if ((test1_sens + test1_spec) < 1.0) {
+                        warnings <- c(warnings, "Test 1 performance (sens + spec < 100%) may not be suitable for screening")
+                    }
+                } else if (strategy == "serial_negative") {
+                    if (test1_sens > test2_sens) {
+                        warnings <- c(warnings, "For serial negative strategy, Test 2 should typically have higher sensitivity than Test 1")
+                    }
+                } else if (strategy == "parallel") {
+                    if (abs(test1_sens - test2_sens) < 0.05 && abs(test1_spec - test2_spec) < 0.05) {
+                        warnings <- c(warnings, "Parallel testing works best when tests are complementary (different strengths)")
+                    }
+                }
+                
+                # Test characteristic combinations that may be problematic
+                if ((test1_sens + test1_spec) < 1.0 && (test2_sens + test2_spec) < 1.0) {
+                    warnings <- c(warnings, "Both tests have poor performance (sens + spec < 100%) - consider test optimization")
+                }
+                
+                # Show errors if any exist
+                if (length(errors) > 0) {
+                    errorHtml <- paste0(
+                        '<div class="alert alert-danger">',
+                        '<h4><span class="glyphicon glyphicon-exclamation-sign"></span> Input Errors:</h4>',
+                        '<ul>',
+                        paste0('<li>', errors, '</li>', collapse = ''),
+                        '</ul>',
+                        '<p><strong>Please correct these values to proceed with the analysis.</strong></p>',
+                        '</div>'
+                    )
+                    self$results$explanation_text$setContent(errorHtml)
+                    return()
+                }
+                
+                # Show warnings if any exist (but continue with calculation)
+                warningHtml <- ""
+                if (length(warnings) > 0) {
+                    warningHtml <- paste0(
+                        '<div class="alert alert-warning">',
+                        '<h4><span class="glyphicon glyphicon-warning-sign"></span> Clinical Notes:</h4>',
+                        '<ul>',
+                        paste0('<li>', warnings, '</li>', collapse = ''),
+                        '</ul>',
+                        '<p>Analysis will proceed, but please verify these parameters are appropriate for your clinical scenario.</p>',
+                        '</div>'
+                    )
+                }
 
-                # Calculate individual test metrics
-                # PPVs and NPVs depend on prevalence
-                test1_ppv <- (prevalence * test1_sens) / (prevalence * test1_sens + (1 - prevalence) * (1 - test1_spec))
-                test1_npv <- ((1 - prevalence) * test1_spec) / ((1 - prevalence) * test1_spec + prevalence * (1 - test1_sens))
-                test1_plr <- test1_sens / (1 - test1_spec)
-                test1_nlr <- (1 - test1_sens) / test1_spec
-
-                test2_ppv <- (prevalence * test2_sens) / (prevalence * test2_sens + (1 - prevalence) * (1 - test2_spec))
-                test2_npv <- ((1 - prevalence) * test2_spec) / ((1 - prevalence) * test2_spec + prevalence * (1 - test2_sens))
-                test2_plr <- test2_sens / (1 - test2_spec)
-                test2_nlr <- (1 - test2_sens) / test2_spec
+                # Calculate individual test metrics with error handling
+                tryCatch({
+                    # Calculate PPVs and NPVs with protection against edge cases
+                    test1_ppv_denom <- (prevalence * test1_sens) + ((1 - prevalence) * (1 - test1_spec))
+                    if (test1_ppv_denom == 0) {
+                        test1_ppv <- NaN
+                    } else {
+                        test1_ppv <- (prevalence * test1_sens) / test1_ppv_denom
+                    }
+                    
+                    test1_npv_denom <- ((1 - prevalence) * test1_spec) + (prevalence * (1 - test1_sens))
+                    if (test1_npv_denom == 0) {
+                        test1_npv <- NaN
+                    } else {
+                        test1_npv <- ((1 - prevalence) * test1_spec) / test1_npv_denom
+                    }
+                    
+                    # Calculate likelihood ratios with division by zero protection
+                    if (test1_spec == 1) {
+                        test1_plr <- Inf
+                    } else {
+                        test1_plr <- test1_sens / (1 - test1_spec)
+                    }
+                    
+                    if (test1_spec == 0) {
+                        test1_nlr <- Inf
+                    } else {
+                        test1_nlr <- (1 - test1_sens) / test1_spec
+                    }
+                    
+                    # Same calculations for test 2
+                    test2_ppv_denom <- (prevalence * test2_sens) + ((1 - prevalence) * (1 - test2_spec))
+                    if (test2_ppv_denom == 0) {
+                        test2_ppv <- NaN
+                    } else {
+                        test2_ppv <- (prevalence * test2_sens) / test2_ppv_denom
+                    }
+                    
+                    test2_npv_denom <- ((1 - prevalence) * test2_spec) + (prevalence * (1 - test2_sens))
+                    if (test2_npv_denom == 0) {
+                        test2_npv <- NaN
+                    } else {
+                        test2_npv <- ((1 - prevalence) * test2_spec) / test2_npv_denom
+                    }
+                    
+                    if (test2_spec == 1) {
+                        test2_plr <- Inf
+                    } else {
+                        test2_plr <- test2_sens / (1 - test2_spec)
+                    }
+                    
+                    if (test2_spec == 0) {
+                        test2_nlr <- Inf
+                    } else {
+                        test2_nlr <- (1 - test2_sens) / test2_spec
+                    }
+                    
+                    # Ensure results are in valid probability ranges
+                    test1_ppv <- pmax(0, pmin(1, test1_ppv))
+                    test1_npv <- pmax(0, pmin(1, test1_npv))
+                    test2_ppv <- pmax(0, pmin(1, test2_ppv))
+                    test2_npv <- pmax(0, pmin(1, test2_npv))
+                    
+                }, error = function(e) {
+                    # If any calculation fails, set to NA and show error
+                    test1_ppv <<- NA
+                    test1_npv <<- NA
+                    test1_plr <<- NA
+                    test1_nlr <<- NA
+                    test2_ppv <<- NA
+                    test2_npv <<- NA
+                    test2_plr <<- NA
+                    test2_nlr <<- NA
+                    
+                    errorMsg <- paste0(
+                        '<div class="alert alert-danger">',
+                        '<h4><span class="glyphicon glyphicon-exclamation-sign"></span> Calculation Error:</h4>',
+                        '<p>Unable to calculate test metrics with the provided values. Error: ', e$message, '</p>',
+                        '<p>Please check your input parameters and try again.</p>',
+                        '</div>'
+                    )
+                    self$results$explanation_text$setContent(errorMsg)
+                    return()
+                })
 
                 # Calculate combined metrics based on strategy
                 if (strategy == "serial_positive") {
@@ -471,7 +657,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     )
                     explanation <- paste0(explanation, "</ul>")
 
-                    self$results$explanation_text$setContent(explanation)
+                    # Add warnings to explanation if they exist
+                    final_explanation <- explanation
+                    if (length(warnings) > 0) {
+                        final_explanation <- paste0(warningHtml, explanation)
+                    }
+                    
+                    self$results$explanation_text$setContent(final_explanation)
                 }
 
                 # Generate formulas HTML if requested

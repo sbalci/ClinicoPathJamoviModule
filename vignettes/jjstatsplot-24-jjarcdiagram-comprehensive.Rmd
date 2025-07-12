@@ -1,0 +1,766 @@
+---
+title: "Network Visualization with jjarcdiagram"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Network Visualization with jjarcdiagram}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 8
+)
+```
+
+## Introduction
+
+The `jjarcdiagram()` function in ClinicoPath provides elegant network visualization using arc diagrams. Arc diagrams are particularly effective for displaying hierarchical relationships, sequential connections, and network structures with minimal visual clutter.
+
+### Key Features
+
+- **Multiple Network Types**: Social networks, organizational hierarchies, gene regulation, supply chains
+- **Flexible Layouts**: Horizontal and vertical arrangements
+- **Dynamic Sizing**: Nodes sized by degree centrality or fixed values
+- **Group Coloring**: Automatic color assignment based on categorical variables
+- **Weight Visualization**: Arc thickness proportional to connection strength
+- **Network Analytics**: Built-in calculation of network metrics and centrality measures
+- **Interactive Customization**: Extensive styling and layout options
+
+This vignette demonstrates all features of the jjarcdiagram function using various real-world network datasets.
+
+## Loading Required Libraries and Data
+
+```{r setup}
+library(ClinicoPath)
+
+# Load the original arc diagram dataset
+data("arcDiagram")
+
+# Preview the data structure
+str(arcDiagram)
+head(arcDiagram)
+```
+
+## Data Requirements
+
+The jjarcdiagram function works with edge list data representing network connections:
+
+### Required Variables:
+- **Source Node**: Starting point of connections (factor or character)
+- **Target Node**: Endpoint of connections (factor or character)
+
+### Optional Variables:
+- **Edge Weight**: Numeric values representing connection strength
+- **Node Groups**: Categorical variable for color coding nodes
+
+### Data Format:
+- Each row represents one edge/connection
+- Source and target can be any identifiers (names, IDs, etc.)
+- Weights should be positive numeric values
+- Groups can be any categorical variable
+
+## Basic Arc Diagram
+
+### Simple Network Visualization
+
+```{r basic-arc}
+# Basic arc diagram without weights or groups
+jjarcdiagram(
+  data = arcDiagram,
+  source = "source",
+  target = "target",
+  showNodes = TRUE,
+  horizontal = TRUE,
+  plotTitle = "Basic Network Structure"
+)
+```
+
+### Network with Edge Weights
+
+```{r weighted-arc}
+# Arc diagram with edge weights
+jjarcdiagram(
+  data = arcDiagram,
+  source = "source",
+  target = "target",
+  weight = "weight",
+  arcWidth = "weight",
+  showNodes = TRUE,
+  plotTitle = "Weighted Network Connections"
+)
+```
+
+### Network with Group Colors
+
+```{r grouped-arc}
+# Arc diagram with group-based coloring
+jjarcdiagram(
+  data = arcDiagram,
+  source = "source",
+  target = "target",
+  weight = "weight",
+  group = "group",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  showStats = TRUE,
+  plotTitle = "Network with Group-Based Coloring"
+)
+```
+
+## Advanced Network Datasets
+
+### Social Network Analysis
+
+```{r social-network}
+# Load social network test data
+data("jjarcdiagram_social_network")
+
+# Preview the social network data
+str(jjarcdiagram_social_network)
+head(jjarcdiagram_social_network)
+
+# Create social network visualization
+jjarcdiagram(
+  data = jjarcdiagram_social_network,
+  source = "source",
+  target = "target", 
+  weight = "weight",
+  group = "group",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  showStats = TRUE,
+  plotTitle = "Social Network Analysis - Relationship Strength"
+)
+```
+
+### Academic Collaboration Network
+
+```{r academic-network}
+# Load academic collaboration data
+data("jjarcdiagram_academic_network")
+
+# Preview the academic network data
+str(jjarcdiagram_academic_network)
+head(jjarcdiagram_academic_network)
+
+# Create academic collaboration visualization
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "publications",
+  group = "department",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  arcWidth = "weight",
+  sortNodes = "group",
+  showStats = TRUE,
+  plotTitle = "Academic Collaboration Network by Department"
+)
+```
+
+### Organizational Hierarchy
+
+```{r org-hierarchy}
+# Load organizational hierarchy data
+data("jjarcdiagram_org_hierarchy")
+
+# Preview the organizational data
+str(jjarcdiagram_org_hierarchy)
+head(jjarcdiagram_org_hierarchy)
+
+# Create organizational hierarchy visualization
+jjarcdiagram(
+  data = jjarcdiagram_org_hierarchy,
+  source = "employee",
+  target = "reports_to",
+  weight = "relationship_strength",
+  group = "department",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  directed = TRUE,
+  sortNodes = "group",
+  nodeSize = "degree",
+  horizontal = FALSE,
+  showStats = TRUE,
+  plotTitle = "Organizational Reporting Structure"
+)
+```
+
+### Gene Regulatory Network
+
+```{r gene-network}
+# Load gene regulatory network data
+data("jjarcdiagram_gene_network")
+
+# Preview the gene network data
+str(jjarcdiagram_gene_network)
+head(jjarcdiagram_gene_network)
+
+# Create gene regulatory network visualization
+jjarcdiagram(
+  data = jjarcdiagram_gene_network,
+  source = "regulator",
+  target = "target",
+  weight = "regulation_score",
+  group = "pathway",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  arcWidth = "weight",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  showStats = TRUE,
+  plotTitle = "Gene Regulatory Network by Pathway"
+)
+```
+
+### Supply Chain Network
+
+```{r supply-chain}
+# Load supply chain data
+data("jjarcdiagram_supply_chain")
+
+# Preview the supply chain data
+str(jjarcdiagram_supply_chain)
+head(jjarcdiagram_supply_chain)
+
+# Create supply chain visualization
+jjarcdiagram(
+  data = jjarcdiagram_supply_chain,
+  source = "supplier",
+  target = "customer",
+  weight = "volume",
+  group = "industry",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  arcWidth = "weight",
+  sortNodes = "group",
+  horizontal = TRUE,
+  showStats = TRUE,
+  plotTitle = "Supply Chain Network by Industry"
+)
+```
+
+## Layout and Styling Options
+
+### Horizontal vs Vertical Layouts
+
+```{r layout-comparison}
+# Horizontal layout
+jjarcdiagram(
+  data = jjarcdiagram_simple_weighted,
+  source = "from_node",
+  target = "to_node",
+  weight = "connection_weight",
+  horizontal = TRUE,
+  showNodes = TRUE,
+  plotTitle = "Horizontal Arc Diagram"
+)
+
+# Vertical layout
+jjarcdiagram(
+  data = jjarcdiagram_simple_weighted,
+  source = "from_node",
+  target = "to_node",
+  weight = "connection_weight",
+  horizontal = FALSE,
+  showNodes = TRUE,
+  plotTitle = "Vertical Arc Diagram"
+)
+```
+
+### Node Sizing Options
+
+```{r node-sizing}
+# Fixed node size
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "publications",
+  group = "department",
+  nodeSize = "fixed",
+  nodeSizeValue = 3,
+  colorByGroup = TRUE,
+  plotTitle = "Fixed Node Sizes"
+)
+
+# Degree-based node sizing
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "publications",
+  group = "department",
+  nodeSize = "degree",
+  colorByGroup = TRUE,
+  plotTitle = "Degree-Based Node Sizing"
+)
+```
+
+### Arc Width Customization
+
+```{r arc-width}
+# Fixed arc width
+jjarcdiagram(
+  data = jjarcdiagram_supply_chain,
+  source = "supplier",
+  target = "customer",
+  weight = "volume",
+  arcWidth = "fixed",
+  arcWidthValue = 2,
+  plotTitle = "Fixed Arc Width"
+)
+
+# Weight-proportional arc width
+jjarcdiagram(
+  data = jjarcdiagram_supply_chain,
+  source = "supplier",
+  target = "customer",
+  weight = "volume",
+  arcWidth = "weight",
+  arcWidthValue = 3,
+  plotTitle = "Weight-Proportional Arc Width"
+)
+```
+
+### Arc Transparency Effects
+
+```{r transparency}
+# Test different transparency levels
+transparency_levels <- c(0.2, 0.5, 0.8)
+
+for(alpha in transparency_levels) {
+  cat("\n=== Arc Transparency:", alpha, "===\n")
+  result <- jjarcdiagram(
+    data = jjarcdiagram_social_network,
+    source = "source",
+    target = "target",
+    weight = "weight",
+    group = "group",
+    arcTransparency = alpha,
+    colorByGroup = TRUE,
+    plotTitle = paste("Arc Transparency =", alpha)
+  )
+}
+```
+
+## Node Sorting and Ordering
+
+### Sorting by Different Criteria
+
+```{r node-sorting}
+# Sort by node names
+jjarcdiagram(
+  data = jjarcdiagram_gene_network,
+  source = "regulator",
+  target = "target",
+  weight = "regulation_score",
+  group = "pathway",
+  sortNodes = "name",
+  colorByGroup = TRUE,
+  plotTitle = "Sorted by Node Names"
+)
+
+# Sort by degree centrality
+jjarcdiagram(
+  data = jjarcdiagram_gene_network,
+  source = "regulator",
+  target = "target",
+  weight = "regulation_score",
+  group = "pathway",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  colorByGroup = TRUE,
+  plotTitle = "Sorted by Degree (Descending)"
+)
+
+# Sort by groups
+jjarcdiagram(
+  data = jjarcdiagram_gene_network,
+  source = "regulator",
+  target = "target",
+  weight = "regulation_score",
+  group = "pathway",
+  sortNodes = "group",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  plotTitle = "Sorted by Groups"
+)
+```
+
+## Network Direction Options
+
+### Directed vs Undirected Networks
+
+```{r direction-comparison}
+# Directed network (default for hierarchical data)
+jjarcdiagram(
+  data = jjarcdiagram_org_hierarchy,
+  source = "employee",
+  target = "reports_to",
+  weight = "relationship_strength",
+  group = "department",
+  directed = TRUE,
+  colorByGroup = TRUE,
+  plotTitle = "Directed Network (Organizational Hierarchy)"
+)
+
+# Undirected network (treat connections as bidirectional)
+jjarcdiagram(
+  data = jjarcdiagram_org_hierarchy,
+  source = "employee",
+  target = "reports_to",
+  weight = "relationship_strength",
+  group = "department",
+  directed = FALSE,
+  colorByGroup = TRUE,
+  plotTitle = "Undirected Network (Mutual Relationships)"
+)
+```
+
+## Edge Case Scenarios
+
+### Minimal Networks
+
+```{r minimal-network}
+# Load minimal test data
+data("jjarcdiagram_minimal_network")
+
+# Visualize minimal network
+jjarcdiagram(
+  data = jjarcdiagram_minimal_network,
+  source = "from",
+  target = "to",
+  weight = "strength",
+  group = "category",
+  colorByGroup = TRUE,
+  showStats = TRUE,
+  plotTitle = "Minimal Network (3 nodes)"
+)
+```
+
+### Networks with Self-loops
+
+```{r selfloop-network}
+# Load self-loop test data
+data("jjarcdiagram_selfloop_network")
+
+# Visualize network with self-loops
+jjarcdiagram(
+  data = jjarcdiagram_selfloop_network,
+  source = "node1",
+  target = "node2",
+  weight = "weight",
+  group = "type",
+  colorByGroup = TRUE,
+  showNodes = TRUE,
+  showStats = TRUE,
+  plotTitle = "Network with Self-loops"
+)
+```
+
+### Large Networks
+
+```{r large-network}
+# Load large network test data
+data("jjarcdiagram_large_network")
+
+# Preview large network
+cat("Large network size:", nrow(jjarcdiagram_large_network), "edges\n")
+cat("Unique nodes:", length(unique(c(jjarcdiagram_large_network$source, jjarcdiagram_large_network$target))), "\n")
+
+# Visualize large network
+jjarcdiagram(
+  data = jjarcdiagram_large_network,
+  source = "source",
+  target = "target",
+  weight = "weight",
+  group = "cluster",
+  colorByGroup = TRUE,
+  nodeSize = "degree",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  arcWidth = "weight",
+  showStats = TRUE,
+  plotTitle = "Large Network (50+ nodes)"
+)
+```
+
+## Network Analytics and Statistics
+
+### Network Metrics Interpretation
+
+```{r network-stats}
+# Generate comprehensive network statistics
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "publications",
+  group = "department",
+  colorByGroup = TRUE,
+  showStats = TRUE,
+  nodeSize = "degree",
+  sortNodes = "degree",
+  plotTitle = "Academic Network with Comprehensive Statistics"
+)
+```
+
+### Understanding Network Metrics
+
+The network statistics provide valuable insights:
+
+- **Network Density**: Ratio of actual to possible connections (0-1 scale)
+- **Connectivity**: Whether all nodes can reach each other
+- **Degree Centrality**: Number of connections per node
+- **Betweenness Centrality**: Nodes that act as bridges between others
+
+## Customization and Styling
+
+### Custom Colors and Labels
+
+```{r custom-styling}
+# Custom plot with enhanced labeling
+jjarcdiagram(
+  data = jjarcdiagram_social_network,
+  source = "source",
+  target = "target",
+  weight = "weight",
+  group = "group",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  labelSize = 1.2,
+  nodeSize = "degree",
+  nodeSizeValue = 2.5,
+  arcWidth = "weight",
+  arcTransparency = 0.7,
+  plotTitle = "Customized Social Network Visualization",
+  showStats = TRUE
+)
+```
+
+### Multiple Group Variables
+
+```{r multiple-groups}
+# Compare different grouping strategies
+grouping_vars <- c("group", "interaction_type")
+
+for(var in grouping_vars) {
+  cat("\n=== Grouping by", var, "===\n")
+  result <- jjarcdiagram(
+    data = jjarcdiagram_social_network,
+    source = "source",
+    target = "target",
+    weight = "weight",
+    group = var,
+    colorByGroup = TRUE,
+    showLegend = TRUE,
+    plotTitle = paste("Grouped by", var)
+  )
+}
+```
+
+## Clinical and Research Applications
+
+### Biological Networks
+
+```{r biological-applications}
+# Gene regulation network analysis
+jjarcdiagram(
+  data = jjarcdiagram_gene_network,
+  source = "regulator",
+  target = "target",
+  weight = "regulation_score",
+  group = "effect_type",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  sortNodes = "degree",
+  showStats = TRUE,
+  plotTitle = "Gene Regulatory Network by Effect Type"
+)
+```
+
+### Organizational Analysis
+
+```{r organizational-applications}
+# Department-level analysis
+jjarcdiagram(
+  data = jjarcdiagram_org_hierarchy,
+  source = "employee",
+  target = "reports_to",
+  weight = "relationship_strength",
+  group = "level",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  directed = TRUE,
+  sortNodes = "group",
+  horizontal = FALSE,
+  showStats = TRUE,
+  plotTitle = "Organizational Structure by Hierarchy Level"
+)
+```
+
+### Collaboration Networks
+
+```{r collaboration-applications}
+# Research collaboration analysis
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "collaboration_years",
+  group = "department",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  nodeSize = "degree",
+  arcWidth = "weight",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  showStats = TRUE,
+  plotTitle = "Long-term Research Collaborations"
+)
+```
+
+## Performance and Scalability
+
+### Handling Different Network Sizes
+
+```{r performance}
+# Compare performance with different network sizes
+network_sizes <- list(
+  "Small" = jjarcdiagram_minimal_network,
+  "Medium" = jjarcdiagram_social_network,
+  "Large" = jjarcdiagram_large_network
+)
+
+for(size_name in names(network_sizes)) {
+  data_set <- network_sizes[[size_name]]
+  n_nodes <- length(unique(c(data_set[[1]], data_set[[2]])))
+  n_edges <- nrow(data_set)
+  
+  cat("\n=== Network Size:", size_name, "===\n")
+  cat("Nodes:", n_nodes, ", Edges:", n_edges, "\n")
+}
+```
+
+## Best Practices and Recommendations
+
+### Data Preparation Guidelines
+
+1. **Data Quality**: Ensure clean source and target identifiers
+2. **Weight Scaling**: Normalize weights for better visualization
+3. **Group Selection**: Choose meaningful categorical variables
+4. **Edge Validation**: Remove duplicate or invalid connections
+
+### Visualization Guidelines
+
+1. **Layout Choice**: Use horizontal for wide networks, vertical for tall ones
+2. **Node Sizing**: Use degree-based sizing for centrality emphasis
+3. **Color Coding**: Limit groups to 8-10 for clarity
+4. **Arc Transparency**: Use 0.5-0.7 for overlapping connections
+
+### Analysis Workflow
+
+1. **Explore Data Structure**: Check node distribution and edge patterns
+2. **Basic Visualization**: Start with simple layout and default settings
+3. **Add Grouping**: Include categorical variables for insights
+4. **Customize Appearance**: Adjust sizing, colors, and layout
+5. **Analyze Metrics**: Review network statistics for interpretation
+
+## Advanced Features
+
+### Network Comparison
+
+```{r network-comparison}
+# Compare networks with different parameters
+comparison_data <- jjarcdiagram_academic_network
+
+# Network sorted by names
+jjarcdiagram(
+  data = comparison_data,
+  source = "author1",
+  target = "author2",
+  weight = "publications",
+  group = "department",
+  sortNodes = "name",
+  colorByGroup = TRUE,
+  plotTitle = "Academic Network - Alphabetical Order"
+)
+
+# Network sorted by centrality
+jjarcdiagram(
+  data = comparison_data,
+  source = "author1",
+  target = "author2",
+  weight = "publications", 
+  group = "department",
+  sortNodes = "degree",
+  sortDecreasing = TRUE,
+  colorByGroup = TRUE,
+  plotTitle = "Academic Network - Centrality Order"
+)
+```
+
+### Dynamic Network Properties
+
+```{r dynamic-properties}
+# Analyze temporal aspects using collaboration years
+jjarcdiagram(
+  data = jjarcdiagram_academic_network,
+  source = "author1",
+  target = "author2",
+  weight = "collaboration_years",
+  group = "department",
+  colorByGroup = TRUE,
+  showLegend = TRUE,
+  arcWidth = "weight",
+  nodeSize = "degree",
+  showStats = TRUE,
+  plotTitle = "Collaboration Duration Network"
+)
+```
+
+## Conclusion
+
+The `jjarcdiagram()` function provides a powerful and flexible approach to network visualization that is particularly well-suited for:
+
+### Key Advantages:
+
+- **Clarity**: Minimal visual clutter compared to traditional network plots
+- **Scalability**: Handles networks from 3 to 100+ nodes effectively
+- **Flexibility**: Supports various network types and data formats
+- **Analytics**: Built-in network metrics and centrality measures
+- **Customization**: Extensive styling and layout options
+
+### Ideal Use Cases:
+
+- **Hierarchical Networks**: Organizational charts, taxonomy trees
+- **Sequential Processes**: Workflow diagrams, pipeline analysis
+- **Collaboration Networks**: Research partnerships, social connections
+- **Biological Networks**: Gene regulation, protein interactions
+- **Supply Chains**: Manufacturing and distribution networks
+
+### Best Applications:
+
+- Networks with clear directional flow
+- Hierarchical or semi-hierarchical structures
+- Medium-sized networks (10-100 nodes)
+- Networks where edge overlap is problematic in traditional layouts
+
+For additional resources and advanced network analysis techniques, see the ClinicoPath documentation and other visualization vignettes in this package.
