@@ -138,9 +138,15 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (self$options$show_percentages) {
                 # Check if ComplexUpset supports upset_text_percentage
                 if (exists("upset_text_percentage", where = asNamespace("ComplexUpset"))) {
-                    plot <- plot + ComplexUpset::intersection_size(
-                        text_mapping = ggplot2::aes(label = !!ComplexUpset::upset_text_percentage())
-                    )
+                    # Try-catch to handle potential aesthetic issues
+                    tryCatch({
+                        plot <- plot + ComplexUpset::intersection_size(
+                            text_mapping = ggplot2::aes(label = !!ComplexUpset::upset_text_percentage())
+                        )
+                    }, error = function(e) {
+                        warning("Error with upset_text_percentage: ", e$message, ". Using regular intersection size display.")
+                        plot <<- plot + ComplexUpset::intersection_size()
+                    })
                 } else {
                     # Fallback: just show intersection sizes without percentages
                     warning("ComplexUpset package does not support upset_text_percentage. Showing intersection sizes instead.")

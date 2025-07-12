@@ -57,6 +57,7 @@ basic_forest <- jforester(
   estimates = "odds_ratio",
   ci_lower = "or_lower_ci",
   ci_upper = "or_upper_ci",
+  sample_sizes = "sample_size",
   effect_type = "or",
   plot_title = "Meta-Analysis of Treatment Effectiveness",
   x_axis_label = "Odds Ratio (95% CI)"

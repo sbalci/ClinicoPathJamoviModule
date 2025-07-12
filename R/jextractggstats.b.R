@@ -54,7 +54,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         },
         
         .prepareData = function() {
-            data <- self$data
+            data <- as.data.frame(self$data)  # Convert tibble/spec_tbl_df to data.frame
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
             
@@ -63,12 +63,12 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 plot_data <- data[, c(dep_var, group_var), drop = FALSE]
                 names(plot_data) <- c("y", "x")
             } else {
-                plot_data <- data[, dep_var, drop = FALSE]
-                names(plot_data) <- "y"
+                # Ensure we get a data frame even for single column
+                plot_data <- data.frame(y = data[[dep_var]])
             }
             
             # Remove missing values
-            plot_data <- plot_data[complete.cases(plot_data), ]
+            plot_data <- plot_data[complete.cases(plot_data), , drop = FALSE]
             
             # Convert grouping variable to factor if needed
             if (!is.null(group_var) && !is.factor(plot_data$x)) {
@@ -96,8 +96,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 if (analysis_type == "between_stats" && "x" %in% names(data)) {
                     ggstatsplot::ggbetweenstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         pairwise.comparisons = self$options$pairwise_comparisons,
@@ -113,8 +113,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # For within-subjects analysis, assume paired data
                     ggstatsplot::ggwithinstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         pairwise.comparisons = self$options$pairwise_comparisons,
@@ -127,7 +127,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 } else if (analysis_type == "histogram") {
                     ggstatsplot::gghistostats(
                         data = data,
-                        x = y,
+                        x = !!rlang::sym("y"),
                         type = type,
                         conf.level = conf_level,
                         bf.prior = self$options$bf_prior,
@@ -137,8 +137,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 } else if (analysis_type == "correlation" && "x" %in% names(data)) {
                     ggstatsplot::ggscatterstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         bf.prior = self$options$bf_prior,
@@ -148,8 +148,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # Same as correlation but emphasizing scatterplot visualization
                     ggstatsplot::ggscatterstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         bf.prior = self$options$bf_prior,
@@ -160,8 +160,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # For categorical data analysis
                     ggstatsplot::ggbarstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         bf.prior = self$options$bf_prior,
@@ -171,8 +171,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # For contingency table analysis (two categorical variables)
                     ggstatsplot::ggbarstats(
                         data = data,
-                        x = x,
-                        y = y,
+                        x = "x",
+                        y = "y",
                         type = type,
                         conf.level = conf_level,
                         pairwise.comparisons = self$options$pairwise_comparisons,
@@ -185,7 +185,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     test_value <- self$options$test_value
                     ggstatsplot::gghistostats(
                         data = data,
-                        x = y,
+                        x = "y",
                         test.value = test_value,
                         type = type,
                         conf.level = conf_level,
@@ -197,7 +197,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # Default to histogram for single variable
                     ggstatsplot::gghistostats(
                         data = data,
-                        x = y,
+                        x = "y",
                         type = type,
                         conf.level = conf_level,
                         centrality.plotting = self$options$centrality_plotting,
