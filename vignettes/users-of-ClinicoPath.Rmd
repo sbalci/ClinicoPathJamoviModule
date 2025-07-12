@@ -207,6 +207,9 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 # meddecide 
 
+- The Role of Kidney Function in Predicting COVID-19 Severity and Clinical Outcomes: A Retrospective Analysis 
+https://www.mdpi.com/2036-7449/17/4/79 
+
 - The extent of neuroradiological findings in COVID-19 shows correlation with blood biomarkers, Glasgow coma scale score and days in intensive care
 https://www.sciencedirect.com/science/article/pii/S015098612100167X
 
@@ -237,6 +240,8 @@ https://aap.onlinelibrary.wiley.com/doi/full/10.1002/JPER.24-0173
 - Demodex mites among solid organ transplant recipients: a cross-sectional study https://www.termedia.pl/Demodex-mites-among-solid-organ-transplant-recipients-a-cross-sectional-study,7,55181,0,1.html
 
 - Bilimsel Yazılım Geliştirme Süreçleri için bir Yazılım Mühendisliği Yetkinlik Envanteri https://dergipark.org.tr/tr/pub/tbbmd/issue/80549/1159443 
+
+
 
 ## Fagan Nomogram 
 - Transcranial doppler in the non-invasive estimation of intracranial pressure in traumatic brain injury compared to other non-invasive methods in lower-middle income countries: Systematic review and meta-analysis
